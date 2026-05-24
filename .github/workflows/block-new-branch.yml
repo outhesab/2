@@ -1,0 +1,13 @@
+name: Block New Branch — main dışı koruma
+on:
+  create:
+jobs:
+  block:
+    if: github.ref_name != 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete branch
+        run: |
+          gh api repos/${{ github.repository }}/git/refs/heads/${{ github.ref_name }} --method DELETE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

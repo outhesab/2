@@ -51,7 +51,7 @@ import {
     type AppUser,
     type UserRole,
 } from "@/lib/userManager";
-import { SmartImportManager } from "@/pages/SmartImportManager";
+
 import { formatDate } from "@/lib/utils-tr";
 import ExcelImport from "@/pages/ExcelImport";
 import type { DB } from "@/types";

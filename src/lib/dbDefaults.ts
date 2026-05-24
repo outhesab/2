@@ -36,6 +36,11 @@ export function makeDefaultDB(): DB {
       createdAt: new Date().toISOString()
     },
     settings: {},
-    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 }
+    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
+    ortakEmanetler: [],
+    installments: [],
+    partners: [],
+    productCategories: [],
+    notes: []
   };
 }

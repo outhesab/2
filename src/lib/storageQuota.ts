@@ -86,7 +86,7 @@ export function safeWriteJSON(key: string, value: unknown, opts?: { maxAttempts?
       }
       sizes.sort((a, b) => b.size - a.size);
       // Öncelikli temizleme: büyük ve eşleşen anahtarlar
-      const candidates = sizes.filter(s => /log|cache|temp|soba|big_fill/i.test(s.key) && s.key !== key);
+      const candidates = sizes.filter(s => /log|cache|temp|big_fill/i.test(s.key) && s.key !== key);
       let cleaned = 0;
       for (const c of candidates) {
         try { localStorage.removeItem(c.key); cleaned++; } catch (err) { void err; /* ignore cleanup error */ }
