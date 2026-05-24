@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "penpot": {
+            "url": "https://design.penpot.app/mcp/stream?userToken=eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIn0.D-udRyfy04FiHZODEMc6YZ--TeR3CwqscE1lSjGWThQ2YnD8gIRnRQ.VkuYwNSFZiN3zDjy.Y3a47rUE9i082TMhQk-KZw-O4KA5Zo_19476fz38UCq_cTTJg5ORJ_zfqajyGz47FbAUVirlZ8ysv5e4Lbfig7yBoHaKjqSz11OzhFkcAS1CwLnNpilIhudIrSSECUBYujFk95X29171IujWbtJLrJzFJ2bohQylD2cjVMR16nheCLnqOgPQHppzRq2-tbOta19fHUUh3_Gl.L8igXTqbfAI6FfHuD-lBLg",
+            "description": "Penpot design tool - read/write design files, components, tokens"
+        }
+    }
+}

@@ -1,0 +1,522 @@
+{
+  "name": "PARSPEL — Soba Yönetim Sistemi",
+  "version": "3.1.0",
+  "description": "Offline-first işletme yönetim uygulaması. Satış, stok, kasa ve cari takibi.",
+  "lastModified": "2026-05-23",
+  "designSystem": {
+    "colors": {
+      "primary": {
+        "base": "oklch(0.62 0.18 35)",
+        "light": "oklch(0.70 0.16 35)",
+        "dark": "oklch(0.52 0.20 35)",
+        "glow": "oklch(0.62 0.18 35 / 0.40)",
+        "soft": "oklch(0.62 0.18 35 / 0.12)",
+        "ultra": "oklch(0.62 0.18 35 / 0.06)",
+        "description": "Orange/amber — Ana marka rengi"
+      },
+      "secondary": {
+        "base": "oklch(0.60 0.14 260)",
+        "soft": "oklch(0.60 0.14 260 / 0.12)",
+        "description": "Mor/mavi — İkincil renk"
+      },
+      "accent": {
+        "base": "oklch(0.58 0.18 280)",
+        "soft": "oklch(0.58 0.18 280 / 0.12)",
+        "description": "Mor — Vurgu rengi"
+      },
+      "semantic": {
+        "success": "oklch(0.65 0.18 160)",
+        "warning": "oklch(0.70 0.18 85)",
+        "danger": "oklch(0.60 0.22 30)",
+        "info": "oklch(0.60 0.14 260)"
+      },
+      "backgrounds": {
+        "base": "oklch(0.08 0.02 260)",
+        "elevated": "oklch(0.10 0.03 260)",
+        "card": "oklch(1 0 0 / 0.035)",
+        "cardHover": "oklch(1 0 0 / 0.055)",
+        "sidebar": "oklch(0.06 0.02 260)",
+        "glass": "oklch(0.10 0.03 260 / 0.85)",
+        "surface": "oklch(0.12 0.03 260)"
+      },
+      "text": {
+        "primary": "oklch(0.95 0.01 260)",
+        "secondary": "oklch(0.65 0.03 260)",
+        "muted": "oklch(0.40 0.03 260)",
+        "dim": "oklch(0.25 0.05 260)"
+      },
+      "borders": {
+        "default": "oklch(1 0 0 / 0.07)",
+        "strong": "oklch(1 0 0 / 0.12)",
+        "accent": "oklch(0.62 0.18 35 / 0.25)"
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "sans": "DM Sans",
+        "mono": "JetBrains Mono"
+      },
+      "baseFontSize": "15px",
+      "scales": {
+        "h1": { "size": "1.65rem", "weight": 900, "letterSpacing": "-0.03em" },
+        "h2": { "size": "1.35rem", "weight": 800, "letterSpacing": "-0.025em" },
+        "h3": { "size": "1.15rem", "weight": 800, "letterSpacing": "-0.02em" },
+        "h4": { "size": "1rem", "weight": 700, "letterSpacing": "-0.015em" },
+        "h5": { "size": "0.9rem", "weight": 700, "letterSpacing": "-0.01em" },
+        "h6": {
+          "size": "0.82rem",
+          "weight": 700,
+          "textTransform": "uppercase"
+        },
+        "body": { "size": "0.88rem", "weight": 400, "lineHeight": 1.6 },
+        "small": { "size": "0.78rem", "weight": 500 },
+        "mono": { "size": "0.85rem", "fontFamily": "mono" }
+      }
+    },
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "12px",
+      "lg": "16px",
+      "xl": "20px",
+      "2xl": "24px",
+      "3xl": "32px",
+      "4xl": "40px"
+    },
+    "radius": {
+      "sm": "8px",
+      "md": "12px",
+      "lg": "16px",
+      "xl": "20px"
+    },
+    "shadows": {
+      "sm": "0 2px 8px oklch(0 0 0 / 0.3)",
+      "md": "0 4px 20px oklch(0 0 0 / 0.4)",
+      "lg": "0 8px 40px oklch(0 0 0 / 0.5)",
+      "xl": "0 16px 60px oklch(0 0 0 / 0.6)",
+      "accent": "0 8px 32px oklch(0.62 0.18 35 / 0.40)"
+    },
+    "transitions": {
+      "default": "0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+      "spring": "0.28s cubic-bezier(0.22, 1, 0.36, 1)"
+    }
+  },
+  "components": {
+    "buttons": [
+      {
+        "name": "Button",
+        "variants": [
+          "default",
+          "destructive",
+          "outline",
+          "secondary",
+          "ghost",
+          "link"
+        ],
+        "sizes": ["sm", "default", "lg", "icon"],
+        "states": ["default", "hover", "active", "disabled"],
+        "description": "Temel buton bileşeni"
+      }
+    ],
+    "forms": [
+      { "name": "Input", "description": "Metin giriş alanı" },
+      { "name": "Textarea", "description": "Çok satırlı metin alanı" },
+      { "name": "Select", "description": "Açılır liste" },
+      { "name": "Checkbox", "description": "Onay kutusu" },
+      { "name": "Radio Group", "description": "Radyo düğmeleri" },
+      { "name": "Toggle", "description": "Açma/kapama düğmesi" },
+      { "name": "Field", "description": "Form alanı sarıcısı" },
+      { "name": "Label", "description": "Form etiketi" }
+    ],
+    "layout": [
+      {
+        "name": "Card",
+        "description": "Kart bileşeni (Header, Title, Content, Footer)"
+      },
+      { "name": "Accordion", "description": "Katlanabilir panel" },
+      { "name": "Tabs", "description": "Sekme navigasyonu" },
+      { "name": "Sidebar", "description": "Yan panel navigasyonu (236px)" },
+      {
+        "name": "Modal",
+        "description": "Responsive modal (bottom-sheet mobil, centered desktop)"
+      },
+      { "name": "Drawer", "description": "Kaydırılabilir panel" },
+      { "name": "Scroll Area", "description": "Kaydırılabilir alan" }
+    ],
+    "dialogs": [
+      { "name": "Dialog", "description": "Temel diyalog" },
+      { "name": "Alert Dialog", "description": "Uyarı diyalogu" },
+      {
+        "name": "Confirm Dialog",
+        "description": "Onay diyalogu (danger/warning/info/success)"
+      },
+      { "name": "Popover", "description": "Açılır panel" },
+      { "name": "Hover Card", "description": "Hover üzerine açılan kart" }
+    ],
+    "data": [
+      {
+        "name": "Table",
+        "description": "Veri tablosu (responsive card view mobil)"
+      },
+      { "name": "Badge", "description": "Etiket" },
+      { "name": "Progress", "description": "İlerleme çubuğu" },
+      { "name": "Pagination", "description": "Sayfalandırma" },
+      { "name": "Chart", "description": "Grafik (Recharts)" }
+    ],
+    "feedback": [
+      { "name": "Toast", "description": "Bildirim (Sonner)" },
+      { "name": "Alert", "description": "Uyarı mesajı" },
+      { "name": "Skeleton", "description": "Yükleme iskeletleri" },
+      { "name": "Empty State", "description": "Boş durum göstergesi" }
+    ],
+    "custom": [
+      { "name": "QuickSaleModal", "description": "Hızlı satış ekleme" },
+      { "name": "QuickIncomeModal", "description": "Hızlı gelir ekleme" },
+      { "name": "QuickProductModal", "description": "Hızlı ürün ekleme" },
+      {
+        "name": "FAB",
+        "description": "Kayan aksiyon düğmesi (sürüklenebilir)"
+      },
+      {
+        "name": "AI Button",
+        "description": "AI asistanı düğmesi (sürüklenebilir)"
+      },
+      {
+        "name": "Report Button",
+        "description": "Rapor düğmesi (sürüklenebilir, pulse animasyonu)"
+      },
+      { "name": "NotificationCenter", "description": "Bildirim merkezi" },
+      { "name": "QuantumLink", "description": "AI ses giriş" },
+      { "name": "SystemMap", "description": "Sistem haritası" },
+      { "name": "InfoRow", "description": "Bilgi satırı" },
+      {
+        "name": "MobileSelect",
+        "description": "Mobil arama yapılabilir açılır liste"
+      }
+    ]
+  },
+  "pages": {
+    "main": [
+      {
+        "id": "dashboard",
+        "name": "Özet",
+        "icon": "📊",
+        "group": "Ana",
+        "description": "Ana kontrol paneli — Günlük ciro, kâr, stok değeri"
+      },
+      {
+        "id": "dashboard-finans",
+        "name": "Finans",
+        "icon": "🏦",
+        "group": "Ana",
+        "description": "Finansal dashboard — Gelir/gider, kasa durumu"
+      },
+      {
+        "id": "dashboard-ticaret",
+        "name": "Ticaret",
+        "icon": "📈",
+        "group": "Ana",
+        "description": "Ticaret dashboard — Satış trendleri, müşteri analizi"
+      },
+      {
+        "id": "dashboard-operasyon",
+        "name": "Operasyon",
+        "icon": "⚙️",
+        "group": "Ana",
+        "description": "Operasyon dashboard — Stok, tedarik, üretim"
+      },
+      {
+        "id": "dashboard-strateji",
+        "name": "Strateji",
+        "icon": "🔮",
+        "group": "Ana",
+        "description": "Strateji dashboard — Tahminler, hedefler, KPI'lar"
+      }
+    ],
+    "operations": [
+      {
+        "id": "sales",
+        "name": "Satış",
+        "icon": "🛒",
+        "group": "Ana",
+        "description": "Satış yönetimi — Nakit/kart/cari ödeme, iskonto, iade"
+      },
+      {
+        "id": "products",
+        "name": "Ürünler",
+        "icon": "📦",
+        "group": "Ana",
+        "description": "Ürün kataloğu — Fiyatlandırma, kategoriler, özellikler"
+      },
+      {
+        "id": "stock",
+        "name": "Stok",
+        "icon": "🔢",
+        "group": "Analiz",
+        "description": "Stok analizi — Giriş/çıkış, hareket geçmişi, uyarılar"
+      },
+      {
+        "id": "fatura",
+        "name": "Fatura",
+        "icon": "🧾",
+        "group": "Ana",
+        "description": "Fatura yönetimi — Satış/alış faturaları, taksit planı"
+      }
+    ],
+    "supply": [
+      {
+        "id": "suppliers",
+        "name": "Tedarikçi",
+        "icon": "🏭",
+        "group": "Tedarik",
+        "description": "Tedarikçi yönetimi — İletişim, fiyatlar, sipariş"
+      },
+      {
+        "id": "pelet",
+        "name": "Pelet",
+        "icon": "🪵",
+        "group": "Tedarik",
+        "description": "Pelet tedarik — Stok, fiyat, sipariş takibi"
+      },
+      {
+        "id": "boruTed",
+        "name": "Boru Tedarik",
+        "icon": "🔩",
+        "group": "Tedarik",
+        "description": "Boru tedarik — Stok, fiyat, sipariş takibi"
+      }
+    ],
+    "finance": [
+      {
+        "id": "cari",
+        "name": "Cari",
+        "icon": "👤",
+        "group": "Finans",
+        "description": "Cari hesaplar — Müşteri/tedarikçi bakiyesi, tahsilat"
+      },
+      {
+        "id": "kasa",
+        "name": "Kasa",
+        "icon": "💰",
+        "group": "Finans",
+        "description": "Kasa yönetimi — Çoklu kasa, gelir/gider, soft-delete"
+      },
+      {
+        "id": "butce",
+        "name": "Bütçe",
+        "icon": "📊",
+        "group": "Finans",
+        "description": "Bütçe planlama — Tahminler, hedefler, sapma analizi"
+      },
+      {
+        "id": "bank",
+        "name": "Banka",
+        "icon": "🏦",
+        "group": "Finans",
+        "description": "Banka hesapları — Bakiye, transferler, uzlaştırma"
+      }
+    ],
+    "analytics": [
+      {
+        "id": "reports",
+        "name": "Raporlar",
+        "icon": "📈",
+        "group": "Analiz",
+        "description": "Raporlar — Satış, kâr, stok, müşteri analitiği"
+      },
+      {
+        "id": "cizelge",
+        "name": "Çizelge",
+        "icon": "📅",
+        "group": "Analiz",
+        "description": "Çizelge — Takvim görünümü, etkinlik planlama"
+      },
+      {
+        "id": "monitor",
+        "name": "İzleme",
+        "icon": "🔔",
+        "group": "Analiz",
+        "description": "Gerçek zamanlı izleme — Uyarılar, anomaliler"
+      },
+      {
+        "id": "kontrol",
+        "name": "Kontrol",
+        "icon": "⚡",
+        "group": "Analiz",
+        "description": "Kontrol halkası — Kalite kontrol, uygunluk"
+      },
+      {
+        "id": "anomali",
+        "name": "Anomali",
+        "icon": "⚠️",
+        "group": "Analiz",
+        "description": "Anomali tespiti — Anormal işlemler, uyarılar"
+      }
+    ],
+    "system": [
+      {
+        "id": "entegrasyon",
+        "name": "Entegrasyon",
+        "icon": "🔗",
+        "group": "Sistem",
+        "description": "Entegrasyonlar — Firebase, API bağlantıları"
+      },
+      {
+        "id": "excelmerge",
+        "name": "Veri Birleştir",
+        "icon": "📊",
+        "group": "Sistem",
+        "description": "Excel veri birleştirme — Toplu işlemler"
+      },
+      {
+        "id": "excelimport",
+        "name": "Excel İçe Aktar",
+        "icon": "📥",
+        "group": "Sistem",
+        "description": "Excel içe aktarma — Ürün, müşteri, işlem"
+      },
+      {
+        "id": "notlar",
+        "name": "Not Defteri",
+        "icon": "📝",
+        "group": "Sistem",
+        "description": "Not defteri — Kişisel notlar, hatırlatmalar"
+      },
+      {
+        "id": "partners",
+        "name": "Ortaklar",
+        "icon": "🤝",
+        "group": "Sistem",
+        "description": "Ortak yönetimi — Roller, izinler, erişim"
+      },
+      {
+        "id": "settings",
+        "name": "Ayarlar",
+        "icon": "⚙️",
+        "group": "Sistem",
+        "description": "Sistem ayarları — UI, bağlantılar, güvenlik, agentlar"
+      },
+      {
+        "id": "bughunter",
+        "name": "Bug Hunter",
+        "icon": "🐛",
+        "group": "Sistem",
+        "description": "Hata raporlama — Bug takibi, geri bildirim"
+      }
+    ]
+  },
+  "layouts": {
+    "desktop": {
+      "sidebarWidth": "236px",
+      "breakpoint": "768px",
+      "mainPadding": "20px 22px",
+      "cardPadding": "16px 18px",
+      "description": "Desktop layout — Fixed sidebar, full table view"
+    },
+    "mobile": {
+      "sidebarWidth": "collapsible",
+      "breakpoint": "<768px",
+      "mainPadding": "12px 8px",
+      "cardPadding": "12px 14px",
+      "description": "Mobile layout — Hamburger menu, card-based tables, bottom sheets"
+    }
+  },
+  "animations": {
+    "transitions": [
+      { "name": "pageEnter", "duration": "0.3s", "easing": "ease-out" },
+      { "name": "pageExit", "duration": "0.2s", "easing": "ease-in" },
+      { "name": "fadeIn", "duration": "0.18s", "easing": "ease-out" },
+      { "name": "fadeInUp", "duration": "0.3s", "easing": "ease-out" },
+      { "name": "scaleIn", "duration": "0.2s", "easing": "ease-out" },
+      { "name": "slideUp", "duration": "0.3s", "easing": "ease-out" },
+      { "name": "slideIn", "duration": "0.3s", "easing": "ease-out" }
+    ],
+    "keyframes": [
+      { "name": "shimmer", "description": "Yükleme animasyonu" },
+      { "name": "accentGlow", "description": "Vurgu parıltısı" },
+      { "name": "onlinePulse", "description": "Çevrimiçi durumu göstergesi" },
+      { "name": "badgePulse", "description": "Badge nabız animasyonu" },
+      { "name": "countUp", "description": "Sayı artış animasyonu" },
+      { "name": "reportPulse", "description": "Rapor nabız animasyonu" },
+      { "name": "micPulse", "description": "Mikrofon nabız animasyonu" },
+      { "name": "ripple", "description": "Dalgalanma efekti" }
+    ]
+  },
+  "patterns": {
+    "statCard": {
+      "description": "İstatistik kartı — Hover lift, gradient, trend göstergesi",
+      "components": ["Card", "Badge", "Chart"]
+    },
+    "fab": {
+      "description": "Kayan aksiyon düğmesi — Sürüklenebilir, multi-action menu",
+      "actions": ["Hızlı Satış", "Ürün Ekle", "Gelir", "Gider"]
+    },
+    "quickModal": {
+      "description": "Hızlı ekleme modali — Bottom sheet mobil, centered desktop",
+      "types": ["QuickSaleModal", "QuickIncomeModal", "QuickProductModal"]
+    },
+    "confirmDialog": {
+      "description": "Onay diyalogu — Otomatik varyant tespiti",
+      "variants": ["danger", "warning", "info", "success"]
+    },
+    "responsiveTable": {
+      "description": "Responsive tablo — Tablo desktop, kart mobil",
+      "features": ["Hover states", "Sorting", "Filtering", "Pagination"]
+    }
+  },
+  "accessibility": {
+    "features": [
+      "Focus rings on interactive elements",
+      "ARIA labels and semantic HTML",
+      "Keyboard navigation support",
+      "Error boundary with error logging",
+      "Confirmation dialogs for destructive actions",
+      "Sound feedback for actions",
+      "Voice input support (QuantumLink AI)",
+      "Offline-first with sync status indicators",
+      "Multi-language support (Turkish)"
+    ]
+  },
+  "stateManagement": {
+    "zustand": "Global state (agentStore)",
+    "context": "Auth, confirm dialogs, toast notifications",
+    "localStorage": "UI preferences, favorites, setup data",
+    "indexedDB": "Offline-first data persistence"
+  },
+  "technologies": {
+    "frontend": "React 19 + TypeScript",
+    "build": "Vite 7",
+    "ui": "Tailwind CSS 4 + Radix UI (shadcn/ui)",
+    "mobile": "Capacitor 8 (Android)",
+    "test": "Vitest + fast-check",
+    "storage": "localStorage + Firebase Firestore (optional)",
+    "animation": "Framer Motion",
+    "charts": "Recharts",
+    "notifications": "Sonner",
+    "forms": "React Hook Form"
+  },
+  "designPrinciples": [
+    "Dark-first — Default dark theme with light mode support",
+    "Industrial aesthetic — Orange/amber primary, clean typography",
+    "Glassmorphism — Semi-transparent cards with backdrop blur",
+    "Micro-interactions — Smooth animations, hover effects, drag feedback",
+    "Accessibility — WCAG compliance, keyboard navigation, screen reader support",
+    "Offline-first — Works without internet, syncs when available",
+    "Mobile-first responsive — Optimized for all screen sizes",
+    "Performance — Lazy-loaded pages, skeleton loaders, efficient animations"
+  ],
+  "exportFormats": {
+    "figma": "https://www.figma.com/file/[project-id]/PARSPEL",
+    "documentation": "Design system documentation with component specs",
+    "code": "React components with TypeScript types",
+    "tokens": "CSS variables and design tokens"
+  },
+  "notes": {
+    "setup": "Bu dosya Figma'da kullanılmak üzere tasarlanmıştır. Figma'da yeni bir dosya oluşturun ve bu JSON'u referans olarak kullanın.",
+    "components": "55+ shadcn/ui bileşeni + 10+ özel bileşen",
+    "pages": "27 ana sayfa + 5 dashboard varyasyonu",
+    "responsive": "Desktop (>768px) ve Mobile (<768px) için optimize edilmiş",
+    "offline": "Offline-first mimarisi — localStorage + IndexedDB + Firebase Firestore (opsiyonel)",
+    "agents": "Multi-agent yapı — Stok, Kasa, Cari, Satış, Fatura, Rapor, DeepSeek ajanları"
+  }
+}

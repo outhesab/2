@@ -1,0 +1,56 @@
+# Bağımlılıklar
+node_modules/
+
+# Build çıktıları
+dist/
+build/
+
+# Test raporları
+test-report/
+test-results/
+playwright-report/
+
+# Android build
+android/.gradle/
+android/.kotlin/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/
+android/app/google-services.json
+
+# Ortam değişkenleri (hassas)
+.env
+.env.local
+.env.*.local
+
+# Geçici dosyalar
+*.log
+*.tmp
+html.meta.json.gz
+test-report.html
+assets/
+
+# Yedek klasör
+vy/
+
+# API anahtarları (düz metin)
+api-keys.txt
+api-refs-summary.txt
+
+# Geliştirme çıktıları
+dev_error.txt
+dev_output.txt
+
+# Playwright MCP
+.playwright-mcp/
+
+# AI session continuation verileri (geçici)
+.omo/run-continuation/
+
+# IDE
+.vscode/launch.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
