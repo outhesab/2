@@ -12,7 +12,7 @@ export async function askDeepSeek(
 ): Promise<string> {
   requireKey(apiKey, "DeepSeek");
   const body: Record<string, unknown> = {
-    model: "deepseek",
+    model: options?.reasoning ? "deepseek-reasoner" : "deepseek-chat",
     messages,
     stream: true,
     max_tokens: options?.maxTokens ?? 1024,
