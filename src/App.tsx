@@ -37,7 +37,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import { Router, Switch, Route, useLocation } from "wouter";
-import { AnimatePresence, motion } from "framer-motion";
 
 const AIAsistan = lazy(() => import("@/pages/AIAsistan"));
 const AnomaliOneri = lazy(() => import("@/pages/AnomaliOneri"));
@@ -1358,16 +1357,8 @@ function AppContent({
 
         {/* CONTENT */}
         <main className={`app-main-content ${isMobile ? "mobile" : "desktop"}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 14, scale: 0.99, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -8, scale: 0.98, filter: "blur(2px)" }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Suspense fallback={<PageFallback />}>
-                <Switch>
+          <Suspense fallback={<PageFallback />}>
+            <Switch>
                   <Route path="/dashboard">
                     <Dashboard
                       db={db}
@@ -1443,8 +1434,6 @@ function AppContent({
                   </Route>
                 </Switch>
               </Suspense>
-            </motion.div>
-          </AnimatePresence>
         </main>
       </div>
 
