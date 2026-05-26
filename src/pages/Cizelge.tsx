@@ -123,6 +123,49 @@ export default function Cizelge({ db }: Props) {
     setSelectedDay(null);
   };
 
+  // Yaklaşan 7 gün olayları
+  const upcomingEvents = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekLater = new Date(today);
+    weekLater.setDate(weekLater.getDate() + 7);
+    const events: { date: string; label: string; type: 'siparis' | 'tahsilat' | 'vade' | 'teslimat'; amount?: number; relatedName?: string }[] = [];
+    const dateKey = (d: string) => d.slice(0, 10);
+    db.invoices?.forEach(inv => {
+      if (inv.deleted || !inv.dueDate) return;
+      const d = dateKey(inv.dueDate);
+      if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
+        events.push({ date: d, label: `Fatura #${inv.invoiceNo}`, type: 'vade', amount: inv.total, relatedName: inv.cariName });
+      }
+    });
+    db.orders?.forEach(o => {
+      if (o.deleted || !o.deliveryDate) return;
+      const d = dateKey(o.deliveryDate);
+      if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
+        events.push({ date: d, label: `Sipariş #${o.id.slice(0, 6)}`, type: 'teslimat', amount: o.amount, relatedName: o.supplierId });
+      }
+    });
+    db.cari?.filter(c => !c.deleted && c.type === 'musteri' && c.balance > 0).forEach(c => {
+      if (c.lastTransaction) {
+        const t = new Date(c.lastTransaction);
+        const vade = new Date(t);
+        vade.setDate(vade.getDate() + 30);
+        const d = dateKey(vade.toISOString());
+        if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
+          events.push({ date: d, label: `${c.name} alacak`, type: 'tahsilat', amount: c.balance, relatedName: c.name });
+        }
+      }
+    });
+    return events.sort((a, b) => a.date.localeCompare(b.date));
+  }, [db.invoices, db.orders, db.cari]);
+
+  const eventTypeStyle: Record<string, { bg: string; color: string; border: string; icon: string }> = {
+    siparis: { bg: 'rgba(59,130,246,0.1)', color: '#60a5fa', border: 'rgba(59,130,246,0.25)', icon: '📋' },
+    tahsilat: { bg: 'rgba(16,185,129,0.1)', color: '#34d399', border: 'rgba(16,185,129,0.25)', icon: '💰' },
+    vade: { bg: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: 'rgba(239,68,68,0.25)', icon: '🔴' },
+    teslimat: { bg: 'rgba(245,158,11,0.1)', color: '#fbbf24', border: 'rgba(245,158,11,0.25)', icon: '🚚' },
+  };
+
   // Ay toplamları
   const _monthTotal = Object.values(dayMap)
     .filter((_, i) => {
@@ -242,6 +285,35 @@ export default function Cizelge({ db }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Yaklaşan 7 Gün Paneli */}
+      {upcomingEvents.length > 0 && (
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 18px', marginBottom: 14, position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <span style={{ fontSize: '1.1rem' }}>📅</span>
+            <span style={{ color: '#f1f5f9', fontWeight: 800, fontSize: '0.88rem' }}>Yaklaşan 7 Gün</span>
+            <span style={{ color: '#475569', fontSize: '0.72rem' }}>{upcomingEvents.length} olay</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {upcomingEvents.map((ev, i) => {
+              const s = eventTypeStyle[ev.type];
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: s.bg, border: `1px solid ${s.border}` }}>
+                  <span style={{ fontSize: '1rem' }}>{s.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#f1f5f9', fontSize: '0.82rem', fontWeight: 600 }}>{ev.label}</div>
+                    {ev.relatedName && <div style={{ color: '#64748b', fontSize: '0.72rem' }}>{ev.relatedName}</div>}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: s.color, fontWeight: 700, fontSize: '0.85rem' }}>{ev.amount ? `₺${ev.amount.toLocaleString('tr-TR')}` : '-'}</div>
+                    <div style={{ color: '#475569', fontSize: '0.68rem' }}>{new Date(ev.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Ay özet kartları */}
       {viewMode === "month" && (

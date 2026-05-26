@@ -20,6 +20,35 @@ export default function Kasa({ db, save }: Props) {
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [sayimModal, setSayimModal] = useState(false);
+  const [sayimForm, setSayimForm] = useState<Record<string, string>>({});
+  const [sayimDate, setSayimDate] = useState(new Date().toISOString().slice(0, 10));
+  const sayimFarklar = useMemo(() => {
+    const result: { kasaId: string; kasaName: string; icon: string; fiziki: number; sistem: number; fark: number }[] = [];
+    kasalar.forEach(k => {
+      const fiziki = parseFloat(sayimForm[k.id] || '0') || 0;
+      const sistem = bakiyeler[k.id] || 0;
+      result.push({ kasaId: k.id, kasaName: k.name, icon: k.icon, fiziki, sistem, fark: fiziki - sistem });
+    });
+    return result;
+  }, [kasalar, bakiyeler, sayimForm]);
+  const sayimToplamFark = sayimFarklar.reduce((s, f) => s + Math.abs(f.fark), 0);
+  const gunSonuSayimPDF = () => {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Gün Sonu Sayım - ${sayimDate}</title><style>body{font-family:Arial,sans-serif;margin:40px}h1{color:#333;border-bottom:2px solid #ff5722;padding-bottom:10px}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#1e293b;color:#fff;padding:10px;text-align:left}td{padding:10px;border-bottom:1px solid #ddd}.yesil{color:#10b981;font-weight:700}.kirmizi{color:#ef4444;font-weight:700}.toplam{margin-top:20px;font-size:1.1rem;font-weight:700}.footer{margin-top:40px;color:#666;font-size:0.85rem}</style></head><body>`);
+    w.document.write(`<h1>📋 Gün Sonu Sayım ${sayimDate}</h1>`);
+    w.document.write(`<table><thead><tr><th>Kasa</th><th>Sistem Bakiyesi</th><th>Fiziki Sayım</th><th>Fark</th></tr></thead><tbody>`);
+    sayimFarklar.forEach(f => {
+      const cls = f.fark > 0 ? 'yesil' : f.fark < 0 ? 'kirmizi' : '';
+      w.document.write(`<tr><td>${f.icon} ${f.kasaName}</td><td>₺${f.sistem.toFixed(2)}</td><td>₺${f.fiziki.toFixed(2)}</td><td class="${cls}">${f.fark >= 0 ? '+' : ''}₺${f.fark.toFixed(2)}</td></tr>`);
+    });
+    w.document.write(`</tbody></table>`);
+    w.document.write(`<div class="toplam">Toplam Fark: <span class="${sayimToplamFark > 0 ? 'kirmizi' : ''}">₺${sayimToplamFark.toFixed(2)}</span></div>`);
+    w.document.write(`<div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Gün Sonu Raporu</div></body></html>`);
+    w.document.close();
+    w.print();
+  };
 
   const catLabels: Record<string, string> = {
     satis: '🛒 Satış', tahsilat: '💰 Tahsilat', diger_gelir: '➕ Diğer Gelir',
@@ -187,6 +216,7 @@ export default function Kasa({ db, save }: Props) {
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={() => setIncomeModal(true)} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: '#10b981', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>+ Gelir</button>
         <button onClick={() => setExpenseModal(true)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, color: '#ef4444', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>- Gider</button>
+        <button onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }} style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, color: '#a78bfa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📋 Gün Sonu Sayım</button>
         <button onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, color: '#60a5fa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel İndir</button>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ara..." style={{ padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem', flex: 1 }} />
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: '9px 10px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.85rem' }} />
@@ -237,6 +267,58 @@ export default function Kasa({ db, save }: Props) {
 
       <EntryModal type="gelir" open={incomeModal} onClose={() => setIncomeModal(false)} />
       <EntryModal type="gider" open={expenseModal} onClose={() => setExpenseModal(false)} />
+
+      <Modal open={sayimModal} onClose={() => setSayimModal(false)} title="📋 Gün Sonu Sayım">
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Tarih</label>
+          <input type="date" value={sayimDate} onChange={e => setSayimDate(e.target.value)} style={inp} />
+        </div>
+        <div style={{ display: 'grid', gap: 12 }}>
+          {kasalar.map(k => {
+            const fiziki = parseFloat(sayimForm[k.id] || '0') || 0;
+            const sistem = bakiyeler[k.id] || 0;
+            const fark = fiziki - sistem;
+            const farkColor = fark > 0 ? '#10b981' : fark < 0 ? '#ef4444' : '#64748b';
+            return (
+              <div key={k.id} style={{ background: 'rgba(15,23,42,0.4)', borderRadius: 12, padding: '14px 16px', border: `1px solid ${fark !== 0 ? farkColor + '30' : 'rgba(255,255,255,0.06)'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <div>
+                    <span style={{ fontSize: '1.2rem', marginRight: 6 }}>{k.icon}</span>
+                    <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{k.name}</span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Sistem Bakiyesi</div>
+                    <div style={{ color: '#f1f5f9', fontWeight: 700 }}>{formatMoney(sistem)}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ ...lbl, fontSize: '0.75rem', marginBottom: 4 }}>Fiziki Sayım</label>
+                    <input type="number" inputMode="decimal" value={sayimForm[k.id] || ''} onChange={e => setSayimForm(f => ({ ...f, [k.id]: e.target.value }))} style={{ ...inp, padding: '14px 16px', fontSize: '1.4rem', fontWeight: 800, textAlign: 'center' }} placeholder="0,00" step={0.01} />
+                  </div>
+                </div>
+                {sayimForm[k.id] && sayimForm[k.id] !== '' && (
+                  <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: 8, background: fark !== 0 ? `${farkColor}10` : 'transparent' }}>
+                    <span style={{ color: '#64748b', fontSize: '0.82rem' }}>Fark</span>
+                    <span style={{ color: farkColor, fontWeight: 800, fontSize: '1.1rem' }}>{fark >= 0 ? '+' : ''}{formatMoney(fark)}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {sayimToplamFark > 0 && (
+          <div style={{ marginTop: 14, padding: '12px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <span style={{ color: '#fca5a5', fontWeight: 700, fontSize: '0.95rem' }}>
+              ⚠️ Toplam Fark: {formatMoney(sayimToplamFark)} — Sayım sonuçlarını kontrol edin.
+            </span>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+          <button onClick={gunSonuSayimPDF} style={{ flex: 1, background: '#8b5cf6', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>🖨️ PDF Yazdır</button>
+          <button onClick={() => setSayimModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>Kapat</button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export default function Stock({ db, save }: Props) {
   const { playSound } = useSoundFeedback();
   const [adjustModal, setAdjustModal] = useState(false);
   const [form, setForm] = useState({ productId: '', type: 'giris' as 'giris' | 'cikis' | 'duzeltme', amount: '', note: '' });
-  const [tab, setTab] = useState<'products' | 'history'>('products');
+  const [tab, setTab] = useState<'products' | 'abc' | 'dead' | 'history'>('products');
   const [search, setSearch] = useState('');
   const [histSearch, setHistSearch] = useState('');
   const [histTypeFilter, setHistTypeFilter] = useState('');
@@ -60,6 +60,54 @@ export default function Stock({ db, save }: Props) {
     setAdjustModal(false);
   };
 
+  // ABC Analizi
+  const abcData = useMemo(() => {
+    const productRev: Record<string, { name: string; category: string; revenue: number; qty: number; profit: number }> = {};
+    db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').forEach(s => {
+      if (!productRev[s.productId]) productRev[s.productId] = { name: s.productName, category: s.productCategory || '', revenue: 0, qty: 0, profit: 0 };
+      productRev[s.productId].revenue += s.total;
+      productRev[s.productId].qty += s.quantity;
+      productRev[s.productId].profit += s.profit;
+    });
+    const sorted = Object.entries(productRev).sort((a, b) => b[1].revenue - a[1].revenue);
+    const totalRev = sorted.reduce((s, [, v]) => s + v.revenue, 0) || 1;
+    let cumul = 0;
+    return sorted.map(([id, v]) => {
+      cumul += v.revenue;
+      const pct = cumul / totalRev;
+      const cls = pct <= 0.8 ? 'A' : pct <= 0.95 ? 'B' : 'C';
+      return { id, ...v, revenuePct: (v.revenue / totalRev * 100), cumulPct: pct * 100, class: cls };
+    });
+  }, [db.sales]);
+  const abcSummary = useMemo(() => {
+    const s = { A: { count: 0, revenue: 0 }, B: { count: 0, revenue: 0 }, C: { count: 0, revenue: 0 } };
+    abcData.forEach(v => { s[v.class].count++; s[v.class].revenue += v.revenue; });
+    return s;
+  }, [abcData]);
+
+  // Ölü Stok (90+ gün hareketsiz)
+  const deadStock = useMemo(() => {
+    const now = Date.now();
+    const cutoff90 = new Date(now - 90 * 86400000).toISOString();
+    const lastMovementByProduct: Record<string, string> = {};
+    db.stockMovements.forEach(m => {
+      const existing = lastMovementByProduct[m.productId];
+      if (!existing || m.date > existing) lastMovementByProduct[m.productId] = m.date;
+    });
+    return db.products.filter(p => {
+      if (p.deleted) return false;
+      if (p.stock <= 0) return false;
+      const last = lastMovementByProduct[p.id];
+      if (!last) return true;
+      return last < cutoff90;
+    }).map(p => {
+      const last = lastMovementByProduct[p.id] || p.createdAt;
+      const daysSince = Math.floor((now - new Date(last).getTime()) / 86400000);
+      return { ...p, lastMovement: last, daysSince };
+    }).sort((a, b) => b.daysSince - a.daysSince);
+  }, [db.products, db.stockMovements]);
+  const deadStockValue = deadStock.reduce((s, p) => s + p.cost * p.stock, 0);
+
   const activeProducts = db.products.filter(p => !p.deleted);
   const totalValue = activeProducts.reduce((s, p) => s + p.cost * p.stock, 0);
   const outOfStock = activeProducts.filter(p => p.stock === 0).length;
@@ -77,9 +125,9 @@ export default function Stock({ db, save }: Props) {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={() => setAdjustModal(true)} style={{ background: '#ff5722', border: 'none', borderRadius: 10, color: '#fff', padding: '10px 20px', fontWeight: 700, cursor: 'pointer' }}>⚙️ Stok Ayarla</button>
         <button onClick={() => { exportToExcel(db, { sheets: ['stok'] }); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: '#10b981', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel İndir</button>
-        {(['products', 'history'] as const).map(t => (
+        {(['products', 'abc', 'dead', 'history'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} style={{ padding: '9px 16px', border: 'none', borderRadius: 10, cursor: 'pointer', fontWeight: 600, background: tab === t ? '#ff5722' : '#273548', color: tab === t ? '#fff' : '#94a3b8' }}>
-            {t === 'products' ? '📦 Ürünler' : '📋 Hareketler'}
+            {t === 'products' ? '📦 Ürünler' : t === 'abc' ? '📊 ABC' : t === 'dead' ? '💀 Ölü Stok' : '📋 Hareketler'}
           </button>
         ))}
       </div>
@@ -118,6 +166,102 @@ export default function Stock({ db, save }: Props) {
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {tab === 'abc' && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+            {(['A', 'B', 'C'] as const).map(cls => {
+              const d = abcSummary[cls];
+              const colors: Record<string, string> = { A: '#10b981', B: '#3b82f6', C: '#64748b' };
+              const labels: Record<string, string> = { A: 'A — %80 Ciro (Kritik)', B: 'B — %15 Ciro (Orta)', C: 'C — %5 Ciro (Düşük)' };
+              return (
+                <div key={cls} style={{ background: `${colors[cls]}10`, borderRadius: 12, padding: '14px 16px', border: `1px solid ${colors[cls]}25` }}>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: colors[cls] }}>{d.count} ürün</div>
+                  <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: 4 }}>{labels[cls]}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 2 }}>Ciro: ₺{(d.revenue / 1000).toFixed(0)}K</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
+              <thead>
+                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                  {['Sınıf', 'Ürün', 'Ciro', 'Ciro %', 'Küm.%', 'Adet', 'Kâr'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {abcData.length === 0 ? (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Satış verisi yok</td></tr>
+                ) : abcData.map((v, i) => {
+                  const clsColor = v.class === 'A' ? '#10b981' : v.class === 'B' ? '#3b82f6' : '#64748b';
+                  return (
+                    <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td data-label="Sınıf" style={{ padding: '12px 16px' }}>
+                        <span style={{ background: `${clsColor}20`, color: clsColor, borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{v.class}</span>
+                      </td>
+                      <td data-label="Ürün" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{v.name}</td>
+                      <td data-label="Ciro" style={{ padding: '12px 16px', color: '#10b981', fontWeight: 700 }}>₺{(v.revenue / 1000).toFixed(1)}K</td>
+                      <td data-label="Ciro %" style={{ padding: '12px 16px', color: '#94a3b8' }}>%{v.revenuePct.toFixed(1)}</td>
+                      <td data-label="Küm.%"><div style={{ height: 6, borderRadius: 3, background: '#273548', overflow: 'hidden', maxWidth: 80 }}><div style={{ width: `${v.cumulPct}%`, height: 6, borderRadius: 3, background: clsColor }} /></div></td>
+                      <td data-label="Adet" style={{ padding: '12px 16px', color: '#94a3b8' }}>{v.qty}</td>
+                      <td data-label="Kâr" style={{ padding: '12px 16px', color: v.profit >= 0 ? '#f59e0b' : '#ef4444' }}>₺{(v.profit / 1000).toFixed(1)}K</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {tab === 'dead' && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 14 }}>
+            <div style={{ background: '#ef444410', borderRadius: 12, padding: '14px 16px', border: '1px solid #ef444425' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ef4444' }}>{deadStock.length}</div>
+              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Ölü Stok (90+ gün)</div>
+            </div>
+            <div style={{ background: '#f59e0b10', borderRadius: 12, padding: '14px 16px', border: '1px solid #f59e0b25' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f59e0b' }}>{formatMoney(deadStockValue)}</div>
+              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Bağlı Sermaye</div>
+            </div>
+            <div style={{ background: '#3b82f610', borderRadius: 12, padding: '14px 16px', border: '1px solid #3b82f625' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#3b82f6' }}>
+                {deadStock.length > 0 ? `₺${(deadStockValue / deadStock.length / 1000).toFixed(0)}K` : '—'}
+              </div>
+              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Ort. Ürün Değeri</div>
+            </div>
+          </div>
+          <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
+              <thead>
+                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                  {['Ürün', 'Stok', 'Maliyet', 'Değer', 'Son Hareket', 'Gün'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {deadStock.length === 0 ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Ölü stok bulunamadı</td></tr>
+                ) : deadStock.map(p => (
+                  <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td data-label="Ürün" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{p.name}</td>
+                    <td data-label="Stok" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 700 }}>{p.stock}</td>
+                    <td data-label="Maliyet" style={{ padding: '12px 16px', color: '#94a3b8' }}>{formatMoney(p.cost)}</td>
+                    <td data-label="Değer" style={{ padding: '12px 16px', color: '#f59e0b', fontWeight: 700 }}>{formatMoney(p.cost * p.stock)}</td>
+                    <td data-label="Son Hareket" style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(p.lastMovement)}</td>
+                    <td data-label="Gün" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 600 }}>{p.daysSince}g</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

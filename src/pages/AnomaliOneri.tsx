@@ -11,6 +11,7 @@ import {
 } from "@/lib/anomalyEngine";
 import type { DB } from "@/types";
 import { useCallback, useMemo, useState } from "react";
+import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Props {
   db: DB;
@@ -324,6 +325,25 @@ export default function AnomaliOneri({ db, save }: Props) {
         ? "#f59e0b"
         : "#ef4444";
 
+  // Trend verisi (localStorage)
+  const trendData = useMemo(() => {
+    const logs: { date: string; count: number }[] = [];
+    try {
+      const raw = localStorage.getItem('anomalyTrend');
+      if (raw) logs.push(...JSON.parse(raw));
+    } catch { /* ignore */ }
+    // Bugünkü sayıyı ekle
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const existingIdx = logs.findIndex(l => l.date === todayKey);
+    if (existingIdx >= 0) logs[existingIdx] = { date: todayKey, count: report.anomalies.length };
+    else logs.push({ date: todayKey, count: report.anomalies.length });
+    // Son 30 günü tut
+    const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const filtered = logs.filter(l => l.date >= cutoff).sort((a, b) => a.date.localeCompare(b.date));
+    try { localStorage.setItem('anomalyTrend', JSON.stringify(filtered)); } catch { /* ignore */ }
+    return filtered;
+  }, [report.anomalies.length]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Header */}
@@ -411,17 +431,59 @@ export default function AnomaliOneri({ db, save }: Props) {
             gap: 10,
           }}
         >
+          {/* Sağlık Skoru Göstergesi (Gauge) */}
+          <div
+            style={{
+              background: "rgba(0,0,0,0.25)",
+              borderRadius: 10,
+              padding: "6px 10px",
+              textAlign: "center",
+            }}
+          >
+            <ResponsiveContainer width="100%" height={70}>
+              <PieChart>
+                <Pie
+                  startAngle={180}
+                  endAngle={0}
+                  data={[
+                    { value: report.healthScore },
+                    { value: 100 - report.healthScore },
+                  ]}
+                  cx="50%"
+                  cy="80%"
+                  innerRadius={26}
+                  outerRadius={32}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  <Cell fill={scoreColor} />
+                  <Cell fill="rgba(255,255,255,0.06)" />
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div
+              style={{
+                fontSize: "1.3rem",
+                fontWeight: 800,
+                color: scoreColor,
+                marginTop: -6,
+              }}
+            >
+              {report.healthScore}
+            </div>
+            <div
+              style={{
+                fontSize: "0.62rem",
+                color: "#475569",
+                marginTop: 1,
+                textTransform: "uppercase",
+              }}
+            >
+              Sağlık Skoru
+            </div>
+          </div>
           {[
-            {
-              label: "Sağlık Skoru",
-              value: `${report.healthScore}/100`,
-              color: scoreColor,
-            },
-            {
-              label: "Kritik",
-              value: report.summary.critical,
-              color: "#ef4444",
-            },
+            { label: "Kritik", value: report.summary.critical, color: "#ef4444" },
             { label: "Uyarı", value: report.summary.warning, color: "#f59e0b" },
             { label: "Bilgi", value: report.summary.info, color: "#3b82f6" },
             { label: "Toplam", value: report.summary.total, color: "#94a3b8" },
@@ -448,6 +510,33 @@ export default function AnomaliOneri({ db, save }: Props) {
             </div>
           ))}
         </div>
+
+        {/* Trend Grafiği */}
+        {trendData.length > 1 && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ color: "#475569", fontSize: "0.68rem", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Anomali Trendi (30 gün)
+            </div>
+            <ResponsiveContainer width="100%" height={64}>
+              <AreaChart data={trendData} margin={{ top: 2, right: 4, bottom: 2, left: -20 }}>
+                <defs>
+                  <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={scoreColor} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={scoreColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" tick={false} axisLine={false} tickLine={false} />
+                <YAxis tick={false} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ background: "#0f1e35", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: "0.72rem" }}
+                  labelStyle={{ color: "#94a3b8" }}
+                  itemStyle={{ color: "#f1f5f9" }}
+                />
+                <Area type="monotone" dataKey="count" stroke={scoreColor} strokeWidth={2} fill="url(#trendGrad)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
       {/* AI mesajı */}

@@ -188,6 +188,56 @@ export default function DashboardTicaret({ db, onTabChange: _onTabChange }: Prop
         </MagazineCard>
       </div>
 
+      {/* Isı Haritası — Saat × Gün */}
+      {(() => {
+        const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+        const hours = Array.from({ length: 12 }, (_, i) => `${i + 8}:00`);
+        const heat: Record<string, Record<string, number>> = {};
+        days.forEach(d => { heat[d] = {}; hours.forEach(h => { heat[d][h] = 0; }); });
+        db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').forEach(s => {
+          const d = new Date(s.createdAt);
+          const day = days[d.getDay() === 0 ? 6 : d.getDay() - 1];
+          const hour = `${d.getHours()}:00`;
+          if (heat[day] && heat[day][hour] !== undefined) heat[day][hour] += s.total;
+        });
+        const allVals = Object.values(heat).flatMap(d => Object.values(d));
+        const maxVal = Math.max(...allVals, 1);
+        return (
+          <div style={{ marginBottom: 14 }}>
+            <MagazineCard title="Satış Isı Haritası" subtitle="Saat × Gün (ciro bazında)">
+              <div style={{ display: 'flex', gap: 4 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 20, minWidth: 32 }}>
+                  {hours.map(h => <div key={h} style={{ height: 24, fontSize: '0.6rem', color: MUTED, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 4 }}>{h}</div>)}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                    {days.map(d => <div key={d} style={{ flex: 1, textAlign: 'center', fontSize: '0.65rem', color: MUTED, fontWeight: 600 }}>{d}</div>)}
+                  </div>
+                  {hours.map(h => (
+                    <div key={h} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                      {days.map(day => {
+                        const val = heat[day][h] || 0;
+                        const pct = val / maxVal;
+                        const intensity = Math.max(0.05, pct);
+                        return (
+                          <div key={`${day}-${h}`} title={`${day} ${h}: ${formatMoney(val)}`}
+                            style={{ flex: 1, height: 24, borderRadius: 3, background: `rgba(13,115,119,${intensity})`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          >
+                            <span style={{ fontSize: '0.55rem', color: pct > 0.5 ? '#fff' : MUTED, fontWeight: 600 }}>
+                              {val > 0 ? `₺${(val / 1000).toFixed(0)}` : ''}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </MagazineCard>
+          </div>
+        );
+      })()}
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         <MagazineCard title="Ödeme Yöntem Trendi" subtitle="Son 14 gün">
           {paymentData.length === 0 ? (

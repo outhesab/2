@@ -204,6 +204,48 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
         </OpCard>
       )}
 
+      {(filter === "all" || filter === "stok") && (() => {
+        // Bugün sipariş verilmesi gereken ürünler
+        const reorderUrgency = db.products.filter(p => !p.deleted && p.stock > 0)
+          .map(p => {
+            const daily = avgDailySales[p.name] || 0;
+            const daysLeft = daily > 0 ? p.stock / daily : 999;
+            const minDays = p.minStock / Math.max(daily, 0.01);
+            const urgencyScore = Math.max(0, Math.min(100, (1 - daysLeft / Math.max(minDays, 1)) * 100));
+            return { ...p, dailySales: daily, daysLeft, urgencyScore };
+          })
+          .filter(p => p.urgencyScore > 50 || p.stock <= p.minStock)
+          .sort((a, b) => b.urgencyScore - a.urgencyScore)
+          .slice(0, 8);
+        if (reorderUrgency.length === 0) return null;
+        return (
+          <OpCard title="BUGÜN SİPARİŞ VER" subtitle="Acil yeniden sipariş listesi" extra={<span style={{ color: '#ff6b35', fontFamily: MONO, fontWeight: 700 }}>{reorderUrgency.length}</span>} style={{ marginTop: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {reorderUrgency.map((p, i) => {
+                const urgencyColor = p.urgencyScore > 80 ? '#ef4444' : p.urgencyScore > 60 ? '#ff6b35' : '#f59e0b';
+                return (
+                  <motion.div key={p.id} initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
+                    whileHover={{ background: `${BORDER}40` }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, background: `${urgencyColor}06`, cursor: 'pointer' }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: TEXT, fontSize: '0.78rem', fontWeight: 600 }}>{p.name}</div>
+                      <div style={{ color: MUTED, fontSize: '0.68rem', fontFamily: MONO }}>
+                        Stok: {p.stock} · Günlük: {p.dailySales.toFixed(1)} · {p.daysLeft < 30 ? `${Math.floor(p.daysLeft)} gün kaldı` : 'Yeterli'}
+                      </div>
+                    </div>
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: BORDER, overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.min(100, p.urgencyScore)}%`, height: 4, borderRadius: 2, background: urgencyColor }} />
+                    </div>
+                    <span style={{ color: urgencyColor, fontFamily: MONO, fontSize: '0.72rem', fontWeight: 700 }}>{Math.round(p.urgencyScore)}%</span>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </OpCard>
+        );
+      })()}
+
       {(filter === "all" || filter === "sipariş") && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 12 }}>
           {orderPipeline.map((o) => {

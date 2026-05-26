@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { formatMoney, formatDate } from "@/lib/utils-tr";
 import type { DB } from "@/types";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
@@ -122,6 +122,43 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
       }));
   }, [db.sales]);
 
+  // Sezonsallık analizi
+  const seasonalityData = useMemo(() => {
+    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const monthlyTotals: Record<string, { total: number; count: number }> = {};
+    db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').forEach(s => {
+      const d = new Date(s.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthlyTotals[key]) monthlyTotals[key] = { total: 0, count: 0 };
+      monthlyTotals[key].total += s.total;
+      monthlyTotals[key].count++;
+    });
+    // Ay bazında ortalama (yıllar arası)
+    const monthAvgs = Array.from({ length: 12 }, (_, m) => {
+      const vals = Object.entries(monthlyTotals)
+        .filter(([k]) => parseInt(k.split('-')[1]) === m + 1)
+        .map(([, v]) => v.total);
+      const avg = vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+      return { month: monthNames[m], monthIndex: m, avg };
+    });
+    const overallAvg = monthAvgs.reduce((s, m) => s + m.avg, 0) / 12 || 1;
+    const withCoeff = monthAvgs.map(m => ({
+      ...m,
+      coefficient: m.avg / overallAvg,
+      forecast: m.avg,
+    }));
+    // 3 aylık nakit akışı tahmini
+    const now = new Date();
+    const cashFlowForecast = Array.from({ length: 3 }, (_, i) => {
+      const m = (now.getMonth() + i) % 12;
+      const monthData = withCoeff[m];
+      const gider = insights.gunlukGider * 30;
+      const net = (monthData?.avg || 0) - gider;
+      return { month: monthNames[m], gelir: monthData?.avg || 0, gider, net };
+    });
+    return { monthlyData: withCoeff, cashFlowForecast };
+  }, [db.sales, insights.gunlukGider]);
+
   const whatIf = useMemo(() => {
     const totalCariBalance = db.cari.filter((c) => !c.deleted && c.type === "musteri").reduce((s, c) => s + c.balance, 0);
     const earlyPaymentBenefit = totalCariBalance * 0.05;
@@ -231,6 +268,51 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
           <span><span style={{ color: "#7c3aed" }}>━</span> Gerçek</span>
           <span><span style={{ color: "#06b6d4", borderBottom: "2px dashed #06b6d4" }}>━</span> Tahmin</span>
         </div>
+      </GlassCard>
+
+      {/* Sezonsallık Grafiği */}
+      <GlassCard title="Sezonsallık Analizi" subtitle="Aylık ortalama ciro dağılımı ve 3 aylık nakit akışı tahmini" accent="#8b5cf6" shimmer={loading}>
+        {!loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={seasonalityData.monthlyData} margin={{ top: 4, right: 4, bottom: 4, left: -16 }}>
+                  <XAxis dataKey="month" tick={{ fontSize: 9, fill: '#475569' }} axisLine={false} tickLine={false} interval={1} />
+                  <YAxis tick={{ fontSize: 9, fill: '#475569' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
+                  <Tooltip formatter={(v: number, n: string) => [formatMoney(v), n === 'avg' ? 'Ortalama' : n]} contentStyle={{ background: 'rgba(10,10,20,0.95)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, fontSize: '0.72rem' }} />
+                  <Bar dataKey="avg" radius={[3, 3, 0, 0]} maxBarSize={20}>
+                    {seasonalityData.monthlyData.map((entry, idx) => (
+                      <Cell key={idx} fill={entry.coefficient > 1.2 ? '#10b981' : entry.coefficient > 0.8 ? '#8b5cf6' : '#64748b'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4, fontSize: '0.62rem', color: '#64748b' }}>
+                <span><span style={{ color: '#10b981' }}>●</span> Yüksek</span>
+                <span><span style={{ color: '#8b5cf6' }}>●</span> Normal</span>
+                <span><span style={{ color: '#64748b' }}>●</span> Düşük</span>
+              </div>
+            </div>
+            <div>
+              <div style={{ color: '#64748b', fontSize: '0.68rem', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nakit Akışı Tahmini (3 Ay)</div>
+              {seasonalityData.cashFlowForecast.map((c, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                  style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.04)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>{c.month}</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gelir / 1000).toFixed(0)}K</span>
+                    <span style={{ color: '#64748b', fontSize: '0.68rem', margin: '0 4px' }}>/</span>
+                    <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gider / 1000).toFixed(0)}K</span>
+                    <div style={{ color: c.net >= 0 ? '#10b981' : '#ef4444', fontSize: '0.82rem', fontWeight: 700 }}>
+                      {c.net >= 0 ? '+' : ''}₺{(c.net / 1000).toFixed(0)}K
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
       </GlassCard>
 
       {/* Anomaly Detector + What-If */}

@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.4.0',
+    date: '26 Mayıs 2026',
+    title: 'Faz 2 Öncelik 1+2 — Kritik İşlevler & Dashboard İyileştirmeleri',
+    summary: 'Kasa gün sonu sayım, çizelge 7 gün paneli, stok ABC analizi+ölü stok, sağlık skoru gauge, alacak yaşlandırma, ısı haritası, kritiklik widget ve sezonsallık grafiği eklendi.',
+    changes: [
+      { type: 'yeni', text: 'Kasa gün sonu sayım formu: fiziki/sistem bakiye karşılaştırması, renk kodlu fark göstergesi, PDF yazdırma' },
+      { type: 'yeni', text: 'Çizelge yaklaşan 7 gün paneli: fatura vade, sipariş teslim, alacak tahsilat takvimi renk kodlu' },
+      { type: 'yeni', text: 'Stok ABC analizi: A=%80, B=%15, C=%5 segmentasyonu, kümülatif ciro grafiği' },
+      { type: 'yeni', text: 'Stok ölü stok tespiti: 90+ gün hareketsiz ürünler, bağlı sermaye hesaplaması' },
+      { type: 'yeni', text: 'Anomali sağlık skoru gauge: PieChart ile yarım çember gösterge, 30 günlük trend grafiği' },
+      { type: 'yeni', text: 'DashboardFinans alacak yaşlandırma: 0-30/31-60/61-90/90+ gün renk kodlu kartlar ve müşteri detay tablosu' },
+      { type: 'yeni', text: 'DashboardTicaret ısı haritası: saat×gün satış yoğunluğu grid görseli' },
+      { type: 'yeni', text: 'DashboardOperasyon bugün sipariş listesi: aciliyet skoruna göre sıralı yeniden sipariş önerileri' },
+      { type: 'yeni', text: 'DashboardStrateji sezonsallık analizi: 12 aylık ortalama+mevsim katsayısı, 3 aylık nakit akışı tahmini' },
+    ],
+  },
+  {
     version: '3.3.0',
     date: '26 Mayıs 2026',
     title: 'Faz 1 Yeni Detay Sayfaları',

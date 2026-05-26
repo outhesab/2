@@ -229,6 +229,80 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
         </GoldCard>
       </div>
 
+      {/* Alacak Yaşlandırma */}
+      {(() => {
+        const now = Date.now();
+        const dayMs = 86400000;
+        const musteri = db.cari.filter(c => !c.deleted && c.type === 'musteri' && c.balance > 0);
+        const aging = { '0-30': [] as typeof musteri, '31-60': [] as typeof musteri, '61-90': [] as typeof musteri, '90+': [] as typeof musteri };
+        musteri.forEach(c => {
+          if (!c.lastTransaction) { aging['90+'].push(c); return; }
+          const days = Math.floor((now - new Date(c.lastTransaction).getTime()) / dayMs);
+          if (days <= 30) aging['0-30'].push(c);
+          else if (days <= 60) aging['31-60'].push(c);
+          else if (days <= 90) aging['61-90'].push(c);
+          else aging['90+'].push(c);
+        });
+        const agingColors: Record<string, string> = { '0-30': '#10b981', '31-60': '#f59e0b', '61-90': '#fb923c', '90+': '#ef4444' };
+        return (
+          <div style={{ marginBottom: 14 }}><GoldCard title="Alacak Yaşlandırma" subtitle="Son işlem tarihine göre müşteri alacakları" accent="#f59e0b">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+              {Object.entries(aging).map(([range, customers]) => {
+                const total = customers.reduce((s, c) => s + c.balance, 0);
+                const color = agingColors[range];
+                return (
+                  <div key={range} style={{ background: `${color}10`, borderRadius: 10, padding: '12px 14px', border: `1px solid ${color}25` }}>
+                    <div style={{ color, fontSize: '1.2rem', fontWeight: 800 }}>{formatMoney(total)}</div>
+                    <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{range} gün ({customers.length} müşteri)</div>
+                    <div style={{ display: 'flex', gap: 4, marginTop: 6, height: 4 }}>
+                      {['0-30', '31-60', '61-90', '90+'].map(r => {
+                        const pct = musteri.length > 0 ? (aging[r].length / musteri.length) * 100 : 0;
+                        return <div key={r} style={{ flex: pct, height: 4, borderRadius: 2, background: agingColors[r], opacity: r === range ? 1 : 0.3 }} />;
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {musteri.length > 0 && (
+              <div style={{ marginTop: 10 }}>
+                <div className="responsive-table-wrap" style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        {['Müşteri', 'Bakiye', 'Son İşlem', 'Grup'].map(h => (
+                          <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: '#64748b', fontWeight: 600 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {musteri.sort((a, b) => {
+                        const aDays = a.lastTransaction ? Math.floor((now - new Date(a.lastTransaction).getTime()) / dayMs) : 999;
+                        const bDays = b.lastTransaction ? Math.floor((now - new Date(b.lastTransaction).getTime()) / dayMs) : 999;
+                        return bDays - aDays;
+                      }).slice(0, 10).map(c => {
+                        const days = c.lastTransaction ? Math.floor((now - new Date(c.lastTransaction).getTime()) / dayMs) : 999;
+                        const range = days <= 30 ? '0-30' : days <= 60 ? '31-60' : days <= 90 ? '61-90' : '90+';
+                        return (
+                          <tr key={c.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                            <td style={{ padding: '6px 8px', color: '#f1f5f9', fontWeight: 500 }}>{c.name}</td>
+                            <td style={{ padding: '6px 8px', color: '#10b981', fontWeight: 700 }}>{formatMoney(c.balance)}</td>
+                            <td style={{ padding: '6px 8px', color: '#64748b' }}>{c.lastTransaction ? formatDate(c.lastTransaction) : '-'}</td>
+                            <td style={{ padding: '6px 8px' }}>
+                              <span style={{ background: `${agingColors[range]}20`, color: agingColors[range], borderRadius: 4, padding: '2px 6px', fontSize: '0.68rem', fontWeight: 600 }}>{days}d</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </GoldCard></div>
+        );
+      })()}
+
       {/* Alt Kartlar */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 14 }}>
         <GoldCard title="Nakit" accent="#06b6d4"><StatNumber label="Bakiye" value={formatMoney(finansData.nakit)} color="#06b6d4" /></GoldCard>
