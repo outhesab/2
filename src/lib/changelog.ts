@@ -20,6 +20,32 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.3.0',
+    date: '26 Mayıs 2026',
+    title: 'Faz 1 Yeni Detay Sayfaları',
+    summary: 'Ürün, satış, cari, ortak emanet ve AI aksiyon günlüğü için Faz 1 kapsamındaki yeni UI sayfaları eklendi.',
+    changes: [
+      { type: 'yeni', text: '/urunler/:id ürün detay sayfası eklendi: stok hareketleri, satış kâr analizi ve minimum stok eşiği yönetimi' },
+      { type: 'yeni', text: '/satis/:id satış detay sayfası eklendi: bağlı ürünler, kasa, fatura, stok ve denetim izi görünümü' },
+      { type: 'yeni', text: '/cari/:id cari ekstre sayfası eklendi: kronolojik işlem dökümü, bakiye trendi ve gecikmiş taksit uyarıları' },
+      { type: 'yeni', text: '/ortak-emanet sayfası eklendi: emanet/iade kayıtları kasa ve ortak cari bakiyesiyle birlikte işlenir' },
+      { type: 'yeni', text: '/ai/eylem-log sayfası ve aiActionLog kaydı eklendi: AI aksiyonları, risk etiketi ve geri alma akışı izlenir' },
+    ],
+  },
+  {
+    version: '3.2.0',
+    date: '26 Mayıs 2026',
+    title: 'Performans İyileştirmeleri & PWA Aktivasyonu',
+    summary: 'Ana JS bundle\'ı %43 küçültüldü (433KB → 245KB). Firebase SDK ayrı chunk\'a taşındı. PWA (Service Worker + manifest) aktifleştirildi. Build yapılandırması optimize edildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'manualChunks: Firebase SDK ayrı chunk\'a taşındı (163KB) — ana bundle 433KB\'den 245KB\'ye düştü (%43 azalma)' },
+      { type: 'iyilestirme', text: 'manualChunks: sonner (toast) ayrı `ui` chunk\'ına taşındı (34KB)' },
+      { type: 'iyilestirme', text: 'PWA reactivasyon: Service Worker + manifest + workbox ile 53 asset precache, offline navigasyon desteği' },
+      { type: 'iyilestirme', text: 'PWA runtime caching: Google Fonts (CacheFirst, 1 yıl) ve Firebase API (NetworkOnly) eklendi' },
+      { type: 'iyilestirme', text: 'README.md: "Build & Performans" bölümü eklendi — chunk tablosu ve PWA durumu' },
+    ],
+  },
+  {
     version: '3.1.0',
     date: '21 Mayıs 2026',
     title: 'Kararlı Sürüm Hazırlığı — Android Manifest & İzinler',

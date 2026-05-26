@@ -10,6 +10,7 @@ import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { DB, SaleItem } from "@/types";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 interface Props {
   db: DB;
@@ -27,6 +28,7 @@ export default function Sales({ db, save: _save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
   const { playSound } = useSoundFeedback();
+  const [, setLocation] = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
   const [_receiptId, setReceiptId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "tamamlandi" | "iade" | "iptal">(
@@ -493,8 +495,24 @@ export default function Sales({ db, save: _save }: Props) {
                     </span>
                   </td>
                   <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => setLocation(`/satis/${s.id}`)}
+                          style={{
+                            background: "rgba(59,130,246,0.1)",
+                            border: "none",
+                            borderRadius: 6,
+                            color: "#60a5fa",
+                            padding: "4px 10px",
+                            cursor: "pointer",
+                            fontSize: "0.8rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Detay
+                        </button>
                     {s.status === "tamamlandi" && (
-                      <div style={{ display: "flex", gap: 6 }}>
+                      <>
                         <button
                           onClick={() => handleReturn(s.id)}
                           style={{
@@ -525,8 +543,9 @@ export default function Sales({ db, save: _save }: Props) {
                         >
                           ✕ İptal
                         </button>
-                      </div>
+                      </>
                     )}
+                      </div>
                   </td>
                 </tr>
               ))

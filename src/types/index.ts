@@ -348,6 +348,21 @@ export interface ActivityLog {
   createdAt?: string;
 }
 
+export interface AIActionLogEntry {
+  id: string;
+  createdAt: string;
+  model: 'deepseek' | 'claude' | 'gemini' | 'offline';
+  mode: 'manual' | 'auto';
+  messageIndex?: number;
+  actionType: string;
+  label: string;
+  status: 'applied' | 'blocked' | 'failed';
+  dangerous?: boolean;
+  affectedIds?: string[];
+  notes?: string[];
+  error?: string;
+}
+
 export interface OrtakEmanet {
   id: string;
   partnerId: string;
@@ -457,5 +472,5 @@ export interface DB {
   productCategories: ProductCategory[];
   notes: Note[];
   _auditLog: AuditEntry[];
+  aiActionLog?: AIActionLogEntry[];
 }
-

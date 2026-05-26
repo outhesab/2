@@ -52,7 +52,7 @@ describe("askDeepSeek", () => {
     const callArgs = fetchSpy.mock.calls[0];
     expect(callArgs[0]).toBe("https://api.deepseek.com/chat/completions");
     const body = JSON.parse(String((callArgs[1] as RequestInit)?.body || "{}"));
-    expect(body.model).toBe("deepseek");
+    expect(body.model).toBe("deepseek-chat");
     expect(body.stream).toBe(true);
     expect(body.messages).toHaveLength(1);
   });

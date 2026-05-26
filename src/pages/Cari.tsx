@@ -6,6 +6,7 @@ import { isExactMatch, similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { Cari as CariType, DB } from "@/types";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 interface Props {
   db: DB;
@@ -83,6 +84,7 @@ function debtColor(days: number | null): {
 export default function Cari({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
+  const [, setLocation] = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "musteri" | "tedarikci">("all");
   const [search, setSearch] = useState("");
@@ -813,7 +815,7 @@ export default function Cari({ db, save }: Props) {
                       borderBottom: "1px solid rgba(255,255,255,0.04)",
                       cursor: "pointer",
                     }}
-                    onClick={() => setDetailId(c.id)}
+                    onClick={() => setLocation(`/cari/${c.id}`)}
                   >
                     <td
                       data-label="Ad"

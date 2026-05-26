@@ -2858,4 +2858,102 @@ describe("🏪 Kapsamlı Senaryo Testleri", () => {
       );
     });
   });
+
+  describe("🆕 Faz 1 — Yeni Sayfa Veri Akışları", () => {
+    it("AI aksiyon log kaydı DB içinde güvenli şekilde taşınmalı", () => {
+      const db = makeDB({
+        aiActionLog: [
+          {
+            id: "ai-log-1",
+            createdAt: now(),
+            model: "claude",
+            mode: "manual",
+            actionType: "stok_guncelle",
+            label: "Stok düzelt",
+            status: "applied",
+            dangerous: true,
+            affectedIds: ["urun-1"],
+          },
+        ],
+      });
+
+      expect(db.aiActionLog).toHaveLength(1);
+      expect(db.aiActionLog?.[0].dangerous).toBe(true);
+    });
+
+    it("ortak emanet kaydı emanet, kasa ve ortak cari bakiyesini birlikte güncellemeli", () => {
+      const nowIso = now();
+      const prev = makeDB({
+        partners: [{ id: "ortak-1", name: "Fevzi Ortak", createdAt: nowIso }],
+        cari: [
+          {
+            id: "cari-ortak-1",
+            name: "Fevzi Ortak",
+            type: "musteri",
+            ortak: true,
+            partnerId: "ortak-1",
+            balance: 0,
+            createdAt: nowIso,
+            updatedAt: nowIso,
+          },
+        ],
+        kasa: [
+          {
+            id: "kasa-baslangic",
+            type: "gelir",
+            category: "devir",
+            amount: 1000,
+            kasa: "nakit",
+            createdAt: nowIso,
+            updatedAt: nowIso,
+          },
+        ],
+      });
+
+      const amount = 250;
+      const next: DB = {
+        ...prev,
+        ortakEmanetler: [
+          {
+            id: "emanet-1",
+            partnerId: "ortak-1",
+            description: "Ortak emanet",
+            amount,
+            type: "emanet",
+            createdAt: nowIso,
+            updatedAt: nowIso,
+          },
+        ],
+        kasa: [
+          ...prev.kasa,
+          {
+            id: "kasa-emanet",
+            type: "gider",
+            category: "ortak_emanet",
+            amount,
+            kasa: "nakit",
+            description: "Ortak emanet",
+            relatedId: "ortak-1",
+            createdAt: nowIso,
+            updatedAt: nowIso,
+          },
+        ],
+        cari: prev.cari.map((c) =>
+          c.partnerId === "ortak-1"
+            ? {
+                ...c,
+                balance: c.balance + amount,
+                lastTransaction: nowIso,
+                updatedAt: nowIso,
+              }
+            : c,
+        ),
+      };
+
+      expect(next.ortakEmanetler).toHaveLength(1);
+      expect(next.kasa.at(-1)?.type).toBe("gider");
+      expect(next.cari[0].balance).toBe(amount);
+      expect(validateTransaction(prev, next)).toEqual([]);
+    });
+  });
 });

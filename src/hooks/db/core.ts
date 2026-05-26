@@ -123,6 +123,7 @@ function makeDefaultDB(): DB {
     ] as ProductCategory[],
     notes: [],
     _auditLog: [],
+    aiActionLog: [],
   };
 }
 
@@ -174,6 +175,7 @@ function loadFromStorage(): DB {
       merged.productCategories = def.productCategories;
     if (!Array.isArray(merged.notes)) merged.notes = [];
     if (!Array.isArray(merged._auditLog)) merged._auditLog = [];
+    if (!Array.isArray(merged.aiActionLog)) merged.aiActionLog = [];
     return merged;
   } catch {
     return makeDefaultDB();

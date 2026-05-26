@@ -18,7 +18,7 @@ import { buildContext, offlineReply, QUICK_PROMPTS } from "@/lib/aiOffline";
 import { askDeepSeek } from "@/lib/deepseek";
 import { getUserSession } from "@/lib/userManager";
 import { formatMoney, genId } from "@/lib/utils-tr";
-import type { DB } from "@/types";
+import type { AIActionLogEntry, DB } from "@/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface Props {
@@ -69,6 +69,24 @@ function MarkdownText({ text }: { text: string }) {
       .replace(/\n/g, "<br/>"),
   );
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+function getActionAffectedIds(action: DBAction): string[] {
+  const ids = new Set<string>();
+  const payload = action.payload || {};
+  ["id", "productId", "cariId", "saleId", "invoiceId", "kasaEntryId"].forEach(
+    (key) => {
+      const value = payload[key];
+      if (typeof value === "string" && value.trim()) ids.add(value.trim());
+    },
+  );
+  return [...ids];
+}
+
+function isDangerousAction(action: DBAction): boolean {
+  return ["sale", "kasa_gider", "stok_guncelle", "cari_tahsilat"].includes(
+    action.type,
+  );
 }
 
 function ApiSettings({ onClose }: { onClose: () => void }) {
@@ -333,6 +351,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           let appliedCount = 0;
           const violations: string[] = [];
           const fallbackNotes: string[] = [];
+          const actionLogs: AIActionLogEntry[] = [];
           const actionLimit = autoApplyActions
             ? Math.max(1, maxAutoActions)
             : Number.MAX_SAFE_INTEGER;
@@ -345,13 +364,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             const action = actions[i];
             const attempted = applyActionWithFallback(next, action);
             if (attempted.applied) {
+              const appliedAction = attempted.appliedAction || action;
               next = attempted.next;
               appliedCount += 1;
-              dispatchAgentFlow(
-                (attempted.appliedAction || action) as Parameters<
-                  typeof dispatchAgentFlow
-                >[0],
-              );
+              dispatchAgentFlow(appliedAction as Parameters<typeof dispatchAgentFlow>[0]);
               fallbackNotes.push(`AgentAkisi:${action.label}`);
               if (
                 attempted.appliedAction &&
@@ -361,13 +377,40 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   `${action.label} => ${attempted.appliedAction.label}`,
                 );
               }
+              actionLogs.push({
+                id: genId(),
+                createdAt: new Date().toISOString(),
+                model: modelSource,
+                mode: autoApplyActions ? "auto" : "manual",
+                messageIndex: msgIdx,
+                actionType: appliedAction.type,
+                label: appliedAction.label,
+                status: "applied",
+                dangerous: isDangerousAction(appliedAction),
+                affectedIds: getActionAffectedIds(appliedAction),
+                notes: attempted.notes,
+              });
             } else {
-              violations.push(
-                attempted.notes[0] || `${action.label}: İşlem uygulanamadı`,
-              );
+              const error =
+                attempted.notes[0] || `${action.label}: İşlem uygulanamadı`;
+              violations.push(error);
               if (attempted.notes.length > 1) {
                 fallbackNotes.push(...attempted.notes.slice(1));
               }
+              actionLogs.push({
+                id: genId(),
+                createdAt: new Date().toISOString(),
+                model: modelSource,
+                mode: autoApplyActions ? "auto" : "manual",
+                messageIndex: msgIdx,
+                actionType: action.type,
+                label: action.label,
+                status: "failed",
+                dangerous: isDangerousAction(action),
+                affectedIds: getActionAffectedIds(action),
+                notes: attempted.notes,
+                error,
+              });
               if (stopOnViolation) break;
             }
           }
@@ -396,6 +439,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           return {
             ...next,
             _activityLog: [...(next._activityLog || []), aiLog],
+            aiActionLog: [...actionLogs, ...(next.aiActionLog || [])].slice(
+              0,
+              200,
+            ),
           };
         });
         setActionResult({
@@ -416,7 +463,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         });
       }
     },
-    [save, autoApplyActions, maxAutoActions, stopOnViolation],
+    [save, autoApplyActions, maxAutoActions, stopOnViolation, modelSource],
   );
 
   // Sesli �zellikler

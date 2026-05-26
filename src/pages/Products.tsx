@@ -5,6 +5,7 @@ import { useConfirm } from '@/components/ConfirmDialog';
 import { genId, formatMoney, calcProfit } from '@/lib/utils-tr';
 import { exportArrayToExcel } from '@/lib/excelExport';
 import type { DB, Product } from '@/types';
+import { useLocation } from 'wouter';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -13,6 +14,7 @@ const empty: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = { name: '', categ
 export default function Products({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
+  const [, setLocation] = useLocation();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -137,6 +139,7 @@ export default function Products({ db, save }: Props) {
               <div style={{ color: stockStatus.color, fontSize: '0.85rem', fontWeight: 600, marginBottom: 10 }}>{stockStatus.label}</div>
               {p.barcode && <div style={{ fontSize: '0.72rem', color: '#475569', marginBottom: 10 }}>🔖 {p.barcode}</div>}
               <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setLocation(`/urunler/${p.id}`)} style={{ flex: 1, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, color: '#34d399', padding: '7px 0', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }}>Detay</button>
                 <button onClick={() => openEdit(p)} style={{ flex: 1, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, color: '#60a5fa', padding: '7px 0', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }}>✏️ Düzenle</button>
                 <button onClick={() => handleDelete(p.id)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, color: '#ef4444', padding: '7px 10px', cursor: 'pointer', fontWeight: 600 }}>🗑️</button>
               </div>

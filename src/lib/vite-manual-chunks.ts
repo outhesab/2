@@ -27,7 +27,11 @@ export function manualChunks(id: string): string | undefined {
   if (id.includes('framer-motion')) return 'animations';
   // Lucide React icons chunk
   if (id.includes('lucide-react')) return 'icons';
+  // Firebase SDK chunk
+  if (id.includes('firebase')) return 'firebase';
   // xlsx Excel processing chunk
   if (id.includes('xlsx')) return 'excel';
+  // sonner toast chunk
+  if (id.includes('sonner')) return 'ui';
   return undefined;
 }

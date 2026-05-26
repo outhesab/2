@@ -39,12 +39,14 @@ import {
 import { Router, Switch, Route, useLocation } from "wouter";
 
 const AIAsistan = lazy(() => import("@/pages/AIAsistan"));
+const AIEylemLog = lazy(() => import("@/pages/AIEylemLog"));
 const AnomaliOneri = lazy(() => import("@/pages/AnomaliOneri"));
 const Bank = lazy(() => import("@/pages/Bank"));
 const BoruTed = lazy(() => import("@/pages/BoruTed"));
 const BugHunter = lazy(() => import("@/pages/BugHunter"));
 const Butce = lazy(() => import("@/pages/Butce"));
 const Cari = lazy(() => import("@/pages/Cari"));
+const CariDetail = lazy(() => import("@/pages/CariDetail"));
 const Cizelge = lazy(() => import("@/pages/Cizelge"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const DashboardFinans = lazy(() => import("@/pages/DashboardFinans"));
@@ -60,11 +62,14 @@ const KontrolHalkasi = lazy(() => import("@/pages/KontrolHalkasi"));
 const Monitor = lazy(() => import("@/pages/Monitor"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Notlar = lazy(() => import("@/pages/Notlar"));
+const OrtakEmanet = lazy(() => import("@/pages/OrtakEmanet"));
 const Partners = lazy(() => import("@/pages/Partners"));
 const Pelet = lazy(() => import("@/pages/Pelet"));
 const Products = lazy(() => import("@/pages/Products"));
+const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const Reports = lazy(() => import("@/pages/Reports"));
 const Sales = lazy(() => import("@/pages/Sales"));
+const SaleDetail = lazy(() => import("@/pages/SaleDetail"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const Stock = lazy(() => import("@/pages/Stock"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
@@ -98,6 +103,7 @@ const TABS = [
   { id: "suppliers", label: "Tedarikçi", icon: "🏭", group: "Tedarik" },
   { id: "pelet", label: "Pelet", icon: "🪵", group: "Tedarik" },
   { id: "boruTed", label: "Boru Tedarik", icon: "🔩", group: "Tedarik" },
+  { id: "ortakEmanet", label: "Ortak Emanet", icon: "🤝", group: "Tedarik" },
   { id: "cari", label: "Cari", icon: "👤", group: "Finans" },
   { id: "kasa", label: "Kasa", icon: "💰", group: "Finans" },
   { id: "butce", label: "Bütçe", icon: "📊", group: "Finans" },
@@ -115,10 +121,61 @@ const TABS = [
   { id: "bughunter", label: "Bug Hunter", icon: "🐛", group: "Sistem" },
   { id: "anomali", label: "Anomali", icon: "⚠️", group: "Analiz" },
   { id: "excelimport", label: "Excel İçe Aktar", icon: "📥", group: "Sistem" },
+  { id: "aiEylemLog", label: "AI Eylem Log", icon: "🧠", group: "Sistem" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 type TabGroup = (typeof TABS)[number]["group"];
+
+const TAB_PATHS: Record<TabId, string> = {
+  dashboard: "/dashboard",
+  "dashboard-finans": "/dashboard-finans",
+  "dashboard-ticaret": "/dashboard-ticaret",
+  "dashboard-operasyon": "/dashboard-operasyon",
+  "dashboard-strateji": "/dashboard-strateji",
+  products: "/products",
+  sales: "/sales",
+  fatura: "/fatura",
+  suppliers: "/suppliers",
+  pelet: "/pelet",
+  boruTed: "/boruTed",
+  ortakEmanet: "/ortak-emanet",
+  cari: "/cari",
+  kasa: "/kasa",
+  butce: "/butce",
+  bank: "/bank",
+  reports: "/reports",
+  cizelge: "/cizelge",
+  stock: "/stock",
+  monitor: "/monitor",
+  kontrol: "/kontrol",
+  entegrasyon: "/entegrasyon",
+  excelmerge: "/excelmerge",
+  notlar: "/notlar",
+  partners: "/partners",
+  settings: "/settings",
+  bughunter: "/bughunter",
+  anomali: "/anomali",
+  excelimport: "/excelimport",
+  aiEylemLog: "/ai/eylem-log",
+};
+
+function getActiveTabFromLocation(location: string): TabId {
+  const path = location.split("?")[0].replace(/\/$/, "") || "/";
+  if (path.startsWith("/urunler/")) return "products";
+  if (path.startsWith("/satis/")) return "sales";
+  if (path.startsWith("/cari/")) return "cari";
+
+  const match = (Object.entries(TAB_PATHS) as [TabId, string][]).find(
+    ([, routePath]) => routePath === path,
+  );
+  if (match) return match[0];
+
+  const legacyTabId = path.replace("/", "");
+  return TABS.some((tab) => tab.id === legacyTabId)
+    ? (legacyTabId as TabId)
+    : "dashboard";
+}
 
 const PRIORITY_TABS: readonly TabId[] = [
   "dashboard",
@@ -710,13 +767,13 @@ function AppContent({
   username?: string;
   guestTimeLeft: number;
 }) {
-  const { db, save, exportJSON, importJSON } = useDB();
+  const { db, save, exportJSON, importJSON, undo } = useDB();
   useEffect(() => {
     const ctx: AgentContext = { getDB: () => db, save };
     getAllAgents().forEach((agent) => agent.bagla(ctx));
   }, [db, save]);
   const [location, setLocation] = useLocation();
-  const activeTab = (location && TABS.some((t) => t.id === location.replace("/", "")) ? location.replace("/", "") : "dashboard") as TabId;
+  const activeTab = getActiveTabFromLocation(location);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [favoriteTabs, setFavoriteTabs] = useState<TabId[]>(loadFavoriteTabs);
   const [expandedGroups, setExpandedGroups] = useState<
@@ -862,7 +919,7 @@ function AppContent({
   }, []);
 
   const navigate = useCallback((tab: TabId) => {
-    setLocation("/" + tab);
+    setLocation(TAB_PATHS[tab]);
     setSidebarOpen(false);
   }, [setLocation]);
 
@@ -1394,12 +1451,16 @@ function AppContent({
                       onTabChange={(tab) => navigate(tab as TabId)}
                     />
                   </Route>
+                  <Route path="/urunler/:id"><ProductDetail db={db} save={save} /></Route>
+                  <Route path="/satis/:id"><SaleDetail db={db} /></Route>
+                  <Route path="/cari/:id"><CariDetail db={db} /></Route>
                   <Route path="/products"><Products db={db} save={save} /></Route>
                   <Route path="/sales"><Sales db={db} save={save} /></Route>
                   <Route path="/fatura"><Fatura db={db} save={save} /></Route>
                   <Route path="/suppliers"><Suppliers db={db} save={save} /></Route>
                   <Route path="/pelet"><Pelet db={db} save={save} /></Route>
                   <Route path="/boruTed"><BoruTed db={db} save={save} /></Route>
+                  <Route path="/ortak-emanet"><OrtakEmanet db={db} save={save} /></Route>
                   <Route path="/cari"><Cari db={db} save={save} /></Route>
                   <Route path="/kasa"><Kasa db={db} save={save} /></Route>
                   <Route path="/butce"><Butce db={db} save={save} /></Route>
@@ -1424,6 +1485,7 @@ function AppContent({
                   <Route path="/bughunter"><BugHunter /></Route>
                   <Route path="/anomali"><AnomaliOneri db={db} save={save} /></Route>
                   <Route path="/excelimport"><ExcelImport db={db} save={save} /></Route>
+                  <Route path="/ai/eylem-log"><AIEylemLog db={db} undo={undo} /></Route>
                   <Route path="/not-found"><NotFound /></Route>
                   <Route>
                     <Dashboard

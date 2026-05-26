@@ -41,6 +41,7 @@ export function makeDefaultDB(): DB {
     installments: [],
     partners: [],
     productCategories: [],
-    notes: []
+    notes: [],
+    aiActionLog: []
   };
 }

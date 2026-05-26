@@ -2,24 +2,50 @@
 
 Soba satışı, stok, kasa ve cari takibini tek ekranda yöneten, offline-first çalışan bir işletme yönetim uygulaması.
 
-## Başlamadan Önce
+---
 
-Bu projede geliştirmeye başlamadan önce aşağıdaki talimat dokümanını okuyun:
+## İçindekiler
 
-Bu doküman:
+- [Başlarken](#başlarken)
+- [Özellikler](#özellikler)
+- [Teknoloji](#teknoloji)
+- [Proje Yapısı](#proje-yapısı)
+- [Komutlar](#komutlar)
+- [Test](#test)
+- [Build & Performans](#build--performans)
+- [Changelog Zorunluluğu](#changelog-zorunluluğu)
+- [Firebase Sync](#firebase-sync-opsiyonel)
+- [Mobil](#mobil)
+- [Lisans](#lisans)
 
-- proje mimarisini,
-- agent yapısını,
-- öncelikleri,
-- test stratejisini,
-- riskleri,
-- uygulanacak geliştirme yaklaşımını tanımlar.
+---
 
-Zorunlu başlangıç kuralı:
+## Başlarken
 
-- Yeni görev almadan önce bu dokümanı inceleyin.
-- Geliştirme kararlarını bu talimata göre verin.
-- Offline-first, IndexedDB, multi-agent yapı ve test disiplini temel kabul edilir.
+```bash
+pnpm install
+pnpm run dev
+```
+
+### Geliştirme Kuralları
+
+Proje kuralları ve talimatlar `opencode.json` dosyasında tanımlıdır. Yeni bir değişiklik yapmadan önce mutlaka okuyun.
+
+Referans dokümanlar:
+
+| Dosya | İçerik |
+|-------|--------|
+| `opencode.json` | Proje kuralları, komutlar, bağımlılıklar |
+| `PARSPEL_MASTER_PROJE_DOKUMANI.txt` | Master proje dokümanı |
+| `PROJECT_ANALYSIS_SUMMARY.txt` | Proje analizi özeti |
+| `PERFORMANCE_REPORT.md` | Build performans raporu |
+| `src/agents/AGENTS.md` | Multi-agent sistemi dokümanı |
+| `src/components/AGENTS.md` | Bileşen mimarisi |
+| `src/lib/AGENTS.md` | Utility kütüphaneleri |
+| `src/hooks/AGENTS.md` | React hook'ları |
+| `src/pages/AGENTS.md` | Sayfa yapısı |
+
+---
 
 ## Özellikler
 
@@ -31,38 +57,46 @@ Zorunlu başlangıç kuralı:
 - **Fatura** — Satış ve alış faturaları, taksit planı
 - **Raporlar & Dashboard** — Günlük ciro, kâr, stok değeri
 - **Offline-First** — localStorage birincil depolama, Firebase Firestore opsiyonel bulut sync
-- **PWA + Android** — Capacitor ile Android APK desteği
+- **Multi-Agent Sistemi** — 7 ajan (Satış, Kasa, Cari, Stok, Fatura, Rapor, DeepSeek), mitt tabanlı AgentBus
 - **Rule Engine** — Her işlemde otomatik kural kontrolü (negatif stok, negatif kasa, sıfır tutar, mükerrer işlem)
 - **Audit Log** — Tüm işlemlerin denetim kaydı
+- **PWA** — Service Worker + Web Manifest, offline çalışma desteği
+- **Android** — Capacitor 8 ile native APK
+
+---
 
 ## Teknoloji
 
-| Katman   | Teknoloji                                     |
-| -------- | --------------------------------------------- |
-| Frontend | React 19 + TypeScript                         |
-| Build    | Vite 7                                        |
-| UI       | Tailwind CSS 4 + Radix UI (shadcn/ui)         |
-| Mobil    | Capacitor 8 (Android)                         |
-| Test     | Vitest + fast-check (property-based testing)  |
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend | React 19 + TypeScript |
+| Build | Vite 7 |
+| UI | Tailwind CSS 4 + Radix UI (shadcn/ui) |
+| Animasyon | Framer Motion |
+| State | Zustand |
+| Mobil | Capacitor 8 (Android) |
+| Test | Vitest + fast-check (property-based) |
 | Depolama | localStorage + Firebase Firestore (opsiyonel) |
+| AI | DeepSeek (API) |
+| PWA | vite-plugin-pwa + workbox |
 
-## Kurulum
-
-```bash
-pnpm install
-pnpm run dev
-```
+---
 
 ## Komutlar
 
 ```bash
 pnpm run dev          # Geliştirme sunucusu
 pnpm run build        # Production build
+pnpm run preview      # Build önizleme
 pnpm run test         # Testleri izle (watch mode)
 pnpm run test:run     # Testleri tek seferlik çalıştır
 pnpm run typecheck    # TypeScript tip kontrolü
+pnpm run lint         # ESLint ile kod kontrolü
+pnpm run lint:fix     # ESLint otomatik düzeltme
 pnpm run cap:android  # Android build + Android Studio aç
 ```
+
+---
 
 ## Test
 
@@ -72,14 +106,95 @@ pnpm run test:run
 
 # Belirli test dosyası
 pnpm exec vitest run src/lib/kapsamli-senaryo.test.ts
-pnpm exec vitest run src/lib/kapsamli-senaryo.test.ts
 ```
 
-Test dosyaları `src/lib/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
+Test dosyaları `src/lib/` ve `src/__tests__/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
+
+---
+
+## Build & Performans
+
+```bash
+pnpm run build
+```
+
+### Chunk Dağılımı
+
+| Chunk | Boyut | İçerik |
+|-------|-------|--------|
+| `index` | 245 KB | Ana uygulama kodu |
+| `vendor` | 235 KB | React 19 + ReactDOM |
+| `firebase` | 163 KB | Firebase Firestore SDK |
+| `charts` | 385 KB | Recharts / D3 grafikler |
+| `animations` | 129 KB | Framer Motion |
+| `ui` | 34 KB | Sonner (toast) |
+| `exceljs` | 1 MB | Excel işleme (lazy load) |
+
+### PWA
+
+Service Worker + Web Manifest aktif. 53 asset precache ile offline çalışma desteklenir. Google Fonts CacheFirst (1 yıl), Firebase API NetworkOnly olarak yapılandırılmıştır.
+
+Detaylı rapor: `PERFORMANCE_REPORT.md`
+
+---
+
+## Changelog Zorunluluğu
+
+Her kaynak kod değişikliği (`.ts`, `.tsx`, `.js`, `.jsx`, `.css`, `.html` vb.) **mutlaka** `src/lib/changelog.ts` dosyasına yeni bir sürüm girişi eklenmelidir.
+
+`src/lib/changelog.ts` dosyası uygulama içinde (Sürüm Kitapçığı sayfası) görüntülenen değişiklik geçmişidir.
+
+### Değişiklik Tipleri
+
+| Tip | Kullanım |
+|-----|----------|
+| `yeni` | Yeni özellik eklemesi |
+| `iyilestirme` | Mevcut özellik iyileştirmesi |
+| `duzeltme` | Hata düzeltmesi |
+| `kaldirildi` | Özellik kaldırılması |
+
+### Örnek
+
+```typescript
+{
+  version: '3.2.0',
+  date: '26 Mayıs 2026',
+  title: 'Performans İyileştirmeleri',
+  summary: 'Kısa açıklama.',
+  changes: [
+    { type: 'iyilestirme', text: 'Yapılan değişiklik' },
+    { type: 'duzeltme', text: 'Düzeltilen hata' },
+  ],
+},
+```
+
+### Git Hook (pre-commit)
+
+`src/lib/changelog.ts` güncellenmeden commit yapılmasını engelleyen bir pre-commit hook bulunur:
+
+- Hook dosyası: `.simple-git-hooks/pre-commit`
+- `pnpm install` sonrası otomatik aktif olur (`simple-git-hooks` ile)
+- Kaynak kod değişikliği varsa ve changelog güncellenmemişse commit reddedilir
+
+---
 
 ## Firebase Sync (Opsiyonel)
 
 Uygulama içi **Entegrasyonlar** sayfasından Firebase proje bilgilerini girerek bulut sync aktif edilebilir. Aktif edilmezse uygulama tamamen offline çalışır.
+
+---
+
+## Mobil
+
+Capacitor 8 ile Android APK desteği:
+
+```bash
+pnpm run cap:android
+```
+
+Android manifest, ikonlar, bildirim izinleri ve tema renkleri `android/` dizininde yapılandırılmıştır.
+
+---
 
 ## Lisans
 

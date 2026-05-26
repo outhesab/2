@@ -454,6 +454,7 @@ export function fullRestoreDB(
     "partners",
     "notes",
     "_auditLog",
+    "aiActionLog",
   ];
   for (const key of arrayKeys) {
     if (!Array.isArray(data[key]))
