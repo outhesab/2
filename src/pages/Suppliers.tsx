@@ -4,7 +4,7 @@ import { useToast } from "@/components/Toast";
 import { similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { Cari, DB, Order, OrderItem, Supplier } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   db: DB;
@@ -36,6 +36,8 @@ export default function Suppliers({ db, save }: Props) {
   const [form, setForm] = useState<Partial<Supplier>>(emptySupplier);
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => { const t = setTimeout(() => setDebouncedSearch(search), 200); return () => clearTimeout(t); }, [search]);
   const [selectedSup, setSelectedSup] = useState("");
   const [dupWarning, setDupWarning] = useState<
     { name: string; score: number }[]
@@ -450,11 +452,11 @@ export default function Suppliers({ db, save }: Props) {
   let filteredSuppliers = allSuppliers;
   if (catFilter !== "hepsi")
     filteredSuppliers = filteredSuppliers.filter((s) => s._kat === catFilter);
-  if (search)
+  if (debouncedSearch)
     filteredSuppliers = filteredSuppliers.filter(
       (s) =>
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        (s.phone || "").includes(search),
+        s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (s.phone || "").includes(debouncedSearch),
     );
 
   let orders = db.orders;
@@ -691,6 +693,29 @@ export default function Suppliers({ db, save }: Props) {
                       {formatMoney(s.totalAmount || 0)}
                     </span>
                   </div>
+                  {(() => {
+                    const supplierOrders = db.orders.filter(o => o.supplierId === s.id && o.status !== 'iptal');
+                    const completedOnTime = supplierOrders.filter(o => {
+                      if (o.status !== 'tamamlandi') return false;
+                      if (!o.deliveryDate || !o.createdAt) return true;
+                      const diff = (new Date(o.deliveryDate).getTime() - new Date(o.createdAt).getTime()) / 86400000;
+                      return diff <= 7;
+                    });
+                    const onTimeRate = supplierOrders.length > 0 ? (completedOnTime.length / supplierOrders.length) * 100 : 0;
+                    const orderScore = Math.min(30, (s.totalOrders || 0) * 3);
+                    const amountScore = Math.min(30, ((s.totalAmount || 0) / 10000) * 10);
+                    const deliveryScore = onTimeRate * 0.4;
+                    const totalScore = Math.min(100, Math.round(orderScore + amountScore + deliveryScore));
+                    const scoreColor = totalScore >= 70 ? '#10b981' : totalScore >= 40 ? '#f59e0b' : '#ef4444';
+                    return (
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ flex: 1, height: 6, background: '#273548', borderRadius: 3 }}>
+                          <div style={{ width: `${totalScore}%`, height: '100%', background: scoreColor, borderRadius: 3, transition: 'width 0.4s' }} />
+                        </div>
+                        <span style={{ color: scoreColor, fontSize: '0.78rem', fontWeight: 800, minWidth: 32, textAlign: 'right' }}>{totalScore}</span>
+                      </div>
+                    );
+                  })()}
                   {s._kat === "genel" && (
                     <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                       <button

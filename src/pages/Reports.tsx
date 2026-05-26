@@ -1,4 +1,5 @@
 import { exportArrayToExcel as exportToExcel } from "@/lib/excelExport";
+import { downloadObjectSheetsAsXlsx } from "@/lib/safeXlsx";
 import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { DB } from "@/types";
 import { useMemo, useState } from "react";
@@ -45,7 +46,7 @@ const CARD = {
   border: "1px solid rgba(255,255,255,0.07)",
 };
 
-type Tab = "ozet" | "satis" | "urun" | "cari" | "kasa";
+type Tab = "ozet" | "satis" | "urun" | "cari" | "kasa" | "olusturucu";
 type Period = "bu_ay" | "gecen_ay" | "bu_yil" | "ozel";
 
 function periodDates(
@@ -1705,6 +1706,129 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
 }
 
 // ── Ana Bileşen ───────────────────────────────────────────────────────────────
+function RaporOlusturucu({ db, start, end }: { db: DB; start: Date; end: Date }) {
+  const [modules, setModules] = useState<Record<string, boolean>>({ stok: true, cari: false, kasa: false, satis: false });
+  const [exportFormat, setExportFormat] = useState<'tablo' | 'grafik'>('tablo');
+  const [generated, setGenerated] = useState<{ label: string; data: Record<string, string | number>[] }[] | null>(null);
+
+  const generate = () => {
+    const result: { label: string; data: Record<string, string | number>[] }[] = [];
+    if (modules.stok) {
+      const products = db.products.filter(p => !p.deleted).map(p => ({
+        'Ürün Adı': p.name,
+        'Stok': p.stock,
+        'Maliyet': p.cost,
+        'Birim Fiyat': p.price,
+        'KDV': p.vat || 0,
+        'Kâr %': p.cost > 0 ? Math.round(((p.price - p.cost) / p.cost) * 100) : 0,
+        'Kategori': p.category || '-',
+      }));
+      result.push({ label: '📦 Stok Raporu', data: products });
+    }
+    if (modules.cari) {
+      const cari = db.cari.filter(c => !c.deleted).map(c => ({
+        'Ad': c.name,
+        'Tür': c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
+        'Bakiye': c.balance,
+        'Telefon': c.phone || '-',
+        'E-posta': c.email || '-',
+      }));
+      result.push({ label: '👤 Cari Raporu', data: cari });
+    }
+    if (modules.kasa) {
+      const kasa = db.kasa.filter(k => !k.deleted && k.createdAt >= start.toISOString() && k.createdAt <= end.toISOString()).map(k => ({
+        'Tarih': formatDate(k.createdAt),
+        'Tür': k.type === 'gelir' ? 'Gelir' : 'Gider',
+        'Tutar': k.amount,
+        'Kategori': k.category || '-',
+        'Açıklama': k.description || '-',
+      }));
+      result.push({ label: '💰 Kasa Raporu', data: kasa });
+    }
+    if (modules.satis) {
+      const satis = db.sales.filter(s => !s.deleted && s.createdAt >= start.toISOString() && s.createdAt <= end.toISOString()).map(s => ({
+        'Tarih': formatDate(s.createdAt),
+        'Fatura No': s.invoiceNo || '-',
+        'Müşteri': s.cariName || '-',
+        'Toplam': s.total,
+        'Ödeme': s.paymentType || '-',
+        'Durum': s.status || '-',
+      }));
+      result.push({ label: '🛒 Satış Raporu', data: satis });
+    }
+    setGenerated(result);
+  };
+
+  const exportExcel = () => {
+    if (!generated || generated.length === 0) return;
+    downloadObjectSheetsAsXlsx(
+      generated.map(g => ({
+        name: g.label.replace(/[^a-z0-9çşğıüö ]/gi, '').slice(0, 31),
+        rows: g.data.length > 0 ? g.data : [{}],
+        widths: Object.keys(g.data[0] || {}).map(() => 18),
+      })),
+      `ozel-rapor-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    );
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ background: '#111e33', borderRadius: 14, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
+        <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.95rem', margin: '0 0 14px' }}>🔧 Rapor Modülleri</h3>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+          {[{ id: 'stok', label: '📦 Stok' }, { id: 'cari', label: '👤 Cari' }, { id: 'kasa', label: '💰 Kasa' }, { id: 'satis', label: '🛒 Satış' }].map(m => (
+            <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: modules[m.id] ? 'rgba(255,87,34,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${modules[m.id] ? 'rgba(255,87,34,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8, cursor: 'pointer', color: modules[m.id] ? '#ff7043' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>
+              <input type="checkbox" checked={modules[m.id]} onChange={e => setModules(prev => ({ ...prev, [m.id]: e.target.checked }))} style={{ width: 16, height: 16, accentColor: '#ff5722' }} />
+              {m.label}
+            </label>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <select value={exportFormat} onChange={e => setExportFormat(e.target.value as 'tablo' | 'grafik')} style={{ padding: '9px 14px', background: '#0d1b2e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f1f5f9', fontSize: '0.85rem' }}>
+            <option value="tablo">📋 Tablo Görünümü</option>
+            <option value="grafik">📊 Grafik Görünümü</option>
+          </select>
+          <button onClick={generate} style={{ padding: '9px 20px', background: '#ff5722', border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>🚀 Rapor Oluştur</button>
+          {generated && generated.length > 0 && (
+            <button onClick={exportExcel} style={{ padding: '9px 16px', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, color: '#10b981', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📥 Excel İndir</button>
+          )}
+        </div>
+      </div>
+
+      {generated && generated.map((section, si) => (
+        <div key={si} style={{ background: '#111e33', borderRadius: 14, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
+          <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.9rem', margin: '0 0 12px' }}>{section.label} ({section.data.length} kayıt)</h3>
+          {exportFormat === 'tablo' ? (
+            <div className="responsive-table-wrap" style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                    {Object.keys(section.data[0] || {}).map(h => <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: '#64748b', fontWeight: 600 }}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.data.slice(0, 200).map((row, ri) => (
+                    <tr key={ri} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      {Object.values(row).map((v, ci) => (
+                        <td key={ci} style={{ padding: '8px 14px', color: typeof v === 'number' ? '#10b981' : '#94a3b8', fontWeight: typeof v === 'number' ? 600 : 400 }}>{typeof v === 'number' ? v.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : v}</td>
+                      ))}
+                    </tr>
+                  ))}
+                  {section.data.length > 200 && <tr><td colSpan={Object.keys(section.data[0] || {}).length} style={{ textAlign: 'center', padding: 16, color: '#475569' }}>...ve {section.data.length - 200} kayıt daha (Excel ile tamamını indirin)</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ height: 250, color: '#475569', textAlign: 'center', paddingTop: 80 }}>
+              📊 Grafik görünümü — Excel ile dışa aktarın
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Reports({ db }: Props) {
   const [tab, setTab] = useState<Tab>("ozet");
   const [period, setPeriod] = useState<Period>("bu_ay");
@@ -1719,6 +1843,7 @@ export default function Reports({ db }: Props) {
     { id: "urun", label: "Ürün & Stok", icon: "📦" },
     { id: "cari", label: "Cari", icon: "👤" },
     { id: "kasa", label: "Kasa", icon: "💰" },
+    { id: "olusturucu", label: "Oluşturucu", icon: "🔧" },
   ];
 
   const periods: { id: Period; label: string }[] = [
@@ -1852,6 +1977,7 @@ export default function Reports({ db }: Props) {
       {tab === "urun" && <TabUrun db={db} start={start} end={end} />}
       {tab === "cari" && <TabCari db={db} />}
       {tab === "kasa" && <TabKasa db={db} start={start} end={end} />}
+      {tab === "olusturucu" && <RaporOlusturucu db={db} start={start} end={end} />}
     </div>
   );
 }

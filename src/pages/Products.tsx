@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
@@ -9,14 +9,24 @@ import { useLocation } from 'wouter';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 const empty: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = { name: '', category: 'soba', supplierId: '', brand: '', cost: 0, price: 0, stock: 0, minStock: 5, barcode: '', description: '' };
 
 export default function Products({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
   const [, setLocation] = useLocation();
-  const [filter, setFilter] = useState('all');
+  const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 200);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<Partial<Product>>(empty);
   const [editId, setEditId] = useState<string | null>(null);
@@ -33,7 +43,7 @@ export default function Products({ db, save }: Props) {
   if (filter === 'zero') products = products.filter(p => p.stock === 0);
   else if (filter === 'low') products = products.filter(p => p.stock > 0 && p.stock <= p.minStock);
   else if (filter !== 'all') products = products.filter(p => p.category === filter);
-  if (search) products = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || (p.brand || '').toLowerCase().includes(search.toLowerCase()) || (p.barcode || '').includes(search));
+  if (debouncedSearch) products = products.filter(p => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || (p.brand || '').toLowerCase().includes(debouncedSearch.toLowerCase()) || (p.barcode || '').includes(debouncedSearch));
 
   const openAdd = () => { const defCat = productCats[0]?.id || 'soba'; setForm({ ...empty, category: defCat }); setEditId(null); setModalOpen(true); };
   const openEdit = (p: Product) => { setForm({ ...p }); setEditId(p.id); setModalOpen(true); };

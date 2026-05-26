@@ -5,8 +5,14 @@ import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
 import { isExactMatch, similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { Cari as CariType, DB } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => { const t = setTimeout(() => setDebounced(value), delay); return () => clearTimeout(t); }, [value, delay]);
+  return debounced;
+}
 
 interface Props {
   db: DB;
@@ -88,6 +94,7 @@ export default function Cari({ db, save }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState<"all" | "musteri" | "tedarikci">("all");
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 200);
   const [sortBy, setSortBy] = useState<"name" | "balance" | "debt_days">(
     "name",
   );
@@ -109,11 +116,11 @@ export default function Cari({ db, save }: Props) {
   let cari = db.cari.filter((c) => !c.deleted);
   if (filter !== "all") cari = cari.filter((c) => c.type === filter);
   if (showOnlyDebt) cari = cari.filter((c) => c.balance > 0);
-  if (search)
+  if (debouncedSearch)
     cari = cari.filter(
       (c) =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        (c.phone || "").includes(search),
+        c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (c.phone || "").includes(debouncedSearch),
     );
 
   const cariWithDays = cari.map((c) => ({

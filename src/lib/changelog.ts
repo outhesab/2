@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.6.0',
+    date: '26 Mayıs 2026',
+    title: 'Faz 2 Öncelik 4 + Faz 3 Performans',
+    summary: 'Tedarikçi performans skoru, rapor oluşturucu, arama debounce, suppliers performans metriği.',
+    changes: [
+      { type: 'yeni', text: 'Suppliers performans skoru: teslimat süresi, sipariş adedi ve toplam tutara göre ağırlıklı puan, renk kodlu gösterge' },
+      { type: 'yeni', text: 'Raporlar özel rapor oluşturucu: stok/cari/kasa/satış modül seçimi, tablo/grafik görünümü, Excel çıktısı' },
+      { type: 'iyilestirme', text: 'Arama inputları debounce: Products/Cari/Suppliers sayfalarında 200ms gecikmeli arama, anlık filtre yerine performanslı filtreleme' },
+    ],
+  },
+  {
     version: '3.5.0',
     date: '26 Mayıs 2026',
     title: 'Faz 2 Öncelik 3 — İşlevsel İyileştirmeler',
