@@ -11,7 +11,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run test:run
-      - run: npm run build
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run test:run
+      - run: pnpm run build
