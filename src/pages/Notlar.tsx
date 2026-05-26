@@ -27,7 +27,7 @@ export default function Notlar({ db, save }: Props) {
 
   const [search, setSearch] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: '', content: '', color: 'default', tags: '' });
+  const [form, setForm] = useState({ title: '', content: '', color: 'default', tags: '', linkedType: '', linkedId: '', linkedLabel: '' });
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -39,14 +39,22 @@ export default function Notlar({ db, save }: Props) {
       )
     : notes;
 
+  const linkOptions = useMemo(() => {
+    const options: { type: string; label: string; id: string; name: string }[] = [];
+    db.cari.filter(c => !c.deleted).forEach(c => options.push({ type: 'cari', label: '👤 Cari', id: c.id, name: c.name }));
+    db.products.filter(p => !p.deleted).forEach(p => options.push({ type: 'product', label: '📦 Ürün', id: p.id, name: p.name }));
+    db.sales.filter(s => !s.deleted).forEach(s => options.push({ type: 'sale', label: '🛒 Satış', id: s.id, name: `#${s.invoiceNo || s.id.slice(0, 6)}` }));
+    return options;
+  }, [db]);
+
   const openNew = () => {
-    setForm({ title: '', content: '', color: 'default', tags: '' });
+    setForm({ title: '', content: '', color: 'default', tags: '', linkedType: '', linkedId: '', linkedLabel: '' });
     setEditId('new');
     setTimeout(() => textRef.current?.focus(), 100);
   };
 
   const openEdit = (n: Note) => {
-    setForm({ title: n.title, content: n.content, color: n.color || 'default', tags: (n.tags || []).join(', ') });
+    setForm({ title: n.title, content: n.content, color: n.color || 'default', tags: (n.tags || []).join(', '), linkedType: n.linkedType || '', linkedId: n.linkedId || '', linkedLabel: n.linkedLabel || '' });
     setEditId(n.id);
   };
 
@@ -54,13 +62,16 @@ export default function Notlar({ db, save }: Props) {
     if (!form.content.trim() && !form.title.trim()) return;
     const nowIso = new Date().toISOString();
     const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const linkedType = (form.linkedType || undefined) as Note['linkedType'];
+    const linkedId = form.linkedId || undefined;
+    const linkedLabel = form.linkedLabel || undefined;
     save(prev => {
       const notes = [...(prev.notes || [])];
       if (editId === 'new') {
-        notes.unshift({ id: genId(), title: form.title, content: form.content, color: form.color, tags, pinned: false, createdAt: nowIso, updatedAt: nowIso });
+        notes.unshift({ id: genId(), title: form.title, content: form.content, color: form.color, tags, linkedType, linkedId, linkedLabel, pinned: false, createdAt: nowIso, updatedAt: nowIso });
       } else {
         const i = notes.findIndex(n => n.id === editId);
-        if (i >= 0) notes[i] = { ...notes[i], title: form.title, content: form.content, color: form.color, tags, updatedAt: nowIso };
+        if (i >= 0) notes[i] = { ...notes[i], title: form.title, content: form.content, color: form.color, tags, linkedType, linkedId, linkedLabel, updatedAt: nowIso };
       }
       return { ...prev, notes };
     });
@@ -139,6 +150,28 @@ export default function Notlar({ db, save }: Props) {
               placeholder="Etiketler (virgülle ayır)..."
               style={{ flex: 1, minWidth: 120, padding: '6px 10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#94a3b8', fontSize: '0.8rem' }}
             />
+            <select
+              value={form.linkedId ? `${form.linkedType}::${form.linkedId}` : ''}
+              onChange={e => {
+                const val = e.target.value;
+                if (!val) { setForm(f => ({ ...f, linkedType: '', linkedId: '', linkedLabel: '' })); return; }
+                const [t, id] = val.split('::');
+                const opt = linkOptions.find(o => o.type === t && o.id === id);
+                setForm(f => ({ ...f, linkedType: t, linkedId: id, linkedLabel: opt?.name || '' }));
+              }}
+              style={{ minWidth: 140, padding: '6px 10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#94a3b8', fontSize: '0.8rem' }}
+            >
+              <option value="">🔗 Bağlantı Yok</option>
+              {['cari', 'product', 'sale'].map(grp => {
+                const items = linkOptions.filter(o => o.type === grp);
+                if (items.length === 0) return null;
+                return (
+                  <optgroup key={grp} label={grp === 'cari' ? '👤 Cariler' : grp === 'product' ? '📦 Ürünler' : '🛒 Satışlar'}>
+                    {items.map(o => <option key={o.id} value={`${o.type}::${o.id}`}>{o.name}</option>)}
+                  </optgroup>
+                );
+              })}
+            </select>
             <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
               <button onClick={() => setEditId(null)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#64748b', cursor: 'pointer', fontWeight: 600 }}>İptal</button>
               <button onClick={handleSave} style={{ padding: '8px 20px', background: 'linear-gradient(135deg, #ff5722, #ff7043)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontWeight: 700 }}>💾 Kaydet</button>
@@ -176,6 +209,11 @@ export default function Notlar({ db, save }: Props) {
                     {(n.tags || []).map(t => (
                       <span key={t} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '1px 7px', fontSize: '0.7rem', color: '#64748b' }}>#{t}</span>
                     ))}
+                  </div>
+                )}
+                {n.linkedType && n.linkedLabel && (
+                  <div style={{ marginTop: 6, fontSize: '0.75rem', color: '#475569' }}>
+                    🔗 {n.linkedType === 'cari' ? '👤' : n.linkedType === 'product' ? '📦' : '🛒'} {n.linkedLabel}
                   </div>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>

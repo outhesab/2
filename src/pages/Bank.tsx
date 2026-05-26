@@ -503,6 +503,128 @@ export default function Bank({ db, save }: Props) {
         >
           📥 Excel
         </button>
+        <label
+          style={{
+            background: "rgba(16,185,129,0.1)",
+            border: "1px solid rgba(16,185,129,0.2)",
+            borderRadius: 10,
+            color: "#10b981",
+            padding: "9px 14px",
+            fontWeight: 700,
+            cursor: "pointer",
+            fontSize: "0.85rem",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          📤 CSV Yükle
+          <input
+            type="file"
+            accept=".csv"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                const text = evt.target?.result as string;
+                const lines = text.split('\n').filter(l => l.trim());
+                const header = lines[0].toLowerCase();
+                const hasDate = header.includes('tarih') || header.includes('date');
+                const hasDesc = header.includes('açıklama') || header.includes('description') || header.includes('aciklama');
+                const hasAmount = header.includes('tutar') || header.includes('amount') || header.includes('miktar');
+                const hasType = header.includes('tür') || header.includes('type') || header.includes('tur');
+                if (!hasDesc || !hasAmount) {
+                  showToast('CSV\'de en az "Açıklama" ve "Tutar" sütunları olmalı!', 'error');
+                  return;
+                }
+                const parsed = lines.slice(1).map(line => {
+                  const cols = line.split(';').length > 1 ? line.split(';') : line.split(',');
+                  const find = (kw: string[]) => {
+                    const idx = header.split(/[;,]/).findIndex(h => kw.some(k => h.trim().toLowerCase().includes(k)));
+                    return idx >= 0 ? cols[idx]?.trim() : '';
+                  };
+                  const rawAmount = find(['tutar', 'amount', 'miktar']);
+                  const amount = Math.abs(parseFloat(rawAmount.replace(',', '.').replace(/[^0-9.-]/g, '')));
+                  const rawDate = find(['tarih', 'date']) || new Date().toISOString().split('T')[0];
+                  const parsedDate = rawDate.includes('T') ? rawDate : rawDate.includes('.') ? rawDate.split('.')[0] : rawDate;
+                  const desc = find(['açıklama', 'description', 'aciklama']);
+                  const rawType = (find(['tür', 'type', 'tur']) || '').toLowerCase();
+                  const type = rawAmount.startsWith('-') || rawType.includes('giden') || rawType.includes('expense') || rawType.includes('çıkış')
+                    ? ('expense' as const) : ('income' as const);
+                  if (!desc || !amount || amount <= 0) return null;
+                  return { description: desc, amount, date: parsedDate, type };
+                }).filter(Boolean) as { description: string; amount: number; date: string; type: 'income' | 'expense' }[];
+                if (parsed.length === 0) { showToast('CSV\'den veri okunamadı!', 'error'); return; }
+                save((prev) => ({
+                  ...prev,
+                  bankTransactions: [
+                    ...prev.bankTransactions,
+                    ...parsed.map(p => ({
+                      id: genId(),
+                      date: new Date(p.date).toISOString(),
+                      description: p.description,
+                      amount: p.amount,
+                      type: p.type,
+                      status: 'unmatched' as const,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
+                    })),
+                  ],
+                }));
+                showToast(`${parsed.length} işlem yüklendi!`, 'success');
+              };
+              reader.readAsText(file, 'utf-8');
+              e.target.value = '';
+            }}
+          />
+        </label>
+        <button
+          onClick={() => {
+            const unmatched = db.bankTransactions.filter(t => t.status === 'unmatched' || t.status === 'matched');
+            if (unmatched.length === 0) { showToast('Eşlenecek işlem yok', 'info'); return; }
+            let matchCount = 0;
+            save((prev) => ({
+              ...prev,
+              bankTransactions: prev.bankTransactions.map(t => {
+                if (t.status !== 'unmatched' && t.status !== 'matched') return t;
+                const kw = t.description.toLowerCase().replace(/[^a-z0-9çşğıüö]/g, '');
+                const found = prev.cari.filter(c => !c.deleted).find(c => {
+                  const ckw = c.name.toLowerCase().replace(/[^a-z0-9çşğıüö]/g, '');
+                  if (ckw.length < 3) return false;
+                  return kw.includes(ckw) || ckw.includes(kw);
+                });
+                if (!found) {
+                  const words = kw.split(/\s+/).filter(w => w.length > 3);
+                  const match = prev.cari.filter(c => !c.deleted).find(c => {
+                    const ckw = c.name.toLowerCase().replace(/[^a-z0-9çşğıüö]/g, '');
+                    const intersect = words.filter(w => ckw.includes(w));
+                    return intersect.length >= Math.min(2, words.length);
+                  });
+                  if (!match) return t;
+                  matchCount++;
+                  return { ...t, matchedCariId: match.id, status: 'matched' as const, updatedAt: new Date().toISOString() };
+                }
+                matchCount++;
+                return { ...t, matchedCariId: found.id, status: 'matched' as const, updatedAt: new Date().toISOString() };
+              }),
+            }));
+            setTimeout(() => showToast(`${matchCount} işlem eşlendi!`, 'success'), 100);
+          }}
+          style={{
+            background: "rgba(139,92,246,0.12)",
+            border: "1px solid rgba(139,92,246,0.25)",
+            borderRadius: 10,
+            color: "#a78bfa",
+            padding: "9px 14px",
+            fontWeight: 700,
+            cursor: "pointer",
+            fontSize: "0.85rem",
+          }}
+        >
+          🤖 AI Eşle
+        </button>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}

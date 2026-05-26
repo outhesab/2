@@ -258,6 +258,18 @@ export default function Butce({ db, save }: Props) {
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {budgets.length === 0 && <button onClick={initPresets} style={btnSecondary}>✨ Hazır Kategoriler</button>}
           <button onClick={() => { setBankModal(true); setImportResult(null); }} style={btnSecondary}>🏦 Banka Ekstresi İçe Aktar</button>
+          <button onClick={() => {
+            showConfirm('Bütçeyi Kopyala', `Mevcut kategoriler (${budgets.length} adet) yeni yıla kopyalansın mı?`, () => {
+              const newBudgets = budgets.map(b => ({
+                ...b,
+                id: genId(),
+                name: b.name,
+                monthlyLimit: b.monthlyLimit,
+              }));
+              save(prev => ({ ...prev, budgets: [...(prev.budgets || []), ...newBudgets] }));
+              showToast(`${newBudgets.length} kategori kopyalandı!`, 'success');
+            });
+          }} style={btnSecondary}>📋 Bütçeyi Kopyala</button>
           <button onClick={openAdd} style={btnPrimary}>+ Kategori Ekle</button>
         </div>
       </div>

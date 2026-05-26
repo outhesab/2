@@ -20,6 +20,24 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.5.0',
+    date: '26 Mayıs 2026',
+    title: 'Faz 2 Öncelik 3 — İşlevsel İyileştirmeler',
+    summary: 'Toplu fiyat güncelleme, anlık kâr göstergesi, PDF fatura, müşteri segmentasyonu, CSV banka yükleme+AI eşleme, pelet tüketim sayacı, kural editörü iyileştirmeleri, bütçe kopyalama ve not bağlama.',
+    changes: [
+      { type: 'yeni', text: 'Products toplu fiyat güncelleme: % zam/indirim, kategori filtre, önizleme tablosu' },
+      { type: 'yeni', text: 'Sales anlık kâr göstergesi: her ürün satırında (birimFiyat - maliyet) × miktar, toplam kâr/maliyet oranı' },
+      { type: 'yeni', text: 'Fatura PDF yazdırma: şirket bilgileri, VKN, kalem detayları, KDV dökümü ile yeni pencere PDF çıktısı' },
+      { type: 'yeni', text: 'Cari müşteri segmentasyonu: VIP (>50K bakiye), Normal, Riskli (<-10K) badge ve renk kodları' },
+      { type: 'yeni', text: 'Banka CSV yükleme: otomatik sütun algılama (tarih/açıklama/tutar/tür), toplu işlem ekleme' },
+      { type: 'yeni', text: 'Banka AI eşleme: cari adı ve kelime kesişimi ile otomatik eşleştirme motoru' },
+      { type: 'yeni', text: 'Pelet tüketim sayacı: günlük/aylık kg tüketim, çuval stoğu, kalan gün tahmini' },
+      { type: 'iyilestirme', text: 'Monitor kural editörü: stok_min/alacak/borç eşik değerleri, popup ve aktif toggle eklendi' },
+      { type: 'yeni', text: 'Butce bütçe kopyalama: mevcut kategorileri yeni yıla kopyalama' },
+      { type: 'yeni', text: 'Notlar not bağlama: cari/ürün/satış bağlantısı seçici, bağlı entity görüntüleme' },
+    ],
+  },
+  {
     version: '3.4.0',
     date: '26 Mayıs 2026',
     title: 'Faz 2 Öncelik 1+2 — Kritik İşlevler & Dashboard İyileştirmeleri',

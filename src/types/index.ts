@@ -393,6 +393,9 @@ export interface Note {
   color?: string;   // '#fbbf24', '#10b981', vb.
   pinned?: boolean;
   tags?: string[];
+  linkedType?: 'cari' | 'product' | 'sale' | 'purchase' | 'transaction';
+  linkedId?: string;
+  linkedLabel?: string;
   deleted?: boolean;
   createdAt: string;
   updatedAt: string;

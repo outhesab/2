@@ -87,6 +87,41 @@ export default function Pelet({ db, save }: Props) {
         </div>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
+        <div style={{ background: 'linear-gradient(135deg, #ff572212, #ff572204)', borderRadius: 12, border: '1px solid #ff572222', padding: 14 }}>
+          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🔥 Günlük Tüketim</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ff5722', marginTop: 3 }}>{((pellet.gramaj / 1000) * pellet.kgFiyat * 10).toFixed(0)} kg</div>
+          <div style={{ color: '#475569', fontSize: '0.72rem' }}>~10 saat/gün = ₺{((pellet.gramaj / 1000) * pellet.kgFiyat * 10).toFixed(1)}</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #10b98112, #10b98104)', borderRadius: 12, border: '1px solid #10b98122', padding: 14 }}>
+          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>📊 Aylık Tahmin</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#10b981', marginTop: 3 }}>{((pellet.gramaj / 1000) * pellet.kgFiyat * 10 * 26).toFixed(1)} kg</div>
+          <div style={{ color: '#475569', fontSize: '0.72rem' }}>₺{((pellet.gramaj / 1000) * pellet.kgFiyat * 10 * 26).toFixed(0)}/ay</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #3b82f612, #3b82f604)', borderRadius: 12, border: '1px solid #3b82f622', padding: 14 }}>
+          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🏪 Stoktaki Çuval</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa', marginTop: 3 }}>
+            {(() => {
+              const totalQty = db.peletOrders.filter(o => o.status === 'tamamlandi').reduce((s, o) => s + o.qty, 0);
+              const totalConsumed = ((pellet.gramaj / 1000) * 10 * 26 * ((db.peletOrders.filter(o => o.status === 'tamamlandi').length || 1) - 1) || 0);
+              return Math.max(0, Math.floor(((totalQty * 1000) - totalConsumed) / pellet.cuvalKg));
+            })()}
+          </div>
+          <div style={{ color: '#475569', fontSize: '0.72rem' }}>çuval (~{pellet.cuvalKg}kg)</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #a78bfa12, #a78bfa04)', borderRadius: 12, border: '1px solid #a78bfa22', padding: 14 }}>
+          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>⏱️ Kalan Gün</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#a78bfa', marginTop: 3 }}>
+            {(() => {
+              const totalQty = db.peletOrders.filter(o => o.status === 'tamamlandi').reduce((s, o) => s + o.qty, 0);
+              const dailyKg = (pellet.gramaj / 1000) * 10;
+              return dailyKg > 0 ? Math.floor((totalQty * 1000) / dailyKg) : 0;
+            })()}
+          </div>
+          <div style={{ color: '#475569', fontSize: '0.72rem' }}>gün (mevcut stok)</div>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {(['suppliers', 'orders'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} style={{ padding: '9px 18px', border: 'none', borderRadius: 10, cursor: 'pointer', fontWeight: 700, background: tab === t ? '#ff5722' : '#273548', color: tab === t ? '#fff' : '#94a3b8' }}>

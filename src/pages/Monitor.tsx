@@ -1128,9 +1128,9 @@ export default function Monitor({ db, save }: Props) {
               <option value="info">🔵 Bilgi</option>
             </select>
           </div>
-          {(form.type === "kasa_min" || form.type === "satis_hedef") && (
+          {(form.type === "kasa_min" || form.type === "satis_hedef" || form.type === "stok_min") && (
             <div>
-              <label style={lbl}>Eşik Değeri (₺)</label>
+              <label style={lbl}>Eşik Değeri ({form.type === "stok_min" ? "adet" : "₺"})</label>
               <input
                 type="number"
                 inputMode="decimal"
@@ -1139,6 +1139,23 @@ export default function Monitor({ db, save }: Props) {
                   setForm((f) => ({
                     ...f,
                     threshold: parseFloat(e.target.value) || 0,
+                  }))
+                }
+                style={inp}
+              />
+            </div>
+          )}
+          {(form.type === "alacak_vadeli" || form.type === "borc_vadeli") && (
+            <div>
+              <label style={lbl}>Vade Eşiği (gün)</label>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={form.threshold || 30}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    threshold: parseInt(e.target.value) || 30,
                   }))
                 }
                 style={inp}
@@ -1160,6 +1177,26 @@ export default function Monitor({ db, save }: Props) {
               style={inp}
               min={1}
             />
+          </div>
+          <div style={{ display: "flex", gap: 20, alignItems: "center", marginTop: 4 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
+              <input
+                type="checkbox"
+                checked={form.popup ?? true}
+                onChange={(e) => setForm((f) => ({ ...f, popup: e.target.checked }))}
+                style={{ width: 16, height: 16, accentColor: "#ff5722" }}
+              />
+              Popup Bildirim
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
+              <input
+                type="checkbox"
+                checked={form.active ?? true}
+                onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
+                style={{ width: 16, height: 16, accentColor: "#10b981" }}
+              />
+              Aktif
+            </label>
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, marginTop: 20 }}>

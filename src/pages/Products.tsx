@@ -20,6 +20,10 @@ export default function Products({ db, save }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<Partial<Product>>(empty);
   const [editId, setEditId] = useState<string | null>(null);
+  const [bulkModal, setBulkModal] = useState(false);
+  const [bulkPct, setBulkPct] = useState('');
+  const [bulkCat, setBulkCat] = useState('all');
+  const [bulkDirection, setBulkDirection] = useState<'up' | 'down'>('up');
 
   const productCats = db.productCategories || [];
   const getCategoryIcon = (id: string) => productCats.find(c => c.id === id)?.icon || '📦';
@@ -75,6 +79,7 @@ export default function Products({ db, save }: Props) {
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
         <button onClick={openAdd} style={{ background: '#ff5722', border: 'none', borderRadius: 10, color: '#fff', padding: '10px 20px', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>+ Yeni Ürün</button>
         <button onClick={() => { const rows = activeProducts.map(p => ({ Ad: p.name, Kategori: p.category, Marka: p.brand || '', 'Alış': p.cost, 'Satış': p.price, Stok: p.stock, 'Min Stok': p.minStock, Barkod: p.barcode || '' })); exportArrayToExcel(rows, 'urun-listesi'); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, color: '#818cf8', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel</button>
+        <button onClick={() => setBulkModal(true)} style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10, color: '#f59e0b', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📈 Toplu Fiyat</button>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ürün ara..." style={{ flex: 1, minWidth: 200, padding: '10px 14px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem' }} />
       </div>
 
@@ -212,6 +217,78 @@ export default function Products({ db, save }: Props) {
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={handleSave} style={{ flex: 1, background: '#10b981', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>💾 Kaydet</button>
           <button onClick={() => setModalOpen(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+        </div>
+      </Modal>
+
+      <Modal open={bulkModal} onClose={() => setBulkModal(false)} title="📈 Toplu Fiyat Güncelle">
+        <div style={{ display: 'grid', gap: 14 }}>
+          <div>
+            <label style={lbl}>Kategori</label>
+            <select value={bulkCat} onChange={e => setBulkCat(e.target.value)} style={inp}>
+              <option value="all">Tüm Kategoriler</option>
+              {productCats.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Yön</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(['up', 'down'] as const).map(d => (
+                <button key={d} onClick={() => setBulkDirection(d)} style={{ flex: 1, padding: '9px 0', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, background: bulkDirection === d ? '#ff5722' : '#273548', color: bulkDirection === d ? '#fff' : '#94a3b8' }}>
+                  {d === 'up' ? '📈 Zam' : '📉 İndirim'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label style={lbl}>{bulkDirection === 'up' ? 'Zam Yüzdesi (%)' : 'İndirim Yüzdesi (%)'} *</label>
+            <input type="number" inputMode="decimal" value={bulkPct} onChange={e => setBulkPct(e.target.value)} style={{ ...inp, fontSize: '1.5rem', fontWeight: 800, textAlign: 'center', padding: '16px' }} placeholder="0" min={0} step={0.1} />
+          </div>
+          {(() => {
+            const pct = parseFloat(bulkPct);
+            if (!pct || pct <= 0) return null;
+            const filtered = bulkCat === 'all' ? activeProducts : activeProducts.filter(p => p.category === bulkCat);
+            const affected = filtered.filter(p => p.price > 0);
+            const multiplier = bulkDirection === 'up' ? (100 + pct) / 100 : (100 - pct) / 100;
+            const avgBefore = affected.length > 0 ? affected.reduce((s, p) => s + p.price, 0) / affected.length : 0;
+            return (
+              <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '14px 16px' }}>
+                <div style={{ color: '#94a3b8', fontSize: '0.82rem', marginBottom: 8 }}>Önizleme</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: '#64748b', fontSize: '0.82rem' }}>Etkilenen ürün:</span>
+                  <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{affected.length}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ color: '#64748b', fontSize: '0.82rem' }}>Ort. fiyat (önce):</span>
+                  <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{formatMoney(avgBefore)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#64748b', fontSize: '0.82rem' }}>Ort. fiyat (sonra):</span>
+                  <span style={{ color: bulkDirection === 'up' ? '#10b981' : '#ef4444', fontWeight: 700 }}>{formatMoney(avgBefore * multiplier)}</span>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+          <button onClick={() => {
+            const pct = parseFloat(bulkPct);
+            if (!pct || pct <= 0) { showToast('Geçerli yüzde girin!', 'error'); return; }
+            const multiplier = bulkDirection === 'up' ? (100 + pct) / 100 : (100 - pct) / 100;
+            const nowIso = new Date().toISOString();
+            save(prev => ({
+              ...prev,
+              products: prev.products.map(p => {
+                if (p.deleted) return p;
+                if (bulkCat !== 'all' && p.category !== bulkCat) return p;
+                if (p.price <= 0) return p;
+                return { ...p, price: Math.round(p.price * multiplier * 100) / 100, updatedAt: nowIso };
+              }),
+            }));
+            showToast(`${bulkCat === 'all' ? 'Tüm ürünler' : 'Seçili kategori'} ${bulkDirection === 'up' ? `%${pct} zamlandı` : `%${pct} indirim yapıldı`}!`, 'success');
+            setBulkModal(false);
+            setBulkPct('');
+          }} style={{ flex: 1, background: '#f59e0b', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>🔄 Uygula</button>
+          <button onClick={() => setBulkModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
         </div>
       </Modal>
     </div>

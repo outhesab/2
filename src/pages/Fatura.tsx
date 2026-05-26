@@ -1,4 +1,4 @@
-﻿﻿import { useConfirm } from "@/components/ConfirmDialog";
+﻿import { useConfirm } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
@@ -1853,25 +1853,58 @@ export default function Fatura({ db, save }: Props) {
             );
           })()}
 
-          <button
-            onClick={() => {
-              window.print();
-            }}
-            style={{
-              width: "100%",
-              marginTop: 14,
-              padding: "11px 0",
-              background: "rgba(59,130,246,0.12)",
-              border: "1px solid rgba(59,130,246,0.25)",
-              borderRadius: 10,
-              color: "#60a5fa",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: "0.9rem",
-            }}
-          >
-            ğŸ–¨ï¸ YazdÄ±r
-          </button>
+          <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+            <button
+              onClick={() => {
+                window.print();
+              }}
+              style={{
+                flex: 1,
+                padding: "11px 0",
+                background: "rgba(59,130,246,0.12)",
+                border: "1px solid rgba(59,130,246,0.25)",
+                borderRadius: 10,
+                color: "#60a5fa",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+              }}
+            >
+              🖨️ Yazdır
+            </button>
+            <button
+              onClick={() => {
+                const w = window.open('', '_blank');
+                if (!w) return;
+                w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Fatura ${previewInv.invoiceNo}</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#333}h1{color:#ff5722;border-bottom:2px solid #ff5722;padding-bottom:10px}.header{display:flex;justify-content:space-between;margin:20px 0}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1e293b;color:#fff;padding:10px;text-align:left;font-size:0.85rem}td{padding:10px;border-bottom:1px solid #ddd;font-size:0.85rem}.total{text-align:right;font-size:1.1rem;font-weight:700;margin-top:20px}.footer{margin-top:40px;color:#666;font-size:0.8rem;border-top:1px solid #ddd;padding-top:10px}</style></head><body>`);
+                w.document.write(`<h1>${previewInv.type === 'satis' ? 'SATIŞ FATURASI' : 'ALIŞ FATURASI'}</h1>`);
+                w.document.write(`<div class="header"><div><strong>${db.company.name || 'Şirketiniz'}</strong><br>VKN: ${db.company.taxNo || '-'}<br>${db.company.address || ''}</div><div style="text-align:right"><strong>${previewInv.invoiceNo}</strong><br>${formatDate(previewInv.createdAt)}<br>Durum: ${statusLabels[previewInv.status]}</div></div>`);
+                w.document.write(`<p><strong>${previewInv.type === 'satis' ? 'Müşteri' : 'Tedarikçi'}:</strong> ${previewInv.cariName}${previewInv.cariTaxNo ? ` (VKN: ${previewInv.cariTaxNo})` : ''}</p>`);
+                w.document.write(`<table><thead><tr><th>Açıklama</th><th>Miktar</th><th>Birim Fiyat</th><th>KDV %</th><th>Tutar</th></tr></thead><tbody>`);
+                previewInv.items.forEach(it => {
+                  w.document.write(`<tr><td>${it.description}</td><td>${it.quantity}</td><td>₺${it.unitPrice.toFixed(2)}</td><td>%${it.vatRate}</td><td>₺${it.total.toFixed(2)}</td></tr>`);
+                });
+                w.document.write(`</tbody></table>`);
+                w.document.write(`<div class="total">Ara Toplam: ₺${previewInv.subtotal.toFixed(2)}<br>KDV: ₺${previewInv.vatTotal.toFixed(2)}<br>${previewInv.discount > 0 ? `İskonto: -₺${previewInv.discount.toFixed(2)}<br>` : ''}<strong>GENEL TOPLAM: ₺${previewInv.total.toFixed(2)}</strong></div>`);
+                w.document.write(`<div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Fatura</div></body></html>`);
+                w.document.close();
+                w.print();
+              }}
+              style={{
+                flex: 1,
+                padding: "11px 0",
+                background: "rgba(16,185,129,0.12)",
+                border: "1px solid rgba(16,185,129,0.25)",
+                borderRadius: 10,
+                color: "#10b981",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+              }}
+            >
+              📄 PDF İndir
+            </button>
+          </div>
         </Modal>
       )}
     </div>

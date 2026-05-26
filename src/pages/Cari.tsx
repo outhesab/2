@@ -1,4 +1,4 @@
-﻿﻿import { useConfirm } from "@/components/ConfirmDialog";
+﻿import { useConfirm } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
 import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
@@ -826,6 +826,14 @@ export default function Cari({ db, save }: Props) {
                       }}
                     >
                       {c.name}
+                      {(() => {
+                        const seg = c.type === 'musteri' && c.balance > 50000 ? { label: 'VIP', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' }
+                          : c.type === 'musteri' && c.balance >= 0 ? { label: 'Normal', color: '#10b981', bg: 'rgba(16,185,129,0.12)' }
+                          : c.balance < -10000 ? { label: 'Riskli', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' }
+                          : null;
+                        if (!seg) return null;
+                        return <span style={{ marginLeft: 8, background: seg.bg, color: seg.color, borderRadius: 5, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 700, verticalAlign: 'middle' }}>{seg.label}</span>;
+                      })()}
                     </td>
                     <td data-label="Tür" style={{ padding: "12px 16px" }}>
                       <span

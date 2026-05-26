@@ -663,6 +663,16 @@ export default function Sales({ db, save: _save }: Props) {
                     padding: "4px 6px",
                   }}
                 />
+                <span style={{
+                  color: (item.unitPrice - item.cost) >= 0 ? '#10b981' : '#ef4444',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  whiteSpace: 'nowrap',
+                  minWidth: 60,
+                  textAlign: 'right',
+                }}>
+                  ₺{((item.unitPrice - item.cost) * item.quantity).toFixed(0)}
+                </span>
                 <button
                   tabIndex={-1}
                   onClick={() => removeItem(item.productId)}
