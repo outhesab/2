@@ -90,10 +90,10 @@ type Tab = (typeof TABS_LIST)[number]["id"];
 const inp = {
   width: "100%",
   padding: "10px 14px",
-  background: "rgba(0,0,0,0.4)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--bg-surface)",
+  border: "1px solid var(--border)",
   borderRadius: "10px",
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box" as const,
 };
@@ -490,7 +490,7 @@ export default function Settings({
                     style={{
                       fontSize: "1.3rem",
                       fontWeight: 900,
-                      color: d.count > 0 ? "#f1f5f9" : "#334155",
+                      color: d.count > 0 ? "var(--text-primary)" : "var(--text-dim)",
                     }}
                   >
                     {d.count}
@@ -849,7 +849,7 @@ function AdminPanel({
             <div
               key={u.id}
               style={{
-                background: "rgba(0,0,0,0.2)",
+                background: "var(--bg-card)",
                 borderRadius: 12,
                 padding: "12px 14px",
                 border: `1px solid ${u.active ? "rgba(255,255,255,0.06)" : "rgba(239,68,68,0.15)"}`,
@@ -931,7 +931,7 @@ function AdminPanel({
                       : "rgba(239,68,68,0.1)",
                     border: `1px solid ${u.active ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,
                     borderRadius: 8,
-                    color: u.active ? "#10b981" : "#ef4444",
+                    color: u.active ? "var(--color-success)" : "var(--color-danger)",
                     cursor: "pointer",
                     fontSize: "0.8rem",
                   }}
@@ -1045,7 +1045,7 @@ function SoundSettingsPanel({
                 border: "none",
                 cursor: "pointer",
                 position: "relative",
-                background: settings.enabled ? "#10b981" : "#334155",
+                background: settings.enabled ? "var(--color-success)" : "var(--text-dim)",
                 transition: "background 0.2s",
               }}
             >
@@ -1102,8 +1102,8 @@ function SoundSettingsPanel({
                     background:
                       settings.theme === t.id
                         ? "rgba(255,87,34,0.1)"
-                        : "rgba(0,0,0,0.2)",
-                    color: settings.theme === t.id ? "#ff7043" : "#64748b",
+                        :                 "var(--bg-card)",
+                    color: settings.theme === t.id ? "var(--color-danger)" : "var(--text-muted)",
                     textAlign: "center",
                     transition: "all 0.15s",
                     opacity: settings.enabled ? 1 : 0.5,
@@ -1114,7 +1114,7 @@ function SoundSettingsPanel({
                     style={{
                       fontSize: "0.72rem",
                       marginTop: 4,
-                      color: settings.theme === t.id ? "#ff7043" : "#475569",
+                      color: settings.theme === t.id ? "var(--color-danger)" : "var(--text-dim)",
                     }}
                   >
                     {t.desc}
@@ -1144,7 +1144,7 @@ function SoundSettingsPanel({
                 border: "none",
                 cursor: "pointer",
                 position: "relative",
-                background: speechEnabled ? "#10b981" : "#334155",
+                background: speechEnabled ? "var(--color-success)" : "var(--text-dim)",
                 transition: "background 0.2s",
               }}
             >
@@ -1193,11 +1193,11 @@ function SoundSettingsPanel({
               disabled={!settings.enabled}
               style={{
                 padding: "10px 14px",
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: "1px solid var(--border)",
                 borderRadius: 10,
                 cursor: "pointer",
-                background: "rgba(0,0,0,0.3)",
-                color: "#94a3b8",
+                background: "var(--bg-elevated)",
+                color: "var(--text-secondary)",
                 fontWeight: 600,
                 fontSize: "0.85rem",
                 transition: "all 0.15s",
@@ -1342,7 +1342,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
                   <div
                     style={{
                       fontWeight: 600,
-                      color: sheets[s.key] ? "#f1f5f9" : "#64748b",
+                      color: sheets[s.key] ? "var(--text-primary)" : "var(--text-muted)",
                       fontSize: "0.88rem",
                     }}
                   >
@@ -1356,12 +1356,12 @@ function ExcelExportPanel({ db }: { db: DB }) {
                     height: 20,
                     borderRadius: 5,
                     background: sheets[s.key]
-                      ? "#10b981"
+                      ? "var(--color-success)"
                       : "rgba(255,255,255,0.06)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#fff",
+                    color: "var(--text-primary)",
                     fontSize: "0.75rem",
                     fontWeight: 800,
                   }}
@@ -1954,10 +1954,10 @@ function SelectiveRestore({
                       alignItems: "center",
                       justifyContent: "center",
                       background: isSelected
-                        ? "#3b82f6"
+                        ? "var(--color-info)"
                         : "rgba(255,255,255,0.06)",
                       border: `1px solid ${isSelected ? "#3b82f6" : "rgba(255,255,255,0.12)"}`,
-                      color: "#fff",
+                      color: "var(--text-primary)",
                       fontSize: "0.7rem",
                       fontWeight: 700,
                       flexShrink: 0,
@@ -1969,7 +1969,7 @@ function SelectiveRestore({
                   <div className={"settings-flex-1"}>
                     <div
                       style={{
-                        color: isSelected ? "#f1f5f9" : "#64748b",
+                        color: isSelected ? "var(--text-primary)" : "var(--text-muted)",
                         fontWeight: 600,
                         fontSize: "0.82rem",
                       }}
@@ -2645,10 +2645,10 @@ function SmartImportManager({
 
   const btnStyle = (active: boolean, color: string) => ({
     padding: "6px 14px",
-    border: `1px solid ${active ? color : "#334155"}`,
+    border: `1px solid ${active ? color : "var(--text-dim)"}`,
     borderRadius: 8,
     background: active ? `${color}20` : "transparent",
-    color: active ? color : "#64748b",
+    color: active ? color : "var(--text-muted)",
     cursor: "pointer",
     fontWeight: 600,
     fontSize: "0.8rem",
@@ -2719,7 +2719,7 @@ function SmartImportManager({
                       csvTarget === t.id
                         ? "rgba(255,87,34,0.15)"
                         : "transparent",
-                    color: csvTarget === t.id ? "#ff7043" : "#64748b",
+                    color: csvTarget === t.id ? "var(--color-danger)" : "var(--text-muted)",
                     cursor: "pointer",
                     fontWeight: 600,
                     fontSize: "0.8rem",
@@ -2738,9 +2738,9 @@ function SmartImportManager({
                 style={{
                   minWidth: 140,
                   padding: "6px 10px",
-                  background: "rgba(0,0,0,0.3)",
+                  background: "var(--bg-elevated)",
                   borderRadius: 6,
-                  color: m.autoDetected ? "#10b981" : "#f59e0b",
+                  color: m.autoDetected ? "var(--color-success)" : "var(--color-warning)",
                   fontFamily: "monospace",
                   fontSize: "0.82rem",
                   fontWeight: 600,
@@ -3252,7 +3252,7 @@ function VeriOnarim({
                 className="settings-text-primary-bold"
                 style={{
                   color:
-                    healthReport.overall === "healthy" ? "#10b981" : "#ef4444",
+                    healthReport.overall === "healthy" ? "var(--color-success)" : "var(--color-danger)",
                 }}
               >
                 {healthReport.overall === "healthy"
@@ -3361,7 +3361,7 @@ function VeriOnarim({
                 alignItems: "center",
                 gap: 12,
                 padding: "12px 16px",
-                background: "rgba(0,0,0,0.2)",
+                background: "var(--bg-card)",
                 borderRadius: 10,
                 border: `1px solid ${t.color}15`,
               }}
@@ -3481,7 +3481,7 @@ function Card({
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#64748b",
+  color: "var(--text-muted)",
   fontSize: "0.82rem",
   fontWeight: 600,
 };
@@ -3491,7 +3491,7 @@ const _btnPrimary: React.CSSProperties = {
   background: "linear-gradient(135deg, #ff5722, #ff7043)",
   border: "none",
   borderRadius: 12,
-  color: "#fff",
+  color: "var(--text-primary)",
   fontWeight: 800,
   cursor: "pointer",
   fontSize: "0.95rem",
@@ -3603,7 +3603,7 @@ function BaglantiAyarlari({
               <div
                 style={{
                   fontWeight: 700,
-                  color: cfg.activeProvider === p.id ? "#ff7043" : "#f1f5f9",
+                  color: cfg.activeProvider === p.id ? "var(--color-danger)" : "var(--text-primary)",
                   fontSize: "0.9rem",
                 }}
               >
@@ -3633,7 +3633,7 @@ function BaglantiAyarlari({
               border: "none",
               cursor: "pointer",
               position: "relative",
-              background: cfg.firebase.enabled ? "#10b981" : "#334155",
+              background: cfg.firebase.enabled ? "var(--color-success)" : "var(--text-dim)",
               transition: "background 0.2s",
               flexShrink: 0,
             }}
@@ -3779,7 +3779,7 @@ function BaglantiAyarlari({
               background: "rgba(255,87,34,0.12)",
               border: "1px solid rgba(255,87,34,0.25)",
               borderRadius: 9,
-              color: "#ff7043",
+              color: "var(--color-danger)",
               fontWeight: 700,
               cursor: "pointer",
               fontSize: "0.85rem",
@@ -3796,7 +3796,7 @@ function BaglantiAyarlari({
                 alignItems: "center",
                 gap: 6,
                 fontSize: "0.82rem",
-                color: fbTest.ok ? "#10b981" : "#ef4444",
+                color: fbTest.ok ? "var(--color-success)" : "var(--color-danger)",
                 fontWeight: 600,
               }}
             >
@@ -3857,7 +3857,7 @@ function BaglantiAyarlari({
               border: "none",
               cursor: "pointer",
               position: "relative",
-              background: cfg.supabase.enabled ? "#10b981" : "#334155",
+              background: cfg.supabase.enabled ? "var(--color-success)" : "var(--text-dim)",
               transition: "background 0.2s",
               flexShrink: 0,
             }}
@@ -3943,7 +3943,7 @@ CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
               background: "rgba(16,185,129,0.12)",
               border: "1px solid rgba(16,185,129,0.25)",
               borderRadius: 9,
-              color: "#10b981",
+              color: "var(--color-success)",
               fontWeight: 700,
               cursor: "pointer",
               fontSize: "0.85rem",
@@ -3959,7 +3959,7 @@ CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
                 alignItems: "center",
                 gap: 6,
                 fontSize: "0.82rem",
-                color: sbTest.ok ? "#10b981" : "#ef4444",
+                color: sbTest.ok ? "var(--color-success)" : "var(--color-danger)",
                 fontWeight: 600,
               }}
             >
@@ -4101,7 +4101,7 @@ function ArayuzAyarlari({
                 <div
                   style={{
                     fontWeight: 700,
-                    color: isActive ? t.accent : "#f1f5f9",
+                    color: isActive ? t.accent : "var(--text-primary)",
                     fontSize: "0.82rem",
                   }}
                 >
@@ -4122,7 +4122,7 @@ function ArayuzAyarlari({
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "0.6rem",
-                      color: "#fff",
+                      color: "var(--text-primary)",
                       fontWeight: 900,
                     }}
                   >
@@ -4288,7 +4288,7 @@ function ArayuzAyarlari({
                 background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
                 border: "none",
                 borderRadius: 8,
-                color: "#fff",
+                color: "var(--text-primary)",
                 padding: "6px 14px",
                 fontWeight: 700,
                 fontSize: "0.8rem",
@@ -4323,7 +4323,7 @@ function ArayuzAyarlari({
                       prefs.fontScale === s
                         ? prefs.accent
                         : "rgba(255,255,255,0.05)",
-                    color: prefs.fontScale === s ? "#fff" : "#64748b",
+                    color: prefs.fontScale === s ? "var(--text-primary)" : "var(--text-muted)",
                     transition: "all 0.15s",
                   }}
                 >
@@ -4351,7 +4351,7 @@ function ArayuzAyarlari({
                       prefs.cardRadius === r
                         ? prefs.accent
                         : "rgba(255,255,255,0.05)",
-                    color: prefs.cardRadius === r ? "#fff" : "#64748b",
+                    color: prefs.cardRadius === r ? "var(--text-primary)" : "var(--text-muted)",
                     transition: "all 0.15s",
                   }}
                 >
@@ -4385,7 +4385,7 @@ function ArayuzAyarlari({
                       prefs.animSpeed === s
                         ? prefs.accent
                         : "rgba(255,255,255,0.05)",
-                    color: prefs.animSpeed === s ? "#fff" : "#64748b",
+                    color: prefs.animSpeed === s ? "var(--text-primary)" : "var(--text-muted)",
                     transition: "all 0.15s",
                     whiteSpace: "nowrap",
                   }}
@@ -4415,7 +4415,7 @@ function ArayuzAyarlari({
                   border: "none",
                   cursor: "pointer",
                   position: "relative",
-                  background: prefs.compactMode ? prefs.accent : "#334155",
+                  background: prefs.compactMode ? prefs.accent : "var(--text-dim)",
                   transition: "background 0.2s",
                   flexShrink: 0,
                 }}
@@ -4458,7 +4458,7 @@ function ArayuzAyarlari({
             background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
             border: "none",
             borderRadius: 10,
-            color: "#fff",
+            color: "var(--text-primary)",
             fontWeight: 800,
             cursor: "pointer",
             fontSize: "0.88rem",
@@ -4509,7 +4509,7 @@ function ArayuzAyarlari({
                   width: 48,
                   height: 26,
                   borderRadius: 13,
-                  background: prefs[item.key] ? prefs.accent : "#334155",
+                  background: prefs[item.key] ? prefs.accent : "var(--text-dim)",
                   position: "relative",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -4832,10 +4832,10 @@ function AboutPanel({ db }: { db: DB }) {
                 }}
                 style={{
                   padding: "4px 10px",
-                  background: "rgba(0,0,0,0.4)",
+                  background: "var(--bg-surface)",
                   border: `1px solid ${versionErr ? "#ef4444" : "#334155"}`,
                   borderRadius: 8,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   fontSize: "0.85rem",
                   width: 120,
                 }}
@@ -4985,7 +4985,7 @@ function AboutPanel({ db }: { db: DB }) {
                     style={{
                       fontFamily: "monospace",
                       fontWeight: 800,
-                      color: isLatest ? "#ff7043" : "#94a3b8",
+                      color: isLatest ? "var(--color-danger)" : "var(--text-secondary)",
                       fontSize: "0.88rem",
                       minWidth: 60,
                     }}
@@ -5003,7 +5003,7 @@ function AboutPanel({ db }: { db: DB }) {
                   </div>
                   <span
                     style={{
-                      color: "#334155",
+                      color: "var(--text-dim)",
                       fontSize: "0.85rem",
                       transition: "transform 0.2s",
                       transform: isExpanded ? "rotate(180deg)" : "none",
@@ -5245,7 +5245,7 @@ function AgentSettingsPanel({
                         : "rgba(239,68,68,0.1)",
                       border: `1px solid ${enabled ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.2)"}`,
                       borderRadius: 8,
-                      color: enabled ? "#10b981" : "#ef4444",
+                      color: enabled ? "var(--color-success)" : "var(--color-danger)",
                       cursor: "pointer",
                       fontWeight: 700,
                       fontSize: "0.8rem",
@@ -5276,7 +5276,7 @@ function AgentSettingsPanel({
                           onChange={() => togglePermission(agent.id, perm)}
                           style={{
                             cursor: "pointer",
-                            accentColor: "#ff5722",
+                            accentColor: "var(--color-danger)",
                           }}
                         />
                         <span className={"settings-text-muted-xs"}>{perm}</span>
@@ -5341,7 +5341,7 @@ function AgentSettingsPanel({
             <div
               key={stat.label}
               style={{
-                background: "rgba(0,0,0,0.2)",
+                background: "var(--bg-card)",
                 borderRadius: 10,
                 padding: "12px",
                 textAlign: "center",

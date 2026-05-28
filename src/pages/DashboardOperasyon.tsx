@@ -19,7 +19,7 @@ const cardVariants = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 
 function StatusPill({ status }: { status: string }) {
   const col = status === "tamamlandi" || status === "ok" ? "#22c55e"
     : status === "yolda" || status === "warn" ? "#ff6b35"
-    : status === "bekliyor" || status === "critical" ? "#ef4444"
+    : status === "bekliyor" || status === "critical" ? "var(--color-danger)"
     : "#787890";
   return (
     <span style={{
@@ -174,10 +174,10 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
                           whileHover={{ background: `${BORDER}40` }}
                           style={{ borderBottom: `1px solid ${BORDER}`, background: critical ? "#ef444408" : "transparent" }}
                         >
-                          <td style={{ padding: "7px 8px", color: critical ? "#ef4444" : TEXT, fontWeight: 500 }}>{p.name}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: critical ? "#ef4444" : p.stock <= p.minStock / 2 ? "#ff6b35" : TEXT }}>{p.stock}</td>
+                          <td style={{ padding: "7px 8px", color: critical ? "var(--color-danger)" : TEXT, fontWeight: 500 }}>{p.name}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: critical ? "var(--color-danger)" : p.stock <= p.minStock / 2 ? "#ff6b35" : TEXT }}>{p.stock}</td>
                           <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: MUTED }}>{p.minStock}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: depletionDays < 7 ? "#ef4444" : depletionDays < 30 ? "#ff6b35" : MUTED }}>
+                          <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: depletionDays < 7 ? "var(--color-danger)" : depletionDays < 30 ? "#ff6b35" : MUTED }}>
                             {critical ? "BİTTİ" : `${depletionDays}g`}
                           </td>
                           <td style={{ padding: "7px 8px", textAlign: "right", fontFamily: MONO, color: MUTED }}>{formatMoney(p.cost * p.stock)}</td>
@@ -222,7 +222,7 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
           <OpCard title="BUGÜN SİPARİŞ VER" subtitle="Acil yeniden sipariş listesi" extra={<span style={{ color: '#ff6b35', fontFamily: MONO, fontWeight: 700 }}>{reorderUrgency.length}</span>} style={{ marginTop: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {reorderUrgency.map((p, i) => {
-                const urgencyColor = p.urgencyScore > 80 ? '#ef4444' : p.urgencyScore > 60 ? '#ff6b35' : '#f59e0b';
+                const urgencyColor = p.urgencyScore > 80 ? 'var(--color-danger)' : p.urgencyScore > 60 ? '#ff6b35' : 'var(--color-warning)';
                 return (
                   <motion.div key={p.id} initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                     whileHover={{ background: `${BORDER}40` }}
@@ -249,7 +249,7 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
       {(filter === "all" || filter === "sipariş") && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 12 }}>
           {orderPipeline.map((o) => {
-            const col = o.status === "tamamlandi" ? "#22c55e" : o.status === "yolda" ? "#ff6b35" : o.status === "bekliyor" ? "#ef4444" : MUTED;
+            const col = o.status === "tamamlandi" ? "#22c55e" : o.status === "yolda" ? "#ff6b35" : o.status === "bekliyor" ? "var(--color-danger)" : MUTED;
             return (
               <OpCard key={o.status} title={o.status.toUpperCase()} extra={<span style={{ fontFamily: MONO, color: col, fontSize: "1.2rem", fontWeight: 700 }}>{o.count}</span>}>
                 <div style={{ color: MUTED, fontSize: "0.8rem", fontFamily: MONO }}>{formatMoney(o.total)}</div>
@@ -300,7 +300,7 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
             <div>
               <div style={{ color: MUTED, fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Depolama</div>
               <div style={{ background: BORDER, borderRadius: 4, height: 8, overflow: "hidden" }}>
-                <div style={{ width: `${systemHealth.storagePct}%`, height: 8, borderRadius: 4, background: systemHealth.storagePct > 70 ? "#ef4444" : systemHealth.storagePct > 40 ? "#ff6b35" : "#22c55e", transition: "width 0.5s" }} />
+                <div style={{ width: `${systemHealth.storagePct}%`, height: 8, borderRadius: 4, background: systemHealth.storagePct > 70 ? "var(--color-danger)" : systemHealth.storagePct > 40 ? "#ff6b35" : "#22c55e", transition: "width 0.5s" }} />
               </div>
               <div style={{ color: TEXT, fontSize: "0.8rem", fontFamily: MONO, marginTop: 2 }}>%{systemHealth.storagePct.toFixed(1)}</div>
             </div>

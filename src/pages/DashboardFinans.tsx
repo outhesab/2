@@ -10,12 +10,12 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empt
 
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
-const CARD_BG = "#0f1e35";
+const CARD_BG = "var(--bg-elevated)";
 const GOLD = "#d4a04a";
-const CHART_AXIS = { fontSize: 11, fill: "#64748b", fontFamily: "'Plus Jakarta Sans',sans-serif" };
+const CHART_AXIS = { fontSize: 11, fill: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" };
 const CHART_TOOLTIP = {
-  contentStyle: { background: "#0f1e35", border: `1px solid ${GOLD}30`, borderRadius: 10, fontSize: "0.82rem" },
-  labelStyle: { color: "#94a3b8" }, itemStyle: { color: "#f1f5f9" },
+  contentStyle: { background: "var(--bg-elevated)", border: `1px solid ${GOLD}30`, borderRadius: 10, fontSize: "0.82rem" },
+  labelStyle: { color: "var(--text-secondary)" }, itemStyle: { color: "var(--text-primary)" },
 };
 
 const containerVariants = {
@@ -40,10 +40,10 @@ function GoldCard({ title, subtitle, children, accent = GOLD, extra }: {
       <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${accent}04, transparent 60%)`, pointerEvents: "none" }} />
       <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", border: `1px solid ${accent}10`, pointerEvents: "none" }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: subtitle ? 4 : 14 }}>
-        <h3 style={{ color: "#f1f5f9", fontSize: "1rem", fontWeight: 600, letterSpacing: "0.02em" }}>{title}</h3>
+        <h3 style={{ color: "var(--text-primary)", fontSize: "1rem", fontWeight: 600, letterSpacing: "0.02em" }}>{title}</h3>
         {extra}
       </div>
-      {subtitle && <p style={{ color: "#64748b", fontSize: "0.8rem", marginBottom: 14 }}>{subtitle}</p>}
+      {subtitle && <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginBottom: 14 }}>{subtitle}</p>}
       {children}
     </motion.div>
   );
@@ -52,9 +52,9 @@ function GoldCard({ title, subtitle, children, accent = GOLD, extra }: {
 function StatNumber({ label, value, color = GOLD, sub }: { label: string; value: string; color?: string; sub?: string }) {
   return (
     <div style={{ textAlign: "center", padding: "10px 6px" }}>
-      <div style={{ color: "#64748b", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{label}</div>
+      <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{label}</div>
       <div style={{ color, fontSize: "1.3rem", fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{value}</div>
-      {sub && <div style={{ color: "#475569", fontSize: "0.72rem", marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ color: "var(--text-dim)", fontSize: "0.72rem", marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -119,11 +119,11 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
 
   const healthScore = useMemo(() => {
     const { netSermaye, stokDeger } = finansData;
-    if (netSermaye <= 0) return { score: 0, label: "Kritik", color: "#ef4444" };
+    if (netSermaye <= 0) return { score: 0, label: "Kritik", color: "var(--color-danger)" };
     const ratio = netSermaye / Math.max(stokDeger, 1);
-    if (ratio > 1.5) return { score: 90, label: "Mükemmel", color: "#10b981" };
-    if (ratio > 0.8) return { score: 65, label: "İyi", color: "#f59e0b" };
-    return { score: 35, label: "Dikkat", color: "#ef4444" };
+    if (ratio > 1.5) return { score: 90, label: "Mükemmel", color: "var(--color-success)" };
+    if (ratio > 0.8) return { score: 65, label: "İyi", color: "var(--color-warning)" };
+    return { score: 35, label: "Dikkat", color: "var(--color-danger)" };
   }, [finansData]);
 
   return (
@@ -133,17 +133,17 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
       {/* Üst Başlık */}
       <motion.div variants={cardVariants} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
         <div>
-          <h1 style={{ color: "#f1f5f9", fontSize: "1.4rem", fontWeight: 700, letterSpacing: "0.02em" }}>
+          <h1 style={{ color: "var(--text-primary)", fontSize: "1.4rem", fontWeight: 700, letterSpacing: "0.02em" }}>
             <span style={{ color: GOLD }}>✦</span> Finans Komuta Merkezi
           </h1>
-          <p style={{ color: "#64748b", fontSize: "0.82rem" }}>v{db._version || 0} · {formatDate(new Date().toISOString())}</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>v{db._version || 0} · {formatDate(new Date().toISOString())}</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {["14d", "30d"].map((f) => (
             <motion.button key={f} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
               style={{
                 padding: "6px 16px", borderRadius: 8, border: `1px solid ${filter === f ? GOLD : `${GOLD}30`}`,
-                background: filter === f ? `${GOLD}20` : "transparent", color: filter === f ? GOLD : "#94a3b8",
+                background: filter === f ? `${GOLD}20` : "transparent", color: filter === f ? GOLD : "var(--text-secondary)",
                 cursor: "pointer", fontSize: "0.8rem", fontWeight: 500,
               }}
               onClick={() => {}}
@@ -156,13 +156,13 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
 
       {/* Finansal Sağlık Skoru */}
       <motion.div variants={cardVariants} style={{
-        background: `linear-gradient(135deg, ${CARD_BG}, #0d1528)`, borderRadius: 14, border: `1px solid ${GOLD}18`,
+        background: `linear-gradient(135deg, ${CARD_BG}, var(--bg-elevated))`, borderRadius: 14, border: `1px solid ${GOLD}18`,
         borderTop: `3px solid ${healthScore.color}`, padding: "20px 22px", marginBottom: 16,
         display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
       }}>
         <div style={{ position: "relative", width: 80, height: 80 }}>
           <svg viewBox="0 0 36 36" style={{ width: 80, height: 80 }}>
-            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#1e293b" strokeWidth="3" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--border-strong)" strokeWidth="3" />
             <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={healthScore.color} strokeWidth="3"
               strokeDasharray={`${healthScore.score}, 100`} strokeLinecap="round"
             />
@@ -172,15 +172,15 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
           </div>
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: "#f1f5f9", fontSize: "0.95rem", fontWeight: 600 }}>Finansal Sağlık: {healthScore.label}</div>
-          <div style={{ color: "#64748b", fontSize: "0.8rem", marginTop: 2 }}>
+          <div style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 600 }}>Finansal Sağlık: {healthScore.label}</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: 2 }}>
             Net Sermaye / Stok Değeri oranı · {formatMoney(finansData.netSermaye)} / {formatMoney(finansData.stokDeger)}
           </div>
         </div>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-          <StatNumber label="Bu Ay Ciro" value={formatMoney(finansData.buAyCiro)} color={finansData.ciroFarkPct >= 0 ? "#10b981" : "#ef4444"} sub={`%${finansData.ciroFarkPct.toFixed(1)} geçen aya göre`} />
-          <StatNumber label="Net Sermaye" value={formatMoney(finansData.netSermaye)} color={finansData.netSermaye >= 0 ? GOLD : "#ef4444"} />
-          <StatNumber label="Stok Değeri" value={formatMoney(finansData.stokDeger)} color="#3b82f6" />
+          <StatNumber label="Bu Ay Ciro" value={formatMoney(finansData.buAyCiro)} color={finansData.ciroFarkPct >= 0 ? "var(--color-success)" : "var(--color-danger)"} sub={`%${finansData.ciroFarkPct.toFixed(1)} geçen aya göre`} />
+          <StatNumber label="Net Sermaye" value={formatMoney(finansData.netSermaye)} color={finansData.netSermaye >= 0 ? GOLD : "var(--color-danger)"} />
+          <StatNumber label="Stok Değeri" value={formatMoney(finansData.stokDeger)} color="var(--color-info)" />
         </div>
       </motion.div>
 
@@ -194,17 +194,17 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
               <AreaChart data={finansData.chartData} margin={{ top: 8, right: 8, bottom: 4, left: -8 }}>
                 <defs>
                   <linearGradient id="gelirGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} /><stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-success)" stopOpacity={0.3} /><stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="giderGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25} /><stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-danger)" stopOpacity={0.25} /><stop offset="95%" stopColor="var(--color-danger)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={CHART_AXIS} axisLine={false} tickLine={false} />
                 <YAxis tick={CHART_AXIS} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
                 <Tooltip formatter={(v: number, n: string) => [formatMoney(v), n === "gelir" ? "Gelir" : "Gider"]} contentStyle={CHART_TOOLTIP.contentStyle} labelStyle={CHART_TOOLTIP.labelStyle} itemStyle={CHART_TOOLTIP.itemStyle} />
-                <Area type="monotone" dataKey="gelir" stroke="#10b981" strokeWidth={2} fill="url(#gelirGrad)" dot={{ r: 2, fill: "#10b981" }} />
-                <Area type="monotone" dataKey="gider" stroke="#ef4444" strokeWidth={2} fill="url(#giderGrad)" dot={{ r: 2, fill: "#ef4444" }} />
+                <Area type="monotone" dataKey="gelir" stroke="var(--color-success)" strokeWidth={2} fill="url(#gelirGrad)" dot={{ r: 2, fill: "var(--color-success)" }} />
+                <Area type="monotone" dataKey="gider" stroke="var(--color-danger)" strokeWidth={2} fill="url(#giderGrad)" dot={{ r: 2, fill: "var(--color-danger)" }} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -219,10 +219,10 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
                 <XAxis dataKey="date" tick={CHART_AXIS} axisLine={false} tickLine={false} />
                 <YAxis tick={CHART_AXIS} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
                 <Tooltip formatter={(v: number) => [formatMoney(v), ""]} contentStyle={CHART_TOOLTIP.contentStyle} labelStyle={CHART_TOOLTIP.labelStyle} itemStyle={CHART_TOOLTIP.itemStyle} />
-                <Bar dataKey="nakit" stackId="pay" fill="#10b981" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="kart" stackId="pay" fill="#3b82f6" />
-                <Bar dataKey="havale" stackId="pay" fill="#f59e0b" />
-                <Bar dataKey="cariPay" stackId="pay" fill="#8b5cf6" />
+                <Bar dataKey="nakit" stackId="pay" fill="var(--color-success)" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="kart" stackId="pay" fill="var(--color-info)" />
+                <Bar dataKey="havale" stackId="pay" fill="var(--color-warning)" />
+                <Bar dataKey="cariPay" stackId="pay" fill="var(--color-accent)" />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -243,9 +243,9 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
           else if (days <= 90) aging['61-90'].push(c);
           else aging['90+'].push(c);
         });
-        const agingColors: Record<string, string> = { '0-30': '#10b981', '31-60': '#f59e0b', '61-90': '#fb923c', '90+': '#ef4444' };
+        const agingColors: Record<string, string> = { '0-30': 'var(--color-success)', '31-60': 'var(--color-warning)', '61-90': '#fb923c', '90+': 'var(--color-danger)' };
         return (
-          <div style={{ marginBottom: 14 }}><GoldCard title="Alacak Yaşlandırma" subtitle="Son işlem tarihine göre müşteri alacakları" accent="#f59e0b">
+          <div style={{ marginBottom: 14 }}><GoldCard title="Alacak Yaşlandırma" subtitle="Son işlem tarihine göre müşteri alacakları" accent="var(--color-warning)">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
               {Object.entries(aging).map(([range, customers]) => {
                 const total = customers.reduce((s, c) => s + c.balance, 0);
@@ -253,7 +253,7 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
                 return (
                   <div key={range} style={{ background: `${color}10`, borderRadius: 10, padding: '12px 14px', border: `1px solid ${color}25` }}>
                     <div style={{ color, fontSize: '1.2rem', fontWeight: 800 }}>{formatMoney(total)}</div>
-                    <div style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{range} gün ({customers.length} müşteri)</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{range} gün ({customers.length} müşteri)</div>
                     <div style={{ display: 'flex', gap: 4, marginTop: 6, height: 4 }}>
                       {['0-30', '31-60', '61-90', '90+'].map(r => {
                         const pct = musteri.length > 0 ? (aging[r].length / musteri.length) * 100 : 0;
@@ -269,9 +269,9 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
                 <div className="responsive-table-wrap" style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
                         {['Müşteri', 'Bakiye', 'Son İşlem', 'Grup'].map(h => (
-                          <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: '#64748b', fontWeight: 600 }}>{h}</th>
+                          <th key={h} style={{ padding: '6px 8px', textAlign: 'left', color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -284,10 +284,10 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
                         const days = c.lastTransaction ? Math.floor((now - new Date(c.lastTransaction).getTime()) / dayMs) : 999;
                         const range = days <= 30 ? '0-30' : days <= 60 ? '31-60' : days <= 90 ? '61-90' : '90+';
                         return (
-                          <tr key={c.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                            <td style={{ padding: '6px 8px', color: '#f1f5f9', fontWeight: 500 }}>{c.name}</td>
-                            <td style={{ padding: '6px 8px', color: '#10b981', fontWeight: 700 }}>{formatMoney(c.balance)}</td>
-                            <td style={{ padding: '6px 8px', color: '#64748b' }}>{c.lastTransaction ? formatDate(c.lastTransaction) : '-'}</td>
+                          <tr key={c.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 500 }}>{c.name}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--color-success)', fontWeight: 700 }}>{formatMoney(c.balance)}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-muted)' }}>{c.lastTransaction ? formatDate(c.lastTransaction) : '-'}</td>
                             <td style={{ padding: '6px 8px' }}>
                               <span style={{ background: `${agingColors[range]}20`, color: agingColors[range], borderRadius: 4, padding: '2px 6px', fontSize: '0.68rem', fontWeight: 600 }}>{days}d</span>
                             </td>
@@ -307,21 +307,21 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 14 }}>
         <GoldCard title="Nakit" accent="#06b6d4"><StatNumber label="Bakiye" value={formatMoney(finansData.nakit)} color="#06b6d4" /></GoldCard>
         <GoldCard title="Banka" accent="#6366f1"><StatNumber label="Bakiye" value={formatMoney(finansData.banka)} color="#6366f1" /></GoldCard>
-        <GoldCard title="POS Ziraat" accent="#f59e0b"><StatNumber label="Bakiye" value={formatMoney(finansData.posZiraat)} color="#f59e0b" /></GoldCard>
-        <GoldCard title="POS İş Bankası" accent="#3b82f6"><StatNumber label="Bakiye" value={formatMoney(finansData.posIs)} color="#3b82f6" /></GoldCard>
-        <GoldCard title="POS YK" accent="#8b5cf6"><StatNumber label="Bakiye" value={formatMoney(finansData.posYk)} color="#8b5cf6" /></GoldCard>
-        <GoldCard title="Müşteri Alacak" accent="#10b981"><StatNumber label="Toplam" value={formatMoney(finansData.musteriAlacak)} color="#10b981" /></GoldCard>
-        <GoldCard title="Tedarikçi Borç" accent="#ef4444"><StatNumber label="Toplam" value={formatMoney(finansData.tedarikciBorç)} color="#ef4444" /></GoldCard>
+        <GoldCard title="POS Ziraat" accent="var(--color-warning)"><StatNumber label="Bakiye" value={formatMoney(finansData.posZiraat)} color="var(--color-warning)" /></GoldCard>
+        <GoldCard title="POS İş Bankası" accent="var(--color-info)"><StatNumber label="Bakiye" value={formatMoney(finansData.posIs)} color="var(--color-info)" /></GoldCard>
+        <GoldCard title="POS YK" accent="var(--color-accent)"><StatNumber label="Bakiye" value={formatMoney(finansData.posYk)} color="var(--color-accent)" /></GoldCard>
+        <GoldCard title="Müşteri Alacak" accent="var(--color-success)"><StatNumber label="Toplam" value={formatMoney(finansData.musteriAlacak)} color="var(--color-success)" /></GoldCard>
+        <GoldCard title="Tedarikçi Borç" accent="var(--color-danger)"><StatNumber label="Toplam" value={formatMoney(finansData.tedarikciBorç)} color="var(--color-danger)" /></GoldCard>
       </div>
 
       {/* Hızlı İşlemler */}
       <GoldCard title="Hızlı İşlemler" subtitle="">
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {[
-            { label: "Kasa İşlemi", icon: "💰", tab: "kasa", color: "#f59e0b" },
+            { label: "Kasa İşlemi", icon: "💰", tab: "kasa", color: "var(--color-warning)" },
             { label: "Banka", icon: "🏦", tab: "bank", color: "#6366f1" },
-            { label: "Bütçe", icon: "📊", tab: "butce", color: "#10b981" },
-            { label: "Cari Hesaplar", icon: "👤", tab: "cari", color: "#3b82f6" },
+            { label: "Bütçe", icon: "📊", tab: "butce", color: "var(--color-success)" },
+            { label: "Cari Hesaplar", icon: "👤", tab: "cari", color: "var(--color-info)" },
           ].map((b) => (
             <motion.button key={b.tab} onClick={() => onTabChange(b.tab)}
               whileHover={{ scale: 1.04, background: `${b.color}20` }} whileTap={{ scale: 0.96 }}

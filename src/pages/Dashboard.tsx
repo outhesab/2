@@ -174,9 +174,9 @@ async function loadDashboardPrefsFromFirebase(): Promise<{ leftWidgets: WidgetId
 }
 
 const chartStyle = {
-  contentStyle: { background: '#0f1e35', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, fontSize: '0.82rem', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' },
-  labelStyle: { color: '#94a3b8' },
-  itemStyle: { color: '#f1f5f9' },
+        contentStyle: { background: '#0f1e35', border: '1px solid var(--border)', borderRadius: 10, fontSize: '0.82rem', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' },
+        labelStyle: { color: '#94a3b8' },
+        itemStyle: { color: 'var(--text-primary)' },
 };
 
 const chartAxisStyle = { fontSize: 11, fill: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" };
@@ -360,7 +360,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
       case 'chart':
         return (
           <WidgetCard title="Son 7 Günlük Performans" subtitle="Ciro ve kâr trendi" extra={
-            <div className="dash-chart-extra"><LegendDot color="#ff5722" label="Ciro" /><LegendDot color="#10b981" label="Kâr" /></div>
+            <div className="dash-chart-extra"><LegendDot color="var(--color-danger)" label="Ciro" /><LegendDot color="var(--color-success)" label="Kâr" /></div>
           }>
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 4, left: -8 }}>
@@ -382,7 +382,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                   contentStyle={chartStyle.contentStyle}
                   labelStyle={chartStyle.labelStyle}
                   itemStyle={chartStyle.itemStyle}
-                  cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#ff5722" strokeWidth={2.5} fill="url(#ciroGrad)" dot={{ r: 3, fill: '#ff5722', stroke: '#0f1e35', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#ff5722', stroke: '#fff', strokeWidth: 2 }} />
                 <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2.5} fill="url(#karGrad)" dot={{ r: 3, fill: '#10b981', stroke: '#0f1e35', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
@@ -420,7 +420,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.04, type: 'spring', stiffness: 260, damping: 24 }}
-                whileHover={{ x: 4, background: 'rgba(255,255,255,0.02)' }}
+                whileHover={{ x: 4, background: 'var(--bg-card)' }}
                 className={`dash-sale-row${i > 0 ? ' bordered' : ''}`}
               >
                 <div className={`dash-sale-icon ${s.status === 'tamamlandi' ? 'completed' : 'returned'}`}>
@@ -448,7 +448,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
           }>
             {stats.outOfStock > 0 && (
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="dash-stock-alert-row">
-                <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }} className="dash-stock-alert-dot" style={{ background: '#ef4444' }} />
+                <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }} className="dash-stock-alert-dot" style={{ background: 'var(--color-danger)' }} />
                 <span className="dash-stock-alert-text"><strong className="dash-stock-alert-strong danger">{stats.outOfStock} ürün</strong> stok bitti</span>
               </motion.div>
             )}
@@ -479,7 +479,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                 whileHover={{ x: 3 }}
                 className="dash-activity-row"
               >
-                <motion.div className="dash-activity-dot" whileHover={{ scale: 2, background: '#ff5722' }} />
+                <motion.div className="dash-activity-dot" whileHover={{ scale: 2, background: 'var(--color-danger)' }} />
                 <div className="dash-activity-content">
                   <div className="dash-activity-action">{a.action}</div>
                   {a.detail && <div className="dash-activity-detail">{a.detail}</div>}
@@ -620,7 +620,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04, type: 'spring', stiffness: 260, damping: 24 }}
-                whileHover={{ x: 2, background: 'rgba(0,0,0,0.3)' }}
+                whileHover={{ x: 2, background: 'var(--bg-elevated)' }}
                 className="dash-backup-item"
               >
                 <div>
@@ -653,7 +653,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
           <FormulaItem label="Banka" value={stats.banka} color="#6366f1" />
           <span className="dash-gunsonu-op">+</span>
           <FormulaItem label="Müşteri Alacağı" value={stats.totalReceivable} color="#10b981" />
-          <span className="dash-gunsonu-op" style={{ color: '#ef4444' }}>−</span>
+          <span className="dash-gunsonu-op" style={{ color: 'var(--color-danger)' }}>−</span>
           <FormulaItem label="Tedarikçi Borcu" value={stats.totalPayable} color="#ef4444" />
           <span className="dash-gunsonu-op">=</span>
           <motion.div
@@ -663,7 +663,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
             style={{ background: stats.netSermaye >= 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', border: `1px solid ${stats.netSermaye >= 0 ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}` }}
           >
             <div className="dash-gunsonu-result-label">Net Sermaye</div>
-            <div className="dash-gunsonu-result-value" style={{ color: stats.netSermaye >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(stats.netSermaye)}</div>
+            <div className="dash-gunsonu-result-value" style={{ color: stats.netSermaye >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>{formatMoney(stats.netSermaye)}</div>
           </motion.div>
         </div>
       </div>
@@ -841,8 +841,8 @@ function KasaSayimWidget({ db }: { db: DB }) {
               key={k.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, type: 'spring', stiffness: 260, damping: 24 }}
-              whileHover={{ x: 2, background: 'rgba(0,0,0,0.3)' }}
+transition={{ delay: i * 0.08, type: 'spring', stiffness: 260, damping: 24 }}
+                whileHover={{ x: 2, background: 'var(--bg-elevated)' }}
               className="dash-kasa-row">
               <div>
                 <div className="dash-kasa-info-label">{k.icon} {k.name}</div>
@@ -856,7 +856,7 @@ function KasaSayimWidget({ db }: { db: DB }) {
               />
               {fark !== null && (
                 <div className="dash-kasa-fark">
-                  <div className="dash-kasa-fark-value" style={{ color: Math.abs(fark) < 1 ? '#10b981' : fark > 0 ? '#3b82f6' : '#ef4444' }}>
+                  <div className="dash-kasa-fark-value" style={{ color: Math.abs(fark) < 1 ? 'var(--color-success)' : fark > 0 ? 'var(--color-info)' : 'var(--color-danger)' }}>
                     {fark >= 0 ? '+' : ''}{formatMoney(fark)}
                   </div>
                   <div className="dash-kasa-fark-label">{Math.abs(fark) < 1 ? '✓ Eşit' : fark > 0 ? 'Fazla' : 'Eksik'}</div>
@@ -931,7 +931,7 @@ function YedekHatirlatmaWidget() {
 function WidgetCard({ title, subtitle, children, extra }: { title: string; subtitle?: string; children: React.ReactNode; extra?: React.ReactNode }) {
   return (
     <motion.div
-      whileHover={{ borderColor: 'rgba(255,255,255,0.12)', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+      whileHover={{ borderColor: 'var(--border-strong)', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       className="dash-widget-card"
     >

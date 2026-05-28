@@ -7,12 +7,12 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empt
 
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
-const IRIDESCENT = "linear-gradient(135deg, #7c3aed, #06b6d4, #ec4899)";
+const IRIDESCENT = "linear-gradient(135deg, #7c3aed, var(--color-info), #ec4899)";
 const CHART_TOOLTIP = {
   contentStyle: { background: "rgba(10,10,20,0.95)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, backdropFilter: "blur(12px)" as const, fontSize: "0.8rem" },
-  labelStyle: { color: "#94a3b8" }, itemStyle: { color: "#f1f5f9" },
+  labelStyle: { color: "var(--text-secondary)" }, itemStyle: { color: "var(--text-primary)" },
 };
-const CHART_AXIS = { fontSize: 10, fill: "#475569", fontFamily: "'Plus Jakarta Sans',sans-serif" };
+const CHART_AXIS = { fontSize: 10, fill: "var(--text-dim)", fontFamily: "'Plus Jakarta Sans',sans-serif" };
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } } as const;
 const cardVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 260, damping: 24 } } };
@@ -24,20 +24,20 @@ function GlassCard({ title, subtitle, children, accent, extra, shimmer }: {
     <motion.div variants={cardVariants} layout
       whileHover={{ boxShadow: `0 8px 40px ${accent || "#7c3aed"}15`, borderColor: `${accent || "#7c3aed"}20` }}
       style={{
-        background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14, padding: "18px 20px", position: "relative", overflow: "hidden",
+        background: "var(--border)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", position: "relative", overflow: "hidden",
       }}
     >
       {accent && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: accent }} />}
       <div style={{ position: "absolute", top: -40, right: -40, width: 100, height: 100, borderRadius: "50%", background: `${accent || "#7c3aed"}06`, pointerEvents: "none" }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: subtitle ? 4 : 12 }}>
-        <h3 style={{ color: "#f1f5f9", fontSize: "0.9rem", fontWeight: 500, letterSpacing: "0.01em" }}>{title}</h3>
+        <h3 style={{ color: "var(--text-primary)", fontSize: "0.9rem", fontWeight: 500, letterSpacing: "0.01em" }}>{title}</h3>
         {extra}
       </div>
-      {subtitle && <p style={{ color: "#64748b", fontSize: "0.78rem", marginBottom: 12 }}>{subtitle}</p>}
+      {subtitle && <p style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginBottom: 12 }}>{subtitle}</p>}
       {shimmer ? (
         <div style={{ padding: "20px 0", textAlign: "center" }}>
-          <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ color: "#64748b", fontSize: "0.85rem" }}>
+          <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
             <span style={{ fontSize: "1.2rem" }}>🔮</span> Hesaplanıyor...
           </motion.div>
         </div>
@@ -180,7 +180,7 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
         <h1 style={{ fontSize: "1.4rem", fontWeight: 300, letterSpacing: "0.04em", background: IRIDESCENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Strateji Paneli
         </h1>
-        <p style={{ color: "#64748b", fontSize: "0.8rem", fontWeight: 300 }}>AI Destekli İçgörüler ve Tahminler</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", fontWeight: 300 }}>AI Destekli İçgörüler ve Tahminler</p>
       </motion.div>
 
       {/* AI Insight Cards */}
@@ -188,20 +188,20 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
         <GlassCard title="Aylık Ciro Trendi" accent="#7c3aed" shimmer={loading}>
           {!loading && (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: "#f1f5f9" }}>{formatMoney(insights.buAyCiro)}</div>
-              <div style={{ fontSize: "0.82rem", color: insights.changePct >= 0 ? "#10b981" : "#ef4444", marginTop: 4 }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: "var(--text-primary)" }}>{formatMoney(insights.buAyCiro)}</div>
+              <div style={{ fontSize: "0.82rem", color: insights.changePct >= 0 ? "var(--color-success)" : "var(--color-danger)", marginTop: 4 }}>
                 {insights.changePct >= 0 ? "▲" : "▼"} %{Math.abs(insights.changePct).toFixed(1)} geçen aya göre
               </div>
-              <div style={{ color: "#64748b", fontSize: "0.72rem", marginTop: 2 }}>Geçen ay: {formatMoney(insights.gecenAyCiro)}</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.72rem", marginTop: 2 }}>Geçen ay: {formatMoney(insights.gecenAyCiro)}</div>
             </div>
           )}
         </GlassCard>
 
-        <GlassCard title="En İyi Kategori" accent="#06b6d4" shimmer={loading}>
+        <GlassCard title="En İyi Kategori" accent="var(--color-info)" shimmer={loading}>
           {!loading && (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={{ fontSize: "1.2rem", fontWeight: 400, color: "#f1f5f9", marginBottom: 4 }}>{insights.topCat?.name || "-"}</div>
-              <div style={{ fontSize: "1.3rem", fontWeight: 300, color: "#06b6d4" }}>{insights.topCat ? formatMoney(insights.topCat.value) : "Veri yok"}</div>
+              <div style={{ fontSize: "1.2rem", fontWeight: 400, color: "var(--text-primary)", marginBottom: 4 }}>{insights.topCat?.name || "-"}</div>
+              <div style={{ fontSize: "1.3rem", fontWeight: 300, color: "var(--color-info)" }}>{insights.topCat ? formatMoney(insights.topCat.value) : "Veri yok"}</div>
             </div>
           )}
         </GlassCard>
@@ -209,25 +209,25 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
         <GlassCard title="Nakit Akış Tahmini" accent="#ec4899" shimmer={loading}>
           {!loading && (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: "#f1f5f9" }}>{insights.cashRunway} gün</div>
-              <div style={{ color: "#64748b", fontSize: "0.78rem", marginTop: 4 }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: "var(--text-primary)" }}>{insights.cashRunway} gün</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
                 Günlük gider: {formatMoney(insights.gunlukGider)}
               </div>
-              <div style={{ color: insights.cashRunway < 30 ? "#ef4444" : insights.cashRunway < 60 ? "#f59e0b" : "#10b981", fontSize: "0.72rem" }}>
+              <div style={{ color: insights.cashRunway < 30 ? "var(--color-danger)" : insights.cashRunway < 60 ? "var(--color-warning)" : "var(--color-success)", fontSize: "0.72rem" }}>
                 {insights.cashRunway < 30 ? "⚠️ Kritik seviye" : insights.cashRunway < 60 ? "📊 Orta seviye" : "✅ Yeterli"}
               </div>
             </div>
           )}
         </GlassCard>
 
-        <GlassCard title="Stok Uyarısı" accent="#f59e0b" shimmer={loading}>
+        <GlassCard title="Stok Uyarısı" accent="var(--color-warning)" shimmer={loading}>
           {!loading && (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: insights.stockAlert > 0 ? "#ef4444" : "#10b981" }}>{insights.stockAlert}</div>
-              <div style={{ color: "#64748b", fontSize: "0.78rem", marginTop: 4 }}>üründe stok uyarısı</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 300, color: insights.stockAlert > 0 ? "var(--color-danger)" : "var(--color-success)" }}>{insights.stockAlert}</div>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>üründe stok uyarısı</div>
               {insights.stockAlert > 0 && (
                 <motion.button onClick={() => onTabChange("products")} whileHover={{ scale: 1.05 }}
-                  style={{ marginTop: 8, padding: "4px 14px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "#f59e0b", cursor: "pointer", fontSize: "0.72rem" }}
+                  style={{ marginTop: 8, padding: "4px 14px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)", color: "var(--color-warning)", cursor: "pointer", fontSize: "0.72rem" }}
                 >
                   Görüntüle →
                 </motion.button>
@@ -238,10 +238,10 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
       </div>
 
       {/* Forecast Chart */}
-      <GlassCard title="Ciro Tahmini" subtitle="Son 30 gün gerçek + 7 gün tahmin (basit projeksiyon)" accent="linear-gradient(90deg, #7c3aed, #06b6d4)">
+      <GlassCard title="Ciro Tahmini" subtitle="Son 30 gün gerçek + 7 gün tahmin (basit projeksiyon)" accent="linear-gradient(90deg, #7c3aed, var(--color-info))">
         {loading ? (
           <div style={{ height: 220, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ color: "#64748b" }}>🔮 Tahmin hesaplanıyor...</motion.div>
+            <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ color: "var(--text-muted)" }}>🔮 Tahmin hesaplanıyor...</motion.div>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
@@ -257,21 +257,21 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
               <XAxis dataKey="date" tick={CHART_AXIS} axisLine={false} tickLine={false} />
               <YAxis tick={CHART_AXIS} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
               <Tooltip formatter={(v: number, n: string) => [formatMoney(v), n === "actual" ? "Gerçek" : n === "forecast" ? "Tahmin" : n]} contentStyle={CHART_TOOLTIP.contentStyle} labelStyle={CHART_TOOLTIP.labelStyle} itemStyle={CHART_TOOLTIP.itemStyle} />
-              <Area type="monotone" dataKey="upper" stroke="none" fill="#06b6d4" fillOpacity={0.08} />
-              <Area type="monotone" dataKey="lower" stroke="none" fill="#06b6d4" fillOpacity={0.08} />
+              <Area type="monotone" dataKey="upper" stroke="none" fill="var(--color-info)" fillOpacity={0.08} />
+              <Area type="monotone" dataKey="lower" stroke="none" fill="var(--color-info)" fillOpacity={0.08} />
               <Area type="monotone" dataKey="actual" stroke="#7c3aed" strokeWidth={2} fill="url(#actualGrad)" dot={{ r: 2, fill: "#7c3aed" }} />
-              <Area type="monotone" dataKey="forecast" stroke="#06b6d4" strokeWidth={2} strokeDasharray="6 4" fill="url(#forecastGrad)" dot={{ r: 3, fill: "#06b6d4" }} />
+              <Area type="monotone" dataKey="forecast" stroke="var(--color-info)" strokeWidth={2} strokeDasharray="6 4" fill="url(#forecastGrad)" dot={{ r: 3, fill: "var(--color-info)" }} />
             </AreaChart>
           </ResponsiveContainer>
         )}
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 6, fontSize: "0.72rem", color: "#64748b" }}>
+        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 6, fontSize: "0.72rem", color: "var(--text-muted)" }}>
           <span><span style={{ color: "#7c3aed" }}>━</span> Gerçek</span>
-          <span><span style={{ color: "#06b6d4", borderBottom: "2px dashed #06b6d4" }}>━</span> Tahmin</span>
+          <span><span style={{ color: "var(--color-info)", borderBottom: "2px dashed var(--color-info)" }}>━</span> Tahmin</span>
         </div>
       </GlassCard>
 
       {/* Sezonsallık Grafiği */}
-      <GlassCard title="Sezonsallık Analizi" subtitle="Aylık ortalama ciro dağılımı ve 3 aylık nakit akışı tahmini" accent="#8b5cf6" shimmer={loading}>
+      <GlassCard title="Sezonsallık Analizi" subtitle="Aylık ortalama ciro dağılımı ve 3 aylık nakit akışı tahmini" accent="var(--color-accent)" shimmer={loading}>
         {!loading && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <div>
@@ -282,29 +282,29 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
                   <Tooltip formatter={(v: number, n: string) => [formatMoney(v), n === 'avg' ? 'Ortalama' : n]} contentStyle={{ background: 'rgba(10,10,20,0.95)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, fontSize: '0.72rem' }} />
                   <Bar dataKey="avg" radius={[3, 3, 0, 0]} maxBarSize={20}>
                     {seasonalityData.monthlyData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.coefficient > 1.2 ? '#10b981' : entry.coefficient > 0.8 ? '#8b5cf6' : '#64748b'} />
+                      <Cell key={idx} fill={entry.coefficient > 1.2 ? 'var(--color-success)' : entry.coefficient > 0.8 ? '#8b5cf6' : 'var(--text-muted)'} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4, fontSize: '0.62rem', color: '#64748b' }}>
-                <span><span style={{ color: '#10b981' }}>●</span> Yüksek</span>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4, fontSize: '0.62rem', color: 'var(--text-muted)' }}>
+                <span><span style={{ color: 'var(--color-success)' }}>●</span> Yüksek</span>
                 <span><span style={{ color: '#8b5cf6' }}>●</span> Normal</span>
-                <span><span style={{ color: '#64748b' }}>●</span> Düşük</span>
+                <span><span style={{ color: 'var(--text-muted)' }}>●</span> Düşük</span>
               </div>
             </div>
             <div>
-              <div style={{ color: '#64748b', fontSize: '0.68rem', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nakit Akışı Tahmini (3 Ay)</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.68rem', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nakit Akışı Tahmini (3 Ay)</div>
               {seasonalityData.cashFlowForecast.map((c, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
                   style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.04)', marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
-                  <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>{c.month}</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>{c.month}</span>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gelir / 1000).toFixed(0)}K</span>
-                    <span style={{ color: '#64748b', fontSize: '0.68rem', margin: '0 4px' }}>/</span>
-                    <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gider / 1000).toFixed(0)}K</span>
-                    <div style={{ color: c.net >= 0 ? '#10b981' : '#ef4444', fontSize: '0.82rem', fontWeight: 700 }}>
+                    <span style={{ color: 'var(--color-success)', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gelir / 1000).toFixed(0)}K</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.68rem', margin: '0 4px' }}>/</span>
+                    <span style={{ color: 'var(--color-danger)', fontSize: '0.75rem', fontWeight: 600 }}>₺{(c.gider / 1000).toFixed(0)}K</span>
+                    <div style={{ color: c.net >= 0 ? 'var(--color-success)' : 'var(--color-danger)', fontSize: '0.82rem', fontWeight: 700 }}>
                       {c.net >= 0 ? '+' : ''}₺{(c.net / 1000).toFixed(0)}K
                     </div>
                   </div>
@@ -317,7 +317,7 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
 
       {/* Anomaly Detector + What-If */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
-        <GlassCard title="Anomali Dedektörü" subtitle={`${anomalies.length} anomali tespit edildi`} accent="#ef4444" shimmer={loading}>
+        <GlassCard title="Anomali Dedektörü" subtitle={`${anomalies.length} anomali tespit edildi`} accent="var(--color-danger)" shimmer={loading}>
           {!loading && (
             anomalies.length === 0 ? (
               <Empty><EmptyHeader><EmptyMedia>✅</EmptyMedia><EmptyTitle>Anomali bulunamadı</EmptyTitle></EmptyHeader></Empty>
@@ -329,14 +329,14 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 6px", borderBottom: i < anomalies.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", fontSize: "0.78rem" }}
                   >
                     <div style={{ flex: 1 }}>
-                      <span style={{ color: "#f1f5f9" }}>{a.productName}</span>
-                      <span style={{ color: "#64748b", marginLeft: 6, fontSize: "0.7rem" }}>{formatDate(a.createdAt)}</span>
+                      <span style={{ color: "var(--text-primary)" }}>{a.productName}</span>
+                      <span style={{ color: "var(--text-muted)", marginLeft: 6, fontSize: "0.7rem" }}>{formatDate(a.createdAt)}</span>
                     </div>
-                    <span style={{ color: "#f1f5f9", fontFamily: "'Courier New',monospace", marginRight: 10 }}>{formatMoney(a.total)}</span>
+                    <span style={{ color: "var(--text-primary)", fontFamily: "'Courier New',monospace", marginRight: 10 }}>{formatMoney(a.total)}</span>
                     <span style={{
                       padding: "2px 8px", borderRadius: 8, fontSize: "0.65rem", fontWeight: 600,
                       background: a.severity === "HIGH" ? "#ef444420" : a.severity === "MEDIUM" ? "#f59e0b20" : "#3b82f620",
-                      color: a.severity === "HIGH" ? "#ef4444" : a.severity === "MEDIUM" ? "#f59e0b" : "#3b82f6",
+                      color: a.severity === "HIGH" ? "var(--color-danger)" : a.severity === "MEDIUM" ? "var(--color-warning)" : "var(--color-info)",
                     }}>
                       {a.severity}
                     </span>
@@ -347,13 +347,13 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
           )}
         </GlassCard>
 
-        <GlassCard title="What-IF Senaryoları" subtitle="Veriye dayalı simülasyonlar" accent="#10b981" shimmer={loading}>
+        <GlassCard title="What-IF Senaryoları" subtitle="Veriye dayalı simülasyonlar" accent="var(--color-success)" shimmer={loading}>
           {!loading && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { icon: "💳", label: "Müşteriler %5 erken ödeme yapsa", value: formatMoney(whatIf.earlyPaymentBenefit), detail: `${db.cari.filter(c => !c.deleted && c.type === 'musteri').length} müşteri baz alındı`, color: "#10b981" },
-                { icon: "📈", label: "Ortalama fiyat %10 artsa", value: `+${formatMoney(whatIf.priceBoost)}/ay`, detail: `Geçen ay ciro: ${formatMoney(whatIf.lastMonthRevenue)}`, color: "#3b82f6" },
-                { icon: "🔄", label: "Stok devir hızı %20 artarsa", value: `-${formatMoney(whatIf.turnoverSaving)}`, detail: "Maliyet avantajı", color: "#8b5cf6" },
+                { icon: "💳", label: "Müşteriler %5 erken ödeme yapsa", value: formatMoney(whatIf.earlyPaymentBenefit), detail: `${db.cari.filter(c => !c.deleted && c.type === 'musteri').length} müşteri baz alındı`, color: "var(--color-success)" },
+                { icon: "📈", label: "Ortalama fiyat %10 artsa", value: `+${formatMoney(whatIf.priceBoost)}/ay`, detail: `Geçen ay ciro: ${formatMoney(whatIf.lastMonthRevenue)}`, color: "var(--color-info)" },
+                { icon: "🔄", label: "Stok devir hızı %20 artarsa", value: `-${formatMoney(whatIf.turnoverSaving)}`, detail: "Maliyet avantajı", color: "var(--color-accent)" },
               ].map((item, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                   whileHover={{ x: 3, background: "rgba(255,255,255,0.03)" }}
@@ -361,10 +361,10 @@ export default function DashboardStrateji({ db, onTabChange }: Props) {
                 >
                   <span style={{ fontSize: "1.2rem" }}>{item.icon}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ color: "#94a3b8", fontSize: "0.75rem" }}>{item.label}</div>
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75rem" }}>{item.label}</div>
                     <div style={{ color: item.color, fontSize: "0.95rem", fontWeight: 600 }}>{item.value}</div>
                   </div>
-                  <div style={{ color: "#475569", fontSize: "0.65rem", textAlign: "right", maxWidth: 120 }}>{item.detail}</div>
+                  <div style={{ color: "var(--text-dim)", fontSize: "0.65rem", textAlign: "right", maxWidth: 120 }}>{item.detail}</div>
                 </motion.div>
               ))}
             </div>

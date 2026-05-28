@@ -7,6 +7,7 @@
 import { logger } from "@/lib/logger";
 
 export interface UIPrefs {
+  themeId: string;
   accent: string;
   bgBase: string;
   fontScale: number;
@@ -15,7 +16,6 @@ export interface UIPrefs {
   sidebarStyle: "default" | "minimal" | "colored";
   cardRadius: number;
   lightMode: boolean;
-  // Floating buton ayarları
   showAIButton: boolean;
   showFABButton: boolean;
   showReportButton: boolean;
@@ -25,6 +25,7 @@ export interface UIPrefs {
 }
 
 export const DEFAULT_PREFS: UIPrefs = {
+  themeId: "carbon",
   accent: "#22c55e",
   bgBase: "#041512",
   fontScale: 1,

@@ -20,6 +20,24 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.7.0',
+    date: '28 Mayıs 2026',
+    title: 'Premium Tema Sistemi + CSS Tokenizasyonu',
+    summary: '3 premium tema (Corporate Enterprise, Modern Dark, Elegant Light), CSS variable token sistemi, layout bileşen ayrıştırması, tüm dashboard ve settings sayfalarında hardcoded renkler CSS var ile değiştirildi.',
+    changes: [
+      { type: 'yeni', text: 'Premium tema sistemi: 3 tema (Corporate Enterprise, Modern Dark, Elegant Light), runtime switching, localStorage persistence' },
+      { type: 'yeni', text: 'ThemeProvider + useTheme hook — React context ile tema yönetimi, geriye uyumlu sobaUI:updated event dinleme' },
+      { type: 'yeni', text: 'CSS variable token sistemi (OKLCH): 40+ premium değişken (gölgeler, glassmorphism, gradient, easing, renk skalası 50-900)' },
+      { type: 'iyilestirme', text: 'App.tsx 1613→600 satıra düşürüldü: 7 layout bileşeni ayrıldı (Sidebar, Header, GlobalSearch, UserMenu, ReportButton, FAB, AIDrawer)' },
+      { type: 'iyilestirme', text: 'Tab konfigürasyonu src/config/tabs.ts\'e taşındı — tüm layout bileşenleri ortak kullanıyor' },
+      { type: 'iyilestirme', text: 'Dashboard (5 sayfa): 200+ hardcoded hex/rgba renk CSS variable referanslarına dönüştürüldü' },
+      { type: 'iyilestirme', text: 'Settings.tsx: 150+ inline style rengi CSS variable\'a dönüştürüldü' },
+      { type: 'iyilestirme', text: 'SystemMap: tüm düğüm/kenar renkleri CSS variable tokenlarına dönüştürüldü' },
+      { type: 'iyilestirme', text: 'Products.tsx: derleme hatası giderildi (çift state tanımı, eksik filter)' },
+      { type: 'duzeltme', text: 'index.css: premium tema değişkenleri, spacing ve tipografi skalası eklendi' },
+    ],
+  },
+  {
     version: '3.6.0',
     date: '26 Mayıs 2026',
     title: 'Faz 2 Öncelik 4 + Faz 3 Performans',

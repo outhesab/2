@@ -13,9 +13,9 @@ interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (p
 const TEAL = "#0d7377";
 const WHITE = "#ffffff";
 const TEXT = "#1e293b";
-const MUTED = "#64748b";
+const MUTED = "var(--text-muted)";
 const BORDER = "#e0ddd5";
-const CAT_COLORS = ["#0d7377", "#b45309", "#3b82f6", "#f59e0b", "#8b5cf6", "#10b981", "#ef4444", "#06b6d4", "#ec4899", "#6366f1"];
+const CAT_COLORS = ["#0d7377", "#b45309", "var(--color-info)", "var(--color-warning)", "var(--color-accent)", "var(--color-success)", "var(--color-danger)", "var(--color-info)", "#ec4899", "var(--color-accent)"];
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } } as const;
 const cardVariants = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 260, damping: 24 } } };
@@ -135,10 +135,10 @@ export default function DashboardTicaret({ db, onTabChange: _onTabChange }: Prop
         style={{ display: "flex", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 4, marginBottom: 16, overflow: "auto" }}
       >
         <KpiBadge label="Toplam Satış" value={String(kpi.totalSales)} color={TEAL} />
-        <KpiBadge label="Ort. Sipariş" value={formatMoney(kpi.avgOrder)} color="#3b82f6" />
+        <KpiBadge label="Ort. Sipariş" value={formatMoney(kpi.avgOrder)} color="var(--color-info)" />
         <KpiBadge label="En İyi Kategori" value={kpi.topCat.slice(0, 12)} color="#b45309" sub={kpi.topCat} />
-        <KpiBadge label="En Çok Satan" value={kpi.topProd.slice(0, 12)} color="#f59e0b" sub={kpi.topProd} />
-        <KpiBadge label="İade Oranı" value={`%${kpi.returnRate.toFixed(1)}`} color={kpi.returnRate > 10 ? "#ef4444" : TEAL} />
+        <KpiBadge label="En Çok Satan" value={kpi.topProd.slice(0, 12)} color="var(--color-warning)" sub={kpi.topProd} />
+        <KpiBadge label="İade Oranı" value={`%${kpi.returnRate.toFixed(1)}`} color={kpi.returnRate > 10 ? "var(--color-danger)" : TEAL} />
       </motion.div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
@@ -248,18 +248,18 @@ export default function DashboardTicaret({ db, onTabChange: _onTabChange }: Prop
                 <XAxis dataKey="date" tick={chartAxis} axisLine={false} tickLine={false} />
                 <YAxis tick={chartAxis} axisLine={false} tickLine={false} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} />
                 <Tooltip formatter={(v: number) => [formatMoney(v), ""]} contentStyle={chartTooltip.contentStyle} />
-                <Bar dataKey="nakit" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="kart" stackId="a" fill="#3b82f6" />
-                <Bar dataKey="havale" stackId="a" fill="#f59e0b" />
-                <Bar dataKey="cariP" stackId="a" fill="#8b5cf6" />
+                <Bar dataKey="nakit" stackId="a" fill="var(--color-success)" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="kart" stackId="a" fill="var(--color-info)" />
+                <Bar dataKey="havale" stackId="a" fill="var(--color-warning)" />
+                <Bar dataKey="cariP" stackId="a" fill="var(--color-accent)" />
               </BarChart>
             </ResponsiveContainer>
           )}
           <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 8, fontSize: "0.72rem", color: MUTED }}>
-            <span><span style={{ color: "#10b981" }}>●</span> Nakit</span>
-            <span><span style={{ color: "#3b82f6" }}>●</span> Kart</span>
-            <span><span style={{ color: "#f59e0b" }}>●</span> Havale</span>
-            <span><span style={{ color: "#8b5cf6" }}>●</span> Cari</span>
+            <span><span style={{ color: "var(--color-success)" }}>●</span> Nakit</span>
+            <span><span style={{ color: "var(--color-info)" }}>●</span> Kart</span>
+            <span><span style={{ color: "var(--color-warning)" }}>●</span> Havale</span>
+            <span><span style={{ color: "var(--color-accent)" }}>●</span> Cari</span>
           </div>
         </MagazineCard>
 

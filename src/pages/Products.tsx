@@ -24,12 +24,12 @@ export default function Products({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
   const [, setLocation] = useLocation();
-  const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<Partial<Product>>(empty);
   const [editId, setEditId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>('all');
   const [bulkModal, setBulkModal] = useState(false);
   const [bulkPct, setBulkPct] = useState('');
   const [bulkCat, setBulkCat] = useState('all');
