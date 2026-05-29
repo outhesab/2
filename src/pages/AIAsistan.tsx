@@ -8,6 +8,7 @@ import {
 } from "@/lib/aiActions";
 import type { Message as ApiMessage } from "@/lib/aiApi";
 import { askClaude, askGemini } from "@/lib/aiApi";
+import DOMPurify from 'dompurify';
 import {
   getKeys,
   invalidateKeyCache,
@@ -68,7 +69,7 @@ function MarkdownText({ text }: { text: string }) {
       .replace(/\n\n/g, "<br/>")
       .replace(/\n/g, "<br/>"),
   );
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
 }
 
 function getActionAffectedIds(action: DBAction): string[] {

@@ -20,6 +20,22 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.9.0',
+    date: '29 Mayıs 2026',
+    title: 'Güvenlik Düzeltmeleri + QuantumLink Yeniden Tasarımı',
+    summary: 'XSS koruması (DOMPurify), CSP meta tag, document.write kaldırma, QuantumLink teması seçilebilir hale getirildi.',
+    changes: [
+      { type: 'yeni', text: 'DOMPurify entegrasyonu — dangerouslySetInnerHTML önüne sanitization eklendi (AIAsistan, excelmerge/ai-asistan)' },
+      { type: 'yeni', text: 'CSP (Content-Security-Policy) meta tag eklendi — script-src, style-src, connect-src tanımlı' },
+      { type: 'yeni', text: 'QuantumLink tema paletleri: 3 seçenek (Mavi, Amber, Yeşil) — localStorage\'a kaydediliyor' },
+      { type: 'iyilestirme', text: 'Fatura.tsx document.write() → DOMPurify.sanitize + esc() ile güvenli HTML oluşturma' },
+      { type: 'iyilestirme', text: 'Kasa.tsx document.write() → DOMPurify.sanitize + esc() ile güvenli HTML oluşturma' },
+      { type: 'iyilestirme', text: 'QuantumLink trigger butonu tema rengiyle uyumlu gradient kullanıyor' },
+      { type: 'iyilestirme', text: 'QuantumLink mesaj balonları tema rengiyle uyumlu' },
+      { type: 'duzeltme', text: 'QuantumLink input butonu sabit beyaz yerine tema gradient\'i kullanıyor' },
+    ],
+  },
+  {
     version: '3.8.0',
     date: '29 Mayıs 2026',
     title: 'Doküman Temizliği + Geliştirici Deneyimi',

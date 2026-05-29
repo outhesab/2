@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PARSPEL</string>
+    <string name="title_activity_main">PARSPEL</string>
+    <string name="package_name">com.parspel.soba</string>
+    <string name="custom_url_scheme">com.parspel.soba</string>
+</resources>

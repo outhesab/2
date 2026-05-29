@@ -6,6 +6,7 @@ import { useSoundFeedback } from '@/hooks/useSoundFeedback';
 import { exportToExcel } from '@/lib/excelExport';
 import { genId, formatMoney, formatDate } from '@/lib/utils-tr';
 import type { DB } from '@/types';
+import DOMPurify from 'dompurify';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -36,16 +37,18 @@ export default function Kasa({ db, save }: Props) {
   const gunSonuSayimPDF = () => {
     const w = window.open('', '_blank');
     if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Gün Sonu Sayım - ${sayimDate}</title><style>body{font-family:Arial,sans-serif;margin:40px}h1{color:#333;border-bottom:2px solid #ff5722;padding-bottom:10px}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#1e293b;color:#fff;padding:10px;text-align:left}td{padding:10px;border-bottom:1px solid #ddd}.yesil{color:#10b981;font-weight:700}.kirmizi{color:#ef4444;font-weight:700}.toplam{margin-top:20px;font-size:1.1rem;font-weight:700}.footer{margin-top:40px;color:#666;font-size:0.85rem}</style></head><body>`);
-    w.document.write(`<h1>📋 Gün Sonu Sayım ${sayimDate}</h1>`);
-    w.document.write(`<table><thead><tr><th>Kasa</th><th>Sistem Bakiyesi</th><th>Fiziki Sayım</th><th>Fark</th></tr></thead><tbody>`);
-    sayimFarklar.forEach(f => {
+    const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Gün Sonu Sayım - ${esc(sayimDate)}</title><style>body{font-family:Arial,sans-serif;margin:40px}h1{color:#333;border-bottom:2px solid #ff5722;padding-bottom:10px}table{width:100%;border-collapse:collapse;margin-top:20px}th{background:#1e293b;color:#fff;padding:10px;text-align:left}td{padding:10px;border-bottom:1px solid #ddd}.yesil{color:#10b981;font-weight:700}.kirmizi{color:#ef4444;font-weight:700}.toplam{margin-top:20px;font-size:1.1rem;font-weight:700}.footer{margin-top:40px;color:#666;font-size:0.85rem}</style></head><body>
+    <h1>📋 Gün Sonu Sayım ${esc(sayimDate)}</h1>
+    <table><thead><tr><th>Kasa</th><th>Sistem Bakiyesi</th><th>Fiziki Sayım</th><th>Fark</th></tr></thead><tbody>
+    ${sayimFarklar.map(f => {
       const cls = f.fark > 0 ? 'yesil' : f.fark < 0 ? 'kirmizi' : '';
-      w.document.write(`<tr><td>${f.icon} ${f.kasaName}</td><td>₺${f.sistem.toFixed(2)}</td><td>₺${f.fiziki.toFixed(2)}</td><td class="${cls}">${f.fark >= 0 ? '+' : ''}₺${f.fark.toFixed(2)}</td></tr>`);
-    });
-    w.document.write(`</tbody></table>`);
-    w.document.write(`<div class="toplam">Toplam Fark: <span class="${sayimToplamFark > 0 ? 'kirmizi' : ''}">₺${sayimToplamFark.toFixed(2)}</span></div>`);
-    w.document.write(`<div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Gün Sonu Raporu</div></body></html>`);
+      return `<tr><td>${esc(f.icon)} ${esc(f.kasaName)}</td><td>₺${f.sistem.toFixed(2)}</td><td>₺${f.fiziki.toFixed(2)}</td><td class="${cls}">${f.fark >= 0 ? '+' : ''}₺${f.fark.toFixed(2)}</td></tr>`;
+    }).join('')}
+    </tbody></table>
+    <div class="toplam">Toplam Fark: <span class="${sayimToplamFark > 0 ? 'kirmizi' : ''}">₺${sayimToplamFark.toFixed(2)}</span></div>
+    <div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Gün Sonu Raporu</div></body></html>`;
+    w.document.write(DOMPurify.sanitize(html));
     w.document.close();
     w.print();
   };

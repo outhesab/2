@@ -4,6 +4,7 @@ import { useToast } from "@/components/Toast";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { DB, Installment, Invoice, InvoiceItem } from "@/types";
 import { useMemo, useState } from "react";
+import DOMPurify from 'dompurify';
 
 function createInstallmentPlan(
   invoiceId: string,
@@ -1876,17 +1877,17 @@ export default function Fatura({ db, save }: Props) {
               onClick={() => {
                 const w = window.open('', '_blank');
                 if (!w) return;
-                w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Fatura ${previewInv.invoiceNo}</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#333}h1{color:#ff5722;border-bottom:2px solid #ff5722;padding-bottom:10px}.header{display:flex;justify-content:space-between;margin:20px 0}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1e293b;color:#fff;padding:10px;text-align:left;font-size:0.85rem}td{padding:10px;border-bottom:1px solid #ddd;font-size:0.85rem}.total{text-align:right;font-size:1.1rem;font-weight:700;margin-top:20px}.footer{margin-top:40px;color:#666;font-size:0.8rem;border-top:1px solid #ddd;padding-top:10px}</style></head><body>`);
-                w.document.write(`<h1>${previewInv.type === 'satis' ? 'SATIŞ FATURASI' : 'ALIŞ FATURASI'}</h1>`);
-                w.document.write(`<div class="header"><div><strong>${db.company.name || 'Şirketiniz'}</strong><br>VKN: ${db.company.taxNo || '-'}<br>${db.company.address || ''}</div><div style="text-align:right"><strong>${previewInv.invoiceNo}</strong><br>${formatDate(previewInv.createdAt)}<br>Durum: ${statusLabels[previewInv.status]}</div></div>`);
-                w.document.write(`<p><strong>${previewInv.type === 'satis' ? 'Müşteri' : 'Tedarikçi'}:</strong> ${previewInv.cariName}${previewInv.cariTaxNo ? ` (VKN: ${previewInv.cariTaxNo})` : ''}</p>`);
-                w.document.write(`<table><thead><tr><th>Açıklama</th><th>Miktar</th><th>Birim Fiyat</th><th>KDV %</th><th>Tutar</th></tr></thead><tbody>`);
-                previewInv.items.forEach(it => {
-                  w.document.write(`<tr><td>${it.description}</td><td>${it.quantity}</td><td>₺${it.unitPrice.toFixed(2)}</td><td>%${it.vatRate}</td><td>₺${it.total.toFixed(2)}</td></tr>`);
-                });
-                w.document.write(`</tbody></table>`);
-                w.document.write(`<div class="total">Ara Toplam: ₺${previewInv.subtotal.toFixed(2)}<br>KDV: ₺${previewInv.vatTotal.toFixed(2)}<br>${previewInv.discount > 0 ? `İskonto: -₺${previewInv.discount.toFixed(2)}<br>` : ''}<strong>GENEL TOPLAM: ₺${previewInv.total.toFixed(2)}</strong></div>`);
-                w.document.write(`<div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Fatura</div></body></html>`);
+                const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Fatura ${esc(previewInv.invoiceNo)}</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#333}h1{color:#ff5722;border-bottom:2px solid #ff5722;padding-bottom:10px}.header{display:flex;justify-content:space-between;margin:20px 0}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#1e293b;color:#fff;padding:10px;text-align:left;font-size:0.85rem}td{padding:10px;border-bottom:1px solid #ddd;font-size:0.85rem}.total{text-align:right;font-size:1.1rem;font-weight:700;margin-top:20px}.footer{margin-top:40px;color:#666;font-size:0.8rem;border-top:1px solid #ddd;padding-top:10px}</style></head><body>
+                <h1>${previewInv.type === 'satis' ? 'SATIŞ FATURASI' : 'ALIŞ FATURASI'}</h1>
+                <div class="header"><div><strong>${esc(db.company.name || 'Şirketiniz')}</strong><br>VKN: ${esc(db.company.taxNo || '-')}<br>${esc(db.company.address || '')}</div><div style="text-align:right"><strong>${esc(previewInv.invoiceNo)}</strong><br>${esc(formatDate(previewInv.createdAt))}<br>Durum: ${esc(statusLabels[previewInv.status])}</div></div>
+                <p><strong>${previewInv.type === 'satis' ? 'Müşteri' : 'Tedarikçi'}:</strong> ${esc(previewInv.cariName)}${previewInv.cariTaxNo ? ` (VKN: ${esc(previewInv.cariTaxNo)})` : ''}</p>
+                <table><thead><tr><th>Açıklama</th><th>Miktar</th><th>Birim Fiyat</th><th>KDV %</th><th>Tutar</th></tr></thead><tbody>
+                ${previewInv.items.map(it => `<tr><td>${esc(it.description)}</td><td>${it.quantity}</td><td>₺${it.unitPrice.toFixed(2)}</td><td>%${it.vatRate}</td><td>₺${it.total.toFixed(2)}</td></tr>`).join('')}
+                </tbody></table>
+                <div class="total">Ara Toplam: ₺${previewInv.subtotal.toFixed(2)}<br>KDV: ₺${previewInv.vatTotal.toFixed(2)}<br>${previewInv.discount > 0 ? `İskonto: -₺${previewInv.discount.toFixed(2)}<br>` : ''}<strong>GENEL TOPLAM: ₺${previewInv.total.toFixed(2)}</strong></div>
+                <div class="footer">${new Date().toLocaleString('tr-TR')} · PARSPEL Fatura</div></body></html>`;
+                w.document.write(DOMPurify.sanitize(html));
                 w.document.close();
                 w.print();
               }}

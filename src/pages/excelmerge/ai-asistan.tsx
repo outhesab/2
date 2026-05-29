@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ExcelFile } from "@/lib/excel-merge";
+import DOMPurify from 'dompurify';
 import {
   analyzeOffline,
   buildFileContext,
@@ -399,7 +400,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                       ) : (
                         <div
                           className="prose prose-sm max-w-none dark:prose-invert"
-                          dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(msg.content)) }}
                         />
                       )}
                     </>
