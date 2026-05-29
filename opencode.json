@@ -1,7 +1,7 @@
 {
   "project": {
     "name": "PARSPEL",
-    "version": "3.2.0",
+    "version": "3.8.0",
     "description": "Soba satışı, stok, kasa ve cari takibini tek ekranda yöneten, offline-first çalışan işletme yönetim uygulaması."
   },
   "instructions": [

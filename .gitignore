@@ -50,7 +50,13 @@ dev_output.txt
 # IDE
 .vscode/launch.json
 .idea/
+.kiro/
+.sixth/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Geliştirme çıktıları
+console-logs.txt
+*.png
