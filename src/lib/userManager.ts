@@ -140,19 +140,27 @@ export async function saveUsers(users: AppUser[]): Promise<boolean> {
 
 // ── Parola doğrulama ──────────────────────────────────────────────────────
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  const parts = storedHash.split(':');
-  if (parts.length !== 2) return false;
-  const [saltHex, hashHex] = parts;
-  const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits'],
-  );
-  const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' },
-    keyMaterial, 256,
-  );
-  const derivedHex = Array.from(new Uint8Array(derived)).map(b => b.toString(16).padStart(2, '0')).join('');
-  return derivedHex === hashHex;
+  // PBKDF2 format (salt:hash)
+  if (storedHash.includes(':')) {
+    const [saltHex, hashHex] = storedHash.split(':');
+    const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits'],
+    );
+    const derived = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' },
+      keyMaterial, 256,
+    );
+    const derivedHex = Array.from(new Uint8Array(derived)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return derivedHex === hashHex;
+  }
+  // Legacy SHA-256 fallback (64 hex chars, salt'sız eski hash)
+  if (storedHash.length === 64 && /^[0-9a-f]{64}$/i.test(storedHash)) {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+    const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex.toLowerCase() === storedHash.toLowerCase();
+  }
+  return false;
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -165,9 +173,16 @@ export async function loginUser(username: string, password: string): Promise<App
     if (u.username.toLowerCase() === username.toLowerCase() && u.active) {
       const match = await verifyPassword(password, u.passwordHash);
       if (match) {
-        const updated = users.map(x => x.id === u.id ? { ...x, lastLogin: new Date().toISOString() } : x);
+        let updated = users.map(x => x.id === u.id ? { ...x, lastLogin: new Date().toISOString() } : x);
+        // Legacy SHA-256 hash'i PBKDF2'ye yükselt
+        const isLegacy = !u.passwordHash.includes(':') && u.passwordHash.length === 64;
+        if (isLegacy) {
+          const newHash = await hashPassword(password);
+          const userIdx = updated.findIndex(x => x.id === u.id);
+          if (userIdx !== -1) updated[userIdx] = { ...updated[userIdx], passwordHash: newHash };
+        }
         saveUsers(updated).catch(() => logger.error('sync', 'Kullanıcı güncelleme Firebase\'e yazılamadı'));
-        return u;
+        return updated.find(x => x.id === u.id) || u;
       }
     }
   }

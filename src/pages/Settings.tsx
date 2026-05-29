@@ -21,6 +21,8 @@ import {
     THEMES,
     type UIPrefs,
 } from "@/hooks/useUIPrefs";
+import { PREMIUM_THEMES, isPremiumTheme } from "@/theme/themes";
+import { useTheme } from "@/theme/useTheme";
 import {
     APP_SUBTITLE,
     loadAppConfig,
@@ -4126,6 +4128,64 @@ function ArayuzAyarlari({
                       fontWeight: 900,
                     }}
                   >
+                    ✓
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Premium Temalar */}
+      <Card title="💎 Premium Temalar">
+        <div className={"settings-grid-auto-150"}>
+          {PREMIUM_THEMES.map((t) => {
+            const isActive = prefs.themeId === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => {
+                  set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === "light" });
+                  showToast(`✨ ${t.label} teması uygulandı!`, "success");
+                }}
+                style={{
+                  padding: "12px 10px",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  background: isActive ? `${t.accent}18` : "rgba(0,0,0,0.3)",
+                  border: `2px solid ${isActive ? t.accent : "rgba(255,255,255,0.07)"}`,
+                  transition: "all 0.15s",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: 42,
+                    marginBottom: 8,
+                    borderRadius: 10,
+                    border: `1px solid ${t.type === "light" ? "rgba(15,23,42,0.08)" : "rgba(255,255,255,0.08)"}`,
+                    background: `linear-gradient(135deg, ${t.bg} 0%, ${t.accent} 100%)`,
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div className={"settings-theme-blob-1"} />
+                  <div className={"settings-theme-blob-2"} />
+                  <div className={"settings-theme-overlay"}>
+                    <span className={"settings-theme-dot"} />
+                    <span className={"settings-theme-bar"} />
+                    <span className={"settings-theme-bar-sm"} />
+                  </div>
+                </div>
+                <div style={{ fontWeight: 700, color: isActive ? t.accent : "var(--text-primary)", fontSize: "0.82rem" }}>
+                  {t.label}
+                </div>
+                <div className={"settings-text-dim-11"}>{t.desc}</div>
+                {isActive && (
+                  <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: "var(--text-primary)", fontWeight: 900 }}>
                     ✓
                   </div>
                 )}

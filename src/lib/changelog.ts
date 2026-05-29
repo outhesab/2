@@ -33,6 +33,12 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'iyilestirme', text: 'QuantumLink trigger butonu tema rengiyle uyumlu gradient kullanıyor' },
       { type: 'iyilestirme', text: 'QuantumLink mesaj balonları tema rengiyle uyumlu' },
       { type: 'duzeltme', text: 'QuantumLink input butonu sabit beyaz yerine tema gradient\'i kullanıyor' },
+      { type: 'duzeltme', text: 'UTF-8 encoding: AIAsistan/Cari/BugHunter sayfalarında U+FFFD bozuk karakterler düzeltildi' },
+      { type: 'duzeltme', text: 'UTF-8 BOM kaldırıldı (Fatura, Cari, BugHunter TSX + 2 CSS dosyası)' },
+      { type: 'duzeltme', text: 'Tüm .ts/.tsx dosyaları CRLF → LF normalize edildi (172 dosya)' },
+      { type: 'duzeltme', text: 'TypeScript derleme hataları giderildi (Stock/Kasa/DashboardFinans/types/index)' },
+      { type: 'iyilestirme', text: '.gitattributes eklendi — LF + UTF-8 working-tree-encoding zorlaması' },
+      { type: 'iyilestirme', text: 'PowerShell UTF-8 code page (65001) yapılandırması — Türkçe karakter görüntüleme' },
     ],
   },
   {

@@ -24,6 +24,18 @@ export default function Kasa({ db, save }: Props) {
   const [sayimModal, setSayimModal] = useState(false);
   const [sayimForm, setSayimForm] = useState<Record<string, string>>({});
   const [sayimDate, setSayimDate] = useState(new Date().toISOString().slice(0, 10));
+
+  const kasalar = db.kasalar || [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }];
+
+  const bakiyeler = useMemo(() => {
+    const map: Record<string, number> = {};
+    kasalar.forEach(k => map[k.id] = 0);
+    db.kasa.filter(e => !e.deleted).forEach(e => {
+      map[e.kasa] = (map[e.kasa] || 0) + (e.type === 'gelir' ? e.amount : -e.amount);
+    });
+    return map;
+  }, [db.kasa, kasalar]);
+
   const sayimFarklar = useMemo(() => {
     const result: { kasaId: string; kasaName: string; icon: string; fiziki: number; sistem: number; fark: number }[] = [];
     kasalar.forEach(k => {
@@ -62,17 +74,6 @@ export default function Kasa({ db, save }: Props) {
   };
   const [form, setForm] = useState({ amount: '', description: '', kasa: 'nakit', cariId: '', partnerId: '', category: '' });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const kasalar = db.kasalar || [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }];
-
-  const bakiyeler = useMemo(() => {
-    const map: Record<string, number> = {};
-    kasalar.forEach(k => map[k.id] = 0);
-    db.kasa.filter(e => !e.deleted).forEach(e => {
-      map[e.kasa] = (map[e.kasa] || 0) + (e.type === 'gelir' ? e.amount : -e.amount);
-    });
-    return map;
-  }, [db.kasa, kasalar]);
 
   const totalBakiye = Object.values(bakiyeler).reduce((s, v) => s + v, 0);
 

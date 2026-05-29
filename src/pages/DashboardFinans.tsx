@@ -256,7 +256,7 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{range} gün ({customers.length} müşteri)</div>
                     <div style={{ display: 'flex', gap: 4, marginTop: 6, height: 4 }}>
                       {['0-30', '31-60', '61-90', '90+'].map(r => {
-                        const pct = musteri.length > 0 ? (aging[r].length / musteri.length) * 100 : 0;
+                        const pct = musteri.length > 0 ? ((aging as Record<string, typeof musteri>)[r].length / musteri.length) * 100 : 0;
                         return <div key={r} style={{ flex: pct, height: 4, borderRadius: 2, background: agingColors[r], opacity: r === range ? 1 : 0.3 }} />;
                       })}
                     </div>

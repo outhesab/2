@@ -1,4 +1,4 @@
-﻿import { useConfirm } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
 import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
@@ -539,7 +539,7 @@ export default function Cari({ db, save }: Props) {
                   fontWeight: 700,
                 }}
               >
-                g��� 60+ gün bekleyen alacaklar:
+                60+ gün bekleyen alacaklar:
               </div>
               {aging["60+"].slice(0, 5).map((c) => (
                 <div
@@ -565,7 +565,7 @@ export default function Cari({ db, save }: Props) {
                   </span>
                   {c.phone && (
                     <span style={{ color: "#64748b", fontSize: "0.78rem" }}>
-                      g��? {c.phone}
+                      📞 {c.phone}
                     </span>
                   )}
                   <span
@@ -615,7 +615,7 @@ export default function Cari({ db, save }: Props) {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    g��� Tahsil Et
+                    💰 Tahsil Et
                   </button>
                 </div>
               ))}
@@ -663,7 +663,7 @@ export default function Cari({ db, save }: Props) {
             fontSize: "0.85rem",
           }}
         >
-          g��� Excel İndir
+          📥 Excel İndir
         </button>
         <button
           onClick={() => {
@@ -694,12 +694,12 @@ export default function Cari({ db, save }: Props) {
             fontSize: "0.85rem",
           }}
         >
-          g��� Ekstre
+          📄 Ekstre
         </button>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="g��� Ara..."
+          placeholder="🔍 Ara..."
           style={{
             flex: 1,
             padding: "9px 13px",
@@ -727,8 +727,8 @@ export default function Cari({ db, save }: Props) {
             {f === "all"
               ? "Tümü"
               : f === "musteri"
-                ? "g��� Müşteri"
-                : "g��� Tedarikçi"}
+                ? "👥 Müşteri"
+                : "🏭 Tedarikçi"}
           </button>
         ))}
         <button
@@ -744,7 +744,7 @@ export default function Cari({ db, save }: Props) {
             color: showOnlyDebt ? "#fff" : "#94a3b8",
           }}
         >
-          {showOnlyDebt ? "g��� Borçlular" : "Borçlular"}
+          {showOnlyDebt ? "🚨 Borçlular" : "Borçlular"}
         </button>
         <select
           value={sortBy}
@@ -857,8 +857,8 @@ export default function Cari({ db, save }: Props) {
                         }}
                       >
                         {c.type === "musteri"
-                          ? "g��� Müşteri"
-                          : "g��� Tedarikçi"}
+                          ? "👥 Müşteri"
+                          : "🏭 Tedarikçi"}
                       </span>
                       {c.ortak && (
                         <span
@@ -872,7 +872,7 @@ export default function Cari({ db, save }: Props) {
                             fontWeight: 600,
                           }}
                         >
-                          g��� Ortak
+                          🤝 Ortak
                         </span>
                       )}
                     </td>
@@ -1002,7 +1002,7 @@ export default function Cari({ db, save }: Props) {
                             fontSize: "0.82rem",
                           }}
                         >
-                          g���️
+                          🗑️
                         </button>
                       </div>
                     </td>
@@ -1017,7 +1017,7 @@ export default function Cari({ db, save }: Props) {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editId ? "✏️ Cari Düzenle" : "�?� Yeni Cari"}
+        title={editId ? "✏️ Cari Düzenle" : "🆕 Yeni Cari"}
       >
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
@@ -1303,19 +1303,19 @@ export default function Cari({ db, save }: Props) {
                 label: "Toplam Alışveriş",
                 value: formatMoney(totalPurchased),
                 color: "#3b82f6",
-                icon: "g���",
+                icon: "🛒",
               },
               {
                 label: "Tahsil Edilen",
                 value: formatMoney(totalPaid),
                 color: "#10b981",
-                icon: "g���",
+                icon: "💰",
               },
               {
                 label: "Fatura Sayısı",
                 value: String(detailInvoices.length),
                 color: "#8b5cf6",
-                icon: "g���",
+                icon: "📄",
               },
             ].map((s) => (
               <div

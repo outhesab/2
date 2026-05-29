@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 
 // ============================================================================
 // TİP TANIMLARI
@@ -792,7 +792,7 @@ export default function BugHunter() {
       bg: "rgba(220,38,38,0.15)",
       border: "rgba(220,38,38,0.4)",
       text: "#dc2626",
-      icon: "��",
+      icon: "🚨",
     },
     pending: {
       bg: "rgba(100,116,139,0.1)",

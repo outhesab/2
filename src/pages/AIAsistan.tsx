@@ -312,7 +312,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   const [autoApplyActions, setAutoApplyActions] = useState(false);
   const [maxAutoActions, setMaxAutoActions] = useState(3);
   const [stopOnViolation, setStopOnViolation] = useState(true);
-  // Onay bekleyen DB i�lemleri
+  // Onay bekleyen DB işlemleri
   const [pendingActions, setPendingActions] = useState<{
     msgIdx: number;
     actions: DBAction[];
@@ -423,7 +423,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               `Uygulanan:${appliedCount}`,
               `Toplam:${actions.length}`,
               actions.map((a) => a.label).join(" | "),
-              violations.length ? `�hlal:${violations.join(" ; ")}` : "",
+              violations.length ? `İhlal:${violations.join(" ; ")}` : "",
               fallbackNotes.length
                 ? `Fallback:${fallbackNotes.join(" ; ")}`
                 : "",
@@ -460,14 +460,14 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         setActionResult({
           msgIdx,
           success: false,
-          msg: err.message || "Hata olu�tu",
+          msg: err.message || "Hata oluştu",
         });
       }
     },
     [save, autoApplyActions, maxAutoActions, stopOnViolation, modelSource],
   );
 
-  // Sesli �zellikler
+  // Sesli özellikler
   const { speaking, speak, stop: stopSpeak } = useSpeechSynthesis();
   const {
     listening,
@@ -477,7 +477,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     stop: stopListen,
   } = useSpeechRecognition((text) => {
     setInput(text);
-    // Sesli giri�ten gelen metni otomatik g�nder
+    // Sesli girişten gelen metni otomatik gönder
     setTimeout(() => sendText(text), 100);
   });
 
@@ -517,10 +517,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       });
   }, []);
 
-  const [isOnline, setIsOnline] = useState(true); // ba�lang��ta online kabul et
+  const [isOnline, setIsOnline] = useState(true); // başlangıçta online kabul et
 
   useEffect(() => {
-    // Capacitor Network plugin (Android WebView'da navigator.onLine g�venilmez)
+    // Capacitor Network plugin (Android WebView'da navigator.onLine güvenilmez)
     const initNetwork = async () => {
       try {
         const { Network } = await import("@capacitor/network");
@@ -553,7 +553,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       const userMsg = (text || input).trim();
       if (!userMsg || loading) return;
 
-      // Rate limit korumas�: son istekten en az 3 saniye ge�meli
+      // Rate limit koruması: son istekten en az 3 saniye geçmeli
       const now = Date.now();
       const lastReq = parseInt(sessionStorage.getItem("ai_last_req") || "0");
       const elapsed = now - lastReq;
@@ -564,7 +564,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           { role: "user", content: userMsg },
           {
             role: "assistant",
-            content: `⏳ �ok h�zl� istek g�nderiyorsunuz. L�tfen ${wait} saniye bekleyin.`,
+            content: `⏳ Çok hızlı istek gönderiyorsunuz. Lütfen ${wait} saniye bekleyin.`,
             source: "offline",
           },
         ]);
@@ -617,7 +617,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         return;
       }
 
-      // Key'leri her seferinde cache'den al (kaydet sonras� invalidate edilir)
+      // Key'leri her seferinde cache'den al (kaydet sonrası invalidate edilir)
       const keys = await getKeys();
       keysRef.current = keys;
       const claudeKey = keys.claude;
@@ -635,7 +635,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         });
       };
 
-      // Yan�t tamamland���nda action bloklar�n� parse et
+      // Yanıt tamamlandığında action bloklarını parse et
       const finalizeResponse = (msgIndex: number) => {
         setMessages((prev) => {
           const msg = prev[msgIndex];
@@ -662,7 +662,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         });
       };
 
-      // Rate limit hata mesaj� olu�tur
+      // Rate limit hata mesajı oluştur
       const rateLimitMsg = (api: string) =>
         `🚨 **${api} rate limit aşıldı** - çok fazla istek gönderildi.\n\nBirkaç dakika bekleyip tekrar deneyin. Bu sürede çevrimdışı mod aktif.`;
 
@@ -719,7 +719,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             setLoading(false);
             return true;
           }
-          console.warn(`${source} ba�ar�s�z:`, e);
+          console.warn(`${source} başarısız:`, e);
           return false;
         }
       };
@@ -733,7 +733,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             async (msgs, ctx, key, cb) => {
               const systemMsg = {
                 role: "system" as const,
-                content: `Sen Soba i�letmesi i�in AI analistsin. K�sa, net, T�rk�e yan�t ver.\n\n${ctx}`,
+                content: `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\n\n${ctx}`,
               };
               const userMsgs = msgs
                 .filter((m) => m.content)
@@ -754,12 +754,12 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
 
       const noKeyMsg =
         modelSource === "deepseek"
-          ? "?? DeepSeek API anahtar� girilmemi�. Ayarlar'dan ekleyin veya farkl� bir kaynak se�in."
+          ? "?? DeepSeek API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
           : modelSource === "claude"
-            ? "?? Claude API anahtar� girilmemi�. Ayarlar'dan ekleyin veya farkl� bir kaynak se�in."
+            ? "?? Claude API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
             : modelSource === "gemini"
-              ? "? Gemini API anahtar� girilmemi�. Ayarlar'dan ekleyin veya farkl� bir kaynak se�in."
-              : "?? �evrimd��� mod � temel sorulara yan�t verir.";
+              ? "? Gemini API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
+              : "?? Çevrimdışı mod — temel sorulara yanıt verir.";
       const reply = offlineReply(db, userMsg);
       setMessages((prev) => {
         const u = [...prev];
@@ -769,7 +769,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             noKeyMsg +
             (modelSource === "offline"
               ? `\n\n${reply}`
-              : `\n\n?? �evrimd��� yan�t:\n${reply}`),
+              : `\n\n?? Çevrimdışı yanıt:\n${reply}`),
           source: "offline",
         };
         return u;
@@ -796,12 +796,12 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     ],
   );
 
-  // Sesli giri�ten �a�r�labilmesi i�in ayr� ref
+  // Sesli girişten çağrılabilmesi için ayrı ref
   const sendText = useCallback(
     (text: string) => {
       if (!text.trim() || loading) return;
       setInput("");
-      // send fonksiyonunu text parametresiyle �a��r
+      // send fonksiyonunu text parametresiyle çağır
       send(text);
     },
     [send, loading],
@@ -840,7 +840,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     },
   };
 
-  // Anl�k i�letme �zeti
+  // Anlık işletme özeti
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
@@ -915,9 +915,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               }}
             >
               {!isOnline
-                ? "🔌 �evrimd��� — temel sorulara yan�t verir"
+                ? "🔌 Çevrimdışı — temel sorulara yanıt verir"
                 : hasKeys
-                  ? `✅ ${keysRef.current.deepseek ? "DeepSeek " : ""}${keysRef.current.claude ? "Claude " : ""}${keysRef.current.gemini ? "Gemini" : ""} haz�r`
+                  ? `✅ ${keysRef.current.deepseek ? "DeepSeek " : ""}${keysRef.current.claude ? "Claude " : ""}${keysRef.current.gemini ? "Gemini" : ""} hazır`
                   : keyAccessForbidden
                     ? "🚫 Firebase anahtar erişimi kısıtlı (403) — yerel/env anahtar kullanın"
                     : keyLoadError
@@ -925,7 +925,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                       : "⚠️ API anahtarı girilmemiş - Ayarlar'a girin"}
             </p>
           </div>
-          {/* Anl�k �zet */}
+          {/* Anlık Özet */}
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             {[
               {
@@ -1319,7 +1319,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           {isAdminUser && adminMode && (
             <button
               onClick={() => setStopOnViolation((v) => !v)}
-              title="Kural ihlalinde davran��"
+              title="Kural ihlalinde davranış"
               style={{
                 background: stopOnViolation
                   ? "rgba(239,68,68,0.16)"
@@ -1369,7 +1369,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         </div>
       )}
 
-      {/* API Ayarlar� */}
+      {/* API Ayarları */}
       {showSettings && (
         <div
           style={{
@@ -1391,7 +1391,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <h3
               style={{ color: "#f1f5f9", fontWeight: 700, fontSize: "0.95rem" }}
             >
-              ⚙️ API Ayarlar�
+              ⚙️ API Ayarları
             </h3>
             <button
               onClick={() => {
@@ -1418,7 +1418,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         </div>
       )}
 
-      {/* Quick prompts — bo� ekranda b�y�k grid */}
+      {/* Quick prompts — boş ekranda büyük grid */}
       {messages.length === 0 && !showSettings && (
         <div style={{ marginBottom: 14 }}>
           <div
@@ -1734,7 +1734,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   fontSize: "0.85rem",
                 }}
               >
-                �ptal
+                İptal
               </button>
             </div>
           </div>
@@ -1783,10 +1783,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   }}
                 >
                   {apiStatus === "claude"
-                    ? "Claude d���n�yor..."
+                    ? "Claude düşünüyor..."
                     : apiStatus === "gemini"
-                      ? "Gemini yan�tl�yor..."
-                      : "Yan�t haz�rlan�yor..."}
+                      ? "Gemini yanıtlıyor..."
+                      : "Yanıt hazırlanıyor..."}
                 </span>
               </div>
             </div>
@@ -1811,7 +1811,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             placeholder={
               listening
                 ? "🎤 Dinleniyor..."
-                : "Sorunuzu yaz�n veya 🎤 mikrofona bas�n..."
+                : "Sorunuzu yazın veya 🎤 mikrofona basın..."
             }
             rows={2}
             disabled={loading || listening}
@@ -1895,7 +1895,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           </button>
         )}
 
-        {/* G�nder butonu */}
+        {/* Gönder butonu */}
         <button
           onClick={() => send()}
           disabled={loading || !input.trim() || listening}
@@ -1957,10 +1957,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           }}
         >
           {speaking ? "🔊" : autoSpeak ? "🔈" : "🔇"}
-          <span>{autoSpeak ? "Sesli A��k" : "Sesli Kapal�"}</span>
+          <span>{autoSpeak ? "Sesli Açık" : "Sesli Kapalı"}</span>
         </button>
 
-        {/* Son cevab� sesli oku */}
+        {/* Son cevabı sesli oku */}
         {messages.length > 0 &&
           messages[messages.length - 1]?.role === "assistant" &&
           messages[messages.length - 1]?.content && (
@@ -1984,7 +1984,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 transition: "all 0.2s",
               }}
             >
-              {speaking ? "⏹ Durdur" : "▶ Son Cevab� Oku"}
+              {speaking ? "⏹ Durdur" : "▶ Son Cevabı Oku"}
             </button>
           )}
 

@@ -31,6 +31,7 @@ export interface Product {
   minStock: number;
   barcode?: string;
   description?: string;
+  vat?: number;
   deleted?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -63,6 +64,8 @@ export interface Sale {
   total: number;
   profit: number;
   payment: string;
+  paymentType?: string;
+  invoiceNo?: string;
   status: 'tamamlandi' | 'iade' | 'iptal' | 'completed';
   items: SaleItem[];
   returnedAt?: string;

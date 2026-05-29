@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { useSoundFeedback } from '@/hooks/useSoundFeedback';
 import { exportToExcel } from '@/lib/excelExport';
-import { genId, formatDate } from '@/lib/utils-tr';
+import { genId, formatDate, formatMoney } from '@/lib/utils-tr';
 import type { DB } from '@/types';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
@@ -64,6 +64,7 @@ export default function Stock({ db, save }: Props) {
   const abcData = useMemo(() => {
     const productRev: Record<string, { name: string; category: string; revenue: number; qty: number; profit: number }> = {};
     db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').forEach(s => {
+      if (!s.productId) return;
       if (!productRev[s.productId]) productRev[s.productId] = { name: s.productName, category: s.productCategory || '', revenue: 0, qty: 0, profit: 0 };
       productRev[s.productId].revenue += s.total;
       productRev[s.productId].qty += s.quantity;
@@ -72,10 +73,10 @@ export default function Stock({ db, save }: Props) {
     const sorted = Object.entries(productRev).sort((a, b) => b[1].revenue - a[1].revenue);
     const totalRev = sorted.reduce((s, [, v]) => s + v.revenue, 0) || 1;
     let cumul = 0;
-    return sorted.map(([id, v]) => {
+    return sorted.map(([id, v]): { id: string; name: string; category: string; revenue: number; qty: number; profit: number; revenuePct: number; cumulPct: number; class: 'A' | 'B' | 'C' } => {
       cumul += v.revenue;
       const pct = cumul / totalRev;
-      const cls = pct <= 0.8 ? 'A' : pct <= 0.95 ? 'B' : 'C';
+      const cls: 'A' | 'B' | 'C' = pct <= 0.8 ? 'A' : pct <= 0.95 ? 'B' : 'C';
       return { id, ...v, revenuePct: (v.revenue / totalRev * 100), cumulPct: pct * 100, class: cls };
     });
   }, [db.sales]);
