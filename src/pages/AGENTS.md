@@ -1,24 +1,25 @@
 # PARSPEL — Sayfalar
 
-27 sayfa, wouter routing, `src/App.tsx`'te tanımlı.
+36 sayfa + 8 excelmerge alt sayfası, wouter routing, `src/App.tsx`'te tanımlı.
 
 ## Modül Grupları
 
 | Grup | Sayfalar |
 |------|----------|
-| **Ana** | Dashboard, Products, Sales, Fatura |
+| **Ana** | Dashboard, DashboardFinans, DashboardTicaret, DashboardOperasyon, DashboardStrateji, Products, ProductDetail, Sales, SaleDetail, Fatura |
 | **Tedarik** | Suppliers, Pelet, BoruTed |
-| **Finans** | Cari, Kasa, Butce, Bank |
+| **Finans** | Cari, CariDetail, Kasa, Butce, Bank |
 | **Analiz** | Reports, Stock, Cizelge, Monitor, KontrolHalkasi, AnomaliOneri |
-| **Sistem** | Settings, Entegrasyonlar, ExcelMerge, ExcelImport, Notlar, Partners, BugHunter, AIAsistan |
+| **Sistem** | Settings, Entegrasyonlar, ExcelMerge, ExcelImport, Notlar, Partners, OrtakEmanet, BugHunter, AIAsistan, AIEylemLog |
 
 ## Özel Dizin
 
-`src/pages/excelmerge/` — ExcelMerge sayfasına ait alt bileşenler.
+`src/pages/excelmerge/` — ExcelMerge sayfasına ait alt bileşenler:
+upload, merge, diff, search, preview, temizle, ai-asistan, not-found
 
 ## Kurallar
 
-- Tüm sayfalar statik import (React.lazy kullanılmıyor — yeni sayfada kullan)
+- Tüm sayfalar `React.lazy()` ile import edilir
 - `save((prev: DB) => next: DB)` ile veri yazma
 - `useDB()` hook'u ile veri okuma
 - Her sayfa kendi içinde bağımsız, ortak state yok
@@ -30,6 +31,11 @@
 ```tsx
 // src/App.tsx — wouter <Route> tanımları
 <Route path="/" component={Dashboard} />
-<Route path="/sales" component={Sales} />
-// ... 27 route
+<Route path="/urunler" component={Products} />
+<Route path="/urunler/:id" component={ProductDetail} />
+<Route path="/satis" component={Sales} />
+<Route path="/satis/:id" component={SaleDetail} />
+<Route path="/cari" component={Cari} />
+<Route path="/cari/:id" component={CariDetail} />
+// ... toplam 36+ route
 ```

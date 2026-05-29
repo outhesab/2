@@ -1,23 +1,37 @@
 # PARSPEL — UI Bileşenleri
 
-55 shadcn/ui + 12 custom bileşen.
+55 shadcn/ui + 15 custom + 8 layout = 78 bileşen.
 
 ## Yapı
 
 ```
 src/components/
 ├── ui/               # 55 shadcn/ui bileşeni (Radix UI tabanlı)
-├── Modal.tsx         # Genel modal (inline style var — yenisini ekleme)
-├── ConfirmDialog.tsx # Onay diyaloğu
-├── ErrorBoundary.tsx # Global hata sınırı
-├── IconPicker.tsx    # İkon seçici
-├── LoginScreen.tsx   # Giriş ekranı
-├── MobileSelect.tsx  # Mobil seçim
-├── NotificationCenter.tsx # Bildirim merkezi
-├── QuantumLink.tsx   # Özel bağlantı bileşeni
-├── SetupWizard.tsx   # Kurulum sihirbazı
-├── SystemMap.tsx     # Sistem haritası
-├── Toast.tsx         # Toast bildirimi
+├── layout/           # 8 layout bileşeni
+│   ├── Sidebar.tsx
+│   ├── Header.tsx
+│   ├── FAB.tsx
+│   ├── AIDrawer.tsx
+│   ├── GlobalSearch.tsx
+│   ├── UserMenu.tsx
+│   ├── ReportButton.tsx
+│   └── PageFallback.tsx
+├── ConfirmDialog.tsx
+├── ErrorBoundary.tsx
+├── IconPicker.tsx
+├── InfoRow.tsx
+├── LoginScreen.tsx
+├── MobileSelect.tsx
+├── Modal.tsx
+├── NotificationCenter.tsx
+├── QuantumLink.tsx
+├── QuickIncomeModal.tsx
+├── QuickProductModal.tsx
+├── QuickSaleModal.tsx
+├── SetupWizard.tsx
+├── SkeletonLoaders.tsx
+├── SystemMap.tsx
+└── Toast.tsx
 ```
 
 ## Kurallar

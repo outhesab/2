@@ -1,0 +1,95 @@
+# PARSPEL — Değişiklik Günlüğü
+
+Tüm önemli değişiklikler bu dosyada belgelenir.
+
+Format: [Keep a Changelog](https://keepachangelog.com/)
+
+---
+
+## [3.7.0] - 28 Mayıs 2026
+
+### Eklenen
+- Premium tema sistemi: 3 tema (Corporate Enterprise, Modern Dark, Elegant Light)
+- CSS variable token sistemi (OKLCH): 40+ premium değişken
+- Layout bileşen ayrıştırması: 7 bileşen ayrıldı
+
+### İyileştirme
+- Dashboard ve Settings sayfalarında hardcoded renkler CSS var ile değiştirildi
+
+---
+
+## [3.6.0] - 26 Mayıs 2026
+
+### Eklenen
+- Tedarikçi performans skoru
+- Raporlar özel rapor oluşturucu
+- Arama debounce (200ms)
+
+---
+
+## [3.5.0] - 26 Mayıs 2026
+
+### Eklenen
+- Toplu fiyat güncelleme
+- Anlık kâr göstergesi
+- PDF fatura yazdırma
+- Müşteri segmentasyonu (VIP/Normal/Riskli)
+- Banka CSV yükleme + AI eşleme
+- Pelet tüketim sayacı
+
+---
+
+## [3.4.0] - 26 Mayıs 2026
+
+### Eklenen
+- Kasa gün sonu sayım formu
+- Çizelge yaklaşan 7 gün paneli
+- Stok ABC analizi + ölü stok tespiti
+- Anomali sağlık skoru gauge
+- Alacak yaşlandırma paneli
+- Isı haritası (saat×gün)
+
+---
+
+## [3.3.0] - 26 Mayıs 2026
+
+### Eklenen
+- Ürün detay sayfası (/urunler/:id)
+- Satış detay sayfası (/satis/:id)
+- Cari ekstre sayfası (/cari/:id)
+- Ortak emanet sayfası
+- AI eylem günlüğü sayfası
+
+---
+
+## [3.2.0] - 26 Mayıs 2026
+
+### İyileştirme
+- Ana JS bundle %43 küçültüldü (433KB → 245KB)
+- Firebase SDK ayrı chunk'a taşındı
+- PWA reaktivasyonu (Service Worker + manifest)
+
+---
+
+## [3.1.0] - 21 Mayıs 2026
+
+### Eklenen
+- Android launcher ikonları
+- Bildirim ikonu
+
+### İyileştirme
+- Android manifest izinleri tamamlandı
+- Capacitor config production-safe yapıldı
+
+---
+
+## [3.0.0] - 9 Mayıs 2026
+
+### Eklenen
+- Multi-agent altyapısı
+- IndexedDB snapshot yazma/geri yükleme
+- AI aksiyon fallback zinciri
+
+---
+
+Daha eski değişiklikler için `src/lib/changelog.ts` dosyasına bakın.

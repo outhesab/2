@@ -37,9 +37,14 @@ Referans dokümanlar:
 |-------|--------|
 | `opencode.json` | Proje kuralları, komutlar, bağımlılıklar |
 | `PARSPEL_MASTER_PROJE_DOKUMANI.txt` | Master proje dokümanı |
-| `PROJECT_ANALYSIS_SUMMARY.txt` | Proje analizi özeti |
-| `PERFORMANCE_REPORT.md` | Build performans raporu |
-| `src/agents/AGENTS.md` | Multi-agent sistemi dokümanı |
+| `docs/VERI_MODELI.md` | Veri şeması, tablolar, ilişkiler |
+| `docs/KULLANICI_SENARYOLARI.md` | 6 detaylı kullanıcı senaryosu |
+| `docs/API_SERVIS.md` | Servis katmanı, kural motoru, AI |
+| `docs/AGENT_SISTEMI.md` | Multi-agent mimarisi, flow diyagramları |
+| `docs/PERFORMANS.md` | Build chunk analizi, PWA yapılandırması |
+| `docs/UI_UX.md` | UI/UX wireframe, navigasyon, offline-first |
+| `docs/FIGMA.md` | Tasarım sistemi, kurulum rehberi |
+| `src/agents/AGENTS.md` | Agent dokümantasyonu |
 | `src/components/AGENTS.md` | Bileşen mimarisi |
 | `src/lib/AGENTS.md` | Utility kütüphaneleri |
 | `src/hooks/AGENTS.md` | React hook'ları |

@@ -20,6 +20,33 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.8.0',
+    date: '29 Mayıs 2026',
+    title: 'Doküman Temizliği + Geliştirici Deneyimi',
+    summary: 'Tüm MD dosyaları yeniden yapılandırıldı, 12 yeni geliştirici aracı eklendi, duplicate dosyalar temizlendi.',
+    changes: [
+      { type: 'yeni', text: '.editorconfig — editörler arası tutarlı kodlama standardı' },
+      { type: 'yeni', text: '.prettierrc + .prettierignore — proje seviyesinde Prettier konfigürasyonu' },
+      { type: 'yeni', text: '.nvmrc — Node 22 sürüm sabitleme' },
+      { type: 'yeni', text: 'LICENSE (MIT) — resmi lisans dosyası' },
+      { type: 'yeni', text: 'CONTRIBUTING.md — katkı rehberi, branş modeli, commit kuralları' },
+      { type: 'yeni', text: 'DEVELOPMENT.md — teknik geliştirme rehberi, mimari, pattern\'ler' },
+      { type: 'yeni', text: 'CHANGELOG.md — root\'da GitHub Releases için standart changelog' },
+      { type: 'yeni', text: '.github/ISSUE_TEMPLATE — hata bildirimi ve özellik önerisi şablonları' },
+      { type: 'yeni', text: '.github/PULL_REQUEST_TEMPLATE.md — PR checklist' },
+      { type: 'yeni', text: 'docs/README.md — doküman indeksi' },
+      { type: 'yeni', text: 'WEEKLY_PLAN.md — 6 haftalık iyileştirme planı' },
+      { type: 'iyilestirme', text: 'quality-gate.yml — CI pipeline\'a lint adımını eklendi' },
+      { type: 'iyilestirme', text: 'package.json — engines alanı, prettier devDep, format scriptleri' },
+      { type: 'iyilestirme', text: 'SYSTEM_CONTEXT.md 5 parçaya bölündü (docs/VERI_MODELI, KULLANICI_SENARYOLARI, API_SERVIS, AGENT_SISTEMI, UI_UX)' },
+      { type: 'iyilestirme', text: 'FIGMA-README + FIGMA-SETUP-GUIDE tek docs/FIGMA.md dosyasında birleştirildi' },
+      { type: 'iyilestirme', text: 'AGENTS.md dosyaları güncellendi (doğru sayfa/bileşen/hook sayıları)' },
+      { type: 'iyilestirme', text: 'README.md referans tablosu güncellendi' },
+      { type: 'kaldirildi', text: 'Untitled-1.md silindi (4 kez tekrarlanmış duplicate rapor)' },
+      { type: 'kaldirildi', text: 'Teknik Analiz ve İyileştir.md silindi (duplicate)' },
+    ],
+  },
+  {
     version: '3.7.0',
     date: '28 Mayıs 2026',
     title: 'Premium Tema Sistemi + CSS Tokenizasyonu',
