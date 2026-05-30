@@ -5,7 +5,7 @@
 
 export const APP_NAME = 'PARSPEL';
 export const APP_SUBTITLE = 'Yönetim Sistemi';
-export const APP_DEFAULT_VERSION = '3.0.0';
+export const APP_DEFAULT_VERSION = '3.10.0';
 export const APP_STORAGE_KEY = 'parspelConfig';
 
 // ── Versiyon Yönetimi ──────────────────────────────────────────────────────

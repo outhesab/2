@@ -7,6 +7,7 @@ import {
 import { formatMoney, formatDate } from "@/lib/utils-tr";
 import type { DB } from "@/types";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
+import { getAppVersion } from "@/lib/version";
 
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
@@ -136,7 +137,7 @@ export default function DashboardFinans({ db, onTabChange }: Props) {
           <h1 style={{ color: "var(--text-primary)", fontSize: "1.4rem", fontWeight: 700, letterSpacing: "0.02em" }}>
             <span style={{ color: GOLD }}>✦</span> Finans Komuta Merkezi
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>v{db._version || 0} · {formatDate(new Date().toISOString())}</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>v{getAppVersion()} · DB: {db._version || 0} · {formatDate(new Date().toISOString())}</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {["14d", "30d"].map((f) => (

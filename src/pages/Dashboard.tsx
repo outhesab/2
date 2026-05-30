@@ -8,6 +8,7 @@ import { saveBackupToFirebase, listBackupsFromFirebase, restoreBackupFromFirebas
 import { loadConnConfig } from '@/lib/connConfig';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { logger } from '@/lib/logger';
+import { getAppVersion } from '@/lib/version';
 
 interface Props {
   db: DB;
@@ -556,7 +557,8 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
       <div className="dash-header-row">
         <div className="dash-badge-box">
           <span className="dash-badge-label">VERSİYON</span>
-          <span className="dash-badge-value">v{db._version || 0}</span>
+          <span className="dash-badge-value">v{getAppVersion()}</span>
+          <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", marginLeft: 6 }}>(DB: {db._version || 0})</span>
         </div>
         {(() => {
           try {

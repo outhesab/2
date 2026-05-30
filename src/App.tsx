@@ -18,6 +18,7 @@ import {
   saveUIPrefs,
 } from "@/hooks/useUIPrefs";
 import { loadConnConfigFromFirebase, saveConnConfig } from "@/lib/connConfig";
+import { getAppVersion, getVersionTitle } from "@/lib/version";
 import {
   lazy,
   Suspense,
@@ -154,12 +155,12 @@ function AppContent({
 
   // Son gÃƒÆ’Ã‚Â¼ncelleme toast'u ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â her versiyon iÃƒÆ’Ã‚Â§in bir kez gÃƒÆ’Ã‚Â¶ster
   useEffect(() => {
-    const LATEST_VERSION = '3.10.0';
-    const seenKey = `parspel_update_seen_${LATEST_VERSION}`;
+    const appVersion = getAppVersion();
+    const seenKey = `parspel_update_seen_${appVersion}`;
     try {
       if (!localStorage.getItem(seenKey)) {
         setTimeout(() => {
-          showToast(`PARSPEL v${LATEST_VERSION} — Konsol Kaydedici + Lint temizliği eklendi`, 'info');
+          showToast(`PARSPEL v${appVersion} — ${getVersionTitle()}`, 'info');
           try { localStorage.setItem(seenKey, '1'); } catch { /* localStorage yazma hatasÃƒâ€Ã‚Â± */ }
         }, 1500);
       }

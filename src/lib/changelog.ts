@@ -20,6 +20,24 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.0',
+    date: '30 Mayıs 2026',
+    title: 'Konsol Kaydedici + Lint/TypeScript Temizliği',
+    summary: 'DevTools konsol çıktılarını otomatik kaydeden sistem, 13 lint hatası + 48 uyarı sıfırlandı, ESLint konfigürasyonu iyileştirildi.',
+    changes: [
+      { type: 'yeni', text: 'Konsol Kaydedici (consoleRecorder) — tüm console.log/warn/error/info/debug çağrılarını localStorage\'a kaydeder, canlı abonelik, dışa aktarım' },
+      { type: 'yeni', text: 'ConsoleKayit sayfası — kayıtlı konsol çıktılarını canlı izleme, seviye/metin filtresi, detay paneli, JSON export' },
+      { type: 'yeni', text: 'Unified Version Sistemi (src/lib/version.ts) — getAppVersion(), isVersionGte(), getVersionInfo() ile tüm sayfalarda tek versiyon kaynağı' },
+      { type: 'duzeltme', text: 'QuantumLink.tsx: 6 adet any tip kaldırıldı, SpeechRecognition interface eklendi, processCommand useCallback ile sarıldı' },
+      { type: 'duzeltme', text: 'Fatura.tsx: 3 adet any type cast proper union type\'a çevrildi (filter, payment, status)' },
+      { type: 'duzeltme', text: 'Settings.tsx: @ts-ignore → @ts-expect-error, kullanılmayan import/değişkenler temizlendi' },
+      { type: 'duzeltme', text: '20+ dosyada kullanılmayan değişken/import temizliği, eksik hook dependency düzeltmeleri' },
+      { type: 'duzeltme', text: 'package.json, appConfig.ts, changelog.ts versiyonları senkronize edildi' },
+      { type: 'iyilestirme', text: 'eslint.config.js: varsIgnorePattern eklendi, react-refresh ui/* ve shared component\'lerde kapatıldı' },
+      { type: 'iyilestirme', text: 'tabs.ts: boş catch bloğuna void 0 eklendi (no-empty)' },
+    ],
+  },
+  {
     version: '3.9.0',
     date: '29 Mayıs 2026',
     title: 'Güvenlik Düzeltmeleri + QuantumLink Yeniden Tasarımı',
@@ -319,24 +337,6 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'yeni', text: 'localStorage birincil depolama' },
       { type: 'yeni', text: 'Tedarikçi & sipariş yönetimi' },
       { type: 'yeni', text: 'Pelet & boru tedarik modülleri' },
-    ],
-  },
-];
-
-  {
-    version: '3.10.0',
-    date: '30 Mayıs 2026',
-    title: 'Konsol Kaydedici + Lint/TypeScript Temizliği',
-    summary: 'DevTools konsol çıktılarını otomatik kaydeden sistem, 13 lint hatası + 48 uyarı sıfırlandı, ESLint konfigürasyonu iyileştirildi.',
-    changes: [
-      { type: 'yeni', text: 'Konsol Kaydedici (consoleRecorder) — tüm console.log/warn/error/info/debug çağrılarını localStorage\'a kaydeder, canlı abonelik, dışa aktarım' },
-      { type: 'yeni', text: 'ConsoleKayit sayfası — kayıtlı konsol çıktılarını canlı izleme, seviye/metin filtresi, detay paneli, JSON export' },
-      { type: 'duzeltme', text: 'QuantumLink.tsx: 6 adet any tip kaldırıldı, SpeechRecognition interface eklendi, processCommand useCallback ile sarıldı' },
-      { type: 'duzeltme', text: 'Fatura.tsx: 3 adet any type cast proper union type\'a çevrildi (filter, payment, status)' },
-      { type: 'duzeltme', text: 'Settings.tsx: @ts-ignore → @ts-expect-error, kullanılmayan import/değişkenler temizlendi' },
-      { type: 'duzeltme', text: '20+ dosyada kullanılmayan değişken/import temizliği, eksik hook dependency düzeltmeleri' },
-      { type: 'iyilestirme', text: 'eslint.config.js: varsIgnorePattern eklendi, react-refresh ui/* ve shared component\'lerde kapatıldı' },
-      { type: 'iyilestirme', text: 'tabs.ts: boş catch bloğuna void 0 eklendi (no-empty)' },
     ],
   },
 ];
