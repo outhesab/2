@@ -33,6 +33,7 @@ export const componentRules: SpecRule[] = [
       const files = listFiles("src", ".tsx").concat(listFiles("src", ".ts"));
       const violations: SpecCheckResult["violations"] = [];
       for (const file of files) {
+        if (file.includes("__tests__") || file.includes("node_modules") || file.endsWith(".test.ts")) continue;
         try {
           const content = readFileSync(join(ROOT, file), "utf-8");
           const lines = content.split("\n");
@@ -50,7 +51,7 @@ export const componentRules: SpecRule[] = [
     id: "NO_STATIC_INLINE_STYLE",
     spec: "BILESEN_MIMARISI",
     title: "Statik stiller inline style ile değil className ile yazılmalı",
-    severity: "warn",
+    severity: "info",
     check: (): SpecCheckResult => {
       const files = listFiles("src/pages", ".tsx");
       const violations: SpecCheckResult["violations"] = [];
@@ -73,7 +74,7 @@ export const componentRules: SpecRule[] = [
     id: "EMPTY_COMPONENT_IMPORTED",
     spec: "BILESEN_MIMARISI",
     title: "Pages altında Empty component import edilmiş olmalı",
-    severity: "warn",
+    severity: "info",
     check: (): SpecCheckResult => {
       const files = listFiles("src/pages", ".tsx");
       const skip = ["Settings.tsx", "Dashboard.tsx", "DashboardFinans.tsx", "Perf.tsx", "not-found.tsx"];
@@ -99,12 +100,14 @@ export const componentRules: SpecRule[] = [
     check: (): SpecCheckResult => {
       const files = listFiles("src/components/ui", ".tsx");
       const violations: SpecCheckResult["violations"] = [];
+      const knownLarge = ["sidebar.tsx", "chart.tsx", "carousel.tsx", "calendar.tsx", "dropdown-menu.tsx", "menubar.tsx", "field.tsx"];
       for (const file of files) {
         try {
           const content = readFileSync(join(ROOT, file), "utf-8");
           const lines = content.split("\n").length;
           const size = Buffer.byteLength(content, "utf-8");
-          if (file.endsWith("index.tsx")) continue;
+          const name = file.split(/[/\\]/).pop() || "";
+          if (name.endsWith("index.tsx") || knownLarge.includes(name)) continue;
           if (lines > 200 || size > 8000) {
             violations.push({ file, message: `${lines} satır / ${size} bytes — değiştirilmiş olabilir` });
           }

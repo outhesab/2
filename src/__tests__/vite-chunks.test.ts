@@ -2,7 +2,7 @@
 
 import { describe, test } from 'vitest';
 import * as fc from 'fast-check';
-import { manualChunks } from '../lib/vite-manual-chunks';
+import { manualChunks } from '@/lib/vite-manual-chunks';
 
 /**
  * Validates: Requirements 3.1, 3.3, 3.4, 3.5, 3.6, 8.2, 8.3

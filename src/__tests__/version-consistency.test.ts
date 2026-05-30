@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { CHANGELOG } from '../lib/changelog';
-import { APP_DEFAULT_VERSION, validateVersion } from '../lib/appConfig';
-import { VERSION } from '../lib/version';
-import pkg from '../../package.json';
+import { readFileSync } from 'fs';
+import { CHANGELOG } from '@/lib/changelog';
+import { APP_DEFAULT_VERSION, validateVersion } from '@/lib/appConfig';
+import { VERSION } from '@/lib/version';
 
 describe('version consistency', () => {
   it('CHANGELOG latest entry matches VERSION constant', () => {
@@ -10,6 +10,7 @@ describe('version consistency', () => {
   });
 
   it('package.json version matches changelog latest', () => {
+    const pkg = JSON.parse(readFileSync('package.json', 'utf-8'));
     expect(pkg.version).toBe(CHANGELOG[0].version);
   });
 

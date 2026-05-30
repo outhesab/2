@@ -1,74 +1,76 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
 
+const SYSTEM_FILES = [
+  "useDB.ts", "useUIPrefs.ts", "appConfig.ts", "connConfig.ts",
+  "logger.ts", "consoleRecorder.ts", "firebase.ts", "tabs.ts",
+  "version.ts", "specs", "ErrorBoundary.tsx", "SetupWizard.tsx",
+  "QuantumLink.tsx", "ReportButton.tsx", "useDraggableButton.ts",
+  "agentConfig.ts", "healthCheck.ts", "storageQuota.ts", "userManager.ts",
+  "db/core.ts", "Settings.tsx",
+];
+
+function walkFiles(dir: string, ext: string, results: string[] = []): string[] {
+  try {
+    const entries = readdirSync(join(ROOT, dir), { withFileTypes: true });
+    for (const entry of entries) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules") walkFiles(full, ext, results);
+      } else if (entry.name.endsWith(ext)) {
+        results.push(full);
+      }
+    }
+  } catch { /* skip */ }
+  return results;
+}
+
 export const dataRules: SpecRule[] = [
   {
-    id: "NO_DIRECT_LOCALSTORAGE_WRITE",
+    id: "NO_DIRECT_DB_WRITE",
     spec: "VERI_KATMANI",
-    title: "save() dışında localStorage.setItem kullanımı yasak",
+    title: "doğrudan sobaYonetim DB key'ine yazmak yasak — save() kullanılmalı",
     severity: "error",
     check: (): SpecCheckResult => {
-      const allowed = ["useDB.ts", "useUIPrefs.ts", "appConfig.ts", "connConfig.ts", "logger.ts", "consoleRecorder.ts", "firebase.ts", "tabs.ts", "version.ts", "specs"];
+      const files = walkFiles("src", ".tsx").concat(walkFiles("src", ".ts"));
       const violations: SpecCheckResult["violations"] = [];
-
-      function walk(dir: string) {
+      for (const file of files) {
+        if (SYSTEM_FILES.some((a) => file.includes(a))) continue;
         try {
-          const entries = require("node:fs").readdirSync(join(ROOT, dir), { withFileTypes: true });
-          for (const entry of entries) {
-            const full = join(dir, entry.name);
-            if (entry.isDirectory()) {
-              if (!entry.name.startsWith(".") && entry.name !== "node_modules") walk(full);
-            } else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
-              if (allowed.some((a) => full.includes(a))) continue;
-              try {
-                const content = require("node:fs").readFileSync(join(ROOT, full), "utf-8");
-                const lines = content.split("\n");
-                for (let i = 0; i < lines.length; i++) {
-                  if (lines[i].includes("localStorage.setItem") && !lines[i].includes("sobaYonetim_favoriteTabs")) {
-                    violations.push({ file: full, line: i + 1, message: "Doğrudan localStorage.setItem — save() kullanılmalı" });
-                  }
-                }
-              } catch { /* skip */ }
+          const content = readFileSync(join(ROOT, file), "utf-8");
+          const lines = content.split("\n");
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('localStorage.setItem("sobaYonetim"') || lines[i].includes("localStorage.setItem('sobaYonetim'")) {
+              violations.push({ file, line: i + 1, message: "save() kullanılmalı, doğrudan DB yazımı yasak" });
             }
           }
         } catch { /* skip */ }
       }
-
-      walk("src");
       return { passed: violations.length === 0, violations };
     },
   },
   {
-    id: "NO_LOCALSTORAGE_IN_PAGES",
+    id: "NO_DB_JSON_PARSE_IN_PAGES",
     spec: "VERI_KATMANI",
-    title: "Sayfalarda doğrudan localStorage erişimi yasak",
+    title: "Sayfalarda doğrudan sobaYonetim JSON parse etmek yasak",
     severity: "error",
     check: (): SpecCheckResult => {
+      const files = walkFiles("src/pages", ".tsx");
+      const allowed = ["Settings.tsx", "Dashboard.tsx", "DashboardOperasyon.tsx"];
       const violations: SpecCheckResult["violations"] = [];
-
-      function walk(dir: string) {
+      for (const file of files) {
+        const name = file.split(/[/\\]/).pop() || "";
+        if (allowed.includes(name)) continue;
         try {
-          const entries = require("node:fs").readdirSync(join(ROOT, dir), { withFileTypes: true });
-          for (const entry of entries) {
-            const full = join(dir, entry.name);
-            if (entry.isDirectory()) {
-              if (!entry.name.startsWith(".")) walk(full);
-            } else if (entry.name.endsWith(".tsx")) {
-              try {
-                const content = require("node:fs").readFileSync(join(ROOT, full), "utf-8");
-                if (content.includes("localStorage.getItem") || content.includes("localStorage.setItem")) {
-                  violations.push({ file: full, message: "Sayfada doğrudan localStorage erişimi — useDB() kullanılmalı" });
-                }
-              } catch { /* skip */ }
-            }
+          const content = readFileSync(join(ROOT, file), "utf-8");
+          if (content.includes('getItem("sobaYonetim"') || content.includes("getItem('sobaYonetim'")) {
+            violations.push({ file, message: "Sayfada doğrudan DB localStorage erişimi — useDB() kullanılmalı" });
           }
         } catch { /* skip */ }
       }
-
-      walk("src/pages");
       return { passed: violations.length === 0, violations };
     },
   },

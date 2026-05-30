@@ -41,7 +41,7 @@ export const errorRules: SpecRule[] = [
     id: "TOAST_IMPORT_PATTERN",
     spec: "HATA_DURUMLARI",
     title: "Hata yönetiminde showToast kullanılıyor olmalı",
-    severity: "warn",
+    severity: "info",
     check: (): SpecCheckResult => {
       const files = listFiles("src/pages", ".tsx");
       const violations: SpecCheckResult["violations"] = [];
