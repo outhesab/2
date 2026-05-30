@@ -33,6 +33,8 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'Settings.tsx: @ts-ignore → @ts-expect-error, kullanılmayan import/değişkenler temizlendi' },
       { type: 'duzeltme', text: '20+ dosyada kullanılmayan değişken/import temizliği, eksik hook dependency düzeltmeleri' },
       { type: 'duzeltme', text: 'package.json, appConfig.ts, changelog.ts versiyonları senkronize edildi' },
+      { type: 'yeni', text: 'Versiyon tutarlılık testi (version-consistency.test.ts) — 5 test: package.json ↔ changelog ↔ APP_DEFAULT_VERSION ↔ sıralama' },
+      { type: 'iyilestirme', text: 'AGENTS.md dosyalarına versiyon sistemi kuralları eklendi' },
       { type: 'iyilestirme', text: 'eslint.config.js: varsIgnorePattern eklendi, react-refresh ui/* ve shared component\'lerde kapatıldı' },
       { type: 'iyilestirme', text: 'tabs.ts: boş catch bloğuna void 0 eklendi (no-empty)' },
     ],

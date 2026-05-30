@@ -24,7 +24,8 @@ src/lib/
 ├── safeXlsx.ts           # Güvenli XLSX işlemleri
 ├── similarity.ts         # Benzerlik algoritmaları
 ├── userManager.ts        # Kullanıcı yönetimi
-├── *.test.ts             # 9 test dosyası (pure fonksiyon)
+├── version.ts            # Unified versiyon sistemi (getAppVersion, getVersionInfo)
+├── *.test.ts             # 10 test dosyası (pure fonksiyon)
 ```
 
 ## RuleEngine
@@ -39,6 +40,13 @@ src/lib/
 - `createAuditEntry(prev, next, metadata)` → audit log kaydı
 - prev/next diff'i otomatik çıkarır
 - Trim: 2000 kayıt üstü eski kayıtları temizler
+
+## Versiyon Sistemi
+
+- **Tek kaynak:** `src/lib/version.ts` — `getAppVersion()`, `getVersionInfo()`, `isVersionGte()`
+- **Tüm sayfalar** versiyonu `getAppVersion()` ile okur, asla hardcode veya `db._version` kullanmaz
+- `package.json`, `APP_DEFAULT_VERSION`, changelog son entry'si her zaman aynı olmalı
+- Tutarlılık testi: `src/__tests__/version-consistency.test.ts`
 
 ## Test Pattern
 
