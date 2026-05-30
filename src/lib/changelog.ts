@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.3',
+    date: '30 Mayıs 2026',
+    title: 'Versiyon Tutarlılık Düzeltmesi + Lint Temizliği',
+    summary: "package.json ve APP_DEFAULT_VERSION changelog ile senkronize edildi (3.10.0 → 3.10.2). Spec rule dosyalarında kullanılmayan import'lar temizlendi (4 lint warning giderildi).",
+    changes: [
+      { type: 'duzeltme', text: 'package.json version 3.10.0 → 3.10.2 (changelog ile senkron) — version-consistency testi düzeldi' },
+      { type: 'duzeltme', text: 'src/lib/appConfig.ts APP_DEFAULT_VERSION 3.10.0 → 3.10.2 (changelog ile senkron)' },
+      { type: 'iyilestirme', text: 'src/lib/specs/component-rules.ts: unused import (statSync, relative) ve unused function (allowedFile) kaldırıldı' },
+      { type: 'iyilestirme', text: 'src/lib/specs/error-rules.ts: unused import (statSync) kaldırıldı' },
+    ],
+  },
+  {
     version: '3.10.2',
     date: '30 Mayıs 2026',
     title: 'Build Fix — Spec Modülü Node.js/Browser Ayrıştırması',

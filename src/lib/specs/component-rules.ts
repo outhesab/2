@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
@@ -17,10 +17,6 @@ function listFiles(dir: string, ext: string, results: string[] = []): string[] {
     }
   } catch { /* skip */ }
   return results;
-}
-
-function allowedFile(name: string): boolean {
-  return ["useDB.ts", "useUIPrefs.ts", "appConfig.ts", "connConfig.ts", "logger.ts", "consoleRecorder.ts", "firebase.ts", "tabs.ts", "version.ts"].some((a) => name.includes(a));
 }
 
 export const componentRules: SpecRule[] = [
