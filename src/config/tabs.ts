@@ -29,6 +29,7 @@ export const TABS = [
   { id: "anomali", label: "Anomali", icon: "⚠️", group: "Analiz" },
   { id: "excelimport", label: "Excel İçe Aktar", icon: "📥", group: "Sistem" },
   { id: "aiEylemLog", label: "AI Eylem Log", icon: "🧠", group: "Sistem" },
+  { id: "specdashboard", label: "Spec", icon: "📋", group: "Sistem" },
 ] as const;
 
 export type TabId = (typeof TABS)[number]["id"];
@@ -65,6 +66,7 @@ export const TAB_PATHS: Record<TabId, string> = {
   anomali: "/anomali",
   excelimport: "/excelimport",
   aiEylemLog: "/ai/eylem-log",
+  specdashboard: "/spec",
 };
 
 export function getActiveTabFromLocation(location: string): TabId {

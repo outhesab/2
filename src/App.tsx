@@ -70,6 +70,7 @@ const Sales = lazy(() => import("@/pages/Sales"));
 const SaleDetail = lazy(() => import("@/pages/SaleDetail"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const Perf = lazy(() => import("@/pages/Perf"));
+const SpecDashboard = lazy(() => import("@/pages/SpecDashboard"));
 const Stock = lazy(() => import("@/pages/Stock"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
 import { Toaster } from "sonner";
@@ -505,6 +506,7 @@ function AppContent({
                   <Route path="/ai/eylem-log"><AIEylemLog db={db} undo={undo} /></Route>
                   <Route path="/not-found"><NotFound /></Route>
                   <Route path="/perf"><Perf /></Route>
+                  <Route path="/spec"><SpecDashboard /></Route>
                   <Route>
                     <Dashboard
                       db={db}
