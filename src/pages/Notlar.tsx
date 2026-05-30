@@ -103,7 +103,7 @@ export default function Notlar({ db, save }: Props) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="🔍 Not ara..."
-          style={{ flex: 1, padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem' }}
+          style={{ flex: 1, padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem' }}
         />
         <div style={{ display: 'flex', gap: 4 }}>
           {(['grid', 'list'] as const).map(v => (
@@ -124,7 +124,7 @@ export default function Notlar({ db, save }: Props) {
             value={form.title}
             onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
             placeholder="Başlık (opsiyonel)..."
-            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f1f5f9', fontSize: '0.95rem', fontWeight: 700, marginBottom: 10, boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginBottom: 10, boxSizing: 'border-box' }}
           />
           <textarea
             ref={textRef}
@@ -132,7 +132,7 @@ export default function Notlar({ db, save }: Props) {
             onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
             placeholder="Notunuzu buraya yazın..."
             rows={6}
-            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f1f5f9', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6, fontFamily: 'inherit' }}
+            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6, fontFamily: 'inherit' }}
           />
           <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             {/* Renk seçici */}
@@ -200,7 +200,7 @@ export default function Notlar({ db, save }: Props) {
                 onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.transform = ''}
               >
                 {n.pinned && <div style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.8rem' }}>📌</div>}
-                {n.title && <div style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.9rem', marginBottom: 6, paddingRight: 20 }}>{n.title}</div>}
+                {n.title && <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: 6, paddingRight: 20 }}>{n.title}</div>}
                 <div style={{ color: '#94a3b8', fontSize: '0.83rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: view === 'grid' ? 120 : 'none', overflow: 'hidden' }}>
                   {n.content}
                 </div>

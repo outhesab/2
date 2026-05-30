@@ -55,11 +55,11 @@ function MarkdownText({ text }: { text: string }) {
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(
         /^### (.+)$/gm,
-        '<h4 style="color:#ff7043;font-size:0.9rem;margin:10px 0 4px;font-weight:700">$1</h4>',
+        '<h4 style="color:var(--accent);font-size:0.9rem;margin:10px 0 4px;font-weight:700">$1</h4>',
       )
       .replace(
         /^## (.+)$/gm,
-        '<h3 style="color:#f1f5f9;font-size:1rem;margin:12px 0 6px;font-weight:800">$1</h3>',
+        '<h3 style="color:var(--text-primary);font-size:1rem;margin:12px 0 6px;font-weight:800">$1</h3>',
       )
       .replace(/^- (.+)$/gm, '<li style="margin:3px 0;padding-left:4px">$1</li>')
       .replace(
@@ -136,7 +136,7 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
     width: "100%",
     padding: "9px 12px",
     background: "#0f172a",
-    border: "1px solid #334155",
+    border: "1px solid var(--border)",
     borderRadius: 8,
     color: "#f1f5f9",
     fontSize: "0.85rem",
@@ -277,7 +277,7 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               style={{
                 background: "#273548",
-                border: "1px solid #334155",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 color: "#94a3b8",
                 padding: "10px 16px",
@@ -820,23 +820,23 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   > = {
     deepseek: {
       label: "🧠 DeepSeek",
-      color: "#4ade80",
-      bg: "rgba(74,222,128,0.12)",
+      color: "var(--color-success)",
+      bg: "var(--color-success-soft)",
     },
     claude: {
       label: "🤖 Claude",
-      color: "#818cf8",
-      bg: "rgba(99,102,241,0.12)",
+      color: "var(--color-accent)",
+      bg: "var(--color-accent-soft)",
     },
     gemini: {
       label: "✨ Gemini",
-      color: "#a78bfa",
-      bg: "rgba(139,92,246,0.12)",
+      color: "var(--color-primary-light)",
+      bg: "var(--color-primary-ultra)",
     },
     offline: {
       label: "🔌 Çevrimdışı",
-      color: "#64748b",
-      bg: "rgba(100,116,139,0.1)",
+      color: "var(--text-muted)",
+      bg: "var(--bg-card)",
     },
   };
 
@@ -909,7 +909,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             </h2>
             <p
               style={{
-                color: "#475569",
+                color: "var(--text-secondary)",
                 fontSize: "0.78rem",
                 margin: "3px 0 0",
               }}
@@ -958,7 +958,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 >
                   {s.value}
                 </div>
-                <div style={{ color: "#475569", fontSize: "0.65rem" }}>
+                <div style={{ color: "var(--text-secondary)", fontSize: "0.65rem" }}>
                   {s.label}
                 </div>
               </div>
@@ -1106,7 +1106,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   background: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.07)",
                   borderRadius: 8,
-                  color: "#475569",
+                  color: "var(--text-secondary)",
                   padding: "7px 12px",
                   cursor: "pointer",
                   fontSize: "0.82rem",
@@ -1186,7 +1186,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 </div>
                 <div
                   style={{
-                    color: "#475569",
+                    color: "var(--text-secondary)",
                     fontSize: "0.62rem",
                     marginTop: 1,
                   }}
@@ -1203,7 +1203,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             }
             style={{
               background: "rgba(15,23,42,0.6)",
-              border: "1px solid #334155",
+              border: "1px solid var(--border)",
               borderRadius: 8,
               color: "#f1f5f9",
               padding: "6px 8px",
@@ -1357,7 +1357,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 background: "rgba(255,255,255,0.04)",
                 border: "none",
                 borderRadius: 8,
-                color: "#475569",
+                color: "var(--text-secondary)",
                 padding: "6px 10px",
                 cursor: "pointer",
                 fontSize: "0.85rem",
@@ -1437,7 +1437,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             </div>
             <h3
               style={{
-                color: "#475569",
+                color: "var(--text-secondary)",
                 fontWeight: 700,
                 marginBottom: 6,
                 fontSize: "0.95rem",
@@ -1447,7 +1447,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             </h3>
             <p
               style={{
-                color: "#334155",
+                color: "var(--text-secondary)",
                 fontSize: "0.8rem",
                 maxWidth: 360,
                 lineHeight: 1.6,
@@ -1563,7 +1563,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               >
                 <div
                   style={{
-                    color: "#e2e8f0",
+                     color: "var(--text-primary)",
                     fontSize: "0.87rem",
                     lineHeight: 1.7,
                   }}
@@ -1603,7 +1603,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                     style={{
                       background: "none",
                       border: "none",
-                      color: copiedIdx === i ? "#10b981" : "#334155",
+                      color: copiedIdx === i ? "var(--color-success)" : "var(--text-secondary)",
                       cursor: "pointer",
                       fontSize: "0.72rem",
                       padding: "2px 6px",
@@ -1636,7 +1636,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               <span style={{ fontSize: "1.1rem" }}>⚡</span>
               <span
                 style={{
-                  color: "#10b981",
+                  color: "var(--color-success)",
                   fontWeight: 700,
                   fontSize: "0.88rem",
                 }}
@@ -1645,7 +1645,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               </span>
               <span
                 style={{
-                  color: "#475569",
+                  color: "var(--text-muted)",
                   fontSize: "0.78rem",
                   marginLeft: "auto",
                 }}
@@ -1681,7 +1681,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                               : "💳"}
                 </span>
                 <span
-                  style={{ color: "#e2e8f0", fontSize: "0.83rem", flex: 1 }}
+                  style={{ color: "var(--text-primary)", fontSize: "0.83rem", flex: 1 }}
                 >
                   {a.label}
                 </span>
@@ -1690,7 +1690,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             {actionResult && actionResult.msgIdx === pendingActions.msgIdx && (
               <div
                 style={{
-                  color: actionResult.success ? "#10b981" : "#ef4444",
+                  color: actionResult.success ? "var(--color-success)" : "var(--color-danger)",
                   fontSize: "0.82rem",
                   fontWeight: 600,
                   textAlign: "center",
@@ -1777,7 +1777,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 ))}
                 <span
                   style={{
-                    color: "#475569",
+                    color: "var(--text-secondary)",
                     fontSize: "0.75rem",
                     marginLeft: 6,
                   }}
@@ -2011,7 +2011,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 background: "rgba(99,102,241,0.06)",
                 border: "1px solid rgba(99,102,241,0.12)",
                 borderRadius: 7,
-                color: "#475569",
+                color: "var(--text-secondary)",
                 padding: "4px 10px",
                 cursor: "pointer",
                 fontSize: "0.75rem",

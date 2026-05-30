@@ -279,7 +279,7 @@ export default function Monitor({ db, save }: Props) {
             {healthScore}
           </div>
           <div
-            style={{ color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600 }}
+            style={{ color: "var(--text-dim)", fontSize: "0.78rem", fontWeight: 600 }}
           >
             Sağlık Skoru
           </div>
@@ -297,7 +297,7 @@ export default function Monitor({ db, save }: Props) {
             {summary.critical}
           </div>
           <div
-            style={{ color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600 }}
+            style={{ color: "var(--text-dim)", fontSize: "0.78rem", fontWeight: 600 }}
           >
             Kritik
           </div>
@@ -315,7 +315,7 @@ export default function Monitor({ db, save }: Props) {
             {summary.warning}
           </div>
           <div
-            style={{ color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600 }}
+            style={{ color: "var(--text-dim)", fontSize: "0.78rem", fontWeight: 600 }}
           >
             Uyarı
           </div>
@@ -333,7 +333,7 @@ export default function Monitor({ db, save }: Props) {
             {summary.info}
           </div>
           <div
-            style={{ color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600 }}
+            style={{ color: "var(--text-dim)", fontSize: "0.78rem", fontWeight: 600 }}
           >
             Bilgi
           </div>
@@ -351,7 +351,7 @@ export default function Monitor({ db, save }: Props) {
             {alerts.length}
           </div>
           <div
-            style={{ color: "#94a3b8", fontSize: "0.78rem", fontWeight: 600 }}
+            style={{ color: "var(--text-dim)", fontSize: "0.78rem", fontWeight: 600 }}
           >
             Aktif Alarm
           </div>
@@ -436,7 +436,7 @@ export default function Monitor({ db, save }: Props) {
                 Tüm veriler tutarlı!
               </p>
               <p
-                style={{ color: "#64748b", fontSize: "0.85rem", marginTop: 8 }}
+                style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 8 }}
               >
                 Hiçbir veri bütünlüğü sorunu bulunamadı.
               </p>
@@ -479,7 +479,7 @@ export default function Monitor({ db, save }: Props) {
                         borderRadius: 6,
                         padding: "2px 8px",
                         fontSize: "0.72rem",
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontWeight: 600,
                       }}
                     >
@@ -487,7 +487,7 @@ export default function Monitor({ db, save }: Props) {
                     </span>
                     <span
                       style={{
-                        color: "#f1f5f9",
+                        color: "var(--text-primary)",
                         fontWeight: 700,
                         fontSize: "0.9rem",
                       }}
@@ -497,7 +497,7 @@ export default function Monitor({ db, save }: Props) {
                   </div>
                   <p
                     style={{
-                      color: "#94a3b8",
+                      color: "var(--text-dim)",
                       fontSize: "0.85rem",
                       marginBottom: issue.suggestion ? 6 : 0,
                     }}
@@ -555,11 +555,11 @@ export default function Monitor({ db, save }: Props) {
                     }}
                   />
                   <span
-                    style={{ color: "#f1f5f9", fontSize: "0.9rem", flex: 1 }}
+                    style={{ color: "var(--text-primary)", fontSize: "0.9rem", flex: 1 }}
                   >
                     {a.msg}
                   </span>
-                  <span style={{ color: "#64748b", fontSize: "0.8rem" }}>
+                  <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
                     {a.ruleName}
                   </span>
                 </div>
@@ -591,7 +591,7 @@ export default function Monitor({ db, save }: Props) {
           <div style={{ display: "grid", gap: 12 }}>
             {db.monitorRules.length === 0 ? (
               <div
-                style={{ textAlign: "center", padding: 48, color: "#64748b" }}
+                style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}
               >
                 Kural bulunamadı
               </div>
@@ -619,7 +619,7 @@ export default function Monitor({ db, save }: Props) {
                         marginBottom: 4,
                       }}
                     >
-                      <span style={{ fontWeight: 700, color: "#f1f5f9" }}>
+                      <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>
                         {r.name}
                       </span>
                       <span
@@ -635,7 +635,7 @@ export default function Monitor({ db, save }: Props) {
                         {r.level}
                       </span>
                     </div>
-                    <p style={{ color: "#64748b", fontSize: "0.82rem" }}>
+                    <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
                       {ruleLabels[r.type] || r.type} · Her {r.interval}dk
                     </p>
                   </div>
@@ -727,7 +727,7 @@ export default function Monitor({ db, save }: Props) {
               <div style={{ fontSize: "3rem", marginBottom: 12 }}>🐛</div>
               <p style={{ fontWeight: 700 }}>Hata kaydı yok!</p>
               <p
-                style={{ color: "#64748b", fontSize: "0.85rem", marginTop: 8 }}
+                style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 8 }}
               >
                 Uygulama hatasız çalışıyor.
               </p>
@@ -761,14 +761,14 @@ export default function Monitor({ db, save }: Props) {
                     >
                       {log.message}
                     </span>
-                    <span style={{ color: "#64748b", fontSize: "0.78rem" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>
                     {formatDate(log.time || "")}
                     </span>
                   </div>
                   {log.stack && (
                     <pre
                       style={{
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.75rem",
                         fontFamily: "monospace",
                         background: "#0f172a",
@@ -817,7 +817,7 @@ export default function Monitor({ db, save }: Props) {
           </div>
 
           {filteredAuditLog.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "#64748b" }}>
+            <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
               <div style={{ fontSize: "3rem", marginBottom: 12 }}>🔒</div>
               <p style={{ fontWeight: 700 }}>Denetim kaydı yok</p>
               <p
@@ -891,7 +891,7 @@ export default function Monitor({ db, save }: Props) {
                       {/* İşlem tipi */}
                       <span
                         style={{
-                          color: "#f1f5f9",
+                          color: "var(--text-primary)",
                           fontWeight: 600,
                           fontSize: "0.88rem",
                         }}
@@ -899,7 +899,7 @@ export default function Monitor({ db, save }: Props) {
                         {entry.action}
                       </span>
                       {/* Entity */}
-                      <span style={{ color: "#94a3b8", fontSize: "0.82rem" }}>
+                      <span style={{ color: "var(--text-dim)", fontSize: "0.82rem" }}>
                         {entry.entity}
                         {entry.entityId
                           ? ` #${entry.entityId.slice(0, 8)}`
@@ -992,7 +992,7 @@ export default function Monitor({ db, save }: Props) {
                               {v.ruleName}
                             </span>
                             <span
-                              style={{ color: "#94a3b8", fontSize: "0.82rem" }}
+                              style={{ color: "var(--text-dim)", fontSize: "0.82rem" }}
                             >
                               {v.message}
                             </span>
@@ -1012,7 +1012,7 @@ export default function Monitor({ db, save }: Props) {
       {tab === "activity" && (
         <>
           {activityLog.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "#64748b" }}>
+            <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
               <div style={{ fontSize: "3rem", marginBottom: 12 }}>📋</div>
               <p style={{ fontWeight: 700 }}>Aktivite kaydı yok</p>
               <p
@@ -1042,7 +1042,7 @@ export default function Monitor({ db, save }: Props) {
                   <div style={{ flex: 1 }}>
                     <span
                       style={{
-                        color: "#f1f5f9",
+                        color: "var(--text-primary)",
                         fontSize: "0.88rem",
                         fontWeight: 600,
                       }}
@@ -1052,7 +1052,7 @@ export default function Monitor({ db, save }: Props) {
                     {log.detail && (
                       <span
                         style={{
-                          color: "#64748b",
+                          color: "var(--text-muted)",
                           fontSize: "0.82rem",
                           marginLeft: 8,
                         }}
@@ -1179,7 +1179,7 @@ export default function Monitor({ db, save }: Props) {
             />
           </div>
           <div style={{ display: "flex", gap: 20, alignItems: "center", marginTop: 4 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-dim)", fontSize: "0.85rem" }}>
               <input
                 type="checkbox"
                 checked={form.popup ?? true}
@@ -1188,7 +1188,7 @@ export default function Monitor({ db, save }: Props) {
               />
               Popup Bildirim
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-dim)", fontSize: "0.85rem" }}>
               <input
                 type="checkbox"
                 checked={form.active ?? true}
@@ -1221,7 +1221,7 @@ export default function Monitor({ db, save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "11px 20px",
               cursor: "pointer",
             }}
@@ -1251,7 +1251,7 @@ function getActionIcon(action: string): string {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#94a3b8",
+  color: "var(--text-dim)",
   fontSize: "0.85rem",
   fontWeight: 500,
 };
@@ -1261,7 +1261,7 @@ const inp: React.CSSProperties = {
   background: "rgba(15,23,42,0.6)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };

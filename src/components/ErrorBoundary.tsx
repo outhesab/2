@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div style={{ padding: 40, textAlign: 'center', color: '#f1f5f9', background: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-primary)', background: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontSize: '4rem', marginBottom: 16 }}>⚠️</div>
           <h2 style={{ color: '#ef4444', marginBottom: 12, fontWeight: 800 }}>Bir Hata Oluştu</h2>
           <p style={{ color: '#94a3b8', marginBottom: 20, maxWidth: 480, lineHeight: 1.6 }}>

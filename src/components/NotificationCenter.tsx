@@ -223,7 +223,7 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
               boxShadow: criticalCount > 0 ? '0 4px 16px rgba(239,68,68,0.4)' : '0 4px 16px rgba(0,0,0,0.3)',
             }}>🔔</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, color: '#f1f5f9', fontSize: '0.93rem' }}>Bildirimler</div>
+              <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.93rem' }}>Bildirimler</div>
               <div style={{ color: '#334155', fontSize: '0.67rem' }}>Son güncelleme: {lastRefresh}</div>
             </div>
             <button
@@ -291,7 +291,7 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 2 }}>
                             <span style={{ fontSize: '0.88rem', lineHeight: 1, flexShrink: 0 }}>{n.icon}</span>
-                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0', lineHeight: 1.3 }}>{n.title}</span>
+                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{n.title}</span>
                           </div>
                           <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.4, marginBottom: n.targetTab ? 8 : 0 }}>{n.detail}</div>
                           {n.targetTab && (

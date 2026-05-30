@@ -71,35 +71,35 @@ export default function Pelet({ db, save }: Props) {
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 20 }}>
-        <div style={{ background: '#1e293b', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
-          <div style={{ color: '#64748b', fontSize: '0.78rem' }}>🪵 Saatlik Maliyet</div>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>🪵 Saatlik Maliyet</div>
           <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ff5722', marginTop: 4 }}>₺{((pellet.gramaj / 1000) * pellet.kgFiyat).toFixed(4)}</div>
           <div style={{ color: '#475569', fontSize: '0.75rem', marginTop: 2 }}>{pellet.gramaj}g/saat × ₺{pellet.kgFiyat}/kg</div>
         </div>
-        <div style={{ background: '#1e293b', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
-          <div style={{ color: '#64748b', fontSize: '0.78rem' }}>📦 Çuval Fiyatı</div>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>📦 Çuval Fiyatı</div>
           <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#10b981', marginTop: 4 }}>{formatMoney(pellet.cuvalKg * pellet.kgFiyat)}</div>
           <div style={{ color: '#475569', fontSize: '0.75rem', marginTop: 2 }}>{pellet.cuvalKg}kg × ₺{pellet.kgFiyat}</div>
         </div>
-        <div style={{ background: '#1e293b', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
-          <div style={{ color: '#64748b', fontSize: '0.78rem' }}>🏭 Tedarikçi Sayısı</div>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: 18, border: '1px solid #334155' }}>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>🏭 Tedarikçi Sayısı</div>
           <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#3b82f6', marginTop: 4 }}>{db.peletSuppliers.length}</div>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
         <div style={{ background: 'linear-gradient(135deg, #ff572212, #ff572204)', borderRadius: 12, border: '1px solid #ff572222', padding: 14 }}>
-          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🔥 Günlük Tüketim</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🔥 Günlük Tüketim</div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ff5722', marginTop: 3 }}>{((pellet.gramaj / 1000) * pellet.kgFiyat * 10).toFixed(0)} kg</div>
           <div style={{ color: '#475569', fontSize: '0.72rem' }}>~10 saat/gün = ₺{((pellet.gramaj / 1000) * pellet.kgFiyat * 10).toFixed(1)}</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #10b98112, #10b98104)', borderRadius: 12, border: '1px solid #10b98122', padding: 14 }}>
-          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>📊 Aylık Tahmin</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>📊 Aylık Tahmin</div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#10b981', marginTop: 3 }}>{((pellet.gramaj / 1000) * pellet.kgFiyat * 10 * 26).toFixed(1)} kg</div>
           <div style={{ color: '#475569', fontSize: '0.72rem' }}>₺{((pellet.gramaj / 1000) * pellet.kgFiyat * 10 * 26).toFixed(0)}/ay</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #3b82f612, #3b82f604)', borderRadius: 12, border: '1px solid #3b82f622', padding: 14 }}>
-          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🏪 Stoktaki Çuval</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>🏪 Stoktaki Çuval</div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa', marginTop: 3 }}>
             {(() => {
               const totalQty = db.peletOrders.filter(o => o.status === 'tamamlandi').reduce((s, o) => s + o.qty, 0);
@@ -110,7 +110,7 @@ export default function Pelet({ db, save }: Props) {
           <div style={{ color: '#475569', fontSize: '0.72rem' }}>çuval (~{pellet.cuvalKg}kg)</div>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #a78bfa12, #a78bfa04)', borderRadius: 12, border: '1px solid #a78bfa22', padding: 14 }}>
-          <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>⏱️ Kalan Gün</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase' }}>⏱️ Kalan Gün</div>
           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#a78bfa', marginTop: 3 }}>
             {(() => {
               const totalQty = db.peletOrders.filter(o => o.status === 'tamamlandi').reduce((s, o) => s + o.qty, 0);
@@ -135,13 +135,13 @@ export default function Pelet({ db, save }: Props) {
       {tab === 'suppliers' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px,1fr))', gap: 14 }}>
           {db.peletSuppliers.length === 0 ? (
-            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 48, color: '#64748b' }}>Tedarikçi eklenmedi</div>
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>Tedarikçi eklenmedi</div>
           ) : db.peletSuppliers.map(s => (
-            <div key={s.id} style={{ background: '#1e293b', borderRadius: 12, border: '1px solid #334155', padding: 18 }}>
-              <h4 style={{ fontWeight: 700, color: '#f1f5f9', marginBottom: 6 }}>🪵 {s.name}</h4>
-              {s.phone && <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: 4 }}>📞 {s.phone}</p>}
+            <div key={s.id} style={{ background: 'var(--bg-card)', borderRadius: 12, border: '1px solid #334155', padding: 18 }}>
+              <h4 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🪵 {s.name}</h4>
+              {s.phone && <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: 4 }}>📞 {s.phone}</p>}
               {s.tonPrice && <p style={{ color: '#10b981', fontSize: '0.88rem', fontWeight: 700, marginBottom: 4 }}>₺{s.tonPrice}/ton</p>}
-              {s.note && <p style={{ color: '#64748b', fontSize: '0.8rem' }}>{s.note}</p>}
+              {s.note && <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{s.note}</p>}
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                 <button onClick={() => { setSupForm({ ...s }); setEditSupId(s.id); setSupModal(true); }} style={{ flex: 1, background: 'rgba(59,130,246,0.1)', border: 'none', borderRadius: 8, color: '#60a5fa', padding: '7px 0', cursor: 'pointer', fontSize: '0.82rem' }}>✏️ Düzenle</button>
                 <button onClick={() => deleteSupplier(s.id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: 8, color: '#ef4444', padding: '7px 10px', cursor: 'pointer' }}>🗑️</button>
@@ -152,24 +152,24 @@ export default function Pelet({ db, save }: Props) {
       )}
 
       {tab === 'orders' && (
-        <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+        <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
             <thead>
               <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
                 {['Tarih', 'Tedarikçi', 'Miktar (ton)', 'Birim Fiyat', 'Toplam', 'Durum', ''].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600 }}>{h}</th>
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {db.peletOrders.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Sipariş bulunamadı</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Sipariş bulunamadı</td></tr>
               ) : [...db.peletOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(o => (
                 <tr key={o.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <td data-label="Tarih" style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(o.createdAt)}</td>
-                  <td data-label="Tedarikçi" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{db.peletSuppliers.find(s => s.id === o.supplierId)?.name || '-'}</td>
-                  <td data-label="Miktar" style={{ padding: '12px 16px', color: '#94a3b8' }}>{o.qty} ton</td>
-                  <td data-label="Birim Fiyat" style={{ padding: '12px 16px', color: '#94a3b8' }}>₺{o.unitPrice}/ton</td>
+                  <td data-label="Tarih" style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{formatDate(o.createdAt)}</td>
+                  <td data-label="Tedarikçi" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{db.peletSuppliers.find(s => s.id === o.supplierId)?.name || '-'}</td>
+                  <td data-label="Miktar" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>{o.qty} ton</td>
+                  <td data-label="Birim Fiyat" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>₺{o.unitPrice}/ton</td>
                   <td data-label="Toplam" style={{ padding: '12px 16px', color: '#10b981', fontWeight: 700 }}>{formatMoney(o.totalAmount)}</td>
                   <td data-label="Durum" style={{ padding: '12px 16px' }}>
                     <span style={{ background: `${statusColor[o.status]}22`, color: statusColor[o.status], borderRadius: 6, padding: '2px 8px', fontSize: '0.8rem', fontWeight: 600 }}>{statusLabel[o.status]}</span>
@@ -195,7 +195,7 @@ export default function Pelet({ db, save }: Props) {
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={saveSupplier} style={{ flex: 1, background: '#10b981', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>💾 Kaydet</button>
-          <button onClick={() => setSupModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+          <button onClick={() => setSupModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
         </div>
       </Modal>
 
@@ -216,19 +216,19 @@ export default function Pelet({ db, save }: Props) {
           <div><label style={lbl}>Not</label><textarea value={orderForm.note} onChange={e => setOrderForm(f => ({ ...f, note: e.target.value }))} style={{ ...inp, minHeight: 50 }} /></div>
           {orderForm.qty && orderForm.unitPrice && (
             <div style={{ background: '#0f172a', borderRadius: 8, padding: '10px 14px' }}>
-              <span style={{ color: '#94a3b8' }}>Toplam: </span>
+              <span style={{ color: 'var(--text-dim)' }}>Toplam: </span>
               <strong style={{ color: '#10b981' }}>{formatMoney(parseFloat(orderForm.qty) * parseFloat(orderForm.unitPrice))}</strong>
             </div>
           )}
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={saveOrder} style={{ flex: 1, background: '#ff5722', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>📦 Sipariş Ver</button>
-          <button onClick={() => setOrderModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+          <button onClick={() => setOrderModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
         </div>
       </Modal>
     </div>
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem', boxSizing: 'border-box' };
+const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
+const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };

@@ -36,7 +36,7 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
   const inp: React.CSSProperties = {
     width: '100%', padding: '11px 14px',
     background: '#0f1e35', border: '1px solid #1e3a5f',
-    borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem',
+    borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem',
     outline: 'none', boxSizing: 'border-box',
   };
 
@@ -99,8 +99,8 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
 
             {/* Header */}
             <div style={{ padding: '8px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{label || placeholder}</span>
-              <button onClick={close} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, color: '#94a3b8', padding: '5px 10px', cursor: 'pointer', fontSize: '0.8rem' }}>✕ Kapat</button>
+              <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 600 }}>{label || placeholder}</span>
+              <button onClick={close} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, color: 'var(--text-dim)', padding: '5px 10px', cursor: 'pointer', fontSize: '0.8rem' }}>✕ Kapat</button>
             </div>
 
             {/* Search */}

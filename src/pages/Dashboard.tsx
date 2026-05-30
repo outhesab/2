@@ -175,12 +175,12 @@ async function loadDashboardPrefsFromFirebase(): Promise<{ leftWidgets: WidgetId
 }
 
 const chartStyle = {
-        contentStyle: { background: '#0f1e35', border: '1px solid var(--border)', borderRadius: 10, fontSize: '0.82rem', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' },
-        labelStyle: { color: '#94a3b8' },
+        contentStyle: { background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, fontSize: '0.82rem', boxShadow: '0 8px 24px var(--shadow-lg)' },
+        labelStyle: { color: 'var(--text-muted)' },
         itemStyle: { color: 'var(--text-primary)' },
 };
 
-const chartAxisStyle = { fontSize: 11, fill: '#475569', fontFamily: "'Plus Jakarta Sans', sans-serif" };
+const chartAxisStyle = { fontSize: 11, fill: 'var(--text-dim)', fontFamily: "'Plus Jakarta Sans', sans-serif" };
 export default function Dashboard({ db, onTabChange, save }: Props) {
   const [prefs, setPrefs] = useState(loadDashboardPrefs);
 
@@ -375,8 +375,8 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" tick={chartAxisStyle} axisLine={false} tickLine={false} label={{ value: 'Gün', position: 'insideBottomRight', offset: -4, style: { fill: '#334155', fontSize: 10 } }} />
-                <YAxis tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} label={{ value: '₺', angle: -90, position: 'insideLeft', offset: 8, style: { fill: '#334155', fontSize: 10 } }} />
+                <XAxis dataKey="date" tick={chartAxisStyle} axisLine={false} tickLine={false} label={{ value: 'Gün', position: 'insideBottomRight', offset: -4, style: { fill: 'var(--text-dim)', fontSize: 10 } }} />
+                <YAxis tick={chartAxisStyle} axisLine={false} tickLine={false} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)} label={{ value: '₺', angle: -90, position: 'insideLeft', offset: 8, style: { fill: 'var(--text-dim)', fontSize: 10 } }} />
                 <Tooltip
                   formatter={(v: number, n: string) => [formatMoney(v), n === 'revenue' ? 'Ciro' : 'Kâr']}
                   labelFormatter={(label) => `📅 ${label}`}
@@ -385,8 +385,8 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                   itemStyle={chartStyle.itemStyle}
                   cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#ff5722" strokeWidth={2.5} fill="url(#ciroGrad)" dot={{ r: 3, fill: '#ff5722', stroke: '#0f1e35', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#ff5722', stroke: '#fff', strokeWidth: 2 }} />
-                <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2.5} fill="url(#karGrad)" dot={{ r: 3, fill: '#10b981', stroke: '#0f1e35', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="revenue" stroke="#ff5722" strokeWidth={2.5} fill="url(#ciroGrad)" dot={{ r: 3, fill: '#ff5722', stroke: 'var(--bg-base)', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#ff5722', stroke: 'var(--text-primary)', strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2.5} fill="url(#karGrad)" dot={{ r: 3, fill: '#10b981', stroke: 'var(--bg-base)', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#10b981', stroke: 'var(--text-primary)', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </WidgetCard>

@@ -15,23 +15,30 @@ const STORAGE_KEY = "sobaYonetim";
 const INDEXED_SNAPSHOT_KEY = "primary";
 
 async function saveToIndexedSnapshot(db: DB): Promise<void> {
+  const t = logger.time("db", "IndexedSnapshot yaz");
   try {
     await indexedDb.snapshots.put({
       id: INDEXED_SNAPSHOT_KEY,
       data: JSON.stringify(db),
       updatedAt: new Date().toISOString(),
     });
+    t.end({ size: JSON.stringify(db).length });
   } catch (e) {
+    t.end({ error: String(e) });
     logger.warn("db", "IndexedDB snapshot yazılamadı", { error: String(e) });
   }
 }
 
 async function loadFromIndexedSnapshot(): Promise<DB | null> {
+  const t = logger.time("db", "IndexedSnapshot oku");
   try {
     const snap = await indexedDb.snapshots.get(INDEXED_SNAPSHOT_KEY);
-    if (!snap?.data) return null;
-    return JSON.parse(snap.data) as DB;
+    if (!snap?.data) { t.end({ empty: true }); return null; }
+    const result = JSON.parse(snap.data) as DB;
+    t.end({ version: result._version });
+    return result;
   } catch (e) {
+    t.end({ error: String(e) });
     logger.warn("db", "IndexedDB snapshot okunamadı", { error: String(e) });
     return null;
   }
@@ -128,6 +135,7 @@ function makeDefaultDB(): DB {
 }
 
 function loadFromStorage(): DB {
+  const loadT = logger.time("db", "localStorage yükle");
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return makeDefaultDB();
@@ -176,8 +184,10 @@ function loadFromStorage(): DB {
     if (!Array.isArray(merged.notes)) merged.notes = [];
     if (!Array.isArray(merged._auditLog)) merged._auditLog = [];
     if (!Array.isArray(merged.aiActionLog)) merged.aiActionLog = [];
+    loadT.end({ version: merged._version });
     return merged;
   } catch {
+    loadT.end({ error: "parse" });
     return makeDefaultDB();
   }
 }
@@ -186,6 +196,7 @@ let _isSaving = false;
 let _pendingDb: DB | null = null;
 
 function saveToStorage(db: DB): boolean {
+  const t = logger.time("db", "localStorage yaz");
   if (_isSaving) {
     _pendingDb = db;
     return false;
@@ -194,8 +205,10 @@ function saveToStorage(db: DB): boolean {
   try {
     db._version = (db._version || 0) + 1;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    t.end({ version: db._version });
     return true;
-  } catch {
+  } catch (e) {
+    t.end({ error: String(e) });
     return false;
   } finally {
     _isSaving = false;
@@ -340,6 +353,7 @@ export function useDB() {
     undoStackRef.current = [...stack];
 
     setDb((prev) => {
+      const ut = logger.time("db", "undo()");
       const restored: DB = {
         ...target,
         _version: (prev._version || 0) + 1,
@@ -358,6 +372,7 @@ export function useDB() {
       };
       saveToStorage(restored);
       void saveToIndexedSnapshot(restored);
+      ut.end({ version: restored._version });
       if (syncTimer.current) clearTimeout(syncTimer.current);
       syncTimer.current = setTimeout(() => {
         saveToFirebase(restored);
@@ -423,6 +438,7 @@ export function useDB() {
       },
     ) => {
       setDb((prev) => {
+        const st = logger.time("db", "saveGuarded()");
         let next = updater(prev);
         (next as DB & { _lastSyncAt?: string })._lastSyncAt =
           new Date().toISOString();
@@ -476,6 +492,7 @@ export function useDB() {
           };
           saveToStorage(auditOnly);
           void saveToIndexedSnapshot(auditOnly);
+          st.end({ version: prev._version, blocked: true });
           logger.warn("db", "saveGuarded: İşlem engellendi", {
             violations: violations
               .filter((v) => v.severity === "block")
@@ -490,6 +507,7 @@ export function useDB() {
         };
         saveToStorage(withAudit);
         void saveToIndexedSnapshot(withAudit);
+        st.end({ version: withAudit._version });
         if (syncTimer.current) clearTimeout(syncTimer.current);
         syncTimer.current = setTimeout(() => {
           saveToFirebase(withAudit);

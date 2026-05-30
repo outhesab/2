@@ -135,29 +135,29 @@ export default function Stock({ db, save }: Props) {
 
       {tab === 'products' && (
         <>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ürün ara..." style={{ marginBottom: 14, width: '100%', padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', boxSizing: 'border-box' }} />
-          <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ürün ara..." style={{ marginBottom: 14, width: '100%', padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box' }} />
+          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
                   {['Ürün', 'Kategori', 'Stok', 'Min.Stok', 'Durum', ''].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {sortedProducts.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Ürün bulunamadı</td></tr>
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Ürün bulunamadı</td></tr>
                 ) : sortedProducts.map(p => {
                   const stockStatus = p.stock === 0 ? { color: '#ef4444', label: '🔴 Bitti', bg: 'rgba(239,68,68,0.1)' } : p.stock <= p.minStock ? { color: '#f59e0b', label: '⚠️ Az', bg: 'rgba(245,158,11,0.1)' } : { color: '#10b981', label: '✓ Normal', bg: 'rgba(16,185,129,0.1)' };
                   const catIcon = (db.productCategories || []).find(c => c.id === p.category)?.icon || '📦';
                   const catName = (db.productCategories || []).find(c => c.id === p.category)?.name || p.category;
                   return (
                     <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td data-label="Ürün" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{catIcon} {p.name}</td>
-                      <td data-label="Kategori" style={{ padding: '12px 16px', color: '#94a3b8', fontSize: '0.85rem' }}>{catName}</td>
+                      <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{catIcon} {p.name}</td>
+                      <td data-label="Kategori" style={{ padding: '12px 16px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>{catName}</td>
                       <td data-label="Stok" style={{ padding: '12px 16px', color: p.stock === 0 ? '#ef4444' : p.stock <= p.minStock ? '#f59e0b' : '#10b981', fontWeight: 700, fontSize: '1rem' }}>{p.stock}</td>
-                      <td data-label="Min.Stok" style={{ padding: '12px 16px', color: '#64748b' }}>{p.minStock}</td>
+                      <td data-label="Min.Stok" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{p.minStock}</td>
                       <td data-label="Durum" style={{ padding: '12px 16px' }}>
                         <span style={{ background: stockStatus.bg, color: stockStatus.color, borderRadius: 6, padding: '3px 10px', fontSize: '0.82rem', fontWeight: 600 }}>{stockStatus.label}</span>
                       </td>
@@ -183,24 +183,24 @@ export default function Stock({ db, save }: Props) {
               return (
                 <div key={cls} style={{ background: `${colors[cls]}10`, borderRadius: 12, padding: '14px 16px', border: `1px solid ${colors[cls]}25` }}>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: colors[cls] }}>{d.count} ürün</div>
-                  <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: 4 }}>{labels[cls]}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 2 }}>Ciro: ₺{(d.revenue / 1000).toFixed(0)}K</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-dim)', marginTop: 4 }}>{labels[cls]}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>Ciro: ₺{(d.revenue / 1000).toFixed(0)}K</div>
                 </div>
               );
             })}
           </div>
-          <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
                   {['Sınıf', 'Ürün', 'Ciro', 'Ciro %', 'Küm.%', 'Adet', 'Kâr'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {abcData.length === 0 ? (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Satış verisi yok</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Satış verisi yok</td></tr>
                 ) : abcData.map((v, _i) => {
                   const clsColor = v.class === 'A' ? '#10b981' : v.class === 'B' ? '#3b82f6' : '#64748b';
                   return (
@@ -208,11 +208,11 @@ export default function Stock({ db, save }: Props) {
                       <td data-label="Sınıf" style={{ padding: '12px 16px' }}>
                         <span style={{ background: `${clsColor}20`, color: clsColor, borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{v.class}</span>
                       </td>
-                      <td data-label="Ürün" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{v.name}</td>
+                      <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{v.name}</td>
                       <td data-label="Ciro" style={{ padding: '12px 16px', color: '#10b981', fontWeight: 700 }}>₺{(v.revenue / 1000).toFixed(1)}K</td>
-                      <td data-label="Ciro %" style={{ padding: '12px 16px', color: '#94a3b8' }}>%{v.revenuePct.toFixed(1)}</td>
+                      <td data-label="Ciro %" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>%{v.revenuePct.toFixed(1)}</td>
                       <td data-label="Küm.%"><div style={{ height: 6, borderRadius: 3, background: '#273548', overflow: 'hidden', maxWidth: 80 }}><div style={{ width: `${v.cumulPct}%`, height: 6, borderRadius: 3, background: clsColor }} /></div></td>
-                      <td data-label="Adet" style={{ padding: '12px 16px', color: '#94a3b8' }}>{v.qty}</td>
+                      <td data-label="Adet" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>{v.qty}</td>
                       <td data-label="Kâr" style={{ padding: '12px 16px', color: v.profit >= 0 ? '#f59e0b' : '#ef4444' }}>₺{(v.profit / 1000).toFixed(1)}K</td>
                     </tr>
                   );
@@ -228,38 +228,38 @@ export default function Stock({ db, save }: Props) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 14 }}>
             <div style={{ background: '#ef444410', borderRadius: 12, padding: '14px 16px', border: '1px solid #ef444425' }}>
               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ef4444' }}>{deadStock.length}</div>
-              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Ölü Stok (90+ gün)</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Ölü Stok (90+ gün)</div>
             </div>
             <div style={{ background: '#f59e0b10', borderRadius: 12, padding: '14px 16px', border: '1px solid #f59e0b25' }}>
               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f59e0b' }}>{formatMoney(deadStockValue)}</div>
-              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Bağlı Sermaye</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Bağlı Sermaye</div>
             </div>
             <div style={{ background: '#3b82f610', borderRadius: 12, padding: '14px 16px', border: '1px solid #3b82f625' }}>
               <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#3b82f6' }}>
                 {deadStock.length > 0 ? `₺${(deadStockValue / deadStock.length / 1000).toFixed(0)}K` : '—'}
               </div>
-              <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>Ort. Ürün Değeri</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Ort. Ürün Değeri</div>
             </div>
           </div>
-          <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
                   {['Ürün', 'Stok', 'Maliyet', 'Değer', 'Son Hareket', 'Gün'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {deadStock.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Ölü stok bulunamadı</td></tr>
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Ölü stok bulunamadı</td></tr>
                 ) : deadStock.map(p => (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td data-label="Ürün" style={{ padding: '12px 16px', color: '#f1f5f9', fontWeight: 600 }}>{p.name}</td>
+                    <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{p.name}</td>
                     <td data-label="Stok" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 700 }}>{p.stock}</td>
-                    <td data-label="Maliyet" style={{ padding: '12px 16px', color: '#94a3b8' }}>{formatMoney(p.cost)}</td>
+                    <td data-label="Maliyet" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>{formatMoney(p.cost)}</td>
                     <td data-label="Değer" style={{ padding: '12px 16px', color: '#f59e0b', fontWeight: 700 }}>{formatMoney(p.cost * p.stock)}</td>
-                    <td data-label="Son Hareket" style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(p.lastMovement)}</td>
+                    <td data-label="Son Hareket" style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{formatDate(p.lastMovement)}</td>
                     <td data-label="Gün" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 600 }}>{p.daysSince}g</td>
                   </tr>
                 ))}
@@ -272,8 +272,8 @@ export default function Stock({ db, save }: Props) {
       {tab === 'history' && (
         <>
           <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-            <input value={histSearch} onChange={e => { setHistSearch(e.target.value); setHistPage(1); }} placeholder="🔍 Ürün ara..." style={{ flex: 1, minWidth: 160, padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', boxSizing: 'border-box' }} />
-            <select value={histTypeFilter} onChange={e => { setHistTypeFilter(e.target.value); setHistPage(1); }} style={{ padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', cursor: 'pointer' }}>
+            <input value={histSearch} onChange={e => { setHistSearch(e.target.value); setHistPage(1); }} placeholder="🔍 Ürün ara..." style={{ flex: 1, minWidth: 160, padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box' }} />
+            <select value={histTypeFilter} onChange={e => { setHistTypeFilter(e.target.value); setHistPage(1); }} style={{ padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', cursor: 'pointer' }}>
               <option value="">Tüm İşlemler</option>
               <option value="satis">🛒 Satış</option>
               <option value="iade">↩️ İade</option>
@@ -282,30 +282,30 @@ export default function Stock({ db, save }: Props) {
               <option value="duzeltme">⚙️ Düzeltme</option>
             </select>
           </div>
-          <div ref={movTableRef} className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+          <div ref={movTableRef} className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
                   {['Tarih', 'Ürün', 'İşlem', 'Miktar', 'Önceki', 'Sonraki', 'Not'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {pagedMovements.length === 0 ? (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Hareket bulunamadı</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Hareket bulunamadı</td></tr>
                 ) : pagedMovements.map(m => {
                   const typeMap: Record<string, { label: string; color: string }> = { giris: { label: '📥 Giriş', color: '#10b981' }, cikis: { label: '📤 Çıkış', color: '#ef4444' }, satis: { label: '🛒 Satış', color: '#3b82f6' }, iade: { label: '↩️ İade', color: '#8b5cf6' }, duzeltme: { label: '⚙️ Düzeltme', color: '#f59e0b' }, siparis: { label: '📦 Sipariş', color: '#8b5cf6' } };
-                  const t = typeMap[m.type] || { label: m.type, color: '#94a3b8' };
+                  const t = typeMap[m.type] || { label: m.type, color: 'var(--text-dim)' };
                   return (
                     <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(m.date)}</td>
-                      <td data-label="Ürün" style={{ padding: '11px 16px', color: '#f1f5f9', fontWeight: 600 }}>{m.productName}</td>
+                      <td data-label="Tarih" style={{ padding: '11px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{formatDate(m.date)}</td>
+                      <td data-label="Ürün" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{m.productName}</td>
                       <td data-label="İşlem" style={{ padding: '11px 16px' }}><span style={{ color: t.color, fontWeight: 600, fontSize: '0.85rem' }}>{t.label}</span></td>
                       <td data-label="Miktar" style={{ padding: '11px 16px', color: m.amount >= 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>{m.amount > 0 ? '+' : ''}{m.amount}</td>
-                      <td data-label="Önceki" style={{ padding: '11px 16px', color: '#94a3b8' }}>{m.before}</td>
-                      <td data-label="Sonraki" style={{ padding: '11px 16px', color: '#f1f5f9', fontWeight: 600 }}>{m.after}</td>
-                      <td data-label="Not" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{m.note || '-'}</td>
+                      <td data-label="Önceki" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{m.before}</td>
+                      <td data-label="Sonraki" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{m.after}</td>
+                      <td data-label="Not" style={{ padding: '11px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{m.note || '-'}</td>
                     </tr>
                   );
                 })}
@@ -314,9 +314,9 @@ export default function Stock({ db, save }: Props) {
           </div>
           {totalHistPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 14 }}>
-              <button onClick={() => { setHistPage(p => Math.max(1, p - 1)); scrollToMovTable(); }} disabled={histPage === 1} style={{ padding: '6px 14px', background: histPage === 1 ? '#1e293b' : '#273548', border: '1px solid #334155', borderRadius: 8, color: histPage === 1 ? '#334155' : '#94a3b8', cursor: histPage === 1 ? 'default' : 'pointer', fontWeight: 600 }}>← Önceki</button>
-              <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Sayfa {histPage} / {totalHistPages} (toplam {sortedMovements.length} kayıt)</span>
-              <button onClick={() => { setHistPage(p => Math.min(totalHistPages, p + 1)); scrollToMovTable(); }} disabled={histPage === totalHistPages} style={{ padding: '6px 14px', background: histPage === totalHistPages ? '#1e293b' : '#273548', border: '1px solid #334155', borderRadius: 8, color: histPage === totalHistPages ? '#334155' : '#94a3b8', cursor: histPage === totalHistPages ? 'default' : 'pointer', fontWeight: 600 }}>Sonraki →</button>
+              <button onClick={() => { setHistPage(p => Math.max(1, p - 1)); scrollToMovTable(); }} disabled={histPage === 1} style={{ padding: '6px 14px', background: histPage === 1 ? '#1e293b' : '#273548', border: '1px solid var(--border)', borderRadius: 8, color: histPage === 1 ? '#334155' : '#94a3b8', cursor: histPage === 1 ? 'default' : 'pointer', fontWeight: 600 }}>← Önceki</button>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Sayfa {histPage} / {totalHistPages} (toplam {sortedMovements.length} kayıt)</span>
+              <button onClick={() => { setHistPage(p => Math.min(totalHistPages, p + 1)); scrollToMovTable(); }} disabled={histPage === totalHistPages} style={{ padding: '6px 14px', background: histPage === totalHistPages ? '#1e293b' : '#273548', border: '1px solid var(--border)', borderRadius: 8, color: histPage === totalHistPages ? '#334155' : '#94a3b8', cursor: histPage === totalHistPages ? 'default' : 'pointer', fontWeight: 600 }}>Sonraki →</button>
             </div>
           )}
         </>
@@ -352,21 +352,21 @@ export default function Stock({ db, save }: Props) {
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={handleAdjust} style={{ flex: 1, background: '#10b981', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>💾 Kaydet</button>
-          <button onClick={() => setAdjustModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+          <button onClick={() => setAdjustModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
         </div>
       </Modal>
     </div>
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem', boxSizing: 'border-box' };
+const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
+const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };
 
 function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ background: '#1e293b', borderRadius: 12, padding: '16px 18px', border: `1px solid ${color}22` }}>
+    <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: '16px 18px', border: `1px solid ${color}22` }}>
       <div style={{ fontSize: '1.4rem', fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: 4 }}>{label}</div>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>{label}</div>
     </div>
   );
 }

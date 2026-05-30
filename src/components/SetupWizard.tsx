@@ -222,7 +222,7 @@ export default function SetupWizard({ onComplete }: Props) {
         {/* Butonlar */}
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           {step > 0 && (
-            <button onClick={prev} style={{ padding: '12px 18px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, background: 'transparent', color: '#64748b', cursor: 'pointer', fontWeight: 600 }}>
+            <button onClick={prev} style={{ padding: '12px 18px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 600 }}>
               ← Geri
             </button>
           )}
@@ -258,7 +258,7 @@ function StepWelcome({ steps }: { steps: { title: string; icon: string; desc: st
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '11px 14px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ fontSize: '1.2rem', width: 28, textAlign: 'center' }}>{s.icon}</span>
             <div>
-              <div style={{ color: '#e2e8f0', fontWeight: 600, fontSize: '0.88rem' }}>{s.title}</div>
+              <div style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.88rem' }}>{s.title}</div>
               <div style={{ color: '#475569', fontSize: '0.75rem' }}>{s.desc}</div>
             </div>
           </div>
@@ -359,7 +359,7 @@ function StepUrunler({ urunler, setUrunler, kategoriler }: { urunler: UrunDef[];
         {urunler.map((u, i) => (
           <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <span style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}>ÜRÜN {i + 1}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>ÜRÜN {i + 1}</span>
               {urunler.length > 1 && <button onClick={() => remove(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -420,7 +420,7 @@ function StepOrtaklar({ ortaklar, setOrtaklar, ortakCariAc, setOrtakCariAc }: {
           {ortaklar.map((o, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 600 }}>ORTAK {i + 1}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>ORTAK {i + 1}</span>
                 <button onClick={() => remove(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -476,5 +476,5 @@ function StepPassword({ pass, setPass, pass2, setPass2 }: { pass: string; setPas
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 5, color: '#64748b', fontSize: '0.8rem', fontWeight: 600 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#f1f5f9', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none' };
+const lbl: React.CSSProperties = { display: 'block', marginBottom: 5, color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 };
+const inp: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none' };

@@ -555,7 +555,7 @@ export default function Cari({ db, save }: Props) {
                 >
                   <span
                     style={{
-                      color: "#f1f5f9",
+                      color: "var(--text-primary)",
                       fontWeight: 600,
                       fontSize: "0.85rem",
                       flex: 1,
@@ -706,7 +706,7 @@ export default function Cari({ db, save }: Props) {
             background: "#1e293b",
             border: "1px solid #334155",
             borderRadius: 10,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
           }}
         />
         {(["all", "musteri", "tedarikci"] as const).map((f) => (
@@ -828,7 +828,7 @@ export default function Cari({ db, save }: Props) {
                       data-label="Ad"
                       style={{
                         padding: "12px 16px",
-                        color: "#f1f5f9",
+                        color: "var(--text-primary)",
                         fontWeight: 600,
                       }}
                     >
@@ -1383,7 +1383,7 @@ export default function Cari({ db, save }: Props) {
                 }}
               >
                 <span style={{ color: "#475569" }}>{l}: </span>
-                <span style={{ color: "#e2e8f0", fontWeight: 600 }}>{v}</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{v}</span>
               </div>
             ))}
             <button
@@ -1527,7 +1527,7 @@ export default function Cari({ db, save }: Props) {
                         <td style={{ padding: "8px 10px", color: "#64748b" }}>
                           {formatDate(k.createdAt)}
                         </td>
-                        <td style={{ padding: "8px 10px", color: "#e2e8f0" }}>
+                        <td style={{ padding: "8px 10px", color: "var(--text-primary)" }}>
                           {k.description || "-"}
                         </td>
                         <td
@@ -1590,7 +1590,7 @@ export default function Cari({ db, save }: Props) {
                         <td style={{ padding: "8px 10px", color: "#64748b" }}>
                           {formatDate(s.createdAt)}
                         </td>
-                        <td style={{ padding: "8px 10px", color: "#e2e8f0" }}>
+                        <td style={{ padding: "8px 10px", color: "var(--text-primary)" }}>
                           {s.productName || s.items?.[0]?.productName || "-"}
                         </td>
                         <td style={{ padding: "8px 10px", color: "#94a3b8" }}>
@@ -1732,7 +1732,7 @@ const inp: React.CSSProperties = {
   background: "rgba(15,23,42,0.6)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };

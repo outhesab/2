@@ -73,7 +73,7 @@ export default function Entegrasyonlar({ db }: Props) {
             {sel.features.map(f => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
                 <span style={{ color: sel.color, fontSize: '0.85rem' }}>✓</span>
-                <span style={{ color: '#e2e8f0', fontSize: '0.85rem' }}>{f}</span>
+                <span style={{ color: 'var(--text-primary)', fontSize: '0.85rem' }}>{f}</span>
               </div>
             ))}
           </div>

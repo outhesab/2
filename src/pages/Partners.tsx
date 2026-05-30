@@ -286,7 +286,7 @@ export default function Partners({ db, save }: Props) {
           marginBottom: 20,
         }}
       >
-        <h3 style={{ fontWeight: 700, color: "#f1f5f9", marginBottom: 4 }}>
+        <h3 style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
           📊 Toplam Kâr Paylaşımı
         </h3>
         <p style={{ color: "#10b981", fontSize: "1.5rem", fontWeight: 800 }}>
@@ -303,7 +303,7 @@ export default function Partners({ db, save }: Props) {
               borderTop: "1px solid rgba(255,255,255,0.04)",
             }}
           >
-            <span style={{ color: "#94a3b8" }}>
+            <span style={{ color: "var(--text-dim)" }}>
               {p.name}
               {p.share != null ? ` (%${p.share})` : ""}
             </span>
@@ -330,7 +330,7 @@ export default function Partners({ db, save }: Props) {
               gridColumn: "1/-1",
               textAlign: "center",
               padding: 48,
-              color: "#64748b",
+              color: "var(--text-muted)",
             }}
           >
             <div style={{ fontSize: "3rem" }}>🤝</div>
@@ -352,7 +352,7 @@ export default function Partners({ db, save }: Props) {
                 }}
               >
                 <h4
-                  style={{ fontWeight: 700, color: "#f1f5f9", marginBottom: 4 }}
+                  style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}
                 >
                   🤝 {p.name}
                 </h4>
@@ -369,7 +369,7 @@ export default function Partners({ db, save }: Props) {
                 {p.phone && (
                   <p
                     style={{
-                      color: "#94a3b8",
+                      color: "var(--text-dim)",
                       fontSize: "0.85rem",
                       marginBottom: 4,
                     }}
@@ -377,13 +377,13 @@ export default function Partners({ db, save }: Props) {
                     📞 {p.phone}
                   </p>
                 )}
-                <p style={{ color: "#64748b", fontSize: "0.82rem" }}>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
                   Toplam emanet:{" "}
                   <strong style={{ color: "#f59e0b" }}>
                     {formatMoney(totalEmanet)}
                   </strong>
                 </p>
-                <p style={{ color: "#64748b", fontSize: "0.82rem" }}>
+                <p style={{ color: "var(--text-muted)", fontSize: "0.82rem" }}>
                   Kâr payı:{" "}
                   <strong style={{ color: "#10b981" }}>
                     {p.share != null
@@ -445,7 +445,7 @@ export default function Partners({ db, save }: Props) {
               borderBottom: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <h3 style={{ fontWeight: 700, color: "#f1f5f9" }}>
+            <h3 style={{ fontWeight: 700, color: "var(--text-primary)" }}>
               💰 Emanet Hareketleri
             </h3>
           </div>
@@ -459,7 +459,7 @@ export default function Partners({ db, save }: Props) {
                       style={{
                         padding: "12px 16px",
                         textAlign: "left",
-                        color: "#64748b",
+                        color: "var(--text-muted)",
                         fontSize: "0.78rem",
                         fontWeight: 600,
                       }}
@@ -487,7 +487,7 @@ export default function Partners({ db, save }: Props) {
                         data-label="Tarih"
                         style={{
                           padding: "11px 16px",
-                          color: "#64748b",
+                          color: "var(--text-muted)",
                           fontSize: "0.82rem",
                         }}
                       >
@@ -497,7 +497,7 @@ export default function Partners({ db, save }: Props) {
                         data-label="Ortak"
                         style={{
                           padding: "11px 16px",
-                          color: "#f1f5f9",
+                          color: "var(--text-primary)",
                           fontWeight: 600,
                         }}
                       >
@@ -518,7 +518,7 @@ export default function Partners({ db, save }: Props) {
                         data-label="Not"
                         style={{
                           padding: "11px 16px",
-                          color: "#94a3b8",
+                          color: "var(--text-dim)",
                           fontSize: "0.85rem",
                         }}
                       >
@@ -613,7 +613,7 @@ export default function Partners({ db, save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "11px 20px",
               cursor: "pointer",
             }}
@@ -692,7 +692,7 @@ export default function Partners({ db, save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "11px 20px",
               cursor: "pointer",
             }}
@@ -708,7 +708,7 @@ export default function Partners({ db, save }: Props) {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#94a3b8",
+  color: "var(--text-dim)",
   fontSize: "0.85rem",
   fontWeight: 500,
 };
@@ -718,7 +718,7 @@ const inp: React.CSSProperties = {
   background: "rgba(15,23,42,0.6)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };

@@ -36,7 +36,7 @@ const TT_STYLE = {
   background: "#0f172a",
   border: "1px solid #334155",
   borderRadius: 8,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.82rem",
 };
 const CARD = {
@@ -175,7 +175,7 @@ function SectionBox({
         <h3
           style={{
             fontWeight: 700,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             fontSize: "0.95rem",
             margin: 0,
           }}
@@ -781,7 +781,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     <td
                       style={{
                         padding: "9px 12px",
-                        color: "#f1f5f9",
+                        color: "var(--text-primary)",
                         fontWeight: 600,
                       }}
                     >
@@ -832,7 +832,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     <td
                       style={{
                         padding: "9px 12px",
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         textAlign: "right",
                       }}
                     >
@@ -1081,7 +1081,7 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
                       <td
                         style={{
                           padding: "8px 10px",
-                          color: "#f1f5f9",
+                          color: "var(--text-primary)",
                           fontWeight: 500,
                           maxWidth: 200,
                           overflow: "hidden",
@@ -1128,7 +1128,7 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
                       <td
                         style={{
                           padding: "8px 10px",
-                          color: "#94a3b8",
+                          color: "var(--text-dim)",
                           textAlign: "right",
                         }}
                       >
@@ -1359,7 +1359,7 @@ function TabCari({ db }: { db: DB }) {
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: 7,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
                 fontSize: "0.8rem",
                 width: 120,
               }}
@@ -1441,7 +1441,7 @@ function TabCari({ db }: { db: DB }) {
                   <td
                     style={{
                       padding: "8px 10px",
-                      color: "#f1f5f9",
+                      color: "var(--text-primary)",
                       fontWeight: 500,
                     }}
                   >
@@ -1480,7 +1480,7 @@ function TabCari({ db }: { db: DB }) {
                     {formatMoney(Math.abs(c.balance))}{" "}
                     {c.balance > 0 ? "▲" : c.balance < 0 ? "▼" : ""}
                   </td>
-                  <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                  <td style={{ padding: "8px 10px", color: "var(--text-muted)" }}>
                     {c.phone || "—"}
                   </td>
                 </tr>
@@ -1902,7 +1902,7 @@ export default function Reports({ db }: Props) {
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: 8,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
                 fontSize: "0.82rem",
               }}
             />
@@ -1916,7 +1916,7 @@ export default function Reports({ db }: Props) {
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: 8,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
                 fontSize: "0.82rem",
               }}
             />

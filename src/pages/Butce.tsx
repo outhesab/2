@@ -16,7 +16,7 @@ const PRESET_CATEGORIES: Omit<BudgetCategory, 'id'>[] = [
   { name: 'Ham Madde/Stok', icon: '📦', monthlyLimit: 15000, color: '#10b981', kasaCategories: ['alis', 'stok', 'hammadde', 'alis_fatura'] },
   { name: 'Nakliye/Kargo', icon: '🚚', monthlyLimit: 3000, color: '#06b6d4', kasaCategories: ['nakliye', 'kargo', 'tasima'] },
   { name: 'Reklam/Pazarlama', icon: '📢', monthlyLimit: 2000, color: '#ec4899', kasaCategories: ['reklam', 'pazarlama', 'tanitim'] },
-  { name: 'Diğer Giderler', icon: '📋', monthlyLimit: 5000, color: '#64748b', kasaCategories: ['diger', 'genel'] },
+  { name: 'Diğer Giderler', icon: '📋', monthlyLimit: 5000, color: 'var(--text-muted)', kasaCategories: ['diger', 'genel'] },
 ];
 
 const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
@@ -32,7 +32,7 @@ export default function Butce({ db, save }: Props) {
   const [bankModal, setBankModal] = useState(false);
   const [importResult, setImportResult] = useState<{ total: number; matched: number; entries: Array<{ date: string; desc: string; amount: number; type: 'gelir' | 'gider' }> } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState<Omit<BudgetCategory, 'id'>>({ name: '', icon: '📋', monthlyLimit: 0, color: '#64748b', kasaCategories: [] });
+  const [form, setForm] = useState<Omit<BudgetCategory, 'id'>>({ name: '', icon: '📋', monthlyLimit: 0, color: 'var(--text-muted)', kasaCategories: [] });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const budgets: BudgetCategory[] = db.budgets || [];
@@ -104,7 +104,7 @@ export default function Butce({ db, save }: Props) {
     });
   };
 
-  const openAdd = () => { setForm({ name: '', icon: '📋', monthlyLimit: 0, color: '#64748b', kasaCategories: [] }); setEditId(null); setModal(true); };
+  const openAdd = () => { setForm({ name: '', icon: '📋', monthlyLimit: 0, color: 'var(--text-muted)', kasaCategories: [] }); setEditId(null); setModal(true); };
   const openEdit = (b: BudgetCategory) => { setForm({ name: b.name, icon: b.icon, monthlyLimit: b.monthlyLimit, color: b.color, kasaCategories: [...b.kasaCategories] }); setEditId(b.id); setModal(true); };
 
   const handleSave = () => {
@@ -294,7 +294,7 @@ export default function Butce({ db, save }: Props) {
       {budgets.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 60, background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ fontSize: '3rem', marginBottom: 14 }}>📊</div>
-          <h3 style={{ color: '#e2e8f0', marginBottom: 8 }}>Bütçe kategorisi yok</h3>
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>Bütçe kategorisi yok</h3>
           <p style={{ color: '#475569', marginBottom: 20, fontSize: '0.9rem' }}>Gider kategorileri ekleyerek aylık bütçenizi takip edin</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={initPresets} style={btnPrimary}>✨ Hazır Kategoriler Yükle</button>
@@ -338,7 +338,7 @@ export default function Butce({ db, save }: Props) {
               </div>
               {uncategorized.slice(0, 5).map(k => (
                 <div key={k.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: '0.82rem' }}>
-                  <span style={{ color: '#64748b' }}>{k.description || k.category}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{k.description || k.category}</span>
                   <span style={{ color: '#ef4444', fontWeight: 600 }}>{formatMoney(k.amount)}</span>
                 </div>
               ))}
@@ -379,7 +379,7 @@ export default function Butce({ db, save }: Props) {
               ))}
             </div>
             Her satırda: <strong>Tarih, Açıklama, Tutar</strong> (virgül / noktalı virgül / tab ayrımlı veya Excel sütunları)<br />
-            <em style={{ color: '#64748b' }}>İpucu: Excel'den "Farklı Kaydet → CSV" veya doğrudan .xlsx yükleyebilirsiniz.</em>
+            <em style={{ color: 'var(--text-muted)' }}>İpucu: Excel'den "Farklı Kaydet → CSV" veya doğrudan .xlsx yükleyebilirsiniz.</em>
           </div>
           {!importResult ? (
             <>
@@ -403,7 +403,7 @@ export default function Butce({ db, save }: Props) {
               <div style={{ maxHeight: 200, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: 10, padding: 10 }}>
                 {importResult.entries.slice(0, 15).map((e, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: '0.78rem' }}>
-                    <span style={{ color: '#64748b', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.desc}</span>
+                    <span style={{ color: 'var(--text-muted)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.desc}</span>
                     <span style={{ color: e.type === 'gelir' ? '#10b981' : '#ef4444', fontWeight: 700, marginLeft: 8 }}>{e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}</span>
                   </div>
                 ))}
@@ -411,7 +411,7 @@ export default function Butce({ db, save }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={confirmImport} style={{ flex: 1, padding: '12px 0', background: 'linear-gradient(135deg,#10b981,#059669)', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 800, cursor: 'pointer' }}>✅ {importResult.total} İşlemi Kasa'ya Aktar</button>
-                <button onClick={() => setImportResult(null)} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 10, color: '#64748b', cursor: 'pointer' }}>İptal</button>
+                <button onClick={() => setImportResult(null)} style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 10, color: 'var(--text-muted)', cursor: 'pointer' }}>İptal</button>
               </div>
             </div>
           )}
@@ -421,9 +421,9 @@ export default function Butce({ db, save }: Props) {
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 5, color: '#64748b', fontSize: '0.8rem', fontWeight: 600 };
+const lbl: React.CSSProperties = { display: 'block', marginBottom: 5, color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 };
 const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f1f5f9', fontSize: '0.88rem', boxSizing: 'border-box' };
-const miniBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: 'none', borderRadius: 6, color: '#64748b', padding: '4px 6px', cursor: 'pointer', fontSize: '0.82rem' };
-const sel: React.CSSProperties = { padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, color: '#94a3b8', fontSize: '0.85rem' };
+const miniBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: 'none', borderRadius: 6, color: 'var(--text-muted)', padding: '4px 6px', cursor: 'pointer', fontSize: '0.82rem' };
+const sel: React.CSSProperties = { padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, color: 'var(--text-dim)', fontSize: '0.85rem' };
 const btnPrimary: React.CSSProperties = { background: 'linear-gradient(135deg,#ff5722,#ff7043)', border: 'none', borderRadius: 10, color: '#fff', padding: '9px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' };
 const btnSecondary: React.CSSProperties = { background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 10, color: '#60a5fa', padding: '9px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem' };

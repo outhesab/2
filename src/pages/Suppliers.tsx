@@ -562,7 +562,7 @@ export default function Suppliers({ db, save }: Props) {
                 background: "#1e293b",
                 border: "1px solid #334155",
                 borderRadius: 10,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
               }}
             />
           </div>
@@ -600,7 +600,7 @@ export default function Suppliers({ db, save }: Props) {
                   gridColumn: "1/-1",
                   textAlign: "center",
                   padding: 48,
-                  color: "#64748b",
+                  color: "var(--text-muted)",
                 }}
               >
                 Tedarikçi bulunamadı
@@ -624,7 +624,7 @@ export default function Suppliers({ db, save }: Props) {
                       marginBottom: 4,
                     }}
                   >
-                    <h4 style={{ fontWeight: 700, color: "#f1f5f9" }}>
+                    <h4 style={{ fontWeight: 700, color: "var(--text-primary)" }}>
                       {s.name}
                     </h4>
                     <span
@@ -642,7 +642,7 @@ export default function Suppliers({ db, save }: Props) {
                   </div>
                   <p
                     style={{
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                       fontSize: "0.82rem",
                       marginBottom: 10,
                     }}
@@ -652,7 +652,7 @@ export default function Suppliers({ db, save }: Props) {
                   {s.phone && (
                     <p
                       style={{
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.85rem",
                         marginBottom: 4,
                       }}
@@ -663,7 +663,7 @@ export default function Suppliers({ db, save }: Props) {
                   {s.email && (
                     <p
                       style={{
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.82rem",
                         marginBottom: 4,
                       }}
@@ -680,7 +680,7 @@ export default function Suppliers({ db, save }: Props) {
                       justifyContent: "space-between",
                     }}
                   >
-                    <span style={{ color: "#64748b", fontSize: "0.8rem" }}>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
                       {s.totalOrders || 0} sipariş
                     </span>
                     <span
@@ -809,7 +809,7 @@ export default function Suppliers({ db, save }: Props) {
                 background: "#1e293b",
                 border: "1px solid #334155",
                 borderRadius: 10,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
               }}
             >
               <option value="">Tüm Tedarikçiler</option>
@@ -845,7 +845,7 @@ export default function Suppliers({ db, save }: Props) {
                         style={{
                           padding: "12px 16px",
                           textAlign: "left",
-                          color: "#64748b",
+                          color: "var(--text-muted)",
                           fontSize: "0.78rem",
                           fontWeight: 600,
                           textTransform: "uppercase",
@@ -865,7 +865,7 @@ export default function Suppliers({ db, save }: Props) {
                       style={{
                         textAlign: "center",
                         padding: 40,
-                        color: "#64748b",
+                        color: "var(--text-muted)",
                       }}
                     >
                       Sipariş bulunamadı
@@ -883,7 +883,7 @@ export default function Suppliers({ db, save }: Props) {
                         data-label="Tarih"
                         style={{
                           padding: "12px 16px",
-                          color: "#64748b",
+                          color: "var(--text-muted)",
                           fontSize: "0.82rem",
                         }}
                       >
@@ -893,7 +893,7 @@ export default function Suppliers({ db, save }: Props) {
                         data-label="Tedarikçi"
                         style={{
                           padding: "12px 16px",
-                          color: "#f1f5f9",
+                          color: "var(--text-primary)",
                           fontWeight: 600,
                         }}
                       >
@@ -904,7 +904,7 @@ export default function Suppliers({ db, save }: Props) {
                         data-label="Ürünler"
                         style={{
                           padding: "12px 16px",
-                          color: "#94a3b8",
+                          color: "var(--text-dim)",
                           fontSize: "0.85rem",
                           maxWidth: 200,
                           overflow: "hidden",
@@ -1066,7 +1066,7 @@ export default function Suppliers({ db, save }: Props) {
                   <p
                     key={i}
                     style={{
-                      color: "#94a3b8",
+                      color: "var(--text-dim)",
                       fontSize: "0.8rem",
                       margin: "2px 0",
                     }}
@@ -1167,7 +1167,7 @@ export default function Suppliers({ db, save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "11px 20px",
               cursor: "pointer",
             }}
@@ -1254,7 +1254,7 @@ export default function Suppliers({ db, save }: Props) {
                 padding: "8px 10px",
               }}
             >
-              <span style={{ flex: 1, color: "#f1f5f9", fontSize: "0.88rem" }}>
+              <span style={{ flex: 1, color: "var(--text-primary)", fontSize: "0.88rem" }}>
                 {item.productName}
               </span>
               <input
@@ -1277,7 +1277,7 @@ export default function Suppliers({ db, save }: Props) {
                   background: "#1e293b",
                   border: "1px solid #334155",
                   borderRadius: 6,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   padding: "4px 6px",
                   textAlign: "center",
                 }}
@@ -1302,7 +1302,7 @@ export default function Suppliers({ db, save }: Props) {
                   background: "#1e293b",
                   border: "1px solid #334155",
                   borderRadius: 6,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   padding: "4px 6px",
                 }}
               />
@@ -1378,8 +1378,8 @@ export default function Suppliers({ db, save }: Props) {
                   marginBottom: 4,
                 }}
               >
-                <span style={{ color: "#94a3b8" }}>Ürün Toplamı</span>
-                <span style={{ color: "#f1f5f9", fontWeight: 700 }}>
+                <span style={{ color: "var(--text-dim)" }}>Ürün Toplamı</span>
+                <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                   {formatMoney(orderItems.reduce((s, i) => s + i.lineTotal, 0))}
                 </span>
               </div>
@@ -1391,7 +1391,7 @@ export default function Suppliers({ db, save }: Props) {
                     marginBottom: 4,
                   }}
                 >
-                  <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+                  <span style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
                     + Nakliye
                   </span>
                   <span
@@ -1413,7 +1413,7 @@ export default function Suppliers({ db, save }: Props) {
                   paddingTop: 8,
                 }}
               >
-                <span style={{ color: "#94a3b8" }}>Genel Toplam</span>
+                <span style={{ color: "var(--text-dim)" }}>Genel Toplam</span>
                 <span
                   style={{
                     color: "#10b981",
@@ -1451,7 +1451,7 @@ export default function Suppliers({ db, save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "11px 20px",
               cursor: "pointer",
             }}
@@ -1467,7 +1467,7 @@ export default function Suppliers({ db, save }: Props) {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#94a3b8",
+  color: "var(--text-dim)",
   fontSize: "0.85rem",
   fontWeight: 500,
 };
@@ -1477,7 +1477,7 @@ const inp: React.CSSProperties = {
   background: "rgba(15,23,42,0.6)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };

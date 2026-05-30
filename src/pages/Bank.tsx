@@ -366,14 +366,14 @@ export default function Bank({ db, save }: Props) {
     background: "rgba(15,23,42,0.6)",
     border: "1px solid #334155",
     borderRadius: 10,
-    color: "#f1f5f9",
+    color: "var(--text-primary)",
     fontSize: "0.9rem",
     boxSizing: "border-box",
   };
   const lbl: React.CSSProperties = {
     display: "block",
     marginBottom: 6,
-    color: "#94a3b8",
+    color: "var(--text-dim)",
     fontSize: "0.82rem",
     fontWeight: 600,
   };
@@ -630,10 +630,10 @@ export default function Bank({ db, save }: Props) {
           style={{
             flex: 1,
             padding: "9px 13px",
-            background: "#1e293b",
+            background: "var(--bg-card)",
             border: "1px solid #334155",
             borderRadius: 10,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             minWidth: 120,
           }}
         />
@@ -643,10 +643,10 @@ export default function Bank({ db, save }: Props) {
           onChange={(e) => setDateFrom(e.target.value)}
           style={{
             padding: "9px 10px",
-            background: "#1e293b",
+            background: "var(--bg-card)",
             border: "1px solid #334155",
             borderRadius: 10,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             fontSize: "0.85rem",
           }}
         />
@@ -656,10 +656,10 @@ export default function Bank({ db, save }: Props) {
           onChange={(e) => setDateTo(e.target.value)}
           style={{
             padding: "9px 10px",
-            background: "#1e293b",
+            background: "var(--bg-card)",
             border: "1px solid #334155",
             borderRadius: 10,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             fontSize: "0.85rem",
           }}
         />
@@ -674,7 +674,7 @@ export default function Bank({ db, save }: Props) {
               border: "none",
               borderRadius: 8,
               background: "#334155",
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               cursor: "pointer",
             }}
           >
@@ -730,7 +730,7 @@ export default function Bank({ db, save }: Props) {
                       : f === "expense"
                         ? "rgba(239,68,68,0.2)"
                         : "#273548"
-                    : "#1e293b",
+                    : "var(--bg-card)",
                 color:
                   typeFilter === f
                     ? f === "income"
@@ -751,7 +751,7 @@ export default function Bank({ db, save }: Props) {
       <div
         className="responsive-table-wrap"
         style={{
-          background: "#1e293b",
+          background: "var(--bg-card)",
           borderRadius: 14,
           border: "1px solid #334155",
           overflowX: "auto",
@@ -773,7 +773,7 @@ export default function Bank({ db, save }: Props) {
                     style={{
                       padding: "11px 14px",
                       textAlign: "left",
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                       fontSize: "0.75rem",
                       fontWeight: 700,
                       textTransform: "uppercase",
@@ -813,7 +813,7 @@ export default function Bank({ db, save }: Props) {
                       data-label="Tarih"
                       style={{
                         padding: "11px 14px",
-                        color: "#64748b",
+                        color: "var(--text-muted)",
                         fontSize: "0.82rem",
                       }}
                     >
@@ -823,7 +823,7 @@ export default function Bank({ db, save }: Props) {
                       data-label="Açıklama"
                       style={{
                         padding: "11px 14px",
-                        color: "#e2e8f0",
+                        color: "var(--text-primary)",
                         maxWidth: 220,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -1097,7 +1097,7 @@ export default function Bank({ db, save }: Props) {
                 background: "#273548",
                 border: "1px solid #334155",
                 borderRadius: 10,
-                color: "#94a3b8",
+                color: "var(--text-dim)",
                 padding: "12px 18px",
                 cursor: "pointer",
               }}

@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.1',
+    date: '30 Mayıs 2026',
+    title: 'Tema/Contrast Düzeltmeleri — Hardcoded Renkler CSS Variable\'a Dönüştürüldü',
+    summary: '30+ sayfada hardcoded renkler CSS variable referanslarına dönüştürüldü. AI Asistan, Dashboard, Kasa, Stock, Products, Sales, Reports, Fatura ve 20+ sayfada kontrast sorunları giderildi. Light/dark tema geçişlerinde okunamayan yazı sorunu çözüldü.',
+    changes: [
+      { type: 'iyilestirme', text: 'AIAsistan: mesaj metin/sourceLabel/onay kartı renkleri hardcoded → CSS variable' },
+      { type: 'iyilestirme', text: 'DashboardOperasyon/Ticaret: sabit dark/light renk sabitleri → var(--text-primary)/var(--bg-card)' },
+      { type: 'iyilestirme', text: '18 sayfada #f1f5f9, #e2e8f0 text rengi → var(--text-primary) (Sales, Reports, Fatura, Bank, Stock, Products, Kasa, Cizelge, Suppliers, Pelet, Partners, Notlar, Monitor, ConsoleKayit, Cari, Butce, ExcelImport, BugHunter, Perf, Entegrasyonlar)' },
+      { type: 'iyilestirme', text: 'Kasa/Stock/Products/Pelet: #1e293b arkaplan → var(--bg-card), #334155 border → var(--border)' },
+      { type: 'iyilestirme', text: '#94a3b8 → var(--text-dim), #64748b → var(--text-muted), #475569 → var(--text-secondary) toplu dönüşüm' },
+      { type: 'iyilestirme', text: 'Settings: #fff arkaplanlar → var(--bg-elevated) (dark mod uyumu)' },
+      { type: 'iyilestirme', text: 'Dashboard grafik: chart label/axis/dot renkleri CSS variable\'a dönüştürüldü' },
+      { type: 'iyilestirme', text: 'AIAsistan: Markdown başlık/sourceLabel renkleri CSS variable\'a dönüştürüldü (#ff7043→var(--accent))' },
+      { type: 'kaldirildi', text: 'Settings/Arayüz: Özel Renk Seçimi (accent/bgBase renk seçici) kaldırıldı — sadece temalar kaldı' },
+    ],
+  },
+  {
     version: '3.10.0',
     date: '30 Mayıs 2026',
     title: 'Konsol Kaydedici + Lint/TypeScript Temizliği',

@@ -25,15 +25,15 @@ export interface UIPrefs {
 }
 
 export const DEFAULT_PREFS: UIPrefs = {
-  themeId: "carbon",
-  accent: "#22c55e",
-  bgBase: "#041512",
+  themeId: "corporate",
+  accent: "#2563eb",
+  bgBase: "#f8fafc",
   fontScale: 1,
   animSpeed: "normal",
   compactMode: false,
   sidebarStyle: "default",
   cardRadius: 12,
-  lightMode: false,
+  lightMode: true,
   showAIButton: true,
   showFABButton: true,
   showReportButton: true,
@@ -110,10 +110,8 @@ export function applyUIPrefs(prefs: UIPrefs): void {
   const isLight = prefs.lightMode;
 
   if (isLight) {
-    document.body.classList.add("light-mode");
     document.body.classList.remove("dark-mode");
   } else {
-    document.body.classList.remove("light-mode");
     document.body.classList.add("dark-mode");
   }
 

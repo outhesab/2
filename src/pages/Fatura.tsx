@@ -644,7 +644,7 @@ export default function Fatura({ db, save }: Props) {
               background: "rgba(0,0,0,0.3)",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 8,
-              color: "#f1f5f9",
+              color: "var(--text-primary)",
               fontSize: "0.85rem",
               width: 160,
             }}
@@ -658,7 +658,7 @@ export default function Fatura({ db, save }: Props) {
               background: "rgba(0,0,0,0.3)",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 8,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               fontSize: "0.82rem",
             }}
           >
@@ -674,7 +674,7 @@ export default function Fatura({ db, save }: Props) {
               background: "rgba(0,0,0,0.3)",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 8,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               fontSize: "0.82rem",
             }}
           >
@@ -772,7 +772,7 @@ export default function Fatura({ db, save }: Props) {
                     >
                       <span
                         style={{
-                          color: "#f1f5f9",
+                          color: "var(--text-primary)",
                           fontWeight: 700,
                           fontFamily: "monospace",
                           fontSize: "0.88rem",
@@ -817,7 +817,7 @@ export default function Fatura({ db, save }: Props) {
                     data-label="Müşteri"
                     style={{
                       padding: "12px 14px",
-                      color: "#e2e8f0",
+                      color: "var(--text-primary)",
                       fontWeight: 600,
                       fontSize: "0.88rem",
                     }}
@@ -863,7 +863,7 @@ export default function Fatura({ db, save }: Props) {
                     data-label="Ödeme"
                     style={{
                       padding: "12px 14px",
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                       fontSize: "0.82rem",
                     }}
                   >
@@ -1282,7 +1282,7 @@ export default function Fatura({ db, save }: Props) {
                 }}
               >
                 <span
-                  style={{ color: "#64748b", fontSize: "0.82rem", flex: 1 }}
+                  style={{ color: "var(--text-muted)", fontSize: "0.82rem", flex: 1 }}
                 >
                   İskonto
                 </span>
@@ -1368,7 +1368,7 @@ export default function Fatura({ db, save }: Props) {
               <div>
                 <h3
                   style={{
-                    color: "#f1f5f9",
+                    color: "var(--text-primary)",
                     fontWeight: 800,
                     fontSize: "1rem",
                     marginBottom: 4,
@@ -1427,7 +1427,7 @@ export default function Fatura({ db, save }: Props) {
               >
                 {previewInv.type === "satis" ? "MÃœÅTERÄ°" : "TEDARÄ°KÃ‡Ä°"}
               </p>
-              <p style={{ color: "#f1f5f9", fontWeight: 700 }}>
+              <p style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                 {previewInv.cariName}
               </p>
               {previewInv.cariTaxNo && (
@@ -1477,7 +1477,7 @@ export default function Fatura({ db, save }: Props) {
                     <td
                       style={{
                         padding: "8px 10px",
-                        color: "#e2e8f0",
+                        color: "var(--text-primary)",
                         fontSize: "0.88rem",
                       }}
                     >
@@ -1486,7 +1486,7 @@ export default function Fatura({ db, save }: Props) {
                     <td
                       style={{
                         padding: "8px 10px",
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.85rem",
                       }}
                     >
@@ -1495,7 +1495,7 @@ export default function Fatura({ db, save }: Props) {
                     <td
                       style={{
                         padding: "8px 10px",
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.85rem",
                       }}
                     >
@@ -1504,7 +1504,7 @@ export default function Fatura({ db, save }: Props) {
                     <td
                       style={{
                         padding: "8px 10px",
-                        color: "#94a3b8",
+                        color: "var(--text-dim)",
                         fontSize: "0.85rem",
                       }}
                     >
@@ -1601,7 +1601,7 @@ export default function Fatura({ db, save }: Props) {
                 >
                   <span
                     style={{
-                      color: "#94a3b8",
+                      color: "var(--text-dim)",
                       fontWeight: 700,
                       fontSize: "0.88rem",
                     }}
@@ -1705,7 +1705,7 @@ export default function Fatura({ db, save }: Props) {
                           background: "rgba(255,255,255,0.05)",
                           border: "1px solid rgba(255,255,255,0.08)",
                           borderRadius: 8,
-                          color: "#64748b",
+                          color: "var(--text-muted)",
                           padding: "9px 14px",
                           cursor: "pointer",
                           fontSize: "0.85rem",
@@ -1776,7 +1776,7 @@ export default function Fatura({ db, save }: Props) {
                             <td
                               style={{
                                 padding: "8px 10px",
-                                color: "#64748b",
+                                color: "var(--text-muted)",
                                 fontSize: "0.82rem",
                               }}
                             >
@@ -1785,7 +1785,7 @@ export default function Fatura({ db, save }: Props) {
                             <td
                               style={{
                                 padding: "8px 10px",
-                                color: "#e2e8f0",
+                                color: "var(--text-primary)",
                                 fontSize: "0.82rem",
                               }}
                             >
@@ -1916,7 +1916,7 @@ const miniBtn: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
   border: "none",
   borderRadius: 6,
-  color: "#64748b",
+  color: "var(--text-muted)",
   padding: "4px 6px",
   cursor: "pointer",
   fontSize: "0.82rem",
@@ -1924,7 +1924,7 @@ const miniBtn: React.CSSProperties = {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 5,
-  color: "#64748b",
+  color: "var(--text-muted)",
   fontSize: "0.82rem",
   fontWeight: 600,
 };
@@ -1934,7 +1934,7 @@ const inp: React.CSSProperties = {
   background: "rgba(0,0,0,0.4)",
   border: "1px solid rgba(255,255,255,0.08)",
   borderRadius: 8,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.88rem",
   boxSizing: "border-box",
 };

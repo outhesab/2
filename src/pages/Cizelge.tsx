@@ -291,7 +291,7 @@ export default function Cizelge({ db }: Props) {
         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 18px', marginBottom: 14, position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: '1.1rem' }}>📅</span>
-            <span style={{ color: '#f1f5f9', fontWeight: 800, fontSize: '0.88rem' }}>Yaklaşan 7 Gün</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.88rem' }}>Yaklaşan 7 Gün</span>
             <span style={{ color: '#475569', fontSize: '0.72rem' }}>{upcomingEvents.length} olay</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -301,8 +301,8 @@ export default function Cizelge({ db }: Props) {
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: s.bg, border: `1px solid ${s.border}` }}>
                   <span style={{ fontSize: '1rem' }}>{s.icon}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ color: '#f1f5f9', fontSize: '0.82rem', fontWeight: 600 }}>{ev.label}</div>
-                    {ev.relatedName && <div style={{ color: '#64748b', fontSize: '0.72rem' }}>{ev.relatedName}</div>}
+                    <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600 }}>{ev.label}</div>
+                    {ev.relatedName && <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{ev.relatedName}</div>}
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ color: s.color, fontWeight: 700, fontSize: '0.85rem' }}>{ev.amount ? `₺${ev.amount.toLocaleString('tr-TR')}` : '-'}</div>

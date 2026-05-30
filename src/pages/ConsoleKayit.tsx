@@ -2,7 +2,7 @@ import { consoleRecorder, type ConsoleLevel, type ConsoleRecord } from "@/lib/co
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 
 const LEVEL_CONFIG: Record<ConsoleLevel, { label: string; color: string; bg: string; icon: string }> = {
-  log: { label: "Log", color: "#94a3b8", bg: "rgba(148,163,184,0.08)", icon: "📄" },
+  log: { label: "Log", color: "var(--text-dim)", bg: "rgba(148,163,184,0.08)", icon: "📄" },
   info: { label: "Info", color: "#3b82f6", bg: "rgba(59,130,246,0.1)", icon: "ℹ️" },
   warn: { label: "Warn", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: "⚠️" },
   error: { label: "Error", color: "#ef4444", bg: "rgba(239,68,68,0.1)", icon: "❌" },
@@ -124,10 +124,10 @@ export default function ConsoleKayit() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: "1.5rem" }}>🖥️</span>
           <div>
-            <h1 style={{ margin: 0, fontSize: "1.3rem", fontWeight: 700, color: "#f1f5f9" }}>
+            <h1 style={{ margin: 0, fontSize: "1.3rem", fontWeight: 700, color: "var(--text-primary)" }}>
               Konsol Kayıtları
             </h1>
-            <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "#64748b" }}>
+            <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "var(--text-muted)" }}>
               {records.length} kayıt &middot; Oturum: {consoleRecorder.getSessionId()}
             </p>
           </div>
@@ -166,12 +166,12 @@ export default function ConsoleKayit() {
         }}
       >
         {[
-          { label: "Toplam", value: records.length, color: "#64748b" },
+          { label: "Toplam", value: records.length, color: "var(--text-muted)" },
           { label: "Hata", value: counts.error, color: "#ef4444" },
           { label: "Uyarı", value: counts.warn, color: "#f59e0b" },
           { label: "Bilgi", value: counts.info, color: "#3b82f6" },
           { label: "Debug", value: counts.debug, color: "#8b5cf6" },
-          { label: "Log", value: counts.log, color: "#94a3b8" },
+          { label: "Log", value: counts.log, color: "var(--text-dim)" },
           { label: "Hata Oranı", value: `${errorRate}%`, color: errorRate > 10 ? "#ef4444" : "#10b981" },
         ].map((stat, i) => (
           <div
@@ -186,7 +186,7 @@ export default function ConsoleKayit() {
             <div style={{ fontSize: "1.3rem", fontWeight: 800, color: stat.color }}>
               {stat.value}
             </div>
-            <div style={{ fontSize: "0.7rem", color: "#64748b", marginTop: 2 }}>
+            <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: 2 }}>
               {stat.label}
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function ConsoleKayit() {
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: 8,
-            color: "#f1f5f9",
+            color: "var(--text-primary)",
             fontSize: "0.85rem",
           }}
         />
@@ -240,7 +240,7 @@ export default function ConsoleKayit() {
               : LEVEL_CONFIG[f].icon + " " + LEVEL_CONFIG[f].label}
           </button>
         ))}
-        <label style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", color: "#64748b", fontSize: "0.8rem", cursor: "pointer" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", color: "var(--text-muted)", fontSize: "0.8rem", cursor: "pointer" }}>
           <input type="checkbox" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} />
           Otomatik Kaydır
         </label>
@@ -260,7 +260,7 @@ export default function ConsoleKayit() {
           }}
         >
           {filtered.length === 0 ? (
-            <div style={{ padding: 32, textAlign: "center", color: "#64748b" }}>
+            <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)" }}>
               <div style={{ fontSize: "2rem", marginBottom: 8, opacity: 0.4 }}>🖥️</div>
               <p>Konsol kaydı bulunamadı</p>
               <p style={{ fontSize: "0.75rem", marginTop: 4 }}>
@@ -339,7 +339,7 @@ export default function ConsoleKayit() {
                       </span>
                       <span
                         style={{
-                          color: "#e2e8f0",
+                          color: "var(--text-primary)",
                           wordBreak: "break-word",
                           whiteSpace: "pre-wrap",
                           lineHeight: 1.5,
@@ -369,13 +369,13 @@ export default function ConsoleKayit() {
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <h3 style={{ margin: 0, fontSize: "0.95rem", color: "#f1f5f9" }}>Kayıt Detayı</h3>
+              <h3 style={{ margin: 0, fontSize: "0.95rem", color: "var(--text-primary)" }}>Kayıt Detayı</h3>
               <button
                 onClick={() => setSelectedRecord(null)}
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#64748b",
+                  color: "var(--text-muted)",
                   cursor: "pointer",
                   fontSize: "1.1rem",
                 }}
@@ -397,7 +397,7 @@ export default function ConsoleKayit() {
               />
               <DetailRow label="Oturum" value={selectedRecord.sessionId} />
               <div>
-                <div style={{ color: "#64748b", fontSize: "0.75rem", marginBottom: 4, fontWeight: 600 }}>
+                <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginBottom: 4, fontWeight: 600 }}>
                   İÇERİK
                 </div>
                 <div
@@ -405,7 +405,7 @@ export default function ConsoleKayit() {
                     background: "rgba(0,0,0,0.3)",
                     borderRadius: 6,
                     padding: "8px 10px",
-                    color: "#e2e8f0",
+                    color: "var(--text-primary)",
                     fontSize: "0.8rem",
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
@@ -420,7 +420,7 @@ export default function ConsoleKayit() {
               </div>
               {selectedRecord.stack && (
                 <div>
-                  <div style={{ color: "#64748b", fontSize: "0.75rem", marginBottom: 4, fontWeight: 600 }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginBottom: 4, fontWeight: 600 }}>
                     STACK TRACE
                   </div>
                   <div
@@ -474,7 +474,7 @@ export default function ConsoleKayit() {
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div style={{ display: "flex", gap: 8 }}>
-      <span style={{ color: "#64748b", fontSize: "0.75rem", fontWeight: 600, minWidth: 60, flexShrink: 0 }}>
+      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, minWidth: 60, flexShrink: 0 }}>
         {label}
       </span>
       <span style={{ color: "#cbd5e1", fontSize: "0.8rem", wordBreak: "break-all" }}>{value}</span>

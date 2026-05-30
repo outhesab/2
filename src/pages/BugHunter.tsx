@@ -844,7 +844,7 @@ export default function BugHunter() {
               style={{
                 margin: "4px 0 0",
                 fontSize: "0.85rem",
-                color: "#94a3b8",
+                color: "var(--text-dim)",
               }}
             >
               Kapsamli Hata Ayiklama & Test Sistemi — React Muhasebe Uygulamasi
@@ -886,7 +886,7 @@ export default function BugHunter() {
               {
                 label: "Toplam Test",
                 value: report.totalTests,
-                color: "#64748b",
+                color: "var(--text-muted)",
               },
               { label: "Basarili", value: report.passed, color: "#10b981" },
               { label: "Basarisiz", value: report.failed, color: "#ef4444" },
@@ -924,7 +924,7 @@ export default function BugHunter() {
                 <div
                   style={{
                     fontSize: "0.75rem",
-                    color: "#94a3b8",
+                    color: "var(--text-dim)",
                     marginTop: 2,
                   }}
                 >
@@ -998,7 +998,7 @@ export default function BugHunter() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {filteredResults.length === 0 ? (
               <div
-                style={{ textAlign: "center", padding: 32, color: "#64748b" }}
+                style={{ textAlign: "center", padding: 32, color: "var(--text-muted)" }}
               >
                 <div style={{ fontSize: "2rem", marginBottom: 8 }}>🔍</div>
                 <p>Filtreye uygun test sonucu bulunamadi</p>
@@ -1035,7 +1035,7 @@ export default function BugHunter() {
                           background: "rgba(0,0,0,0.2)",
                           padding: "3px 8px",
                           borderRadius: 6,
-                          color: "#94a3b8",
+                          color: "var(--text-dim)",
                         }}
                       >
                         {result.category} › {result.subCategory}
@@ -1063,7 +1063,7 @@ export default function BugHunter() {
                     >
                       <div
                         style={{
-                          color: "#e2e8f0",
+                          color: "var(--text-primary)",
                           fontSize: "0.85rem",
                           marginBottom: 8,
                         }}
@@ -1117,7 +1117,7 @@ export default function BugHunter() {
           style={{
             textAlign: "center",
             padding: "60px 20px",
-            color: "#64748b",
+            color: "var(--text-muted)",
           }}
         >
           <div style={{ fontSize: "4rem", marginBottom: 16, opacity: 0.3 }}>

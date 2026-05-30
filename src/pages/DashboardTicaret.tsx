@@ -10,11 +10,11 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empt
 
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
-const TEAL = "#0d7377";
-const WHITE = "#ffffff";
-const TEXT = "#1e293b";
+const TEAL = "var(--color-info)";
+const WHITE = "var(--bg-card)";
+const TEXT = "var(--text-primary)";
 const MUTED = "var(--text-muted)";
-const BORDER = "#e0ddd5";
+const BORDER = "var(--border)";
 const CAT_COLORS = ["#0d7377", "#b45309", "var(--color-info)", "var(--color-warning)", "var(--color-accent)", "var(--color-success)", "var(--color-danger)", "var(--color-info)", "#ec4899", "var(--color-accent)"];
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } } as const;

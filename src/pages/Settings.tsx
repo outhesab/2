@@ -1054,7 +1054,7 @@ function SoundSettingsPanel({
                   width: 20,
                   height: 20,
                   borderRadius: "50%",
-                  background: "#fff",
+                  background: "var(--bg-elevated)",
                   position: "absolute",
                   top: 4,
                   left: settings.enabled ? 28 : 4,
@@ -1153,7 +1153,7 @@ function SoundSettingsPanel({
                   width: 20,
                   height: 20,
                   borderRadius: "50%",
-                  background: "#fff",
+                  background: "var(--bg-elevated)",
                   position: "absolute",
                   top: 4,
                   left: speechEnabled ? 28 : 4,
@@ -3643,7 +3643,7 @@ function BaglantiAyarlari({
                 width: 18,
                 height: 18,
                 borderRadius: "50%",
-                background: "#fff",
+                background: "var(--bg-elevated)",
                 position: "absolute",
                 top: 4,
                 left: cfg.firebase.enabled ? 26 : 4,
@@ -3867,7 +3867,7 @@ function BaglantiAyarlari({
                 width: 18,
                 height: 18,
                 borderRadius: "50%",
-                background: "#fff",
+                background: "var(--bg-elevated)",
                 position: "absolute",
                 top: 4,
                 left: cfg.supabase.enabled ? 26 : 4,
@@ -4193,171 +4193,7 @@ function ArayuzAyarlari({
         </div>
       </Card>
 
-      {/* Özel Renk */}
-      <Card title="🖌️ Özel Renk Seçimi">
-        <div className={"settings-grid-2-16"}>
-          <div>
-            <label className={"settings-lbl"}>Ana Renk (Accent)</label>
-            <div className={"settings-flex-row-10"}>
-              <input
-                type="color"
-                value={prefs.accent}
-                onChange={(e) => set({ accent: e.target.value })}
-                className={"settings-color-input"}
-              />
-              <input
-                type="text"
-                value={prefs.accent}
-                onChange={(e) => {
-                  if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))
-                    set({ accent: e.target.value });
-                }}
-                style={{
-                  ...inp,
-                  flex: 1,
-                  fontFamily: "monospace",
-                  fontSize: "0.88rem",
-                }}
-                placeholder="#ff5722"
-              />
-            </div>
-            {/* Hızlı renk paleti */}
-            <div className={"settings-flex-wrap-6"}>
-              {[
-                "#ff5722",
-                "#ef4444",
-                "#f59e0b",
-                "#10b981",
-                "#0ea5e9",
-                "#6366f1",
-                "#8b5cf6",
-                "#ec4899",
-                "#14b8a6",
-                "#84cc16",
-              ].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => set({ accent: c })}
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 7,
-                    background: c,
-                    border:
-                      prefs.accent === c
-                        ? "2px solid #fff"
-                        : "2px solid transparent",
-                    cursor: "pointer",
-                    boxShadow: prefs.accent === c ? `0 0 8px ${c}` : "none",
-                    transition: "all 0.15s",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={"settings-lbl"}>Arka Plan Rengi</label>
-            <div className={"settings-flex-row-10"}>
-              <input
-                type="color"
-                value={prefs.bgBase}
-                onChange={(e) => set({ bgBase: e.target.value })}
-                className={"settings-color-input"}
-              />
-              <input
-                type="text"
-                value={prefs.bgBase}
-                onChange={(e) => {
-                  if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value))
-                    set({ bgBase: e.target.value });
-                }}
-                style={{
-                  ...inp,
-                  flex: 1,
-                  fontFamily: "monospace",
-                  fontSize: "0.88rem",
-                }}
-                placeholder="#070e1c"
-              />
-            </div>
-            <div className={"settings-flex-wrap-6"}>
-              {[
-                "#070e1c",
-                "#050f1a",
-                "#0a0714",
-                "#061410",
-                "#0f0c04",
-                "#0a0f18",
-                "#0f0505",
-                "#111827",
-              ].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => set({ bgBase: c })}
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 7,
-                    background: c,
-                    border:
-                      prefs.bgBase === c
-                        ? "2px solid #fff"
-                        : "2px solid rgba(255,255,255,0.2)",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Canlı önizleme */}
-        <div className={"settings-preview-box"}>
-          <div
-            style={{
-              background: prefs.bgBase,
-              padding: "14px 16px",
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 9,
-                background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.9rem",
-              }}
-            >
-              🔥
-            </div>
-            <div>
-              <div className={"settings-text-primary-sm"}>Önizleme</div>
-              <div className={"settings-text-dim"}>Seçilen tema görünümü</div>
-            </div>
-            <button
-              style={{
-                marginLeft: "auto",
-                background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
-                border: "none",
-                borderRadius: 8,
-                color: "var(--text-primary)",
-                padding: "6px 14px",
-                fontWeight: 700,
-                fontSize: "0.8rem",
-                cursor: "pointer",
-              }}
-            >
-              Buton
-            </button>
-          </div>
-        </div>
-      </Card>
+
 
       {/* Yazı & Boyut */}
       <Card title="🔤 Yazı & Boyut">
@@ -4483,7 +4319,7 @@ function ArayuzAyarlari({
                     width: 18,
                     height: 18,
                     borderRadius: "50%",
-                    background: "#fff",
+                    background: "var(--bg-elevated)",
                     position: "absolute",
                     top: 4,
                     left: prefs.compactMode ? 26 : 4,
@@ -4582,7 +4418,7 @@ function ArayuzAyarlari({
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    background: "#fff",
+                    background: "var(--bg-elevated)",
                     transition: "left 0.2s",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
                   }}

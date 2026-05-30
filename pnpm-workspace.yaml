@@ -3,5 +3,6 @@ packages:
 allowBuilds:
   "@firebase/util": true
   esbuild: true
+  msgpackr-extract: true
   protobufjs: true
   simple-git-hooks: true

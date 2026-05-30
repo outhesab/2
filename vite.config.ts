@@ -5,18 +5,35 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
+import Inspect from "vite-plugin-inspect";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from "rollup-plugin-visualizer";
 import { manualChunks } from "./src/lib/vite-manual-chunks";
 
 export { manualChunks };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: "./",
   plugins: [
     react(),
     tailwindcss(),
+    mode === "analyze"
+      ? visualizer({
+          emitFile: true,
+          filename: "stats.html",
+          open: false,
+          gzipSize: true,
+          brotliSize: true,
+        })
+      : null,
+    process.env.NODE_ENV === "production"
+      ? null
+      : Inspect({
+          build: false,
+          open: false,
+        }),
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
@@ -51,9 +68,9 @@ export default defineConfig({
         navigateFallback: "/",
       },
       manifest: {
-        name: "PARSPEL — Soba Yönetim Sistemi",
+        name: "PARSPEL â€” Soba Yonetim Sistemi",
         short_name: "PARSPEL",
-        description: "Soba satış ve stok yönetim sistemi",
+        description: "Soba satis ve stok yonetim sistemi",
         theme_color: "#0a0e27",
         background_color: "#0a0e27",
         display: "standalone",
@@ -96,7 +113,6 @@ export default defineConfig({
   server: {
     port: 3000,
     host: "127.0.0.1",
-    // Capacitor live reload için
     hmr: {
       port: 3001,
     },
@@ -118,6 +134,25 @@ export default defineConfig({
       mainFields: ["main", "module"],
     },
   },
+      coverage: {
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      include: ["src/**/*.ts", "src/**/*.tsx"],
+      exclude: [
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/**/*.d.ts",
+        "src/test/**",
+        "src/agents/**",
+        "**/node_modules/**",
+      ],
+      thresholds: {
+        lines: 20,
+        functions: 15,
+        branches: 15,
+        statements: 20,
+      },
+    },
   test: {
     globals: true,
     environment: "jsdom",
@@ -126,15 +161,11 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "scripts/**",
-      // Playwright e2e testleri — ayrı runner ile çalışır
       "**/e2e/**",
-      // Boş test dosyaları
       "**/gercekci-senaryolar.test.ts",
       "**/uygulama-gercek.test.ts",
-      // vy/ yedek klasörü — src/ ile aynı
       "vy/**",
-      // QA toolkit — ayrı Playwright kurulumu gerektirir
       "qa-toolkit/**",
     ],
   },
-});
+}));

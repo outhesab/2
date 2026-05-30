@@ -173,7 +173,7 @@ export async function loginUser(username: string, password: string): Promise<App
     if (u.username.toLowerCase() === username.toLowerCase() && u.active) {
       const match = await verifyPassword(password, u.passwordHash);
       if (match) {
-        let updated = users.map(x => x.id === u.id ? { ...x, lastLogin: new Date().toISOString() } : x);
+        const updated = users.map(x => x.id === u.id ? { ...x, lastLogin: new Date().toISOString() } : x);
         // Legacy SHA-256 hash'i PBKDF2'ye yükselt
         const isLegacy = !u.passwordHash.includes(':') && u.passwordHash.length === 64;
         if (isLegacy) {

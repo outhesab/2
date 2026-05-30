@@ -107,7 +107,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const premiumTheme = isPremium ? getPremiumTheme(uiPrefs.themeId) : null;
 
   const value = useMemo<ThemeContextValue>(() => ({
-    currentThemeId: uiPrefs.themeId || 'carbon',
+    currentThemeId: uiPrefs.themeId || 'corporate',
     setThemeId,
     uiPrefs,
     updateUIPrefs,

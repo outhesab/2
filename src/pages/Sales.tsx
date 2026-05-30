@@ -345,7 +345,7 @@ export default function Sales({ db, save: _save }: Props) {
       <div
         className="responsive-table-wrap"
         style={{
-          background: "#1e293b",
+          background: "var(--bg-card)",
           borderRadius: 14,
           border: "1px solid #334155",
           overflowX: "auto",
@@ -376,7 +376,7 @@ export default function Sales({ db, save: _save }: Props) {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#64748b",
+                    color: "var(--text-muted)",
                     fontSize: "0.78rem",
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -392,7 +392,7 @@ export default function Sales({ db, save: _save }: Props) {
               <tr>
                 <td
                   colSpan={9}
-                  style={{ textAlign: "center", padding: 40, color: "#64748b" }}
+                  style={{ textAlign: "center", padding: 40, color: "var(--text-muted)" }}
                 >
                   Satış bulunamadı
                 </td>
@@ -407,7 +407,7 @@ export default function Sales({ db, save: _save }: Props) {
                     data-label="Tarih"
                     style={{
                       padding: "12px 16px",
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                       fontSize: "0.82rem",
                     }}
                   >
@@ -417,7 +417,7 @@ export default function Sales({ db, save: _save }: Props) {
                     data-label="Ürün"
                     style={{
                       padding: "12px 16px",
-                      color: "#f1f5f9",
+                      color: "var(--text-primary)",
                       fontWeight: 600,
                     }}
                   >
@@ -427,13 +427,13 @@ export default function Sales({ db, save: _save }: Props) {
                     data-label="Müşteri"
                     style={{
                       padding: "12px 16px",
-                      color: "#94a3b8",
+                      color: "var(--text-dim)",
                       fontSize: "0.85rem",
                     }}
                   >
                     {db.cari.find((c) => c.id === s.cariId)?.name || "-"}
                   </td>
-                  <td data-label="Miktar" style={{ padding: "12px 16px", color: "#94a3b8" }}>
+                  <td data-label="Miktar" style={{ padding: "12px 16px", color: "var(--text-dim)" }}>
                     {s.quantity}
                   </td>
                   <td
@@ -598,7 +598,7 @@ export default function Sales({ db, save: _save }: Props) {
                 }}
               >
                 <span
-                  style={{ flex: 1, color: "#f1f5f9", fontSize: "0.88rem" }}
+                  style={{ flex: 1, color: "var(--text-primary)", fontSize: "0.88rem" }}
                 >
                   {item.productName}
                 </span>
@@ -623,15 +623,15 @@ export default function Sales({ db, save: _save }: Props) {
                   }}
                   style={{
                     width: 55,
-                    background: "#1e293b",
+                    background: "var(--bg-card)",
                     border: "1px solid #334155",
                     borderRadius: 6,
-                    color: "#f1f5f9",
+                    color: "var(--text-primary)",
                     padding: "4px 6px",
                     textAlign: "center",
                   }}
                 />
-                <span style={{ color: "#64748b", fontSize: "0.8rem" }}>×</span>
+                <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>×</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -656,10 +656,10 @@ export default function Sales({ db, save: _save }: Props) {
                   }}
                   style={{
                     width: 80,
-                    background: "#1e293b",
+                    background: "var(--bg-card)",
                     border: "1px solid #334155",
                     borderRadius: 6,
-                    color: "#f1f5f9",
+                    color: "var(--text-primary)",
                     padding: "4px 6px",
                   }}
                 />
@@ -790,7 +790,7 @@ export default function Sales({ db, save: _save }: Props) {
                   background: "#0f172a",
                   border: "1px solid #334155",
                   borderRadius: 8,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   padding: "8px 10px",
                 }}
               />
@@ -804,7 +804,7 @@ export default function Sales({ db, save: _save }: Props) {
                   background: "#0f172a",
                   border: "1px solid #334155",
                   borderRadius: 8,
-                  color: "#f1f5f9",
+                  color: "var(--text-primary)",
                   padding: "8px 10px",
                 }}
               >
@@ -870,7 +870,7 @@ export default function Sales({ db, save: _save }: Props) {
                       : "#0f172a",
                 border: `1px solid ${kalan > 0 && tahsilat !== "" ? "#f59e0b" : kalan < 0 && tahsilat !== "" ? "#10b981" : "#334155"}`,
                 borderRadius: 8,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
                 padding: "10px 14px",
                 boxSizing: "border-box",
                 fontSize: "1rem",
@@ -954,7 +954,7 @@ export default function Sales({ db, save: _save }: Props) {
               background: "#273548",
               border: "1px solid #334155",
               borderRadius: 10,
-              color: "#94a3b8",
+              color: "var(--text-dim)",
               padding: "12px 20px",
               cursor: "pointer",
             }}
@@ -970,16 +970,16 @@ export default function Sales({ db, save: _save }: Props) {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#94a3b8",
+  color: "var(--text-dim)",
   fontSize: "0.85rem",
   fontWeight: 500,
 };
 const sinp: React.CSSProperties = {
   padding: "9px 13px",
-  background: "#1e293b",
+  background: "var(--bg-card)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
 };
 const sinpStyle: React.CSSProperties = {
@@ -988,7 +988,7 @@ const sinpStyle: React.CSSProperties = {
   background: "rgba(15,23,42,0.6)",
   border: "1px solid #334155",
   borderRadius: 10,
-  color: "#f1f5f9",
+  color: "var(--text-primary)",
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };
@@ -1007,18 +1007,18 @@ function StatCard({
   return (
     <div
       style={{
-        background: "#1e293b",
+        background: "var(--bg-card)",
         borderRadius: 12,
         padding: "16px 18px",
         border: `1px solid ${color}22`,
       }}
     >
       <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.78rem", marginTop: 4 }}>
+      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
         {label}
       </div>
       {sub && (
-        <div style={{ color: "#94a3b8", fontSize: "0.82rem", marginTop: 2 }}>
+        <div style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: 2 }}>
           {sub}
         </div>
       )}
@@ -1046,7 +1046,7 @@ function Row({
         marginBottom: 6,
       }}
     >
-      <span style={{ color: "#64748b", fontSize: big ? "0.9rem" : "0.82rem" }}>
+      <span style={{ color: "var(--text-muted)", fontSize: big ? "0.9rem" : "0.82rem" }}>
         {label}
       </span>
       <span

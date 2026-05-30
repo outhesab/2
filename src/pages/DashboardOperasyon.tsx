@@ -8,10 +8,10 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empt
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
 const MONO = "'Courier New', monospace";
-const CARD_BG = "#1a1a22";
-const BORDER = "#2a2a32";
-const TEXT = "#e2e8f0";
-const MUTED = "#787890";
+const CARD_BG = "var(--bg-card)";
+const BORDER = "var(--border)";
+const TEXT = "var(--text-primary)";
+const MUTED = "var(--text-muted)";
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } } as const;
 const cardVariants = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 260, damping: 24 } } };

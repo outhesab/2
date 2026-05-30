@@ -363,4 +363,4 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 const thStyle: React.CSSProperties = { padding: '6px 10px', textAlign: 'left', color: '#334155', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap' };
-const tdStyle: React.CSSProperties = { padding: '7px 10px', color: '#e2e8f0' };
+const tdStyle: React.CSSProperties = { padding: '7px 10px', color: 'var(--text-primary)' };

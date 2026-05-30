@@ -197,7 +197,7 @@ export default function Kasa({ db, save }: Props) {
         <button onClick={() => saveEntry(type)} style={{ flex: 1, background: type === 'gelir' ? '#10b981' : '#ef4444', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>
           💾 Kaydet
         </button>
-        <button onClick={onClose} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+        <button onClick={onClose} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
       </div>
     </Modal>
   );
@@ -205,12 +205,12 @@ export default function Kasa({ db, save }: Props) {
   return (
     <div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ background: '#1e293b', borderRadius: 14, padding: '16px 20px', border: '1px solid #334155', flex: '1 1 140px' }}>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', flex: '1 1 140px' }}>
           <div style={{ color: '#64748b', fontSize: '0.78rem', marginBottom: 4, textTransform: 'uppercase' }}>💰 Toplam Kasa</div>
           <div style={{ fontSize: '1.6rem', fontWeight: 800, color: totalBakiye >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(totalBakiye)}</div>
         </div>
         {kasalar.map(k => (
-          <div key={k.id} style={{ background: '#1e293b', borderRadius: 14, padding: '16px 20px', border: '1px solid #334155', flex: '1 1 120px', cursor: 'pointer' }} onClick={() => setKasaFilter(k.id)}>
+          <div key={k.id} style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', flex: '1 1 120px', cursor: 'pointer' }} onClick={() => setKasaFilter(k.id)}>
             <div style={{ color: '#64748b', fontSize: '0.78rem', marginBottom: 4 }}>{k.icon} {k.name}</div>
             <div style={{ fontSize: '1.3rem', fontWeight: 800, color: (bakiyeler[k.id] || 0) >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(bakiyeler[k.id] || 0)}</div>
           </div>
@@ -218,23 +218,23 @@ export default function Kasa({ db, save }: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={() => setIncomeModal(true)} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: '#10b981', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>+ Gelir</button>
-        <button onClick={() => setExpenseModal(true)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, color: '#ef4444', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>- Gider</button>
+        <button onClick={() => setIncomeModal(true)} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: 'var(--color-success)', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>+ Gelir</button>
+        <button onClick={() => setExpenseModal(true)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, color: 'var(--color-danger)', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>- Gider</button>
         <button onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }} style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, color: '#a78bfa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📋 Gün Sonu Sayım</button>
         <button onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, color: '#60a5fa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel İndir</button>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ara..." style={{ padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem', flex: 1 }} />
-        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: '9px 10px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.85rem' }} />
-        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: '9px 10px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.85rem' }} />
-        {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '8px 10px', border: 'none', borderRadius: 8, background: '#334155', color: '#94a3b8', cursor: 'pointer', fontSize: '0.82rem' }}>✕</button>}
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ara..." style={{ padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', flex: 1 }} />
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
+        {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '8px 10px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕</button>}
         {['all', 'gelir', 'gider'].map(f => (
           <button key={f} onClick={() => setFilter(f)} style={{ padding: '8px 14px', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', background: filter === f ? '#ff5722' : '#273548', color: filter === f ? '#fff' : '#94a3b8' }}>
             {f === 'all' ? 'Tümü' : f === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
           </button>
         ))}
-        {kasaFilter !== 'all' && <button onClick={() => setKasaFilter('all')} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, background: '#334155', color: '#94a3b8', cursor: 'pointer', fontSize: '0.82rem' }}>✕ Filtre Kaldır</button>}
+        {kasaFilter !== 'all' && <button onClick={() => setKasaFilter('all')} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕ Filtre Kaldır</button>}
       </div>
 
-      <div className="responsive-table-wrap" style={{ background: '#1e293b', borderRadius: 14, border: '1px solid #334155', overflowX: 'auto' }}>
+      <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
           <thead>
             <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
@@ -249,9 +249,9 @@ export default function Kasa({ db, save }: Props) {
             ) : sorted.map(e => (
               <tr key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                 <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(e.createdAt)}</td>
-                <td data-label="Açıklama" style={{ padding: '11px 16px', color: '#f1f5f9', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.description || '-'}</td>
-                <td data-label="Kategori" style={{ padding: '11px 16px', color: '#94a3b8', fontSize: '0.82rem' }}>{catLabels[e.category] || e.category || '-'}</td>
-                <td data-label="Kasa" style={{ padding: '11px 16px', color: '#94a3b8' }}>{kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}</td>
+                <td data-label="Açıklama" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.description || '-'}</td>
+                <td data-label="Kategori" style={{ padding: '11px 16px', color: 'var(--text-dim)', fontSize: '0.82rem' }}>{catLabels[e.category] || e.category || '-'}</td>
+                <td data-label="Kasa" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}</td>
                 <td data-label="Tutar" style={{ padding: '11px 16px', fontWeight: 700, color: e.type === 'gelir' ? '#10b981' : '#ef4444' }}>
                   {e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}
                 </td>
@@ -261,7 +261,7 @@ export default function Kasa({ db, save }: Props) {
                   </span>
                 </td>
                 <td style={{ padding: '11px 16px' }}>
-                  <button onClick={() => deleteEntry(e.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
+                  <button onClick={() => deleteEntry(e.id)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
                 </td>
               </tr>
             ))}
@@ -288,11 +288,11 @@ export default function Kasa({ db, save }: Props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <div>
                     <span style={{ fontSize: '1.2rem', marginRight: 6 }}>{k.icon}</span>
-                    <span style={{ color: '#f1f5f9', fontWeight: 700 }}>{k.name}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{k.name}</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Sistem Bakiyesi</div>
-                    <div style={{ color: '#f1f5f9', fontWeight: 700 }}>{formatMoney(sistem)}</div>
+                    <div style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{formatMoney(sistem)}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -320,12 +320,12 @@ export default function Kasa({ db, save }: Props) {
         )}
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button onClick={gunSonuSayimPDF} style={{ flex: 1, background: '#8b5cf6', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>🖨️ PDF Yazdır</button>
-          <button onClick={() => setSayimModal(false)} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '11px 20px', cursor: 'pointer' }}>Kapat</button>
+          <button onClick={() => setSayimModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>Kapat</button>
         </div>
       </Modal>
     </div>
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid #334155', borderRadius: 10, color: '#f1f5f9', fontSize: '0.9rem', boxSizing: 'border-box' };
+const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
+const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };

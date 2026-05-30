@@ -34,7 +34,7 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
   const inp: React.CSSProperties = {
     width: '100%', padding: '7px 10px',
     background: 'rgba(15,23,42,0.6)', border: '1px solid #334155',
-    borderRadius: 8, color: '#f1f5f9', fontSize: '0.85rem', boxSizing: 'border-box',
+    borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.85rem', boxSizing: 'border-box',
   };
 
   return (
