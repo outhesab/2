@@ -44,6 +44,7 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'yeni', text: 'src/lib/specs/ — dinamik spec rule engine (types, component, error, nav, data, test rules)' },
       { type: 'yeni', text: 'src/__tests__/spec-compliance.test.ts — 13 spec kuralı için otomatik compliance testi' },
       { type: 'yeni', text: 'src/pages/SpecDashboard.tsx — canlı spec durumu sayfası (Sistem > Spec)' },
+      { type: 'iyilestirme', text: 'package.json — test:specs scripti eklendi (vitest run .../spec-compliance.test.ts)' },
       { type: 'iyilestirme', text: 'eslint.config.js: varsIgnorePattern eklendi, react-refresh ui/* ve shared component\'lerde kapatıldı' },
       { type: 'iyilestirme', text: 'tabs.ts: boş catch bloğuna void 0 eklendi (no-empty)' },
     ],

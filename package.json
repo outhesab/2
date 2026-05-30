@@ -18,6 +18,7 @@
                     "format:check":  "prettier --check src/",
                     "test":  "vitest",
                     "test:run":  "vitest run",
+                    "test:specs":  "vitest run src/__tests__/spec-compliance.test.ts",
                     "test:e2e":  "playwright test",
                     "cap:android":  "vite build \u0026\u0026 pnpm exec cap sync android \u0026\u0026 pnpm exec cap open android",
                     "postinstall":  "echo ok",
