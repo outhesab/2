@@ -20,7 +20,20 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    },
+  },
+  {
+    files: [
+      "src/components/ui/*",
+      "src/components/ConfirmDialog.tsx",
+      "src/components/LoginScreen.tsx",
+      "src/components/SetupWizard.tsx",
+      "src/components/Toast.tsx",
+      "src/theme/ThemeProvider.tsx",
+    ],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 )

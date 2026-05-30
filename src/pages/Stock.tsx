@@ -201,7 +201,7 @@ export default function Stock({ db, save }: Props) {
               <tbody>
                 {abcData.length === 0 ? (
                   <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Satış verisi yok</td></tr>
-                ) : abcData.map((v, i) => {
+                ) : abcData.map((v, _i) => {
                   const clsColor = v.class === 'A' ? '#10b981' : v.class === 'B' ? '#3b82f6' : '#64748b';
                   return (
                     <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>

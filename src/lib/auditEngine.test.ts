@@ -70,7 +70,7 @@ function makeKasaEntry(overrides: Partial<KasaEntry> = {}): KasaEntry {
   };
 }
 
-function _makeCari(overrides: Partial<Cari> = {}): Cari {
+function _makeCariHelper(overrides: Partial<Cari> = {}): Cari {
   const now = new Date().toISOString();
   return {
     id: "cari1",

@@ -531,10 +531,8 @@ export default function Bank({ db, save }: Props) {
                 const text = evt.target?.result as string;
                 const lines = text.split('\n').filter(l => l.trim());
                 const header = lines[0].toLowerCase();
-                const hasDate = header.includes('tarih') || header.includes('date');
                 const hasDesc = header.includes('açıklama') || header.includes('description') || header.includes('aciklama');
                 const hasAmount = header.includes('tutar') || header.includes('amount') || header.includes('miktar');
-                const hasType = header.includes('tür') || header.includes('type') || header.includes('tur');
                 if (!hasDesc || !hasAmount) {
                   showToast('CSV\'de en az "Açıklama" ve "Tutar" sütunları olmalı!', 'error');
                   return;

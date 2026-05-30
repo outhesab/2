@@ -25,7 +25,7 @@ export default function Kasa({ db, save }: Props) {
   const [sayimForm, setSayimForm] = useState<Record<string, string>>({});
   const [sayimDate, setSayimDate] = useState(new Date().toISOString().slice(0, 10));
 
-  const kasalar = db.kasalar || [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }];
+  const kasalar = useMemo(() => db.kasalar || [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }], [db.kasalar]);
 
   const bakiyeler = useMemo(() => {
     const map: Record<string, number> = {};

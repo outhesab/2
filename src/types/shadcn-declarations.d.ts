@@ -196,7 +196,7 @@ declare module 'react-hook-form' {
 
   export type FieldValues = Record<string, unknown>
   export type FieldPath<T extends FieldValues> = string & keyof T
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   export type ControllerProps<T extends FieldValues = FieldValues, N extends FieldPath<T> = FieldPath<T>> = {
     name: N
     control?: unknown
@@ -212,10 +212,10 @@ declare module 'react-hook-form' {
     setValue: (name: string, value: unknown) => void
     getFieldState: (name: string, formState?: { errors: Record<string, unknown> }) => { invalid: boolean; error?: { message?: string } }
   }
-  export function useFormContext<T extends FieldValues>(): UseFormReturn
+  export function useFormContext(): UseFormReturn
   export const FormProvider: React.ComponentType<{ children: React.ReactNode }>
   export const Controller: React.ComponentType<ControllerProps>
-  export function useForm<T extends FieldValues>(defaultValues?: unknown): UseFormReturn
+  export function useForm(defaultValues?: unknown): UseFormReturn
 }
 
 declare module 'framer-motion' {

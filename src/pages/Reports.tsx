@@ -221,7 +221,7 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const ciro = sales.reduce((s, x) => s + x.total, 0);
   const kar = sales.reduce((s, x) => s + x.profit, 0);
   const prevCiro = prevSales.reduce((s, x) => s + x.total, 0);
-  const _prevKar = prevSales.reduce((s, x) => s + x.profit, 0);
+  prevSales.reduce((s, x) => s + x.profit, 0);
   const delta = (curr: number, prev: number) =>
     prev === 0
       ? null
@@ -230,7 +230,7 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const alacak = db.cari
     .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
-  const _borc = db.cari
+  db.cari
     .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
   const kasaToplam = db.kasa

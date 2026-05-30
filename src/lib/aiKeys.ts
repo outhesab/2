@@ -81,7 +81,7 @@ async function getKeys(): Promise<AiKeys & { state: KeyState }> {
     _keyCache.loaded = false;
   }
   if (_keyCache.loaded) {
-    const { loaded: _, ...keys } = _keyCache;
+    const { loaded: _used, ...keys } = _keyCache;
     return { ...keys, state: "ok" };
   }
   const result = await loadKeysFromFirebase();

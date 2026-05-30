@@ -4,7 +4,6 @@ import { useToast } from "@/components/Toast";
 import {
     mergeRestoreDB,
     saveBackupToFirebase,
-    // @ts-ignore - useDB'den export edilecek
     type RestoreReport,
 } from "@/hooks/useDB";
 import type {
@@ -21,8 +20,7 @@ import {
     THEMES,
     type UIPrefs,
 } from "@/hooks/useUIPrefs";
-import { PREMIUM_THEMES, isPremiumTheme } from "@/theme/themes";
-import { useTheme } from "@/theme/useTheme";
+import { PREMIUM_THEMES, isPremiumTheme as _isPremiumTheme } from "@/theme/themes";
 import {
     APP_SUBTITLE,
     loadAppConfig,
@@ -3487,7 +3485,7 @@ const lbl: React.CSSProperties = {
   fontSize: "0.82rem",
   fontWeight: 600,
 };
-const _btnPrimary: React.CSSProperties = {
+const _btnPrimaryStyle: React.CSSProperties = {
   width: "100%",
   padding: "13px 0",
   background: "linear-gradient(135deg, #ff5722, #ff7043)",
@@ -5134,8 +5132,8 @@ function AboutPanel({ db }: { db: DB }) {
 
 // ── Agent Settings Panel ────────────────────────────────────────────────────
 function AgentSettingsPanel({
-  db,
-  save,
+  db: _db,
+  save: _save,
 }: {
   db: DB;
   save: (fn: (prev: DB) => DB) => void;

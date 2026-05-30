@@ -55,7 +55,7 @@ async function checkFirebase(): Promise<HealthMetric> {
   }
 
   try {
-    const data = await readDoc(["config", "health"]);
+    await readDoc(["config", "health"]);
     const ms = Math.round(performance.now() - start);
     const status: HealthStatus = ms < 800 ? 'healthy' : ms < 2500 ? 'degraded' : 'critical';
     return {

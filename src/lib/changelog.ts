@@ -323,6 +323,24 @@ export const CHANGELOG: VersionEntry[] = [
   },
 ];
 
+  {
+    version: '3.10.0',
+    date: '30 Mayıs 2026',
+    title: 'Konsol Kaydedici + Lint/TypeScript Temizliği',
+    summary: 'DevTools konsol çıktılarını otomatik kaydeden sistem, 13 lint hatası + 48 uyarı sıfırlandı, ESLint konfigürasyonu iyileştirildi.',
+    changes: [
+      { type: 'yeni', text: 'Konsol Kaydedici (consoleRecorder) — tüm console.log/warn/error/info/debug çağrılarını localStorage\'a kaydeder, canlı abonelik, dışa aktarım' },
+      { type: 'yeni', text: 'ConsoleKayit sayfası — kayıtlı konsol çıktılarını canlı izleme, seviye/metin filtresi, detay paneli, JSON export' },
+      { type: 'duzeltme', text: 'QuantumLink.tsx: 6 adet any tip kaldırıldı, SpeechRecognition interface eklendi, processCommand useCallback ile sarıldı' },
+      { type: 'duzeltme', text: 'Fatura.tsx: 3 adet any type cast proper union type\'a çevrildi (filter, payment, status)' },
+      { type: 'duzeltme', text: 'Settings.tsx: @ts-ignore → @ts-expect-error, kullanılmayan import/değişkenler temizlendi' },
+      { type: 'duzeltme', text: '20+ dosyada kullanılmayan değişken/import temizliği, eksik hook dependency düzeltmeleri' },
+      { type: 'iyilestirme', text: 'eslint.config.js: varsIgnorePattern eklendi, react-refresh ui/* ve shared component\'lerde kapatıldı' },
+      { type: 'iyilestirme', text: 'tabs.ts: boş catch bloğuna void 0 eklendi (no-empty)' },
+    ],
+  },
+];
+
 export const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: string; bg: string }> = {
   yeni:        { label: '✨ Yeni',        color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
   iyilestirme: { label: '⚡ İyileştirme', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },

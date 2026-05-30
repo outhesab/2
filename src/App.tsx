@@ -18,7 +18,6 @@ import {
   saveUIPrefs,
 } from "@/hooks/useUIPrefs";
 import { loadConnConfigFromFirebase, saveConnConfig } from "@/lib/connConfig";
-import { formatMoney, genId } from "@/lib/utils-tr";
 import {
   lazy,
   Suspense,
@@ -29,7 +28,7 @@ import {
   useState,
 } from "react";
 import { Router, Switch, Route, useLocation } from "wouter";
-import { TABS, type TabId, type TabGroup, TAB_PATHS, getActiveTabFromLocation, DEFAULT_EXPANDED_GROUPS, loadFavoriteTabs, saveFavoriteTabs } from "@/config/tabs";
+import { TABS, type TabId, type TabGroup, TAB_PATHS, getActiveTabFromLocation, loadFavoriteTabs, saveFavoriteTabs } from "@/config/tabs";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import FAB from "@/components/layout/FAB";
@@ -69,14 +68,15 @@ const Reports = lazy(() => import("@/pages/Reports"));
 const Sales = lazy(() => import("@/pages/Sales"));
 const SaleDetail = lazy(() => import("@/pages/SaleDetail"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const Perf = lazy(() => import("@/pages/Perf"));
 const Stock = lazy(() => import("@/pages/Stock"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
 import { Toaster } from "sonner";
 
-// UI tercihlerini uygulama başlangıcında localStorage'dan hızlıca yükle
+// UI tercihlerini uygulama baÃƒâ€¦Ã…Â¸langÃƒâ€Ã‚Â±cÃƒâ€Ã‚Â±nda localStorage'dan hÃƒâ€Ã‚Â±zlÃƒâ€Ã‚Â±ca yÃƒÆ’Ã‚Â¼kle
 applyUIPrefs(loadUIPrefs());
 
-// Arka planda Firebase'den güncel prefs'leri çek ve uygula
+// Arka planda Firebase'den gÃƒÆ’Ã‚Â¼ncel prefs'leri ÃƒÆ’Ã‚Â§ek ve uygula
 Promise.all([loadUIPrefsFromFirebase(), loadConnConfigFromFirebase()])
   .then(([fbPrefs, fbConn]) => {
     if (fbPrefs) {
@@ -87,7 +87,7 @@ Promise.all([loadUIPrefsFromFirebase(), loadConnConfigFromFirebase()])
       saveConnConfig(fbConn);
     }
   })
-  .catch(() => logger.error('sync', 'Firebase config/UI prefs yüklenemedi'));
+  .catch(() => logger.error('sync', 'Firebase config/UI prefs yÃƒÆ’Ã‚Â¼klenemedi'));
 
 function AppContent({
   onLogout,
@@ -125,7 +125,7 @@ function AppContent({
   const prevOnline = useRef(isOnline);
   const { showToast } = useToast();
 
-  // UIPrefs değişikliklerini dinle (Settings'ten güncelleme gelince yansısın)
+  // UIPrefs deÃƒâ€Ã…Â¸iÃƒâ€¦Ã…Â¸ikliklerini dinle (Settings'ten gÃƒÆ’Ã‚Â¼ncelleme gelince yansÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â±n)
   useEffect(() => {
     const handler = () => setUiPrefs(loadUIPrefs());
     window.addEventListener("storage", handler);
@@ -152,21 +152,21 @@ function AppContent({
     return unsub;
   }, []);
 
-  // Son güncelleme toast'u — her versiyon için bir kez göster
+  // Son gÃƒÆ’Ã‚Â¼ncelleme toast'u ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â her versiyon iÃƒÆ’Ã‚Â§in bir kez gÃƒÆ’Ã‚Â¶ster
   useEffect(() => {
-    const LATEST_VERSION = '3.0.0';
+    const LATEST_VERSION = '3.10.0';
     const seenKey = `parspel_update_seen_${LATEST_VERSION}`;
     try {
       if (!localStorage.getItem(seenKey)) {
         setTimeout(() => {
-          showToast(`🚀 v${LATEST_VERSION} — Multi-agent orkestrasyonu, IndexedDB snapshot ve fallback aksiyon akisi eklendi`, 'info');
-          try { localStorage.setItem(seenKey, '1'); } catch { /* localStorage yazma hatası */ }
+          showToast(`PARSPEL v${LATEST_VERSION} — Konsol Kaydedici + Lint temizliği eklendi`, 'info');
+          try { localStorage.setItem(seenKey, '1'); } catch { /* localStorage yazma hatasÃƒâ€Ã‚Â± */ }
         }, 1500);
       }
-    } catch { /* localStorage okuma hatası */ }
+    } catch { /* localStorage okuma hatasÃƒâ€Ã‚Â± */ }
   }, [showToast]);
 
-  // İlk kurulum verisini DB'ye yaz (bir kez)
+  // Ãƒâ€Ã‚Â°lk kurulum verisini DB'ye yaz (bir kez)
   useEffect(() => {
     const setup = getSetupData();
     if (!setup) return;
@@ -177,7 +177,7 @@ function AppContent({
       const now = new Date().toISOString();
       // Kasalar
       const kasalar = setup.kasalar.length > 0 ? setup.kasalar : prev.kasalar;
-      // Ürünler
+      // ÃƒÆ’Ã…â€œrÃƒÆ’Ã‚Â¼nler
       const mevcutIds = new Set(prev.products.map((p: { id: string }) => p.id));
       const yeniUrunler = (setup.urunler || []).filter(
         (u: { id: string }) => !mevcutIds.has(u.id),
@@ -231,10 +231,10 @@ function AppContent({
   useEffect(() => {
     if (prevOnline.current !== isOnline) {
       if (isOnline) {
-        showToast("İnternet bağlantısı yeniden kuruldu", "success");
+        showToast("Ãƒâ€Ã‚Â°nternet baÃƒâ€Ã…Â¸lantÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â± yeniden kuruldu", "success");
       } else {
         showToast(
-          "Çevrimdışı çalışıyorsunuz — veriler korunuyor",
+          "ÃƒÆ’Ã¢â‚¬Â¡evrimdÃƒâ€Ã‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€Ã‚Â± ÃƒÆ’Ã‚Â§alÃƒâ€Ã‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€Ã‚Â±yorsunuz ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â veriler korunuyor",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           "info" as any,
         );
@@ -287,7 +287,7 @@ function AppContent({
     );
   }, [activeTab]);
 
-  // Yedek event listener (Dashboard widget'ından tetiklenir)
+  // Yedek event listener (Dashboard widget'Ãƒâ€Ã‚Â±ndan tetiklenir)
   useEffect(() => {
     const handler = () => {
       exportJSON();
@@ -503,6 +503,7 @@ function AppContent({
                   <Route path="/excelimport"><ExcelImport db={db} save={save} /></Route>
                   <Route path="/ai/eylem-log"><AIEylemLog db={db} undo={undo} /></Route>
                   <Route path="/not-found"><NotFound /></Route>
+                  <Route path="/perf"><Perf /></Route>
                   <Route>
                     <Dashboard
                       db={db}

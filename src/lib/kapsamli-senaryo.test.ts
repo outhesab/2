@@ -1601,8 +1601,6 @@ describe("🏪 Kapsamlı Senaryo Testleri", () => {
       const db0 = makeDB();
       const { nextDB: db1 } = cariEkle(db0, { name: "Silinecek Cari" });
       const cariId = db1.cari[0].id;
-      const _createdAt = db1.cari[0].updatedAt;
-
       // Kısa bir bekleme simüle etmek için updatedAt'i geçmişe al
       const db1Modified: DB = {
         ...db1,

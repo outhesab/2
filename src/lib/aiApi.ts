@@ -7,7 +7,7 @@ export interface Message {
 export interface AIAction {
   type: "query" | "update" | "report";
   module: string;
-  payload: any;
+  payload: unknown;
 }
 
 function requireKey(key: string, name: string): void {

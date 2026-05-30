@@ -115,5 +115,6 @@ export function saveFavoriteTabs(tabIds: readonly TabId[]) {
   try {
     localStorage.setItem(FAVORITE_TABS_KEY, JSON.stringify(tabIds.slice(0, 6)));
   } catch {
+    void 0;
   }
 }

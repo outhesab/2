@@ -649,10 +649,10 @@ export default function Fatura({ db, save }: Props) {
               width: 160,
             }}
           />
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          { }
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={(e) => setFilter(e.target.value as "all" | "satis" | "alis")}
             style={{
               padding: "8px 10px",
               background: "rgba(0,0,0,0.3)",
@@ -1179,13 +1179,13 @@ export default function Fatura({ db, save }: Props) {
                 >
                   <div>
                     <label style={lbl}>Ödeme</label>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    { }
                     <select
                       value={form.payment}
                       onChange={(e) =>
                         setForm((f) => ({
                           ...f,
-                          payment: e.target.value as any,
+                          payment: e.target.value as "nakit" | "kart" | "cari" | "havale",
                         }))
                       }
                       style={inp}
@@ -1211,11 +1211,11 @@ export default function Fatura({ db, save }: Props) {
                 </div>
                 <div>
                   <label style={lbl}>Durum</label>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  { }
                   <select
                     value={form.status}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, status: e.target.value as any }))
+                      setForm((f) => ({ ...f, status: e.target.value as "taslak" | "onaylandi" | "odendi" | "iptal" }))
                     }
                     style={inp}
                   >

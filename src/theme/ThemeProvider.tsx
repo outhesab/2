@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { loadUIPrefs, saveUIPrefs, applyUIPrefs, type UIPrefs } from '@/hooks/useUIPrefs';
-import { PREMIUM_THEMES, getPremiumTheme, isPremiumTheme } from './themes';
+import { getPremiumTheme, isPremiumTheme } from './themes';
 import type { PremiumCSSVars } from './types';
 
 export interface ThemeContextValue {
@@ -91,7 +91,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyTheme(uiPrefs);
-  }, []);
+  }, [applyTheme, uiPrefs]);
 
   useEffect(() => {
     const handler = () => {

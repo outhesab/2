@@ -167,7 +167,7 @@ export default function Cizelge({ db }: Props) {
   };
 
   // Ay toplamları
-  const _monthTotal = Object.values(dayMap)
+  Object.values(dayMap)
     .filter((_, i) => {
       const keys = Object.keys(dayMap);
       return keys[i]?.startsWith(

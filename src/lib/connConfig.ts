@@ -135,7 +135,7 @@ export function getFirebaseDocUrl(cfg: FirebaseConfig): string {
 
 /** Firebase bağlantısını test et */
 export async function testFirebase(
-  cfg: FirebaseConfig,
+  _cfg: FirebaseConfig,
 ): Promise<{ ok: boolean; msg: string }> {
   if (!isFirebaseReady())
     return { ok: false, msg: "Firebase SDK başlatılamadı" };
