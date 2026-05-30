@@ -45,13 +45,13 @@ export default function SpecDashboard() {
       </motion.div>
 
       {specList.map((spec) => (
-        <SpecCard key={spec.name} name={spec.name} ruleCount={spec.count} />
+        <SpecCard key={spec.name} name={spec.name} count={spec.count} />
       ))}
     </motion.div>
   );
 }
 
-function SpecCard({ name, ruleCount }: { name: string; count: number }) {
+function SpecCard({ name, count }: { name: string; count: number }) {
   const rules = useMemo(() => getRulesBySpec(name), [name]);
 
   return (
@@ -59,7 +59,7 @@ function SpecCard({ name, ruleCount }: { name: string; count: number }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div>
           <h2 style={{ color: TEXT_PRIMARY, fontSize: "1.05rem", fontWeight: 600 }}>{name}</h2>
-          <p style={{ color: TEXT_MUTED, fontSize: "0.8rem" }}>{ruleCount} kural · docs/{name}.md</p>
+          <p style={{ color: TEXT_MUTED, fontSize: "0.8rem" }}>{count} kural · docs/{name}.md</p>
         </div>
         <a href={`/docs/${name.toLowerCase()}.md`} style={{ color: "#3b82f6", fontSize: "0.8rem", textDecoration: "none" }}>
           Spec'i oku →

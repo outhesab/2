@@ -1,54 +1,43 @@
-import type { SpecGroupResult, SpecRule } from "./types";
-import { componentRules } from "./component-rules";
-import { errorRules } from "./error-rules";
-import { navigationRules } from "./navigation-rules";
-import { dataRules } from "./data-rules";
-import { testRules } from "./test-rules";
+import type { SpecRule, SpecCheckResult } from "./types";
 
-const ALL_RULES: SpecRule[] = [
-  ...componentRules,
-  ...errorRules,
-  ...navigationRules,
-  ...dataRules,
-  ...testRules,
+interface SpecMeta {
+  id: string;
+  spec: string;
+  title: string;
+  severity: "error" | "warn" | "info";
+}
+
+const META: SpecMeta[] = [
+  { id: "NO_RELATIVE_IMPORT", spec: "BILESEN_MIMARISI", title: "Hiçbir dosyada relative import (../) kullanılmamalı", severity: "error" },
+  { id: "NO_STATIC_INLINE_STYLE", spec: "BILESEN_MIMARISI", title: "Statik stiller inline style ile değil className ile yazılmalı", severity: "info" },
+  { id: "EMPTY_COMPONENT_IMPORTED", spec: "BILESEN_MIMARISI", title: "Pages altında Empty component import edilmiş olmalı", severity: "info" },
+  { id: "SHADCN_UNTOUCHED", spec: "BILESEN_MIMARISI", title: "shadcn/ui dosyaları değiştirilmemiş olmalı", severity: "error" },
+  { id: "SUSPENSE_WRAPPED_ROUTES", spec: "HATA_DURUMLARI", title: "Tüm route'lar <Suspense> ile sarılmış olmalı", severity: "error" },
+  { id: "TOAST_IMPORT_PATTERN", spec: "HATA_DURUMLARI", title: "Hata yönetiminde showToast kullanılıyor olmalı", severity: "info" },
+  { id: "ERROR_BOUNDARY_ACTIVE", spec: "HATA_DURUMLARI", title: "ErrorBoundary mevcut ve aktif", severity: "error" },
+  { id: "ALL_ROUTES_LAZY", spec: "NAVIGASYON", title: "Tüm page import'ları React.lazy() ile sarılmış olmalı", severity: "error" },
+  { id: "TAB_ROUTE_MATCH", spec: "NAVIGASYON", title: "Her tab için TABS ve TAB_PATHS'de eşleşen kayıt olmalı", severity: "error" },
+  { id: "NO_DIRECT_DB_WRITE", spec: "VERI_KATMANI", title: "doğrudan sobaYonetim DB key'ine yazmak yasak — save() kullanılmalı", severity: "error" },
+  { id: "NO_DB_JSON_PARSE_IN_PAGES", spec: "VERI_KATMANI", title: "Sayfalarda doğrudan sobaYonetim JSON parse etmek yasak", severity: "error" },
+  { id: "VERSION_CONSISTENCY_TEST_EXISTS", spec: "TEST_STRATEJISI", title: "Cross-file consistency testi mevcut olmalı", severity: "error" },
 ];
 
+function toSpecRule(m: SpecMeta): SpecRule {
+  return { ...m, check: (): SpecCheckResult => ({ passed: false, violations: [{ file: "", message: "check() yalnızca test ortamında çalışır" }] }) };
+}
+
 export function getAllRules(): SpecRule[] {
-  return ALL_RULES;
+  return META.map(toSpecRule);
 }
 
 export function getRulesBySpec(spec: string): SpecRule[] {
-  return ALL_RULES.filter((r) => r.spec === spec);
+  return META.filter((m) => m.spec === spec).map(toSpecRule);
 }
 
 export function getSpecList(): { name: string; count: number }[] {
   const map = new Map<string, number>();
-  for (const r of ALL_RULES) {
-    map.set(r.spec, (map.get(r.spec) || 0) + 1);
+  for (const m of META) {
+    map.set(m.spec, (map.get(m.spec) || 0) + 1);
   }
   return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
-}
-
-export function runSpecs(): SpecGroupResult[] {
-  const specMap = new Map<string, SpecRule[]>();
-  for (const rule of ALL_RULES) {
-    if (!specMap.has(rule.spec)) specMap.set(rule.spec, []);
-    specMap.get(rule.spec)!.push(rule);
-  }
-
-  return Array.from(specMap.entries()).map(([spec, rules]) => {
-    let passed = 0;
-    const ruleResults = rules.map((rule) => {
-      const result = rule.check();
-      if (result.passed) passed++;
-      return {
-        id: rule.id,
-        title: rule.title,
-        severity: rule.severity as "error" | "warn" | "info",
-        passed: result.passed,
-        violations: result.violations,
-      };
-    });
-    return { spec, passed, total: rules.length, rules: ruleResults };
-  });
 }

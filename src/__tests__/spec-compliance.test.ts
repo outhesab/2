@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { runSpecs } from "@/lib/specs/index";
+import { runSpecs } from "@/lib/specs/runner";
 
 describe("Spec Compliance", () => {
   const results = runSpecs();

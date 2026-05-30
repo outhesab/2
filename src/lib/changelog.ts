@@ -20,6 +20,16 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.2',
+    date: '30 Mayıs 2026',
+    title: 'Build Fix — Spec Modülü Node.js/Browser Ayrıştırması',
+    summary: 'Spec rule dosyaları (component-rules, data-rules, error-rules, navigation-rules, test-rules) browser build\'de node:fs/node:path import hatası veriyordu. Browser-safe index.ts ve Node.js runner.ts olarak ikiye ayrıldı. CI quality-gate (lint → typecheck → test → build) artık başarıyla geçiyor.',
+    changes: [
+      { type: 'iyilestirme', text: 'src/lib/specs/: browser-safe index.ts ve Node.js runner.ts olarak ayrıldı — build\'de node:fs external hatası giderildi' },
+      { type: 'duzeltme', text: 'SpecDashboard: SpecCard ruleCount → count prop adı düzeltildi (TS hatası)' },
+    ],
+  },
+  {
     version: '3.10.1',
     date: '30 Mayıs 2026',
     title: 'Tema/Contrast Düzeltmeleri — Hardcoded Renkler CSS Variable\'a Dönüştürüldü',
