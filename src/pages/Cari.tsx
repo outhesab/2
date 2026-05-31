@@ -4,6 +4,10 @@ import { useToast } from "@/components/Toast";
 import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
 import { isExactMatch, similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
+import EmptyState from "@/components/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileSpreadsheet, HandCoins, UserRoundSearch, Users } from "lucide-react";
 import type { Cari as CariType, DB } from "@/types";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -647,25 +651,18 @@ export default function Cari({ db, save }: Props) {
         >
           + Yeni Cari
         </button>
-        <button
+        <Button
+          variant="outline"
           onClick={() => {
             exportToExcel(db, { sheets: ["cari"] });
             showToast("Excel indirildi!", "success");
           }}
-          style={{
-            background: "rgba(139,92,246,0.15)",
-            border: "1px solid rgba(139,92,246,0.3)",
-            borderRadius: 10,
-            color: "#a78bfa",
-            padding: "10px 16px",
-            fontWeight: 700,
-            cursor: "pointer",
-            fontSize: "0.85rem",
-          }}
         >
-          📥 Excel İndir
-        </button>
-        <button
+          <FileSpreadsheet />
+          Excel İndir
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => {
             const rows = sorted.map((c) => ({
               Ad: c.name,
@@ -683,19 +680,10 @@ export default function Cari({ db, save }: Props) {
             exportArrayToExcel(rows, "cari-listesi");
             showToast("Ekstre indirildi!", "success");
           }}
-          style={{
-            background: "rgba(16,185,129,0.12)",
-            border: "1px solid rgba(16,185,129,0.25)",
-            borderRadius: 10,
-            color: "#10b981",
-            padding: "10px 16px",
-            fontWeight: 700,
-            cursor: "pointer",
-            fontSize: "0.85rem",
-          }}
         >
-          📄 Ekstre
-        </button>
+          <HandCoins />
+          Ekstre
+        </Button>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -703,34 +691,19 @@ export default function Cari({ db, save }: Props) {
           style={{
             flex: 1,
             padding: "9px 13px",
-            background: "#1e293b",
-            border: "1px solid #334155",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
             borderRadius: 10,
             color: "var(--text-primary)",
           }}
         />
-        {(["all", "musteri", "tedarikci"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: "8px 14px",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: "0.82rem",
-              background: filter === f ? "#ff5722" : "#273548",
-              color: filter === f ? "#fff" : "#94a3b8",
-            }}
-          >
-            {f === "all"
-              ? "Tümü"
-              : f === "musteri"
-                ? "👥 Müşteri"
-                : "🏭 Tedarikçi"}
-          </button>
-        ))}
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as "all" | "musteri" | "tedarikci")}>
+          <TabsList>
+            <TabsTrigger value="all">Tümü</TabsTrigger>
+            <TabsTrigger value="musteri">Müşteri</TabsTrigger>
+            <TabsTrigger value="tedarikci">Tedarikçi</TabsTrigger>
+          </TabsList>
+        </Tabs>
         <button
           onClick={() => setShowOnlyDebt((v) => !v)}
           style={{
@@ -751,10 +724,10 @@ export default function Cari({ db, save }: Props) {
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           style={{
             padding: "8px 12px",
-            background: "#1e293b",
-            border: "1px solid #334155",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
             borderRadius: 8,
-            color: "#94a3b8",
+            color: "var(--text-muted)",
             fontSize: "0.82rem",
             cursor: "pointer",
           }}
@@ -768,9 +741,9 @@ export default function Cari({ db, save }: Props) {
       <div
         className="responsive-table-wrap"
         style={{
-          background: "#1e293b",
+          background: "var(--bg-card)",
           borderRadius: 14,
-          border: "1px solid #334155",
+          border: "1px solid var(--border)",
           overflowX: "auto",
         }}
       >
@@ -791,7 +764,7 @@ export default function Cari({ db, save }: Props) {
                   style={{
                     padding: "12px 16px",
                     textAlign: "left",
-                    color: "#64748b",
+                    color: "var(--text-muted)",
                     fontSize: "0.78rem",
                     fontWeight: 600,
                     textTransform: "uppercase",
@@ -807,9 +780,20 @@ export default function Cari({ db, save }: Props) {
               <tr>
                 <td
                   colSpan={7}
-                  style={{ textAlign: "center", padding: 40, color: "#64748b" }}
+                  style={{ padding: 24 }}
                 >
-                  Cari bulunamadı
+                  <EmptyState
+                    icon={UserRoundSearch}
+                    title="Cari bulunamadı"
+                    description="Arama veya filtrelere göre eşleşen müşteri/tedarikçi kaydı yok."
+                    actionLabel="Filtreleri sıfırla"
+                    onAction={() => {
+                      setFilter("all");
+                      setShowOnlyDebt(false);
+                      setSortBy("name");
+                      setSearch("");
+                    }}
+                  />
                 </td>
               </tr>
             ) : (
@@ -1488,7 +1472,7 @@ export default function Cari({ db, save }: Props) {
           </div>
           {histTab === "kasa" &&
             (detailKasa.length === 0 ? (
-              <EmptyState />
+              <EmptyState icon={HandCoins} title="Kasa hareketi yok" description="Bu cariye bağlı kasa hareketi henüz oluşmadı." />
             ) : (
               <div style={{ maxHeight: 260, overflowY: "auto" }}>
                 <table
@@ -1551,7 +1535,7 @@ export default function Cari({ db, save }: Props) {
             ))}
           {histTab === "satis" &&
             (detailSales.length === 0 ? (
-              <EmptyState />
+              <EmptyState icon={Users} title="Satış kaydı yok" description="Bu cariye ait tamamlanmış satış bulunamadı." />
             ) : (
               <div style={{ maxHeight: 260, overflowY: "auto" }}>
                 <table
@@ -1622,7 +1606,7 @@ export default function Cari({ db, save }: Props) {
             ))}
           {histTab === "fatura" &&
             (detailInvoices.length === 0 ? (
-              <EmptyState />
+              <EmptyState icon={FileSpreadsheet} title="Fatura kaydı yok" description="Bu cariye bağlı fatura hareketi bulunamadı." />
             ) : (
               <div style={{ maxHeight: 260, overflowY: "auto" }}>
                 <table
@@ -1722,15 +1706,15 @@ export default function Cari({ db, save }: Props) {
 const lbl: React.CSSProperties = {
   display: "block",
   marginBottom: 6,
-  color: "#94a3b8",
+  color: "var(--text-muted)",
   fontSize: "0.85rem",
   fontWeight: 500,
 };
 const inp: React.CSSProperties = {
   width: "100%",
   padding: "10px 14px",
-  background: "rgba(15,23,42,0.6)",
-  border: "1px solid #334155",
+  background: "var(--bg-card)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   color: "var(--text-primary)",
   fontSize: "0.9rem",
@@ -1751,18 +1735,18 @@ function StatCard({
   return (
     <div
       style={{
-        background: "#1e293b",
+        background: "var(--bg-card)",
         borderRadius: 12,
         padding: "16px 18px",
         border: `1px solid ${color}22`,
       }}
     >
       <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.78rem", marginTop: 4 }}>
+      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
         {label}
       </div>
       {sub && (
-        <div style={{ color: "#475569", fontSize: "0.75rem", marginTop: 2 }}>
+        <div style={{ color: "var(--text-secondary)", fontSize: "0.75rem", marginTop: 2 }}>
           {sub}
         </div>
       )}
@@ -1770,17 +1754,3 @@ function StatCard({
   );
 }
 
-function EmptyState() {
-  return (
-    <p
-      style={{
-        color: "#334155",
-        textAlign: "center",
-        padding: "20px 0",
-        fontSize: "0.85rem",
-      }}
-    >
-      Kayıt bulunamadı
-    </p>
-  );
-}

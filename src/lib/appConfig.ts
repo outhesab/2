@@ -3,9 +3,11 @@
  * Uygulama adı, versiyon ve ikon sistemi buradan yönetilir.
  */
 
-export const APP_NAME = 'PARSPEL';
-export const APP_SUBTITLE = 'Yönetim Sistemi';
-export const APP_DEFAULT_VERSION = '3.10.3';
+import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
+
+export const APP_NAME = BRAND_NAME;
+export const APP_SUBTITLE = BRAND_SUBTITLE;
+export const APP_DEFAULT_VERSION = getBrandVersion();
 export const APP_STORAGE_KEY = 'parspelConfig';
 
 // ── Versiyon Yönetimi ──────────────────────────────────────────────────────

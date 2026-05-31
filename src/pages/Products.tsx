@@ -1,3 +1,5 @@
+import EmptyState from "@/components/EmptyState";
+import { PackageSearch } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
@@ -127,9 +129,17 @@ export default function Products({ db, save }: Props) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
         {products.length === 0 ? (
-          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: 12 }}>📦</div>
-            <p>Ürün bulunamadı</p>
+          <div style={{ gridColumn: '1/-1' }}>
+            <EmptyState
+              icon={PackageSearch}
+              title="Ürün bulunamadı"
+              description="Arama veya filtreleri sıfırlayıp ürün listenizi tekrar görüntüleyin."
+              actionLabel="Tüm ürünleri göster"
+              onAction={() => {
+                setFilter("all");
+                setSearch("");
+              }}
+            />
           </div>
         ) : products.map(p => {
           const margin = calcProfit(p.price, p.cost);

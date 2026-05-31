@@ -1,6 +1,8 @@
+import EmptyState from "@/components/EmptyState";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
+import { FileText } from "lucide-react";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { DB, Installment, Invoice, InvoiceItem } from "@/types";
 import { useMemo, useState } from "react";
@@ -732,21 +734,12 @@ export default function Fatura({ db, save }: Props) {
           <tbody>
             {invoices.length === 0 ? (
               <tr>
-                <td
-                  colSpan={8}
-                  style={{ textAlign: "center", padding: 48, color: "#334155" }}
-                >
-                  <div style={{ fontSize: "3rem", marginBottom: 12 }}>📄</div>
-                  <p style={{ fontSize: "0.9rem" }}>Henüz fatura yok</p>
-                  <p
-                    style={{
-                      fontSize: "0.82rem",
-                      marginTop: 8,
-                      color: "#1e3a5f",
-                    }}
-                  >
-                    Yukarıdaki butonlarla ilk faturanızı oluşturun
-                  </p>
+                <td colSpan={8} style={{ padding: 24 }}>
+                  <EmptyState
+                    icon={FileText}
+                    title="Henüz fatura yok"
+                    description="Yukarıdaki aksiyonlarla ilk satış veya alış faturanızı oluşturabilirsiniz."
+                  />
                 </td>
               </tr>
             ) : (

@@ -606,7 +606,7 @@ body.dark-mode .app-sidebar { background: linear-gradient(180deg, oklch(0.06 0.0
 .app-sidebar.mobile-closed { left: -248px; }
 .app-sidebar-logo-wrap { padding: 16px 14px 13px; border-bottom: 1px solid var(--border); }
 .app-sidebar-logo-row { display: flex; align-items: center; gap: 10px; }
-.app-sidebar-logo-icon { width: 40px; height: 40px; flex-shrink: 0; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 4px 20px var(--color-primary-glow), 0 0 0 6px var(--color-primary-ultra); animation: sidebarLogoPulse 4s ease-in-out infinite; }
+.app-sidebar-logo-icon { width: 40px; height: 40px; flex-shrink: 0; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; box-shadow: 0 4px 20px var(--color-primary-glow), 0 0 0 6px var(--color-primary-ultra); animation: sidebarLogoPulse 4s ease-in-out infinite; }
 .app-sidebar-logo-text-wrap { flex: 1; min-width: 0; }
 .app-sidebar-logo-title { font-weight: 800; color: var(--text-primary); font-size: 0.94rem; letter-spacing: -0.015em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-sidebar-logo-subtitle { color: var(--text-dim); font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 1px; }
@@ -716,8 +716,8 @@ body.dark-mode .app-sidebar { background: linear-gradient(180deg, oklch(0.06 0.0
 .app-sync-text.saving { color: var(--color-warning); }
 .app-sync-text.error { color: var(--color-danger); }
 
-.app-backup-btn { background: var(--color-info-soft); border: 1px solid var(--color-info-soft); border-radius: 8px; color: var(--color-info); padding: 5px 10px; cursor: pointer; font-size: 0.77rem; font-weight: 700; transition: all 0.15s; }
-.app-backup-btn:hover { background: var(--color-info-soft); }
+.app-backup-btn { background: transparent; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text-secondary); padding: 5px 10px; cursor: pointer; font-size: 0.77rem; font-weight: 700; transition: all 0.15s; }
+.app-backup-btn:hover { background: var(--bg-card); }
 .app-header-date { color: var(--text-dim); font-size: 0.73rem; font-weight: 500; white-space: nowrap; padding: 0 4px; }
 
 .app-kasa-widget { margin: 0 7px 7px; cursor: pointer; background: linear-gradient(135deg, var(--color-success-soft) 0%, transparent 100%); border: 1px solid var(--color-success-soft); border-radius: 12px; padding: 10px 12px; transition: all 0.2s; }
@@ -1617,12 +1617,12 @@ body.dark-mode .login-bg-gradient {
 .dash-statcard-bg-icon { position: absolute; top: -16px; right: -10px; font-size: 5.5rem; opacity: 0.05; pointer-events: none; transform: rotate(-8deg); filter: blur(1px); }
 .dash-statcard-accent-line { position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 16px 16px 0 0; }
 .dash-statcard-icon { font-size: 1.4rem; margin-bottom: 10px; }
-.dash-statcard-value { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; animation: countUp 0.4s ease both; }
+.dash-statcard-value { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1; animation: countUp 0.4s ease both; color: var(--text-primary) !important; }
 .dash-statcard-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72rem; font-weight: 700; margin-top: 4px; border-radius: 5px; padding: 2px 6px; }
 .dash-statcard-trend.up { color: var(--color-success); background: var(--color-success-soft); }
 .dash-statcard-trend.down { color: var(--color-danger); background: var(--color-danger-soft); }
-.dash-statcard-label { color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 7px; }
-.dash-statcard-sub { color: var(--text-dim); font-size: 0.73rem; margin-top: 3px; }
+.dash-statcard-label { color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 7px; }
+.dash-statcard-sub { color: var(--text-muted); font-size: 0.73rem; margin-top: 3px; }
 .dash-statcard-arrow { position: absolute; bottom: 12px; right: 14px; font-size: 0.9rem; }
 
 .dash-header-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }

@@ -1,3 +1,4 @@
+import { BRAND_NAME } from "@/config/brand";
 import { useState } from 'react';
 import { hashPass } from './LoginScreen';
 import { genId } from '@/lib/utils-tr';
@@ -250,7 +251,7 @@ function StepWelcome({ steps }: { steps: { title: string; icon: string; desc: st
   return (
     <div>
       <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: 20, textAlign: 'center' }}>
-        <strong style={{ color: '#ff7043' }}>SOLHAN</strong> Yönetim Sistemine hoş geldiniz.<br />
+        <strong style={{ color: '#ff7043' }}>{BRAND_NAME}</strong> Yönetim Sistemine hoş geldiniz.<br />
         Bu sihirbaz sistemi işletmenize göre yapılandıracak.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -274,7 +275,7 @@ function StepCompany({ companyName, setCompanyName, city, setCity }: { companyNa
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
         <label style={lbl}>İşletme / Firma Adı *</label>
-        <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="örn: Solhan Isıtma Sistemleri" style={inp} autoFocus />
+        <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="örn: PARSPEL Isıtma Sistemleri" style={inp} autoFocus />
       </div>
       <div>
         <label style={lbl}>Şehir / İlçe <span style={{ color: '#334155' }}>(isteğe bağlı)</span></label>

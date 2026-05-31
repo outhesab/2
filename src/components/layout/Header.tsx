@@ -1,9 +1,10 @@
-import { type Dispatch, type SetStateAction } from 'react';
-import { TABS, type TabId } from '@/config/tabs';
-import type { DB } from '@/types';
-import GlobalSearch from './GlobalSearch';
-import UserMenu from './UserMenu';
-import NotificationCenter from '@/components/NotificationCenter';
+import { type Dispatch, type SetStateAction } from "react";
+import { formatDateLong } from "@/lib/format";
+import { TABS, type TabId } from "@/config/tabs";
+import type { DB } from "@/types";
+import GlobalSearch from "./GlobalSearch";
+import UserMenu from "./UserMenu";
+import NotificationCenter from "@/components/NotificationCenter";
 
 interface HeaderProps {
   isMobile: boolean;
@@ -38,13 +39,14 @@ export default function Header({
   onLogout,
   guestTimeLeft,
 }: HeaderProps) {
+  const ActiveIcon = TABS.find((t) => t.id === activeTab)?.icon;
   return (
     <header className={`app-header ${isMobile ? 'mobile' : 'desktop'}`}>
       {isMobile && <button onClick={() => setSidebarOpen((o) => !o)} className="app-header-menu-btn">☰</button>}
       <div className={`app-header-title-wrap ${isMobile ? 'mobile' : 'desktop'}`}>
         <h1 className={`app-header-title ${isMobile ? 'mobile' : 'desktop'}`}>
           <span className={`app-header-title-icon ${activeGroupClass}`}>
-            {TABS.find((t) => t.id === activeTab)?.icon}
+            {ActiveIcon ? <ActiveIcon className="size-4" /> : null}
           </span>
           {TABS.find((t) => t.id === activeTab)?.label}
         </h1>
@@ -85,14 +87,10 @@ export default function Header({
             </span>
           </div>
         )}
-        <button onClick={exportJSON} title="Hızlı Yedek Al" className="app-backup-btn">
-          {isMobile ? '💾' : '💾 Yedek'}
+          <button onClick={exportJSON} title="Hızlı Yedek Al" className="app-backup-btn">
+          {isMobile ? 'Yedek' : 'Yedek'}
         </button>
-        {!isMobile && (
-          <div className="app-header-date">
-            {new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' })}
-          </div>
-        )}
+        {!isMobile && <div className="app-header-date">{formatDateLong(new Date())}</div>}
         <UserMenu username={username} onLogout={onLogout} isMobile={isMobile} guestTimeLeft={guestTimeLeft} />
       </div>
     </header>

@@ -3,6 +3,7 @@
  * Kullanıcılar Firebase config/users dökümanında saklanır
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
 import { logger } from '@/lib/logger';
 import {
   loginUser, getUserSession, setUserSession, clearUserSession,
@@ -193,7 +194,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
       {/* Üst bilgi */}
       <div className="login-header">
-        Solhan Ticaret Yönetim Sistemi
+        {BRAND_NAME} · {BRAND_SUBTITLE}
       </div>
       <div className="login-clock">
         {time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -218,7 +219,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               {success ? '✅' : '🔥'}
             </div>
             <h1 className="login-title">
-              Solhan
+              {BRAND_NAME}
             </h1>
             <p className="login-subtitle">
               {fbStatus === 'connecting'
@@ -352,7 +353,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
         </div>
 
         <div className="login-footer">
-          Solhan Ticaret &copy; {new Date().getFullYear()} · v3.0.0 · Veriler Firebase'de güvenle saklanır
+          {BRAND_NAME} &copy; {new Date().getFullYear()} · v{getBrandVersion()} · Veriler Firebase'de güvenle saklanır
         </div>
       </div>
     </div>

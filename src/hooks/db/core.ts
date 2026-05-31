@@ -17,12 +17,13 @@ const INDEXED_SNAPSHOT_KEY = "primary";
 async function saveToIndexedSnapshot(db: DB): Promise<void> {
   const t = logger.time("db", "IndexedSnapshot yaz");
   try {
+    const data = JSON.stringify(db);
     await indexedDb.snapshots.put({
       id: INDEXED_SNAPSHOT_KEY,
-      data: JSON.stringify(db),
+      data,
       updatedAt: new Date().toISOString(),
     });
-    t.end({ size: JSON.stringify(db).length });
+    t.end({ size: data.length });
   } catch (e) {
     t.end({ error: String(e) });
     logger.warn("db", "IndexedDB snapshot yazılamadı", { error: String(e) });
@@ -156,34 +157,23 @@ function loadFromStorage(): DB {
     if (!merged.pelletSettings) merged.pelletSettings = def.pelletSettings;
     if (!merged.company || typeof merged.company !== "object")
       merged.company = def.company;
-    if (!Array.isArray(merged.products)) merged.products = [];
-    if (!Array.isArray(merged.sales)) merged.sales = [];
-    if (!Array.isArray(merged.suppliers)) merged.suppliers = [];
-    if (!Array.isArray(merged.orders)) merged.orders = [];
-    if (!Array.isArray(merged.cari)) merged.cari = [];
-    if (!Array.isArray(merged.kasa)) merged.kasa = [];
-    if (!Array.isArray(merged.bankTransactions)) merged.bankTransactions = [];
-    if (!Array.isArray(merged.matchRules)) merged.matchRules = [];
-    if (!Array.isArray(merged.monitorLog)) merged.monitorLog = [];
-    if (!Array.isArray(merged.stockMovements)) merged.stockMovements = [];
-    if (!Array.isArray(merged.peletSuppliers)) merged.peletSuppliers = [];
-    if (!Array.isArray(merged.peletOrders)) merged.peletOrders = [];
-    if (!Array.isArray(merged.boruSuppliers)) merged.boruSuppliers = [];
-    if (!Array.isArray(merged.boruOrders)) merged.boruOrders = [];
-    if (!Array.isArray(merged.invoices)) merged.invoices = [];
-    if (!Array.isArray(merged.budgets)) merged.budgets = [];
-    if (!Array.isArray(merged.returns)) merged.returns = [];
-    if (!Array.isArray(merged._activityLog)) merged._activityLog = [];
-    if (!Array.isArray(merged.ortakEmanetler)) merged.ortakEmanetler = [];
-    if (!Array.isArray(merged.installments)) merged.installments = [];
+
+    const arrayKeys: (keyof DB)[] = [
+      "products", "sales", "suppliers", "orders", "cari", "kasa",
+      "bankTransactions", "matchRules", "monitorLog", "stockMovements",
+      "peletSuppliers", "peletOrders", "boruSuppliers", "boruOrders",
+      "invoices", "budgets", "returns", "_activityLog", "ortakEmanetler",
+      "installments", "partners", "notes", "_auditLog", "aiActionLog"
+    ];
+    arrayKeys.forEach((key) => {
+      if (!Array.isArray(merged[key])) (merged as Record<string, unknown>)[key] = [];
+    });
+
     if (
       !Array.isArray(merged.productCategories) ||
       merged.productCategories.length === 0
     )
       merged.productCategories = def.productCategories;
-    if (!Array.isArray(merged.notes)) merged.notes = [];
-    if (!Array.isArray(merged._auditLog)) merged._auditLog = [];
-    if (!Array.isArray(merged.aiActionLog)) merged.aiActionLog = [];
     loadT.end({ version: merged._version });
     return merged;
   } catch {
@@ -232,17 +222,16 @@ export function useDB() {
         logger.info("db", "Firebase boş, yerel veri kullanılıyor");
         return;
       }
-      const localDb = loadFromStorage();
-      if ((cloudDb._version || 0) > (localDb._version || 0)) {
+      if ((cloudDb._version || 0) > (db._version || 0)) {
         logger.info("db", "Bulut verisi daha güncel — güncelleniyor", {
-          local: localDb._version,
+          local: db._version,
           cloud: cloudDb._version,
         });
         saveToStorage(cloudDb);
         void saveToIndexedSnapshot(cloudDb);
         setDb(cloudDb);
       } else {
-        logger.info("db", "Yerel veri güncel", { version: localDb._version });
+        logger.info("db", "Yerel veri güncel", { version: db._version });
       }
       emitSync("idle");
     });
@@ -299,7 +288,7 @@ export function useDB() {
       const entry = createAuditEntry({
         action: "save",
         entity: "DB",
-        prevDB: prev,
+        prevDB: Object.freeze({ ...prev }),
         nextDB: next,
         status: auditStatus,
         violations: violations.length > 0 ? violations : undefined,
@@ -326,7 +315,7 @@ export function useDB() {
         const stack = undoStackRef.current;
         undoStackRef.current = [
           ...stack.slice(-(MAX_UNDO - 1)),
-          JSON.parse(JSON.stringify(prev)),
+          structuredClone(prev),
         ];
       }
 
@@ -347,28 +336,30 @@ export function useDB() {
   }, []);
 
   const undo = useCallback((): boolean => {
+    if (isGuestSession()) {
+      logger.warn("db", "Misafir oturumunda geri alma engellendi");
+      return false;
+    }
+
     const stack = undoStackRef.current;
     if (stack.length === 0) return false;
-    const target = stack.pop()!;
-    undoStackRef.current = [...stack];
+    const target = stack.pop()!; 
 
     setDb((prev) => {
       const ut = logger.time("db", "undo()");
       const restored: DB = {
         ...target,
         _version: (prev._version || 0) + 1,
-        _auditLog: [
-          {
-            id: genId(),
+        _auditLog: trimAuditLog([
+          createAuditEntry({
             action: "undo",
             entity: "DB",
             prevDB: prev,
             nextDB: target,
             status: "applied",
-            timestamp: new Date().toISOString(),
-          } as never,
+          }),
           ...(prev._auditLog || []),
-        ].slice(0, 200),
+        ]),
       };
       saveToStorage(restored);
       void saveToIndexedSnapshot(restored);
@@ -437,6 +428,11 @@ export function useDB() {
         detail?: string;
       },
     ) => {
+      if (isGuestSession()) {
+        logger.warn("db", "Misafir oturumunda saveGuarded engellendi");
+        return;
+      }
+
       setDb((prev) => {
         const st = logger.time("db", "saveGuarded()");
         let next = updater(prev);
@@ -478,7 +474,7 @@ export function useDB() {
           action: auditMeta?.action ?? "saveGuarded",
           entity: auditMeta?.entity ?? "DB",
           entityId: auditMeta?.entityId,
-          prevDB: prev,
+          prevDB: Object.freeze({ ...prev }),
           nextDB: next,
           status: auditStatus,
           violations: violations.length > 0 ? violations : undefined,

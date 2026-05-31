@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
+import pkg from "./package.json";
 import Inspect from "vite-plugin-inspect";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
@@ -16,6 +17,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => ({
   base: "./",
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -68,9 +72,9 @@ export default defineConfig(({ mode }) => ({
         navigateFallback: "/",
       },
       manifest: {
-        name: "PARSPEL â€” Soba Yonetim Sistemi",
+        name: "PARSPEL — Soba Yönetim Sistemi",
         short_name: "PARSPEL",
-        description: "Soba satis ve stok yonetim sistemi",
+        description: "PARSPEL Soba Yönetim Sistemi",
         theme_color: "#0a0e27",
         background_color: "#0a0e27",
         display: "standalone",

@@ -22,13 +22,13 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: '3.10.3',
     date: '30 Mayıs 2026',
-    title: 'Versiyon Tutarlılık Düzeltmesi + Lint Temizliği',
-    summary: "package.json ve APP_DEFAULT_VERSION changelog ile senkronize edildi (3.10.0 → 3.10.2). Spec rule dosyalarında kullanılmayan import'lar temizlendi (4 lint warning giderildi).",
+    title: 'Marka Birliği + UI/UX Tutarlılık Geçişi',
+    summary: 'Brand adı, sürüm kaynağı, tarih/para lokalizasyonu ve temel dashboard/header/sidebar deneyimi tekilleştirildi. Production görünüm için toast ve düzenleme kontrolleri sadeleştirildi.',
     changes: [
-      { type: 'duzeltme', text: 'package.json version 3.10.0 → 3.10.2 (changelog ile senkron) — version-consistency testi düzeldi' },
-      { type: 'duzeltme', text: 'src/lib/appConfig.ts APP_DEFAULT_VERSION 3.10.0 → 3.10.2 (changelog ile senkron)' },
-      { type: 'iyilestirme', text: 'src/lib/specs/component-rules.ts: unused import (statSync, relative) ve unused function (allowedFile) kaldırıldı' },
-      { type: 'iyilestirme', text: 'src/lib/specs/error-rules.ts: unused import (statSync) kaldırıldı' },
+      { type: 'duzeltme', text: 'Tek brand adı PARSPEL olarak login, sidebar ve toast yüzeylerinde birleştirildi' },
+      { type: 'duzeltme', text: 'Sürüm bilgisi Vite define üzerinden package.json ile senkron hale getirildi' },
+      { type: 'iyilestirme', text: 'Tarih ve para gösterimleri ortak formatter yardımcılarına taşındı' },
+      { type: 'iyilestirme', text: 'Dashboard düzenleme kontrolleri görünümden ayrılarak production görünümü sadeleştirildi' },
     ],
   },
   {

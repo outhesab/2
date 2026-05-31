@@ -1,4 +1,5 @@
 import { logger } from "@/lib/logger";
+import { BRAND_NAME } from "@/config/brand";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { ConfirmProvider } from "@/components/ConfirmDialog";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -157,15 +158,19 @@ function AppContent({
   // Son gÃƒÆ’Ã‚Â¼ncelleme toast'u ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â her versiyon iÃƒÆ’Ã‚Â§in bir kez gÃƒÆ’Ã‚Â¶ster
   useEffect(() => {
     const appVersion = getAppVersion();
-    const seenKey = `parspel_update_seen_${appVersion}`;
+    const seenVersion = localStorage.getItem("lastSeenVersion");
     try {
-      if (!localStorage.getItem(seenKey)) {
+      if (seenVersion !== appVersion) {
         setTimeout(() => {
-          showToast(`PARSPEL v${appVersion} — ${getVersionTitle()}`, 'info');
-          try { localStorage.setItem(seenKey, '1'); } catch { /* localStorage yazma hatasÃƒâ€Ã‚Â± */ }
+          showToast(`${BRAND_NAME} v${appVersion} — ${getVersionTitle()}`, "info", {
+            duration: 7000,
+          });
+          localStorage.setItem("lastSeenVersion", appVersion);
         }, 1500);
       }
-    } catch { /* localStorage okuma hatasÃƒâ€Ã‚Â± */ }
+    } catch {
+      void 0;
+    }
   }, [showToast]);
 
   // Ãƒâ€Ã‚Â°lk kurulum verisini DB'ye yaz (bir kez)

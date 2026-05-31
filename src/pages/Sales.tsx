@@ -10,6 +10,8 @@ import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { DB, SaleItem } from "@/types";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import EmptyState from "@/components/EmptyState";
+import { ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface Props {
@@ -392,9 +394,20 @@ export default function Sales({ db, save: _save }: Props) {
               <tr>
                 <td
                   colSpan={9}
-                  style={{ textAlign: "center", padding: 40, color: "var(--text-muted)" }}
+                  style={{ padding: 24 }}
                 >
-                  Satış bulunamadı
+                  <EmptyState
+                    icon={ShoppingCart}
+                    title="Satış bulunamadı"
+                    description="Seçili tarih aralığında veya filtrelerde eşleşen satış kaydı yok."
+                    actionLabel="Filtreleri temizle"
+                    onAction={() => {
+                      setFilter("all");
+                      setSearch("");
+                      setDateFrom("");
+                      setDateTo("");
+                    }}
+                  />
                 </td>
               </tr>
             ) : (

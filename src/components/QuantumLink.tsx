@@ -2,7 +2,7 @@
  * QuantumLink — Floating AI asistan paneli
  * Seçilebilir tema paletleri: Mavi, Amber, Yeşil
  */
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type CSSProperties } from 'react';
 import { BrainCircuit, X, Mic, MicOff, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DB } from '@/types';
@@ -48,32 +48,20 @@ type PaletteId = 'blue' | 'amber' | 'green';
 interface QLPalette {
   id: PaletteId;
   label: string;
-  accent: string;
-  accentRgb: string;
-  gradient: string;
 }
 
 const PALETTES: QLPalette[] = [
   {
     id: 'blue',
     label: 'Mavi',
-    accent: '#3b82f6',
-    accentRgb: '59,130,246',
-    gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
   },
   {
     id: 'amber',
     label: 'Amber',
-    accent: '#f59e0b',
-    accentRgb: '245,158,11',
-    gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
   },
   {
     id: 'green',
     label: 'Yeşil',
-    accent: '#10b981',
-    accentRgb: '16,185,129',
-    gradient: 'linear-gradient(135deg, #10b981, #059669)',
   },
 ];
 
@@ -122,6 +110,28 @@ function quickReply(db: DB, query: string): string {
   return `🤖 Quantum Link\n\nSorabileceğiniz konular:\n• Kasa durumu\n• Stok özeti\n• Bu ay satışlar\n• Müşteri alacakları\n\nDetaylı analiz için AI Asistan sayfasını kullanın.`;
 }
 
+const panelVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 40, 
+    scale: 0.9, 
+    filter: 'blur(10px)' 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1, 
+    filter: 'blur(0px)',
+    transition: { type: 'spring', damping: 20, stiffness: 300, staggerChildren: 0.05 }
+  },
+  exit: { 
+    opacity: 0, 
+    y: 20, 
+    scale: 0.95, 
+    transition: { duration: 0.2, ease: 'easeIn' } 
+  }
+};
+
 // ── Bileşen ────────────────────────────────────────────────────────
 export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -134,10 +144,20 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
   ]);
   const [inputText, setInputText] = useState('');
 
-  const palette = PALETTES.find(p => p.id === paletteId) || PALETTES[0];
-
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // CSS Değişkenlerini dinamik olarak ayarla
+  const qlStyles = {
+    '--ql-accent': paletteId === 'blue' ? 'oklch(0.60 0.14 260)' : paletteId === 'amber' ? 'oklch(0.70 0.18 85)' : 'oklch(0.65 0.18 160)',
+    '--ql-accent-rgb': paletteId === 'blue' ? '59,130,246' : paletteId === 'amber' ? '245,158,11' : '16,185,129',
+    '--ql-gradient': paletteId === 'blue' 
+      ? 'linear-gradient(135deg, oklch(0.60 0.14 260), oklch(0.50 0.18 265))'
+      : paletteId === 'amber'
+      ? 'linear-gradient(135deg, oklch(0.70 0.18 85), oklch(0.60 0.18 70))'
+      : 'linear-gradient(135deg, oklch(0.65 0.18 160), oklch(0.55 0.18 150))',
+    '--ql-accent-glow': `rgba(var(--ql-accent-rgb), 0.4)`,
+  } as CSSProperties;
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -195,7 +215,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
   };
 
   return (
-    <>
+    <div style={qlStyles}>
       {/* Floating trigger */}
       <button
         onClick={() => setIsOpen(true)}
@@ -203,20 +223,20 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
         style={{
           position: 'fixed', bottom: 90, right: 20,
           width: 52, height: 52,
-          background: palette.gradient,
+          background: 'var(--ql-gradient)',
           border: 'none',
           borderRadius: '50%', color: '#fff', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: `0 0 30px rgba(${palette.accentRgb},0.4)`,
+          boxShadow: `0 0 30px var(--ql-accent-glow)`,
           zIndex: 140, transition: 'transform 0.2s, box-shadow 0.2s',
         }}
         onMouseEnter={e => {
           e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = `0 0 40px rgba(${palette.accentRgb},0.6)`;
+          e.currentTarget.style.boxShadow = `0 0 40px rgba(var(--ql-accent-rgb), 0.6)`;
         }}
         onMouseLeave={e => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = `0 0 30px rgba(${palette.accentRgb},0.4)`;
+          e.currentTarget.style.boxShadow = `0 0 30px var(--ql-accent-glow)`;
         }}
       >
         <BrainCircuit size={22} />
@@ -232,34 +252,35 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
             />
 
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              variants={panelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="quantum-glass-panel"
               style={{
                 position: 'fixed', bottom: 152, right: 20,
                 width: 380, maxWidth: 'calc(100vw - 40px)', height: 520,
-                background: '#09090b',
                 borderRadius: 28,
-                boxShadow: `0 0 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(${palette.accentRgb},0.15)`,
+                boxShadow: `0 0 100px rgba(0,0,0,0.5), var(--ai-accent-glow)`,
                 display: 'flex', flexDirection: 'column',
-                zIndex: 149, overflow: 'hidden',
+                zIndex: 149,
               }}
             >
               {/* Header */}
               <div style={{
-                padding: '20px 24px', borderBottom: `1px solid rgba(${palette.accentRgb},0.1)`,
+                padding: '20px 24px', borderBottom: `1px solid var(--glass-border)`,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,
+                position: 'relative', zIndex: 2
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
-                    width: 8, height: 8, background: palette.accent, borderRadius: '50%',
-                    boxShadow: `0 0 8px rgba(${palette.accentRgb},0.6)`,
+                    width: 8, height: 8, background: 'var(--ql-accent)', borderRadius: '50%',
+                    boxShadow: `0 0 8px rgba(var(--ql-accent-rgb), 0.6)`,
                     animation: 'pulse 2s ease-in-out infinite',
                   }} />
                   <span style={{
                     fontSize: '0.65rem', fontWeight: 900,
-                    textTransform: 'uppercase', letterSpacing: '0.4em', color: palette.accent,
+                    textTransform: 'uppercase', letterSpacing: '0.4em', color: 'var(--ql-accent)',
                   }}>
                     Quantum Link
                   </span>
@@ -269,7 +290,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     onClick={() => setShowPalette(!showPalette)}
                     title="Tema Değiştir"
                     style={{
-                      background: showPalette ? palette.accent : 'transparent',
+                      background: showPalette ? 'var(--ql-accent)' : 'transparent',
                       border: 'none', color: showPalette ? '#fff' : '#52525b',
                       cursor: 'pointer', padding: 6, borderRadius: 8,
                       display: 'flex', alignItems: 'center', transition: 'all 0.2s',
@@ -295,7 +316,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    style={{ overflow: 'hidden', borderBottom: `1px solid rgba(${palette.accentRgb},0.1)` }}
+                    style={{ overflow: 'hidden', borderBottom: `1px solid var(--glass-border)`, position: 'relative', zIndex: 2 }}
                   >
                     <div style={{ padding: '12px 24px', display: 'flex', gap: 8 }}>
                       {PALETTES.map(p => (
@@ -304,11 +325,11 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                           onClick={() => changePalette(p.id)}
                           style={{
                             flex: 1, padding: '10px 0', borderRadius: 12, border: 'none',
-                            background: paletteId === p.id ? p.gradient : '#18181b',
+                            background: paletteId === p.id ? 'var(--ql-gradient)' : '#18181b',
                             color: paletteId === p.id ? '#fff' : '#71717a',
                             fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
                             transition: 'all 0.2s',
-                            boxShadow: paletteId === p.id ? `0 0 12px rgba(${p.accentRgb.replace(',',',').split(',').join(',')},0.3)` : 'none',
+                            boxShadow: paletteId === p.id ? `0 0 12px var(--ql-accent-glow)` : 'none',
                           }}
                         >
                           {p.label}
@@ -330,29 +351,33 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
               >
                 {messages.map((msg, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                    <div style={{
-                      maxWidth: '85%', padding: '14px 16px', borderRadius: 16,
-                      background: msg.role === 'user' ? palette.accent : '#18181b',
-                      border: msg.role === 'user' ? 'none' : `1px solid rgba(${palette.accentRgb},0.08)`,
-                    }}>
-                      <p style={{
-                        fontSize: '0.78rem', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-line',
-                        color: msg.role === 'user' ? '#fff' : '#71717a',
-                        fontWeight: msg.role === 'user' ? 700 : 400,
+                    <div 
+                      className={msg.role === 'assistant' ? 'quantum-msg-bubble-ai quantum-glass-panel' : ''}
+                      style={{
+                        maxWidth: '85%', padding: '14px 16px', borderRadius: 16,
+                        background: msg.role === 'user' ? 'var(--ql-accent)' : 'var(--glass-bg)',
+                        border: msg.role === 'user' ? 'none' : '1px solid var(--glass-border-bright)',
+                      }}
+                    >
+                      <div style={{
+                        fontSize: '0.78rem', lineHeight: 1.6,
+                        color: msg.role === 'user' ? '#fff' : 'var(--text-primary)',
+                        fontWeight: msg.role === 'user' ? 600 : 400,
+                        whiteSpace: 'pre-line',
                       }}>
                         {msg.text}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 ))}
 
                 {isProcessing && (
                   <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                    <div style={{ background: '#18181b', padding: '14px 18px', borderRadius: 16, border: `1px solid rgba(${palette.accentRgb},0.08)` }}>
+                    <div style={{ background: '#18181b', padding: '14px 18px', borderRadius: 16, border: `1px solid rgba(var(--ql-accent-rgb), 0.08)` }}>
                       <div style={{ display: 'flex', gap: 4 }}>
                         {[0, 1, 2].map(i => (
                           <div key={i} style={{
-                            width: 5, height: 5, background: palette.accent, borderRadius: '50%',
+                            width: 5, height: 5, background: 'var(--ql-accent)', borderRadius: '50%',
                             animation: `bounce 1.2s ease ${i * 0.15}s infinite`,
                           }} />
                         ))}
@@ -363,10 +388,9 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
               </div>
 
               {/* Input */}
-              <div style={{
+              <div className="quantum-input-section" style={{
                 padding: '16px 20px',
-                background: 'rgba(0,0,0,0.4)',
-                borderTop: `1px solid rgba(${palette.accentRgb},0.08)`,
+                position: 'relative', zIndex: 2,
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
                 {hasSpeech && (
@@ -374,7 +398,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     onClick={toggleListening}
                     style={{
                       width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                      background: isListening ? palette.accent : '#27272a',
+                      background: isListening ? 'var(--ql-accent)' : '#27272a',
                       border: 'none', color: isListening ? '#fff' : '#52525b',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'all 0.2s',
@@ -402,7 +426,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     disabled={isProcessing}
                     style={{
                       width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                      background: palette.gradient, border: 'none', color: '#fff',
+                      background: 'var(--ql-gradient)', border: 'none', color: '#fff',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '0.9rem', fontWeight: 700,
                     }}
@@ -413,6 +437,6 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

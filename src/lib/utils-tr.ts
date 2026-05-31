@@ -1,9 +1,15 @@
+import {
+  formatCurrency,
+  formatDateShort as formatDateShortIntl,
+  formatDateTime,
+} from "@/lib/format";
+
 export function genId(): string {
   return crypto.randomUUID();
 }
 
 export function formatMoney(n: number): string {
-  return (n || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 2 });
+  return formatCurrency(n);
 }
 
 export function formatMoneyShort(n: number): string {
@@ -15,14 +21,14 @@ export function formatMoneyShort(n: number): string {
 export function formatDate(iso: string): string {
   if (!iso) return '-';
   try {
-    return new Date(iso).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return formatDateTime(iso);
   } catch { return iso; }
 }
 
 export function formatDateShort(iso: string): string {
   if (!iso) return '-';
   try {
-    return new Date(iso).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return formatDateShortIntl(iso);
   } catch { return iso; }
 }
 

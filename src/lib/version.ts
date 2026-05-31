@@ -1,7 +1,8 @@
+import { getBrandVersion } from "@/config/brand";
 import { CHANGELOG } from "./changelog";
 import { loadAppConfig, validateVersion } from "./appConfig";
 
-export const VERSION = CHANGELOG[0]?.version || "1.0.0";
+export const VERSION = getBrandVersion();
 
 export const VERSION_DATE = CHANGELOG[0]?.date || "";
 

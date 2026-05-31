@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect } from 'react';
 import { useDraggableButton } from '@/hooks/useDraggableButton';
 import { Modal } from '@/components/Modal';
@@ -60,6 +61,7 @@ export default function FAB({ db, save, onOpenAI, uiPrefs }: FABProps) {
           onPointerMove={ai.onPointerMove}
           onPointerUp={ai.onPointerUp}
           onClick={() => { if (!ai.isDragging.current) onOpenAI(); }}
+          aria-label="AI Asistanı aç"
           title="AI Asistan"
           className="fab-ai-btn"
         >
@@ -76,15 +78,23 @@ export default function FAB({ db, save, onOpenAI, uiPrefs }: FABProps) {
               </button>
             </div>
           ))}
-          <button
-            onPointerDown={fab.onPointerDown}
-            onPointerMove={fab.onPointerMove}
-            onPointerUp={fab.onPointerUp}
-            onClick={() => { if (!fab.isDragging.current) setOpen((o) => !o); }}
-            className={`fab-main-btn ${open ? 'open' : ''}`}
-          >
-            +
-          </button>
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onPointerDown={fab.onPointerDown}
+                  onPointerMove={fab.onPointerMove}
+                  onPointerUp={fab.onPointerUp}
+                  onClick={() => { if (!fab.isDragging.current) setOpen((o) => !o); }}
+                  className={`fab-main-btn ${open ? 'open' : ''}`}
+                  aria-label="Hızlı işlemler menüsünü aç"
+                >
+                  +
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Hızlı işlemler</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
       {modal && (

@@ -87,6 +87,9 @@ function repairReferentialIntegrity(db: DB): DB {
   const productIds = new Set(db.products.map((p) => p.id));
   const cariIds = new Set(db.cari.map((c) => c.id));
   const partnerIds = new Set(db.partners.map((p) => p.id));
+  const supplierIds = new Set(db.suppliers.map((s) => s.id));
+  const boruSupplierIds = new Set((db.boruSuppliers || []).map((s) => s.id));
+  const peletSupplierIds = new Set((db.peletSuppliers || []).map((s) => s.id));
 
   let changed = false;
 
@@ -106,12 +109,36 @@ function repairReferentialIntegrity(db: DB): DB {
     return k;
   });
 
+  const orders = db.orders.map((o) => {
+    if (o.supplierId && !supplierIds.has(o.supplierId)) {
+      changed = true;
+      return { ...o, supplierId: undefined as unknown as string };
+    }
+    return o;
+  });
+
   const invoices = (db.invoices || []).map((inv) => {
     if (inv.cariId && !cariIds.has(inv.cariId)) {
       changed = true;
       return { ...inv, cariId: undefined };
     }
     return inv;
+  });
+
+  const boruOrders = (db.boruOrders || []).map((o) => {
+    if (o.supplierId && !boruSupplierIds.has(o.supplierId)) {
+      changed = true;
+      return { ...o, supplierId: undefined as unknown as string };
+    }
+    return o;
+  });
+
+  const peletOrders = (db.peletOrders || []).map((o) => {
+    if (o.supplierId && !peletSupplierIds.has(o.supplierId)) {
+      changed = true;
+      return { ...o, supplierId: undefined as unknown as string };
+    }
+    return o;
   });
 
   const ortakEmanetler = (db.ortakEmanetler || []).map((e) => {
@@ -124,7 +151,7 @@ function repairReferentialIntegrity(db: DB): DB {
 
   if (!changed) return db;
   logger.info("db", "Referans bütünlüğü onarıldı", { changed });
-  return { ...db, sales, kasa, invoices, ortakEmanetler };
+  return { ...db, sales, kasa, orders, invoices, boruOrders, peletOrders, ortakEmanetler };
 }
 
 // ── Geri yükleme veri doğrulama ve tekerrür kontrolü ─────────────────────

@@ -1,3 +1,21 @@
+import EmptyState from "@/components/EmptyState";
+import {
+  ChevronDown,
+  Coins,
+  CreditCard,
+  Download,
+  Landmark,
+  Plus,
+  WalletCards,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useState, useMemo } from 'react';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
@@ -76,6 +94,13 @@ export default function Kasa({ db, save }: Props) {
 
 
   const totalBakiye = Object.values(bakiyeler).reduce((s, v) => s + v, 0);
+  const posBakiyeleri = {
+    pos_ziraat: bakiyeler.pos_ziraat || 0,
+    pos_is: bakiyeler.pos_is || 0,
+    pos_yk: bakiyeler.pos_yk || 0,
+  };
+  const totalPos = Object.values(posBakiyeleri).reduce((sum, value) => sum + value, 0);
+  const bankaToplam = (bakiyeler.banka || 0) + totalPos;
 
   let entries = db.kasa.filter(e => !e.deleted);
   if (filter === 'gelir') entries = entries.filter(e => e.type === 'gelir');
@@ -204,33 +229,65 @@ export default function Kasa({ db, save }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', flex: '1 1 140px' }}>
-          <div style={{ color: '#64748b', fontSize: '0.78rem', marginBottom: 4, textTransform: 'uppercase' }}>💰 Toplam Kasa</div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 800, color: totalBakiye >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(totalBakiye)}</div>
-        </div>
-        {kasalar.map(k => (
-          <div key={k.id} style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', flex: '1 1 120px', cursor: 'pointer' }} onClick={() => setKasaFilter(k.id)}>
-            <div style={{ color: '#64748b', fontSize: '0.78rem', marginBottom: 4 }}>{k.icon} {k.name}</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: (bakiyeler[k.id] || 0) >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(bakiyeler[k.id] || 0)}</div>
-          </div>
-        ))}
+      <div style={{ display: 'grid', gap: 12, marginBottom: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+        {[
+          { label: 'Kasa', value: totalBakiye, icon: WalletCards },
+          { label: 'Nakit', value: bakiyeler.nakit || 0, icon: Coins },
+          { label: 'Banka', value: bankaToplam, icon: Landmark },
+          { label: 'POS', value: totalPos, icon: CreditCard },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', cursor: item.label !== "Kasa" ? 'pointer' : 'default' }} onClick={item.label === "Nakit" ? () => setKasaFilter("nakit") : item.label === "Banka" ? () => setKasaFilter("banka") : undefined}>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
+                <Icon size={14} /> {item.label}
+              </div>
+              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: item.value >= 0 ? 'var(--text-primary)' : '#ef4444' }}>{formatMoney(item.value)}</div>
+              {item.label === "POS" ? (
+                <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ziraat {formatMoney(posBakiyeleri.pos_ziraat)}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>İş {formatMoney(posBakiyeleri.pos_is)}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>YapıKredi {formatMoney(posBakiyeleri.pos_yk)}</span>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={() => setIncomeModal(true)} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: 'var(--color-success)', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>+ Gelir</button>
-        <button onClick={() => setExpenseModal(true)} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, color: 'var(--color-danger)', padding: '10px 18px', fontWeight: 700, cursor: 'pointer' }}>- Gider</button>
-        <button onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }} style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, color: '#a78bfa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📋 Gün Sonu Sayım</button>
-        <button onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, color: '#60a5fa', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel İndir</button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Plus />
+              Yeni İşlem
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => setIncomeModal(true)}>Gelir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setExpenseModal(true)}>Gider</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button variant="outline" onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }}>
+          <WalletCards />
+          Gün Sonu Sayım
+        </Button>
+        <Button variant="outline" onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }}>
+          <Download />
+          Excel İndir
+        </Button>
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ara..." style={{ padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', flex: 1 }} />
         <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
         <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
         {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '8px 10px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕</button>}
-        {['all', 'gelir', 'gider'].map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{ padding: '8px 14px', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem', background: filter === f ? '#ff5722' : '#273548', color: filter === f ? '#fff' : '#94a3b8' }}>
-            {f === 'all' ? 'Tümü' : f === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
-          </button>
-        ))}
+        <Tabs value={filter} onValueChange={setFilter}>
+          <TabsList>
+            <TabsTrigger value="all">Tümü</TabsTrigger>
+            <TabsTrigger value="gelir">Gelir</TabsTrigger>
+            <TabsTrigger value="gider">Gider</TabsTrigger>
+          </TabsList>
+        </Tabs>
         {kasaFilter !== 'all' && <button onClick={() => setKasaFilter('all')} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕ Filtre Kaldır</button>}
       </div>
 
@@ -245,7 +302,21 @@ export default function Kasa({ db, save }: Props) {
           </thead>
           <tbody>
             {sorted.length === 0 ? (
-              <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Kayıt bulunamadı</td></tr>
+              <tr><td colSpan={7} style={{ padding: 24 }}>
+                <EmptyState
+                  icon={WalletCards}
+                  title="Kasa kaydı bulunamadı"
+                  description="Seçili filtrelerle eşleşen gelir veya gider hareketi yok."
+                  actionLabel="Filtreleri temizle"
+                  onAction={() => {
+                    setFilter("all");
+                    setKasaFilter("all");
+                    setSearch("");
+                    setDateFrom("");
+                    setDateTo("");
+                  }}
+                />
+              </td></tr>
             ) : sorted.map(e => (
               <tr key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                 <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(e.createdAt)}</td>

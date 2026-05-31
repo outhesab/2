@@ -58,6 +58,7 @@ export default function ReportButton({ visible }: ReportButtonProps) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onClick={() => { if (!isDragging.current) setOpen((o) => !o); }}
+        aria-label="Hata bildir veya not al"
         title="Hata Bildir / Not Al"
         className="report-btn"
       >

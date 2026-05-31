@@ -27,6 +27,7 @@ import {
     saveAppConfig,
     validateVersion,
 } from "@/lib/appConfig";
+import { BRAND_NAME } from "@/config/brand";
 import { CHANGE_TYPE_CONFIG, CHANGELOG } from "@/lib/changelog";
 import {
     DEFAULT_CONN,
@@ -4329,6 +4330,24 @@ function ArayuzAyarlari({
                 />
               </button>
             </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="🧩 Düzenleme Modu">
+        <div className={"settings-grid-2-16"}>
+          <div className={"settings-info-box"}>
+            <div className={"settings-text-primary-sm"}>Dashboard widget yönetimi</div>
+            <p className={"settings-text-muted-xs"}>
+              Özet sayfasındaki widget seçimi ve sıralaması mevcut tercihleriniz üzerinden korunur.
+              Dashboard artık yalnızca görüntülemeye odaklanır; düzenleme kontrolleri burada yönetilir.
+            </p>
+          </div>
+          <div className={"settings-info-box"}>
+            <div className={"settings-text-primary-sm"}>Marka görünürlüğü</div>
+            <p className={"settings-text-muted-xs"}>
+              {BRAND_NAME} ve sürüm bilgisi artık tek kaynaktan gösterilir.
+            </p>
           </div>
         </div>
       </Card>

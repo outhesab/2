@@ -196,6 +196,35 @@ describe('duplicate_transaction kuralı', () => {
     expect(violations.some(v => v.ruleId === 'duplicate_transaction' && v.severity === 'warn')).toBe(true);
   });
 
+  it('60 saniye içinde çok küçük amount farkı varsa warn ihlali üretmez (precision/rounding güvenliği)', () => {
+    const now = new Date();
+    const recentTime = new Date(now.getTime() - 30_000).toISOString(); // 30 saniye önce
+
+    const existingEntry = makeKasaEntry({
+      id: 'k_existing',
+      cariId: 'cari1',
+      amount: 500.00,
+      kasa: 'nakit',
+      createdAt: recentTime,
+    });
+
+    const prev = makeDB({ kasa: [existingEntry] });
+
+    // Double/rounding edge: amount eşit değil ama pratikte aynı para gibi görünebilir.
+    const newEntry = makeKasaEntry({
+      id: 'k_new',
+      cariId: 'cari1',
+      amount: 500.0001,
+      kasa: 'nakit',
+      createdAt: now.toISOString(),
+    });
+
+    const next = makeDB({ kasa: [existingEntry, newEntry] });
+
+    const violations = validateTransaction(prev, next);
+    expect(violations.filter(v => v.ruleId === 'duplicate_transaction')).toHaveLength(0);
+  });
+
   it('60 saniyeden eski kayıt → ihlal üretmez', () => {
     const now = new Date();
     const oldTime = new Date(now.getTime() - 120_000).toISOString(); // 2 dakika önce

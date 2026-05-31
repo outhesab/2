@@ -1,5 +1,7 @@
-import { TABS, type TabGroup, type TabId } from '@/config/tabs';
-import { formatMoney } from '@/lib/utils-tr';
+import type { LucideIcon } from "lucide-react";
+import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
+import { TABS, type TabGroup, type TabId } from "@/config/tabs";
+import { formatMoney } from "@/lib/utils-tr";
 
 interface SidebarProps {
   isMobile: boolean;
@@ -7,7 +9,7 @@ interface SidebarProps {
   setSidebarOpen: (v: boolean) => void;
   activeTab: TabId;
   navigate: (tab: TabId) => void;
-  priorityTabs: Array<{ id: TabId; label: string; icon: string; group: TabGroup }>;
+  priorityTabs: Array<{ id: TabId; label: string; icon: LucideIcon; group: TabGroup }>;
   toggleGroup: (group: TabGroup) => void;
   expandedGroups: Record<TabGroup, boolean>;
   toggleFavoriteTab: (tabId: TabId) => void;
@@ -22,8 +24,16 @@ interface SidebarProps {
 
 const GROUPS: TabGroup[] = ['Ana', 'Tedarik', 'Finans', 'Analiz', 'Sistem'];
 
+const GROUP_CLASS_MAP: Record<TabGroup, string> = {
+  Ana: 'ana',
+  Tedarik: 'tedarik',
+  Finans: 'finans',
+  Analiz: 'analiz',
+  Sistem: 'sistem',
+};
+
 function groupClass(group: TabGroup): string {
-  return group === 'Ana' ? 'ana' : group === 'Tedarik' ? 'tedarik' : group === 'Finans' ? 'finans' : group === 'Analiz' ? 'analiz' : 'sistem';
+  return GROUP_CLASS_MAP[group] || 'sistem';
 }
 
 export default function Sidebar({
@@ -48,10 +58,10 @@ export default function Sidebar({
     <aside className={`app-sidebar ${isMobile && !sidebarOpen ? 'mobile-closed' : 'mobile-open'}`}>
       <div className="app-sidebar-logo-wrap">
         <div className="app-sidebar-logo-row">
-          <div className="app-sidebar-logo-icon">🔥</div>
+          <div className="app-sidebar-logo-icon" aria-hidden="true">P</div>
           <div className="app-sidebar-logo-text-wrap">
-            <div className="app-sidebar-logo-title">Soba Yönetim</div>
-            <div className="app-sidebar-logo-subtitle">Sistemi · v3.0</div>
+            <div className="app-sidebar-logo-title">{BRAND_NAME}</div>
+            <div className="app-sidebar-logo-subtitle">{BRAND_SUBTITLE} · v{getBrandVersion()}</div>
           </div>
           {isMobile && <button onClick={() => setSidebarOpen(false)} className="app-sidebar-close-btn">✕</button>}
         </div>
@@ -67,6 +77,7 @@ export default function Sidebar({
             {priorityTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const gClass = groupClass(tab.group);
+              const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
@@ -74,7 +85,7 @@ export default function Sidebar({
                   aria-label={`${tab.label} hızlı erişim`}
                   className={`app-priority-tab ${gClass} ${isActive ? 'active' : 'inactive'}`}
                 >
-                  <span className={`app-priority-tab-icon ${isActive ? 'active' : 'inactive'}`}>{tab.icon}</span>
+                  <span className={`app-priority-tab-icon ${isActive ? 'active' : 'inactive'}`}><Icon className="size-4" /></span>
                   <span className="app-priority-tab-label">{tab.label}</span>
                 </button>
               );
@@ -103,13 +114,14 @@ export default function Sidebar({
                 const isActive = activeTab === tab.id;
                 const isFavorite = favoriteTabs.includes(tab.id);
                 const tClass = groupClass(tab.group);
+                const Icon = tab.icon;
                 return (
                   <div key={tab.id} className="app-nav-tab-row">
                     <button
                       onClick={() => navigate(tab.id)}
                       className={`app-nav-tab-btn ${tClass} ${isActive ? 'active' : 'inactive'}`}
                     >
-                      <span className={`app-nav-tab-icon ${isActive ? 'active' : 'inactive'}`}>{tab.icon}</span>
+                      <span className={`app-nav-tab-icon ${isActive ? 'active' : 'inactive'}`}><Icon className="size-4" /></span>
                       <span className="app-nav-tab-label">{tab.label}</span>
                       {badge ? <span className={`app-nav-badge ${tab.id === 'products' || tab.id === 'monitor' ? 'danger' : 'warn'}`}>{badge > 99 ? '99+' : badge}</span> : null}
                       {isActive && <span className={`app-nav-tab-active-line ${tClass}`} />}
@@ -133,7 +145,7 @@ export default function Sidebar({
 
       <div onClick={() => navigate('kasa')} className="app-kasa-widget">
         <div className="app-kasa-widget-head">
-          <span>💰</span>
+          <span aria-hidden="true">₺</span>
           <span>Toplam Kasa</span>
           <span className="app-kasa-widget-dot" />
         </div>
@@ -171,11 +183,11 @@ export default function Sidebar({
           <span className={`app-status-text ${isOnline ? 'online' : 'offline'}`}>
             {isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}
           </span>
-          <span className={`app-sync-mini ${syncStatus}`}>
+          <span className={`app-sync-mini ${syncStatus}`} title={lastSyncTime}>
             {syncStatus === 'saving' ? '⟳ Senkronize…' : syncStatus === 'saved' ? `✓ ${lastSyncTime}` : syncStatus === 'error' ? '✗ Hata' : syncStatus === 'loading' ? '↓ Yüklüyor' : ''}
           </span>
         </div>
-        <div className="app-status-foot">🔒 Firebase & localStorage · Güvenli</div>
+        <div className="app-status-foot">PARSPEL · Firebase & localStorage · Güvenli</div>
       </div>
     </aside>
   );

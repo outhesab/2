@@ -9,6 +9,7 @@ import { loadConnConfig } from '@/lib/connConfig';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { logger } from '@/lib/logger';
 import { getAppVersion } from '@/lib/version';
+import { BRAND_NAME } from '@/config/brand';
 
 interface Props {
   db: DB;
@@ -119,7 +120,7 @@ function ScrollableCards({ cards, onTabChange }: { cards: StatCardData[]; onTabC
   );
 }
 
-const WIDGET_OPTIONS = [
+const _WIDGET_OPTIONS = [
   { id: 'chart', icon: '📈', label: 'Performans Grafiği' },
   { id: 'quickStats', icon: '📊', label: 'Hızlı Özet' },
   { id: 'recentSales', icon: '🛒', label: 'Son Satışlar' },
@@ -132,7 +133,7 @@ const WIDGET_OPTIONS = [
   { id: 'yedekHatirlatma', icon: '💾', label: 'Yedek Hatırlatma' },
 ] as const;
 
-type WidgetId = typeof WIDGET_OPTIONS[number]['id'];
+type WidgetId = typeof _WIDGET_OPTIONS[number]['id'];
 
 function loadDashboardPrefs(): { leftWidgets: WidgetId[]; brightness: number } {
   try {
@@ -253,7 +254,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
     setTimeout(() => setBackupMsg(''), 5000);
   };
 
-  const updatePrefs = (patch: Partial<{ leftWidgets: WidgetId[]; brightness: number }>) => {
+  const _updatePrefs = (patch: Partial<{ leftWidgets: WidgetId[]; brightness: number }>) => {
     const next = { ...prefs, ...patch };
     setPrefs(next);
     saveDashboardPrefs(next);
@@ -338,23 +339,6 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
 
   const recentSales = [...db.sales].filter(s => !s.deleted).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8);
   const recentActivity = [...db._activityLog].sort((a, b) => new Date(b.time || b.createdAt || "").getTime() - new Date(a.time || a.createdAt || "").getTime()).slice(0, 6);
-
-  const toggleWidget = (id: WidgetId) => {
-    const list = prefs.leftWidgets.includes(id)
-      ? prefs.leftWidgets.filter(w => w !== id)
-      : [...prefs.leftWidgets, id];
-    updatePrefs({ leftWidgets: list });
-  };
-
-  const moveWidget = (id: WidgetId, dir: number) => {
-    const list = [...prefs.leftWidgets];
-    const idx = list.indexOf(id);
-    if (idx < 0) return;
-    const newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= list.length) return;
-    [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
-    updatePrefs({ leftWidgets: list });
-  };
 
   const renderWidget = (id: WidgetId) => {
     switch (id) {
@@ -551,13 +535,13 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
   const showSidePanel = contentWidth >= 1100;
 
   return (
-    <div className="dash-container" style={{ filter: `brightness(${prefs.brightness / 100})` }}>
+    <div className="dash-container">
       <ScrollableCards cards={statCards} onTabChange={onTabChange} />
 
       <div className="dash-header-row">
         <div className="dash-badge-box">
           <span className="dash-badge-label">VERSİYON</span>
-          <span className="dash-badge-value">v{getAppVersion()}</span>
+          <span className="dash-badge-value">{BRAND_NAME} v{getAppVersion()}</span>
           <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", marginLeft: 6 }}>(DB: {db._version || 0})</span>
         </div>
         {(() => {
@@ -696,7 +680,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
               <EmptyHeader>
                 <EmptyMedia>🧩</EmptyMedia>
                 <EmptyTitle>Widget alanı boş</EmptyTitle>
-                <EmptyDescription>Sağ panelden widget ekleyin</EmptyDescription>
+                <EmptyDescription>Ayarlar &gt; Düzenleme Modu üzerinden widget ekleyin</EmptyDescription>
               </EmptyHeader>
             </Empty>
           )}
@@ -705,68 +689,14 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
         <motion.div className="dash-side-col" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.08 } } }}>
           <motion.div variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0 } }} className="dash-side-card">
             <div className="dash-side-card-header">
-              <span className="dash-side-card-icon">☀️</span>
-              <span className="dash-side-card-title">Parlaklık</span>
-              <span className="dash-side-card-value">{prefs.brightness}%</span>
-            </div>
-            <input
-              type="range" min={40} max={120} value={prefs.brightness}
-              onChange={e => updatePrefs({ brightness: Number(e.target.value) })}
-              className="dash-range-input"
-            />
-            <div className="dash-range-labels">
-              <span className="dash-range-label">🌙 Karanlık</span>
-              <span className="dash-range-label">☀️ Parlak</span>
-            </div>
-            {prefs.brightness !== 100 && (
-              <motion.button
-                onClick={() => updatePrefs({ brightness: 100 })}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="dash-reset-btn"
-              >
-                Sıfırla (100%)
-              </motion.button>
-            )}
-          </motion.div>
-
-          <motion.div variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0 } }} className="dash-side-card">
-            <div className="dash-side-card-header">
               <span className="dash-side-card-icon">🧩</span>
-              <span className="dash-side-card-title">Widget Yönetimi</span>
+              <span className="dash-side-card-title">Özet düzeni</span>
             </div>
-            <div className="dash-tips-list">
-              {WIDGET_OPTIONS.map(w => {
-                const active = prefs.leftWidgets.includes(w.id);
-                const idx = prefs.leftWidgets.indexOf(w.id);
-                return (
-                  <motion.div
-                    key={w.id}
-                    layout
-                    whileHover={{ scale: 1.01, x: 2 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className={`dash-widget-item ${active ? 'active' : 'inactive'}`}
-                    style={{ border: `1px solid ${active ? 'rgba(255,87,34,0.15)' : 'rgba(255,255,255,0.04)'}` }}
-                  >
-                    <span className="dash-widget-item-icon">{w.icon}</span>
-                    <span className={`dash-widget-item-label ${active ? 'active' : 'inactive'}`}>{w.label}</span>
-                    {active && (
-                      <div style={{ display: 'flex', gap: 2 }}>
-                        <motion.button onClick={() => moveWidget(w.id, -1)} disabled={idx === 0} whileHover={idx !== 0 ? { scale: 1.15 } : {}} whileTap={idx !== 0 ? { scale: 0.9 } : {}} className={`dash-widget-move-btn ${idx === 0 ? 'disabled' : 'enabled'}`}>▲</motion.button>
-                        <motion.button onClick={() => moveWidget(w.id, 1)} disabled={idx === prefs.leftWidgets.length - 1} whileHover={idx !== prefs.leftWidgets.length - 1 ? { scale: 1.15 } : {}} whileTap={idx !== prefs.leftWidgets.length - 1 ? { scale: 0.9 } : {}} className={`dash-widget-move-btn ${idx === prefs.leftWidgets.length - 1 ? 'disabled' : 'enabled'}`}>▼</motion.button>
-                      </div>
-                    )}
-                    <motion.button
-                      onClick={() => toggleWidget(w.id)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className={`dash-widget-toggle-btn ${active ? 'active' : 'inactive'}`}
-                    >
-                      {active ? '−' : '+'}
-                    </motion.button>
-                  </motion.div>
-                );
-              })}
+            <div className="dash-widget-item inactive">
+              <span className="dash-widget-item-icon">⚙️</span>
+              <span className="dash-widget-item-label inactive">
+                Widget yönetimi ve parlaklık kontrolleri Ayarlar &gt; Düzenleme Modu alanına taşındı.
+              </span>
             </div>
           </motion.div>
 
