@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import { type LucideIcon, Sparkles } from "lucide-react";
 import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
 import { TABS, type TabGroup, type TabId } from "@/config/tabs";
 import { formatMoney } from "@/lib/utils-tr";
@@ -58,7 +58,7 @@ export default function Sidebar({
     <aside className={`app-sidebar ${isMobile && !sidebarOpen ? 'mobile-closed' : 'mobile-open'}`}>
       <div className="app-sidebar-logo-wrap">
         <div className="app-sidebar-logo-row">
-          <div className="app-sidebar-logo-icon" aria-hidden="true">P</div>
+          <div className="app-sidebar-logo-icon" aria-hidden="true"><Sparkles size={20} /></div>
           <div className="app-sidebar-logo-text-wrap">
             <div className="app-sidebar-logo-title">{BRAND_NAME}</div>
             <div className="app-sidebar-logo-subtitle">{BRAND_SUBTITLE} · v{getBrandVersion()}</div>

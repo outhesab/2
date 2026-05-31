@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.5',
+    date: '31 Mayıs 2026',
+    title: 'UI Düzeltmeleri + Dashboard Widget Yönetimi',
+    summary: "Dashboard stat card renkleri düzeltildi (eski !important hatası). Widget yönetimi ve parlaklık kontrolü Settings'e gerçek kontrollerle eklendi. Sidebar logosu iyileştirildi, yedek butonu eski görünür stiline döndü.",
+    changes: [
+      { type: 'duzeltme', text: 'Dashboard: .dash-statcard-value !important kaldırıldı — istatistik kart renkleri (gelir/kâr/stok) artık doğru gösterilir' },
+      { type: 'iyilestirme', text: 'Settings > Dashboard Düzenleme: widget aç/kapa, sıralama ve parlaklık ayarı eklendi' },
+      { type: 'iyilestirme', text: 'Sidebar: "P" logo yerine lucide-react Sparkles ikonu kullanıldı' },
+      { type: 'iyilestirme', text: 'Header: yedek butonu tekrar info renginde görünür hale getirildi' },
+    ],
+  },
+  {
     version: '3.10.4',
     date: '31 Mayıs 2026',
     title: 'Login Ekranı Modernizasyonu + exceljs → xlsx Geçişi',

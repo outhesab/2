@@ -27,7 +27,6 @@ import {
     saveAppConfig,
     validateVersion,
 } from "@/lib/appConfig";
-import { BRAND_NAME } from "@/config/brand";
 import { CHANGE_TYPE_CONFIG, CHANGELOG } from "@/lib/changelog";
 import {
     DEFAULT_CONN,
@@ -149,6 +148,40 @@ export default function Settings({
   const [tab, setTab] = useState<Tab>("arayuz");
   const [uiPrefs, setUiPrefs] = useState<UIPrefs>(loadUIPrefs);
   const [connCfg, setConnCfg] = useState<ConnConfig>(loadConnConfig);
+
+  const WIDGET_OPTIONS = [
+    { id: 'chart', icon: '📈', label: 'Performans Grafiği' },
+    { id: 'quickStats', icon: '📊', label: 'Hızlı Özet' },
+    { id: 'recentSales', icon: '🛒', label: 'Son Satışlar' },
+    { id: 'tips', icon: '💡', label: 'Akıllı Öneriler' },
+    { id: 'stockAlerts', icon: '⚠️', label: 'Stok Uyarıları' },
+    { id: 'activity', icon: '📋', label: 'Son Aktiviteler' },
+    { id: 'excelBar', icon: '📊', label: 'Excel İndir' },
+    { id: 'categoryChart', icon: '🍩', label: 'Kategori Dağılımı' },
+    { id: 'kasaSayim', icon: '🏦', label: 'Gün Sonu Kasa Sayımı' },
+    { id: 'yedekHatirlatma', icon: '💾', label: 'Yedek Hatırlatma' },
+  ] as const;
+  type WidgetId = typeof WIDGET_OPTIONS[number]['id'];
+
+  const [dashboardPrefs, setDashboardPrefs] = useState<{ leftWidgets: WidgetId[]; brightness: number }>(() => {
+    try {
+      const raw = localStorage.getItem('dashboardPrefs');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return {
+          leftWidgets: Array.isArray(parsed.leftWidgets) ? parsed.leftWidgets.filter((id: string) => WIDGET_OPTIONS.some(w => w.id === id)) : ['chart', 'recentSales', 'tips', 'excelBar'],
+          brightness: typeof parsed.brightness === 'number' ? parsed.brightness : 100,
+        };
+      }
+    } catch { /* ignore */ }
+    return { leftWidgets: ['chart', 'recentSales', 'tips', 'excelBar'], brightness: 100 };
+  });
+
+  const saveDashboardPrefs = (patch: Partial<{ leftWidgets: WidgetId[]; brightness: number }>) => {
+    const next = { ...dashboardPrefs, ...patch };
+    setDashboardPrefs(next);
+    try { localStorage.setItem('dashboardPrefs', JSON.stringify(next)); } catch { /* ignore */ }
+  };
 
   const saveCompany = () => {
     save((prev) => ({
@@ -4334,20 +4367,65 @@ function ArayuzAyarlari({
         </div>
       </Card>
 
-      <Card title="🧩 Düzenleme Modu">
+      <Card title="🧩 Dashboard Düzenleme">
         <div className={"settings-grid-2-16"}>
-          <div className={"settings-info-box"}>
-            <div className={"settings-text-primary-sm"}>Dashboard widget yönetimi</div>
-            <p className={"settings-text-muted-xs"}>
-              Özet sayfasındaki widget seçimi ve sıralaması mevcut tercihleriniz üzerinden korunur.
-              Dashboard artık yalnızca görüntülemeye odaklanır; düzenleme kontrolleri burada yönetilir.
-            </p>
+          <div>
+            <label className={"settings-lbl"}>Parlaklık</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                type="range"
+                min="50"
+                max="150"
+                value={dashboardPrefs.brightness}
+                onChange={(e) => saveDashboardPrefs({ brightness: Number(e.target.value) })}
+                style={{ flex: 1, accentColor: 'var(--color-primary)' }}
+              />
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', minWidth: 36, textAlign: 'right' }}>%{dashboardPrefs.brightness}</span>
+            </div>
           </div>
-          <div className={"settings-info-box"}>
-            <div className={"settings-text-primary-sm"}>Marka görünürlüğü</div>
-            <p className={"settings-text-muted-xs"}>
-              {BRAND_NAME} ve sürüm bilgisi artık tek kaynaktan gösterilir.
-            </p>
+          <div />
+        </div>
+        <div style={{ marginTop: 14 }}>
+          <label className={"settings-lbl"}>Widget'lar</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {WIDGET_OPTIONS.map((w) => {
+              const idx = dashboardPrefs.leftWidgets.indexOf(w.id);
+              const enabled = idx >= 0;
+              const toggle = () => {
+                if (enabled) {
+                  saveDashboardPrefs({ leftWidgets: dashboardPrefs.leftWidgets.filter((id) => id !== w.id) });
+                } else {
+                  saveDashboardPrefs({ leftWidgets: [...dashboardPrefs.leftWidgets, w.id] });
+                }
+              };
+              const moveUp = () => {
+                if (idx <= 0) return;
+                const arr = [...dashboardPrefs.leftWidgets];
+                [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                saveDashboardPrefs({ leftWidgets: arr });
+              };
+              const moveDown = () => {
+                if (idx < 0 || idx >= dashboardPrefs.leftWidgets.length - 1) return;
+                const arr = [...dashboardPrefs.leftWidgets];
+                [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                saveDashboardPrefs({ leftWidgets: arr });
+              };
+              return (
+                <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', borderRadius: 8, background: enabled ? 'var(--bg-card)' : 'transparent', border: '1px solid var(--border)', opacity: enabled ? 1 : 0.5 }}>
+                  <span style={{ fontSize: '1rem', width: 22, textAlign: 'center' }}>{w.icon}</span>
+                  <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>{w.label}</span>
+                  {enabled && (
+                    <>
+                      <button onClick={moveUp} disabled={idx === 0} style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'var(--text-dim)' : 'var(--text-secondary)', fontSize: '0.85rem', padding: '2px 4px' }} title="Yukarı taşı">↑</button>
+                      <button onClick={moveDown} disabled={idx === dashboardPrefs.leftWidgets.length - 1} style={{ background: 'none', border: 'none', cursor: idx === dashboardPrefs.leftWidgets.length - 1 ? 'default' : 'pointer', color: idx === dashboardPrefs.leftWidgets.length - 1 ? 'var(--text-dim)' : 'var(--text-secondary)', fontSize: '0.85rem', padding: '2px 4px' }} title="Aşağı taşı">↓</button>
+                    </>
+                  )}
+                  <button onClick={toggle} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', padding: '2px 4px', color: enabled ? '#ef4444' : 'var(--color-success)' }} title={enabled ? 'Gizle' : 'Göster'}>
+                    {enabled ? '✕' : '+'}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </Card>
