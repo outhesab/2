@@ -22,13 +22,20 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: '3.10.4',
     date: '31 Mayıs 2026',
-    title: 'Login Ekranı Modernizasyonu + Demo Hızlı Giriş',
-    summary: 'Login ekranı lucide-react ikonlara geçirildi, demo hesapla tek tıkla giriş butonu eklendi, mobil için responsive düzenlemeler ve skeleton loading eklendi.',
+    title: 'Login Ekranı Modernizasyonu + exceljs → xlsx Geçişi',
+    summary: "Login ekranı lucide-react ikonlara geçirildi, demo hesapla tek tıkla giriş butonu eklendi. exceljs kaldırıldı, yerine xlsx (SheetJS) kullanılıyor — güvenlik açıkları çözüldü, bundle küçüldü.",
     changes: [
       { type: 'iyilestirme', text: 'LoginScreen: emoji ikonlar lucide-react bileşenlerle değiştirildi (User, Lock, Eye, LogIn, Sparkles vb.)' },
       { type: 'yeni', text: 'LoginScreen: "Demo Hesap ile Hızlı Giriş" butonu eklendi — tek tıkla demo29605 oturumu açar' },
       { type: 'iyilestirme', text: 'LoginScreen: mobil responsive düzen (küçük ekran padding/font-size iyileştirmesi)' },
       { type: 'iyilestirme', text: 'LoginScreen: Firebase bağlanırken skeleton loading gösterimi' },
+      { type: 'iyilestirme', text: 'appConfig: APP_NAME/APP_SUBTITLE/APP_DEFAULT_VERSION → centralized brand config (src/config/brand.ts)' },
+      { type: 'kaldirildi', text: 'exceljs bağımlılığı kaldırıldı (3.10.0) — güvenlik açıkları ve bakım sorunları nedeniyle' },
+      { type: 'iyilestirme', text: 'safeXlsx.ts: exceljs API → xlsx (SheetJS) API dönüşümü — readSafeWorkbook, downloadObjectSheetsAsXlsx, downloadAoASheetsAsXlsx yeniden yazıldı' },
+      { type: 'iyilestirme', text: 'xlsx@0.18.5 eklendi — daha hafif, bakımı aktif (exceljs 1MB → xlsx 424KB)' },
+      { type: 'iyilestirme', text: 'vite.config.ts: exceljs referansları temizlendi (commonjsOptions.ignore, optimizeDeps.include)' },
+      { type: 'duzeltme', text: 'pnpm audit güvenlik açıkları çözüldü (tmp path traversal) — exceljs kalktığı için otomatik kapandı' },
+      { type: 'kaldirildi', text: 'package.json pnpm.overrides (tmp>=0.2.6) kaldırıldı — artık gerek yok' },
     ],
   },
   {

@@ -1,11 +1,4 @@
-type ExcelJSModule = typeof import('exceljs');
-let _ExcelJS: ExcelJSModule | null = null;
-async function getExcelJS(): Promise<ExcelJSModule> {
-  if (!_ExcelJS) {
-    _ExcelJS = await import('exceljs');
-  }
-  return _ExcelJS;
-}
+import * as XLSX from 'xlsx';
 
 const DEFAULT_ALLOWED_EXTENSIONS = ['.xlsx', '.xlsm', '.csv'] as const;
 const DANGEROUS_HEADER_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -41,74 +34,53 @@ export function assertSafeSpreadsheetFile(file: File, allowedExtensions: readonl
   }
 }
 
-function normalizeCellValue(value: unknown): unknown {
-  if (value == null) return null;
-  if (value instanceof Date) return value;
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value;
-  if (Array.isArray(value)) return value.map(item => normalizeCellValue(item)).join(' ');
-
-  if (typeof value === 'object') {
-    if ('result' in value && value.result != null) return normalizeCellValue(value.result as unknown);
-    if ('text' in value && typeof value.text === 'string') return value.text;
-    if ('hyperlink' in value && typeof value.hyperlink === 'string') return value.hyperlink;
-    if ('richText' in value && Array.isArray(value.richText)) return value.richText.map(part => part.text).join('');
-    if ('formula' in value && typeof value.formula === 'string') return value.formula;
-  }
-
-  return String(value);
-}
-
-function validateWorksheet(worksheet: { name: string; actualRowCount?: number; rowCount?: number; actualColumnCount?: number; columnCount?: number }, sourceName?: string) {
-  const rowCount = Math.max(worksheet.actualRowCount || 0, worksheet.rowCount || 0);
-  const colCount = Math.max(worksheet.actualColumnCount || 0, worksheet.columnCount || 0);
+function validateSheetRange(ws: XLSX.WorkSheet, sheetName: string, sourceName?: string): void {
+  const ref = ws['!ref'];
+  if (!ref) return;
+  const range = XLSX.utils.decode_range(ref);
+  const rowCount = range.e.r + 1;
+  const colCount = range.e.c + 1;
   if (rowCount > SAFE_XLSX_LIMITS.maxRows) {
-    fail(`${sourceName || 'Dosya'} icindeki ${worksheet.name} sayfasi cok buyuk. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
+    fail(`${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok buyuk. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
   }
   if (colCount > SAFE_XLSX_LIMITS.maxCols) {
-    fail(`${sourceName || 'Dosya'} icindeki ${worksheet.name} sayfasi cok genis. En fazla ${SAFE_XLSX_LIMITS.maxCols} sutun desteklenir.`);
+    fail(`${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok genis. En fazla ${SAFE_XLSX_LIMITS.maxCols} sutun desteklenir.`);
   }
-}
-
-function extractSheetRows(worksheet: { name: string; actualRowCount?: number; rowCount?: number; actualColumnCount?: number; columnCount?: number; eachRow: (opts: { includeEmpty: boolean }, cb: (row: { actualCellCount?: number; cellCount?: number; getCell: (col: number) => { value: unknown } }) => void) => void }, options: { defval?: unknown; blankrows?: boolean } = {}): unknown[][] {
-  validateWorksheet(worksheet);
-  const rows: unknown[][] = [];
-
-  worksheet.eachRow({ includeEmpty: options.blankrows ?? false }, (row) => {
-    const maxCells = Math.min(Math.max(row.actualCellCount || 0, row.cellCount || 0), SAFE_XLSX_LIMITS.maxCols);
-    const values = Array.from({ length: maxCells }, (_, index) => {
-      const normalized = normalizeCellValue(row.getCell(index + 1).value);
-      return normalized ?? (options.defval ?? '');
-    });
-
-    const hasContent = values.some(value => value !== null && value !== undefined && String(value).trim() !== '');
-    if (!hasContent && !(options.blankrows ?? false)) return;
-    rows.push(values);
-  });
-
-  if (rows.length > SAFE_XLSX_LIMITS.maxRows) {
-    fail(`Sayfa veri limiti asildi. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
-  }
-
-  return rows;
 }
 
 export async function readSafeWorkbook(input: ArrayBuffer, options: { sourceName?: string }): Promise<SafeWorkbookData> {
-  const ExcelJS = await getExcelJS();
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(input);
-  if (workbook.worksheets.length === 0) {
+  const workbook = XLSX.read(input, { type: 'array' });
+
+  if (workbook.SheetNames.length === 0) {
     fail('Dosyada okunabilir sayfa bulunamadi.');
   }
-  if (workbook.worksheets.length > SAFE_XLSX_LIMITS.maxSheets) {
+  if (workbook.SheetNames.length > SAFE_XLSX_LIMITS.maxSheets) {
     fail(`Cok fazla sayfa var. En fazla ${SAFE_XLSX_LIMITS.maxSheets} sayfa desteklenir.`);
   }
-  workbook.worksheets.forEach(worksheet => validateWorksheet(worksheet, options.sourceName));
+
+  workbook.SheetNames.forEach(name => validateSheetRange(workbook.Sheets[name], name, options.sourceName));
 
   return {
-    sheetNames: workbook.worksheets.map(worksheet => worksheet.name),
+    sheetNames: workbook.SheetNames,
     getSheetRows: (sheetName, rowOptions = {}) => {
-      const worksheet = workbook.getWorksheet(sheetName);
-      return worksheet ? extractSheetRows(worksheet, rowOptions) : [];
+      const ws = workbook.Sheets[sheetName];
+      if (!ws) return [];
+
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, {
+        header: 1,
+        defval: rowOptions.defval != null ? String(rowOptions.defval) : '',
+        blankrows: rowOptions.blankrows ?? false,
+      }) as unknown[][];
+
+      if (rows.length > SAFE_XLSX_LIMITS.maxRows) {
+        fail(`Sayfa veri limiti asildi. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
+      }
+
+      if (!rowOptions.blankrows) {
+        return rows.filter(row => row.some(cell => cell != null && String(cell).trim() !== ''));
+      }
+
+      return rows;
     },
   };
 }
@@ -181,10 +153,10 @@ export function parseCsvText(text: string): unknown[][] {
   return rows;
 }
 
-function applyColumnWidths(worksheet: { getColumn: (index: number) => { width?: number } }, widths?: number[]) {
-  widths?.forEach((width, index) => {
-    worksheet.getColumn(index + 1).width = width;
-  });
+function applyColumnWidths(worksheet: XLSX.WorkSheet, widths?: number[]) {
+  if (widths && widths.length > 0) {
+    worksheet['!cols'] = widths.map(w => ({ wch: Math.max(w, 0) }));
+  }
 }
 
 function triggerDownload(buffer: BlobPart, fileName: string) {
@@ -205,22 +177,15 @@ export async function downloadObjectSheetsAsXlsx(
   sheets: Array<{ name: string; rows: Record<string, unknown>[]; widths?: number[] }>,
   fileName: string,
 ): Promise<void> {
-  const ExcelJS = await getExcelJS();
-  const workbook = new ExcelJS.Workbook();
+  const workbook = XLSX.utils.book_new();
 
   sheets.forEach((sheet) => {
-    const worksheet = workbook.addWorksheet(sheet.name);
-    const headers = sheet.rows.length > 0 ? Object.keys(sheet.rows[0]) : [];
-    if (headers.length > 0) {
-      worksheet.addRow(headers);
-      sheet.rows.forEach((row) => worksheet.addRow(headers.map(header => row[header] ?? '')));
-    } else {
-      worksheet.addRow([]);
-    }
-    applyColumnWidths(worksheet, sheet.widths);
+    const ws = XLSX.utils.json_to_sheet(sheet.rows);
+    applyColumnWidths(ws, sheet.widths);
+    XLSX.utils.book_append_sheet(workbook, ws, sheet.name);
   });
 
-  const buffer = await workbook.xlsx.writeBuffer();
+  const buffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
   triggerDownload(buffer, fileName);
 }
 
@@ -228,15 +193,14 @@ export async function downloadAoASheetsAsXlsx(
   sheets: Array<{ name: string; rows: unknown[][]; widths?: number[] }>,
   fileName: string,
 ): Promise<void> {
-  const ExcelJS = await getExcelJS();
-  const workbook = new ExcelJS.Workbook();
+  const workbook = XLSX.utils.book_new();
 
   sheets.forEach((sheet) => {
-    const worksheet = workbook.addWorksheet(sheet.name);
-    sheet.rows.forEach((row) => worksheet.addRow(row));
-    applyColumnWidths(worksheet, sheet.widths);
+    const ws = XLSX.utils.aoa_to_sheet(sheet.rows);
+    applyColumnWidths(ws, sheet.widths);
+    XLSX.utils.book_append_sheet(workbook, ws, sheet.name);
   });
 
-  const buffer = await workbook.xlsx.writeBuffer();
+  const buffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
   triggerDownload(buffer, fileName);
 }

@@ -111,7 +111,6 @@ export default defineConfig(({ mode }) => ({
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
-      ignore: ["exceljs"],
     },
   },
   server: {
@@ -132,7 +131,6 @@ export default defineConfig(({ mode }) => ({
       "@capacitor/app",
       "@capacitor/device",
       "framer-motion",
-      "exceljs",
     ],
     esbuildOptions: {
       mainFields: ["main", "module"],
