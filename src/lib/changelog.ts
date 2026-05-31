@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.4',
+    date: '31 Mayıs 2026',
+    title: 'Login Ekranı Modernizasyonu + Demo Hızlı Giriş',
+    summary: 'Login ekranı lucide-react ikonlara geçirildi, demo hesapla tek tıkla giriş butonu eklendi, mobil için responsive düzenlemeler ve skeleton loading eklendi.',
+    changes: [
+      { type: 'iyilestirme', text: 'LoginScreen: emoji ikonlar lucide-react bileşenlerle değiştirildi (User, Lock, Eye, LogIn, Sparkles vb.)' },
+      { type: 'yeni', text: 'LoginScreen: "Demo Hesap ile Hızlı Giriş" butonu eklendi — tek tıkla demo29605 oturumu açar' },
+      { type: 'iyilestirme', text: 'LoginScreen: mobil responsive düzen (küçük ekran padding/font-size iyileştirmesi)' },
+      { type: 'iyilestirme', text: 'LoginScreen: Firebase bağlanırken skeleton loading gösterimi' },
+    ],
+  },
+  {
     version: '3.10.3',
     date: '30 Mayıs 2026',
     title: 'Marka Birliği + UI/UX Tutarlılık Geçişi',

@@ -1,25 +1,10 @@
 {
-  "project": {
-    "name": "PARSPEL",
-    "version": "3.8.0",
-    "description": "Soba satışı, stok, kasa ve cari takibini tek ekranda yöneten, offline-first çalışan işletme yönetim uygulaması."
-  },
+  "$schema": "https://opencode.ai/config.json",
   "instructions": [
     "PAKET YÖNETİCİSİ: Sadece pnpm kullan. npm veya yarn kullanma.",
-    "CHANGELOG ZORUNLULUĞU: Her kaynak kod değişikliğinden sonra src/lib/changelog.ts dosyasına mutlaka yeni bir sürüm girişi ekle. pre-commit hook bunu kontrol eder.",
-    "commitizen/pre-commit: .simple-git-hooks/pre-commit dosyası changelog güncellemesini zorunlu kılar. Devre dışı bırakma.",
-    "OFFLINE-FIRST: localStorage birincil depolama, Firebase Firestore opsiyonel sync. Testler prevDB → işlem → nextDB pattern'i ile çalışır.",
+    "CHANGELOG ZORUNLULUĞU: Her kaynak kod değişikliğinden sonra src/lib/changelog.ts dosyasına mutlaka yeni bir sürüm girişi ekle.",
+    "OFFLINE-FIRST: localStorage birincil depolama, Firebase Firestore opsiyonel sync.",
     "TEST: Vitest + fast-check (property-based). pnpm run test:run ile çalıştır.",
-    "YENİ ÖZELLİK: src/lib/kapsamli-senaryo.test.ts dosyasına kapsamlı senaryo testi ekle.",
     "MOBİL: Capacitor 8 ile Android APK. pnpm run cap:android ile build al."
-  ],
-  "commands": {
-    "dev": "pnpm run dev",
-    "build": "pnpm run build",
-    "test": "pnpm run test",
-    "test:run": "pnpm run test:run",
-    "typecheck": "pnpm run typecheck",
-    "lint": "pnpm run lint",
-    "android": "pnpm run cap:android"
-  }
+  ]
 }

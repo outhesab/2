@@ -10,6 +10,7 @@ import {
   loadUsers, createUser, startGuestSession, isGuestSession,
   getGuestSessionRemaining, type AppUser,
 } from '@/lib/userManager';
+import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 
 export { hashPassword as hashPass } from '@/lib/userManager';
 
@@ -215,9 +216,9 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
         <div className="login-card">
           {/* Logo */}
           <div className="login-logo-wrap">
-            <div className="login-logo-circle">
-              {success ? '✅' : '🔥'}
-            </div>
+              <div className="login-logo-circle">
+                {success ? <Sparkles size={32} /> : <Zap size={32} />}
+              </div>
             <h1 className="login-title">
               {BRAND_NAME}
             </h1>
@@ -232,24 +233,27 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
             </p>
           </div>
 
-          {/* Bağlanıyor animasyonu */}
+          {/* Bağlanıyor skeleton */}
           {fbStatus === 'connecting' && (
-            <div className="login-connecting-row">
-              {[0, 1, 2].map(i => <div key={i} className="login-connecting-dot" style={{ animation: `loginFbDot 1.2s ease-in-out ${i * 0.2}s infinite` }} />)}
+            <div className="login-skeleton">
+              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
+              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
+              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '40%', height: 20, borderRadius: 8 }} /></div>
+              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
             </div>
           )}
 
           {/* Hata */}
           {fbStatus === 'error' && (
             <div className="login-error-box">
-              <div className="login-error-title">⚠️ Bağlantı Hatası</div>
+              <div className="login-error-title"><AlertTriangle size={14} /> Bağlantı Hatası</div>
               <div className="login-error-desc">Firebase'e erişilemiyor. Yerel kullanıcı yoksa internete bağlanıp bir kez giriş yapın.</div>
               <button className="login-guest-btn" onClick={() => {
                 const guest = startGuestSession();
                 setSuccess(true);
                 setTimeout(() => onLogin(guest, false), 900);
               }}>
-                ⏳ 15dk Misafir Girişi
+                <Zap size={16} /> 15dk Misafir Girişi
               </button>
             </div>
           )}
@@ -259,7 +263,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
             <div className="login-form">
               {/* Kullanıcı adı */}
               <div className="login-field">
-                <span className="login-field-icon">👤</span>
+                <User className="login-field-icon" size={18} />
                 <input
                   ref={usernameRef}
                   className={`login-input${error ? ' error' : ''}`}
@@ -274,7 +278,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
               {/* Şifre */}
               <div className="login-field">
-                <span className="login-field-icon">🔒</span>
+                <Lock className="login-field-icon" size={18} />
                 <input
                   className={`login-input${error ? ' error' : ''}`}
                   type={showPass ? 'text' : 'password'}
@@ -284,15 +288,15 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                   placeholder="Şifre (en az 4 karakter)"
                   autoComplete={registerMode ? 'new-password' : 'current-password'}
                 />
-                <button className="login-pass-toggle" onClick={() => setShowPass(v => !v)}>
-                  {showPass ? '🙈' : '👁️'}
+                <button className="login-pass-toggle" onClick={() => setShowPass(v => !v)} aria-label={showPass ? 'Şifreyi gizle' : 'Şifreyi göster'}>
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
               {/* Şifre tekrar (kayıt modu) */}
               {registerMode && (
                 <div className="login-field">
-                  <span className="login-field-icon">🔐</span>
+                  <KeyRound className="login-field-icon" size={18} />
                   <input
                     className={`login-input${error ? ' error' : ''}`}
                     type={showPass ? 'text' : 'password'}
@@ -308,7 +312,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               {/* Hata mesajı */}
               {error && (
                 <div className="login-error-msg">
-                  ⚠️ {error}
+                  <AlertTriangle size={16} /> {error}
                 </div>
               )}
 
@@ -318,6 +322,21 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                   <input className="login-remember-checkbox" type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
                   <span className="login-remember-text">Beni hatırla <span className="login-remember-hint">(30 gün)</span></span>
                 </label>
+              )}
+
+              {/* Demo hızlı giriş */}
+              {!registerMode && (
+                <button
+                  className="login-demo-btn"
+                  onClick={() => {
+                    setUsername('demo29605');
+                    setPass('demo1234');
+                    setTimeout(() => handleLogin(), 100);
+                  }}
+                  disabled={loading}
+                >
+                  <Sparkles size={16} /> Demo Hesap ile Hızlı Giriş
+                </button>
               )}
 
               {/* Buton */}
@@ -331,14 +350,14 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                       <span className="login-spinner" />
                       {registerMode ? 'Kaydediliyor…' : 'Doğrulanıyor…'}
                     </span>
-                  : registerMode ? '📝 Kayıt Ol' : '🚀 Giriş Yap'
+                  : registerMode ? <><UserPlus size={18} /> Kayıt Ol</> : <><LogIn size={18} /> Giriş Yap</>
                 }
               </button>
 
               {/* Kayıt / Giriş geçiş linki */}
               <div className="login-switch-row">
                 <button className="login-switch-btn" onClick={() => { setRegisterMode(v => !v); setError(''); setPass(''); setPass2(''); }}>
-                  {registerMode ? '🔑 Zaten hesabın var mı? Giriş Yap' : '📝 Hesabın yok mu? Kayıt Ol'}
+                  {registerMode ? 'Zaten hesabın var mı? Giriş Yap' : 'Hesabın yok mu? Kayıt Ol'}
                 </button>
               </div>
             </div>
@@ -347,7 +366,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
           {/* Yeniden bağlan */}
           {fbStatus === 'error' && (
             <button className="login-retry-btn" onClick={checkUsers}>
-              🔄 Yeniden Bağlan
+              <RefreshCw size={16} /> Yeniden Bağlan
             </button>
           )}
         </div>
