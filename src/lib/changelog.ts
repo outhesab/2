@@ -20,6 +20,24 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.10.7',
+    date: '2 Haziran 2026',
+    title: 'QuantumLink Agent Entegrasyonu',
+    summary: 'Sesli/yazılı komutlar dispatchAgentFlow ile agent sistemine yönlendirildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'QuantumLink: processCommand() dispatchAgentFlow entegrasyonu — satış, kasa gelir/gider, cari tahsilat komutları artık agent sistemi üzerinden işlenir' },
+    ],
+  },
+  {
+    version: '3.10.6',
+    date: '2 Haziran 2026',
+    title: 'QuantumLink Aktif',
+    summary: 'Sesli AI asistan paneli arayüze eklendi.',
+    changes: [
+      { type: 'duzeltme', text: 'QuantumLink bileşeni App.tsx\'e eklendi, FAB ile çakışmadan çalışır' },
+    ],
+  },
+  {
     version: '3.10.5',
     date: '31 Mayıs 2026',
     title: 'UI Düzeltmeleri + Dashboard Widget Yönetimi',

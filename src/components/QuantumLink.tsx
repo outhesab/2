@@ -7,6 +7,7 @@ import { BrainCircuit, X, Mic, MicOff, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DB } from '@/types';
 import { formatMoney } from '@/lib/utils-tr';
+import { dispatchAgentFlow } from '@/agents/orchestrator';
 
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
@@ -163,20 +164,86 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, isProcessing]);
 
-  const processCommand = useCallback((text: string) => {
+  const processCommand = useCallback(async (text: string) => {
     if (!text.trim()) return;
     setIsProcessing(true);
     setMessages(prev => [...prev, { role: 'user', text }]);
-    setTimeout(() => {
-      const response = quickReply(db, text);
-      setMessages(prev => [...prev, { role: 'assistant', text: response }]);
-      try {
-        const u = new SpeechSynthesisUtterance(response.replace(/[•\n]/g, ' '));
-        u.lang = 'tr-TR'; u.rate = 1.1;
-        window.speechSynthesis.speak(u);
-      } catch { void 0; }
+
+    const q = text.toLowerCase().trim();
+
+    // Sayı çıkar (örn: "1500 TL" → 1500)
+    const paraMatch = q.match(/(\d+[\d.,]*)\s*(tl|lira)?/);
+    const tutar = paraMatch ? parseFloat(paraMatch[1].replace(',', '.')) : 0;
+
+    // İsim çıkar (tahsilat için)
+    const isimMatch = q.match(/tahsilat\s+(.+?)(\s+\d|$)/i);
+    const isim = isimMatch ? isimMatch[1].trim() : '';
+
+    let isAgentCommand = false;
+
+    try {
+      // Satış komutları
+      if ((q.includes('satış') || q.includes('sattım') || q.includes('satis')) && tutar > 0) {
+        const payment = q.includes('kart') ? 'kart' : q.includes('cari') ? 'cari' : 'nakit';
+        await dispatchAgentFlow({
+          type: 'sale',
+          label: `Sesli satış: ${tutar}₺ ${payment}`,
+          payload: { total: tutar, payment, profit: 0 }
+        });
+        isAgentCommand = true;
+      }
+      // Gelir komutu
+      else if ((q.includes('gelir') || q.includes('tahsilat') && !isim) && tutar > 0 && !q.includes('gider')) {
+        await dispatchAgentFlow({
+          type: 'kasa_gelir',
+          label: `Sesli gelir: ${tutar}₺`,
+          payload: { amount: tutar, description: text }
+        });
+        isAgentCommand = true;
+      }
+      // Gider komutu
+      else if (q.includes('gider') && tutar > 0) {
+        await dispatchAgentFlow({
+          type: 'kasa_gider',
+          label: `Sesli gider: ${tutar}₺`,
+          payload: { amount: tutar, description: text }
+        });
+        isAgentCommand = true;
+      }
+      // Tahsilat komutu (isimli)
+      else if (q.includes('tahsilat') && isim && tutar > 0) {
+        await dispatchAgentFlow({
+          type: 'cari_tahsilat',
+          label: `Sesli tahsilat: ${isim} ${tutar}₺`,
+          payload: { amount: tutar, cariName: isim }
+        });
+        isAgentCommand = true;
+      }
+
+      if (isAgentCommand) {
+        const successMsg = `✅ İşlem tamamlandı: ${text}`;
+        setMessages(prev => [...prev, { role: 'assistant', text: successMsg }]);
+        try {
+          const u = new SpeechSynthesisUtterance('İşlem tamamlandı');
+          u.lang = 'tr-TR'; u.rate = 1.1;
+          window.speechSynthesis.speak(u);
+        } catch { void 0; }
+      } else {
+        // Soru tipli → quickReply
+        const response = quickReply(db, text);
+        setMessages(prev => [...prev, { role: 'assistant', text: response }]);
+        try {
+          const u = new SpeechSynthesisUtterance(response.replace(/[•\n]/g, ' '));
+          u.lang = 'tr-TR'; u.rate = 1.1;
+          window.speechSynthesis.speak(u);
+        } catch { void 0; }
+      }
+    } catch (err) {
+      const errMsg = `❌ Hata: ${err instanceof Error ? err.message : 'İşlem başarısız'}`;
+      setMessages(prev => [...prev, { role: 'assistant', text: errMsg }]);
+    } finally {
       setIsProcessing(false);
-    }, 700);
+    }
   }, [db]);
 
   useEffect(() => {

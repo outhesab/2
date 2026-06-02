@@ -36,6 +36,7 @@ import Header from "@/components/layout/Header";
 import FAB from "@/components/layout/FAB";
 import ReportButton from "@/components/layout/ReportButton";
 import AIDrawer from "@/components/layout/AIDrawer";
+import { QuantumLink } from "@/components/QuantumLink";
 import PageFallback from "@/components/layout/PageFallback";
 
 const AIEylemLog = lazy(() => import("@/pages/AIEylemLog"));
@@ -543,6 +544,8 @@ function AppContent({
         save={save}
       />
 
+      {/* QuantumLink */}
+      <QuantumLink db={db} />
 
     </div>
   );
