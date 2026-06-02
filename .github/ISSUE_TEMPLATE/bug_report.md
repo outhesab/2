@@ -1,9 +1,10 @@
 ---
 name: Hata Bildirimi
 about: Bir hatayı bildirin
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
 assignees: ''
+
 ---
 
 ## Hata Özeti

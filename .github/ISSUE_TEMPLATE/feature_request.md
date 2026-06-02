@@ -1,9 +1,10 @@
 ---
 name: Özellik Önerisi
 about: Yeni bir özellik önerin
-title: '[FEATURE] '
+title: "[FEATURE] "
 labels: enhancement
 assignees: ''
+
 ---
 
 ## Özellik Özeti
