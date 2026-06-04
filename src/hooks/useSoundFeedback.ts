@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export type SoundType = 'success' | 'error' | 'warning' | 'sale' | 'notification';
 export type SoundTheme = 'standart' | 'minimal' | 'yogun';
@@ -159,8 +159,7 @@ let _globalCtx: AudioContext | null = null;
 function getOrCreateAudioContext(): AudioContext | null {
   try {
     if (!_globalCtx || _globalCtx.state === 'closed') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      _globalCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      _globalCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     return _globalCtx;
   } catch {
@@ -193,8 +192,7 @@ export function useSoundFeedback() {
       ctxRef.current = _globalCtx;
     } else if (!ctxRef.current || ctxRef.current.state === 'closed') {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
         _globalCtx = ctxRef.current;
       } catch {
         return null;
@@ -265,6 +263,15 @@ export function useSoundFeedback() {
       setTimeout(() => speakMessage(message), 300);
     }
   }, [playSound, speakMessage]);
+
+  useEffect(() => {
+    return () => {
+      if (ctxRef.current && ctxRef.current.state !== 'closed') {
+        ctxRef.current.close().catch(() => {});
+        ctxRef.current = null;
+      }
+    };
+  }, []);
 
   return { playSound, speakMessage, playSoundWithSpeech };
 }

@@ -5,6 +5,7 @@
 
 import { loadConnConfig } from '@/lib/connConfig';
 import { logger } from '@/lib/logger';
+import { indexedDb } from '@/db/indexeddb';
 
 const USERS_CACHE_KEY = 'soba_users_cache';
 
@@ -202,7 +203,9 @@ export function startGuestSession(): AppUser {
     active: true,
     createdAt: new Date().toISOString(),
   };
-  sessionStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ start: Date.now() }));
+  const start = Date.now();
+  sessionStorage.setItem(GUEST_SESSION_KEY, JSON.stringify({ start }));
+  indexedDb.guestSessions.put({ id: 'guest', start, hash: btoa(String(start)) }).catch(() => {});
   setUserSession(guest, false);
   return guest;
 }
@@ -212,7 +215,25 @@ export function isGuestSession(): boolean {
     const raw = sessionStorage.getItem(GUEST_SESSION_KEY);
     if (!raw) return false;
     const { start } = JSON.parse(raw);
-    return Date.now() - start < GUEST_SESSION_DURATION;
+    const valid = Date.now() - start < GUEST_SESSION_DURATION;
+    if (!valid) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function verifyGuestSessionIntegrity(): Promise<boolean> {
+  try {
+    const raw = sessionStorage.getItem(GUEST_SESSION_KEY);
+    if (!raw) return false;
+    const { start } = JSON.parse(raw);
+    if (Date.now() - start >= GUEST_SESSION_DURATION) return false;
+    const record = await indexedDb.guestSessions.get('guest');
+    if (!record) return false;
+    if (record.start !== start) return false;
+    if (record.hash !== btoa(String(start))) return false;
+    return true;
   } catch {
     return false;
   }

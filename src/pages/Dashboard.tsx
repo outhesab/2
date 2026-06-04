@@ -10,7 +10,7 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/
 import { logger } from '@/lib/logger';
 import { getAppVersion } from '@/lib/version';
 import { BRAND_NAME } from '@/config/brand';
-import { WIDGET_OPTIONS, type WidgetId } from '@/config/widgets';
+import type { WidgetId } from '@/config/widgets';
 
 interface Props {
   db: DB;

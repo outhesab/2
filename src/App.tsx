@@ -77,10 +77,10 @@ const Stock = lazy(() => import("@/pages/Stock"));
 const Suppliers = lazy(() => import("@/pages/Suppliers"));
 import { Toaster } from "sonner";
 
-// UI tercihlerini uygulama baÃƒâ€¦Ã…Â¸langÃƒâ€Ã‚Â±cÃƒâ€Ã‚Â±nda localStorage'dan hÃƒâ€Ã‚Â±zlÃƒâ€Ã‚Â±ca yÃƒÆ’Ã‚Â¼kle
+// UI tercihlerini uygulama başlangıcında localStorage'dan hızlıca yükle
 applyUIPrefs(loadUIPrefs());
 
-// Arka planda Firebase'den gÃƒÆ’Ã‚Â¼ncel prefs'leri ÃƒÆ’Ã‚Â§ek ve uygula
+// Arka planda Firebase'den güncel prefs'leri çek ve uygula
 Promise.all([loadUIPrefsFromFirebase(), loadConnConfigFromFirebase()])
   .then(([fbPrefs, fbConn]) => {
     if (fbPrefs) {
@@ -91,7 +91,7 @@ Promise.all([loadUIPrefsFromFirebase(), loadConnConfigFromFirebase()])
       saveConnConfig(fbConn);
     }
   })
-  .catch(() => logger.error('sync', 'Firebase config/UI prefs yÃƒÆ’Ã‚Â¼klenemedi'));
+  .catch(() => logger.error('sync', 'Firebase config/UI prefs yüklenemedi'));
 
 function AppContent({
   onLogout,
@@ -129,7 +129,7 @@ function AppContent({
   const prevOnline = useRef(isOnline);
   const { showToast } = useToast();
 
-  // UIPrefs deÃƒâ€Ã…Â¸iÃƒâ€¦Ã…Â¸ikliklerini dinle (Settings'ten gÃƒÆ’Ã‚Â¼ncelleme gelince yansÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â±n)
+  // UIPrefs değişikliklerini dinle (Settings'ten güncelleme gelince yansısın)
   useEffect(() => {
     const handler = () => setUiPrefs(loadUIPrefs());
     window.addEventListener("storage", handler);
@@ -156,7 +156,7 @@ function AppContent({
     return unsub;
   }, []);
 
-  // Son gÃƒÆ’Ã‚Â¼ncelleme toast'u ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â her versiyon iÃƒÆ’Ã‚Â§in bir kez gÃƒÆ’Ã‚Â¶ster
+  // Son güncelleme toast'u — her versiyon için bir kez göster
   useEffect(() => {
     const appVersion = getAppVersion();
     const seenVersion = localStorage.getItem("lastSeenVersion");
@@ -174,7 +174,7 @@ function AppContent({
     }
   }, [showToast]);
 
-  // Ãƒâ€Ã‚Â°lk kurulum verisini DB'ye yaz (bir kez)
+  // İlk kurulum verisini DB'ye yaz (bir kez)
   useEffect(() => {
     const setup = getSetupData();
     if (!setup) return;
@@ -185,7 +185,7 @@ function AppContent({
       const now = new Date().toISOString();
       // Kasalar
       const kasalar = setup.kasalar.length > 0 ? setup.kasalar : prev.kasalar;
-      // ÃƒÆ’Ã…â€œrÃƒÆ’Ã‚Â¼nler
+      // Ürünler
       const mevcutIds = new Set(prev.products.map((p: { id: string }) => p.id));
       const yeniUrunler = (setup.urunler || []).filter(
         (u: { id: string }) => !mevcutIds.has(u.id),
@@ -239,10 +239,10 @@ function AppContent({
   useEffect(() => {
     if (prevOnline.current !== isOnline) {
       if (isOnline) {
-        showToast("Ãƒâ€Ã‚Â°nternet baÃƒâ€Ã…Â¸lantÃƒâ€Ã‚Â±sÃƒâ€Ã‚Â± yeniden kuruldu", "success");
+        showToast("İnternet bağlantısı yeniden kuruldu", "success");
       } else {
         showToast(
-          "ÃƒÆ’Ã¢â‚¬Â¡evrimdÃƒâ€Ã‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€Ã‚Â± ÃƒÆ’Ã‚Â§alÃƒâ€Ã‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€Ã‚Â±yorsunuz ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â veriler korunuyor",
+          "Çevrimdışı çalışıyorsunuz — veriler korunuyor",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           "info" as any,
         );
@@ -295,7 +295,7 @@ function AppContent({
     );
   }, [activeTab]);
 
-  // Yedek event listener (Dashboard widget'Ãƒâ€Ã‚Â±ndan tetiklenir)
+  // Yedek event listener (Dashboard widget'ından tetiklenir)
   useEffect(() => {
     const handler = () => {
       exportJSON();

@@ -1,4 +1,4 @@
-import { useConfirm } from "@/components/ConfirmDialog";
+﻿import { useConfirm } from "@/components/ConfirmDialog";
 import { SystemMap } from "@/components/SystemMap";
 import { useToast } from "@/components/Toast";
 import {
@@ -14,13 +14,11 @@ import type {
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import {
     applyUIPrefs,
-    DEFAULT_PREFS,
     loadUIPrefs,
     saveUIPrefs,
-    THEMES,
     type UIPrefs,
 } from "@/hooks/useUIPrefs";
-import { PREMIUM_THEMES, isPremiumTheme as _isPremiumTheme } from "@/theme/themes";
+import { isPremiumTheme as _isPremiumTheme } from "@/theme/themes";
 import {
     APP_SUBTITLE,
     loadAppConfig,
@@ -29,11 +27,8 @@ import {
 } from "@/lib/appConfig";
 import { CHANGE_TYPE_CONFIG, CHANGELOG } from "@/lib/changelog";
 import {
-    DEFAULT_CONN,
     loadConnConfig,
     saveConnConfig,
-    testFirebase,
-    testSupabase,
     type ConnConfig,
 } from "@/lib/connConfig";
 import { exportToExcel } from "@/lib/excelExport";
@@ -58,6 +53,9 @@ import type { DB } from "@/types";
 import { WIDGET_OPTIONS, type WidgetId } from "@/config/widgets";
 
 import { useEffect, useRef, useState } from "react";
+import { ArayuzAyarlari } from "./SettingsArayuz";
+import { BaglantiAyarlari } from "./SettingsBaglanti";
+import { Card } from "./SettingsCard";
 
 interface Props {
   db: DB;
@@ -67,23 +65,23 @@ interface Props {
 }
 
 const TABS_LIST = [
-  { id: "arayuz", icon: "🎨", label: "Arayüz" },
-  { id: "baglantilar", icon: "🔌", label: "Bağlantılar" },
-  { id: "company", icon: "🏢", label: "Şirket" },
-  { id: "categories", icon: "🏷️", label: "Kategoriler" },
-  { id: "pellet", icon: "🪵", label: "Pelet" },
-  { id: "sound", icon: "🔊", label: "Ses" },
-  { id: "agent", icon: "🤖", label: "Agentlar" },
-  { id: "backup", icon: "💾", label: "Yedek & Geri Yükleme" },
-  { id: "excel_export", icon: "📊", label: "Excel Çıktı" },
-  { id: "activity", icon: "📋", label: "Aktivite" },
-  { id: "shortcuts", icon: "⌨️", label: "Kısayollar" },
-  { id: "repair", icon: "🔧", label: "Veri Onarım" },
-  { id: "excel", icon: "📥", label: "Excel İçe Aktar" },
-  { id: "data", icon: "🗄️", label: "Veri Yönetimi" },
-  { id: "security", icon: "🔐", label: "Güvenlik" },
-  { id: "sysmap", icon: "🗺️", label: "Sistem Haritası" },
-  { id: "about", icon: "ℹ️", label: "Hakkında" },
+  { id: "arayuz", icon: "ğŸ¨", label: "ArayÃ¼z" },
+  { id: "baglantilar", icon: "ğŸ”Œ", label: "BaÄŸlantÄ±lar" },
+  { id: "company", icon: "ğŸ¢", label: "Åirket" },
+  { id: "categories", icon: "ğŸ·ï¸", label: "Kategoriler" },
+  { id: "pellet", icon: "ğŸªµ", label: "Pelet" },
+  { id: "sound", icon: "ğŸ”Š", label: "Ses" },
+  { id: "agent", icon: "ğŸ¤–", label: "Agentlar" },
+  { id: "backup", icon: "ğŸ’¾", label: "Yedek & Geri YÃ¼kleme" },
+  { id: "excel_export", icon: "ğŸ“Š", label: "Excel Ã‡Ä±ktÄ±" },
+  { id: "activity", icon: "ğŸ“‹", label: "Aktivite" },
+  { id: "shortcuts", icon: "âŒ¨ï¸", label: "KÄ±sayollar" },
+  { id: "repair", icon: "ğŸ”§", label: "Veri OnarÄ±m" },
+  { id: "excel", icon: "ğŸ“¥", label: "Excel Ä°Ã§e Aktar" },
+  { id: "data", icon: "ğŸ—„ï¸", label: "Veri YÃ¶netimi" },
+  { id: "security", icon: "ğŸ”", label: "GÃ¼venlik" },
+  { id: "sysmap", icon: "ğŸ—ºï¸", label: "Sistem HaritasÄ±" },
+  { id: "about", icon: "â„¹ï¸", label: "HakkÄ±nda" },
 ] as const;
 
 type Tab = (typeof TABS_LIST)[number]["id"];
@@ -122,7 +120,7 @@ function saveSoundSettingsToStorage(settings: SoundSettings) {
     parsed.soundSettings = settings;
     localStorage.setItem("sobaYonetim", JSON.stringify(parsed));
   } catch {
-    /* localStorage yazma hatası — sessizce geç */
+    /* localStorage yazma hatasÄ± â€” sessizce geÃ§ */
   }
 }
 
@@ -137,7 +135,7 @@ export default function Settings({
   const { showConfirm } = useConfirm();
   const { playSound } = useSoundFeedback();
   const [company, setCompany] = useState(() => {
-    // db.company boşsa db.settings'den doldur (setup wizard buraya yazar)
+    // db.company boÅŸsa db.settings'den doldur (setup wizard buraya yazar)
     const s = (db.settings || {}) as Record<string, string>;
     return {
       ...db.company,
@@ -186,18 +184,18 @@ export default function Settings({
         city: (company as { city?: string }).city || "",
       },
     }));
-    showToast("Şirket bilgileri kaydedildi!", "success");
+    showToast("Åirket bilgileri kaydedildi!", "success");
   };
 
   const savePellet = () => {
     save((prev) => ({ ...prev, pelletSettings: { ...pellet } }));
-    showToast("Pelet ayarları kaydedildi!", "success");
+    showToast("Pelet ayarlarÄ± kaydedildi!", "success");
   };
 
   const clearData = () => {
     showConfirm(
-      "Tüm Verileri Sil",
-      "TÜM verileriniz kalıcı olarak silinecek! Bu işlem geri alınamaz. Emin misiniz?",
+      "TÃ¼m Verileri Sil",
+      "TÃœM verileriniz kalÄ±cÄ± olarak silinecek! Bu iÅŸlem geri alÄ±namaz. Emin misiniz?",
       () => {
         localStorage.removeItem("sobaYonetim");
         window.location.reload();
@@ -207,26 +205,26 @@ export default function Settings({
   };
 
   const dataStats = [
-    { label: "Ürünler", count: db.products.length, icon: "📦" },
-    { label: "Satışlar", count: db.sales.length, icon: "🛒" },
-    { label: "Tedarikçiler", count: db.suppliers.length, icon: "🏭" },
-    { label: "Cari Hesaplar", count: db.cari.length, icon: "👤" },
-    { label: "Kasa İşlemleri", count: db.kasa.length, icon: "💰" },
-    { label: "Banka İşlemleri", count: db.bankTransactions.length, icon: "🏦" },
-    { label: "Pelet Tedarikçi", count: db.peletSuppliers.length, icon: "🪵" },
-    { label: "Boru Tedarikçi", count: db.boruSuppliers.length, icon: "🔩" },
+    { label: "ÃœrÃ¼nler", count: db.products.length, icon: "ğŸ“¦" },
+    { label: "SatÄ±ÅŸlar", count: db.sales.length, icon: "ğŸ›’" },
+    { label: "TedarikÃ§iler", count: db.suppliers.length, icon: "ğŸ­" },
+    { label: "Cari Hesaplar", count: db.cari.length, icon: "ğŸ‘¤" },
+    { label: "Kasa Ä°ÅŸlemleri", count: db.kasa.length, icon: "ğŸ’°" },
+    { label: "Banka Ä°ÅŸlemleri", count: db.bankTransactions.length, icon: "ğŸ¦" },
+    { label: "Pelet TedarikÃ§i", count: db.peletSuppliers.length, icon: "ğŸªµ" },
+    { label: "Boru TedarikÃ§i", count: db.boruSuppliers.length, icon: "ğŸ”©" },
   ];
 
   const totalRecords = dataStats.reduce((s, d) => s + d.count, 0);
 
   const shortcuts = [
-    { key: "Ctrl + 1", desc: "Özet (Dashboard)" },
-    { key: "Ctrl + 2", desc: "Ürünler" },
-    { key: "Ctrl + 3", desc: "Satış" },
+    { key: "Ctrl + 1", desc: "Ã–zet (Dashboard)" },
+    { key: "Ctrl + 2", desc: "ÃœrÃ¼nler" },
+    { key: "Ctrl + 3", desc: "SatÄ±ÅŸ" },
     { key: "Ctrl + 4", desc: "Kasa" },
     { key: "Ctrl + 5", desc: "Raporlar" },
-    { key: "+ Butonu", desc: "Hızlı Eylem Menüsü (sağ alt)" },
-    { key: "Ctrl + Z", desc: "Geri Al (tarayıcı düzeyi)" },
+    { key: "+ Butonu", desc: "HÄ±zlÄ± Eylem MenÃ¼sÃ¼ (saÄŸ alt)" },
+    { key: "Ctrl + Z", desc: "Geri Al (tarayÄ±cÄ± dÃ¼zeyi)" },
   ];
 
   return (
@@ -271,16 +269,16 @@ export default function Settings({
       )}
 
       {tab === "company" && (
-        <Card title="🏢 Şirket Bilgileri">
+        <Card title="ğŸ¢ Åirket Bilgileri">
           <div className={"settings-grid"}>
             <div className={"settings-grid-2"}>
               <FV
-                label="Şirket Adı"
+                label="Åirket AdÄ±"
                 value={company.name || ""}
                 onChange={(v) => setCompany((c) => ({ ...c, name: v }))}
               />
               <FV
-                label="Şehir"
+                label="Åehir"
                 value={(company as { city?: string }).city || ""}
                 onChange={(v) => setCompany((c) => ({ ...c, city: v }))}
               />
@@ -312,14 +310,14 @@ export default function Settings({
               />
             </div>
             <button onClick={saveCompany} className={"settings-btn-primary"}>
-              💾 Şirket Bilgilerini Kaydet
+              ğŸ’¾ Åirket Bilgilerini Kaydet
             </button>
           </div>
         </Card>
       )}
 
       {tab === "pellet" && (
-        <Card title="🪵 Pelet Ayarları">
+        <Card title="ğŸªµ Pelet AyarlarÄ±">
           <div className={"settings-grid-2"}>
             <FV
               label="Gramaj (gr/torba)"
@@ -331,7 +329,7 @@ export default function Settings({
               }
             />
             <FV
-              label="Kg Fiyatı (₺)"
+              label="Kg FiyatÄ± (â‚º)"
               type="number"
               inputMode="decimal"
               value={String(pellet.kgFiyat)}
@@ -349,7 +347,7 @@ export default function Settings({
               }
             />
             <FV
-              label="Kritik Gün Sayısı"
+              label="Kritik GÃ¼n SayÄ±sÄ±"
               type="number"
               inputMode="decimal"
               value={String(pellet.critDays)}
@@ -359,14 +357,14 @@ export default function Settings({
             />
           </div>
           <div className={"settings-warning-box"}>
-            💡 Mevcut değerler: {pellet.cuvalKg}kg çuval · ₺{pellet.kgFiyat}/kg
-            · {pellet.gramaj}gr/torba
+            ğŸ’¡ Mevcut deÄŸerler: {pellet.cuvalKg}kg Ã§uval Â· â‚º{pellet.kgFiyat}/kg
+            Â· {pellet.gramaj}gr/torba
           </div>
           <button
             onClick={savePellet}
             className={`${"settings-btn-primary"} ${"settings-mt-16"}`}
           >
-            💾 Pelet Ayarlarını Kaydet
+            ğŸ’¾ Pelet AyarlarÄ±nÄ± Kaydet
           </button>
         </Card>
       )}
@@ -377,13 +375,13 @@ export default function Settings({
 
       {tab === "backup" && (
         <div className={"settings-grid"}>
-          <Card title="📤 Yedek Al">
+          <Card title="ğŸ“¤ Yedek Al">
             <p className={"settings-text-muted"}>
-              Tüm verilerinizi{" "}
+              TÃ¼m verilerinizi{" "}
               <strong className={"settings-text-orange"}>
-                JSON formatında
+                JSON formatÄ±nda
               </strong>{" "}
-              dışa aktarın.
+              dÄ±ÅŸa aktarÄ±n.
             </p>
             <div className={"settings-grid-auto"}>
               {dataStats.slice(0, 4).map((d) => (
@@ -395,13 +393,13 @@ export default function Settings({
               ))}
             </div>
             <div className={"settings-success-box"}>
-              Toplam {totalRecords} kayıt yedeklenecek
+              Toplam {totalRecords} kayÄ±t yedeklenecek
             </div>
             <button
               onClick={exportJSON}
               className={`${"settings-btn-primary"} ${"settings-btn-green"}`}
             >
-              Yedeği İndir (.json)
+              YedeÄŸi Ä°ndir (.json)
             </button>
           </Card>
 
@@ -468,9 +466,9 @@ export default function Settings({
       )}
 
       {tab === "shortcuts" && (
-        <Card title="⌨️ Klavye Kısayolları">
+        <Card title="âŒ¨ï¸ Klavye KÄ±sayollarÄ±">
           <p className={"settings-text-gray"}>
-            Uygulamayı daha hızlı kullanmak için aşağıdaki kısayolları
+            UygulamayÄ± daha hÄ±zlÄ± kullanmak iÃ§in aÅŸaÄŸÄ±daki kÄ±sayollarÄ±
             kullanabilirsiniz.
           </p>
           <div className={"settings-grid-8"}>
@@ -506,7 +504,7 @@ export default function Settings({
 
       {tab === "data" && (
         <div className={"settings-grid"}>
-          <Card title="🗄️ Veri İstatistikleri">
+          <Card title="ğŸ—„ï¸ Veri Ä°statistikleri">
             <div className={"settings-grid-auto"}>
               {dataStats.map((d) => (
                 <div key={d.label} className={"settings-stat-box"}>
@@ -515,7 +513,7 @@ export default function Settings({
                     style={{
                       fontSize: "1.3rem",
                       fontWeight: 900,
-                      color: d.count > 0 ? "var(--text-primary)" : "var(--text-dim)",
+                      color: d.count > 0 ? "var(--text-primary)" : "var(--text-dim)"
                     }}
                   >
                     {d.count}
@@ -527,43 +525,43 @@ export default function Settings({
             <div className={"settings-text-center"}>
               Toplam{" "}
               <strong className={"settings-text-white"}>{totalRecords}</strong>{" "}
-              kayıt · localStorage'da saklanıyor
+              kayÄ±t Â· localStorage'da saklanÄ±yor
             </div>
           </Card>
 
-          <Card title="🗑️ Tehlikeli Alan">
+          <Card title="ğŸ—‘ï¸ Tehlikeli Alan">
             <p className={"settings-text-muted"}>
-              Aşağıdaki işlemler{" "}
-              <strong className={"settings-text-red"}>geri alınamaz</strong>.
-              Önce yedek almanızı şiddetle tavsiye ederiz.
+              AÅŸaÄŸÄ±daki iÅŸlemler{" "}
+              <strong className={"settings-text-red"}>geri alÄ±namaz</strong>.
+              Ã–nce yedek almanÄ±zÄ± ÅŸiddetle tavsiye ederiz.
             </p>
             <div className={"settings-grid-10"}>
               <DangerAction
-                label="Satış Geçmişini Temizle"
-                desc={`${db.sales.length} satış kaydı silinecek`}
+                label="SatÄ±ÅŸ GeÃ§miÅŸini Temizle"
+                desc={`${db.sales.length} satÄ±ÅŸ kaydÄ± silinecek`}
                 onConfirm={() => {
                   save((prev) => ({ ...prev, sales: [] }));
-                  showToast("Satış geçmişi temizlendi!");
+                  showToast("SatÄ±ÅŸ geÃ§miÅŸi temizlendi!");
                 }}
               />
               <DangerAction
-                label="Kasa İşlemlerini Temizle"
-                desc={`${db.kasa.length} kasa kaydı silinecek`}
+                label="Kasa Ä°ÅŸlemlerini Temizle"
+                desc={`${db.kasa.length} kasa kaydÄ± silinecek`}
                 onConfirm={() => {
                   save((prev) => ({ ...prev, kasa: [] }));
                   showToast("Kasa temizlendi!");
                 }}
               />
               <DangerAction
-                label="Aktivite Günlüğünü Temizle"
-                desc={`${db._activityLog.length} kayıt silinecek`}
+                label="Aktivite GÃ¼nlÃ¼ÄŸÃ¼nÃ¼ Temizle"
+                desc={`${db._activityLog.length} kayÄ±t silinecek`}
                 onConfirm={() => {
                   save((prev) => ({ ...prev, _activityLog: [] }));
-                  showToast("Aktivite günlüğü temizlendi!");
+                  showToast("Aktivite gÃ¼nlÃ¼ÄŸÃ¼ temizlendi!");
                 }}
               />
               <button onClick={clearData} className={"settings-btn-danger"}>
-                ☠️ TÜM VERİLERİ SİL ve Sıfırla
+                â˜ ï¸ TÃœM VERÄ°LERÄ° SÄ°L ve SÄ±fÄ±rla
               </button>
             </div>
           </Card>
@@ -574,11 +572,11 @@ export default function Settings({
 
       {tab === "sysmap" && (
         <div className={"settings-grid"}>
-          <Card title="🗺️ Sistem Haritası — Modüller Arası İlişkiler">
+          <Card title="ğŸ—ºï¸ Sistem HaritasÄ± â€” ModÃ¼ller ArasÄ± Ä°liÅŸkiler">
             <p className={"settings-text-muted"}>
-              Her modülün diğer modülleri nasıl etkilediğini gösteren akış
-              diyagramı. Düz çizgi = doğrudan veri etkisi, kesik çizgi = veri
-              sağlar.
+              Her modÃ¼lÃ¼n diÄŸer modÃ¼lleri nasÄ±l etkilediÄŸini gÃ¶steren akÄ±ÅŸ
+              diyagramÄ±. DÃ¼z Ã§izgi = doÄŸrudan veri etkisi, kesik Ã§izgi = veri
+              saÄŸlar.
             </p>
             <SystemMap />
           </Card>
@@ -605,32 +603,32 @@ function SecurityPanel({
 
   const handleChange = async () => {
     if (!oldPass) {
-      showToast("Mevcut parolayı girin!", "error");
+      showToast("Mevcut parolayÄ± girin!", "error");
       return;
     }
     if (newPass.length < 4) {
-      showToast("Yeni parola en az 4 karakter olmalı!", "error");
+      showToast("Yeni parola en az 4 karakter olmalÄ±!", "error");
       return;
     }
     if (newPass !== newPass2) {
-      showToast("Yeni parolalar eşleşmiyor!", "error");
+      showToast("Yeni parolalar eÅŸleÅŸmiyor!", "error");
       return;
     }
     if (!session) {
-      showToast("Oturum bulunamadı!", "error");
+      showToast("Oturum bulunamadÄ±!", "error");
       return;
     }
     setLoading(true);
     const users = await loadUsers();
     const me = users.find((u) => u.id === session.userId);
     if (!me) {
-      showToast("Kullanıcı bulunamadı!", "error");
+      showToast("KullanÄ±cÄ± bulunamadÄ±!", "error");
       setLoading(false);
       return;
     }
     const oldHash = await hashPass(oldPass);
     if (oldHash !== me.passwordHash) {
-      showToast("Mevcut parola yanlış!", "error");
+      showToast("Mevcut parola yanlÄ±ÅŸ!", "error");
       setOldPass("");
       setLoading(false);
       return;
@@ -640,21 +638,21 @@ function SecurityPanel({
       setOldPass("");
       setNewPass("");
       setNewPass2("");
-      showToast("Parola başarıyla güncellendi!", "success");
+      showToast("Parola baÅŸarÄ±yla gÃ¼ncellendi!", "success");
     } else {
-      showToast("Firebase kayıt hatası!", "error");
+      showToast("Firebase kayÄ±t hatasÄ±!", "error");
     }
     setLoading(false);
   };
 
   return (
     <div className={"settings-grid"}>
-      <Card title="🔐 Şifremi Değiştir">
+      <Card title="ğŸ” Åifremi DeÄŸiÅŸtir">
         <div className={"settings-grid-12"}>
           {session && (
             <div className={"settings-info-box"}>
-              👤 Giriş yapan: <strong>{session.username}</strong> (
-              {session.role === "admin" ? "Yönetici" : "Kullanıcı"})
+              ğŸ‘¤ GiriÅŸ yapan: <strong>{session.username}</strong> (
+              {session.role === "admin" ? "YÃ¶netici" : "KullanÄ±cÄ±"})
             </div>
           )}
           <div>
@@ -664,14 +662,14 @@ function SecurityPanel({
                 type={showOld ? "text" : "password"}
                 value={oldPass}
                 onChange={(e) => setOldPass(e.target.value)}
-                placeholder="Mevcut parolanız"
+                placeholder="Mevcut parolanÄ±z"
                 style={{ ...inp, paddingRight: 44 }}
               />
               <button
                 onClick={() => setShowOld((p) => !p)}
                 className={"settings-input-toggle"}
               >
-                {showOld ? "🙈" : "👁️"}
+                {showOld ? "ğŸ™ˆ" : "ğŸ‘ï¸"}
               </button>
             </div>
           </div>
@@ -689,7 +687,7 @@ function SecurityPanel({
                 onClick={() => setShowNew((p) => !p)}
                 className={"settings-input-toggle"}
               >
-                {showNew ? "🙈" : "👁️"}
+                {showNew ? "ğŸ™ˆ" : "ğŸ‘ï¸"}
               </button>
             </div>
           </div>
@@ -699,7 +697,7 @@ function SecurityPanel({
               type={showNew ? "text" : "password"}
               value={newPass2}
               onChange={(e) => setNewPass2(e.target.value)}
-              placeholder="Yeni parolayı tekrar girin"
+              placeholder="Yeni parolayÄ± tekrar girin"
               className={"settings-inp"}
               onKeyDown={(e) => e.key === "Enter" && handleChange()}
             />
@@ -709,18 +707,18 @@ function SecurityPanel({
             disabled={loading}
             className={"settings-btn-primary"}
           >
-            {loading ? "⏳ Değiştiriliyor..." : "🔐 Parolayı Değiştir"}
+            {loading ? "â³ DeÄŸiÅŸtiriliyor..." : "ğŸ” ParolayÄ± DeÄŸiÅŸtir"}
           </button>
         </div>
       </Card>
 
-      {/* Yönetici Paneli — sadece admin görür */}
+      {/* YÃ¶netici Paneli â€” sadece admin gÃ¶rÃ¼r */}
       {session?.role === "admin" && <AdminPanel showToast={showToast} />}
     </div>
   );
 }
 
-// ── Yönetici Paneli ────────────────────────────────────────────────────────
+// â”€â”€ YÃ¶netici Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AdminPanel({
   showToast,
 }: {
@@ -747,17 +745,17 @@ function AdminPanel({
 
   const handleCreate = async () => {
     if (!newUsername.trim()) {
-      showToast("Kullanıcı adı gerekli!", "error");
+      showToast("KullanÄ±cÄ± adÄ± gerekli!", "error");
       return;
     }
     if (newPass.length < 4) {
-      showToast("Şifre en az 4 karakter!", "error");
+      showToast("Åifre en az 4 karakter!", "error");
       return;
     }
     setSaving(true);
     const result = await createUser(newUsername.trim(), newPass, newRole);
     if (result.ok) {
-      showToast(`✅ ${newUsername} oluşturuldu`, "success");
+      showToast(`âœ… ${newUsername} oluÅŸturuldu`, "success");
       setNewUsername("");
       setNewPass("");
       await refresh();
@@ -774,7 +772,7 @@ function AdminPanel({
   ) => {
     await toggleUserActive(userId);
     showToast(
-      `${username} ${active ? "devre dışı bırakıldı" : "aktif edildi"}`,
+      `${username} ${active ? "devre dÄ±ÅŸÄ± bÄ±rakÄ±ldÄ±" : "aktif edildi"}`,
       "info",
     );
     await refresh();
@@ -783,7 +781,7 @@ function AdminPanel({
   const handleDelete = async (userId: string, username: string) => {
     if (
       !confirm(
-        `"${username}" kullanıcısını silmek istediğinizden emin misiniz?`,
+        `"${username}" kullanÄ±cÄ±sÄ±nÄ± silmek istediÄŸinizden emin misiniz?`,
       )
     )
       return;
@@ -794,17 +792,17 @@ function AdminPanel({
 
   const handleRoleChange = async (userId: string, role: UserRole) => {
     await updateUserRole(userId, role);
-    showToast("Rol güncellendi", "success");
+    showToast("Rol gÃ¼ncellendi", "success");
     await refresh();
   };
 
   const handleResetPass = async (userId: string) => {
     if (resetPassVal.length < 4) {
-      showToast("Şifre en az 4 karakter!", "error");
+      showToast("Åifre en az 4 karakter!", "error");
       return;
     }
     await updateUserPassword(userId, resetPassVal);
-    showToast("Şifre sıfırlandı", "success");
+    showToast("Åifre sÄ±fÄ±rlandÄ±", "success");
     setResetPassId(null);
     setResetPassVal("");
     await refresh();
@@ -816,13 +814,13 @@ function AdminPanel({
   };
 
   return (
-    <Card title="👥 Kullanıcı Yönetimi">
-      {/* Yeni kullanıcı ekle */}
+    <Card title="ğŸ‘¥ KullanÄ±cÄ± YÃ¶netimi">
+      {/* Yeni kullanÄ±cÄ± ekle */}
       <div className={"settings-section-box"}>
-        <div className={"settings-section-title"}>➕ Yeni Kullanıcı Ekle</div>
+        <div className={"settings-section-title"}>â• Yeni KullanÄ±cÄ± Ekle</div>
         <div className={"settings-grid-2-10"}>
           <div>
-            <label className={"settings-lbl"}>Kullanıcı Adı *</label>
+            <label className={"settings-lbl"}>KullanÄ±cÄ± AdÄ± *</label>
             <input
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
@@ -831,7 +829,7 @@ function AdminPanel({
             />
           </div>
           <div>
-            <label className={"settings-lbl"}>Şifre *</label>
+            <label className={"settings-lbl"}>Åifre *</label>
             <input
               type="password"
               value={newPass}
@@ -849,8 +847,8 @@ function AdminPanel({
               onChange={(e) => setNewRole(e.target.value as UserRole)}
               className={"settings-inp"}
             >
-              <option value="user">👤 Kullanıcı</option>
-              <option value="admin">⭐ Yönetici</option>
+              <option value="user">ğŸ‘¤ KullanÄ±cÄ±</option>
+              <option value="admin">â­ YÃ¶netici</option>
             </select>
           </div>
           <button
@@ -858,16 +856,16 @@ function AdminPanel({
             disabled={saving}
             className={`${"settings-btn-primary"} ${"settings-flex-1"}`}
           >
-            {saving ? "..." : "➕ Ekle"}
+            {saving ? "..." : "â• Ekle"}
           </button>
         </div>
       </div>
 
-      {/* Kullanıcı listesi */}
+      {/* KullanÄ±cÄ± listesi */}
       {loading ? (
-        <div className={"settings-empty-state"}>Yükleniyor...</div>
+        <div className={"settings-empty-state"}>YÃ¼kleniyor...</div>
       ) : users.length === 0 ? (
-        <div className={"settings-empty-state"}>Kullanıcı bulunamadı</div>
+        <div className={"settings-empty-state"}>KullanÄ±cÄ± bulunamadÄ±</div>
       ) : (
         <div className={"settings-flex-col"}>
           {users.map((u) => (
@@ -904,17 +902,17 @@ function AdminPanel({
                     flexShrink: 0,
                   }}
                 >
-                  {u.role === "admin" ? "⭐" : "👤"}
+                  {u.role === "admin" ? "â­" : "ğŸ‘¤"}
                 </div>
                 <div className={"settings-flex-1-min"}>
                   <div className={"settings-text-primary-sm"}>{u.username}</div>
                   <div className={"settings-text-dim-2"}>
                     {u.lastLogin
-                      ? `Son giriş: ${new Date(u.lastLogin).toLocaleString("tr-TR")}`
-                      : "Hiç giriş yapılmadı"}
+                      ? `Son giriÅŸ: ${new Date(u.lastLogin).toLocaleString("tr-TR")}`
+                      : "HiÃ§ giriÅŸ yapÄ±lmadÄ±"}
                   </div>
                 </div>
-                {/* Rol seçici */}
+                {/* Rol seÃ§ici */}
                 <select
                   value={u.role}
                   onChange={(e) =>
@@ -931,24 +929,24 @@ function AdminPanel({
                     cursor: "pointer",
                   }}
                 >
-                  <option value="user">Kullanıcı</option>
-                  <option value="admin">Yönetici</option>
+                  <option value="user">KullanÄ±cÄ±</option>
+                  <option value="admin">YÃ¶netici</option>
                 </select>
-                {/* Şifre sıfırla */}
+                {/* Åifre sÄ±fÄ±rla */}
                 <button
                   onClick={() => {
                     setResetPassId(resetPassId === u.id ? null : u.id);
                     setResetPassVal("");
                   }}
-                  title="Şifre Sıfırla"
+                  title="Åifre SÄ±fÄ±rla"
                   className={"settings-btn-warning-sm"}
                 >
-                  🔑
+                  ğŸ”‘
                 </button>
                 {/* Aktif/Pasif */}
                 <button
                   onClick={() => handleToggle(u.id, u.username, u.active)}
-                  title={u.active ? "Devre Dışı Bırak" : "Aktif Et"}
+                  title={u.active ? "Devre DÄ±ÅŸÄ± BÄ±rak" : "Aktif Et"}
                   style={{
                     padding: "5px 9px",
                     background: u.active
@@ -961,25 +959,25 @@ function AdminPanel({
                     fontSize: "0.8rem",
                   }}
                 >
-                  {u.active ? "✓" : "✕"}
+                  {u.active ? "âœ“" : "âœ•"}
                 </button>
                 {/* Sil */}
                 <button
                   onClick={() => handleDelete(u.id, u.username)}
-                  title="Kullanıcıyı Sil"
+                  title="KullanÄ±cÄ±yÄ± Sil"
                   className={"settings-btn-danger-sm"}
                 >
-                  🗑️
+                  ğŸ—‘ï¸
                 </button>
               </div>
-              {/* Şifre sıfırlama alanı */}
+              {/* Åifre sÄ±fÄ±rlama alanÄ± */}
               {resetPassId === u.id && (
                 <div className={"settings-flex-row-8"}>
                   <input
                     type="password"
                     value={resetPassVal}
                     onChange={(e) => setResetPassVal(e.target.value)}
-                    placeholder="Yeni şifre (min 4 karakter)"
+                    placeholder="Yeni ÅŸifre (min 4 karakter)"
                     style={{ ...inp, flex: 1 }}
                     autoFocus
                   />
@@ -1037,28 +1035,28 @@ function SoundSettingsPanel({
   };
 
   const themes: { id: SoundTheme; label: string; desc: string }[] = [
-    { id: "standart", label: "🎵 Standart", desc: "Dengeli ve sade sesler" },
-    { id: "minimal", label: "🔇 Minimal", desc: "Kısa ve hafif sesler" },
-    { id: "yogun", label: "🔊 Yoğun", desc: "Belirgin ve güçlü sesler" },
+    { id: "standart", label: "ğŸµ Standart", desc: "Dengeli ve sade sesler" },
+    { id: "minimal", label: "ğŸ”‡ Minimal", desc: "KÄ±sa ve hafif sesler" },
+    { id: "yogun", label: "ğŸ”Š YoÄŸun", desc: "Belirgin ve gÃ¼Ã§lÃ¼ sesler" },
   ];
 
   const soundTypes: { type: SoundType; label: string }[] = [
-    { type: "success", label: "✅ Başarı" },
-    { type: "error", label: "❌ Hata" },
-    { type: "warning", label: "⚠️ Uyarı" },
-    { type: "sale", label: "🛒 Satış" },
-    { type: "notification", label: "🔔 Bildirim" },
+    { type: "success", label: "âœ… BaÅŸarÄ±" },
+    { type: "error", label: "âŒ Hata" },
+    { type: "warning", label: "âš ï¸ UyarÄ±" },
+    { type: "sale", label: "ğŸ›’ SatÄ±ÅŸ" },
+    { type: "notification", label: "ğŸ”” Bildirim" },
   ];
 
   return (
     <div className={"settings-grid"}>
-      <Card title="🔊 Ses Ayarları">
+      <Card title="ğŸ”Š Ses AyarlarÄ±">
         <div className={"settings-grid-20"}>
           <div className={"settings-flex-between"}>
             <div>
               <div className={"settings-text-primary"}>Sesli Geri Bildirim</div>
               <div className={"settings-text-muted-xs"}>
-                İşlem seslerini açın veya kapatın
+                Ä°ÅŸlem seslerini aÃ§Ä±n veya kapatÄ±n
               </div>
             </div>
             <button
@@ -1112,7 +1110,7 @@ function SoundSettingsPanel({
           </div>
 
           <div>
-            <label className={"settings-lbl"}>Ses Teması</label>
+            <label className={"settings-lbl"}>Ses TemasÄ±</label>
             <div className={"settings-grid-auto"}>
               {themes.map((t) => (
                 <button
@@ -1151,13 +1149,13 @@ function SoundSettingsPanel({
         </div>
       </Card>
 
-      <Card title="🗣️ Sesli Konuşma (TTS)">
+      <Card title="ğŸ—£ï¸ Sesli KonuÅŸma (TTS)">
         <div className={"settings-grid-16"}>
           <div className={"settings-flex-between"}>
             <div>
               <div className={"settings-text-primary"}>Sesli Bildirim</div>
               <div className={"settings-text-muted-xs"}>
-                Hata ve uyarılarda sesli konuşma
+                Hata ve uyarÄ±larda sesli konuÅŸma
               </div>
             </div>
             <button
@@ -1192,7 +1190,7 @@ function SoundSettingsPanel({
             onClick={() => {
               if ("speechSynthesis" in window) {
                 const u = new SpeechSynthesisUtterance(
-                  "Merhaba! Bu bir test konuşmasıdır. Önemli bildirimlerde sesli uyarı alacaksınız.",
+                  "Merhaba! Bu bir test konuÅŸmasÄ±dÄ±r. Ã–nemli bildirimlerde sesli uyarÄ± alacaksÄ±nÄ±z.",
                 );
                 u.lang = "tr-TR";
                 u.rate = 1.05;
@@ -1201,14 +1199,14 @@ function SoundSettingsPanel({
             }}
             className={"settings-btn-outline"}
           >
-            🗣️ Test Konuşma
+            ğŸ—£ï¸ Test KonuÅŸma
           </button>
         </div>
       </Card>
 
-      <Card title="🎧 Sesleri Dinle">
+      <Card title="ğŸ§ Sesleri Dinle">
         <p className={"settings-text-gray"}>
-          Her ses tipini aşağıdan test edebilirsiniz.
+          Her ses tipini aÅŸaÄŸÄ±dan test edebilirsiniz.
         </p>
         <div className={"settings-grid-auto"}>
           {soundTypes.map((s) => (
@@ -1247,7 +1245,7 @@ function SoundSettingsPanel({
   );
 }
 
-// AgentSettingsPanel — şu an kullanılmıyor, gerektiğinde eklenebilir
+// AgentSettingsPanel â€” ÅŸu an kullanÄ±lmÄ±yor, gerektiÄŸinde eklenebilir
 
 function ExcelExportPanel({ db }: { db: DB }) {
   const { showToast } = useToast();
@@ -1270,7 +1268,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
       (k) => sheets[k],
     ) as ("stok" | "satislar" | "cari" | "kasa")[];
     if (selectedSheets.length === 0) {
-      showToast("En az bir sekme seçin!", "warning");
+      showToast("En az bir sekme seÃ§in!", "warning");
       return;
     }
     try {
@@ -1280,11 +1278,11 @@ function ExcelExportPanel({ db }: { db: DB }) {
         sheets: selectedSheets,
       });
       showToast(
-        `Excel dosyası oluşturuldu! (${selectedSheets.length} sekme)`,
+        `Excel dosyasÄ± oluÅŸturuldu! (${selectedSheets.length} sekme)`,
         "success",
       );
     } catch {
-      showToast("Excel oluşturulamadı!", "error");
+      showToast("Excel oluÅŸturulamadÄ±!", "error");
     }
   };
 
@@ -1296,32 +1294,32 @@ function ExcelExportPanel({ db }: { db: DB }) {
   }[] = [
     {
       key: "stok",
-      label: "Stok / Ürünler",
-      icon: "📦",
+      label: "Stok / ÃœrÃ¼nler",
+      icon: "ğŸ“¦",
       count: db.products.length,
     },
-    { key: "satislar", label: "Satışlar", icon: "🛒", count: db.sales.length },
-    { key: "cari", label: "Cari Hesaplar", icon: "👤", count: db.cari.length },
-    { key: "kasa", label: "Kasa İşlemleri", icon: "💰", count: db.kasa.length },
+    { key: "satislar", label: "SatÄ±ÅŸlar", icon: "ğŸ›’", count: db.sales.length },
+    { key: "cari", label: "Cari Hesaplar", icon: "ğŸ‘¤", count: db.cari.length },
+    { key: "kasa", label: "Kasa Ä°ÅŸlemleri", icon: "ğŸ’°", count: db.kasa.length },
   ];
 
   return (
     <div className={"settings-grid"}>
-      <Card title="📊 Excel Dışa Aktarma">
+      <Card title="ğŸ“Š Excel DÄ±ÅŸa Aktarma">
         <p className={"settings-text-muted"}>
-          Seçtiğiniz veri gruplarını Türkçe başlıklı, tarih ve para birimi
-          formatlarıyla{" "}
-          <strong className={"settings-text-success"}>.xlsx</strong> dosyasına
-          aktarın.
+          SeÃ§tiÄŸiniz veri gruplarÄ±nÄ± TÃ¼rkÃ§e baÅŸlÄ±klÄ±, tarih ve para birimi
+          formatlarÄ±yla{" "}
+          <strong className={"settings-text-success"}>.xlsx</strong> dosyasÄ±na
+          aktarÄ±n.
         </p>
 
         <div className={"settings-mb-16"}>
           <label className={"settings-lbl"}>
-            Tarih Aralığı (Satış ve Kasa için)
+            Tarih AralÄ±ÄŸÄ± (SatÄ±ÅŸ ve Kasa iÃ§in)
           </label>
           <div className={"settings-grid-2-10"}>
             <div>
-              <label style={{ ...lbl, fontSize: "0.78rem" }}>Başlangıç</label>
+              <label style={{ ...lbl, fontSize: "0.78rem" }}>BaÅŸlangÄ±Ã§</label>
               <input
                 type="date"
                 value={dateFrom}
@@ -1330,7 +1328,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
               />
             </div>
             <div>
-              <label style={{ ...lbl, fontSize: "0.78rem" }}>Bitiş</label>
+              <label style={{ ...lbl, fontSize: "0.78rem" }}>BitiÅŸ</label>
               <input
                 type="date"
                 value={dateTo}
@@ -1373,7 +1371,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
                   >
                     {s.label}
                   </div>
-                  <div className={"settings-text-dim-sm"}>{s.count} kayıt</div>
+                  <div className={"settings-text-dim-sm"}>{s.count} kayÄ±t</div>
                 </div>
                 <div
                   style={{
@@ -1391,7 +1389,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
                     fontWeight: 800,
                   }}
                 >
-                  {sheets[s.key] ? "✓" : ""}
+                  {sheets[s.key] ? "âœ“" : ""}
                 </div>
               </div>
             ))}
@@ -1402,7 +1400,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
           onClick={handleExport}
           className={`${"settings-btn-primary"} ${"settings-btn-green"}`}
         >
-          📊 Excel Dosyasını İndir (.xlsx)
+          ğŸ“Š Excel DosyasÄ±nÄ± Ä°ndir (.xlsx)
         </button>
       </Card>
     </div>
@@ -1446,32 +1444,32 @@ function ActivityPanel({
 
   const getIcon = (action: string) => {
     const a = action.toLowerCase();
-    if (a.includes("satış") || a.includes("satis")) return "🛒";
-    if (a.includes("ürün") || a.includes("urun") || a.includes("stok"))
-      return "📦";
+    if (a.includes("satÄ±ÅŸ") || a.includes("satis")) return "ğŸ›’";
+    if (a.includes("Ã¼rÃ¼n") || a.includes("urun") || a.includes("stok"))
+      return "ğŸ“¦";
     if (a.includes("kasa") || a.includes("gelir") || a.includes("gider"))
-      return "💰";
-    if (a.includes("cari") || a.includes("müşteri")) return "👤";
-    if (a.includes("fatura")) return "🧾";
-    if (a.includes("sipariş")) return "📋";
-    if (a.includes("sil") || a.includes("iptal")) return "🗑️";
-    return "📝";
+      return "ğŸ’°";
+    if (a.includes("cari") || a.includes("mÃ¼ÅŸteri")) return "ğŸ‘¤";
+    if (a.includes("fatura")) return "ğŸ§¾";
+    if (a.includes("sipariÅŸ")) return "ğŸ“‹";
+    if (a.includes("sil") || a.includes("iptal")) return "ğŸ—‘ï¸";
+    return "ğŸ“";
   };
 
   const clearLog = () => {
     showConfirm(
-      "Aktivite Günlüğünü Temizle",
-      `${db._activityLog.length} kayıt silinecek. Devam edilsin mi?`,
+      "Aktivite GÃ¼nlÃ¼ÄŸÃ¼nÃ¼ Temizle",
+      `${db._activityLog.length} kayÄ±t silinecek. Devam edilsin mi?`,
       () => {
         save((prev) => ({ ...prev, _activityLog: [] }));
-        showToast("Aktivite günlüğü temizlendi!");
+        showToast("Aktivite gÃ¼nlÃ¼ÄŸÃ¼ temizlendi!");
       },
       true,
     );
   };
 
   return (
-    <Card title="📋 Aktivite Günlüğü">
+    <Card title="ğŸ“‹ Aktivite GÃ¼nlÃ¼ÄŸÃ¼">
       <div className={"settings-flex-wrap"}>
         <input
           type="date"
@@ -1485,7 +1483,7 @@ function ActivityPanel({
           onChange={(e) => setTypeFilter(e.target.value)}
           style={{ ...inp, flex: 1 }}
         >
-          <option value="all">Tüm İşlemler</option>
+          <option value="all">TÃ¼m Ä°ÅŸlemler</option>
           {actionTypes.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -1497,23 +1495,23 @@ function ActivityPanel({
             onClick={() => setDateFilter("")}
             className={"settings-btn-gray"}
           >
-            ✕ Tarih
+            âœ• Tarih
           </button>
         )}
         <button onClick={clearLog} className={"settings-btn-danger-outline"}>
-          🗑️ Temizle
+          ğŸ—‘ï¸ Temizle
         </button>
       </div>
 
       <div className={"settings-text-dim-xs"}>
-        {filtered.length} kayıt (toplam {activityLog.length})
+        {filtered.length} kayÄ±t (toplam {activityLog.length})
       </div>
 
       <div className={"settings-scroll-list"}>
         {filtered.length === 0 ? (
           <div className={"settings-empty-state"}>
-            <div className={"settings-empty-icon"}>📋</div>
-            <p>Aktivite bulunamadı</p>
+            <div className={"settings-empty-icon"}>ğŸ“‹</div>
+            <p>Aktivite bulunamadÄ±</p>
           </div>
         ) : (
           filtered.map((a) => (
@@ -1539,31 +1537,31 @@ function ActivityPanel({
 }
 
 const RESTORE_SECTIONS = [
-  { key: "products", label: "Ürünler", icon: "📦" },
-  { key: "sales", label: "Satışlar", icon: "🛒" },
-  { key: "suppliers", label: "Tedarikçiler", icon: "🏭" },
-  { key: "cari", label: "Cari Hesaplar", icon: "👤" },
-  { key: "kasa", label: "Kasa İşlemleri", icon: "💰" },
-  { key: "bankTransactions", label: "Banka İşlemleri", icon: "🏦" },
-  { key: "invoices", label: "Faturalar", icon: "🧾" },
-  { key: "orders", label: "Siparişler", icon: "📋" },
-  { key: "stockMovements", label: "Stok Hareketleri", icon: "📊" },
-  { key: "peletSuppliers", label: "Pelet Tedarikçi", icon: "🪵" },
-  { key: "peletOrders", label: "Pelet Sipariş", icon: "🪵" },
-  { key: "boruSuppliers", label: "Boru Tedarikçi", icon: "🔩" },
-  { key: "boruOrders", label: "Boru Sipariş", icon: "🔩" },
-  { key: "budgets", label: "Bütçe", icon: "📊" },
-  { key: "returns", label: "İadeler", icon: "↩️" },
-  { key: "company", label: "Şirket Bilgileri", icon: "🏢", isObject: true },
+  { key: "products", label: "ÃœrÃ¼nler", icon: "ğŸ“¦" },
+  { key: "sales", label: "SatÄ±ÅŸlar", icon: "ğŸ›’" },
+  { key: "suppliers", label: "TedarikÃ§iler", icon: "ğŸ­" },
+  { key: "cari", label: "Cari Hesaplar", icon: "ğŸ‘¤" },
+  { key: "kasa", label: "Kasa Ä°ÅŸlemleri", icon: "ğŸ’°" },
+  { key: "bankTransactions", label: "Banka Ä°ÅŸlemleri", icon: "ğŸ¦" },
+  { key: "invoices", label: "Faturalar", icon: "ğŸ§¾" },
+  { key: "orders", label: "SipariÅŸler", icon: "ğŸ“‹" },
+  { key: "stockMovements", label: "Stok Hareketleri", icon: "ğŸ“Š" },
+  { key: "peletSuppliers", label: "Pelet TedarikÃ§i", icon: "ğŸªµ" },
+  { key: "peletOrders", label: "Pelet SipariÅŸ", icon: "ğŸªµ" },
+  { key: "boruSuppliers", label: "Boru TedarikÃ§i", icon: "ğŸ”©" },
+  { key: "boruOrders", label: "Boru SipariÅŸ", icon: "ğŸ”©" },
+  { key: "budgets", label: "BÃ¼tÃ§e", icon: "ğŸ“Š" },
+  { key: "returns", label: "Ä°adeler", icon: "â†©ï¸" },
+  { key: "company", label: "Åirket Bilgileri", icon: "ğŸ¢", isObject: true },
   {
     key: "pelletSettings",
-    label: "Pelet Ayarları",
-    icon: "⚙️",
+    label: "Pelet AyarlarÄ±",
+    icon: "âš™ï¸",
     isObject: true,
   },
 ] as const;
 
-// ── Tam Geri Yükleme Paneli ────────────────────────────────────────────────
+// â”€â”€ Tam Geri YÃ¼kleme Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FullRestorePanel({
   showToast,
   showConfirm,
@@ -1584,28 +1582,28 @@ function FullRestorePanel({
     if (fileRef.current) fileRef.current.value = "";
 
     showConfirm(
-      "⚠️ Tam Geri Yükleme",
-      `"${file.name}" dosyasındaki veriler yükleniyor. Mevcut tüm veriler bu yedekle değiştirilecek. Önceki veri otomatik yedeklenir. Devam edilsin mi?`,
+      "âš ï¸ Tam Geri YÃ¼kleme",
+      `"${file.name}" dosyasÄ±ndaki veriler yÃ¼kleniyor. Mevcut tÃ¼m veriler bu yedekle deÄŸiÅŸtirilecek. Ã–nceki veri otomatik yedeklenir. Devam edilsin mi?`,
       () => {
-        // Önce mevcut veriyi yedekle
+        // Ã–nce mevcut veriyi yedekle
         saveBackupToFirebase(
           db,
           `onceki_${new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "-")}`,
         ).catch(() =>
-          logger.error("db", "Tam geri yükleme öncesi yedek alınamadı"),
+          logger.error("db", "Tam geri yÃ¼kleme Ã¶ncesi yedek alÄ±namadÄ±"),
         );
 
         const reader = new FileReader();
         reader.onload = (ev) => {
           try {
             const raw = JSON.parse(ev.target?.result as string) as DB;
-            // fullRestoreDB'yi doğrudan import etmek yerine save içinde çağırıyoruz
+            // fullRestoreDB'yi doÄŸrudan import etmek yerine save iÃ§inde Ã§aÄŸÄ±rÄ±yoruz
             save((prev) => {
-              // makeDefaultDB'ye erişim yok burada — prev'i default olarak kullan
+              // makeDefaultDB'ye eriÅŸim yok burada â€” prev'i default olarak kullan
               const def = { ...prev };
-              // Temel yapıyı koru, yedekteki veriyi üzerine yaz
+              // Temel yapÄ±yÄ± koru, yedekteki veriyi Ã¼zerine yaz
               const merged: DB = { ...def, ...raw };
-              // Zorunlu array alanları
+              // Zorunlu array alanlarÄ±
               const arrayKeys = [
                 "products",
                 "sales",
@@ -1656,7 +1654,7 @@ function FullRestorePanel({
               skippedMissingField: 0,
               warnings: [],
             };
-            // Ad kalite kontrolü raporu
+            // Ad kalite kontrolÃ¼ raporu
             (raw.cari || []).forEach((c: { name?: unknown }) => {
               if (
                 typeof c.name !== "string" ||
@@ -1665,7 +1663,7 @@ function FullRestorePanel({
               ) {
                 report.skippedInvalidName++;
                 report.warnings.push(
-                  `Cari gizlendi: "${c.name}" — geçersiz ad`,
+                  `Cari gizlendi: "${c.name}" â€” geÃ§ersiz ad`,
                 );
               }
             });
@@ -1677,7 +1675,7 @@ function FullRestorePanel({
               ) {
                 report.skippedInvalidName++;
                 report.warnings.push(
-                  `Ürün gizlendi: "${p.name}" — geçersiz ad`,
+                  `ÃœrÃ¼n gizlendi: "${p.name}" â€” geÃ§ersiz ad`,
                 );
               }
             });
@@ -1685,12 +1683,12 @@ function FullRestorePanel({
 
             const msg =
               report.skippedInvalidName > 0
-                ? `✅ Geri yükleme tamamlandı. ${report.skippedInvalidName} geçersiz kayıt gizlendi.`
-                : "✅ Tam geri yükleme başarılı! Önceki veri yedeklendi.";
+                ? `âœ… Geri yÃ¼kleme tamamlandÄ±. ${report.skippedInvalidName} geÃ§ersiz kayÄ±t gizlendi.`
+                : "âœ… Tam geri yÃ¼kleme baÅŸarÄ±lÄ±! Ã–nceki veri yedeklendi.";
             showToast(msg, "success");
             setTimeout(() => window.location.reload(), 1800);
           } catch {
-            showToast("Dosya okunamadı veya geçersiz format!", "error");
+            showToast("Dosya okunamadÄ± veya geÃ§ersiz format!", "error");
           }
         };
         reader.readAsText(file);
@@ -1700,11 +1698,11 @@ function FullRestorePanel({
   };
 
   return (
-    <Card title="🔄 Tam Geri Yükleme">
+    <Card title="ğŸ”„ Tam Geri YÃ¼kleme">
       <div className={"settings-error-box"}>
-        <strong>Dikkat:</strong> Mevcut tüm veriler yedekteki verilerle
-        değiştirilir. İşlem öncesi otomatik yedek alınır. Yedekten gelen
-        geçersiz adlı kayıtlar (boş, tek haneli, sadece sayı) gizlenir.
+        <strong>Dikkat:</strong> Mevcut tÃ¼m veriler yedekteki verilerle
+        deÄŸiÅŸtirilir. Ä°ÅŸlem Ã¶ncesi otomatik yedek alÄ±nÄ±r. Yedekten gelen
+        geÃ§ersiz adlÄ± kayÄ±tlar (boÅŸ, tek haneli, sadece sayÄ±) gizlenir.
       </div>
       <input
         ref={fileRef}
@@ -1725,17 +1723,17 @@ function FullRestorePanel({
             "rgba(239,68,68,0.08)";
         }}
       >
-        📂 JSON Yedek Dosyası Seç — Tam Geri Yükle
+        ğŸ“‚ JSON Yedek DosyasÄ± SeÃ§ â€” Tam Geri YÃ¼kle
       </button>
 
       {lastReport && lastReport.warnings.length > 0 && (
         <div className={"settings-warning-box"}>
           <div className={"settings-text-warning-bold"}>
-            ⚠️ Gizlenen Kayıtlar
+            âš ï¸ Gizlenen KayÄ±tlar
           </div>
           {lastReport.warnings.map((w, i) => (
             <div key={i} className={"settings-text-muted"}>
-              • {w}
+              â€¢ {w}
             </div>
           ))}
         </div>
@@ -1781,7 +1779,7 @@ function SelectiveRestore({
       try {
         const data = JSON.parse(ev.target?.result as string);
         if (typeof data !== "object" || Array.isArray(data)) {
-          showToast("Geçersiz JSON formatı!", "error");
+          showToast("GeÃ§ersiz JSON formatÄ±!", "error");
           return;
         }
         setFileData(data);
@@ -1810,7 +1808,7 @@ function SelectiveRestore({
         setAvailable(avail);
         setSelected(new Set(avail.map((a) => a.key)));
       } catch {
-        showToast("JSON ayrıştırılamadı!", "error");
+        showToast("JSON ayrÄ±ÅŸtÄ±rÄ±lamadÄ±!", "error");
       }
     };
     reader.readAsText(file);
@@ -1835,17 +1833,17 @@ function SelectiveRestore({
       .filter((a) => selected.has(a.key))
       .reduce((s, a) => s + a.count, 0);
     showConfirm(
-      "Seçimli Geri Yükleme",
-      `${selected.size} bölüm (${selCount} kayıt) işlenecek. Mevcut ID'ler korunur, geçersiz adlar atlanır. Devam edilsin mi?`,
+      "SeÃ§imli Geri YÃ¼kleme",
+      `${selected.size} bÃ¶lÃ¼m (${selCount} kayÄ±t) iÅŸlenecek. Mevcut ID'ler korunur, geÃ§ersiz adlar atlanÄ±r. Devam edilsin mi?`,
       () => {
         try {
-          // Geri yükleme öncesi mevcut veriyi otomatik yedekle
+          // Geri yÃ¼kleme Ã¶ncesi mevcut veriyi otomatik yedekle
           const preLabel = `onceki_${new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "-")}`;
           saveBackupToFirebase(db, preLabel).catch(() =>
-            logger.error("db", "Seçimli geri yükleme öncesi yedek alınamadı"),
+            logger.error("db", "SeÃ§imli geri yÃ¼kleme Ã¶ncesi yedek alÄ±namadÄ±"),
           );
 
-          // Akıllı birleştirme — ID kontrolü + ad kalite kontrolü
+          // AkÄ±llÄ± birleÅŸtirme â€” ID kontrolÃ¼ + ad kalite kontrolÃ¼
           const { db: mergedDb, report } = mergeRestoreDB(
             db,
             fileData as Partial<DB>,
@@ -1856,15 +1854,15 @@ function SelectiveRestore({
           save(() => mergedDb);
 
           const msg = [
-            `✅ ${report.added} kayıt eklendi.`,
+            `âœ… ${report.added} kayÄ±t eklendi.`,
             report.skippedDuplicate > 0
-              ? `${report.skippedDuplicate} tekrar (ID çakışması) atlandı.`
+              ? `${report.skippedDuplicate} tekrar (ID Ã§akÄ±ÅŸmasÄ±) atlandÄ±.`
               : "",
             report.skippedInvalidName > 0
-              ? `${report.skippedInvalidName} geçersiz adlı kayıt atlandı.`
+              ? `${report.skippedInvalidName} geÃ§ersiz adlÄ± kayÄ±t atlandÄ±.`
               : "",
             report.skippedMissingField > 0
-              ? `${report.skippedMissingField} eksik alanlı kayıt atlandı.`
+              ? `${report.skippedMissingField} eksik alanlÄ± kayÄ±t atlandÄ±.`
               : "",
           ]
             .filter(Boolean)
@@ -1878,7 +1876,7 @@ function SelectiveRestore({
           );
           setTimeout(() => window.location.reload(), 2000);
         } catch {
-          showToast("Geri yükleme sırasında hata oluştu!", "error");
+          showToast("Geri yÃ¼kleme sÄ±rasÄ±nda hata oluÅŸtu!", "error");
         }
       },
       true,
@@ -1894,13 +1892,13 @@ function SelectiveRestore({
   };
 
   return (
-    <Card title="📂 Seçimli Geri Yükleme">
+    <Card title="ğŸ“‚ SeÃ§imli Geri YÃ¼kleme">
       <p className={"settings-text-muted"}>
-        Yedek dosyanızdan{" "}
+        Yedek dosyanÄ±zdan{" "}
         <strong className={"settings-text-orange"}>
-          istediğiniz bölümleri seçerek
+          istediÄŸiniz bÃ¶lÃ¼mleri seÃ§erek
         </strong>{" "}
-        geri yükleyin. Tüm veriyi değiştirmek zorunda değilsiniz.
+        geri yÃ¼kleyin. TÃ¼m veriyi deÄŸiÅŸtirmek zorunda deÄŸilsiniz.
       </p>
 
       {!fileData ? (
@@ -1924,28 +1922,28 @@ function SelectiveRestore({
                 "rgba(59,130,246,0.08)";
             }}
           >
-            JSON Yedek Dosyası Seç
+            JSON Yedek DosyasÄ± SeÃ§
           </button>
         </>
       ) : (
         <div className={"settings-grid-12"}>
           <div className={"settings-success-row"}>
-            <span className={"settings-text-success-lg"}>📄</span>
+            <span className={"settings-text-success-lg"}>ğŸ“„</span>
             <span className={"settings-text-success-bold"}>{fileName}</span>
             <span className={"settings-text-muted-xs"}>
-              {available.length} bölüm bulundu
+              {available.length} bÃ¶lÃ¼m bulundu
             </span>
           </div>
 
           <div className={"settings-flex-row-8"}>
             <span className={"settings-text-primary-sm"}>
-              Geri Yüklenecek Bölümler:
+              Geri YÃ¼klenecek BÃ¶lÃ¼mler:
             </span>
             <button onClick={selectAll} className={"settings-btn-success-sm"}>
-              Tümünü Seç
+              TÃ¼mÃ¼nÃ¼ SeÃ§
             </button>
             <button onClick={selectNone} className={"settings-btn-danger-sm"}>
-              Hiçbirini Seçme
+              HiÃ§birini SeÃ§me
             </button>
           </div>
 
@@ -1988,7 +1986,7 @@ function SelectiveRestore({
                       flexShrink: 0,
                     }}
                   >
-                    {isSelected ? "✓" : ""}
+                    {isSelected ? "âœ“" : ""}
                   </div>
                   <span className={"settings-text-md"}>{section.icon}</span>
                   <div className={"settings-flex-1"}>
@@ -2002,7 +2000,7 @@ function SelectiveRestore({
                       {section.label}
                     </div>
                     <div className={"settings-text-dim"}>
-                      {section.isObject ? "Ayarlar" : `${section.count} kayıt`}
+                      {section.isObject ? "Ayarlar" : `${section.count} kayÄ±t`}
                     </div>
                   </div>
                 </div>
@@ -2012,15 +2010,15 @@ function SelectiveRestore({
 
           {selected.size > 0 && (
             <div className={"settings-warning-box"}>
-              Mevcut ID'ler korunur. Geçersiz adlar (boş, tek haneli, sadece
-              sayı) ve zorunlu alanı eksik kayıtlar atlanır.
+              Mevcut ID'ler korunur. GeÃ§ersiz adlar (boÅŸ, tek haneli, sadece
+              sayÄ±) ve zorunlu alanÄ± eksik kayÄ±tlar atlanÄ±r.
             </div>
           )}
 
           {lastReport && lastReport.warnings.length > 0 && (
             <div className={"settings-error-box"}>
               <div className={"settings-text-danger-bold"}>
-                ⚠️ Atlanan Kayıtlar (
+                âš ï¸ Atlanan KayÄ±tlar (
                 {lastReport.skippedDuplicate +
                   lastReport.skippedInvalidName +
                   lastReport.skippedMissingField}
@@ -2029,24 +2027,24 @@ function SelectiveRestore({
               <div className={"settings-flex-wrap"}>
                 {lastReport.skippedDuplicate > 0 && (
                   <span className={"settings-badge-info"}>
-                    🔁 {lastReport.skippedDuplicate} tekrar ID
+                    ğŸ” {lastReport.skippedDuplicate} tekrar ID
                   </span>
                 )}
                 {lastReport.skippedInvalidName > 0 && (
                   <span className={"settings-badge-danger"}>
-                    ✗ {lastReport.skippedInvalidName} geçersiz ad
+                    âœ— {lastReport.skippedInvalidName} geÃ§ersiz ad
                   </span>
                 )}
                 {lastReport.skippedMissingField > 0 && (
                   <span className={"settings-badge-warning"}>
-                    ⚠ {lastReport.skippedMissingField} eksik alan
+                    âš  {lastReport.skippedMissingField} eksik alan
                   </span>
                 )}
               </div>
               <div className={"settings-scroll-sm"}>
                 {lastReport.warnings.map((w, i) => (
                   <div key={i} className={"settings-text-muted"}>
-                    • {w}
+                    â€¢ {w}
                   </div>
                 ))}
               </div>
@@ -2056,11 +2054,11 @@ function SelectiveRestore({
           <div className={"settings-flex-row-10"}>
             {selected.size > 0 && (
               <button onClick={doRestore} className={"settings-btn-blue"}>
-                {selected.size} Bölümü Geri Yükle
+                {selected.size} BÃ¶lÃ¼mÃ¼ Geri YÃ¼kle
               </button>
             )}
             <button onClick={reset} className={"settings-btn-gray-md"}>
-              Sıfırla
+              SÄ±fÄ±rla
             </button>
           </div>
         </div>
@@ -2070,21 +2068,21 @@ function SelectiveRestore({
 }
 
 const KNOWN_ARRAYS: Record<string, string> = {
-  products: "Ürünler",
-  sales: "Satışlar",
-  suppliers: "Tedarikçiler",
-  cari: "Cari Müşteriler",
+  products: "ÃœrÃ¼nler",
+  sales: "SatÄ±ÅŸlar",
+  suppliers: "TedarikÃ§iler",
+  cari: "Cari MÃ¼ÅŸteriler",
   kasa: "Kasa Hareketleri",
-  bankTransactions: "Banka İşlemleri",
-  orders: "Siparişler",
+  bankTransactions: "Banka Ä°ÅŸlemleri",
+  orders: "SipariÅŸler",
   invoices: "Faturalar",
   stockMovements: "Stok Hareketleri",
-  peletSuppliers: "Pelet Tedarikçi",
-  peletOrders: "Pelet Sipariş",
-  boruSuppliers: "Boru Tedarikçi",
-  boruOrders: "Boru Sipariş",
-  budgets: "Bütçe",
-  returns: "İadeler",
+  peletSuppliers: "Pelet TedarikÃ§i",
+  peletOrders: "Pelet SipariÅŸ",
+  boruSuppliers: "Boru TedarikÃ§i",
+  boruOrders: "Boru SipariÅŸ",
+  budgets: "BÃ¼tÃ§e",
+  returns: "Ä°adeler",
   ortakEmanetler: "Ortak Emanet",
   installments: "Taksitler",
 };
@@ -2118,7 +2116,7 @@ interface ConflictInfo {
 const CSV_COLUMN_MAP: Record<string, { target: string; field: string }> = {
   müşteri: { target: "cari", field: "name" },
   musteri: { target: "cari", field: "name" },
-  "müşteri adı": { target: "cari", field: "name" },
+  "mÃ¼ÅŸteri adÄ±": { target: "cari", field: "name" },
   ad: { target: "cari", field: "name" },
   isim: { target: "cari", field: "name" },
   "ad soyad": { target: "cari", field: "name" },
@@ -2298,25 +2296,25 @@ function SmartImportManager({
     }> = [
       {
         entity: "products",
-        label: "Ürün",
+        label: "ÃœrÃ¼n",
         dbItems: db.products,
         importKey: "products",
       },
       {
         entity: "sales",
-        label: "Satış",
+        label: "SatÄ±ÅŸ",
         dbItems: db.sales,
         importKey: "sales",
       },
       {
         entity: "cari",
-        label: "Cari Müşteri",
+        label: "Cari MÃ¼ÅŸteri",
         dbItems: db.cari,
         importKey: "cari",
       },
       {
         entity: "suppliers",
-        label: "Tedarikçi",
+        label: "TedarikÃ§i",
         dbItems: db.suppliers || [],
         importKey: "suppliers",
       },
@@ -2359,23 +2357,23 @@ function SmartImportManager({
       const val = data[key];
       if (Array.isArray(val)) {
         if (val.length > 0) st[key] = val.length;
-        if (val.length === 0) warns.push(`"${KNOWN_ARRAYS[key]}" alanı boş`);
+        if (val.length === 0) warns.push(`"${KNOWN_ARRAYS[key]}" alanÄ± boÅŸ`);
       } else if (val !== undefined) {
-        errs.push(`"${key}" alanı geçersiz format — dizi bekleniyor`);
+        errs.push(`"${key}" alanÄ± geÃ§ersiz format â€” dizi bekleniyor`);
       }
     });
 
     if (!data.company || typeof data.company !== "object")
-      warns.push("Şirket bilgisi bulunamadı — varsayılan oluşturulacak");
+      warns.push("Åirket bilgisi bulunamadÄ± â€” varsayÄ±lan oluÅŸturulacak");
     if (!data.pelletSettings)
-      warns.push("Pelet ayarları bulunamadı — varsayılan kullanılacak");
+      warns.push("Pelet ayarlarÄ± bulunamadÄ± â€” varsayÄ±lan kullanÄ±lacak");
     if (!data._version)
       warns.push(
-        "Versiyon bilgisi yok — eski format olabilir, lütfen kontrol edin",
+        "Versiyon bilgisi yok â€” eski format olabilir, lÃ¼tfen kontrol edin",
       );
     else if ((data._version as number) < 1)
       warns.push(
-        `Eski versiyon (${data._version}) — bazı alanlar eksik olabilir`,
+        `Eski versiyon (${data._version}) â€” bazÄ± alanlar eksik olabilir`,
       );
 
     return { errs, warns, st };
@@ -2392,7 +2390,7 @@ function SmartImportManager({
       if (ext === "csv" || ext === "tsv" || ext === "txt") {
         const rows = parseCSV(text);
         if (rows.length === 0) {
-          setErrors(["CSV dosyası boş veya geçersiz format"]);
+          setErrors(["CSV dosyasÄ± boÅŸ veya geÃ§ersiz format"]);
           setStage("preview");
           return;
         }
@@ -2414,7 +2412,7 @@ function SmartImportManager({
       try {
         const data = JSON.parse(text);
         if (typeof data !== "object" || Array.isArray(data)) {
-          setErrors(["Geçersiz JSON formatı — nesne bekleniyor"]);
+          setErrors(["GeÃ§ersiz JSON formatÄ± â€” nesne bekleniyor"]);
           setStage("preview");
           setRawData(null);
           return;
@@ -2436,7 +2434,7 @@ function SmartImportManager({
         }
       } catch {
         setErrors([
-          "Dosya ayrıştırılamadı — JSON veya CSV formatını kontrol edin",
+          "Dosya ayrÄ±ÅŸtÄ±rÄ±lamadÄ± â€” JSON veya CSV formatÄ±nÄ± kontrol edin",
         ]);
         setStage("preview");
         setRawData(null);
@@ -2497,7 +2495,7 @@ function SmartImportManager({
         if (!item.kasa) item.kasa = "nakit";
         if (!item.amount) item.amount = 0;
         if (!item.description)
-          item.description = (item.name as string) || "CSV İçe Aktarma";
+          item.description = (item.name as string) || "CSV Ä°Ã§e Aktarma";
         if (!item.category) item.category = "diger";
       }
       return item;
@@ -2533,8 +2531,8 @@ function SmartImportManager({
   const doImport = () => {
     if (!mapped) return;
     showConfirm(
-      "Veri Aktarımını Onayla",
-      "Seçilen çakışma çözümleri uygulanacak ve veriler içe aktarılacak. Mevcut veriler etkilenebilir. Onaylıyor musunuz?",
+      "Veri AktarÄ±mÄ±nÄ± Onayla",
+      "SeÃ§ilen Ã§akÄ±ÅŸma Ã§Ã¶zÃ¼mleri uygulanacak ve veriler iÃ§e aktarÄ±lacak. Mevcut veriler etkilenebilir. OnaylÄ±yor musunuz?",
       () => {
         try {
           const raw = localStorage.getItem("sobaYonetim");
@@ -2548,8 +2546,8 @@ function SmartImportManager({
             cari: [],
             kasa: [],
             kasalar: [
-              { id: "nakit", name: "Nakit", icon: "💵" },
-              { id: "banka", name: "Banka", icon: "🏦" },
+              { id: "nakit", name: "Nakit", icon: "ğŸ’µ" },
+              { id: "banka", name: "Banka", icon: "ğŸ¦" },
             ],
             bankTransactions: [],
             matchRules: [],
@@ -2639,12 +2637,12 @@ function SmartImportManager({
           localStorage.setItem("sobaYonetim", JSON.stringify(finalData));
           setStage("done");
           showToast(
-            "Veriler başarıyla aktarıldı! Sayfa yenilenecek...",
+            "Veriler baÅŸarÄ±yla aktarÄ±ldÄ±! Sayfa yenilenecek...",
             "success",
           );
           setTimeout(() => window.location.reload(), 1200);
         } catch {
-          showToast("İçe aktarma sırasında hata oluştu!", "error");
+          showToast("Ä°Ã§e aktarma sÄ±rasÄ±nda hata oluÅŸtu!", "error");
         }
       },
       true,
@@ -2680,11 +2678,11 @@ function SmartImportManager({
   });
 
   return (
-    <Card title="🧠 Akıllı Veri İçe Aktarma">
+    <Card title="ğŸ§  AkÄ±llÄ± Veri Ä°Ã§e Aktarma">
       <p className={"settings-text-muted"}>
-        JSON, CSV veya TXT dosyanızı analiz eder; kolonları otomatik eşler
-        (müşteri, tarih, tutar vb.), manuel düzeltme imkanı sunar ve çakışmaları
-        çözerek güvenli aktarım yapar.
+        JSON, CSV veya TXT dosyanÄ±zÄ± analiz eder; kolonlarÄ± otomatik eÅŸler
+        (mÃ¼ÅŸteri, tarih, tutar vb.), manuel dÃ¼zeltme imkanÄ± sunar ve Ã§akÄ±ÅŸmalarÄ±
+        Ã§Ã¶zerek gÃ¼venli aktarÄ±m yapar.
       </p>
 
       {stage === "idle" && (
@@ -2700,7 +2698,7 @@ function SmartImportManager({
             onClick={() => fileRef.current?.click()}
             className={"settings-btn-accent-dashed"}
           >
-            Dosya Seç & Akıllı Analiz Başlat
+            Dosya SeÃ§ & AkÄ±llÄ± Analiz BaÅŸlat
           </button>
           <div className={"settings-flex-center"}>
             {["JSON", "CSV", "TSV", "TXT"].map((f) => (
@@ -2716,22 +2714,22 @@ function SmartImportManager({
         <div className={"settings-grid"}>
           <div className={"settings-success-box"}>
             <div className={"settings-text-success-bold"}>
-              {csvRows.length} satır okundu
+              {csvRows.length} satÄ±r okundu
             </div>
             <div className={"settings-text-muted-xs"}>
-              Kolon eşleşmelerini kontrol edin ve gerekirse düzeltin
+              Kolon eÅŸleÅŸmelerini kontrol edin ve gerekirse dÃ¼zeltin
             </div>
           </div>
 
           <div>
             <div className={"settings-flex-row-10"}>
               <span className={"settings-text-primary-sm"}>
-                Hedef Veri Türü:
+                Hedef Veri TÃ¼rÃ¼:
               </span>
               {[
-                { id: "cari", label: "Cari Müşteri", icon: "👤" },
-                { id: "products", label: "Ürün", icon: "📦" },
-                { id: "kasa", label: "Kasa", icon: "💰" },
+                { id: "cari", label: "Cari MÃ¼ÅŸteri", icon: "ğŸ‘¤" },
+                { id: "products", label: "ÃœrÃ¼n", icon: "ğŸ“¦" },
+                { id: "kasa", label: "Kasa", icon: "ğŸ’°" },
               ].map((t) => (
                 <button
                   key={t.id}
@@ -2756,7 +2754,7 @@ function SmartImportManager({
             </div>
           </div>
 
-          <div className={"settings-text-primary-sm"}>Kolon Eşleşmeleri</div>
+          <div className={"settings-text-primary-sm"}>Kolon EÅŸleÅŸmeleri</div>
           {csvMappings.map((m, i) => (
             <div key={m.csvColumn} className={"settings-flex-row-10"}>
               <div
@@ -2776,7 +2774,7 @@ function SmartImportManager({
                   <span className={"settings-text-success-sm"}>otomatik</span>
                 )}
               </div>
-              <span className={"settings-text-dim"}>→</span>
+              <span className={"settings-text-dim"}>â†’</span>
               <select
                 value={m.targetField}
                 onChange={(e) => {
@@ -2790,19 +2788,19 @@ function SmartImportManager({
                 }}
                 className={"settings-select-sm"}
               >
-                <option value="">— Yoksay —</option>
-                <option value="name">Ad / İsim</option>
+                <option value="">â€” Yoksay â€”</option>
+                <option value="name">Ad / Ä°sim</option>
                 <option value="phone">Telefon</option>
                 <option value="email">E-posta</option>
                 <option value="address">Adres</option>
-                <option value="balance">Bakiye / Borç</option>
+                <option value="balance">Bakiye / BorÃ§</option>
                 <option value="amount">Tutar</option>
                 <option value="total">Toplam</option>
                 <option value="price">Fiyat</option>
                 <option value="cost">Maliyet</option>
                 <option value="stock">Stok</option>
                 <option value="category">Kategori</option>
-                <option value="description">Açıklama</option>
+                <option value="description">AÃ§Ä±klama</option>
                 <option value="note">Not</option>
                 <option value="createdAt">Tarih</option>
               </select>
@@ -2812,7 +2810,7 @@ function SmartImportManager({
           {csvRows.length > 0 && (
             <div className={"settings-code-box"}>
               <div className={"settings-text-muted-sm"}>
-                Önizleme (ilk 3 satır):
+                Ã–nizleme (ilk 3 satÄ±r):
               </div>
               <table className={"settings-table"}>
                 <thead>
@@ -2841,10 +2839,10 @@ function SmartImportManager({
 
           <div className={"settings-flex-row-10"}>
             <button onClick={applyCsvImport} className={"settings-btn-purple"}>
-              Devam → Önizleme & Çakışma Çözümü
+              Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
             </button>
             <button onClick={reset} className={"settings-btn-gray-md"}>
-              Sıfırla
+              SÄ±fÄ±rla
             </button>
           </div>
         </div>
@@ -2853,17 +2851,17 @@ function SmartImportManager({
       {stage === "mapping" && rawData && (
         <div className={"settings-grid"}>
           <div className={"settings-text-primary"}>
-            🗺️ Alan Eşleme (Field Mapping)
+            ğŸ—ºï¸ Alan EÅŸleme (Field Mapping)
           </div>
           {Object.keys(legacyMapped).length > 0 && (
             <div className={"settings-success-box"}>
               <div className={"settings-text-success-bold"}>
-                ✅ Otomatik Algılanan Eski Alanlar
+                âœ… Otomatik AlgÄ±lanan Eski Alanlar
               </div>
               {Object.entries(legacyMapped).map(([src, dst]) => (
                 <div key={src} className={"settings-flex-row-8"}>
                   <span className={"settings-mono-warning"}>{src}</span>
-                  <span className={"settings-text-dim"}>→</span>
+                  <span className={"settings-text-dim"}>â†’</span>
                   <span className={"settings-mono-success"}>{dst}</span>
                   <span className={"settings-text-dim-sm"}>
                     ({KNOWN_ARRAYS[dst] || dst})
@@ -2875,12 +2873,12 @@ function SmartImportManager({
           {unknownFields.length > 0 && (
             <div className={"settings-warning-box"}>
               <div className={"settings-text-warning-bold"}>
-                ⚠️ Tanınmayan Alanlar — Eşleme Seçin
+                âš ï¸ TanÄ±nmayan Alanlar â€” EÅŸleme SeÃ§in
               </div>
               {unknownFields.map((field) => (
                 <div key={field} className={"settings-flex-row-10"}>
                   <span className={"settings-mono-warning-md"}>{field}</span>
-                  <span className={"settings-text-dim"}>→</span>
+                  <span className={"settings-text-dim"}>â†’</span>
                   <select
                     value={fieldMappings[field] || ""}
                     onChange={(e) =>
@@ -2891,7 +2889,7 @@ function SmartImportManager({
                     }
                     className={"settings-select-sm"}
                   >
-                    <option value="">— Yoksay (aktarma)</option>
+                    <option value="">â€” Yoksay (aktarma)</option>
                     {Object.entries(KNOWN_ARRAYS).map(([k, label]) => (
                       <option key={k} value={k}>
                         {label} ({k})
@@ -2907,10 +2905,10 @@ function SmartImportManager({
               onClick={() => proceedToPreview(rawData, fieldMappings)}
               className={"settings-btn-purple"}
             >
-              Devam → Önizleme & Çakışma Çözümü
+              Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
             </button>
             <button onClick={reset} className={"settings-btn-gray-md"}>
-              Sıfırla
+              SÄ±fÄ±rla
             </button>
           </div>
         </div>
@@ -2920,20 +2918,20 @@ function SmartImportManager({
         <div className={"settings-grid-12"}>
           {errors.length > 0 && (
             <div className={"settings-error-box"}>
-              <div className={"settings-text-danger-bold"}>❌ Hatalar</div>
+              <div className={"settings-text-danger-bold"}>âŒ Hatalar</div>
               {errors.map((e, i) => (
                 <div key={i} className={"settings-text-danger-sm"}>
-                  • {e}
+                  â€¢ {e}
                 </div>
               ))}
             </div>
           )}
           {warnings.length > 0 && (
             <div className={"settings-warning-box"}>
-              <div className={"settings-text-warning-bold"}>⚠️ Uyarılar</div>
+              <div className={"settings-text-warning-bold"}>âš ï¸ UyarÄ±lar</div>
               {warnings.map((w, i) => (
                 <div key={i} className={"settings-text-warning-sm"}>
-                  • {w}
+                  â€¢ {w}
                 </div>
               ))}
             </div>
@@ -2941,7 +2939,7 @@ function SmartImportManager({
           {Object.keys(stats).length > 0 && (
             <div className={"settings-info-box"}>
               <div className={"settings-text-info-bold"}>
-                📊 İçe Aktarılacak Kayıtlar
+                ğŸ“Š Ä°Ã§e AktarÄ±lacak KayÄ±tlar
               </div>
               <div className={"settings-grid-auto-140"}>
                 {Object.entries(stats).map(([k, v]) => (
@@ -2958,15 +2956,15 @@ function SmartImportManager({
           {conflicts.length > 0 && (
             <div className={"settings-error-box"}>
               <div className={"settings-text-danger-bold"}>
-                ⚡ Çakışma Çözümü
+                âš¡ Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
               </div>
               {conflicts.map((c) => (
                 <div key={c.entity} className={"settings-border-bottom"}>
                   <div className={"settings-text-danger-sm"}>
                     <strong>{c.label}</strong>:{" "}
-                    {c.byId > 0 && `${c.byId} aynı ID`}
+                    {c.byId > 0 && `${c.byId} aynÄ± ID`}
                     {c.byId > 0 && c.byName > 0 && ", "}
-                    {c.byName > 0 && `${c.byName} aynı isim`} çakışması
+                    {c.byName > 0 && `${c.byName} aynÄ± isim`} Ã§akÄ±ÅŸmasÄ±
                   </div>
                   <div className={"settings-flex-row-8"}>
                     <button
@@ -2981,7 +2979,7 @@ function SmartImportManager({
                         "#ef4444",
                       )}
                     >
-                      🔄 Üzerine Yaz
+                      ğŸ”„ Ãœzerine Yaz
                     </button>
                     <button
                       onClick={() =>
@@ -2992,7 +2990,7 @@ function SmartImportManager({
                         "#f59e0b",
                       )}
                     >
-                      ⏭️ Çakışanları Atla
+                      â­ï¸ Ã‡akÄ±ÅŸanlarÄ± Atla
                     </button>
                     <button
                       onClick={() =>
@@ -3003,16 +3001,16 @@ function SmartImportManager({
                         "#10b981",
                       )}
                     >
-                      🔀 Birleştir
+                      ğŸ”€ BirleÅŸtir
                     </button>
                   </div>
                   <div className={"settings-text-dim-sm"}>
                     {resolutions[c.entity] === "overwrite" &&
-                      "Mevcut kayıtlar yeni verilerle tamamen değiştirilir."}
+                      "Mevcut kayÄ±tlar yeni verilerle tamamen deÄŸiÅŸtirilir."}
                     {resolutions[c.entity] === "skip" &&
-                      "Çakışan kayıtlar atlanır; mevcut veriler korunur, yeni olanlar eklenir."}
+                      "Ã‡akÄ±ÅŸan kayÄ±tlar atlanÄ±r; mevcut veriler korunur, yeni olanlar eklenir."}
                     {resolutions[c.entity] === "merge" &&
-                      "Mevcut kayıtlar yeni alanlarla güncellenir; hiç kayıp olmaz."}
+                      "Mevcut kayÄ±tlar yeni alanlarla gÃ¼ncellenir; hiÃ§ kayÄ±p olmaz."}
                   </div>
                 </div>
               ))}
@@ -3021,11 +3019,11 @@ function SmartImportManager({
           <div className={"settings-flex-row-10"}>
             {mapped && errors.length === 0 && (
               <button onClick={doImport} className={"settings-btn-purple"}>
-                ✅ Aktarımı Onayla & Başlat
+                âœ… AktarÄ±mÄ± Onayla & BaÅŸlat
               </button>
             )}
             <button onClick={reset} className={"settings-btn-gray-md"}>
-              Sıfırla
+              SÄ±fÄ±rla
             </button>
           </div>
         </div>
@@ -3033,9 +3031,9 @@ function SmartImportManager({
 
       {stage === "done" && (
         <div className={"settings-empty-state"}>
-          <div className={"settings-empty-icon-lg"}>✅</div>
+          <div className={"settings-empty-icon-lg"}>âœ…</div>
           <div className={"settings-text-success-bold"}>
-            Veriler başarıyla aktarıldı!
+            Veriler baÅŸarÄ±yla aktarÄ±ldÄ±!
           </div>
           <div className={"settings-text-muted-xs"}>Sayfa yenileniyor...</div>
         </div>
@@ -3077,15 +3075,15 @@ function VeriOnarim({
     const issues: string[] = [];
     const saleIds = db.sales.map((s) => s.id);
     const dupSales = saleIds.length - new Set(saleIds).size;
-    if (dupSales > 0) issues.push(`⚠️ ${dupSales} tekrarlanan satış kaydı`);
+    if (dupSales > 0) issues.push(`âš ï¸ ${dupSales} tekrarlanan satÄ±ÅŸ kaydÄ±`);
     const negStock = db.products.filter((p) => p.stock < 0).length;
-    if (negStock > 0) issues.push(`⚠️ ${negStock} ürünün stok değeri negatif`);
+    if (negStock > 0) issues.push(`âš ï¸ ${negStock} Ã¼rÃ¼nÃ¼n stok deÄŸeri negatif`);
     const cariIds = new Set(db.cari.map((c) => c.id));
     const orphanKasa = db.kasa.filter(
       (k) => k.cariId && !cariIds.has(k.cariId),
     ).length;
     if (orphanKasa > 0)
-      issues.push(`⚠️ ${orphanKasa} kasa kaydı silinmiş cariye bağlı`);
+      issues.push(`âš ï¸ ${orphanKasa} kasa kaydÄ± silinmiÅŸ cariye baÄŸlÄ±`);
     const soldProductIds = new Set(
       db.sales
         .flatMap(
@@ -3100,27 +3098,27 @@ function VeriOnarim({
       (p) => soldProductIds.has(p.id) && p.stock === 0,
     ).length;
     if (stocklessProducts > 0)
-      issues.push(`ℹ️ ${stocklessProducts} ürün satıldı ama stok sıfır`);
-    if (!db.company.name) issues.push("ℹ️ Şirket adı girilmemiş");
+      issues.push(`â„¹ï¸ ${stocklessProducts} Ã¼rÃ¼n satÄ±ldÄ± ama stok sÄ±fÄ±r`);
+    if (!db.company.name) issues.push("â„¹ï¸ Åirket adÄ± girilmemiÅŸ");
     const lsSize = new Blob([localStorage.getItem("sobaYonetim") || ""]).size;
     const lsKB = Math.round(lsSize / 1024);
-    issues.push(`📊 localStorage boyutu: ${lsKB} KB (limit ~5MB)`);
+    issues.push(`ğŸ“Š localStorage boyutu: ${lsKB} KB (limit ~5MB)`);
     const orphanInvoices = (db.invoices || []).filter(
       (inv) => inv.cariId && !cariIds.has(inv.cariId),
     ).length;
     if (orphanInvoices > 0)
-      issues.push(`⚠️ ${orphanInvoices} fatura silinmiş cariye bağlı`);
+      issues.push(`âš ï¸ ${orphanInvoices} fatura silinmiÅŸ cariye baÄŸlÄ±`);
     setResults(
       issues.length === 0
-        ? ["✅ Veri tutarlılık kontrolü tamam. Sorun bulunamadı!"]
+        ? ["âœ… Veri tutarlÄ±lÄ±k kontrolÃ¼ tamam. Sorun bulunamadÄ±!"]
         : issues,
     );
   };
 
   const fixNegativeStock = () => {
     showConfirm(
-      "Stok Düzelt",
-      "Negatif stoklar sıfıra çekilecek. Devam edilsin mi?",
+      "Stok DÃ¼zelt",
+      "Negatif stoklar sÄ±fÄ±ra Ã§ekilecek. Devam edilsin mi?",
       () => {
         save((prev) => ({
           ...prev,
@@ -3128,7 +3126,7 @@ function VeriOnarim({
             p.stock < 0 ? { ...p, stock: 0 } : p,
           ),
         }));
-        showToast("Negatif stoklar düzeltildi!");
+        showToast("Negatif stoklar dÃ¼zeltildi!");
         diagnose();
       },
     );
@@ -3137,7 +3135,7 @@ function VeriOnarim({
   const fixOrphanKasa = () => {
     showConfirm(
       "Orphan Temizle",
-      "Silinmiş cariye ait kasa kayıtlarındaki cari bağlantısı kaldırılacak. Devam?",
+      "SilinmiÅŸ cariye ait kasa kayÄ±tlarÄ±ndaki cari baÄŸlantÄ±sÄ± kaldÄ±rÄ±lacak. Devam?",
       () => {
         const cariIds = new Set(db.cari.map((c) => c.id));
         save((prev) => ({
@@ -3148,7 +3146,7 @@ function VeriOnarim({
               : k,
           ),
         }));
-        showToast("Orphan kasa kayıtları düzeltildi!");
+        showToast("Orphan kasa kayÄ±tlarÄ± dÃ¼zeltildi!");
         diagnose();
       },
     );
@@ -3157,7 +3155,7 @@ function VeriOnarim({
   const recalcCariBalance = () => {
     showConfirm(
       "Bakiye Yeniden Hesapla",
-      "Tüm cari bakiyeleri kasa işlemlerine göre sıfırdan hesaplanacak. Mevcut bakiyeler SIFIRLANACAK!",
+      "TÃ¼m cari bakiyeleri kasa iÅŸlemlerine gÃ¶re sÄ±fÄ±rdan hesaplanacak. Mevcut bakiyeler SIFIRLANACAK!",
       () => {
         save((prev) => {
           const cari = prev.cari.map((c) => {
@@ -3170,7 +3168,7 @@ function VeriOnarim({
           });
           return { ...prev, cari };
         });
-        showToast("Cari bakiyeler yeniden hesaplandı!");
+        showToast("Cari bakiyeler yeniden hesaplandÄ±!");
         diagnose();
       },
       true,
@@ -3179,8 +3177,8 @@ function VeriOnarim({
 
   const removeDupSales = () => {
     showConfirm(
-      "Tekrarları Temizle",
-      "Aynı ID'li tekrarlanan satış kayıtları silinecek. Devam edilsin mi?",
+      "TekrarlarÄ± Temizle",
+      "AynÄ± ID'li tekrarlanan satÄ±ÅŸ kayÄ±tlarÄ± silinecek. Devam edilsin mi?",
       () => {
         save((prev) => {
           const seen = new Set<string>();
@@ -3193,7 +3191,7 @@ function VeriOnarim({
             }),
           };
         });
-        showToast("Tekrarlanan satışlar temizlendi!");
+        showToast("Tekrarlanan satÄ±ÅŸlar temizlendi!");
         diagnose();
       },
     );
@@ -3208,12 +3206,12 @@ function VeriOnarim({
     });
     const dups = Object.entries(nameCounts).filter(([, ids]) => ids.length > 1);
     if (dups.length === 0) {
-      showToast("Tekrarlanan cari bulunamadı!");
+      showToast("Tekrarlanan cari bulunamadÄ±!");
       return;
     }
     showConfirm(
-      "Cari Birleştir",
-      `${dups.length} isimde tekrar var. İlk kayıt korunacak. Devam?`,
+      "Cari BirleÅŸtir",
+      `${dups.length} isimde tekrar var. Ä°lk kayÄ±t korunacak. Devam?`,
       () => {
         save((prev) => {
           const toRemove = new Set<string>();
@@ -3225,7 +3223,7 @@ function VeriOnarim({
             cari: prev.cari.filter((c) => !toRemove.has(c.id)),
           };
         });
-        showToast(`${dups.length} grup birleştirildi!`);
+        showToast(`${dups.length} grup birleÅŸtirildi!`);
         diagnose();
       },
       true,
@@ -3234,9 +3232,9 @@ function VeriOnarim({
 
   return (
     <div className={"settings-grid"}>
-      <Card title="🔧 Veri Tutarlılık Kontrolü">
+      <Card title="ğŸ”§ Veri TutarlÄ±lÄ±k KontrolÃ¼">
         <p className={"settings-text-muted"}>
-          Veritabanınızı analiz ederek tutarsız, eksik veya hatalı kayıtları
+          VeritabanÄ±nÄ±zÄ± analiz ederek tutarsÄ±z, eksik veya hatalÄ± kayÄ±tlarÄ±
           tespit edin.
         </p>
         <div className={"settings-flex-row-10"}>
@@ -3245,7 +3243,7 @@ function VeriOnarim({
             className={"settings-btn-blue"}
             style={{ flex: 1 }}
           >
-            🔍 Hızlı Analiz
+            ğŸ” HÄ±zlÄ± Analiz
           </button>
           <button
             onClick={handleDetailedHealthCheck}
@@ -3254,8 +3252,8 @@ function VeriOnarim({
             style={{ flex: 1 }}
           >
             {checkingHealth
-              ? "⌛ Analiz Ediliyor..."
-              : "🛡️ Tam Sistem Taraması"}
+              ? "âŒ› Analiz Ediliyor..."
+              : "ğŸ›¡ï¸ Tam Sistem TaramasÄ±"}
           </button>
         </div>
 
@@ -3281,8 +3279,8 @@ function VeriOnarim({
                 }}
               >
                 {healthReport.overall === "healthy"
-                  ? "✅ Sistem Sağlıklı"
-                  : "⚠️ Sistemde Sorunlar Var"}
+                  ? "âœ… Sistem SaÄŸlÄ±klÄ±"
+                  : "âš ï¸ Sistemde Sorunlar Var"}
                 ({healthReport.score}/100)
               </div>
             </div>
@@ -3309,10 +3307,10 @@ function VeriOnarim({
 
             {healthReport.recommendations.length > 0 && (
               <div className="settings-info-box">
-                <div className="settings-text-info-bold">💡 Öneriler:</div>
+                <div className="settings-text-info-bold">ğŸ’¡ Ã–neriler:</div>
                 {healthReport.recommendations.map((rec, i) => (
                   <div key={i} className="settings-text-muted-xs">
-                    • {rec}
+                    â€¢ {rec}
                   </div>
                 ))}
               </div>
@@ -3327,12 +3325,12 @@ function VeriOnarim({
                 key={i}
                 style={{
                   padding: "10px 14px",
-                  background: r.startsWith("✅")
+                  background: r.startsWith("âœ…")
                     ? "rgba(16,185,129,0.08)"
-                    : r.startsWith("📊")
+                    : r.startsWith("ğŸ“Š")
                       ? "rgba(59,130,246,0.08)"
                       : "rgba(245,158,11,0.08)",
-                  border: `1px solid ${r.startsWith("✅") ? "rgba(16,185,129,0.2)" : r.startsWith("📊") ? "rgba(59,130,246,0.2)" : "rgba(245,158,11,0.2)"}`,
+                  border: `1px solid ${r.startsWith("âœ…") ? "rgba(16,185,129,0.2)" : r.startsWith("ğŸ“Š") ? "rgba(59,130,246,0.2)" : "rgba(245,158,11,0.2)"}`,
                   borderRadius: 9,
                   color: "#e2e8f0",
                   fontSize: "0.85rem",
@@ -3345,36 +3343,36 @@ function VeriOnarim({
         )}
       </Card>
 
-      <Card title="🛠️ Onarım Araçları">
+      <Card title="ğŸ› ï¸ OnarÄ±m AraÃ§larÄ±">
         <div className={"settings-grid-10"}>
           {[
             {
-              label: "📦 Negatif Stokları Sıfırla",
-              desc: "Stok değeri 0'ın altına düşmüş ürünleri sıfıra çeker",
+              label: "ğŸ“¦ Negatif StoklarÄ± SÄ±fÄ±rla",
+              desc: "Stok deÄŸeri 0'Ä±n altÄ±na dÃ¼ÅŸmÃ¼ÅŸ Ã¼rÃ¼nleri sÄ±fÄ±ra Ã§eker",
               action: fixNegativeStock,
               color: "#f59e0b",
             },
             {
-              label: "🔗 Orphan Kasa Bağlantılarını Temizle",
-              desc: "Silinmiş cariye bağlı kasa kayıtlarındaki bağlantıyı kaldırır",
+              label: "ğŸ”— Orphan Kasa BaÄŸlantÄ±larÄ±nÄ± Temizle",
+              desc: "SilinmiÅŸ cariye baÄŸlÄ± kasa kayÄ±tlarÄ±ndaki baÄŸlantÄ±yÄ± kaldÄ±rÄ±r",
               action: fixOrphanKasa,
               color: "#3b82f6",
             },
             {
-              label: "⚖️ Cari Bakiyeleri Yeniden Hesapla",
-              desc: "Tüm bakiyeleri kasa işlemlerine göre baştan hesaplar",
+              label: "âš–ï¸ Cari Bakiyeleri Yeniden Hesapla",
+              desc: "TÃ¼m bakiyeleri kasa iÅŸlemlerine gÃ¶re baÅŸtan hesaplar",
               action: recalcCariBalance,
               color: "#8b5cf6",
             },
             {
-              label: "🗑️ Tekrarlayan Satış Kayıtlarını Temizle",
-              desc: "Aynı ID ile çift kaydedilmiş satışları siler",
+              label: "ğŸ—‘ï¸ Tekrarlayan SatÄ±ÅŸ KayÄ±tlarÄ±nÄ± Temizle",
+              desc: "AynÄ± ID ile Ã§ift kaydedilmiÅŸ satÄ±ÅŸlarÄ± siler",
               action: removeDupSales,
               color: "#10b981",
             },
             {
-              label: "🤝 Aynı İsimli Cari Hesapları Birleştir",
-              desc: "Aynı isimde birden fazla cari varsa tek kayıt bırakır",
+              label: "ğŸ¤ AynÄ± Ä°simli Cari HesaplarÄ± BirleÅŸtir",
+              desc: "AynÄ± isimde birden fazla cari varsa tek kayÄ±t bÄ±rakÄ±r",
               action: mergeduplicateCari,
               color: "#ef4444",
             },
@@ -3416,12 +3414,12 @@ function VeriOnarim({
         </div>
       </Card>
 
-      <Card title="📋 Sistem Bilgileri">
+      <Card title="ğŸ“‹ Sistem Bilgileri">
         <div className={"settings-grid-2-10"}>
           {[
             {
-              label: "Toplam Kayıt",
-              value: `${[db.products, db.sales, db.cari, db.kasa, db.invoices || [], db.budgets || []].reduce((s, a) => s + a.length, 0)} kayıt`,
+              label: "Toplam KayÄ±t",
+              value: `${[db.products, db.sales, db.cari, db.kasa, db.invoices || [], db.budgets || []].reduce((s, a) => s + a.length, 0)} kayÄ±t`,
             },
             {
               label: "localStorage Boyutu",
@@ -3429,7 +3427,7 @@ function VeriOnarim({
             },
             { label: "Uygulama Versiyonu", value: `v${db._version || 1}` },
             {
-              label: "Son Veri Güncellemesi",
+              label: "Son Veri GÃ¼ncellemesi",
               value:
                 db.kasa.length > 0
                   ? new Date(
@@ -3473,7 +3471,7 @@ function DangerAction({
         onClick={() =>
           showConfirm(
             label,
-            `${desc}. Bu işlem geri alınamaz!`,
+            `${desc}. Bu iÅŸlem geri alÄ±namaz!`,
             onConfirm,
             true,
           )
@@ -3482,23 +3480,6 @@ function DangerAction({
       >
         Temizle
       </button>
-    </div>
-  );
-}
-
-function Card({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={"settings-card"}>
-      <div className={"settings-card-header"}>
-        <h3 className={"settings-card-title"}>{title}</h3>
-      </div>
-      <div className={"settings-card-body"}>{children}</div>
     </div>
   );
 }
@@ -3522,1018 +3503,9 @@ const _btnPrimaryStyle: React.CSSProperties = {
   fontSize: "0.95rem",
 };
 
-// ── Bağlantı Ayarları ─────────────────────────────────────────────────────────
-function BaglantiAyarlari({
-  cfg,
-  onChange,
-  showToast,
-}: {
-  cfg: ConnConfig;
-  onChange: (c: ConnConfig) => void;
-  showToast: (m: string, t?: string) => void;
-}) {
-  const [fbTest, setFbTest] = useState<{ ok: boolean; msg: string } | null>(
-    null,
-  );
-  const [fbTesting, setFbTesting] = useState(false);
-  const [sbTest, setSbTest] = useState<{ ok: boolean; msg: string } | null>(
-    null,
-  );
-  const [sbTesting, setSbTesting] = useState(false);
+// BaglantiAyarlari moved to ./SettingsBaglanti
 
-  const setFb = (patch: Partial<typeof cfg.firebase>) =>
-    onChange({ ...cfg, firebase: { ...cfg.firebase, ...patch } });
-  const setSb = (patch: Partial<typeof cfg.supabase>) =>
-    onChange({ ...cfg, supabase: { ...cfg.supabase, ...patch } });
-
-  const handleFbTest = async () => {
-    setFbTesting(true);
-    setFbTest(null);
-    const r = await testFirebase(cfg.firebase);
-    setFbTest(r);
-    setFbTesting(false);
-    showToast(
-      r.ok ? "Firebase bağlantısı başarılı!" : "Firebase bağlantısı başarısız!",
-      r.ok ? "success" : "error",
-    );
-  };
-
-  const handleSbTest = async () => {
-    setSbTesting(true);
-    setSbTest(null);
-    const r = await testSupabase(cfg.supabase);
-    setSbTest(r);
-    setSbTesting(false);
-    showToast(
-      r.ok ? "Supabase bağlantısı başarılı!" : "Supabase bağlantısı başarısız!",
-      r.ok ? "success" : "error",
-    );
-  };
-
-  const handleSave = () => {
-    saveConnConfig(cfg);
-    showToast(
-      "Bağlantı ayarları kaydedildi! Sayfa yenilendiğinde aktif olur.",
-      "success",
-    );
-  };
-
-  const handleReset = () => {
-    onChange(DEFAULT_CONN);
-    saveConnConfig(DEFAULT_CONN);
-    showToast("Varsayılan bağlantı ayarları geri yüklendi!", "success");
-  };
-
-  return (
-    <div className={"settings-grid-16"}>
-      {/* Aktif Sağlayıcı */}
-      <Card title="🔌 Aktif Senkronizasyon Sağlayıcısı">
-        <p className={"settings-text-muted"}>
-          Verileriniz hangi bulut servisiyle senkronize edilsin? Sadece bir
-          sağlayıcı aktif olabilir.
-        </p>
-        <div className={"settings-flex-row-10"}>
-          {(
-            [
-              {
-                id: "firebase",
-                label: "🔥 Firebase",
-                desc: "Google Firestore",
-              },
-              {
-                id: "supabase",
-                label: "⚡ Supabase",
-                desc: "PostgreSQL tabanlı",
-              },
-              { id: "none", label: "🚫 Yok", desc: "Sadece yerel" },
-            ] as const
-          ).map((p) => (
-            <button
-              key={p.id}
-              onClick={() => onChange({ ...cfg, activeProvider: p.id })}
-              style={{
-                flex: 1,
-                padding: "14px 10px",
-                borderRadius: 12,
-                cursor: "pointer",
-                textAlign: "center",
-                background:
-                  cfg.activeProvider === p.id
-                    ? "rgba(255,87,34,0.12)"
-                    : "rgba(0,0,0,0.25)",
-                border: `2px solid ${cfg.activeProvider === p.id ? "rgba(255,87,34,0.5)" : "rgba(255,255,255,0.07)"}`,
-                transition: "all 0.15s",
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: cfg.activeProvider === p.id ? "var(--color-danger)" : "var(--text-primary)",
-                  fontSize: "0.9rem",
-                }}
-              >
-                {p.label}
-              </div>
-              <div className={"settings-text-dim-sm"}>{p.desc}</div>
-              {cfg.activeProvider === p.id && (
-                <div className={"settings-text-success-sm"}>✓ Aktif</div>
-              )}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Firebase */}
-      <Card title="🔥 Firebase Firestore">
-        <div className={"settings-flex-row-10"}>
-          <div className={"settings-text-muted"}>
-            Firebase Firestore REST API ile senkronizasyon
-          </div>
-          <button
-            onClick={() => setFb({ enabled: !cfg.firebase.enabled })}
-            style={{
-              width: 48,
-              height: 26,
-              borderRadius: 13,
-              border: "none",
-              cursor: "pointer",
-              position: "relative",
-              background: cfg.firebase.enabled ? "var(--color-success)" : "var(--text-dim)",
-              transition: "background 0.2s",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                background: "var(--bg-elevated)",
-                position: "absolute",
-                top: 4,
-                left: cfg.firebase.enabled ? 26 : 4,
-                transition: "left 0.2s",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }}
-            />
-          </button>
-        </div>
-
-        {/* JSON Dosyası Yükleme */}
-        <div className={"settings-warning-dashed"}>
-          <div className={"settings-text-primary-mid"}>
-            📁 Firebase Config Dosyası Yükle
-          </div>
-          <div className={"settings-text-dim-sm"}>
-            Firebase Console'dan indirilen{" "}
-            <code className={"settings-text-orange"}>google-services.json</code>{" "}
-            veya web config JSON dosyasını yükleyin — alanlar otomatik dolar.
-          </div>
-          <label className={"settings-block"}>
-            <div className={"settings-btn-orange"}>📂 JSON Dosyası Seç</div>
-            <input
-              type="file"
-              accept=".json"
-              className={"settings-hidden"}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                  try {
-                    const json = JSON.parse(ev.target?.result as string);
-                    // google-services.json formatı
-                    if (json.project_info && json.client) {
-                      const projectId = json.project_info.project_id;
-                      const apiKey =
-                        json.client?.[0]?.api_key?.[0]?.current_key || "";
-                      if (projectId) {
-                        setFb({ projectId, apiKey });
-                        showToast("✅ google-services.json okundu!", "success");
-                        return;
-                      }
-                    }
-                    // Firebase web config formatı: { apiKey, projectId, ... }
-                    if (json.apiKey && json.projectId) {
-                      setFb({ projectId: json.projectId, apiKey: json.apiKey });
-                      showToast("✅ Firebase config okundu!", "success");
-                      return;
-                    }
-                    // firebaseConfig objesi içinde
-                    if (json.firebaseConfig) {
-                      setFb({
-                        projectId: json.firebaseConfig.projectId || "",
-                        apiKey: json.firebaseConfig.apiKey || "",
-                      });
-                      showToast("✅ Firebase config okundu!", "success");
-                      return;
-                    }
-                    showToast(
-                      "⚠️ Tanınan bir Firebase JSON formatı değil. Manuel girin.",
-                      "warning",
-                    );
-                  } catch {
-                    showToast("❌ JSON dosyası okunamadı!", "error");
-                  }
-                };
-                reader.readAsText(file);
-                e.target.value = "";
-              }}
-            />
-          </label>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 12,
-            opacity: cfg.firebase.enabled ? 1 : 0.5,
-            pointerEvents: cfg.firebase.enabled ? "auto" : "none",
-          }}
-        >
-          <div>
-            <label className={"settings-lbl"}>Project ID</label>
-            <input
-              value={cfg.firebase.projectId}
-              onChange={(e) => setFb({ projectId: e.target.value })}
-              className={"settings-inp"}
-              placeholder="örn: my-project-12345"
-            />
-          </div>
-          <div>
-            <label className={"settings-lbl"}>API Key</label>
-            <input
-              type="password"
-              value={cfg.firebase.apiKey}
-              onChange={(e) => setFb({ apiKey: e.target.value })}
-              className={"settings-inp"}
-              placeholder="AIza..."
-            />
-          </div>
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>Doküman Yolu</label>
-            <input
-              value={cfg.firebase.docPath}
-              onChange={(e) => setFb({ docPath: e.target.value })}
-              className={"settings-inp"}
-              placeholder="sync/main"
-            />
-            <div className={"settings-text-dim-13"}>
-              Firestore'daki koleksiyon/doküman yolu. Örn:{" "}
-              <code className={"settings-text-orange"}>sync/main</code>
-            </div>
-          </div>
-        </div>
-
-        {/* Oluşturulan URL önizleme */}
-        {cfg.firebase.projectId && cfg.firebase.apiKey && (
-          <div className={"settings-mono-box"}>
-            {`Firebase: ${cfg.firebase.projectId}/${cfg.firebase.docPath} (SDK ile bağlı)`}
-          </div>
-        )}
-
-        <div className={"settings-flex-row-10"}>
-          <button
-            onClick={handleFbTest}
-            disabled={
-              fbTesting || !cfg.firebase.projectId || !cfg.firebase.apiKey
-            }
-            style={{
-              padding: "9px 18px",
-              background: "rgba(255,87,34,0.12)",
-              border: "1px solid rgba(255,87,34,0.25)",
-              borderRadius: 9,
-              color: "var(--color-danger)",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontSize: "0.85rem",
-              opacity:
-                !cfg.firebase.projectId || !cfg.firebase.apiKey ? 0.4 : 1,
-            }}
-          >
-            {fbTesting ? "⟳ Test ediliyor..." : "🔍 Bağlantıyı Test Et"}
-          </button>
-          {fbTest && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.82rem",
-                color: fbTest.ok ? "var(--color-success)" : "var(--color-danger)",
-                fontWeight: 600,
-              }}
-            >
-              {fbTest.ok ? "✅" : "❌"} {fbTest.msg}
-            </div>
-          )}
-        </div>
-
-        {/* Nasıl alınır? */}
-        <details className={"settings-mt-14"}>
-          <summary className={"settings-text-dim-8"}>
-            📖 Firebase bilgilerini nereden alırım?
-          </summary>
-          <div className={"settings-help-box"}>
-            <div>
-              1.{" "}
-              <a
-                href="https://console.firebase.google.com"
-                target="_blank"
-                rel="noreferrer"
-                className={"settings-text-orange"}
-              >
-                console.firebase.google.com
-              </a>{" "}
-              → Projenizi seçin
-            </div>
-            <div>
-              2. Proje Ayarları (⚙️) → Genel → Proje kimliği ={" "}
-              <strong className={"settings-text-white"}>Project ID</strong>
-            </div>
-            <div>
-              3. Proje Ayarları → Web API anahtarı ={" "}
-              <strong className={"settings-text-white"}>API Key</strong>
-            </div>
-            <div>
-              4. Firestore Database → Koleksiyon ve doküman adı ={" "}
-              <strong className={"settings-text-white"}>Doküman Yolu</strong>
-            </div>
-            <div className={"settings-text-orange"}>
-              ⚠️ Firestore güvenlik kurallarını ayarlamayı unutmayın!
-            </div>
-          </div>
-        </details>
-      </Card>
-
-      {/* Supabase */}
-      <Card title="⚡ Supabase">
-        <div className={"settings-flex-row-10"}>
-          <div className={"settings-text-muted"}>
-            Supabase PostgreSQL ile senkronizasyon (REST API)
-          </div>
-          <button
-            onClick={() => setSb({ enabled: !cfg.supabase.enabled })}
-            style={{
-              width: 48,
-              height: 26,
-              borderRadius: 13,
-              border: "none",
-              cursor: "pointer",
-              position: "relative",
-              background: cfg.supabase.enabled ? "var(--color-success)" : "var(--text-dim)",
-              transition: "background 0.2s",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                background: "var(--bg-elevated)",
-                position: "absolute",
-                top: 4,
-                left: cfg.supabase.enabled ? 26 : 4,
-                transition: "left 0.2s",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }}
-            />
-          </button>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 12,
-            opacity: cfg.supabase.enabled ? 1 : 0.5,
-            pointerEvents: cfg.supabase.enabled ? "auto" : "none",
-          }}
-        >
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>Supabase URL</label>
-            <input
-              value={cfg.supabase.url}
-              onChange={(e) => setSb({ url: e.target.value })}
-              className={"settings-inp"}
-              placeholder="https://xxxxxxxxxxxx.supabase.co"
-            />
-          </div>
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>Anon Key (public)</label>
-            <input
-              type="password"
-              value={cfg.supabase.anonKey}
-              onChange={(e) => setSb({ anonKey: e.target.value })}
-              className={"settings-inp"}
-              placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            />
-          </div>
-          <div>
-            <label className={"settings-lbl"}>Tablo Adı</label>
-            <input
-              value={cfg.supabase.tableName}
-              onChange={(e) => setSb({ tableName: e.target.value })}
-              className={"settings-inp"}
-              placeholder="soba_sync"
-            />
-          </div>
-        </div>
-
-        {/* SQL şeması */}
-        <details className={"settings-mt-12"}>
-          <summary className={"settings-text-dim-8"}>
-            📋 Gerekli SQL şeması
-          </summary>
-          <pre className={"settings-code-block"}>{`CREATE TABLE soba_sync (
-  id TEXT PRIMARY KEY DEFAULT 'main',
-  data JSONB NOT NULL,
-  version INTEGER DEFAULT 0,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- RLS politikası (opsiyonel)
-ALTER TABLE soba_sync ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
-        </details>
-
-        <div className={"settings-flex-row-10"}>
-          <button
-            onClick={handleSbTest}
-            disabled={sbTesting || !cfg.supabase.url || !cfg.supabase.anonKey}
-            style={{
-              padding: "9px 18px",
-              background: "rgba(16,185,129,0.12)",
-              border: "1px solid rgba(16,185,129,0.25)",
-              borderRadius: 9,
-              color: "var(--color-success)",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontSize: "0.85rem",
-              opacity: !cfg.supabase.url || !cfg.supabase.anonKey ? 0.4 : 1,
-            }}
-          >
-            {sbTesting ? "⟳ Test ediliyor..." : "🔍 Bağlantıyı Test Et"}
-          </button>
-          {sbTest && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.82rem",
-                color: sbTest.ok ? "var(--color-success)" : "var(--color-danger)",
-                fontWeight: 600,
-              }}
-            >
-              {sbTest.ok ? "✅" : "❌"} {sbTest.msg}
-            </div>
-          )}
-        </div>
-
-        <details className={"settings-mt-14"}>
-          <summary className={"settings-text-dim-8"}>
-            📖 Supabase bilgilerini nereden alırım?
-          </summary>
-          <div className={"settings-help-box"}>
-            <div>
-              1.{" "}
-              <a
-                href="https://supabase.com/dashboard"
-                target="_blank"
-                rel="noreferrer"
-                className={"settings-text-success"}
-              >
-                supabase.com/dashboard
-              </a>{" "}
-              → Projenizi seçin
-            </div>
-            <div>
-              2. Settings → API → Project URL ={" "}
-              <strong className={"settings-text-white"}>Supabase URL</strong>
-            </div>
-            <div>
-              3. Settings → API → anon public ={" "}
-              <strong className={"settings-text-white"}>Anon Key</strong>
-            </div>
-            <div>4. SQL Editor'da yukarıdaki şemayı çalıştırın</div>
-          </div>
-        </details>
-      </Card>
-
-      {/* Kaydet / Sıfırla */}
-      <div className={"settings-flex-row-10"}>
-        <button onClick={handleReset} className={"settings-btn-outline-md"}>
-          ↺ Varsayılana Sıfırla
-        </button>
-        <button onClick={handleSave} className={"settings-btn-primary-md"}>
-          💾 Bağlantı Ayarlarını Kaydet
-        </button>
-      </div>
-
-      <div className={"settings-warning-box"}>
-        ⚠️ Bağlantı ayarları değiştirildikten sonra{" "}
-        <strong className={"settings-text-white"}>sayfayı yenileyin</strong> —
-        yeni ayarlar aktif olur.
-        <br />
-        🔒 Bağlantı ayarları Firebase'e kaydedilir — tüm cihazlarda geçerlidir.
-      </div>
-    </div>
-  );
-}
-
-// ── Arayüz Ayarları ───────────────────────────────────────────────────────────
-function ArayuzAyarlari({
-  prefs,
-  onChange,
-  showToast,
-  dashboardPrefs,
-  saveDashboardPrefs,
-}: {
-  prefs: UIPrefs;
-  onChange: (p: UIPrefs) => void;
-  showToast: (m: string, t?: string) => void;
-  dashboardPrefs: { leftWidgets: string[]; brightness: number };
-  saveDashboardPrefs: (patch: Partial<{ leftWidgets: string[]; brightness: number }>) => void;
-}) {
-  const set = (patch: Partial<UIPrefs>) => onChange({ ...prefs, ...patch });
-
-  const fontLabels: Record<number, string> = {
-    0.85: "Küçük",
-    1: "Normal",
-    1.1: "Büyük",
-    1.2: "Çok Büyük",
-  };
-  const animLabels: Record<string, string> = {
-    hizli: "⚡ Hızlı",
-    normal: "✨ Normal",
-    yavas: "🐢 Yavaş",
-    yok: "🚫 Yok",
-  };
-  const radiusLabels: Record<number, string> = {
-    6: "Keskin",
-    10: "Az",
-    14: "Normal",
-    20: "Yuvarlak",
-  };
-
-  return (
-    <div className={"settings-grid-16"}>
-      {/* Hazır Temalar */}
-      <Card title="🎨 Temalar">
-        <div className={"settings-grid-auto-150"}>
-          {THEMES.map((t) => {
-            const isActive =
-              prefs.accent === t.accent &&
-              prefs.bgBase === t.bg &&
-              prefs.lightMode === t.light;
-            return (
-              <button
-                key={t.id}
-                onClick={() => {
-                  set({ accent: t.accent, bgBase: t.bg, lightMode: t.light });
-                  showToast(`${t.label} teması uygulandı!`, "success");
-                }}
-                style={{
-                  padding: "12px 10px",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  background: isActive ? `${t.accent}18` : "rgba(0,0,0,0.3)",
-                  border: `2px solid ${isActive ? t.accent : "rgba(255,255,255,0.07)"}`,
-                  transition: "all 0.15s",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    height: 42,
-                    marginBottom: 8,
-                    borderRadius: 10,
-                    border: `1px solid ${t.light ? "rgba(15,23,42,0.08)" : "rgba(255,255,255,0.08)"}`,
-                    background: `linear-gradient(135deg, ${t.bg} 0%, ${t.accent} 100%)`,
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div className={"settings-theme-blob-1"} />
-                  <div className={"settings-theme-blob-2"} />
-                  <div className={"settings-theme-overlay"}>
-                    <span className={"settings-theme-dot"} />
-                    <span className={"settings-theme-bar"} />
-                    <span className={"settings-theme-bar-sm"} />
-                  </div>
-                </div>
-                <div
-                  style={{
-                    fontWeight: 700,
-                    color: isActive ? t.accent : "var(--text-primary)",
-                    fontSize: "0.82rem",
-                  }}
-                >
-                  {t.label}
-                </div>
-                <div className={"settings-text-dim-11"}>{t.desc}</div>
-                {isActive && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 7,
-                      right: 7,
-                      width: 16,
-                      height: 16,
-                      borderRadius: "50%",
-                      background: t.accent,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "0.6rem",
-                      color: "var(--text-primary)",
-                      fontWeight: 900,
-                    }}
-                  >
-                    ✓
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
-
-      {/* Premium Temalar */}
-      <Card title="💎 Premium Temalar">
-        <div className={"settings-grid-auto-150"}>
-          {PREMIUM_THEMES.map((t) => {
-            const isActive = prefs.themeId === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => {
-                  set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === "light" });
-                  showToast(`✨ ${t.label} teması uygulandı!`, "success");
-                }}
-                style={{
-                  padding: "12px 10px",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  background: isActive ? `${t.accent}18` : "rgba(0,0,0,0.3)",
-                  border: `2px solid ${isActive ? t.accent : "rgba(255,255,255,0.07)"}`,
-                  transition: "all 0.15s",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    height: 42,
-                    marginBottom: 8,
-                    borderRadius: 10,
-                    border: `1px solid ${t.type === "light" ? "rgba(15,23,42,0.08)" : "rgba(255,255,255,0.08)"}`,
-                    background: `linear-gradient(135deg, ${t.bg} 0%, ${t.accent} 100%)`,
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div className={"settings-theme-blob-1"} />
-                  <div className={"settings-theme-blob-2"} />
-                  <div className={"settings-theme-overlay"}>
-                    <span className={"settings-theme-dot"} />
-                    <span className={"settings-theme-bar"} />
-                    <span className={"settings-theme-bar-sm"} />
-                  </div>
-                </div>
-                <div style={{ fontWeight: 700, color: isActive ? t.accent : "var(--text-primary)", fontSize: "0.82rem" }}>
-                  {t.label}
-                </div>
-                <div className={"settings-text-dim-11"}>{t.desc}</div>
-                {isActive && (
-                  <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: "var(--text-primary)", fontWeight: 900 }}>
-                    ✓
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
-
-
-
-      {/* Yazı & Boyut */}
-      <Card title="🔤 Yazı & Boyut">
-        <div className={"settings-grid-2-16"}>
-          <div>
-            <label className={"settings-lbl"}>Yazı Boyutu</label>
-            <div className={"settings-flex-row-6"}>
-              {([0.85, 1, 1.1, 1.2] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => set({ fontScale: s })}
-                  style={{
-                    flex: 1,
-                    padding: "9px 4px",
-                    border: "none",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    fontSize: "0.8rem",
-                    background:
-                      prefs.fontScale === s
-                        ? prefs.accent
-                        : "rgba(255,255,255,0.05)",
-                    color: prefs.fontScale === s ? "var(--text-primary)" : "var(--text-muted)",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {fontLabels[s]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={"settings-lbl"}>Köşe Yuvarlama</label>
-            <div className={"settings-flex-row-6"}>
-              {([6, 10, 14, 20] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => set({ cardRadius: r })}
-                  style={{
-                    flex: 1,
-                    padding: "9px 4px",
-                    border: "none",
-                    borderRadius: r,
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                    background:
-                      prefs.cardRadius === r
-                        ? prefs.accent
-                        : "rgba(255,255,255,0.05)",
-                    color: prefs.cardRadius === r ? "var(--text-primary)" : "var(--text-muted)",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {radiusLabels[r]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Animasyon & Mod */}
-      <Card title="⚡ Animasyon & Görünüm">
-        <div className={"settings-grid-2-16"}>
-          <div>
-            <label className={"settings-lbl"}>Animasyon Hızı</label>
-            <div className={"settings-flex-wrap-6"}>
-              {(["hizli", "normal", "yavas", "yok"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => set({ animSpeed: s })}
-                  style={{
-                    flex: 1,
-                    padding: "9px 6px",
-                    border: "none",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    fontSize: "0.78rem",
-                    background:
-                      prefs.animSpeed === s
-                        ? prefs.accent
-                        : "rgba(255,255,255,0.05)",
-                    color: prefs.animSpeed === s ? "var(--text-primary)" : "var(--text-muted)",
-                    transition: "all 0.15s",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {animLabels[s]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={"settings-lbl"}>Kompakt Mod</label>
-            <div className={"settings-flex-row-12"}>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>
-                  Sıkışık Görünüm
-                </div>
-                <div className={"settings-text-dim-2"}>
-                  Tablo ve padding'leri küçültür
-                </div>
-              </div>
-              <button
-                onClick={() => set({ compactMode: !prefs.compactMode })}
-                style={{
-                  width: 48,
-                  height: 26,
-                  borderRadius: 13,
-                  border: "none",
-                  cursor: "pointer",
-                  position: "relative",
-                  background: prefs.compactMode ? prefs.accent : "var(--text-dim)",
-                  transition: "background 0.2s",
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: "50%",
-                    background: "var(--bg-elevated)",
-                    position: "absolute",
-                    top: 4,
-                    left: prefs.compactMode ? 26 : 4,
-                    transition: "left 0.2s",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                  }}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card title="🧩 Dashboard Düzenleme">
-        <div className={"settings-grid-2-16"}>
-          <div>
-            <label className={"settings-lbl"}>Parlaklık</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input
-                type="range"
-                min="50"
-                max="150"
-                value={dashboardPrefs.brightness}
-                onChange={(e) => saveDashboardPrefs({ brightness: Number(e.target.value) })}
-                style={{ flex: 1, accentColor: 'var(--color-primary)' }}
-              />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)', minWidth: 36, textAlign: 'right' }}>%{dashboardPrefs.brightness}</span>
-            </div>
-          </div>
-          <div />
-        </div>
-        <div style={{ marginTop: 14 }}>
-          <label className={"settings-lbl"}>Widget'lar</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {WIDGET_OPTIONS.map((w) => {
-              const idx = dashboardPrefs.leftWidgets.indexOf(w.id);
-              const enabled = idx >= 0;
-              const toggle = () => {
-                if (enabled) {
-                  saveDashboardPrefs({ leftWidgets: dashboardPrefs.leftWidgets.filter((id) => id !== w.id) });
-                } else {
-                  saveDashboardPrefs({ leftWidgets: [...dashboardPrefs.leftWidgets, w.id] });
-                }
-              };
-              const moveUp = () => {
-                if (idx <= 0) return;
-                const arr = [...dashboardPrefs.leftWidgets];
-                [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
-                saveDashboardPrefs({ leftWidgets: arr });
-              };
-              const moveDown = () => {
-                if (idx < 0 || idx >= dashboardPrefs.leftWidgets.length - 1) return;
-                const arr = [...dashboardPrefs.leftWidgets];
-                [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
-                saveDashboardPrefs({ leftWidgets: arr });
-              };
-              return (
-                <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', borderRadius: 8, background: enabled ? 'var(--bg-card)' : 'transparent', border: '1px solid var(--border)', opacity: enabled ? 1 : 0.5 }}>
-                  <span style={{ fontSize: '1rem', width: 22, textAlign: 'center' }}>{w.icon}</span>
-                  <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>{w.label}</span>
-                  {enabled && (
-                    <>
-                      <button onClick={moveUp} disabled={idx === 0} style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'var(--text-dim)' : 'var(--text-secondary)', fontSize: '0.85rem', padding: '2px 4px' }} title="Yukarı taşı">↑</button>
-                      <button onClick={moveDown} disabled={idx === dashboardPrefs.leftWidgets.length - 1} style={{ background: 'none', border: 'none', cursor: idx === dashboardPrefs.leftWidgets.length - 1 ? 'default' : 'pointer', color: idx === dashboardPrefs.leftWidgets.length - 1 ? 'var(--text-dim)' : 'var(--text-secondary)', fontSize: '0.85rem', padding: '2px 4px' }} title="Aşağı taşı">↓</button>
-                    </>
-                  )}
-                  <button onClick={toggle} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', padding: '2px 4px', color: enabled ? '#ef4444' : 'var(--color-success)' }} title={enabled ? 'Gizle' : 'Göster'}>
-                    {enabled ? '✕' : '+'}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </Card>
-
-      {/* Sıfırla */}
-      <div className={"settings-flex-row-10"}>
-        <button
-          onClick={() => {
-            onChange(DEFAULT_PREFS);
-            showToast("Varsayılan tema geri yüklendi!", "success");
-          }}
-          className={"settings-btn-outline-md"}
-        >
-          ↺ Varsayılana Sıfırla
-        </button>
-        <button
-          onClick={() => showToast("Tema kaydedildi!", "success")}
-          style={{
-            flex: 2,
-            padding: "11px 0",
-            background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
-            border: "none",
-            borderRadius: 10,
-            color: "var(--text-primary)",
-            fontWeight: 800,
-            cursor: "pointer",
-            fontSize: "0.88rem",
-          }}
-        >
-          💾 Temayı Kaydet
-        </button>
-      </div>
-
-      {/* Floating Buton Ayarları */}
-      <Card title="🔘 Kayan Buton Ayarları">
-        <p className={"settings-text-gray"}>
-          Ekrandaki kayan butonları göster/gizle. Butonları istediğiniz yere
-          sürükleyebilirsiniz.
-        </p>
-        <div className={"settings-grid-10"}>
-          {[
-            {
-              key: "showAIButton" as const,
-              icon: "🤖",
-              label: "AI Asistan Butonu",
-              desc: "Sol alttaki yapay zeka butonu",
-            },
-            {
-              key: "showFABButton" as const,
-              icon: "➕",
-              label: "Hızlı İşlem Butonu",
-              desc: "Sağ alttaki hızlı satış/gelir/gider butonu",
-            },
-            {
-              key: "showReportButton" as const,
-              icon: "🐛",
-              label: "Hata Bildirme Butonu",
-              desc: "Hata bildirme, not alma ve takip butonu",
-            },
-          ].map((item) => (
-            <div key={item.key} className={"settings-flex-row-12"}>
-              <span className={"settings-text-lg"}>{item.icon}</span>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>{item.label}</div>
-                <div className={"settings-text-dim-7"}>{item.desc}</div>
-              </div>
-              <div
-                onClick={() =>
-                  onChange({ ...prefs, [item.key]: !prefs[item.key] })
-                }
-                style={{
-                  width: 48,
-                  height: 26,
-                  borderRadius: 13,
-                  background: prefs[item.key] ? prefs.accent : "var(--text-dim)",
-                  position: "relative",
-                  cursor: "pointer",
-                  transition: "background 0.2s",
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 3,
-                    left: prefs[item.key] ? 25 : 3,
-                    width: 20,
-                    height: 20,
-                    borderRadius: "50%",
-                    background: "var(--bg-elevated)",
-                    transition: "left 0.2s",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={() => {
-              localStorage.removeItem("aiBtnPos");
-              localStorage.removeItem("fabBtnPos");
-              localStorage.removeItem("reportBtnPos");
-              showToast("Buton konumları sıfırlandı!", "success");
-            }}
-            className={"settings-btn-outline-sm"}
-          >
-            📍 Buton Konumlarını Sıfırla
-          </button>
-        </div>
-      </Card>
-    </div>
-  );
-}
+// ArayuzAyarlari moved to ./SettingsArayuz
 
 function FV({
   label,
@@ -4562,7 +3534,7 @@ function FV({
   );
 }
 
-// ── Kategori Yönetim Component ────────────────────────────────────────────────
+// â”€â”€ Kategori YÃ¶netim Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function KategoriYonetim({
   db,
   save,
@@ -4574,24 +3546,24 @@ function KategoriYonetim({
   const { showConfirm } = useConfirm();
   const cats = db.productCategories || [];
   const [yeniAd, setYeniAd] = useState("");
-  const [yeniIcon, setYeniIcon] = useState("📦");
+  const [yeniIcon, setYeniIcon] = useState("ğŸ“¦");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: "", icon: "" });
 
   const addKat = () => {
     const ad = yeniAd.trim();
     if (!ad) {
-      showToast("Kategori adı gerekli!", "error");
+      showToast("Kategori adÄ± gerekli!", "error");
       return;
     }
     const id = ad
       .toLowerCase()
-      .replace(/ğ/g, "g")
-      .replace(/ü/g, "u")
-      .replace(/ş/g, "s")
-      .replace(/ı/g, "i")
-      .replace(/ö/g, "o")
-      .replace(/ç/g, "c")
+      .replace(/ÄŸ/g, "g")
+      .replace(/Ã¼/g, "u")
+      .replace(/ÅŸ/g, "s")
+      .replace(/Ä±/g, "i")
+      .replace(/Ã¶/g, "o")
+      .replace(/Ã§/g, "c")
       .replace(/[^a-z0-9]/g, "_")
       .replace(/_+/g, "_");
     if (cats.find((c) => c.id === id)) {
@@ -4607,7 +3579,7 @@ function KategoriYonetim({
       ],
     }));
     setYeniAd("");
-    setYeniIcon("📦");
+    setYeniIcon("ğŸ“¦");
     showToast("Kategori eklendi!", "success");
   };
 
@@ -4625,7 +3597,7 @@ function KategoriYonetim({
       ),
     }));
     setEditId(null);
-    showToast("Güncellendi!", "success");
+    showToast("GÃ¼ncellendi!", "success");
   };
 
   const deleteKat = (id: string) => {
@@ -4634,7 +3606,7 @@ function KategoriYonetim({
     ).length;
     if (used > 0) {
       showToast(
-        `${used} ürün bu kategoriyi kullanıyor, silemezsiniz!`,
+        `${used} Ã¼rÃ¼n bu kategoriyi kullanÄ±yor, silemezsiniz!`,
         "error",
       );
       return;
@@ -4651,10 +3623,10 @@ function KategoriYonetim({
   };
 
   return (
-    <Card title="🏷️ Ürün Kategorileri">
+    <Card title="ğŸ·ï¸ ÃœrÃ¼n Kategorileri">
       <div className={"settings-flex-col-12"}>
         {cats.length === 0 && (
-          <div className={"settings-empty-state"}>Henüz kategori yok</div>
+          <div className={"settings-empty-state"}>HenÃ¼z kategori yok</div>
         )}
         {cats.map((c) => (
           <div key={c.id} className={"settings-flex-row-10"}>
@@ -4686,13 +3658,13 @@ function KategoriYonetim({
                   onClick={() => saveEdit(c.id)}
                   className={"settings-btn-green-sm"}
                 >
-                  ✓
+                  âœ“
                 </button>
                 <button
                   onClick={() => setEditId(null)}
                   className={"settings-btn-gray-sm"}
                 >
-                  ✕
+                  âœ•
                 </button>
               </>
             ) : (
@@ -4705,7 +3677,7 @@ function KategoriYonetim({
                     db.products.filter((p) => !p.deleted && p.category === c.id)
                       .length
                   }{" "}
-                  ürün
+                  Ã¼rÃ¼n
                 </span>
                 <button
                   onClick={() => {
@@ -4714,13 +3686,13 @@ function KategoriYonetim({
                   }}
                   className={"settings-btn-info-sm"}
                 >
-                  ✏️
+                  âœï¸
                 </button>
                 <button
                   onClick={() => deleteKat(c.id)}
                   className={"settings-btn-danger-sm"}
                 >
-                  🗑️
+                  ğŸ—‘ï¸
                 </button>
               </>
             )}
@@ -4732,7 +3704,7 @@ function KategoriYonetim({
           value={yeniIcon}
           onChange={(e) => setYeniIcon(e.target.value)}
           style={{ ...inp, width: 52, textAlign: "center", fontSize: "1.2rem" }}
-          placeholder="📦"
+          placeholder="ğŸ“¦"
           maxLength={2}
         />
         <input
@@ -4740,20 +3712,20 @@ function KategoriYonetim({
           onChange={(e) => setYeniAd(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addKat()}
           style={{ ...inp, flex: 1 }}
-          placeholder="Yeni kategori adı..."
+          placeholder="Yeni kategori adÄ±..."
         />
         <button onClick={addKat} className={"settings-btn-primary-sm"}>
           + Ekle
         </button>
       </div>
       <p className={"settings-text-dim-10"}>
-        Ürünleri kullanan kategoriler silinemez.
+        ÃœrÃ¼nleri kullanan kategoriler silinemez.
       </p>
     </Card>
   );
 }
 
-// ── Hakkında Paneli ───────────────────────────────────────────────────────────
+// â”€â”€ HakkÄ±nda Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AboutPanel({ db }: { db: DB }) {
   const totalRecords = [
     db.products,
@@ -4801,13 +3773,13 @@ function AboutPanel({ db }: { db: DB }) {
 
   return (
     <div className={"settings-grid-16"}>
-      {/* Logo & Başlık */}
+      {/* Logo & BaÅŸlÄ±k */}
       <div className={"settings-about-hero"}>
         <div className={"settings-about-icon"}>{appCfg.appIcon}</div>
         <h2 className={"settings-text-primary-lg"}>{appCfg.appName}</h2>
         <p className={"settings-text-primary-mid"}>{APP_SUBTITLE}</p>
         <div className={"settings-flex-center"}>
-          {/* Versiyon — tıklanabilir */}
+          {/* Versiyon â€” tÄ±klanabilir */}
           {editVersion ? (
             <div className={"settings-flex-row-6"}>
               <input
@@ -4839,7 +3811,7 @@ function AboutPanel({ db }: { db: DB }) {
                 onClick={saveVersion}
                 className={"settings-btn-success-sm"}
               >
-                ✓
+                âœ“
               </button>
               <button
                 onClick={() => {
@@ -4848,7 +3820,7 @@ function AboutPanel({ db }: { db: DB }) {
                 }}
                 className={"settings-btn-gray-sm"}
               >
-                ✕
+                âœ•
               </button>
               {versionErr && (
                 <span className={"settings-text-danger-sm"}>{versionErr}</span>
@@ -4860,21 +3832,21 @@ function AboutPanel({ db }: { db: DB }) {
                 setEditVersion(true);
                 setVersionInput(appCfg.version);
               }}
-              title="Versiyonu düzenle"
+              title="Versiyonu dÃ¼zenle"
               className={"settings-badge-primary"}
             >
-              v{appCfg.version} ✏️
+              v{appCfg.version} âœï¸
             </button>
           )}
           <span className={"settings-badge-gray"}>DB v{db._version || 1}</span>
           <span className={"settings-badge-success"}>
-            {totalRecords} kayıt · {lsKB} KB
+            {totalRecords} kayÄ±t Â· {lsKB} KB
           </span>
         </div>
       </div>
 
       {/* Teknoloji Stack */}
-      <Card title="⚙️ Teknoloji">
+      <Card title="âš™ï¸ Teknoloji">
         <div className={"settings-flex-wrap-8"}>
           {techStack.map((t) => (
             <span
@@ -4895,39 +3867,39 @@ function AboutPanel({ db }: { db: DB }) {
         </div>
       </Card>
 
-      {/* Veritabanı Özeti */}
-      <Card title="🗄️ Veritabanı Özeti">
+      {/* VeritabanÄ± Ã–zeti */}
+      <Card title="ğŸ—„ï¸ VeritabanÄ± Ã–zeti">
         <div className={"settings-grid-auto-130"}>
           {[
             {
-              icon: "📦",
-              label: "Ürünler",
+              icon: "ğŸ“¦",
+              label: "ÃœrÃ¼nler",
               count: db.products.filter((p) => !p.deleted).length,
             },
             {
-              icon: "🛒",
-              label: "Satışlar",
+              icon: "ğŸ›’",
+              label: "SatÄ±ÅŸlar",
               count: db.sales.filter((s) => !s.deleted).length,
             },
             {
-              icon: "👤",
+              icon: "ğŸ‘¤",
               label: "Cari",
               count: db.cari.filter((c) => !c.deleted).length,
             },
             {
-              icon: "💰",
-              label: "Kasa Kayıtları",
+              icon: "ğŸ’°",
+              label: "Kasa KayÄ±tlarÄ±",
               count: db.kasa.filter((k) => !k.deleted).length,
             },
             {
-              icon: "🧾",
+              icon: "ğŸ§¾",
               label: "Faturalar",
               count: (db.invoices || []).filter((i) => !i.deleted).length,
             },
-            { icon: "🏭", label: "Tedarikçiler", count: db.suppliers.length },
-            { icon: "📋", label: "Siparişler", count: db.orders.length },
+            { icon: "ğŸ­", label: "TedarikÃ§iler", count: db.suppliers.length },
+            { icon: "ğŸ“‹", label: "SipariÅŸler", count: db.orders.length },
             {
-              icon: "📈",
+              icon: "ğŸ“ˆ",
               label: "Stok Hareketleri",
               count: db.stockMovements.length,
             },
@@ -4941,8 +3913,8 @@ function AboutPanel({ db }: { db: DB }) {
         </div>
       </Card>
 
-      {/* Sürüm Kitapçığı — Changelog */}
-      <Card title="📖 Sürüm Geçmişi">
+      {/* SÃ¼rÃ¼m KitapÃ§Ä±ÄŸÄ± â€” Changelog */}
+      <Card title="ğŸ“– SÃ¼rÃ¼m GeÃ§miÅŸi">
         <div className={"settings-grid-8"}>
           {CHANGELOG.map((entry) => {
             const isExpanded = expandedVersion === entry.version;
@@ -4960,7 +3932,7 @@ function AboutPanel({ db }: { db: DB }) {
                   transition: "all 0.2s",
                 }}
               >
-                {/* Başlık satırı */}
+                {/* BaÅŸlÄ±k satÄ±rÄ± */}
                 <button
                   onClick={() =>
                     setExpandedVersion(isExpanded ? null : entry.version)
@@ -4995,7 +3967,7 @@ function AboutPanel({ db }: { db: DB }) {
                       transform: isExpanded ? "rotate(180deg)" : "none",
                     }}
                   >
-                    ▼
+                    â–¼
                   </span>
                 </button>
 
@@ -5038,12 +4010,12 @@ function AboutPanel({ db }: { db: DB }) {
       </Card>
 
       {/* Lisans */}
-      <Card title="📄 Lisans & Geliştirici">
+      <Card title="ğŸ“„ Lisans & GeliÅŸtirici">
         <div className={"settings-grid-10"}>
           {[
-            { label: "Uygulama", value: `${appCfg.appName} — ${APP_SUBTITLE}` },
-            { label: "Geliştirici", value: "Pars Pelet" },
-            { label: "Lisans", value: "Özel Kullanım — Tüm hakları saklıdır" },
+            { label: "Uygulama", value: `${appCfg.appName} â€” ${APP_SUBTITLE}` },
+            { label: "GeliÅŸtirici", value: "Pars Pelet" },
+            { label: "Lisans", value: "Ã–zel KullanÄ±m â€” TÃ¼m haklarÄ± saklÄ±dÄ±r" },
             { label: "Platform", value: "Web (PWA) + Android (Capacitor)" },
           ].map((row) => (
             <div key={row.label} className={"settings-flex-row-12"}>
@@ -5058,7 +4030,7 @@ function AboutPanel({ db }: { db: DB }) {
 }
 
 
-// ── Agent Settings Panel ────────────────────────────────────────────────────
+// â”€â”€ Agent Settings Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AgentSettingsPanel({
   db: _db,
   save: _save,
@@ -5082,51 +4054,51 @@ function AgentSettingsPanel({
   const agents = [
     {
       id: "stok",
-      name: "Stok Ajanı",
-      icon: "📦",
-      desc: "Ürün stok yönetimi ve uyarıları",
+      name: "Stok AjanÄ±",
+      icon: "ğŸ“¦",
+      desc: "ÃœrÃ¼n stok yÃ¶netimi ve uyarÄ±larÄ±",
       permissions: ["stok.read", "stok.write"],
     },
     {
       id: "kasa",
-      name: "Kasa Ajanı",
-      icon: "💰",
-      desc: "Kasa işlemleri ve nakit yönetimi",
+      name: "Kasa AjanÄ±",
+      icon: "ğŸ’°",
+      desc: "Kasa iÅŸlemleri ve nakit yÃ¶netimi",
       permissions: ["kasa.read", "kasa.write"],
     },
     {
       id: "cari",
-      name: "Cari Ajanı",
-      icon: "👤",
-      desc: "Müşteri ve tedarikçi yönetimi",
+      name: "Cari AjanÄ±",
+      icon: "ğŸ‘¤",
+      desc: "MÃ¼ÅŸteri ve tedarikÃ§i yÃ¶netimi",
       permissions: ["cari.read", "cari.write"],
     },
     {
       id: "satis",
-      name: "Satış Ajanı",
-      icon: "🛒",
-      desc: "Satış işlemleri ve raporlama",
+      name: "SatÄ±ÅŸ AjanÄ±",
+      icon: "ğŸ›’",
+      desc: "SatÄ±ÅŸ iÅŸlemleri ve raporlama",
       permissions: ["satis.read", "satis.write"],
     },
     {
       id: "fatura",
-      name: "Fatura Ajanı",
-      icon: "🧾",
-      desc: "Fatura oluşturma ve yönetimi",
+      name: "Fatura AjanÄ±",
+      icon: "ğŸ§¾",
+      desc: "Fatura oluÅŸturma ve yÃ¶netimi",
       permissions: ["fatura.read", "fatura.write"],
     },
     {
       id: "rapor",
-      name: "Rapor Ajanı",
-      icon: "📊",
+      name: "Rapor AjanÄ±",
+      icon: "ğŸ“Š",
       desc: "Raporlar ve analitik",
       permissions: ["rapor.read"],
     },
     {
       id: "deep_seek",
-      name: "DeepSeek Ajanı",
-      icon: "🤖",
-      desc: "Yapay zeka destekli analiz ve öneriler",
+      name: "DeepSeek AjanÄ±",
+      icon: "ğŸ¤–",
+      desc: "Yapay zeka destekli analiz ve Ã¶neriler",
       permissions: ["deep_seek.read", "deep_seek.write"],
     },
   ];
@@ -5137,7 +4109,7 @@ function AgentSettingsPanel({
       const parsed = raw ? JSON.parse(raw) : {};
       parsed.agentSettings = agentSettings;
       localStorage.setItem("sobaYonetim", JSON.stringify(parsed));
-      showToast("Ajan ayarları kaydedildi!", "success");
+      showToast("Ajan ayarlarÄ± kaydedildi!", "success");
     } catch {
       showToast("Ayarlar kaydedilemedi!", "error");
     }
@@ -5171,21 +4143,21 @@ function AgentSettingsPanel({
 
   const resetToDefaults = () => {
     showConfirm(
-      "Varsayılan Ayarlara Dön",
-      "Tüm ajan ayarları varsayılan değerlere sıfırlanacak. Emin misiniz?",
+      "VarsayÄ±lan Ayarlara DÃ¶n",
+      "TÃ¼m ajan ayarlarÄ± varsayÄ±lan deÄŸerlere sÄ±fÄ±rlanacak. Emin misiniz?",
       () => {
         setAgentSettings(getDefaultAgentSettings());
-        showToast("Varsayılan ayarlara döndü!", "success");
+        showToast("VarsayÄ±lan ayarlara dÃ¶ndÃ¼!", "success");
       },
     );
   };
 
   return (
     <div className={"settings-grid"}>
-      <Card title="🤖 Ajan Yönetimi">
+      <Card title="ğŸ¤– Ajan YÃ¶netimi">
         <p className={"settings-text-muted"}>
-          Sistemdeki ajanları etkinleştirin/devre dışı bırakın ve izinlerini
-          yönetin.
+          Sistemdeki ajanlarÄ± etkinleÅŸtirin/devre dÄ±ÅŸÄ± bÄ±rakÄ±n ve izinlerini
+          yÃ¶netin.
         </p>
 
         <div className={"settings-grid-8"}>
@@ -5213,7 +4185,7 @@ function AgentSettingsPanel({
                   opacity: enabled ? 1 : 0.6,
                 }}
               >
-                {/* Başlık */}
+                {/* BaÅŸlÄ±k */}
                 <div className={"settings-flex-row-12"}>
                   <span style={{ fontSize: "1.4rem" }}>{agent.icon}</span>
                   <div className={"settings-flex-1"}>
@@ -5237,14 +4209,14 @@ function AgentSettingsPanel({
                       fontSize: "0.8rem",
                     }}
                   >
-                    {enabled ? "✓ Aktif" : "✕ Pasif"}
+                    {enabled ? "âœ“ Aktif" : "âœ• Pasif"}
                   </button>
                 </div>
 
-                {/* İzinler */}
+                {/* Ä°zinler */}
                 {enabled && (
                   <div className={"settings-grid-5"}>
-                    <div className={"settings-text-dim-3"}>İzinler:</div>
+                    <div className={"settings-text-dim-3"}>Ä°zinler:</div>
                     {agent.permissions.map((perm) => (
                       <label
                         key={perm}
@@ -5280,19 +4252,19 @@ function AgentSettingsPanel({
             onClick={saveAgentSettings}
             className={"settings-btn-primary"}
           >
-            💾 Ajan Ayarlarını Kaydet
+            ğŸ’¾ Ajan AyarlarÄ±nÄ± Kaydet
           </button>
           <button
             onClick={resetToDefaults}
             className={"settings-btn-gray-md"}
           >
-            ↺ Varsayılana Dön
+            â†º VarsayÄ±lana DÃ¶n
           </button>
         </div>
       </Card>
 
-      {/* Ajan İstatistikleri */}
-      <Card title="📊 Ajan İstatistikleri">
+      {/* Ajan Ä°statistikleri */}
+      <Card title="ğŸ“Š Ajan Ä°statistikleri">
         <div className={"settings-grid-auto-130"}>
           {[
             {
@@ -5302,11 +4274,11 @@ function AgentSettingsPanel({
                   (agentSettings[a.id] as Record<string, unknown>)?.enabled !==
                   false,
               ).length,
-              icon: "✓",
+              icon: "âœ“",
               color: "#10b981",
             },
             {
-              label: "Toplam İzin",
+              label: "Toplam Ä°zin",
               count: Object.values(agentSettings).reduce(
                 (sum: number, agent) =>
                   sum +
@@ -5314,13 +4286,13 @@ function AgentSettingsPanel({
                     ?.length || 0,
                 0,
               ),
-              icon: "🔐",
+              icon: "ğŸ”",
               color: "#f59e0b",
             },
             {
-              label: "Yapılandırılan",
+              label: "YapÄ±landÄ±rÄ±lan",
               count: Object.keys(agentSettings).length,
-              icon: "⚙️",
+              icon: "âš™ï¸",
               color: "#3b82f6",
             },
           ].map((stat) => (
@@ -5352,36 +4324,36 @@ function AgentSettingsPanel({
         </div>
       </Card>
 
-      {/* Ajan Açıklaması */}
-      <Card title="ℹ️ Ajan Açıklaması">
+      {/* Ajan AÃ§Ä±klamasÄ± */}
+      <Card title="â„¹ï¸ Ajan AÃ§Ä±klamasÄ±">
         <div className={"settings-grid-8"}>
           <div className={"settings-info-box"}>
             <div className={"settings-text-primary-sm"}>
-              🤖 Ajanlar Nedir?
+              ğŸ¤– Ajanlar Nedir?
             </div>
             <p className={"settings-text-muted-xs"}>
-              Ajanlar, uygulamanın belirli görevleri otomatik olarak yerine
-              getirmesine yardımcı olan yapay zeka bileşenleridir. Her ajan
-              belirli bir alan (stok, kasa, satış vb.) üzerinde çalışır.
+              Ajanlar, uygulamanÄ±n belirli gÃ¶revleri otomatik olarak yerine
+              getirmesine yardÄ±mcÄ± olan yapay zeka bileÅŸenleridir. Her ajan
+              belirli bir alan (stok, kasa, satÄ±ÅŸ vb.) Ã¼zerinde Ã§alÄ±ÅŸÄ±r.
             </p>
           </div>
           <div className={"settings-info-box"}>
             <div className={"settings-text-primary-sm"}>
-              🔐 İzinler Nedir?
+              ğŸ” Ä°zinler Nedir?
             </div>
             <p className={"settings-text-muted-xs"}>
-              İzinler, her ajanın hangi işlemleri yapabileceğini kontrol eder.
-              "read" = okuma, "write" = yazma/değiştirme. Güvenlik için sadece
+              Ä°zinler, her ajanÄ±n hangi iÅŸlemleri yapabileceÄŸini kontrol eder.
+              "read" = okuma, "write" = yazma/deÄŸiÅŸtirme. GÃ¼venlik iÃ§in sadece
               gerekli izinleri verin.
             </p>
           </div>
           <div className={"settings-info-box"}>
             <div className={"settings-text-primary-sm"}>
-              ⚡ Etkinleştirme/Devre Dışı Bırakma
+              âš¡ EtkinleÅŸtirme/Devre DÄ±ÅŸÄ± BÄ±rakma
             </div>
             <p className={"settings-text-muted-xs"}>
-              Ajanları geçici olarak devre dışı bırakabilirsiniz. Devre dışı
-              bırakılan ajanlar hiçbir işlem yapmaz ve sistem performansını
+              AjanlarÄ± geÃ§ici olarak devre dÄ±ÅŸÄ± bÄ±rakabilirsiniz. Devre dÄ±ÅŸÄ±
+              bÄ±rakÄ±lan ajanlar hiÃ§bir iÅŸlem yapmaz ve sistem performansÄ±nÄ±
               etkilemez.
             </p>
           </div>
@@ -5423,3 +4395,6 @@ function getDefaultAgentSettings(): Record<string, unknown> {
     },
   };
 }
+
+
+

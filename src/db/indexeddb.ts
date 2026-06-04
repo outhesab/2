@@ -33,11 +33,13 @@ export class ParspelDB extends Dexie {
   activityLog!: Table<ActivityLog, string>;
   auditLog!: Table<AgentAuditRecord, string>;
   snapshots!: Table<DbSnapshot, string>;
+  guestSessions!: Table<{ id: string; start: number; hash: string }, string>;
 
   constructor() {
     super("ParspelDB");
 
-    this.version(1).stores({
+    this.version(2).stores({
+      guestSessions: "id",
       urunler: "id, name, category, stock, updatedAt",
       satislar: "id, createdAt, total, payment, cariId, productId",
       stokHareketleri: "id, productId, type, date",

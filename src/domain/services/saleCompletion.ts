@@ -1,6 +1,6 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { SaleIntent, StockMovementV2, CashTransaction, CariUpdate, SaleResult } from "../types";
+import type { SaleIntent, StockMovementV2, CashTransaction, CariUpdate, SaleResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
 
 function calcSubtotal(items: SaleIntent["items"]): number {

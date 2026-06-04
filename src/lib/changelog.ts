@@ -20,6 +20,26 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.13.0',
+    date: '4 Haziran 2026',
+    title: 'Kod Bölme & Güvenlik İyileştirmeleri',
+    summary: 'Settings.tsx (5425→4414 satır), Sales.tsx (1076→599 satır), Cari.tsx (1756→1286 satır) bölünerek kod tabanı modüler hale getirildi. (window as any) kullanımları temizlendi, structuredClone polyfill (safeClone) eklendi, IndexedDB guest session doğrulaması getirildi. CSS değişkenleri design-tokens.css dosyasına ayrıştırıldı. UTF-8 korunmuş Türkçe karakter düzeltmeleri yapıldı.',
+    changes: [
+      { type: 'iyilestirme', text: 'Settings.tsx bölündü: ArayuzAyarlari (SettingsArayuz.tsx), BaglantiAyarlari (SettingsBaglanti.tsx), Card (SettingsCard.tsx) ayrı dosyalara çıkarıldı' },
+      { type: 'iyilestirme', text: 'Sales.tsx bölündü: SaleFormModal (SaleFormModal.tsx) + SalesHelpers.tsx ayrıştırıldı' },
+      { type: 'iyilestirme', text: 'Cari.tsx bölündü: CariDetail (CariDetail.tsx) ayrıştırıldı' },
+      { type: 'iyilestirme', text: 'index.css ikiye bölündü: design-tokens.css (CSS değişkenleri) + index.css (bileşen stilleri)' },
+      { type: 'iyilestirme', text: '(window as any) temizlendi: useSpeech.ts (5), useSoundFeedback.ts (2) → src/types/global.d.ts' },
+      { type: 'iyilestirme', text: 'structuredClone polyfill: safeClone() ile JSON.stringify/parse fallback (iOS Safari uyumluluğu)' },
+      { type: 'iyilestirme', text: 'Guest session IndexedDB doğrulaması eklendi (guestSessions tablosu, Dexie schema v2)' },
+      { type: 'iyilestirme', text: 'UTF-8 bozuk Türkçe karakterler düzeltildi (App.tsx, Settings.tsx, SettingsBaglanti.tsx)' },
+      { type: 'duzeltme', text: 'changelog.ts parse hatası düzeltildi (curl apostrophe)' },
+      { type: 'duzeltme', text: 'saleCompletion.ts relative import düzeltildi (@/domain/types)' },
+      { type: 'duzeltme', text: 'useSoundFeedback.ts useEffect cleanup (AudioContext kapatma) eklendi' },
+      { type: 'duzeltme', text: 'Irregular whitespace (U+00A0) temizliği, WidgetId type fix, version consistency' },
+    ],
+  },
+  {
     version: '3.12.1',
     date: '4 Haziran 2026',
     title: 'UI Düzeltmeleri — Widget, Tema & AI Görünürlük',
@@ -29,7 +49,7 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'Settings sayfası açılırken oluşan "WIDGET_OPTIONS is not defined" hatası giderildi' },
       { type: 'duzeltme', text: 'AI Asistan sayfasındaki inline stillerdeki hardcoded renkler CSS variable ile değiştirildi — butonlar karanlık temada görünmez olmuyor' },
       { type: 'iyilestirme', text: 'Sekme gruplarına özel CSS değişkenleri eklendi (--tab-ana-*, --tab-finans-*, vs.) — finans grubu cyan (#06b6d4) rengine ayrıştırıldı, ışık/karanlık modda tutarlı renkler' },
-      { type: 'iyilestirme', text: 'Premium temalar ve dark mode için tab group renk override'ları eklendi' },
+      { type: 'iyilestirme', text: "Premium temalar ve dark mode için tab group renk override'ları eklendi" },
     ],
   },
   {

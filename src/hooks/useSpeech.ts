@@ -15,12 +15,9 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
     // Android WebView'da her zaman çalışmayabilir; ama plugin/uygulama bazında
     // SpeechRecognition varsa destekli kabul edelim.
     const SpeechRecognition =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).SpeechRecognition ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).webkitSpeechRecognition ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).mozSpeechRecognition;
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition ||
+      window.mozSpeechRecognition;
 
     setSupported(!!SpeechRecognition);
   }, []);
@@ -30,10 +27,8 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
     // SpeechRecognition varsa destekli kabul ederek devam ediyoruz.
 
     const SpeechRecognition =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).SpeechRecognition ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).webkitSpeechRecognition;
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setError('Bu cihaz sesli girişi desteklemiyor');

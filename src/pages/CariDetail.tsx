@@ -1,288 +1,510 @@
+import React from "react";
 import { formatDate, formatMoney } from "@/lib/utils-tr";
-import type { DB } from "@/types";
-import { useMemo } from "react";
-import { useLocation } from "wouter";
+import { exportArrayToExcel } from "@/lib/excelExport";
+import EmptyState from "@/components/EmptyState";
+import { FileSpreadsheet, HandCoins, Users } from "lucide-react";
+import type { Cari as CariType, Sale, KasaEntry, Invoice } from "@/types";
 
 interface Props {
-  db: DB;
+  detail: CariType;
+  detailKasa: KasaEntry[];
+  detailSales: Sale[];
+  detailInvoices: Invoice[];
+  totalPaid: number;
+  totalPurchased: number;
+  histTab: "kasa" | "satis" | "fatura";
+  setHistTab: (t: "kasa" | "satis" | "fatura") => void;
+  onQuickAction: (
+    cariId: string,
+    cariName: string,
+    type: "musteri" | "tedarikci",
+    balance: number,
+  ) => void;
+  showToast: (msg: string, type?: string) => void;
 }
 
-type StatementRow = {
-  id: string;
-  date: string;
-  type: "satis" | "kasa" | "fatura" | "taksit";
-  title: string;
-  detail: string;
-  amount: number;
-  balance: number;
-};
-
-function currentIdFromPath(location: string): string {
-  return decodeURIComponent(location.split("/").filter(Boolean).pop() || "");
-}
-
-const card: React.CSSProperties = {
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 12,
-  padding: 16,
-};
-
-const muted: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "0.86rem",
-};
-
-export default function CariDetail({ db }: Props) {
-  const [location, setLocation] = useLocation();
-  const cariId = currentIdFromPath(location);
-  const cari = db.cari.find((item) => !item.deleted && item.id === cariId);
-
-  const statement = useMemo(() => {
-    if (!cari) return [] as StatementRow[];
-
-    const rows: Omit<StatementRow, "balance">[] = [];
-    db.sales
-      .filter(
-        (sale) =>
-          !sale.deleted &&
-          sale.status === "tamamlandi" &&
-          (sale.cariId === cari.id || sale.cariName === cari.name),
-      )
-      .forEach((sale) => {
-        rows.push({
-          id: sale.id,
-          date: sale.createdAt,
-          type: "satis",
-          title: sale.productName,
-          detail: `${sale.quantity} adet · ${sale.payment}`,
-          amount: sale.total,
-        });
-      });
-
-    db.kasa
-      .filter((entry) => !entry.deleted && entry.cariId === cari.id)
-      .forEach((entry) => {
-        rows.push({
-          id: entry.id,
-          date: entry.createdAt,
-          type: "kasa",
-          title: entry.description || entry.category,
-          detail: `${entry.type} · ${entry.kasa}`,
-          amount: -entry.amount,
-        });
-      });
-
-    db.invoices
-      .filter(
-        (invoice) =>
-          !invoice.deleted &&
-          (invoice.cariId === cari.id || invoice.cariName === cari.name),
-      )
-      .forEach((invoice) => {
-        rows.push({
-          id: invoice.id,
-          date: invoice.createdAt,
-          type: "fatura",
-          title: invoice.invoiceNo,
-          detail: `${invoice.type} · ${invoice.status}`,
-          amount: invoice.saleId ? 0 : invoice.total,
-        });
-      });
-
-    let balance = 0;
-    return rows
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map((row) => {
-        balance += row.amount;
-        return { ...row, balance };
-      })
-      .reverse();
-  }, [cari, db.invoices, db.kasa, db.sales]);
-
-  if (!cari) {
-    return (
-      <div style={card}>
-        <button onClick={() => setLocation("/cari")} style={backButton}>
-          ← Carilere dön
+export default function CariDetail({
+  detail,
+  detailKasa,
+  detailSales,
+  detailInvoices,
+  totalPaid,
+  totalPurchased,
+  histTab,
+  setHistTab,
+  onQuickAction,
+  showToast,
+}: Props) {
+  return (
+    <>
+      {detail.balance > 0 && (
+        <button
+          onClick={() =>
+            onQuickAction(detail.id, detail.name, detail.type, detail.balance)
+          }
+          style={{
+            width: "100%",
+            marginBottom: 14,
+            padding: "10px 0",
+            background:
+              detail.type === "musteri"
+                ? "rgba(16,185,129,0.15)"
+                : "rgba(245,158,11,0.15)",
+            border: `1px solid ${detail.type === "musteri" ? "rgba(16,185,129,0.4)" : "rgba(245,158,11,0.4)"}`,
+            borderRadius: 10,
+            color: detail.type === "musteri" ? "#10b981" : "#f59e0b",
+            fontWeight: 700,
+            cursor: "pointer",
+            fontSize: "0.88rem",
+          }}
+        >
+          {detail.type === "musteri"
+            ? `💰 Tahsilat Al — Bakiye: ${formatMoney(detail.balance)}`
+            : `💸 Ödeme Yap — Borç: ${formatMoney(detail.balance)}`}
         </button>
-        <h2 style={{ color: "#f8fafc", marginTop: 16 }}>Cari bulunamadı</h2>
-        <p style={muted}>Bu cari silinmiş olabilir veya bağlantı eski olabilir.</p>
-      </div>
-    );
-  }
-
-  const invoices = db.invoices.filter(
-    (invoice) =>
-      !invoice.deleted &&
-      (invoice.cariId === cari.id || invoice.cariName === cari.name),
-  );
-  const overdueInstallments = db.installments.filter((installment) => {
-    if (installment.paid) return false;
-    if (installment.dueDate >= new Date().toISOString().slice(0, 10)) return false;
-    return invoices.some((invoice) => invoice.id === installment.invoiceId);
-  });
-  const totalSales = db.sales
-    .filter((sale) => !sale.deleted && sale.cariId === cari.id)
-    .reduce((sum, sale) => sum + sale.total, 0);
-  const totalPayments = db.kasa
-    .filter((entry) => !entry.deleted && entry.cariId === cari.id)
-    .reduce((sum, entry) => sum + entry.amount, 0);
-  const mailTemplate = `mailto:${cari.email || ""}?subject=PARSPEL teklif&body=Merhaba ${encodeURIComponent(cari.name)},%0A%0ASizin için hazırladığımız teklif detaylarını paylaşmak isteriz.%0A%0ASaygılarımızla.`;
-
-  return (
-    <div>
-      <button onClick={() => setLocation("/cari")} style={backButton}>
-        ← Carilere dön
-      </button>
-
-      <section style={{ ...card, marginTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
-          <div>
-            <h2 style={{ color: "#f8fafc", margin: 0 }}>{cari.name}</h2>
-            <div style={{ ...muted, marginTop: 4 }}>
-              {cari.type === "musteri" ? "Müşteri" : "Tedarikçi"}
-              {cari.ortak ? " · Ortak cari" : ""}
-              {cari.phone ? ` · ${cari.phone}` : ""}
-            </div>
-          </div>
-          <a href={mailTemplate} style={mailButton}>
-            Teklif e-postası
-          </a>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 10, marginTop: 18 }}>
-          <Metric label="Güncel Bakiye" value={formatMoney(Math.abs(cari.balance || 0))} color={cari.balance > 0 ? "#10b981" : cari.balance < 0 ? "#ef4444" : "#64748b"} />
-          <Metric label="Satış Toplamı" value={formatMoney(totalSales)} color="#60a5fa" />
-          <Metric label="Tahsilat/Ödeme" value={formatMoney(totalPayments)} color="#f59e0b" />
-          <Metric label="Gecikmiş Taksit" value={`${overdueInstallments.length}`} color={overdueInstallments.length > 0 ? "#ef4444" : "#10b981"} />
-        </div>
-      </section>
-
-      {overdueInstallments.length > 0 && (
-        <section style={{ ...card, marginTop: 16, borderColor: "rgba(239,68,68,0.4)" }}>
-          <h3 style={sectionTitle}>Vadesi Geçmiş Taksitler</h3>
-          <div style={{ display: "grid", gap: 8 }}>
-            {overdueInstallments.map((installment) => (
-              <div key={installment.id} style={row}>
-                <div>
-                  <strong style={{ color: "#f8fafc" }}>{formatDate(installment.dueDate)}</strong>
-                  <div style={muted}>Fatura: {invoices.find((invoice) => invoice.id === installment.invoiceId)?.invoiceNo || installment.invoiceId}</div>
-                </div>
-                <div style={{ color: "#ef4444", fontWeight: 800 }}>
-                  {formatMoney(installment.amount)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(260px,0.8fr)", gap: 16, marginTop: 16 }}>
-        <section style={card}>
-          <h3 style={sectionTitle}>Hesap Ekstresi</h3>
-          {statement.length === 0 ? (
-            <p style={muted}>Bu cari için işlem bulunmuyor.</p>
-          ) : (
-            <div style={{ display: "grid", gap: 8 }}>
-              {statement.map((item) => (
-                <div key={`${item.type}-${item.id}`} style={row}>
-                  <div>
-                    <strong style={{ color: "#f8fafc" }}>{item.title}</strong>
-                    <div style={muted}>{formatDate(item.date)} · {item.detail}</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ color: item.amount >= 0 ? "#10b981" : "#ef4444", fontWeight: 800 }}>
-                      {item.amount === 0 ? "Bilgi" : formatMoney(item.amount)}
-                    </div>
-                    <div style={muted}>Bakiye: {formatMoney(item.balance)}</div>
-                  </div>
-                </div>
-              ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+          gap: 10,
+          marginBottom: 16,
+        }}
+      >
+        {[
+          {
+            label: "Bakiye",
+            value: formatMoney(Math.abs(detail.balance)),
+            color:
+              detail.balance > 0
+                ? "#10b981"
+                : detail.balance < 0
+                  ? "#ef4444"
+                  : "#64748b",
+            icon: detail.balance > 0 ? "↑" : "↓",
+          },
+          {
+            label: "Toplam Alışveriş",
+            value: formatMoney(totalPurchased),
+            color: "#3b82f6",
+            icon: "🛒",
+          },
+          {
+            label: "Tahsil Edilen",
+            value: formatMoney(totalPaid),
+            color: "#10b981",
+            icon: "💰",
+          },
+          {
+            label: "Fatura Sayısı",
+            value: String(detailInvoices.length),
+            color: "#8b5cf6",
+            icon: "📄",
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            style={{
+              background: "rgba(0,0,0,0.25)",
+              borderRadius: 10,
+              padding: "10px 12px",
+              textAlign: "center",
+              border: `1px solid ${s.color}15`,
+            }}
+          >
+            <div style={{ fontSize: "0.85rem", marginBottom: 3 }}>
+              {s.icon}
             </div>
-          )}
-        </section>
-
-        <section style={card}>
-          <h3 style={sectionTitle}>Bakiye Trendi</h3>
-          {statement.length === 0 ? (
-            <p style={muted}>Trend için işlem yok.</p>
-          ) : (
-            <div style={{ display: "grid", gap: 10 }}>
-              {[...statement].reverse().slice(-8).map((item) => {
-                const max = Math.max(
-                  1,
-                  ...statement.map((rowItem) => Math.abs(rowItem.balance)),
-                );
-                const width = Math.max(4, (Math.abs(item.balance) / max) * 100);
-                return (
-                  <div key={`trend-${item.type}-${item.id}`}>
-                    <div style={{ display: "flex", justifyContent: "space-between", color: "#94a3b8", fontSize: "0.78rem", marginBottom: 4 }}>
-                      <span>{formatDate(item.date)}</span>
-                      <span>{formatMoney(item.balance)}</span>
-                    </div>
-                    <div style={{ background: "#0f172a", borderRadius: 999, height: 9, overflow: "hidden" }}>
-                      <div
-                        style={{
-                          width: `${width}%`,
-                          height: "100%",
-                          background: item.balance >= 0 ? "#10b981" : "#ef4444",
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div
+              style={{
+                fontSize: "1.05rem",
+                fontWeight: 800,
+                color: s.color,
+              }}
+            >
+              {s.value}
             </div>
-          )}
-        </section>
+            <div
+              style={{
+                color: "#475569",
+                fontSize: "0.68rem",
+                marginTop: 2,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {s.label}
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 8,
+          marginBottom: 16,
+        }}
+      >
+        {[
+          ["Tür", detail.type === "musteri" ? "👥 Müşteri" : "🏭 Tedarikçi"],
+          ["Telefon", detail.phone || "-"],
+          ["E-posta", detail.email || "-"],
+          ["Vergi No", detail.taxNo || "-"],
+        ].map(([l, v]) => (
+          <div
+            key={l}
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              borderRadius: 8,
+              padding: "6px 12px",
+              fontSize: "0.82rem",
+            }}
+          >
+            <span style={{ color: "#475569" }}>{l}: </span>
+            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <button
+          onClick={() => {
+            const rows = [
+              ...detailSales.map((s) => ({
+                Tarih: formatDate(s.createdAt),
+                İşlem: "Satış",
+                Tutar: s.total,
+                Açıklama: s.productName,
+                Ödeme: s.payment,
+              })),
+              ...detailKasa.map((k) => ({
+                Tarih: formatDate(k.createdAt),
+                İşlem: k.type === "gelir" ? "Tahsilat" : "Ödeme",
+                Tutar: k.type === "gelir" ? k.amount : -k.amount,
+                Açıklama: k.description || "",
+                Ödeme: k.kasa,
+              })),
+            ].sort((a, b) => a.Tarih.localeCompare(b.Tarih));
+            exportArrayToExcel(rows, `ekstre-${detail.name}`);
+            showToast("Ekstre indirildi!", "success");
+          }}
+          style={{
+            background: "rgba(16,185,129,0.12)",
+            border: "1px solid rgba(16,185,129,0.25)",
+            borderRadius: 8,
+            color: "#10b981",
+            padding: "6px 14px",
+            cursor: "pointer",
+            fontSize: "0.8rem",
+            fontWeight: 700,
+            marginLeft: "auto",
+          }}
+        >
+          📥 Ekstre İndir
+        </button>
+      </div>
+      {(detail as unknown as { note?: string }).note && (
+        <div
+          style={{
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.2)",
+            borderRadius: 9,
+            padding: "9px 13px",
+            marginBottom: 14,
+            fontSize: "0.83rem",
+            color: "#fcd34d",
+          }}
+        >
+          💡 {(detail as unknown as { note?: string }).note}
+        </div>
+      )}
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          marginBottom: 12,
+          background: "rgba(0,0,0,0.2)",
+          borderRadius: 10,
+          padding: 4,
+        }}
+      >
+        {[
+          { id: "kasa" as const, label: `💰 Ödemeler (${detailKasa.length})` },
+          { id: "satis" as const, label: `🛒 Satışlar (${detailSales.length})` },
+          { id: "fatura" as const, label: `📄 Faturalar (${detailInvoices.length})` },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setHistTab(t.id)}
+            style={{
+              flex: 1,
+              padding: "7px 4px",
+              border: "none",
+              borderRadius: 7,
+              cursor: "pointer",
+              fontWeight: 700,
+              fontSize: "0.78rem",
+              background:
+                histTab === t.id
+                  ? "linear-gradient(135deg,#ff5722,#ff7043)"
+                  : "transparent",
+              color: histTab === t.id ? "#fff" : "#64748b",
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {histTab === "kasa" &&
+        (detailKasa.length === 0 ? (
+          <EmptyState
+            icon={HandCoins}
+            title="Kasa hareketi yok"
+            description="Bu cariye bağlı kasa hareketi henüz oluşmadı."
+          />
+        ) : (
+          <div style={{ maxHeight: 260, overflowY: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "0.83rem",
+              }}
+            >
+              <thead>
+                <tr>
+                  {["Tarih", "Açıklama", "Tutar", "Hesap"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "8px 10px",
+                        textAlign: "left",
+                        color: "#334155",
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {detailKasa.map((k) => (
+                  <tr
+                    key={k.id}
+                    style={{
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                      {formatDate(k.createdAt)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {k.description || "-"}
+                    </td>
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: k.type === "gelir" ? "#10b981" : "#ef4444",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {k.type === "gelir" ? "+" : "-"}
+                      {formatMoney(k.amount)}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                      {k.kasa}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      {histTab === "satis" &&
+        (detailSales.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="Satış kaydı yok"
+            description="Bu cariye ait tamamlanmış satış bulunamadı."
+          />
+        ) : (
+          <div style={{ maxHeight: 260, overflowY: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "0.83rem",
+              }}
+            >
+              <thead>
+                <tr>
+                  {["Tarih", "Ürün", "Adet", "Toplam", "Ödeme"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "8px 10px",
+                        textAlign: "left",
+                        color: "#334155",
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {detailSales.map((s) => (
+                  <tr
+                    key={s.id}
+                    style={{
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                      {formatDate(s.createdAt)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {s.productName || s.items?.[0]?.productName || "-"}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#94a3b8" }}>
+                      {s.quantity ||
+                        s.items?.reduce(
+                          (a: number, i: { quantity: number }) =>
+                            a + i.quantity,
+                          0,
+                        ) ||
+                        "-"}
+                    </td>
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: "#10b981",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {formatMoney(s.total)}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                      {s.payment}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      {histTab === "fatura" &&
+        (detailInvoices.length === 0 ? (
+          <EmptyState
+            icon={FileSpreadsheet}
+            title="Fatura kaydı yok"
+            description="Bu cariye bağlı fatura hareketi bulunamadı."
+          />
+        ) : (
+          <div style={{ maxHeight: 260, overflowY: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "0.83rem",
+              }}
+            >
+              <thead>
+                <tr>
+                  {["No", "Tür", "Tarih", "Tutar", "Durum"].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "8px 10px",
+                        textAlign: "left",
+                        color: "#334155",
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {detailInvoices.map((inv) => (
+                  <tr
+                    key={inv.id}
+                    style={{
+                      borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    }}
+                  >
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: "#ff7043",
+                        fontFamily: "monospace",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {inv.invoiceNo}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#94a3b8" }}>
+                      {inv.type === "satis" ? "📤 Satış" : "📥 Alış"}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                      {formatDate(inv.createdAt)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "8px 10px",
+                        color: "#10b981",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {formatMoney(inv.total)}
+                    </td>
+                    <td style={{ padding: "8px 10px" }}>
+                      <span
+                        style={{
+                          background:
+                            inv.status === "odendi"
+                              ? "rgba(16,185,129,0.12)"
+                              : inv.status === "onaylandi"
+                                ? "rgba(59,130,246,0.12)"
+                                : "rgba(245,158,11,0.12)",
+                          color:
+                            inv.status === "odendi"
+                              ? "#10b981"
+                              : inv.status === "onaylandi"
+                                ? "#60a5fa"
+                                : "#f59e0b",
+                          borderRadius: 5,
+                          padding: "2px 7px",
+                          fontSize: "0.72rem",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {inv.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+    </>
   );
 }
-
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div style={{ background: "#0f172a", borderRadius: 10, border: `1px solid ${color}33`, padding: "12px 14px" }}>
-      <div style={{ color, fontWeight: 800 }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: 3 }}>{label}</div>
-    </div>
-  );
-}
-
-const sectionTitle: React.CSSProperties = {
-  color: "#f8fafc",
-  margin: "0 0 12px",
-  fontSize: "1rem",
-};
-
-const row: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  background: "#0f172a",
-  border: "1px solid rgba(148,163,184,0.12)",
-  borderRadius: 10,
-  padding: "10px 12px",
-};
-
-const backButton: React.CSSProperties = {
-  background: "rgba(148,163,184,0.12)",
-  border: "1px solid rgba(148,163,184,0.24)",
-  borderRadius: 9,
-  color: "#cbd5e1",
-  cursor: "pointer",
-  fontWeight: 700,
-  padding: "8px 12px",
-};
-
-const mailButton: React.CSSProperties = {
-  alignSelf: "flex-start",
-  background: "rgba(59,130,246,0.14)",
-  border: "1px solid rgba(59,130,246,0.32)",
-  borderRadius: 9,
-  color: "#60a5fa",
-  fontWeight: 800,
-  padding: "8px 12px",
-  textDecoration: "none",
-};

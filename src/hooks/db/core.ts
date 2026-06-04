@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { validateTransaction } from "@/lib/ruleEngine";
 import { genId } from "@/lib/utils-tr";
 import { isGuestSession } from "@/lib/userManager";
+import { safeClone } from "@/lib/safeClone";
 import type { DB, Kasa, ProductCategory, RuleViolation } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { saveToFirebase, loadFromFirebase, emitSync, type SyncStatus } from "./sync";
@@ -315,7 +316,7 @@ export function useDB() {
         const stack = undoStackRef.current;
         undoStackRef.current = [
           ...stack.slice(-(MAX_UNDO - 1)),
-          structuredClone(prev),
+          safeClone(prev),
         ];
       }
 

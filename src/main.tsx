@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import "./design-tokens.css";
 import "./index.css";
 import { requestAllPermissions } from "./lib/permissions";
 import { ThemeProvider } from "@/theme";
