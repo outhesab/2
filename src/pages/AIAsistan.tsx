@@ -900,7 +900,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <h2
               style={{
                 fontWeight: 800,
-                color: "#f1f5f9",
+                color: "var(--text-primary)",
                 fontSize: "1.1rem",
                 margin: 0,
               }}
@@ -979,10 +979,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 style={{
                   background: adminMode
                     ? "rgba(16,185,129,0.2)"
-                    : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${adminMode ? "rgba(16,185,129,0.5)" : "rgba(255,255,255,0.07)"}`,
+                    : "var(--bg-card)",
+                  border: `1px solid ${adminMode ? "rgba(16,185,129,0.5)" : "var(--border)"}`,
                   borderRadius: 8,
-                  color: adminMode ? "#10b981" : "#475569",
+                  color: adminMode ? "#10b981" : "var(--text-secondary)",
                   padding: "7px 10px",
                   cursor: "pointer",
                   fontSize: "0.78rem",
@@ -999,10 +999,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 style={{
                   background: autoApplyActions
                     ? "rgba(245,158,11,0.2)"
-                    : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${autoApplyActions ? "rgba(245,158,11,0.45)" : "rgba(255,255,255,0.07)"}`,
+                    : "var(--bg-card)",
+                  border: `1px solid ${autoApplyActions ? "rgba(245,158,11,0.45)" : "var(--border)"}`,
                   borderRadius: 8,
-                  color: autoApplyActions ? "#f59e0b" : "#475569",
+                  color: autoApplyActions ? "#f59e0b" : "var(--text-secondary)",
                   padding: "7px 10px",
                   cursor: "pointer",
                   fontSize: "0.78rem",
@@ -1725,10 +1725,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   setActionResult(null);
                 }}
                 style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border)",
                   borderRadius: 9,
-                  color: "#64748b",
+                  color: "var(--text-secondary)",
                   padding: "9px 16px",
                   cursor: "pointer",
                   fontSize: "0.85rem",
@@ -1820,10 +1820,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               padding: "11px 15px",
               background: listening
                 ? "rgba(239,68,68,0.08)"
-                : "rgba(99,102,241,0.06)",
-              border: `1px solid ${listening ? "rgba(239,68,68,0.4)" : "rgba(99,102,241,0.2)"}`,
+                : "var(--bg-card)",
+              border: `1px solid ${listening ? "rgba(239,68,68,0.4)" : "var(--border)"}`,
               borderRadius: 12,
-              color: "#f1f5f9",
+              color: "var(--text-primary)",
               fontSize: "0.88rem",
               resize: "none",
               boxSizing: "border-box",
@@ -1833,11 +1833,11 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               transition: "all 0.2s",
             }}
             onFocus={(e) =>
-              (e.target.style.borderColor = "rgba(99,102,241,0.5)")
+              (e.target.style.borderColor = "var(--border-strong)")
             }
             onBlur={(e) => {
               if (!listening)
-                e.target.style.borderColor = "rgba(99,102,241,0.2)";
+                e.target.style.borderColor = "var(--border)";
             }}
           />
           {micError && (
@@ -1905,11 +1905,11 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             flexShrink: 0,
             background:
               loading || !input.trim()
-                ? "rgba(99,102,241,0.1)"
+                ? "var(--bg-card)"
                 : "linear-gradient(135deg,#6366f1,#8b5cf6)",
-            border: "none",
+            border: loading || !input.trim() ? "1px solid var(--border)" : "none",
             borderRadius: 12,
-            color: loading || !input.trim() ? "#334155" : "#fff",
+            color: loading || !input.trim() ? "var(--text-dim)" : "#fff",
             cursor: loading || !input.trim() ? "not-allowed" : "pointer",
             fontSize: "1.1rem",
             display: "flex",
@@ -1942,11 +1942,11 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           style={{
             padding: "5px 12px",
             borderRadius: 8,
-            border: `1px solid ${autoSpeak ? "rgba(16,185,129,0.4)" : "rgba(255,255,255,0.08)"}`,
+            border: `1px solid ${autoSpeak ? "rgba(16,185,129,0.4)" : "var(--border)"}`,
             background: autoSpeak
               ? "rgba(16,185,129,0.1)"
-              : "rgba(255,255,255,0.03)",
-            color: autoSpeak ? "#10b981" : "#475569",
+              : "var(--bg-card)",
+            color: autoSpeak ? "#10b981" : "var(--text-secondary)",
             cursor: "pointer",
             fontSize: "0.78rem",
             fontWeight: 600,
@@ -1972,9 +1972,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               style={{
                 padding: "5px 12px",
                 borderRadius: 8,
-                border: "1px solid rgba(99,102,241,0.2)",
-                background: "rgba(99,102,241,0.06)",
-                color: speaking ? "#818cf8" : "#475569",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: speaking ? "var(--color-accent)" : "var(--text-secondary)",
                 cursor: "pointer",
                 fontSize: "0.78rem",
                 fontWeight: 600,
@@ -1990,7 +1990,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
 
         {micSupported && (
           <span
-            style={{ color: "#1e3a5f", fontSize: "0.7rem", marginLeft: "auto" }}
+            style={{ color: "var(--text-muted)", fontSize: "0.7rem", marginLeft: "auto" }}
           >
             🎤 Basılı tut → konuş → bırak
           </span>
@@ -2008,8 +2008,8 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               onClick={() => send(p.prompt)}
               disabled={loading}
               style={{
-                background: "rgba(99,102,241,0.06)",
-                border: "1px solid rgba(99,102,241,0.12)",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
                 borderRadius: 7,
                 color: "var(--text-secondary)",
                 padding: "4px 10px",
@@ -2019,14 +2019,14 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 transition: "all 0.15s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "#818cf8";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-accent)";
                 (e.currentTarget as HTMLButtonElement).style.borderColor =
-                  "rgba(99,102,241,0.3)";
+                  "var(--border-strong)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "#475569";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
                 (e.currentTarget as HTMLButtonElement).style.borderColor =
-                  "rgba(99,102,241,0.12)";
+                  "var(--border)";
               }}
             >
               {p.label}

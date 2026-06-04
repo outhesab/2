@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.12.1',
+    date: '4 Haziran 2026',
+    title: 'UI Düzeltmeleri — Widget, Tema & AI Görünürlük',
+    summary: 'WIDGET_OPTIONS ortak config/widgets.ts dosyasına taşındı; Settings sayfası açılırken oluşan "not defined" hatası giderildi. AI Asistan butonlarının inline stilleri CSS variable kullanacak şekilde güncellendi (karanlık temada görünmez olma sorunu çözüldü). Sekme gruplarına özel renk değişkenleri eklendi, finans grubu cyan rengine ayrıştırıldı.',
+    changes: [
+      { type: 'iyilestirme', text: 'WIDGET_OPTIONS ve WidgetId tipi src/config/widgets.ts ortak dosyasına taşındı — Dashboard ve Settings aynı kaynaktan import eder' },
+      { type: 'duzeltme', text: 'Settings sayfası açılırken oluşan "WIDGET_OPTIONS is not defined" hatası giderildi' },
+      { type: 'duzeltme', text: 'AI Asistan sayfasındaki inline stillerdeki hardcoded renkler CSS variable ile değiştirildi — butonlar karanlık temada görünmez olmuyor' },
+      { type: 'iyilestirme', text: 'Sekme gruplarına özel CSS değişkenleri eklendi (--tab-ana-*, --tab-finans-*, vs.) — finans grubu cyan (#06b6d4) rengine ayrıştırıldı, ışık/karanlık modda tutarlı renkler' },
+      { type: 'iyilestirme', text: 'Premium temalar ve dark mode için tab group renk override'ları eklendi' },
+    ],
+  },
+  {
     version: '3.12.0',
     date: '2 Haziran 2026',
     title: 'Session 2 — Dumb Agent + Orchestrator Sadeleştirme',
