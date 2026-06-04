@@ -33,24 +33,24 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
 
   const inp: React.CSSProperties = {
     width: '100%', padding: '7px 10px',
-    background: 'rgba(15,23,42,0.6)', border: '1px solid #334155',
-    borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.85rem', boxSizing: 'border-box',
+    background: 'rgba(15,23,42,0.6)', border: '1px solid var(--text-muted)',
+    borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 'var(--text-sm)', boxSizing: 'border-box',
   };
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      {label && <div style={{ color: '#94a3b8', fontSize: '0.82rem', fontWeight: 600, marginBottom: 5 }}>{label}</div>}
+      {label && <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 5 }}>{label}</div>}
       <button
         onClick={() => setOpen(o => !o)}
         title="İkon seç"
         style={{
-          width: size, height: size, borderRadius: 10,
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+          width: size, height: size, borderRadius: 'var(--radius)',
+          background: 'var(--glass-border)', border: '1px solid var(--glass-border)',
           cursor: 'pointer', fontSize: size * 0.55, display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'all 0.15s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,87,34,0.15)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+        onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-primary-soft)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'var(--glass-border)')}
       >
         {isUrl(value)
           ? <img src={value} alt="icon" style={{ width: size * 0.6, height: size * 0.6, objectFit: 'contain', borderRadius: 4 }} />
@@ -60,8 +60,8 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
       {open && (
         <div style={{
           position: 'absolute', top: size + 6, left: 0, zIndex: 500,
-          background: '#0f1e35', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 14, padding: 12, width: 280,
+          background: 'var(--bg-elevated)', border: '1px solid var(--glass-border)',
+          borderRadius: 'var(--radius)', padding: 12, width: 280,
           boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
         }}>
           {/* Arama */}
@@ -80,8 +80,8 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
                 <button key={i} onClick={() => setTab(i)} style={{
                   padding: '3px 8px', border: 'none', borderRadius: 6, cursor: 'pointer',
                   fontSize: '0.72rem', fontWeight: 600,
-                  background: tab === i ? 'rgba(255,87,34,0.2)' : 'rgba(255,255,255,0.05)',
-                  color: tab === i ? '#ff7043' : '#64748b',
+                  background: tab === i ? 'var(--color-primary-soft)' : 'var(--glass-border)',
+                  color: tab === i ? 'var(--color-primary)' : 'var(--text-muted)',
                 }}>
                   {cat.label}
                 </button>
@@ -89,8 +89,8 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
               <button onClick={() => setTab(-1)} style={{
                 padding: '3px 8px', border: 'none', borderRadius: 6, cursor: 'pointer',
                 fontSize: '0.72rem', fontWeight: 600,
-                background: tab === -1 ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)',
-                color: tab === -1 ? '#60a5fa' : '#64748b',
+                background: tab === -1 ? 'var(--color-info-soft)' : 'var(--glass-border)',
+                color: tab === -1 ? 'var(--color-info)' : 'var(--text-muted)',
               }}>
                 🔗 URL
               </button>
@@ -108,8 +108,8 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
               />
               {urlInput && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <img src={urlInput} alt="preview" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 6, background: 'rgba(255,255,255,0.05)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  <button onClick={() => { onChange(urlInput); setOpen(false); setUrlInput(''); }} style={{ flex: 1, padding: '7px 0', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, color: '#10b981', cursor: 'pointer', fontWeight: 700, fontSize: '0.82rem' }}>
+                  <img src={urlInput} alt="preview" style={{ width: 32, height: 32, objectFit: 'contain', borderRadius: 6, background: 'var(--glass-border)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <button onClick={() => { onChange(urlInput); setOpen(false); setUrlInput(''); }} style={{ flex: 1, padding: '7px 0', background: 'var(--color-success-soft)', border: '1px solid var(--color-success-soft)', borderRadius: 'var(--radius-sm)', color: 'var(--color-success)', cursor: 'pointer', fontWeight: 700, fontSize: 'var(--text-sm)' }}>
                     ✓ Kullan
                   </button>
                 </div>
@@ -121,19 +121,19 @@ export function IconPicker({ value, onChange, size = 36, label }: Props) {
               {filteredIcons.map(ic => (
                 <button key={ic} onClick={() => { onChange(ic); setOpen(false); setSearch(''); }} style={{
                   width: 30, height: 30, border: 'none', borderRadius: 7, cursor: 'pointer',
-                  fontSize: '1.1rem', background: value === ic ? 'rgba(255,87,34,0.2)' : 'transparent',
+                  fontSize: '1.1rem', background: value === ic ? 'var(--color-primary-soft)' : 'transparent',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.1s',
                 }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = value === ic ? 'rgba(255,87,34,0.2)' : 'transparent')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--glass-border)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = value === ic ? 'var(--color-primary-soft)' : 'transparent')}
                   title={ic}
                 >
                   {ic}
                 </button>
               ))}
               {filteredIcons.length === 0 && (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#334155', fontSize: '0.8rem', padding: '12px 0' }}>Sonuç yok</div>
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-muted)', fontSize: 'var(--text-sm)', padding: '12px 0' }}>Sonuç yok</div>
               )}
             </div>
           )}

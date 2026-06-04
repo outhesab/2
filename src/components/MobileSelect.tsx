@@ -35,8 +35,8 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
 
   const inp: React.CSSProperties = {
     width: '100%', padding: '11px 14px',
-    background: '#0f1e35', border: '1px solid #1e3a5f',
-    borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem',
+    background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)',
+    borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontSize: 'var(--text-sm)',
     outline: 'none', boxSizing: 'border-box',
   };
 
@@ -48,9 +48,9 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
         onClick={() => setOpen(true)}
         style={{
           width: '100%', padding: '11px 14px',
-          background: '#0f1e35', border: '1px solid #1e3a5f',
-          borderRadius: 10, color: selected ? '#f1f5f9' : '#475569',
-          fontSize: '0.9rem', textAlign: 'left', cursor: 'pointer',
+          background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)',
+          borderRadius: 'var(--radius)', color: selected ? 'var(--text-primary)' : 'var(--text-muted)',
+          fontSize: 'var(--text-sm)', textAlign: 'left', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           ...style,
         }}
@@ -58,7 +58,7 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selected ? selected.label : placeholder}
         </span>
-        <span style={{ color: '#475569', fontSize: '0.75rem', flexShrink: 0, marginLeft: 8 }}>▼</span>
+        <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', flexShrink: 0, marginLeft: 8 }}>▼</span>
       </button>
 
       {/* Bottom Sheet */}
@@ -74,7 +74,7 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
             onClick={close}
             style={{
               position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.7)',
+              background: 'var(--surface-overlay)',
               backdropFilter: 'blur(6px)',
               animation: 'fadeIn 0.2s ease',
             }}
@@ -83,9 +83,9 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
           {/* Sheet */}
           <div style={{
             position: 'relative', zIndex: 1,
-            background: 'linear-gradient(180deg, #0d1f38 0%, #080f1e 100%)',
-            borderRadius: '20px 20px 0 0',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--bg-elevated)',
+            borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
+            border: '1px solid var(--glass-border)',
             borderBottom: 'none',
             maxHeight: '75vh',
             display: 'flex', flexDirection: 'column',
@@ -100,7 +100,7 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
             {/* Header */}
             <div style={{ padding: '8px 18px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 600 }}>{label || placeholder}</span>
-              <button onClick={close} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, color: 'var(--text-dim)', padding: '5px 10px', cursor: 'pointer', fontSize: '0.8rem' }}>✕ Kapat</button>
+              <button onClick={close} style={{ background: 'var(--glass-border)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-dim)', padding: '5px 10px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>✕ Kapat</button>
             </div>
 
             {/* Search */}
@@ -111,7 +111,7 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="🔍 Ara..."
-                  style={{ ...inp, background: '#0a1628', border: '1px solid #1e3a5f' }}
+                  style={{ ...inp, background: 'var(--bg-card)', border: '1px solid var(--border-strong)' }}
                 />
               </div>
             )}
@@ -124,15 +124,15 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
                   onClick={() => { onChange(''); close(); }}
                   style={{
                     width: '100%', padding: '12px 14px', marginBottom: 4,
-                    background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)',
-                    borderRadius: 10, color: '#f87171', fontSize: '0.88rem',
+                    background: 'var(--color-danger-soft)', border: '1px solid var(--color-danger-soft)',
+                    borderRadius: 'var(--radius)', color: '#f87171', fontSize: '0.88rem',
                     textAlign: 'left', cursor: 'pointer',
                   }}
                 >✕ Seçimi Temizle</button>
               )}
 
               {filtered.length === 0 && (
-                <div style={{ textAlign: 'center', color: '#475569', padding: '30px 0', fontSize: '0.88rem' }}>Sonuç bulunamadı</div>
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '30px 0', fontSize: '0.88rem' }}>Sonuç bulunamadı</div>
               )}
 
               {filtered.map(opt => (
@@ -141,17 +141,17 @@ export function MobileSelect({ value, onChange, options, placeholder = '-- Seçi
                   onClick={() => { onChange(opt.value); close(); }}
                   style={{
                     width: '100%', padding: '13px 14px', marginBottom: 4,
-                    background: opt.value === value ? 'rgba(255,87,34,0.12)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${opt.value === value ? 'rgba(255,87,34,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                    borderRadius: 10, color: opt.value === value ? '#ff7043' : '#e2e8f0',
-                    fontSize: '0.9rem', textAlign: 'left', cursor: 'pointer',
+                    background: opt.value === value ? 'var(--color-primary-soft)' : 'var(--bg-card-hover)',
+                    border: `1px solid ${opt.value === value ? 'var(--color-primary-soft)' : 'var(--glass-border)'}`,
+                    borderRadius: 'var(--radius)', color: opt.value === value ? 'var(--color-primary)' : 'var(--text-primary)',
+                    fontSize: 'var(--text-sm)', textAlign: 'left', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     transition: 'all 0.15s',
                   }}
                 >
                   <div>
                     <div style={{ fontWeight: opt.value === value ? 700 : 400 }}>{opt.label}</div>
-                    {opt.sub && <div style={{ fontSize: '0.75rem', color: '#475569', marginTop: 2 }}>{opt.sub}</div>}
+                    {opt.sub && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2 }}>{opt.sub}</div>}
                   </div>
                   {opt.value === value && <span style={{ fontSize: '1rem' }}>✓</span>}
                 </button>

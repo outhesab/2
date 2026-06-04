@@ -6,9 +6,9 @@ const DISMISSED_KEY = 'sobaYonetim_dismissedNotifs';
 const REFRESH_MS = 5 * 60 * 1000; // 5 dakika
 
 const SEV_STYLE: Record<NotifSeverity, { border: string; bg: string; dot: string; label: string }> = {
-  critical: { border: 'rgba(239,68,68,0.35)', bg: 'rgba(239,68,68,0.07)', dot: '#ef4444', label: 'Kritik' },
-  warning:  { border: 'rgba(245,158,11,0.3)',  bg: 'rgba(245,158,11,0.06)', dot: '#f59e0b', label: 'Uyarı'  },
-  info:     { border: 'rgba(96,165,250,0.25)',  bg: 'rgba(96,165,250,0.05)', dot: '#60a5fa', label: 'Bilgi'  },
+  critical: { border: 'var(--color-danger-soft)', bg: 'var(--color-danger-soft)', dot: 'var(--color-danger)', label: 'Kritik' },
+  warning:  { border: 'var(--color-warning-soft)',  bg: 'var(--color-warning-soft)', dot: 'var(--color-warning)', label: 'Uyarı'  },
+  info:     { border: 'var(--color-info-soft)',  bg: 'var(--color-info-soft)', dot: 'var(--color-info)', label: 'Bilgi'  },
 };
 
 const CAT_LABEL: Record<NotifCategory, string> = {
@@ -113,25 +113,25 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
           style={{
             position: 'relative',
             background: open
-              ? 'rgba(245,158,11,0.15)'
+              ? 'var(--color-warning-soft)'
               : unread > 0
-                ? (criticalCount > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.08)')
-                : 'rgba(255,255,255,0.04)',
+                ? (criticalCount > 0 ? 'var(--color-danger-soft)' : 'var(--color-warning-soft)')
+                : 'var(--glass-bg)',
             border: open
-              ? '1px solid rgba(245,158,11,0.4)'
+              ? '1px solid var(--color-warning)'
               : unread > 0
-                ? (criticalCount > 0 ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(245,158,11,0.2)')
-                : '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 9,
+                ? (criticalCount > 0 ? '1px solid var(--color-danger)' : '1px solid var(--color-warning)')
+                : '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius)',
             color: open
-              ? '#fbbf24'
+              ? 'var(--color-warning)'
               : unread > 0
-                ? (criticalCount > 0 ? '#f87171' : '#fbbf24')
-                : '#334155',
+                ? (criticalCount > 0 ? 'var(--color-danger)' : 'var(--color-warning)')
+                : 'var(--text-muted)',
             width: 36,
             height: 36,
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: 'var(--text-base)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -141,14 +141,14 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
           onMouseEnter={e => {
             if (!open) {
               (e.currentTarget as HTMLButtonElement).style.background = criticalCount > 0
-                ? 'rgba(239,68,68,0.18)' : 'rgba(245,158,11,0.14)';
+                ? 'var(--color-danger-soft)' : 'var(--color-warning-soft)';
             }
           }}
           onMouseLeave={e => {
             if (!open) {
               (e.currentTarget as HTMLButtonElement).style.background = unread > 0
-                ? (criticalCount > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.08)')
-                : 'rgba(255,255,255,0.04)';
+                ? (criticalCount > 0 ? 'var(--color-danger-soft)' : 'var(--color-warning-soft)')
+                : 'var(--glass-bg)';
             }
           }}
         >
@@ -159,13 +159,13 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
           <span style={{
             position: 'absolute', top: -4, right: -4,
             minWidth: 16, height: 16,
-            background: criticalCount > 0 ? '#ef4444' : '#f59e0b',
-            color: '#fff',
+            background: criticalCount > 0 ? 'var(--color-danger)' : 'var(--color-warning)',
+            color: 'var(--text-primary)',
             fontSize: '0.6rem', fontWeight: 800,
-            borderRadius: 8,
+            borderRadius: 'var(--radius-sm)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '0 3px',
-            border: '2px solid #070e1c',
+            border: '2px solid var(--bg-elevated)',
             pointerEvents: 'none',
             animation: criticalCount > 0 ? 'badgePulse 2s ease-in-out infinite' : 'none',
           }}>
@@ -177,7 +177,7 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
       {/* Overlay */}
       {open && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 199, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 199, background: 'var(--surface-overlay)', backdropFilter: 'var(--glass-blur)' }}
           onClick={() => setOpen(false)}
         />
       )}
@@ -192,9 +192,9 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
           bottom: 0,
           width: 'min(400px, 100vw)',
           zIndex: 200,
-          background: 'linear-gradient(160deg, #0a1628 0%, #07101e 100%)',
-          borderLeft: '1px solid rgba(255,255,255,0.07)',
-          boxShadow: '-16px 0 50px rgba(0,0,0,0.6)',
+          background: 'linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-card) 100%)',
+          borderLeft: '1px solid var(--glass-border)',
+          boxShadow: '-16px 0 50px var(--surface-overlay)',
           display: 'flex',
           flexDirection: 'column',
           transform: open ? 'translateX(0)' : 'translateX(100%)',
@@ -205,43 +205,43 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
         {/* Başlık */}
         <div style={{
           padding: '16px 18px 13px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid var(--glass-border)',
           flexShrink: 0,
-          background: 'rgba(0,0,0,0.2)',
+          background: 'var(--surface-overlay)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{
               width: 36, height: 36, flexShrink: 0,
               background: criticalCount > 0
-                ? 'linear-gradient(135deg,#ef4444,#dc2626)'
+                ? 'linear-gradient(135deg,var(--color-danger),var(--color-danger))'
                 : unread > 0
-                  ? 'linear-gradient(135deg,#f59e0b,#d97706)'
-                  : 'linear-gradient(135deg,#334155,#475569)',
-              borderRadius: 10,
+                  ? 'linear-gradient(135deg,var(--color-warning),var(--color-warning))'
+                  : 'linear-gradient(135deg,var(--text-muted),var(--text-muted))',
+              borderRadius: 'var(--radius)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1rem',
-              boxShadow: criticalCount > 0 ? '0 4px 16px rgba(239,68,68,0.4)' : '0 4px 16px rgba(0,0,0,0.3)',
+              fontSize: 'var(--text-base)',
+              boxShadow: criticalCount > 0 ? '0 4px 16px var(--color-danger-soft)' : '0 4px 16px var(--surface-overlay)',
             }}>🔔</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.93rem' }}>Bildirimler</div>
-              <div style={{ color: '#334155', fontSize: '0.67rem' }}>Son güncelleme: {lastRefresh}</div>
+              <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 'var(--text-sm)' }}>Bildirimler</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.67rem' }}>Son güncelleme: {lastRefresh}</div>
             </div>
             <button
               onClick={() => setOpen(false)}
-              style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#475569', cursor: 'pointer', width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}
+              style={{ background: 'var(--glass-bg)', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', width: 30, height: 30, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--text-base)', flexShrink: 0 }}
             >×</button>
           </div>
 
           {/* Özet sayaçlar */}
           <div style={{ display: 'flex', gap: 7 }}>
             {([
-              { count: criticalCount, label: 'Kritik', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)' },
-              { count: warningCount, label: 'Uyarı', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.18)' },
-              { count: visible.filter(n => n.severity === 'info').length, label: 'Bilgi', color: '#60a5fa', bg: 'rgba(96,165,250,0.07)', border: 'rgba(96,165,250,0.15)' },
+              { count: criticalCount, label: 'Kritik', color: 'var(--color-danger)', bg: 'var(--color-danger-soft)', border: 'var(--color-danger-soft)' },
+              { count: warningCount, label: 'Uyarı', color: 'var(--color-warning)', bg: 'var(--color-warning-soft)', border: 'var(--color-warning-soft)' },
+              { count: visible.filter(n => n.severity === 'info').length, label: 'Bilgi', color: 'var(--color-info)', bg: 'var(--color-info-soft)', border: 'var(--color-info-soft)' },
             ]).map(({ count, label, color, bg, border }) => (
-              <div key={label} style={{ flex: 1, background: bg, border: `1px solid ${border}`, borderRadius: 9, padding: '6px 8px', textAlign: 'center' }}>
+              <div key={label} style={{ flex: 1, background: bg, border: `1px solid ${border}`, borderRadius: 'var(--radius)', padding: '6px 8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '1.1rem', fontWeight: 900, color, lineHeight: 1 }}>{count}</div>
-                <div style={{ fontSize: '0.6rem', color: '#475569', marginTop: 2 }}>{label}</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
               </div>
             ))}
           </div>
@@ -252,17 +252,17 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
           {visible.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: 12 }}>
               <div style={{ fontSize: '2.5rem' }}>✅</div>
-              <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>Her şey yolunda!</div>
-              <div style={{ color: '#334155', fontSize: '0.75rem', textAlign: 'center' }}>Aktif uyarı yok. Tüm bildirimler okundu işaretlendi.</div>
+              <div style={{ color: 'var(--color-success)', fontWeight: 700, fontSize: 'var(--text-sm)' }}>Her şey yolunda!</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', textAlign: 'center' }}>Aktif uyarı yok. Tüm bildirimler okundu işaretlendi.</div>
               <button
                 onClick={resetDismissed}
-                style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.18)', borderRadius: 8, color: '#60a5fa', padding: '6px 14px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}
+                style={{ background: 'var(--color-info-soft)', border: '1px solid var(--color-info-soft)', borderRadius: 'var(--radius-sm)', color: 'var(--color-info)', padding: '6px 14px', cursor: 'pointer', fontSize: 'var(--text-xs)', fontWeight: 600 }}
               >Bildirimleri Yenile</button>
             </div>
           ) : (
             Object.entries(grouped).map(([cat, items]) => (
               <div key={cat} style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: '0.63rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6, paddingLeft: 2 }}>
+                <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6, paddingLeft: 2 }}>
                   {CAT_LABEL[cat as NotifCategory] || cat}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -290,10 +290,10 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
                         {/* İçerik */}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 2 }}>
-                            <span style={{ fontSize: '0.88rem', lineHeight: 1, flexShrink: 0 }}>{n.icon}</span>
-                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{n.title}</span>
+                            <span style={{ fontSize: 'var(--text-sm)', lineHeight: 1, flexShrink: 0 }}>{n.icon}</span>
+                            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3 }}>{n.title}</span>
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.4, marginBottom: n.targetTab ? 8 : 0 }}>{n.detail}</div>
+                          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', lineHeight: 1.4, marginBottom: n.targetTab ? 8 : 0 }}>{n.detail}</div>
                           {n.targetTab && (
                             <button
                               onClick={() => { onNavigate(n.targetTab!); setOpen(false); }}

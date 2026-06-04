@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.13.1',
+    date: '4 Haziran 2026',
+    title: 'CSS Variable Geçişi — IconPicker, MobileSelect, NotificationCenter',
+    summary: 'IconPicker, MobileSelect ve NotificationCenter bileşenlerindeki hardcoded renk/kenarlık/yazı tipi değerleri CSS variable referanslarına dönüştürüldü. Tema uyumu ve bakım kolaylığı iyileştirildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'IconPicker: hardcoded rgba/hex renkler → CSS variable (--color-primary-soft, --text-muted, --radius-sm, --bg-elevated)' },
+      { type: 'iyilestirme', text: 'MobileSelect: hardcoded renkler → CSS variable (--bg-elevated, --border-strong, --radius, --text-muted, --color-primary-soft)' },
+      { type: 'iyilestirme', text: 'NotificationCenter: seviye stilleri → CSS variable (--color-danger-soft, --color-warning, --color-info, --glass-border, --surface-overlay)' },
+    ],
+  },
+  {
     version: '3.13.0',
     date: '4 Haziran 2026',
     title: 'Kod Bölme & Güvenlik İyileştirmeleri',
