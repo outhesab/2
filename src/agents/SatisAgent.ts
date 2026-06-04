@@ -1,6 +1,7 @@
 import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse, SatisSonuc, YeniSatisParams } from "@/agents/types";
 import { formatMoney, genId } from "@/lib/utils-tr";
+import { completeSale } from "@/domain/services/saleCompletion";
 import type { Sale } from "@/types";
 
 export class SatisAgent extends BaseAgent {
@@ -14,123 +15,85 @@ export class SatisAgent extends BaseAgent {
     if (!this.ctx) {
       return { ok: false, error: "Agent bağlanmadı — önce bagla() çağırın" };
     }
-    if (params.items.length === 0) {
-      return { ok: false, error: "En az bir ürün ekleyin" };
-    }
 
     const db = this.db;
-    const nowIso = params.saleDate
-      ? new Date(params.saleDate).toISOString()
-      : new Date().toISOString();
-    const discountAmount = params.discountAmount ?? 0;
-    const total = params.items.reduce((s, i) => s + i.total, 0) - discountAmount;
-    const profit = params.items.reduce((s, i) => s + i.quantity * (i.unitPrice - i.cost), 0) - discountAmount;
-    const tahsilatNum = params.tahsilat ?? total;
-    const kalan = total - tahsilatNum;
-
-    const yetersizStok = params.items.filter((i) => {
-      const p = db.products.find((x) => x.id === i.productId);
-      return p && p.stock < i.quantity;
-    });
-    if (yetersizStok.length > 0) {
-      const mesaj = yetersizStok
-        .map((i) => {
-          const p = db.products.find((x) => x.id === i.productId);
-          return `${i.productName}: stok ${p?.stock ?? 0}, talep ${i.quantity}`;
-        })
-        .join("\n");
-      return { ok: false, error: `Yetersiz stok:\n${mesaj}` };
-    }
-
-    const sale: Sale = {
-      id: genId(),
-      cariId: params.cariId || undefined,
-      cariName: params.cariId
-        ? db.cari.find((c) => c.id === params.cariId)?.name
-        : undefined,
-      productId: params.items[0]?.productId,
-      productName:
-        params.items.length === 1
-          ? params.items[0].productName
-          : `${params.items[0].productName} +${params.items.length - 1}`,
-      productCategory: params.items[0]
-        ? db.products.find((p) => p.id === params.items[0].productId)?.category
-        : undefined,
-      quantity: params.items.reduce((s, i) => s + i.quantity, 0),
-      unitPrice:
-        total / Math.max(1, params.items.reduce((s, i) => s + i.quantity, 0)),
-      cost: params.items.reduce((s, i) => s + i.cost * i.quantity, 0),
-      discount: params.discount ?? 0,
-      discountAmount,
-      subtotal: params.items.reduce((s, i) => s + i.total, 0),
-      total,
-      profit,
+    const result = completeSale({
+      items: params.items.map((i) => ({
+        productId: i.productId,
+        productName: i.productName,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+        cost: i.cost,
+      })),
       payment: params.payment,
-      status: "tamamlandi",
-      items: params.items,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    };
+      cariId: params.cariId || undefined,
+      customerName: undefined,
+      discount: params.discount,
+      discountAmount: params.discountAmount,
+      tahsilat: params.tahsilat,
+      saleDate: params.saleDate,
+    }, db);
+
+    if (!result.ok) return result;
+
+    const { sale: cs, stockMovements, cashTransaction, cariUpdate, events } = result.data;
 
     this.save((prev) => {
       const products = prev.products.map((p) => {
-        const item = params.items.find((i) => i.productId === p.id);
-        if (!item) return p;
-        return { ...p, stock: Math.max(0, p.stock - item.quantity) };
+        const sm = stockMovements.find((s) => s.productId === p.id);
+        if (!sm) return p;
+        return { ...p, stock: Math.max(0, sm.after) };
       });
 
+      const sale: Sale = {
+        ...cs,
+        cariName: params.cariId
+          ? prev.cari.find((c) => c.id === params.cariId)?.name
+          : undefined,
+        _domainEventLog: events,
+      };
+
       const kasaEntries: typeof prev.kasa = [];
-      const fiiliTahsilat =
-        params.tahsilat === undefined && params.payment === "cari" ? 0 : tahsilatNum;
-      if (fiiliTahsilat > 0) {
-        const kasaId = params.payment === "cari" ? "nakit" : params.payment;
+      if (cashTransaction) {
         kasaEntries.push({
           id: genId(),
-          type: "gelir" as const,
+          type: "gelir",
           category: "satis",
-          amount: fiiliTahsilat,
-          kasa: kasaId,
-          description: `Satış: ${sale.productName}`,
+          amount: cashTransaction.amount,
+          kasa: cashTransaction.kasa,
+          description: cashTransaction.description,
           relatedId: sale.id,
           cariId: params.cariId || undefined,
-          createdAt: nowIso,
-          updatedAt: nowIso,
+          createdAt: cs.createdAt,
+          updatedAt: cs.createdAt,
         });
       }
 
       let cari = prev.cari;
-      if (params.cariId && kalan > 0) {
+      if (cariUpdate) {
         cari = cari.map((c) =>
-          c.id === params.cariId
+          c.id === cariUpdate.cariId
             ? {
                 ...c,
-                balance: (c.balance || 0) + kalan,
-                lastTransaction: nowIso,
-                updatedAt: nowIso,
+                balance: (c.balance || 0) + cariUpdate.balanceChange,
+                lastTransaction: cs.createdAt,
+                updatedAt: cs.createdAt,
               }
             : c,
         );
       }
 
-      const stockMovements = [
-        ...prev.stockMovements,
-        ...params.items.map((i) => {
-          const currentStock =
-            prev.products.find((p) => p.id === i.productId)?.stock || 0;
-          const actualDecrease = Math.min(i.quantity, currentStock);
-          return {
-            id: genId(),
-            productId: i.productId,
-            productName: i.productName,
-            type: "satis" as const,
-            amount: -actualDecrease,
-            before: currentStock,
-            after: currentStock - actualDecrease,
-            note: "Satış",
-            date: nowIso,
-          };
-        }),
-      ];
+      const stockMovementRecords = stockMovements.map((sm) => ({
+        id: genId(),
+        productId: sm.productId,
+        productName: sm.productName,
+        type: "satis" as const,
+        amount: sm.amount,
+        before: sm.before,
+        after: sm.after,
+        note: "Satış",
+        date: cs.createdAt,
+      }));
 
       return {
         ...prev,
@@ -138,12 +101,12 @@ export class SatisAgent extends BaseAgent {
         sales: [...prev.sales, sale],
         kasa: [...prev.kasa, ...kasaEntries],
         cari,
-        stockMovements,
+        stockMovements: [...prev.stockMovements, ...stockMovementRecords],
       };
     });
 
-    this.yayinla("satis.tamamlandi", { saleId: sale.id, total, profit });
-    return { ok: true, data: { saleId: sale.id, total, profit } };
+    this.yayinla("satis.tamamlandi", { saleId: cs.id, total: cs.total, profit: cs.profit });
+    return { ok: true, data: { saleId: cs.id, total: cs.total, profit: cs.profit } };
   }
 
   async iptalEt(saleId: string): Promise<AgentResponse<void>> {

@@ -1,5 +1,6 @@
 import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse } from "@/agents/types";
+import { genId } from "@/lib/utils-tr";
 
 export class KasaAgent extends BaseAgent {
   readonly id = "kasa" as const;
@@ -11,10 +12,9 @@ export class KasaAgent extends BaseAgent {
 
     try {
       const payload = talep.payload || {};
-      if (talep.action === "kasa_gelir" || talep.action === "kasa_gider" || talep.action === "sale") {
+      if (talep.action === "kasa_gelir" || talep.action === "kasa_gider") {
         const amount = payload.amount as number;
-        const isSale = talep.action === "sale";
-        const type = isSale ? "gelir" : (talep.action === "kasa_gelir" ? "gelir" : "gider");
+        const type = talep.action === "kasa_gelir" ? "gelir" : "gider";
 
         if (amount && amount > 0) {
           this.save((prev) => ({
@@ -22,9 +22,9 @@ export class KasaAgent extends BaseAgent {
             kasa: [
               ...prev.kasa,
               {
-                id: crypto.randomUUID(),
+                id: genId(),
                 type: type as "gelir" | "gider",
-                category: isSale ? "satis" : ((payload.category as string) || "diger"),
+                category: (payload.category as string) || "diger",
                 amount,
                 kasa: (payload.kasa as string) || "nakit",
                 description: (payload.description as string) || `Agent: ${talep.action}`,

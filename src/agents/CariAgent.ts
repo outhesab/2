@@ -11,10 +11,9 @@ export class CariAgent extends BaseAgent {
 
     try {
       const payload = talep.payload || {};
-      if (talep.action === "cari_tahsilat" || talep.action === "sale") {
+      if (talep.action === "cari_tahsilat") {
         const cariId = payload.cariId as string;
         const amount = payload.amount as number;
-        const isSale = talep.action === "sale";
         if (cariId && amount) {
           this.save((prev) => ({
             ...prev,
@@ -22,7 +21,7 @@ export class CariAgent extends BaseAgent {
               c.id === cariId
                 ? {
                     ...c,
-                    balance: (c.balance || 0) + (isSale ? amount : -amount),
+                    balance: (c.balance || 0) - amount,
                     lastTransaction: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                   }

@@ -265,6 +265,8 @@ export default function Settings({
             applyUIPrefs(p);
           }}
           showToast={showToast}
+          dashboardPrefs={dashboardPrefs}
+          saveDashboardPrefs={saveDashboardPrefs}
         />
       )}
 
@@ -4058,10 +4060,14 @@ function ArayuzAyarlari({
   prefs,
   onChange,
   showToast,
+  dashboardPrefs,
+  saveDashboardPrefs,
 }: {
   prefs: UIPrefs;
   onChange: (p: UIPrefs) => void;
   showToast: (m: string, t?: string) => void;
+  dashboardPrefs: { leftWidgets: string[]; brightness: number };
+  saveDashboardPrefs: (patch: Partial<{ leftWidgets: string[]; brightness: number }>) => void;
 }) {
   const set = (patch: Partial<UIPrefs>) => onChange({ ...prefs, ...patch });
 

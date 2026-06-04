@@ -20,6 +20,35 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.12.0',
+    date: '2 Haziran 2026',
+    title: 'Session 2 — Dumb Agent + Orchestrator Sadeleştirme',
+    summary: 'SatisAgent artık pure completeSale() kullanır, stok/kasa/cari yan etkilerini tek save()\'de uygular. Orchestrator sale pipeline\'ı sadece ["satis","fatura","rapor"] olarak kısaltıldı (çift kayıt önlendi). StokAgent/KasaAgent/CariAgent non-sale operasyonlar için sadeleştirildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'SatisAgent.yeniSatis(): completeSale() domain service kullanır — stok/kasa/cari yan etkileri tek save() çağrısında uygulanır' },
+      { type: 'iyilestirme', text: 'SatisAgent: satış kaydına _domainEventLog eklenir (denetim izi)' },
+      { type: 'iyilestirme', text: 'orchestrator.ts: sale pipeline ["satis","fatura","rapor"] — stok/kasa/cari çift kayıt hatası giderildi' },
+      { type: 'iyilestirme', text: 'orchestrator.ts: @deprecated eklendi — gelecek sürümde processIntent lehine kaldırılacak' },
+      { type: 'iyilestirme', text: 'StokAgent: sadece stok_guncelle/urun_ekle işlemleri (sale mantığı kaldırıldı)' },
+      { type: 'iyilestirme', text: 'KasaAgent: sadece kasa_gelir/kasa_gider işlemleri (sale mantığı kaldırıldı)' },
+      { type: 'iyilestirme', text: 'CariAgent: sadece cari_tahsilat/cari_ekle işlemleri (sale mantığı kaldırıldı)' },
+      { type: 'iyilestirme', text: 'StokAgent/KasaAgent: crypto.randomUUID() → genId() ile değiştirildi' },
+    ],
+  },
+  {
+    version: '3.11.0',
+    date: '2 Haziran 2026',
+    title: 'Domain Katmanı (Session 1) — Saf İş Mantığı Ayrıştırması',
+    summary: 'Event-driven domain katmanı eklendi: types, eventBus, pure completeSale() fonksiyonu ve intentEngine. İş mantığı agent\'lardan ayrıştırılarak test edilebilir saf fonksiyonlara taşındı.',
+    changes: [
+      { type: 'yeni', text: 'src/domain/types.ts: DomainEvent, SaleIntent, StockMovementV2, CashTransaction, CariUpdate, SaleResult, Intent tipleri' },
+      { type: 'yeni', text: 'src/domain/eventBus.ts: DomainEventBus — typed pub/sub event bus (on/onAny/emit/clear)' },
+      { type: 'yeni', text: 'src/domain/services/saleCompletion.ts: pure completeSale() — stok doğrulama, satış hesaplama, stok/kasa/cari yan etkilerini önceden hesaplar (mutasyon yok)' },
+      { type: 'yeni', text: 'src/domain/intentEngine.ts: processIntent() — intent alır, domain service çağırır, event bus üzerinden yayınlar' },
+      { type: 'iyilestirme', text: 'src/types/index.ts: DomainEvent arayüzü eklendi, Sale._domainEventLog alanı eklendi (geriye uyumlu)' },
+    ],
+  },
+  {
     version: '3.10.7',
     date: '2 Haziran 2026',
     title: 'QuantumLink Agent Entegrasyonu',

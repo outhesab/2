@@ -144,7 +144,7 @@ export default defineConfig(({ mode }) => ({
         "src/**/*.test.ts",
         "src/**/*.test.tsx",
         "src/**/*.d.ts",
-        "src/test/**",
+        "src/__tests__/**",
         "src/agents/**",
         "**/node_modules/**",
       ],
@@ -158,7 +158,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./src/__tests__/setup.ts"],
     exclude: [
       "**/node_modules/**",
       "**/dist/**",

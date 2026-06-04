@@ -68,6 +68,7 @@ export interface Sale {
   invoiceNo?: string;
   status: 'tamamlandi' | 'iade' | 'iptal' | 'completed';
   items: SaleItem[];
+  _domainEventLog?: DomainEvent[];
   returnedAt?: string;
   deleted?: boolean;
   createdAt: string;
@@ -164,6 +165,17 @@ export interface Order {
   deleted?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// ─── Domain Event (paylaşılan) ───────────────────────────────────────────────
+export interface DomainEvent {
+  id: string;
+  type: string;
+  aggregateId: string;
+  aggregateType: string;
+  payload: Record<string, unknown>;
+  timestamp: string;
+  version: number;
 }
 
 // ─── Fatura ──────────────────────────────────────────────────────────────────

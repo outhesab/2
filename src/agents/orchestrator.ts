@@ -1,3 +1,8 @@
+/**
+ * @deprecated Session 2 — Yeni akışta SatisAgent completeSale() ile tüm yan etkileri
+ * tek seferde uygular. Stok/Kasa/Cari agent'ları sadece non-sale operasyonlar için
+ * çağrılır. Gelecek sürümde domain.intentEngine.processIntent() lehine kaldırılacak.
+ */
 import { getAgent } from "@/agents/index";
 import { loadAgentSettings, type AgentId } from "@/lib/agentConfig";
 
@@ -16,14 +21,8 @@ export type OrchestratorAction = {
 
 export function planAgentFlow(action: OrchestratorAction): string[] {
   if (action.type === "sale") {
-    const payment = String(action.payload.payment || "nakit");
-    const steps = ["satis", "stok"];
-    if (payment !== "cari") steps.push("kasa");
-    if (payment === "cari" || action.payload.cariId || action.payload.cariName) {
-      steps.push("cari");
-    }
-    steps.push("fatura", "rapor");
-    return steps;
+    // SatisAgent tüm yan etkileri completeSale() ile tek seferde uygular
+    return ["satis", "fatura", "rapor"];
   }
 
   if (action.type === "kasa_gelir" || action.type === "kasa_gider") {
