@@ -292,7 +292,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
           width: 52, height: 52,
           background: 'var(--ql-gradient)',
           border: 'none',
-          borderRadius: '50%', color: '#fff', cursor: 'pointer',
+          borderRadius: '50%', color: 'var(--text-primary)', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: `0 0 30px var(--ql-accent-glow)`,
           zIndex: 140, transition: 'transform 0.2s, box-shadow 0.2s',
@@ -315,7 +315,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => { setIsOpen(false); setShowPalette(false); }}
-              style={{ position: 'fixed', inset: 0, zIndex: 148, background: 'rgba(0,0,0,0.25)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 148, background: 'var(--surface-overlay)' }}
             />
 
             <motion.div
@@ -327,8 +327,8 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
               style={{
                 position: 'fixed', bottom: 152, right: 20,
                 width: 380, maxWidth: 'calc(100vw - 40px)', height: 520,
-                borderRadius: 28,
-                boxShadow: `0 0 100px rgba(0,0,0,0.5), var(--ai-accent-glow)`,
+                borderRadius: 'var(--radius)',
+                boxShadow: `0 0 100px var(--surface-overlay), var(--ai-accent-glow)`,
                 display: 'flex', flexDirection: 'column',
                 zIndex: 149,
               }}
@@ -356,19 +356,19 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                   <button
                     onClick={() => setShowPalette(!showPalette)}
                     title="Tema Değiştir"
-                    style={{
-                      background: showPalette ? 'var(--ql-accent)' : 'transparent',
-                      border: 'none', color: showPalette ? '#fff' : '#52525b',
-                      cursor: 'pointer', padding: 6, borderRadius: 8,
-                      display: 'flex', alignItems: 'center', transition: 'all 0.2s',
-                    }}
+                      style={{
+                        background: showPalette ? 'var(--ql-accent)' : 'transparent',
+                        border: 'none', color: showPalette ? 'var(--text-primary)' : '#52525b',
+                        cursor: 'pointer', padding: 6, borderRadius: 'var(--radius-sm)',
+                        display: 'flex', alignItems: 'center', transition: 'all 0.2s',
+                      }}
                   >
                     <Palette size={14} />
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 6, borderRadius: 8, display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#fff'}
+                    style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', padding: 6, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'}
                     onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#52525b'}
                   >
                     <X size={14} />
@@ -391,10 +391,10 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                           key={p.id}
                           onClick={() => changePalette(p.id)}
                           style={{
-                            flex: 1, padding: '10px 0', borderRadius: 12, border: 'none',
-                            background: paletteId === p.id ? 'var(--ql-gradient)' : '#18181b',
-                            color: paletteId === p.id ? '#fff' : '#71717a',
-                            fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+                            flex: 1, padding: '10px 0', borderRadius: 'var(--radius)', border: 'none',
+                            background: paletteId === p.id ? 'var(--ql-gradient)' : 'var(--bg-elevated)',
+                            color: paletteId === p.id ? 'var(--text-primary)' : '#71717a',
+                            fontSize: 'var(--text-xs)', fontWeight: 700, cursor: 'pointer',
                             transition: 'all 0.2s',
                             boxShadow: paletteId === p.id ? `0 0 12px var(--ql-accent-glow)` : 'none',
                           }}
@@ -421,14 +421,14 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     <div 
                       className={msg.role === 'assistant' ? 'quantum-msg-bubble-ai quantum-glass-panel' : ''}
                       style={{
-                        maxWidth: '85%', padding: '14px 16px', borderRadius: 16,
+                        maxWidth: '85%', padding: '14px 16px', borderRadius: 'var(--radius-lg)',
                         background: msg.role === 'user' ? 'var(--ql-accent)' : 'var(--glass-bg)',
                         border: msg.role === 'user' ? 'none' : '1px solid var(--glass-border-bright)',
                       }}
                     >
                       <div style={{
-                        fontSize: '0.78rem', lineHeight: 1.6,
-                        color: msg.role === 'user' ? '#fff' : 'var(--text-primary)',
+                        fontSize: 'var(--text-xs)', lineHeight: 1.6,
+                        color: 'var(--text-primary)',
                         fontWeight: msg.role === 'user' ? 600 : 400,
                         whiteSpace: 'pre-line',
                       }}>
@@ -440,7 +440,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
 
                 {isProcessing && (
                   <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                    <div style={{ background: '#18181b', padding: '14px 18px', borderRadius: 16, border: `1px solid rgba(var(--ql-accent-rgb), 0.08)` }}>
+                    <div style={{ background: 'var(--bg-elevated)', padding: '14px 18px', borderRadius: 'var(--radius-lg)', border: `1px solid rgba(var(--ql-accent-rgb), 0.08)` }}>
                       <div style={{ display: 'flex', gap: 4 }}>
                         {[0, 1, 2].map(i => (
                           <div key={i} style={{
@@ -464,9 +464,9 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                   <button
                     onClick={toggleListening}
                     style={{
-                      width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                      background: isListening ? 'var(--ql-accent)' : '#27272a',
-                      border: 'none', color: isListening ? '#fff' : '#52525b',
+                      width: 40, height: 40, borderRadius: 'var(--radius)', flexShrink: 0,
+                      background: isListening ? 'var(--ql-accent)' : 'var(--bg-elevated)',
+                      border: 'none', color: isListening ? 'var(--text-primary)' : '#52525b',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       transition: 'all 0.2s',
                     }}
@@ -483,7 +483,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                   disabled={isProcessing || isListening}
                   style={{
                     flex: 1, background: 'transparent', border: 'none',
-                    color: '#fff', fontSize: '0.85rem', fontWeight: 600,
+                    color: 'var(--text-primary)', fontSize: 'var(--text-sm)', fontWeight: 600,
                     outline: 'none',
                   }}
                 />
@@ -492,10 +492,10 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
                     onClick={handleSubmit}
                     disabled={isProcessing}
                     style={{
-                      width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                      background: 'var(--ql-gradient)', border: 'none', color: '#fff',
+                      width: 32, height: 32, borderRadius: 'var(--radius-sm)', flexShrink: 0,
+                      background: 'var(--ql-gradient)', border: 'none', color: 'var(--text-primary)',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.9rem', fontWeight: 700,
+                      fontSize: 'var(--text-sm)', fontWeight: 700,
                     }}
                   >↑</button>
                 )}

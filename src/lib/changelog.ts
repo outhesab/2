@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.13.2',
+    date: '5 Haziran 2026',
+    title: 'CSS Variable Geçişi — QuantumLink, NotificationCenter tamamlama',
+    summary: 'QuantumLink bileşenindeki hardcoded renk/kenarlık değerleri CSS variable referanslarına dönüştürüldü. NotificationCenter ek CSS variable iyileştirmeleri yapıldı. package.json versiyon uyumu düzeltildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'QuantumLink: inline stiller CSS variable kullanacak şekilde güncellendi' },
+      { type: 'iyilestirme', text: 'NotificationCenter: ek CSS variable dönüşümleri (border, text, renk iyileştirmeleri)' },
+      { type: 'duzeltme', text: 'package.json 3.13.0 → 3.13.2 (versiyon tutarlılığı)' },
+    ],
+  },
+  {
     version: '3.13.1',
     date: '4 Haziran 2026',
     title: 'CSS Variable Geçişi — IconPicker, MobileSelect, NotificationCenter',

@@ -274,7 +274,7 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
                         style={{
                           background: s.bg,
                           border: `1px solid ${s.border}`,
-                          borderRadius: 10,
+                          borderRadius: 'var(--radius)',
                           padding: '10px 12px',
                           display: 'flex',
                           gap: 10,
@@ -298,12 +298,12 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
                             <button
                               onClick={() => { onNavigate(n.targetTab!); setOpen(false); }}
                               style={{
-                                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: 6, color: '#94a3b8', padding: '3px 9px', cursor: 'pointer',
+                                background: 'var(--glass-bg)', border: '1px solid var(--glass-border)',
+                                borderRadius: 6, color: 'var(--text-muted)', padding: '3px 9px', cursor: 'pointer',
                                 fontSize: '0.7rem', fontWeight: 600, transition: 'all 0.15s',
                               }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLButtonElement).style.color = '#f1f5f9'; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8'; }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-bg)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-bg)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; }}
                             >
                               Git →
                             </button>
@@ -314,9 +314,9 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
                         <button
                           onClick={() => dismiss(n.id)}
                           title="Okundu işaretle"
-                          style={{ background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer', fontSize: '0.85rem', lineHeight: 1, padding: 2, flexShrink: 0, borderRadius: 4, transition: 'color 0.15s' }}
-                          onMouseEnter={e => (e.currentTarget.style.color = '#64748b')}
-                          onMouseLeave={e => (e.currentTarget.style.color = '#1e3a5f')}
+                          style={{ background: 'none', border: 'none', color: 'var(--border-strong)', cursor: 'pointer', fontSize: 'var(--text-sm)', lineHeight: 1, padding: 2, flexShrink: 0, borderRadius: 4, transition: 'color 0.15s' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                          onMouseLeave={e => (e.currentTarget.style.color = 'var(--border-strong)')}
                         >×</button>
                       </div>
                     );
@@ -329,21 +329,21 @@ export default function NotificationCenter({ db, onNavigate }: Props) {
 
         {/* Alt butonlar */}
         {visible.length > 0 && (
-          <div style={{ padding: '10px 14px 14px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: 8, flexShrink: 0 }}>
+          <div style={{ padding: '10px 14px 14px', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: 8, flexShrink: 0 }}>
             <button
               onClick={dismissAll}
-              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 9, color: '#475569', padding: '8px', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, transition: 'all 0.15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#94a3b8'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.08)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#475569'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+              style={{ flex: 1, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius)', color: 'var(--text-muted)', padding: '8px', cursor: 'pointer', fontSize: '0.77rem', fontWeight: 600, transition: 'all 0.15s' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-bg)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'var(--glass-bg)'; }}
             >
               ✓ Tümünü Okundu İşaretle
             </button>
             <button
               onClick={refresh}
               title="Yenile"
-              style={{ background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.14)', borderRadius: 9, color: '#60a5fa', padding: '8px 14px', cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(96,165,250,0.14)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(96,165,250,0.07)')}
+              style={{ background: 'var(--color-info-soft)', border: '1px solid var(--color-info-soft)', borderRadius: 'var(--radius)', color: 'var(--color-info)', padding: '8px 14px', cursor: 'pointer', fontSize: 'var(--text-sm)', transition: 'all 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-info-soft)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-info-soft)')}
             >⟳</button>
           </div>
         )}
