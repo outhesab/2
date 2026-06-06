@@ -1,4 +1,5 @@
 import { logger } from "@/lib/logger";
+import { readSSEStream } from "@/lib/streamUtils";
 
 export interface Message {
   role: "user" | "assistant";
@@ -43,30 +44,10 @@ export async function askClaude(
   });
   if (res.status === 429) throw new Error("429 Too many requests");
   if (!res.ok) throw new Error(`Claude API: ${res.status}`);
-  const reader = res.body!.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-  let streamDone = false;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n");
-    buf = lines.pop() || "";
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const data = line.slice(6);
-      if (data === "[DONE]") { streamDone = true; break; }
-      try {
-        const d = JSON.parse(data);
-        if (d.type === "content_block_delta") onChunk(d.delta?.text || "");
-      } catch {
-        logger.warn("aiApi", "Claude stream parse hatası");
-        /* ignore */
-      }
-    }
-    if (streamDone) break;
-  }
+  await readSSEStream(res, onChunk,
+    (d: any) => d.type === "content_block_delta" ? d.delta?.text : undefined,
+    () => logger.warn("aiApi", "Claude stream parse hatası"),
+  );
 }
 
 export async function askGemini(
@@ -110,29 +91,8 @@ export async function askGemini(
   );
   if (res.status === 429) throw new Error("429 Too many requests");
   if (!res.ok) throw new Error(`Gemini API: ${res.status}`);
-  const reader = res.body!.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-  let streamDone = false;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n");
-    buf = lines.pop() || "";
-    for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
-      const data = line.slice(6);
-      if (data === "[DONE]") { streamDone = true; break; }
-      try {
-        const d = JSON.parse(data);
-        const text = d.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) onChunk(text);
-      } catch {
-        logger.warn("aiApi", "Gemini stream parse hatası");
-        /* ignore */
-      }
-    }
-    if (streamDone) break;
-  }
+  await readSSEStream(res, onChunk,
+    (d: any) => d.candidates?.[0]?.content?.parts?.[0]?.text,
+    () => logger.warn("aiApi", "Gemini stream parse hatası"),
+  );
 }

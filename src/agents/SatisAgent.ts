@@ -3,18 +3,15 @@ import type { AgentRequest, AgentResponse, SatisSonuc, YeniSatisParams } from "@
 import { formatMoney, genId } from "@/lib/utils-tr";
 import { completeSale } from "@/domain/services/saleCompletion";
 import type { Sale } from "@/types";
+import { checkSatisWritePermission, buildRefundKasaEntries, updateCariForRefund } from "./satisHelpers";
 
 export class SatisAgent extends BaseAgent {
   readonly id = "satis" as const;
   readonly yetkiler = ["satis.read", "satis.write", "rapor.read"] as const;
 
   async yeniSatis(params: YeniSatisParams): Promise<AgentResponse<SatisSonuc>> {
-    if (!this.yetkiKontrolu("satis.write")) {
-      return { ok: false, error: "satis.write yetkisi yok" };
-    }
-    if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı — önce bagla() çağırın" };
-    }
+    const yetkiErr1 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx, "Agent bağlanmadı — önce bagla() çağırın");
+    if (yetkiErr1) return yetkiErr1;
 
     const db = this.db;
     const result = completeSale({
@@ -110,12 +107,8 @@ export class SatisAgent extends BaseAgent {
   }
 
   async iptalEt(saleId: string): Promise<AgentResponse<void>> {
-    if (!this.yetkiKontrolu("satis.write")) {
-      return { ok: false, error: "satis.write yetkisi yok" };
-    }
-    if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı" };
-    }
+    const yetkiErr2 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
+    if (yetkiErr2) return yetkiErr2;
 
     const nowIso = new Date().toISOString();
     this.save((prev) => {
@@ -137,44 +130,11 @@ export class SatisAgent extends BaseAgent {
       let kasa = prev.kasa;
       let cari = prev.cari;
 
-      const relatedKasaEntries = prev.kasa.filter(
-        (k) => !k.deleted && k.relatedId === sale.id && k.type === "gelir",
+      const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
+        kasa, sale.id, sale.productName, sale.payment, nowIso, "iptal",
       );
-      const tahsilEdilen = relatedKasaEntries.reduce((s, k) => s + k.amount, 0);
-
-      if (tahsilEdilen > 0) {
-        const kasaId = sale.payment === "cari" ? "nakit" : sale.payment;
-        kasa = [
-          ...kasa,
-          {
-            id: genId(),
-            type: "gider" as const,
-            category: "iptal",
-            amount: tahsilEdilen,
-            kasa: kasaId,
-            description: `İptal: ${sale.productName}`,
-            relatedId: sale.id,
-            createdAt: nowIso,
-            updatedAt: nowIso,
-          },
-        ];
-      }
-
-      if (sale.cariId) {
-        const cariyeYazilan = sale.total - tahsilEdilen;
-        if (cariyeYazilan > 0) {
-          cari = cari.map((c) =>
-            c.id === sale.cariId
-              ? {
-                  ...c,
-                  balance: (c.balance || 0) - cariyeYazilan,
-                  lastTransaction: nowIso,
-                  updatedAt: nowIso,
-                }
-              : c,
-          );
-        }
-      }
+      kasa = updatedKasa;
+      cari = updateCariForRefund(cari, sale.cariId, sale.total, tahsilEdilen, nowIso);
 
       return { ...prev, sales, products, kasa, cari };
     });
@@ -184,12 +144,8 @@ export class SatisAgent extends BaseAgent {
   }
 
   async iadeYap(saleId: string, qty?: number | Record<string, number>): Promise<AgentResponse<void>> {
-    if (!this.yetkiKontrolu("satis.write")) {
-      return { ok: false, error: "satis.write yetkisi yok" };
-    }
-    if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı" };
-    }
+    const yetkiErr3 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
+    if (yetkiErr3) return yetkiErr3;
 
     const nowIso = new Date().toISOString();
     this.save((prev) => {
@@ -227,44 +183,11 @@ export class SatisAgent extends BaseAgent {
       let kasa = prev.kasa;
       let cari = prev.cari;
 
-      const relatedKasaEntries = prev.kasa.filter(
-        (k) => !k.deleted && k.relatedId === sale.id && k.type === "gelir",
+      const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
+        kasa, sale.id, sale.productName, sale.payment, nowIso, "iade",
       );
-      const tahsilEdilen = relatedKasaEntries.reduce((s, k) => s + k.amount, 0);
-
-      if (tahsilEdilen > 0) {
-        const kasaId = sale.payment === "cari" ? "nakit" : sale.payment;
-        kasa = [
-          ...kasa,
-          {
-            id: genId(),
-            type: "gider" as const,
-            category: "iade",
-            amount: tahsilEdilen,
-            kasa: kasaId,
-            description: `İade: ${sale.productName}`,
-            relatedId: sale.id,
-            createdAt: nowIso,
-            updatedAt: nowIso,
-          },
-        ];
-      }
-
-      if (sale.cariId) {
-        const cariyeYazilan = sale.total - tahsilEdilen;
-        if (cariyeYazilan > 0) {
-          cari = cari.map((c) =>
-            c.id === sale.cariId
-              ? {
-                  ...c,
-                  balance: (c.balance || 0) - cariyeYazilan,
-                  lastTransaction: nowIso,
-                  updatedAt: nowIso,
-                }
-              : c,
-          );
-        }
-      }
+      kasa = updatedKasa;
+      cari = updateCariForRefund(cari, sale.cariId, sale.total, tahsilEdilen, nowIso);
 
       return { ...prev, sales, products, kasa, cari };
     });
@@ -274,12 +197,8 @@ export class SatisAgent extends BaseAgent {
   }
 
   async fiyatDuzelt(saleId: string, yeniFiyat: number | Record<string, number>): Promise<AgentResponse<void>> {
-    if (!this.yetkiKontrolu("satis.write")) {
-      return { ok: false, error: "satis.write yetkisi yok" };
-    }
-    if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı" };
-    }
+    const yetkiErr4 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
+    if (yetkiErr4) return yetkiErr4;
 
     const nowIso = new Date().toISOString();
     this.save((prev) => {

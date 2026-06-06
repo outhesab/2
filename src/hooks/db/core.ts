@@ -9,6 +9,7 @@ import type { DB, Kasa, ProductCategory, RuleViolation } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { saveToFirebase, loadFromFirebase, emitSync, type SyncStatus } from "./sync";
 import { saveBackupToFirebase, restoreBackupFromFirebase, listBackupsFromFirebase, fullRestoreDB, type RestoreReport } from "./backup";
+import { validateAndClassify, computeAuditStatus, saveBlockedState, saveAppliedState } from "./dbHelpers";
 
 export type { SyncStatus, RestoreReport };
 
@@ -313,18 +314,8 @@ export function useDB() {
         next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
       }
 
-      let violations: RuleViolation[] = [];
-      try {
-        violations = validateTransaction(prev, next);
-      } catch (e) {
-        logger.warn("db", "Rule Engine değerlendirme hatası — atlandı", {
-          error: String(e),
-        });
-      }
-
-      const hasBlock = violations.some((v) => v.severity === "block");
-      const hasWarn = violations.some((v) => v.severity === "warn");
-      const auditStatus = hasBlock ? "blocked" : hasWarn ? "warned" : "applied";
+      const { violations, hasBlock, hasWarn } = validateAndClassify(prev, next, "Rule Engine değerlendirme hatası — atlandı");
+      const auditStatus = computeAuditStatus(hasBlock, hasWarn);
 
       const entry = createAuditEntry({
         action: "save",
@@ -336,19 +327,7 @@ export function useDB() {
       });
 
       if (hasBlock) {
-        const auditOnly: DB = {
-          ...prev,
-          _auditLog: trimAuditLog([entry, ...(prev._auditLog || [])]),
-        };
-        saveToStorage(auditOnly);
-        void saveToIndexedSnapshot(auditOnly);
-        t.end({ version: prev._version, blocked: true });
-        logger.warn("db", "İşlem engellendi (block ihlali)", {
-          violations: violations
-            .filter((v) => v.severity === "block")
-            .map((v) => v.ruleId),
-        });
-        return auditOnly;
+        return saveBlockedState(prev, entry, violations, saveToStorage, saveToIndexedSnapshot, t, "İşlem engellendi (block ihlali)");
       }
 
       // Capture prev snapshot for undo before applying the save
@@ -360,19 +339,7 @@ export function useDB() {
         ];
       }
 
-      const withAudit: DB = {
-        ...next,
-        _auditLog: trimAuditLog([entry, ...(next._auditLog || [])]),
-      };
-      saveToStorage(withAudit);
-      void saveToIndexedSnapshot(withAudit);
-      t.end({ version: withAudit._version, warned: hasWarn });
-
-      if (syncTimer.current) clearTimeout(syncTimer.current);
-      syncTimer.current = setTimeout(() => {
-        saveToFirebase(withAudit);
-      }, 1200);
-      return withAudit;
+      return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, t, { warned: hasWarn });
     });
   }, []);
 
@@ -486,17 +453,7 @@ export function useDB() {
           };
         }
 
-        let violations: RuleViolation[] = [];
-        try {
-          violations = validateTransaction(prev, next);
-        } catch (e) {
-          logger.warn("db", "saveGuarded: Rule Engine hatası — atlandı", {
-            error: String(e),
-          });
-        }
-
-        const hasBlock = violations.some((v) => v.severity === "block");
-        const hasWarn = violations.some((v) => v.severity === "warn");
+        const { violations, hasBlock, hasWarn } = validateAndClassify(prev, next, "saveGuarded: Rule Engine hatası — atlandı");
 
         if ((hasBlock || hasWarn) && onViolation) {
           try {
@@ -507,11 +464,7 @@ export function useDB() {
           }
         }
 
-        const auditStatus = hasBlock
-          ? "blocked"
-          : hasWarn
-            ? "warned"
-            : "applied";
+        const auditStatus = computeAuditStatus(hasBlock, hasWarn);
         const entry = createAuditEntry({
           action: auditMeta?.action ?? "saveGuarded",
           entity: auditMeta?.entity ?? "DB",
@@ -524,33 +477,10 @@ export function useDB() {
         });
 
         if (hasBlock) {
-          const auditOnly: DB = {
-            ...prev,
-            _auditLog: trimAuditLog([entry, ...(prev._auditLog || [])]),
-          };
-          saveToStorage(auditOnly);
-          void saveToIndexedSnapshot(auditOnly);
-          st.end({ version: prev._version, blocked: true });
-          logger.warn("db", "saveGuarded: İşlem engellendi", {
-            violations: violations
-              .filter((v) => v.severity === "block")
-              .map((v) => v.ruleId),
-          });
-          return auditOnly;
+          return saveBlockedState(prev, entry, violations, saveToStorage, saveToIndexedSnapshot, st, "saveGuarded: İşlem engellendi");
         }
 
-        const withAudit: DB = {
-          ...next,
-          _auditLog: trimAuditLog([entry, ...(next._auditLog || [])]),
-        };
-        saveToStorage(withAudit);
-        void saveToIndexedSnapshot(withAudit);
-        st.end({ version: withAudit._version });
-        if (syncTimer.current) clearTimeout(syncTimer.current);
-        syncTimer.current = setTimeout(() => {
-          saveToFirebase(withAudit);
-        }, 1200);
-        return withAudit;
+        return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, st);
       });
     },
     [],

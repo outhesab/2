@@ -1,5 +1,14 @@
 import type { DB } from "@/types";
 import { formatMoney } from "@/lib/utils-tr";
+import {
+  computeAlacak,
+  computeBorc,
+  computeKasaByType,
+  computeKasaToplam,
+  computeStokDeger,
+  getLowStockProducts,
+  getOutOfStockProducts,
+} from "@/lib/dbUtils";
 
 export function offlineReply(db: DB, query: string): string {
   const q = query.toLowerCase();
@@ -26,13 +35,11 @@ export function offlineReply(db: DB, query: string): string {
     .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
 
   if (q.includes("stok") || q.includes("ürün") || q.includes("sipariş")) {
-    const activeProducts = db.products.filter((p) => !p.deleted);
-    const out = activeProducts.filter((p) => p.stock === 0);
-    const low = activeProducts.filter(
-      (p) => p.stock > 0 && p.stock <= p.minStock,
-    );
-    const stokDeger = activeProducts.reduce((s, p) => s + p.cost * p.stock, 0);
-    return `📦 **Stok Ozeti**\n- Toplam urun: ${activeProducts.length} | Stok degeri: ${formatMoney(stokDeger)}\n- Stok biten: ${out.length}${
+    const out = getOutOfStockProducts(db);
+    const low = getLowStockProducts(db);
+    const stokDeger = computeStokDeger(db);
+    const totalUrun = db.products.filter((p) => !p.deleted).length;
+    return `📦 **Stok Ozeti**\n- Toplam urun: ${totalUrun} | Stok degeri: ${formatMoney(stokDeger)}\n- Stok biten: ${out.length}${
       out.length
         ? "\n  " +
           out
@@ -56,12 +63,8 @@ export function offlineReply(db: DB, query: string): string {
     q.includes("para") ||
     q.includes("sermaye")
   ) {
-    const alacak = db.cari
-      .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-      .reduce((s, c) => s + c.balance, 0);
-    const borc = db.cari
-      .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
-      .reduce((s, c) => s + c.balance, 0);
+    const alacak = computeAlacak(db);
+    const borc = computeBorc(db);
     const netSermaye = kasaToplam + alacak - borc;
     return `💰 **Kasa ve Sermaye**\n- Nakit: ${formatMoney(nakit)}\n- Banka: ${formatMoney(banka)}\n- Toplam Kasa: ${formatMoney(kasaToplam)}\n- Musteri Alacagi: ${formatMoney(alacak)}\n- Tedarikci Borcu: ${formatMoney(borc)}\n- **Net Sermaye: ${formatMoney(netSermaye)}**\n\n⚠️ *Cevrimdisi mod*`;
   }
@@ -73,9 +76,7 @@ export function offlineReply(db: DB, query: string): string {
     q.includes("tahsilat")
   ) {
     const activeCari = db.cari.filter((c) => !c.deleted);
-    const alacak = activeCari
-      .filter((c) => c.type === "musteri" && c.balance > 0)
-      .reduce((s, c) => s + c.balance, 0);
+    const alacak = computeAlacak(db);
     const topBorclu = [...activeCari]
       .filter((c) => c.type === "musteri" && c.balance > 0)
       .sort((a, b) => b.balance - a.balance)
@@ -148,13 +149,9 @@ export function offlineReply(db: DB, query: string): string {
     q.includes("öneri") ||
     q.includes("ipucu")
   ) {
-    const out = db.products.filter((p) => !p.deleted && p.stock === 0).length;
-    const low = db.products.filter(
-      (p) => !p.deleted && p.stock > 0 && p.stock <= p.minStock,
-    ).length;
-    const alacak = db.cari
-      .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-      .reduce((s, c) => s + c.balance, 0);
+    const out = getOutOfStockProducts(db).length;
+    const low = getLowStockProducts(db).length;
+    const alacak = computeAlacak(db);
     const riskler: string[] = [];
     if (kasaToplam < 5000)
       riskler.push(`💸 Kasa dusuk: ${formatMoney(kasaToplam)}`);
@@ -194,22 +191,12 @@ export function buildContext(
       new Date(s.createdAt) >= lastMonthStart &&
       new Date(s.createdAt) <= lastMonthEnd,
   );
-  const totalKasa = db.kasa
-    .filter((k) => !k.deleted)
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
-  const nakit = db.kasa
-    .filter((k) => !k.deleted && k.kasa === "nakit")
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
-  const banka = db.kasa
-    .filter((k) => !k.deleted && k.kasa === "banka")
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
-  const outStock = db.products.filter((p) => !p.deleted && p.stock === 0);
-  const lowStock = db.products.filter(
-    (p) => !p.deleted && p.stock > 0 && p.stock <= p.minStock,
-  );
-  const stokDeger = db.products
-    .filter((p) => !p.deleted)
-    .reduce((s, p) => s + p.cost * p.stock, 0);
+  const totalKasa = computeKasaToplam(db);
+  const nakit = computeKasaByType(db, "nakit");
+  const banka = computeKasaByType(db, "banka");
+  const outStock = getOutOfStockProducts(db);
+  const lowStock = getLowStockProducts(db);
+  const stokDeger = computeStokDeger(db);
 
   // Top ürünler — satış adedi ve ciro bazlı
   const productSales: Record<
@@ -270,12 +257,8 @@ export function buildContext(
     .filter((c) => c.days !== null && c.days >= 30)
     .sort((a, b) => (b.days ?? 0) - (a.days ?? 0));
 
-  const alacak = db.cari
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-    .reduce((s, c) => s + c.balance, 0);
-  const borc = db.cari
-    .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
-    .reduce((s, c) => s + c.balance, 0);
+  const alacak = computeAlacak(db);
+  const borc = computeBorc(db);
   const topBorclu = [...db.cari]
     .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
     .sort((a, b) => b.balance - a.balance)

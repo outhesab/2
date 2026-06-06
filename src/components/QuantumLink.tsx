@@ -9,35 +9,7 @@ import type { DB } from '@/types';
 import { formatMoney } from '@/lib/utils-tr';
 import { dispatchAgentFlow } from '@/agents/orchestrator';
 import { logger } from '@/lib/logger';
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  onresult: ((e: SpeechRecognitionEvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-}
-
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult;
-  length: number;
-}
-
-interface SpeechRecognitionResult {
-  [index: number]: SpeechRecognitionAlternative;
-  length: number;
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string;
-  confidence: number;
-}
+import { speak, hasSpeechRecognition, createSpeechRecognition, type SpeechRecognition } from '@/lib/audio';
 
 interface QuantumLinkProps {
   db: DB;
@@ -224,20 +196,12 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
       if (isAgentCommand) {
         const successMsg = `✅ İşlem tamamlandı: ${text}`;
         setMessages(prev => [...prev, { role: 'assistant', text: successMsg }]);
-        try {
-          const u = new SpeechSynthesisUtterance('İşlem tamamlandı');
-          u.lang = 'tr-TR'; u.rate = 1.1;
-          window.speechSynthesis.speak(u);
-        } catch { logger.warn('speech', 'Sesli bildirim oynatılamadı'); }
+        speak('İşlem tamamlandı');
       } else {
         // Soru tipli → quickReply
         const response = quickReply(db, text);
         setMessages(prev => [...prev, { role: 'assistant', text: response }]);
-        try {
-          const u = new SpeechSynthesisUtterance(response.replace(/[•\n]/g, ' '));
-          u.lang = 'tr-TR'; u.rate = 1.1;
-          window.speechSynthesis.speak(u);
-        } catch { logger.warn('speech', 'Sesli yanıt oynatılamadı'); }
+        speak(response.replace(/[•\n]/g, ' '));
       }
     } catch (err) {
       const errMsg = `❌ Hata: ${err instanceof Error ? err.message : 'İşlem başarısız'}`;
@@ -248,15 +212,11 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
   }, [db]);
 
   useEffect(() => {
-    const SR = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
-    if (!SR) return;
-    const instance = new (SR as new () => SpeechRecognition)();
-    instance.continuous = false;
-    instance.lang = 'tr-TR';
-    instance.onresult = (e: SpeechRecognitionEvent) => processCommand(e.results[0][0].transcript);
-    instance.onend = () => setIsListening(false);
-    instance.onerror = () => setIsListening(false);
-    recognitionRef.current = instance;
+    recognitionRef.current = createSpeechRecognition(
+      (transcript) => processCommand(transcript),
+      () => setIsListening(false),
+      () => setIsListening(false),
+    );
   }, [processCommand]);
 
   const toggleListening = () => {
@@ -274,7 +234,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
     setInputText('');
   };
 
-  const hasSpeech = !!(window as unknown as Record<string, unknown>).SpeechRecognition || !!(window as unknown as Record<string, unknown>).webkitSpeechRecognition;
+  const hasSpeech = hasSpeechRecognition();
 
   const changePalette = (id: PaletteId) => {
     setPaletteId(id);

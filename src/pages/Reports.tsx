@@ -1,6 +1,14 @@
 import { exportArrayToExcel as exportToExcel } from "@/lib/excelExport";
 import { downloadObjectSheetsAsXlsx } from "@/lib/safeXlsx";
 import { formatDate, formatMoney } from "@/lib/utils-tr";
+import {
+  computeAlacak,
+  computeBorc,
+  computeKasaToplam,
+  computeStokDeger,
+  getLowStockProducts,
+  getOutOfStockProducts,
+} from "@/lib/dbUtils";
 import type { DB } from "@/types";
 import { useMemo, useState } from "react";
 import {
@@ -227,18 +235,10 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
       ? null
       : `${curr >= prev ? "▲" : "▼"} %${Math.abs(((curr - prev) / prev) * 100).toFixed(1)}`;
 
-  const alacak = db.cari
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-    .reduce((s, c) => s + c.balance, 0);
-  db.cari
-    .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
-    .reduce((s, c) => s + c.balance, 0);
-  const kasaToplam = db.kasa
-    .filter((e) => !e.deleted)
-    .reduce((s, e) => s + (e.type === "gelir" ? e.amount : -e.amount), 0);
-  const stokDeger = db.products
-    .filter((p) => !p.deleted)
-    .reduce((s, p) => s + p.cost * p.stock, 0);
+  const alacak = computeAlacak(db);
+  void computeBorc(db);
+  const kasaToplam = computeKasaToplam(db);
+  const stokDeger = computeStokDeger(db);
 
   // Günlük ciro (son 14 gün)
   const dailyData = useMemo(() => {
@@ -372,10 +372,8 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <SectionBox title="⚠️ Stok Uyarıları">
           {(() => {
-            const out = db.products.filter((p) => !p.deleted && p.stock === 0);
-            const low = db.products.filter(
-              (p) => !p.deleted && p.stock > 0 && p.stock <= p.minStock,
-            );
+            const out = getOutOfStockProducts(db);
+            const low = getLowStockProducts(db);
             if (!out.length && !low.length)
               return (
                 <div

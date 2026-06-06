@@ -5,6 +5,7 @@ import { useToast } from "@/components/Toast";
 import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
 import { isExactMatch, similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
+import { lblMuted as lbl, inpCard as inp } from "@/lib/formStyles";
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1248,23 +1249,8 @@ export default function Cari({ db, save }: Props) {
   );
 }
 
-const lbl: React.CSSProperties = {
-  display: "block",
-  marginBottom: 6,
-  color: "var(--text-muted)",
-  fontSize: "0.85rem",
-  fontWeight: 500,
-};
-const inp: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 14px",
-  background: "var(--bg-card)",
-  border: "1px solid var(--border)",
-  borderRadius: 10,
-  color: "var(--text-primary)",
-  fontSize: "0.9rem",
-  boxSizing: "border-box",
-};
+
+
 
 function StatCard({
   label,

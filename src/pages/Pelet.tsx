@@ -4,6 +4,7 @@ import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { genId, formatMoney, formatDate } from '@/lib/utils-tr';
 import type { DB, PeletSupplier, PeletOrder } from '@/types';
+import { lbl, inp } from '@/lib/formStyles';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -229,6 +230,3 @@ export default function Pelet({ db, save }: Props) {
     </div>
   );
 }
-
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };
