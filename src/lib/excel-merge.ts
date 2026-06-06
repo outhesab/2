@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { assertSafeSpreadsheetFile, downloadAoASheetsAsXlsx, makeSafeHeaders, parseCsvText, readSafeWorkbook } from "./safeXlsx";
 
 export interface SheetData {
@@ -198,6 +199,7 @@ export async function parseJsonFile(file: File): Promise<ExcelFile> {
   try {
     data = JSON.parse(text);
   } catch {
+    logger.warn("excelMerge", "JSON ayrıştırma hatası");
     throw new Error("Geçersiz JSON dosyası");
   }
 
@@ -479,7 +481,7 @@ export function searchAcrossFiles(
 
   let regex: RegExp | null = null;
   if (matchType === "regex") {
-    try { regex = new RegExp(query, "i"); } catch { return results; }
+    try { regex = new RegExp(query, "i"); } catch { logger.warn("excelMerge", "Geçersiz regex deseni"); return results; }
   } else if (matchType === "wildcard") {
     const escaped = query.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
     regex = new RegExp(`^${escaped}$`, "i");

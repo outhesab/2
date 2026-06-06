@@ -67,6 +67,7 @@ export async function listBackupsFromFirebase(): Promise<
       }))
       .sort((a, b) => b.version - a.version);
   } catch {
+    logger.warn('db', 'Yedek listesi Firebase\'den alınamadı');
     return [];
   }
 }
@@ -78,6 +79,7 @@ export async function restoreBackupFromFirebase(backupId: string): Promise<DB | 
     if (!doc?.data) return null;
     return JSON.parse(doc.data) as DB;
   } catch {
+    logger.warn('db', 'Yedek Firebase\'den geri yüklenemedi');
     return null;
   }
 }

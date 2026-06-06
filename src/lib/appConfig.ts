@@ -3,6 +3,7 @@
  * Uygulama adı, versiyon ve ikon sistemi buradan yönetilir.
  */
 
+import { logger } from "@/lib/logger";
 import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
 
 export const APP_NAME = BRAND_NAME;
@@ -23,7 +24,9 @@ export function loadAppConfig(): AppConfig {
   try {
     const raw = localStorage.getItem(APP_STORAGE_KEY);
     if (raw) return { ...defaultConfig(), ...JSON.parse(raw) };
-  } catch { /* ignore */ }
+  } catch {
+    logger.warn("appConfig", "Yapılandırma yüklenemedi");
+    /* ignore */ }
   return defaultConfig();
 }
 

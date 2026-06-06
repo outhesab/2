@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { downloadAoASheetsAsXlsx, downloadObjectSheetsAsXlsx } from '@/lib/safeXlsx';
 import type { DB } from '@/types';
 
@@ -10,6 +11,7 @@ function fmtDate(iso: string): string {
     const yyyy = d.getFullYear();
     return `${dd}.${mm}.${yyyy}`;
   } catch {
+    logger.warn("excelExport", "Tarih biçimlendirme hatası");
     return iso;
   }
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { logger } from '@/lib/logger';
 
 export type SoundType = 'success' | 'error' | 'warning' | 'sale' | 'notification';
 export type SoundTheme = 'standart' | 'minimal' | 'yogun';
@@ -22,6 +23,7 @@ function loadSoundSettings(): SoundSettings {
     const parsed = JSON.parse(raw);
     return { ...DEFAULT_SOUND_SETTINGS, ...(parsed.soundSettings || {}) };
   } catch {
+    logger.warn('sound', 'Ses ayarları okunamadı, varsayılan kullanıldı');
     return DEFAULT_SOUND_SETTINGS;
   }
 }
@@ -150,7 +152,7 @@ function loadSpeechEnabled(): boolean {
     if (!raw) return true;
     const parsed = JSON.parse(raw);
     return parsed.soundSettings?.speechEnabled !== false;
-  } catch { return true; }
+  } catch { logger.warn('sound', 'Konuşma ayarı okunamadı'); return true; }
 }
 
 // Android WebView'da AudioContext'i kullanıcı etkileşimiyle başlat
@@ -163,6 +165,7 @@ function getOrCreateAudioContext(): AudioContext | null {
     }
     return _globalCtx;
   } catch {
+    logger.warn('sound', 'AudioContext oluşturulamadı');
     return null;
   }
 }
@@ -195,6 +198,7 @@ export function useSoundFeedback() {
         ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
         _globalCtx = ctxRef.current;
       } catch {
+        logger.warn('sound', 'AudioContext oluşturulamadı');
         return null;
       }
     }

@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { logger } from '@/lib/logger';
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
@@ -15,7 +16,10 @@ function listFiles(dir: string, ext: string, results: string[] = []): string[] {
         results.push(full);
       }
     }
-  } catch { /* skip */ }
+  } catch {
+    logger.warn('error', 'Klasör taranırken hata oluştu');
+    /* skip */
+  }
   return results;
 }
 
@@ -33,6 +37,7 @@ export const errorRules: SpecRule[] = [
         const passed = routes > 0 && suspense > 0;
         return { passed, violations: passed ? [] : [{ file: "src/App.tsx", message: `${routes} route var ama Suspense bulunamadı` }] };
       } catch {
+        logger.warn('error', 'App.tsx Suspense kontrolü sırasında hata oluştu');
         return { passed: false, violations: [{ file: "src/App.tsx", message: "Okunamadı" }] };
       }
     },
@@ -51,7 +56,10 @@ export const errorRules: SpecRule[] = [
           if (content.includes("catch") && !content.includes("showToast")) {
             violations.push({ file, message: "try/catch var ama showToast kullanılmıyor" });
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('error', 'Toast import kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },
@@ -69,6 +77,7 @@ export const errorRules: SpecRule[] = [
         }
         return { passed: true, violations: [] };
       } catch {
+        logger.warn('error', 'ErrorBoundary dosyası okunurken hata oluştu');
         return { passed: false, violations: [{ file: "ErrorBoundary", message: "Dosya bulunamadı" }] };
       }
     },

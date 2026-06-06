@@ -1,5 +1,6 @@
 ﻿import React, { useState } from "react";
 import { DEFAULT_CONN, saveConnConfig, testFirebase, testSupabase, type ConnConfig } from "@/lib/connConfig";
+import { logger } from "@/lib/logger";
 import { Card } from "./SettingsCard";
 
 export function BaglantiAyarlari({
@@ -64,14 +65,14 @@ export function BaglantiAyarlari({
   };
 
   return (
-    <div className={"settings-grid-16"}>
+    <div className="grid gap-4">
       {/* Aktif SaÄŸlayÄ±cÄ± */}
       <Card title="ğŸ”Œ Aktif Senkronizasyon SaÄŸlayÄ±cÄ±sÄ±">
-        <p className={"settings-text-muted"}>
+        <p className="text-muted-foreground text-sm mb-3.5 leading-relaxed">
           Verileriniz hangi bulut servisiyle senkronize edilsin? Sadece bir
           saÄŸlayÄ±cÄ± aktif olabilir.
         </p>
-        <div className={"settings-flex-row-10"}>
+        <div className="flex items-center gap-2.5">
           {(
             [
               {
@@ -113,9 +114,9 @@ export function BaglantiAyarlari({
               >
                 {p.label}
               </div>
-              <div className={"settings-text-dim-sm"}>{p.desc}</div>
+              <div className="text-[var(--text-dim)] text-xs">{p.desc}</div>
               {cfg.activeProvider === p.id && (
-                <div className={"settings-text-success-sm"}>âœ“ Aktif</div>
+                <div className="text-[var(--color-success)] text-sm mb-1">âœ“ Aktif</div>
               )}
             </button>
           ))}
@@ -124,8 +125,8 @@ export function BaglantiAyarlari({
 
       {/* Firebase */}
       <Card title="ğŸ”¥ Firebase Firestore">
-        <div className={"settings-flex-row-10"}>
-          <div className={"settings-text-muted"}>
+        <div className="flex items-center gap-2.5">
+          <div className="text-muted-foreground text-sm mb-3.5 leading-relaxed">
             Firebase Firestore REST API ile senkronizasyon
           </div>
           <button
@@ -159,21 +160,21 @@ export function BaglantiAyarlari({
         </div>
 
         {/* JSON DosyasÄ± YÃ¼kleme */}
-        <div className={"settings-warning-dashed"}>
-          <div className={"settings-text-primary-mid"}>
+        <div className="bg-amber-500/[0.08] border border-dashed border-amber-500/30 rounded-[10px] p-4">
+          <div className="text-foreground font-bold">
             ğŸ“ Firebase Config DosyasÄ± YÃ¼kle
           </div>
-          <div className={"settings-text-dim-sm"}>
+          <div className="text-[var(--text-dim)] text-xs">
             Firebase Console'dan indirilen{" "}
-            <code className={"settings-text-orange"}>google-services.json</code>{" "}
+            <code className="text-[var(--color-warning)]">google-services.json</code>{" "}
             veya web config JSON dosyasÄ±nÄ± yÃ¼kleyin â€” alanlar otomatik dolar.
           </div>
-          <label className={"settings-block"}>
-            <div className={"settings-btn-orange"}>ğŸ“‚ JSON DosyasÄ± SeÃ§</div>
+          <label className="block">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm bg-[var(--color-warning)]/20 text-[var(--color-warning)] cursor-pointer">ğŸ“‚ JSON DosyasÄ± SeÃ§</div>
             <input
               type="file"
               accept=".json"
-              className={"settings-hidden"}
+              className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
@@ -212,6 +213,7 @@ export function BaglantiAyarlari({
                       "warning",
                     );
                   } catch {
+                    logger.warn('settings', 'Baglanti - JSON dosyası okunamadı');
                     showToast("âŒ JSON dosyasÄ± okunamadÄ±!", "error");
                   }
                 };
@@ -232,47 +234,47 @@ export function BaglantiAyarlari({
           }}
         >
           <div>
-            <label className={"settings-lbl"}>Project ID</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Project ID</label>
             <input
               value={cfg.firebase.projectId}
               onChange={(e) => setFb({ projectId: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="Ã¶rn: my-project-12345"
             />
           </div>
           <div>
-            <label className={"settings-lbl"}>API Key</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">API Key</label>
             <input
               type="password"
               value={cfg.firebase.apiKey}
               onChange={(e) => setFb({ apiKey: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="AIza..."
             />
           </div>
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>DokÃ¼man Yolu</label>
+          <div className="w-full">
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">DokÃ¼man Yolu</label>
             <input
               value={cfg.firebase.docPath}
               onChange={(e) => setFb({ docPath: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="sync/main"
             />
-            <div className={"settings-text-dim-13"}>
+            <div className="text-[var(--text-dim)] text-xs mt-1">
               Firestore'daki koleksiyon/dokÃ¼man yolu. Ã–rn:{" "}
-              <code className={"settings-text-orange"}>sync/main</code>
+              <code className="text-[var(--color-warning)]">sync/main</code>
             </div>
           </div>
         </div>
 
         {/* OluÅŸturulan URL Ã¶nizleme */}
         {cfg.firebase.projectId && cfg.firebase.apiKey && (
-          <div className={"settings-mono-box"}>
+          <div className="bg-[rgba(0,0,0,0.3)] rounded-[10px] p-3 font-mono text-xs">
             {`Firebase: ${cfg.firebase.projectId}/${cfg.firebase.docPath} (SDK ile baÄŸlÄ±)`}
           </div>
         )}
 
-        <div className={"settings-flex-row-10"}>
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleFbTest}
             disabled={
@@ -310,18 +312,18 @@ export function BaglantiAyarlari({
         </div>
 
         {/* NasÄ±l alÄ±nÄ±r? */}
-        <details className={"settings-mt-14"}>
-          <summary className={"settings-text-dim-8"}>
+        <details className="mt-3.5">
+          <summary className="text-[var(--text-dim)] text-sm cursor-pointer font-semibold">
             ğŸ“– Firebase bilgilerini nereden alÄ±rÄ±m?
           </summary>
-          <div className={"settings-help-box"}>
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[10px] p-4 text-sm leading-relaxed">
             <div>
               1.{" "}
               <a
                 href="https://console.firebase.google.com"
                 target="_blank"
                 rel="noreferrer"
-                className={"settings-text-orange"}
+                className="text-[var(--color-warning)]"
               >
                 console.firebase.google.com
               </a>{" "}
@@ -329,17 +331,17 @@ export function BaglantiAyarlari({
             </div>
             <div>
               2. Proje AyarlarÄ± (âš™ï¸) â†’ Genel â†’ Proje kimliÄŸi ={" "}
-              <strong className={"settings-text-white"}>Project ID</strong>
+              <strong className="text-foreground">Project ID</strong>
             </div>
             <div>
               3. Proje AyarlarÄ± â†’ Web API anahtarÄ± ={" "}
-              <strong className={"settings-text-white"}>API Key</strong>
+              <strong className="text-foreground">API Key</strong>
             </div>
             <div>
               4. Firestore Database â†’ Koleksiyon ve dokÃ¼man adÄ± ={" "}
-              <strong className={"settings-text-white"}>DokÃ¼man Yolu</strong>
+              <strong className="text-foreground">DokÃ¼man Yolu</strong>
             </div>
-            <div className={"settings-text-orange"}>
+            <div className="text-[var(--color-warning)]">
               âš ï¸ Firestore gÃ¼venlik kurallarÄ±nÄ± ayarlamayÄ± unutmayÄ±n!
             </div>
           </div>
@@ -348,8 +350,8 @@ export function BaglantiAyarlari({
 
       {/* Supabase */}
       <Card title="âš¡ Supabase">
-        <div className={"settings-flex-row-10"}>
-          <div className={"settings-text-muted"}>
+        <div className="flex items-center gap-2.5">
+          <div className="text-muted-foreground text-sm mb-3.5 leading-relaxed">
             Supabase PostgreSQL ile senkronizasyon (REST API)
           </div>
           <button
@@ -391,42 +393,42 @@ export function BaglantiAyarlari({
             pointerEvents: cfg.supabase.enabled ? "auto" : "none",
           }}
         >
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>Supabase URL</label>
+          <div className="w-full">
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Supabase URL</label>
             <input
               value={cfg.supabase.url}
               onChange={(e) => setSb({ url: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="https://xxxxxxxxxxxx.supabase.co"
             />
           </div>
-          <div className={"settings-grid-full"}>
-            <label className={"settings-lbl"}>Anon Key (public)</label>
+          <div className="w-full">
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Anon Key (public)</label>
             <input
               type="password"
               value={cfg.supabase.anonKey}
               onChange={(e) => setSb({ anonKey: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
             />
           </div>
           <div>
-            <label className={"settings-lbl"}>Tablo AdÄ±</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Tablo AdÄ±</label>
             <input
               value={cfg.supabase.tableName}
               onChange={(e) => setSb({ tableName: e.target.value })}
-              className={"settings-inp"}
+              className="w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-strong)] box-border"
               placeholder="soba_sync"
             />
           </div>
         </div>
 
         {/* SQL ÅŸemasÄ± */}
-        <details className={"settings-mt-12"}>
-          <summary className={"settings-text-dim-8"}>
+        <details className="mt-3">
+          <summary className="text-[var(--text-dim)] text-sm cursor-pointer font-semibold">
             ğŸ“‹ Gerekli SQL ÅŸemasÄ±
           </summary>
-          <pre className={"settings-code-block"}>{`CREATE TABLE soba_sync (
+          <pre className="bg-[rgba(0,0,0,0.4)] rounded-lg p-4 overflow-x-auto text-xs font-mono leading-relaxed">{`CREATE TABLE soba_sync (
   id TEXT PRIMARY KEY DEFAULT 'main',
   data JSONB NOT NULL,
   version INTEGER DEFAULT 0,
@@ -438,7 +440,7 @@ ALTER TABLE soba_sync ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
         </details>
 
-        <div className={"settings-flex-row-10"}>
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleSbTest}
             disabled={sbTesting || !cfg.supabase.url || !cfg.supabase.anonKey}
@@ -472,18 +474,18 @@ CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
           )}
         </div>
 
-        <details className={"settings-mt-14"}>
-          <summary className={"settings-text-dim-8"}>
+        <details className="mt-3.5">
+          <summary className="text-[var(--text-dim)] text-sm cursor-pointer font-semibold">
             ğŸ“– Supabase bilgilerini nereden alÄ±rÄ±m?
           </summary>
-          <div className={"settings-help-box"}>
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-[10px] p-4 text-sm leading-relaxed">
             <div>
               1.{" "}
               <a
                 href="https://supabase.com/dashboard"
                 target="_blank"
                 rel="noreferrer"
-                className={"settings-text-success"}
+                className="text-[var(--color-success)]"
               >
                 supabase.com/dashboard
               </a>{" "}
@@ -491,11 +493,11 @@ CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
             </div>
             <div>
               2. Settings â†’ API â†’ Project URL ={" "}
-              <strong className={"settings-text-white"}>Supabase URL</strong>
+              <strong className="text-foreground">Supabase URL</strong>
             </div>
             <div>
               3. Settings â†’ API â†’ anon public ={" "}
-              <strong className={"settings-text-white"}>Anon Key</strong>
+              <strong className="text-foreground">Anon Key</strong>
             </div>
             <div>4. SQL Editor'da yukarÄ±daki ÅŸemayÄ± Ã§alÄ±ÅŸtÄ±rÄ±n</div>
           </div>
@@ -503,18 +505,18 @@ CREATE POLICY "allow_all" ON soba_sync FOR ALL USING (true);`}</pre>
       </Card>
 
       {/* Kaydet / SÄ±fÄ±rla */}
-      <div className={"settings-flex-row-10"}>
-        <button onClick={handleReset} className={"settings-btn-outline-md"}>
+      <div className="flex items-center gap-2.5">
+        <button onClick={handleReset} className="flex-1 py-[11px] px-0 rounded-[10px] font-bold text-sm border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap">
           â†º VarsayÄ±lana SÄ±fÄ±rla
         </button>
-        <button onClick={handleSave} className={"settings-btn-primary-md"}>
+        <button onClick={handleSave} className="flex-1 py-[11px] px-0 rounded-[10px] font-extrabold text-sm bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white cursor-pointer">
           ğŸ’¾ BaÄŸlantÄ± AyarlarÄ±nÄ± Kaydet
         </button>
       </div>
 
-      <div className={"settings-warning-box"}>
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
         âš ï¸ BaÄŸlantÄ± ayarlarÄ± deÄŸiÅŸtirildikten sonra{" "}
-        <strong className={"settings-text-white"}>sayfayÄ± yenileyin</strong> â€”
+        <strong className="text-foreground">sayfayÄ± yenileyin</strong> â€”
         yeni ayarlar aktif olur.
         <br />
         ğŸ”’ BaÄŸlantÄ± ayarlarÄ± Firebase'e kaydedilir â€” tÃ¼m cihazlarda geÃ§erlidir.

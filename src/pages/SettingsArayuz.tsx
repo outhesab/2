@@ -39,10 +39,10 @@ export function ArayuzAyarlari({
   };
 
   return (
-    <div className={"settings-grid-16"}>
+    <div className="grid gap-4">
       {/* HazÄ±r Temalar */}
       <Card title="ğŸ¨ Temalar">
-        <div className={"settings-grid-auto-150"}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
           {THEMES.map((t) => {
             const isActive =
               prefs.accent === t.accent &&
@@ -95,7 +95,7 @@ export function ArayuzAyarlari({
                 >
                   {t.label}
                 </div>
-                <div className={"settings-text-dim-11"}>{t.desc}</div>
+                <div className="text-[var(--text-dim)] text-[0.7rem] mt-0.5">{t.desc}</div>
                 {isActive && (
                   <div
                     style={{
@@ -125,7 +125,7 @@ export function ArayuzAyarlari({
 
       {/* Premium Temalar */}
       <Card title="ğŸ’ Premium Temalar">
-        <div className={"settings-grid-auto-150"}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
           {PREMIUM_THEMES.map((t) => {
             const isActive = prefs.themeId === t.id;
             return (
@@ -169,7 +169,7 @@ export function ArayuzAyarlari({
                 <div style={{ fontWeight: 700, color: isActive ? t.accent : "var(--text-primary)", fontSize: "0.82rem" }}>
                   {t.label}
                 </div>
-                <div className={"settings-text-dim-11"}>{t.desc}</div>
+                <div className="text-[var(--text-dim)] text-[0.7rem] mt-0.5">{t.desc}</div>
                 {isActive && (
                   <div style={{ position: "absolute", top: 7, right: 7, width: 16, height: 16, borderRadius: "50%", background: t.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: "var(--text-primary)", fontWeight: 900 }}>
                     âœ“
@@ -185,10 +185,10 @@ export function ArayuzAyarlari({
 
       {/* YazÄ± & Boyut */}
       <Card title="ğŸ”¤ YazÄ± & Boyut">
-        <div className={"settings-grid-2-16"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={"settings-lbl"}>YazÄ± Boyutu</label>
-            <div className={"settings-flex-row-6"}>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">YazÄ± Boyutu</label>
+            <div className="flex items-center gap-1.5">
               {([0.85, 1, 1.1, 1.2] as const).map((s) => (
                 <button
                   key={s}
@@ -215,8 +215,8 @@ export function ArayuzAyarlari({
             </div>
           </div>
           <div>
-            <label className={"settings-lbl"}>KÃ¶ÅŸe Yuvarlama</label>
-            <div className={"settings-flex-row-6"}>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">KÃ¶ÅŸe Yuvarlama</label>
+            <div className="flex items-center gap-1.5">
               {([6, 10, 14, 20] as const).map((r) => (
                 <button
                   key={r}
@@ -247,10 +247,10 @@ export function ArayuzAyarlari({
 
       {/* Animasyon & Mod */}
       <Card title="âš¡ Animasyon & GÃ¶rÃ¼nÃ¼m">
-        <div className={"settings-grid-2-16"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={"settings-lbl"}>Animasyon HÄ±zÄ±</label>
-            <div className={"settings-flex-wrap-6"}>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Animasyon HÄ±zÄ±</label>
+            <div className="flex flex-wrap items-center gap-1.5">
               {(["hizli", "normal", "yavas", "yok"] as const).map((s) => (
                 <button
                   key={s}
@@ -278,13 +278,13 @@ export function ArayuzAyarlari({
             </div>
           </div>
           <div>
-            <label className={"settings-lbl"}>Kompakt Mod</label>
-            <div className={"settings-flex-row-12"}>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Kompakt Mod</label>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <div className="text-foreground text-sm font-semibold">
                   SÄ±kÄ±ÅŸÄ±k GÃ¶rÃ¼nÃ¼m
                 </div>
-                <div className={"settings-text-dim-2"}>
+                <div className="text-[var(--text-dim)] text-xs mt-0.5">
                   Tablo ve padding'leri kÃ¼Ã§Ã¼ltÃ¼r
                 </div>
               </div>
@@ -322,9 +322,9 @@ export function ArayuzAyarlari({
       </Card>
 
       <Card title="ğŸ§© Dashboard DÃ¼zenleme">
-        <div className={"settings-grid-2-16"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={"settings-lbl"}>ParlaklÄ±k</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">ParlaklÄ±k</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <input
                 type="range"
@@ -340,7 +340,7 @@ export function ArayuzAyarlari({
           <div />
         </div>
         <div style={{ marginTop: 14 }}>
-          <label className={"settings-lbl"}>Widget'lar</label>
+          <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Widget'lar</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {WIDGET_OPTIONS.map((w) => {
               const idx = dashboardPrefs.leftWidgets.indexOf(w.id);
@@ -385,13 +385,13 @@ export function ArayuzAyarlari({
       </Card>
 
       {/* SÄ±fÄ±rla */}
-      <div className={"settings-flex-row-10"}>
+      <div className="flex items-center gap-2.5">
         <button
           onClick={() => {
             onChange(DEFAULT_PREFS);
             showToast("VarsayÄ±lan tema geri yÃ¼klendi!", "success");
           }}
-          className={"settings-btn-outline-md"}
+          className="flex-1 py-[11px] px-0 rounded-[10px] font-bold text-sm border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
         >
           â†º VarsayÄ±lana SÄ±fÄ±rla
         </button>
@@ -415,11 +415,11 @@ export function ArayuzAyarlari({
 
       {/* Floating Buton AyarlarÄ± */}
       <Card title="ğŸ”˜ Kayan Buton AyarlarÄ±">
-        <p className={"settings-text-gray"}>
+        <p className="text-muted-foreground text-sm mb-4">
           Ekrandaki kayan butonlarÄ± gÃ¶ster/gizle. ButonlarÄ± istediÄŸiniz yere
           sÃ¼rÃ¼kleyebilirsiniz.
         </p>
-        <div className={"settings-grid-10"}>
+        <div className="grid gap-2.5">
           {[
             {
               key: "showAIButton" as const,
@@ -440,11 +440,11 @@ export function ArayuzAyarlari({
               desc: "Hata bildirme, not alma ve takip butonu",
             },
           ].map((item) => (
-            <div key={item.key} className={"settings-flex-row-12"}>
-              <span className={"settings-text-lg"}>{item.icon}</span>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>{item.label}</div>
-                <div className={"settings-text-dim-7"}>{item.desc}</div>
+            <div key={item.key} className="flex items-center gap-3">
+              <span className="text-lg">{item.icon}</span>
+              <div className="flex-1">
+                <div className="text-foreground text-sm font-semibold">{item.label}</div>
+                <div className="text-[var(--text-dim)] text-xs mt-0.5">{item.desc}</div>
               </div>
               <div
                 onClick={() =>
@@ -484,20 +484,20 @@ export function ArayuzAyarlari({
               localStorage.removeItem("reportBtnPos");
               showToast("Buton konumlarÄ± sÄ±fÄ±rlandÄ±!", "success");
             }}
-            className={"settings-btn-outline-sm"}
+            className="py-2 px-4 rounded-lg font-semibold text-xs border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
           >
             ğŸ“ Buton KonumlarÄ±nÄ± SÄ±fÄ±rla
           </button>
         </div>
       </Card>
       {/* SÄ±fÄ±rla */}
-      <div className={"settings-flex-row-10"}>
+      <div className="flex items-center gap-2.5">
         <button
           onClick={() => {
             onChange(DEFAULT_PREFS);
             showToast("VarsayÄ±lan tema geri yÃ¼klendi!", "success");
           }}
-          className={"settings-btn-outline-md"}
+          className="flex-1 py-[11px] px-0 rounded-[10px] font-bold text-sm border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
         >
           â†º VarsayÄ±lana SÄ±fÄ±rla
         </button>
@@ -521,11 +521,11 @@ export function ArayuzAyarlari({
 
       {/* Floating Buton AyarlarÄ± */}
       <Card title="ğŸ”˜ Kayan Buton AyarlarÄ±">
-        <p className={"settings-text-gray"}>
+        <p className="text-muted-foreground text-sm mb-4">
           Ekrandaki kayan butonlarÄ± gÃ¶ster/gizle. ButonlarÄ± istediÄŸiniz yere
           sÃ¼rÃ¼kleyebilirsiniz.
         </p>
-        <div className={"settings-grid-10"}>
+        <div className="grid gap-2.5">
           {[
             {
               key: "showAIButton" as const,
@@ -546,11 +546,11 @@ export function ArayuzAyarlari({
               desc: "Hata bildirme, not alma ve takip butonu",
             },
           ].map((item) => (
-            <div key={item.key} className={"settings-flex-row-12"}>
-              <span className={"settings-text-lg"}>{item.icon}</span>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>{item.label}</div>
-                <div className={"settings-text-dim-7"}>{item.desc}</div>
+            <div key={item.key} className="flex items-center gap-3">
+              <span className="text-lg">{item.icon}</span>
+              <div className="flex-1">
+                <div className="text-foreground text-sm font-semibold">{item.label}</div>
+                <div className="text-[var(--text-dim)] text-xs mt-0.5">{item.desc}</div>
               </div>
               <div
                 onClick={() =>
@@ -590,7 +590,7 @@ export function ArayuzAyarlari({
               localStorage.removeItem("reportBtnPos");
               showToast("Buton konumlarÄ± sÄ±fÄ±rlandÄ±!", "success");
             }}
-            className={"settings-btn-outline-sm"}
+            className="py-2 px-4 rounded-lg font-semibold text-xs border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
           >
             ğŸ“ Buton KonumlarÄ±nÄ± SÄ±fÄ±rla
           </button>

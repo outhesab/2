@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { logger } from '@/lib/logger';
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
@@ -23,6 +24,7 @@ export const navigationRules: SpecRule[] = [
         }
         return { passed: violations.length === 0, violations };
       } catch {
+        logger.warn('navigation', 'App.tsx okunurken hata oluştu');
         return { passed: false, violations: [{ file: "src/App.tsx", message: "Okunamadı" }] };
       }
     },
@@ -47,6 +49,7 @@ export const navigationRules: SpecRule[] = [
         }
         return { passed: violations.length === 0, violations };
       } catch {
+        logger.warn('navigation', 'tabs.ts okunurken hata oluştu');
         return { passed: false, violations: [{ file: "src/config/tabs.ts", message: "Okunamadı" }] };
       }
     },

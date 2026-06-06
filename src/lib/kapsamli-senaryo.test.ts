@@ -2739,13 +2739,12 @@ describe("🏪 Kapsamlı Senaryo Testleri", () => {
             }),
           ),
           (entries) => {
+            let computed = 0;
+            const active = entries.filter((e) => !e.deleted);
+            for (let i = 0; i < active.length; i++) {
+              computed += active[i].type === "gelir" ? active[i].amount : -active[i].amount;
+            }
             const beklenen = entries
-              .filter((e) => !e.deleted)
-              .reduce(
-                (s, e) => s + (e.type === "gelir" ? e.amount : -e.amount),
-                0,
-              );
-            const computed = entries
               .filter((e) => !e.deleted)
               .reduce(
                 (s, e) => s + (e.type === "gelir" ? e.amount : -e.amount),

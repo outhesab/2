@@ -5,7 +5,8 @@
 
 import { loadConnConfig } from '@/lib/connConfig';
 import { logger } from '@/lib/logger';
-import { indexedDb } from '@/db/indexeddb';
+import { indexedDb } from '@/lib/db/indexeddb';
+import { encrypt, decrypt } from '@/lib/crypto';
 
 const USERS_CACHE_KEY = 'soba_users_cache';
 
@@ -42,16 +43,27 @@ function loadUsersFromCache(): AppUser[] {
   try {
     const raw = localStorage.getItem(USERS_CACHE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed as AppUser[] : [];
+    // Legacy plaintext JSON — güncelleme sırasında dönüştürülür
+    if (raw.startsWith('[')) {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed as AppUser[] : [];
+    }
+    // Şifreli format — "aes-gcm:" + encrypted payload
+    if (raw.startsWith('aes-gcm:')) {
+      const decrypted = await decrypt(raw.slice(8));
+      const parsed = JSON.parse(decrypted);
+      return Array.isArray(parsed) ? parsed as AppUser[] : [];
+    }
+    return [];
   } catch {
     return [];
   }
 }
 
-function saveUsersToCache(users: AppUser[]): void {
+async function saveUsersToCache(users: AppUser[]): Promise<void> {
   try {
-    localStorage.setItem(USERS_CACHE_KEY, JSON.stringify(users));
+    const encrypted = await encrypt(JSON.stringify(users));
+    localStorage.setItem(USERS_CACHE_KEY, 'aes-gcm:' + encrypted);
   } catch {
     // localStorage yazilamasa da akisi bozmuyoruz
   }
@@ -86,7 +98,7 @@ export async function loadUsers(): Promise<AppUser[]> {
     const raw = json?.fields?.data?.stringValue;
     if (!raw) return loadUsersFromCache();
     const users = JSON.parse(raw) as AppUser[];
-    saveUsersToCache(users);
+    await saveUsersToCache(users);
     return users;
   } catch {
     return loadUsersFromCache();
@@ -94,7 +106,7 @@ export async function loadUsers(): Promise<AppUser[]> {
 }
 
 export async function saveUsers(users: AppUser[]): Promise<boolean> {
-  saveUsersToCache(users);
+  await saveUsersToCache(users);
 
   const url = getUsersUrl();
   if (!url) return true;
@@ -107,7 +119,6 @@ export async function saveUsers(users: AppUser[]): Promise<boolean> {
   });
 
   try {
-    // Önce PATCH dene (döküman varsa günceller)
     const patchRes = await fetch(url, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -117,7 +128,6 @@ export async function saveUsers(users: AppUser[]): Promise<boolean> {
 
     if (patchRes.ok) return true;
 
-    // 404 ise döküman yok — koleksiyon URL'i ile POST ile oluştur
     if (patchRes.status === 404) {
       const projectId = getFirebaseProject();
       const apiKey = getFirebaseApiKey();
@@ -129,10 +139,9 @@ export async function saveUsers(users: AppUser[]): Promise<boolean> {
         signal: AbortSignal.timeout(8000),
       });
       if (postRes.ok) return true;
-      return true;
     }
 
-    return true;
+    return false;
   } catch (e) {
     console.warn('Firebase bağlantı hatası, kullanıcılar yerelde saklandı:', e);
     return true;
@@ -144,7 +153,7 @@ export async function verifyPassword(password: string, storedHash: string): Prom
   // PBKDF2 format (salt:hash)
   if (storedHash.includes(':')) {
     const [saltHex, hashHex] = storedHash.split(':');
-    const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+    const salt = new Uint8Array((saltHex.match(/.{2}/g) ?? []).map(b => parseInt(b, 16)));
     const keyMaterial = await crypto.subtle.importKey(
       'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits'],
     );
@@ -157,6 +166,7 @@ export async function verifyPassword(password: string, storedHash: string): Prom
   }
   // Legacy SHA-256 fallback (64 hex chars, salt'sız eski hash)
   if (storedHash.length === 64 && /^[0-9a-f]{64}$/i.test(storedHash)) {
+    logger.warn('auth', 'Legacy SHA-256 hash doğrulandı — upgrade-on-login tetiklenecek');
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
     const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     return hashHex.toLowerCase() === storedHash.toLowerCase();

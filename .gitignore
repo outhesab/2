@@ -57,6 +57,9 @@ dev_output.txt
 .DS_Store
 Thumbs.db
 
+# Arşivlenmiş tek-kullanımlık script'ler
+scripts/archive/
+
 # Geliştirme çıktıları
 console-logs.txt
 *.png

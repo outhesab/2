@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { DB } from '@/types';
 import { formatMoney } from '@/lib/utils-tr';
 import { dispatchAgentFlow } from '@/agents/orchestrator';
+import { logger } from '@/lib/logger';
 
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
@@ -69,11 +70,11 @@ const PALETTES: QLPalette[] = [
 const PALETTE_KEY = 'parspel-ql-palette';
 
 function loadPalette(): PaletteId {
-  try { return (localStorage.getItem(PALETTE_KEY) as PaletteId) || 'blue'; } catch { return 'blue'; }
+  try { return (localStorage.getItem(PALETTE_KEY) as PaletteId) || 'blue'; } catch { logger.warn('storage', 'Palette yüklenemedi, varsayılan kullanıldı'); return 'blue'; }
 }
 
 function savePalette(id: PaletteId) {
-  try { localStorage.setItem(PALETTE_KEY, id); } catch { /* */ }
+  try { localStorage.setItem(PALETTE_KEY, id); } catch { logger.warn('storage', 'Palette kaydedilemedi'); /* */ }
 }
 
 // ── Quick Reply ────────────────────────────────────────────────────
@@ -227,7 +228,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
           const u = new SpeechSynthesisUtterance('İşlem tamamlandı');
           u.lang = 'tr-TR'; u.rate = 1.1;
           window.speechSynthesis.speak(u);
-        } catch { void 0; }
+        } catch { logger.warn('speech', 'Sesli bildirim oynatılamadı'); }
       } else {
         // Soru tipli → quickReply
         const response = quickReply(db, text);
@@ -236,7 +237,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
           const u = new SpeechSynthesisUtterance(response.replace(/[•\n]/g, ' '));
           u.lang = 'tr-TR'; u.rate = 1.1;
           window.speechSynthesis.speak(u);
-        } catch { void 0; }
+        } catch { logger.warn('speech', 'Sesli yanıt oynatılamadı'); }
       }
     } catch (err) {
       const errMsg = `❌ Hata: ${err instanceof Error ? err.message : 'İşlem başarısız'}`;
@@ -263,7 +264,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
       recognitionRef.current?.stop();
       setIsListening(false);
     } else {
-      try { recognitionRef.current?.start(); setIsListening(true); } catch { setIsListening(false); }
+      try { recognitionRef.current?.start(); setIsListening(true); } catch { logger.warn('speech', 'Ses tanıma başlatılamadı'); setIsListening(false); }
     }
   };
 

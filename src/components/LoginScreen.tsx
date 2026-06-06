@@ -127,6 +127,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
         setStatusMsg(`${users.filter(u => u.active).length} kullanıcı hazır`);
       }
     } catch {
+      logger.warn('auth', 'Firebase bağlantısı kurulamadı');
       setFbStatus('error');
       setStatusMsg('Firebase bağlantısı kurulamadı');
     }

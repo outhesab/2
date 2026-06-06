@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { logger } from '@/lib/logger';
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
@@ -9,7 +10,7 @@ const SYSTEM_FILES = [
   "logger.ts", "consoleRecorder.ts", "firebase.ts", "tabs.ts",
   "version.ts", "specs", "ErrorBoundary.tsx", "SetupWizard.tsx",
   "QuantumLink.tsx", "ReportButton.tsx", "useDraggableButton.ts",
-  "agentConfig.ts", "healthCheck.ts", "storageQuota.ts", "userManager.ts",
+  "agentConfig.ts", "healthCheck.ts", "userManager.ts",
   "db/core.ts", "Settings.tsx",
 ];
 
@@ -24,7 +25,10 @@ function walkFiles(dir: string, ext: string, results: string[] = []): string[] {
         results.push(full);
       }
     }
-  } catch { /* skip */ }
+  } catch {
+    logger.warn('data', 'Klasör taranırken hata oluştu');
+    /* skip */
+  }
   return results;
 }
 
@@ -44,9 +48,15 @@ export const dataRules: SpecRule[] = [
           const lines = content.split("\n");
           for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('localStorage.setItem("sobaYonetim"') || lines[i].includes("localStorage.setItem('sobaYonetim'")) {
-              violations.push({ file, line: i + 1, message: "save() kullanılmalı, doğrudan DB yazımı yasak" });
+                violations.push({ file, line: i + 1, message: "save() kullanılmalı, doğrudan DB yazımı yasak" });
+              }
             }
           }
+        } catch {
+          logger.warn('data', 'DB yazma kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
+      }
         } catch { /* skip */ }
       }
       return { passed: violations.length === 0, violations };
@@ -67,9 +77,14 @@ export const dataRules: SpecRule[] = [
         try {
           const content = readFileSync(join(ROOT, file), "utf-8");
           if (content.includes('getItem("sobaYonetim"') || content.includes("getItem('sobaYonetim'")) {
-            violations.push({ file, message: "Sayfada doğrudan DB localStorage erişimi — useDB() kullanılmalı" });
+                violations.push({ file, message: "Sayfada doğrudan DB localStorage erişimi — useDB() kullanılmalı" });
+              }
+            }
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('data', 'DB parse kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },

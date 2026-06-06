@@ -2,6 +2,7 @@ import { getAgent } from "@/agents";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import { formatDate, formatMoney } from "@/lib/utils-tr";
+import { logger } from "@/lib/logger";
 import type { AuditEntry, DB, Sale } from "@/types";
 import { useLocation } from "wouter";
 
@@ -18,6 +19,7 @@ function auditMentionsSale(entry: AuditEntry, saleId: string): boolean {
   try {
     return JSON.stringify([entry.prevValue, entry.nextValue]).includes(saleId);
   } catch {
+    logger.warn('sale', 'auditMentionsSale JSON serileştirme hatası');
     return false;
   }
 }
@@ -72,7 +74,7 @@ export default function SaleDetail({ db }: Props) {
     (movement) =>
       productIds.has(movement.productId) &&
       ["satis", "iade"].includes(movement.type) &&
-      movement.date.slice(0, 10) === sale.createdAt.slice(0, 10),
+      (movement.date || movement.createdAt || "").slice(0, 10) === sale.createdAt.slice(0, 10),
   );
   const auditLog = (db._auditLog || []).filter((entry) =>
     auditMentionsSale(entry, sale.id),

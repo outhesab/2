@@ -2,6 +2,7 @@ import { BRAND_NAME } from "@/config/brand";
 import { useState } from 'react';
 import { hashPass } from './LoginScreen';
 import { genId } from '@/lib/utils-tr';
+import { logger } from '@/lib/logger';
 
 const SETUP_DONE_KEY = 'sobaYonetim_setupDone';
 
@@ -21,8 +22,8 @@ async function savePassToFirebase(hash: string): Promise<void> {
       signal: AbortSignal.timeout(8000),
     });
     // Oturum cache'ine de yaz
-    try { sessionStorage.setItem('sobaYonetim_hc', hash); } catch { /* ignore */ }
-  } catch { /* Firebase hata — giriş ekranı tekrar yükleyecek */ }
+    try { sessionStorage.setItem('sobaYonetim_hc', hash); } catch { logger.warn('setup', 'Oturum önbelleğine yazılamadı'); /* ignore */ }
+  } catch { logger.warn('setup', 'Firebase\'e şifre kaydedilemedi'); /* Firebase hata — giriş ekranı tekrar yükleyecek */ }
 }
 
 export function isSetupDone(): boolean {
@@ -33,7 +34,7 @@ export function getSetupData(): SetupResult | null {
   try {
     const raw = localStorage.getItem('sobaYonetim_setupData');
     return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  } catch { logger.warn('setup', 'Kurulum verisi okunamadı'); return null; }
 }
 
 interface KasaDef { name: string; icon: string; enabled: boolean; }
@@ -170,7 +171,7 @@ export default function SetupWizard({ onComplete }: Props) {
       localStorage.setItem('sobaYonetim_setupData', JSON.stringify(result));
       localStorage.setItem(SETUP_DONE_KEY, '1');
       onComplete(result);
-    } catch { setErr('Bir hata oluştu, tekrar deneyin.'); }
+    } catch { logger.warn('setup', 'Kurulum tamamlanamadı'); setErr('Bir hata oluştu, tekrar deneyin.'); }
     setLoading(false);
   };
 

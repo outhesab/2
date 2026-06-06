@@ -14,6 +14,10 @@
         "typecheck": "tsc --noEmit",
         "lint": "eslint src --max-warnings 100",
         "lint:fix": "eslint src --fix",
+        "lint:fallow": "fallow audit",
+        "lint:fallow:all": "fallow",
+        "lint:fallow:health": "fallow health --score",
+        "lint:fallow:deadcode": "fallow dead-code",
         "format": "prettier --write src/",
         "format:check": "prettier --check src/",
         "test": "vitest",
@@ -69,19 +73,14 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.0.0",
-        "concat-map": "^0.0.1",
         "dexie": "^4.0.11",
         "dompurify": "^3.4.7",
-        "fast-check": "^4.1.1",
         "firebase": "^12.13.0",
         "framer-motion": "^12.40.0",
         "input-otp": "^1.0.0",
         "lightningcss": "^1.32.0",
-        "lightningcss-win32-x64-msvc": "^1.32.0",
         "lucide-react": "^0.487.0",
         "mitt": "^3.0.1",
-        "motion-dom": "^12.40.0",
-        "motion-utils": "^12.39.0",
         "react": "^19.2.6",
         "react-day-picker": "^9.0.0",
         "react-dom": "^19.2.6",
@@ -95,12 +94,13 @@
         "xlsx": "^0.18.5",
         "zustand": "^5.0.13"
     },
-    "simple-git-hooks":  {
+    "simple-git-hooks": {
         "pre-commit": ".simple-git-hooks/pre-commit"
     },
     "devDependencies": {
         "@capacitor/cli": "^8.3.4",
         "@eslint/js": "^9.25.1",
+        "@playwright/test": "^1.60.0",
         "@tailwindcss/vite": "^4.1.4",
         "@testing-library/jest-dom": "^6.6.3",
         "@types/react": "^19.1.2",
@@ -125,6 +125,9 @@
         "vite": "^6.3.4",
         "vite-plugin-inspect": "^11.3.3",
         "vite-plugin-pwa": "^1.0.0",
-        "vitest": "^3.1.2"
+        "vitest": "^3.1.2",
+        "fast-check": "^4.1.1",
+        "fallow": "^0.1.5",
+        "lightningcss-win32-x64-msvc": "^1.32.0"
     }
 }

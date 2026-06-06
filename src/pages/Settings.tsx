@@ -56,6 +56,12 @@ import { useEffect, useRef, useState } from "react";
 import { ArayuzAyarlari } from "./SettingsArayuz";
 import { BaglantiAyarlari } from "./SettingsBaglanti";
 import { Card } from "./SettingsCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Props {
   db: DB;
@@ -64,38 +70,9 @@ interface Props {
   importJSON: (f: File) => Promise<boolean>;
 }
 
-const TABS_LIST = [
-  { id: "arayuz", icon: "ğŸ¨", label: "ArayÃ¼z" },
-  { id: "baglantilar", icon: "ğŸ”Œ", label: "BaÄŸlantÄ±lar" },
-  { id: "company", icon: "ğŸ¢", label: "Åirket" },
-  { id: "categories", icon: "ğŸ·ï¸", label: "Kategoriler" },
-  { id: "pellet", icon: "ğŸªµ", label: "Pelet" },
-  { id: "sound", icon: "ğŸ”Š", label: "Ses" },
-  { id: "agent", icon: "ğŸ¤–", label: "Agentlar" },
-  { id: "backup", icon: "ğŸ’¾", label: "Yedek & Geri YÃ¼kleme" },
-  { id: "excel_export", icon: "ğŸ“Š", label: "Excel Ã‡Ä±ktÄ±" },
-  { id: "activity", icon: "ğŸ“‹", label: "Aktivite" },
-  { id: "shortcuts", icon: "âŒ¨ï¸", label: "KÄ±sayollar" },
-  { id: "repair", icon: "ğŸ”§", label: "Veri OnarÄ±m" },
-  { id: "excel", icon: "ğŸ“¥", label: "Excel Ä°Ã§e Aktar" },
-  { id: "data", icon: "ğŸ—„ï¸", label: "Veri YÃ¶netimi" },
-  { id: "security", icon: "ğŸ”", label: "GÃ¼venlik" },
-  { id: "sysmap", icon: "ğŸ—ºï¸", label: "Sistem HaritasÄ±" },
-  { id: "about", icon: "â„¹ï¸", label: "HakkÄ±nda" },
-] as const;
+type Tab = "arayuz" | "baglantilar" | "company" | "categories" | "pellet" | "sound" | "agent" | "backup" | "excel_export" | "activity" | "shortcuts" | "repair" | "excel" | "data" | "security" | "sysmap" | "about";
 
-type Tab = (typeof TABS_LIST)[number]["id"];
-
-const inp = {
-  width: "100%",
-  padding: "10px 14px",
-  background: "var(--bg-surface)",
-  border: "1px solid var(--border)",
-  borderRadius: "10px",
-  color: "var(--text-primary)",
-  fontSize: "0.9rem",
-  boxSizing: "border-box" as const,
-};
+const inpBase = "w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border)] box-border";
 
 function loadSoundSettings(): SoundSettings {
   try {
@@ -109,6 +86,7 @@ function loadSoundSettings(): SoundSettings {
       ...(parsed.soundSettings || {}),
     };
   } catch {
+    logger.warn('settings', 'Ses ayarları localStorage\'dan okunamadı, varsayılan kullanıldı');
     return { enabled: true, volume: 0.5, theme: "standart" };
   }
 }
@@ -120,6 +98,7 @@ function saveSoundSettingsToStorage(settings: SoundSettings) {
     parsed.soundSettings = settings;
     localStorage.setItem("sobaYonetim", JSON.stringify(parsed));
   } catch {
+    logger.warn('settings', 'Ses ayarları localStorage\'a yazılamadı');
     /* localStorage yazma hatasÄ± â€” sessizce geÃ§ */
   }
 }
@@ -160,14 +139,14 @@ export default function Settings({
           brightness: typeof parsed.brightness === 'number' ? parsed.brightness : 100,
         };
       }
-    } catch { /* ignore */ }
+    } catch { logger.warn('settings', 'Dashboard tercihleri localStorage\'dan okunamadı'); /* ignore */ }
     return { leftWidgets: ['chart', 'recentSales', 'tips', 'excelBar'], brightness: 100 };
   });
 
   const saveDashboardPrefs = (patch: Partial<{ leftWidgets: WidgetId[]; brightness: number }>) => {
     const next = { ...dashboardPrefs, ...patch };
     setDashboardPrefs(next);
-    try { localStorage.setItem('dashboardPrefs', JSON.stringify(next)); } catch { /* ignore */ }
+    try { localStorage.setItem('dashboardPrefs', JSON.stringify(next)); } catch { logger.warn('settings', 'Dashboard tercihleri localStorage\'a yazılamadı'); /* ignore */ }
   };
 
   const saveCompany = () => {
@@ -228,20 +207,27 @@ export default function Settings({
   ];
 
   return (
-    <div className={"settings-container"}>
-      <div className={"settings-tab-bar"}>
-        {TABS_LIST.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={
-              tab === t.id ? "settings-tab-btn-active" : "settings-tab-btn"
-            }
-          >
-            {t.icon} {t.label}
-          </button>
-        ))}
-      </div>
+    <div className="p-4 max-w-4xl mx-auto">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full">
+        <TabsList className="flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
+          <TabsTrigger value="arayuz">ğŸŽ¨ ArayÃ¼z</TabsTrigger>
+          <TabsTrigger value="baglantilar">ğŸ”Œ BaÄŸlantÄ±lar</TabsTrigger>
+          <TabsTrigger value="company">ğŸ¢ Åirket</TabsTrigger>
+          <TabsTrigger value="categories">ğŸ·ï¸ Kategoriler</TabsTrigger>
+          <TabsTrigger value="pellet">ğŸªµ Pelet</TabsTrigger>
+          <TabsTrigger value="sound">ğŸ”Š Ses</TabsTrigger>
+          <TabsTrigger value="agent">ğŸ¤– Agentlar</TabsTrigger>
+          <TabsTrigger value="backup">ğŸ’¾ Yedek</TabsTrigger>
+          <TabsTrigger value="excel_export">ğŸ“Š Excel</TabsTrigger>
+          <TabsTrigger value="activity">ğŸ“‹ Aktivite</TabsTrigger>
+          <TabsTrigger value="shortcuts">âŒ¨ KÄ±sayollar</TabsTrigger>
+          <TabsTrigger value="repair">ğŸ”§ OnarÄ±m</TabsTrigger>
+          <TabsTrigger value="excel">ğŸ“¥ Ä°Ã§e Aktar</TabsTrigger>
+          <TabsTrigger value="data">ğŸ—„ Veri</TabsTrigger>
+          <TabsTrigger value="security">ğŸ” GÃ¼venlik</TabsTrigger>
+          <TabsTrigger value="sysmap">ğŸ—º Harita</TabsTrigger>
+          <TabsTrigger value="about">â„¹ HakkÄ±nda</TabsTrigger>
+        </TabsList>
 
       {tab === "arayuz" && (
         <ArayuzAyarlari
@@ -270,8 +256,8 @@ export default function Settings({
 
       {tab === "company" && (
         <Card title="ğŸ¢ Åirket Bilgileri">
-          <div className={"settings-grid"}>
-            <div className={"settings-grid-2"}>
+          <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FV
                 label="Åirket AdÄ±"
                 value={company.name || ""}
@@ -300,25 +286,25 @@ export default function Settings({
               />
             </div>
             <div>
-              <label className={"settings-lbl"}>Adres</label>
+              <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Adres</label>
               <textarea
                 value={company.address || ""}
                 onChange={(e) =>
                   setCompany((c) => ({ ...c, address: e.target.value }))
                 }
-                className={`${"settings-inp"} ${"settings-min-h-70"}`}
+                className={`${inpBase} min-h-[70px]`}
               />
             </div>
-            <button onClick={saveCompany} className={"settings-btn-primary"}>
-              ğŸ’¾ Åirket Bilgilerini Kaydet
-            </button>
+<Button onClick={saveCompany} className="w-full mt-4">
+              ğŸ’¾ ÅŸirket Bilgilerini Kaydet
+            </Button>
           </div>
         </Card>
       )}
 
       {tab === "pellet" && (
         <Card title="ğŸªµ Pelet AyarlarÄ±">
-          <div className={"settings-grid-2"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FV
               label="Gramaj (gr/torba)"
               type="number"
@@ -356,16 +342,16 @@ export default function Settings({
               }
             />
           </div>
-          <div className={"settings-warning-box"}>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
             ğŸ’¡ Mevcut deÄŸerler: {pellet.cuvalKg}kg Ã§uval Â· â‚º{pellet.kgFiyat}/kg
             Â· {pellet.gramaj}gr/torba
           </div>
-          <button
+          <Button
             onClick={savePellet}
-            className={`${"settings-btn-primary"} ${"settings-mt-16"}`}
+            className="btn-primary w-full py-3 rounded-xl font-bold text-sm mt-4"
           >
             ğŸ’¾ Pelet AyarlarÄ±nÄ± Kaydet
-          </button>
+          </Button>
         </Card>
       )}
 
@@ -374,33 +360,33 @@ export default function Settings({
       {tab === "agent" && <AgentSettingsPanel db={db} save={save} />}
 
       {tab === "backup" && (
-        <div className={"settings-grid"}>
+        <div className="grid gap-4">
           <Card title="ğŸ“¤ Yedek Al">
-            <p className={"settings-text-muted"}>
+            <p className="text-muted-foreground text-sm">
               TÃ¼m verilerinizi{" "}
-              <strong className={"settings-text-orange"}>
+              <strong className="text-orange-400 font-semibold">
                 JSON formatÄ±nda
               </strong>{" "}
               dÄ±ÅŸa aktarÄ±n.
             </p>
-            <div className={"settings-grid-auto"}>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {dataStats.slice(0, 4).map((d) => (
-                <div key={d.label} className={"settings-stat-box"}>
-                  <div className={"settings-stat-icon"}>{d.icon}</div>
-                  <div className={"settings-stat-count"}>{d.count}</div>
-                  <div className={"settings-text-dim"}>{d.label}</div>
+                <div key={d.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
+                  <div className="text-lg mb-1">{d.icon}</div>
+                  <div className="text-lg font-bold text-foreground">{d.count}</div>
+                  <div className="text-[var(--text-dim)] text-sm">{d.label}</div>
                 </div>
               ))}
             </div>
-            <div className={"settings-success-box"}>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               Toplam {totalRecords} kayÄ±t yedeklenecek
             </div>
-            <button
+            <Button
               onClick={exportJSON}
-              className={`${"settings-btn-primary"} ${"settings-btn-green"}`}
+              className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm"
             >
               YedeÄŸi Ä°ndir (.json)
-            </button>
+            </Button>
           </Card>
 
           <FullRestorePanel
@@ -467,15 +453,15 @@ export default function Settings({
 
       {tab === "shortcuts" && (
         <Card title="âŒ¨ï¸ Klavye KÄ±sayollarÄ±">
-          <p className={"settings-text-gray"}>
+          <p className="text-muted-foreground text-sm">
             UygulamayÄ± daha hÄ±zlÄ± kullanmak iÃ§in aÅŸaÄŸÄ±daki kÄ±sayollarÄ±
             kullanabilirsiniz.
           </p>
-          <div className={"settings-grid-8"}>
+          <div className="grid gap-2">
             {shortcuts.map((s, i) => (
-              <div key={i} className={"settings-flex-row"}>
-                <kbd className={"settings-kbd"}>{s.key}</kbd>
-                <span className={"settings-text-muted"}>{s.desc}</span>
+              <div key={i} className="flex items-center gap-2">
+                <kbd className="inline-flex items-center rounded-md border border-[var(--border-strong)] px-2.5 py-1 font-mono text-xs font-bold text-[var(--color-warning)] shadow-[0_2px_0_rgba(0,0,0,0.4)]">{s.key}</kbd>
+                <span className="text-muted-foreground text-sm">{s.desc}</span>
               </div>
             ))}
           </div>
@@ -503,12 +489,12 @@ export default function Settings({
       {tab === "categories" && <KategoriYonetim db={db} save={save} />}
 
       {tab === "data" && (
-        <div className={"settings-grid"}>
+        <div className="grid gap-4">
           <Card title="ğŸ—„ï¸ Veri Ä°statistikleri">
-            <div className={"settings-grid-auto"}>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {dataStats.map((d) => (
-                <div key={d.label} className={"settings-stat-box"}>
-                  <div className={"settings-stat-icon-lg"}>{d.icon}</div>
+                <div key={d.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
+                  <div className="text-xl mb-1">{d.icon}</div>
                   <div
                     style={{
                       fontSize: "1.3rem",
@@ -518,24 +504,24 @@ export default function Settings({
                   >
                     {d.count}
                   </div>
-                  <div className={"settings-text-dim-2"}>{d.label}</div>
+                  <div className="text-[var(--text-dim)] text-xs">{d.label}</div>
                 </div>
               ))}
             </div>
-            <div className={"settings-text-center"}>
+            <div className="text-center">
               Toplam{" "}
-              <strong className={"settings-text-white"}>{totalRecords}</strong>{" "}
+              <strong className="text-white">{totalRecords}</strong>{" "}
               kayÄ±t Â· localStorage'da saklanÄ±yor
             </div>
           </Card>
 
           <Card title="ğŸ—‘ï¸ Tehlikeli Alan">
-            <p className={"settings-text-muted"}>
+            <p className="text-muted-foreground text-sm">
               AÅŸaÄŸÄ±daki iÅŸlemler{" "}
-              <strong className={"settings-text-red"}>geri alÄ±namaz</strong>.
+              <strong className="text-red-400 font-semibold">geri alÄ±namaz</strong>.
               Ã–nce yedek almanÄ±zÄ± ÅŸiddetle tavsiye ederiz.
             </p>
-            <div className={"settings-grid-10"}>
+            <div className="grid gap-2.5">
               <DangerAction
                 label="SatÄ±ÅŸ GeÃ§miÅŸini Temizle"
                 desc={`${db.sales.length} satÄ±ÅŸ kaydÄ± silinecek`}
@@ -560,9 +546,9 @@ export default function Settings({
                   showToast("Aktivite gÃ¼nlÃ¼ÄŸÃ¼ temizlendi!");
                 }}
               />
-              <button onClick={clearData} className={"settings-btn-danger"}>
+              <Button onClick={clearData} className="btn-danger w-full py-3 rounded-xl font-bold text-sm">
                 â˜ ï¸ TÃœM VERÄ°LERÄ° SÄ°L ve SÄ±fÄ±rla
-              </button>
+              </Button>
             </div>
           </Card>
         </div>
@@ -571,9 +557,9 @@ export default function Settings({
       {tab === "security" && <SecurityPanel showToast={showToast} />}
 
       {tab === "sysmap" && (
-        <div className={"settings-grid"}>
+        <div className="grid gap-4">
           <Card title="ğŸ—ºï¸ Sistem HaritasÄ± â€” ModÃ¼ller ArasÄ± Ä°liÅŸkiler">
-            <p className={"settings-text-muted"}>
+            <p className="text-muted-foreground text-sm">
               Her modÃ¼lÃ¼n diÄŸer modÃ¼lleri nasÄ±l etkilediÄŸini gÃ¶steren akÄ±ÅŸ
               diyagramÄ±. DÃ¼z Ã§izgi = doÄŸrudan veri etkisi, kesik Ã§izgi = veri
               saÄŸlar.
@@ -584,6 +570,7 @@ export default function Settings({
       )}
 
       {tab === "about" && <AboutPanel db={db} />}
+      </Tabs>
     </div>
   );
 }
@@ -646,69 +633,69 @@ function SecurityPanel({
   };
 
   return (
-    <div className={"settings-grid"}>
+    <div className="grid gap-4">
       <Card title="ğŸ” Åifremi DeÄŸiÅŸtir">
-        <div className={"settings-grid-12"}>
+        <div className="grid gap-3">
           {session && (
-            <div className={"settings-info-box"}>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               ğŸ‘¤ GiriÅŸ yapan: <strong>{session.username}</strong> (
               {session.role === "admin" ? "YÃ¶netici" : "KullanÄ±cÄ±"})
             </div>
           )}
           <div>
-            <label className={"settings-lbl"}>Mevcut Parola</label>
-            <div className={"settings-pos-relative"}>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Mevcut Parola</label>
+            <div className="relative">
               <input
                 type={showOld ? "text" : "password"}
                 value={oldPass}
                 onChange={(e) => setOldPass(e.target.value)}
                 placeholder="Mevcut parolanÄ±z"
-                style={{ ...inp, paddingRight: 44 }}
+                className={inpBase} style={{ paddingRight: 44 }}
               />
-              <button
+              <Button
                 onClick={() => setShowOld((p) => !p)}
-                className={"settings-input-toggle"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-transparent border-none cursor-pointer text-lg"
               >
                 {showOld ? "ğŸ™ˆ" : "ğŸ‘ï¸"}
-              </button>
+              </Button>
             </div>
           </div>
           <div>
-            <label className={"settings-lbl"}>Yeni Parola</label>
-            <div className={"settings-pos-relative"}>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Yeni Parola</label>
+            <div className="relative">
               <input
                 type={showNew ? "text" : "password"}
                 value={newPass}
                 onChange={(e) => setNewPass(e.target.value)}
                 placeholder="En az 4 karakter"
-                style={{ ...inp, paddingRight: 44 }}
+                className={inpBase} style={{ paddingRight: 44 }}
               />
-              <button
+              <Button
                 onClick={() => setShowNew((p) => !p)}
-                className={"settings-input-toggle"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-transparent border-none cursor-pointer text-lg"
               >
                 {showNew ? "ğŸ™ˆ" : "ğŸ‘ï¸"}
-              </button>
+              </Button>
             </div>
           </div>
           <div>
-            <label className={"settings-lbl"}>Yeni Parola (Tekrar)</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Yeni Parola (Tekrar)</label>
             <input
               type={showNew ? "text" : "password"}
               value={newPass2}
               onChange={(e) => setNewPass2(e.target.value)}
               placeholder="Yeni parolayÄ± tekrar girin"
-              className={"settings-inp"}
+              className={inpBase}
               onKeyDown={(e) => e.key === "Enter" && handleChange()}
             />
           </div>
-          <button
+          <Button
             onClick={handleChange}
             disabled={loading}
-            className={"settings-btn-primary"}
+            className="btn-primary w-full py-3 rounded-xl font-bold text-sm"
           >
             {loading ? "â³ DeÄŸiÅŸtiriliyor..." : "ğŸ” ParolayÄ± DeÄŸiÅŸtir"}
-          </button>
+          </Button>
         </div>
       </Card>
 
@@ -816,58 +803,58 @@ function AdminPanel({
   return (
     <Card title="ğŸ‘¥ KullanÄ±cÄ± YÃ¶netimi">
       {/* Yeni kullanÄ±cÄ± ekle */}
-      <div className={"settings-section-box"}>
-        <div className={"settings-section-title"}>â• Yeni KullanÄ±cÄ± Ekle</div>
-        <div className={"settings-grid-2-10"}>
+      <div className="bg-[var(--bg-card)] rounded-xl p-4 mb-4">
+        <div className="text-sm font-semibold text-foreground mb-3">â• Yeni KullanÄ±cÄ± Ekle</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className={"settings-lbl"}>KullanÄ±cÄ± AdÄ± *</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">KullanÄ±cÄ± AdÄ± *</label>
             <input
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               placeholder="kullanici_adi"
-              className={"settings-inp"}
+              className={inpBase}
             />
           </div>
           <div>
-            <label className={"settings-lbl"}>Åifre *</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Åifre *</label>
             <input
               type="password"
               value={newPass}
               onChange={(e) => setNewPass(e.target.value)}
               placeholder="Min. 4 karakter"
-              className={"settings-inp"}
+              className={inpBase}
             />
           </div>
         </div>
-        <div className={"settings-flex-end"}>
-          <div className={"settings-flex-1"}>
-            <label className={"settings-lbl"}>Rol</label>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Rol</label>
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as UserRole)}
-              className={"settings-inp"}
+              className={inpBase}
             >
               <option value="user">ğŸ‘¤ KullanÄ±cÄ±</option>
               <option value="admin">â­ YÃ¶netici</option>
             </select>
           </div>
-          <button
+          <Button
             onClick={handleCreate}
             disabled={saving}
-            className={`${"settings-btn-primary"} ${"settings-flex-1"}`}
+            className="btn-primary flex-1 py-3 rounded-xl font-bold text-sm"
           >
             {saving ? "..." : "â• Ekle"}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* KullanÄ±cÄ± listesi */}
       {loading ? (
-        <div className={"settings-empty-state"}>YÃ¼kleniyor...</div>
+        <div className="text-center py-8 text-muted-foreground text-sm">YÃ¼kleniyor...</div>
       ) : users.length === 0 ? (
-        <div className={"settings-empty-state"}>KullanÄ±cÄ± bulunamadÄ±</div>
+        <div className="text-center py-8 text-muted-foreground text-sm">KullanÄ±cÄ± bulunamadÄ±</div>
       ) : (
-        <div className={"settings-flex-col"}>
+        <div className="flex flex-col gap-2">
           {users.map((u) => (
             <div
               key={u.id}
@@ -904,9 +891,9 @@ function AdminPanel({
                 >
                   {u.role === "admin" ? "â­" : "ğŸ‘¤"}
                 </div>
-                <div className={"settings-flex-1-min"}>
-                  <div className={"settings-text-primary-sm"}>{u.username}</div>
-                  <div className={"settings-text-dim-2"}>
+                <div className="flex-1 min-w-0">
+                  <div className="text-foreground text-sm font-semibold">{u.username}</div>
+                  <div className="text-[var(--text-dim)] text-xs">
                     {u.lastLogin
                       ? `Son giriÅŸ: ${new Date(u.lastLogin).toLocaleString("tr-TR")}`
                       : "HiÃ§ giriÅŸ yapÄ±lmadÄ±"}
@@ -933,18 +920,18 @@ function AdminPanel({
                   <option value="admin">YÃ¶netici</option>
                 </select>
                 {/* Åifre sÄ±fÄ±rla */}
-                <button
+                <Button
                   onClick={() => {
                     setResetPassId(resetPassId === u.id ? null : u.id);
                     setResetPassVal("");
                   }}
                   title="Åifre SÄ±fÄ±rla"
-                  className={"settings-btn-warning-sm"}
+                  className="px-2.5 py-1.5 rounded-lg font-bold text-xs bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
                 >
                   ğŸ”‘
-                </button>
+                </Button>
                 {/* Aktif/Pasif */}
-                <button
+                <Button
                   onClick={() => handleToggle(u.id, u.username, u.active)}
                   title={u.active ? "Devre DÄ±ÅŸÄ± BÄ±rak" : "Aktif Et"}
                   style={{
@@ -960,33 +947,33 @@ function AdminPanel({
                   }}
                 >
                   {u.active ? "âœ“" : "âœ•"}
-                </button>
+                </Button>
                 {/* Sil */}
-                <button
+                <Button
                   onClick={() => handleDelete(u.id, u.username)}
                   title="KullanÄ±cÄ±yÄ± Sil"
-                  className={"settings-btn-danger-sm"}
+                  className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs"
                 >
                   ğŸ—‘ï¸
-                </button>
+                </Button>
               </div>
               {/* Åifre sÄ±fÄ±rlama alanÄ± */}
               {resetPassId === u.id && (
-                <div className={"settings-flex-row-8"}>
+                <div className="flex items-center gap-2">
                   <input
                     type="password"
                     value={resetPassVal}
                     onChange={(e) => setResetPassVal(e.target.value)}
                     placeholder="Yeni ÅŸifre (min 4 karakter)"
-                    style={{ ...inp, flex: 1 }}
+                    className={`${inpBase} flex-1`}
                     autoFocus
                   />
-                  <button
+                  <Button
                     onClick={() => handleResetPass(u.id)}
-                    className={"settings-btn-warning-md"}
+                    className="px-3 py-2 rounded-lg font-bold text-sm bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
                   >
                     Kaydet
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -1008,6 +995,7 @@ function SoundSettingsPanel({
       const d = JSON.parse(localStorage.getItem("sobaYonetim") || "{}");
       return d.soundSettings?.speechEnabled !== false;
     } catch {
+      logger.warn('settings', 'Ses ayarları okunamadı, varsayılan true');
       return true;
     }
   });
@@ -1049,17 +1037,17 @@ function SoundSettingsPanel({
   ];
 
   return (
-    <div className={"settings-grid"}>
+    <div className="grid gap-4">
       <Card title="ğŸ”Š Ses AyarlarÄ±">
-        <div className={"settings-grid-20"}>
-          <div className={"settings-flex-between"}>
+        <div className="grid gap-5">
+          <div className="flex items-center justify-between">
             <div>
-              <div className={"settings-text-primary"}>Sesli Geri Bildirim</div>
-              <div className={"settings-text-muted-xs"}>
+              <div className="text-foreground text-sm">Sesli Geri Bildirim</div>
+              <div className="text-muted-foreground text-xs">
                 Ä°ÅŸlem seslerini aÃ§Ä±n veya kapatÄ±n
               </div>
             </div>
-            <button
+            <Button
               onClick={() => updateSettings({ enabled: !settings.enabled })}
               style={{
                 width: 52,
@@ -1085,13 +1073,13 @@ function SoundSettingsPanel({
                   boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
                 }}
               />
-            </button>
+            </Button>
           </div>
 
           <div>
-            <div className={"settings-flex-between"}>
-              <label className={"settings-lbl"}>Ses Seviyesi</label>
-              <span className={"settings-text-primary-mid"}>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Ses Seviyesi</label>
+              <span className="text-foreground text-sm">
                 {Math.round(settings.volume * 100)}%
               </span>
             </div>
@@ -1104,16 +1092,16 @@ function SoundSettingsPanel({
               onChange={(e) =>
                 updateSettings({ volume: parseFloat(e.target.value) })
               }
-              className={"settings-range-input"}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-[var(--border)] accent-[var(--color-primary)]"
               disabled={!settings.enabled}
             />
           </div>
 
           <div>
-            <label className={"settings-lbl"}>Ses TemasÄ±</label>
-            <div className={"settings-grid-auto"}>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Ses TemasÄ±</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {themes.map((t) => (
-                <button
+                <Button
                   key={t.id}
                   onClick={() => updateSettings({ theme: t.id })}
                   disabled={!settings.enabled}
@@ -1132,7 +1120,7 @@ function SoundSettingsPanel({
                     opacity: settings.enabled ? 1 : 0.5,
                   }}
                 >
-                  <div className={"settings-text-primary-sm"}>{t.label}</div>
+                  <div className="text-foreground text-sm font-semibold">{t.label}</div>
                   <div
                     style={{
                       fontSize: "0.72rem",
@@ -1142,7 +1130,7 @@ function SoundSettingsPanel({
                   >
                     {t.desc}
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -1150,15 +1138,15 @@ function SoundSettingsPanel({
       </Card>
 
       <Card title="ğŸ—£ï¸ Sesli KonuÅŸma (TTS)">
-        <div className={"settings-grid-16"}>
-          <div className={"settings-flex-between"}>
+        <div className="grid gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <div className={"settings-text-primary"}>Sesli Bildirim</div>
-              <div className={"settings-text-muted-xs"}>
+              <div className="text-foreground text-sm">Sesli Bildirim</div>
+              <div className="text-muted-foreground text-xs">
                 Hata ve uyarÄ±larda sesli konuÅŸma
               </div>
             </div>
-            <button
+            <Button
               onClick={toggleSpeech}
               style={{
                 width: 52,
@@ -1184,9 +1172,9 @@ function SoundSettingsPanel({
                   boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
                 }}
               />
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
             onClick={() => {
               if ("speechSynthesis" in window) {
                 const u = new SpeechSynthesisUtterance(
@@ -1197,20 +1185,20 @@ function SoundSettingsPanel({
                 window.speechSynthesis.speak(u);
               }
             }}
-            className={"settings-btn-outline"}
+            className="px-3 py-2 rounded-xl font-bold text-sm border border-[var(--button-outline)]"
           >
             ğŸ—£ï¸ Test KonuÅŸma
-          </button>
+          </Button>
         </div>
       </Card>
 
       <Card title="ğŸ§ Sesleri Dinle">
-        <p className={"settings-text-gray"}>
+        <p className="text-muted-foreground text-sm">
           Her ses tipini aÅŸaÄŸÄ±dan test edebilirsiniz.
         </p>
-        <div className={"settings-grid-auto"}>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {soundTypes.map((s) => (
-            <button
+            <Button
               key={s.type}
               onClick={() => playSound(s.type)}
               disabled={!settings.enabled}
@@ -1237,7 +1225,7 @@ function SoundSettingsPanel({
               }
             >
               {s.label}
-            </button>
+            </Button>
           ))}
         </div>
       </Card>
@@ -1282,6 +1270,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
         "success",
       );
     } catch {
+      logger.warn('settings', 'Excel oluşturulamadı');
       showToast("Excel oluÅŸturulamadÄ±!", "error");
     }
   };
@@ -1304,27 +1293,27 @@ function ExcelExportPanel({ db }: { db: DB }) {
   ];
 
   return (
-    <div className={"settings-grid"}>
+    <div className="grid gap-4">
       <Card title="ğŸ“Š Excel DÄ±ÅŸa Aktarma">
-        <p className={"settings-text-muted"}>
+        <p className="text-muted-foreground text-sm">
           SeÃ§tiÄŸiniz veri gruplarÄ±nÄ± TÃ¼rkÃ§e baÅŸlÄ±klÄ±, tarih ve para birimi
           formatlarÄ±yla{" "}
-          <strong className={"settings-text-success"}>.xlsx</strong> dosyasÄ±na
+          <strong className="text-green-400 font-semibold">.xlsx</strong> dosyasÄ±na
           aktarÄ±n.
         </p>
 
-        <div className={"settings-mb-16"}>
-          <label className={"settings-lbl"}>
+        <div className="mb-4">
+          <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">
             Tarih AralÄ±ÄŸÄ± (SatÄ±ÅŸ ve Kasa iÃ§in)
           </label>
-          <div className={"settings-grid-2-10"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             <div>
               <label style={{ ...lbl, fontSize: "0.78rem" }}>BaÅŸlangÄ±Ã§</label>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className={"settings-inp"}
+                className={inpBase}
               />
             </div>
             <div>
@@ -1333,15 +1322,15 @@ function ExcelExportPanel({ db }: { db: DB }) {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className={"settings-inp"}
+                className={inpBase}
               />
             </div>
           </div>
         </div>
 
-        <div className={"settings-mb-20"}>
-          <label className={"settings-lbl"}>Dahil Edilecek Sayfalar</label>
-          <div className={"settings-grid-2-10"}>
+        <div className="mb-5">
+          <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Dahil Edilecek Sayfalar</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {sheetDefs.map((s) => (
               <div
                 key={s.key}
@@ -1360,8 +1349,8 @@ function ExcelExportPanel({ db }: { db: DB }) {
                   transition: "all 0.15s",
                 }}
               >
-                <span className={"settings-text-lg"}>{s.icon}</span>
-                <div className={"settings-flex-1"}>
+                <span className="text-lg">{s.icon}</span>
+                <div className="flex-1">
                   <div
                     style={{
                       fontWeight: 600,
@@ -1371,7 +1360,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
                   >
                     {s.label}
                   </div>
-                  <div className={"settings-text-dim-sm"}>{s.count} kayÄ±t</div>
+                  <div className="text-[var(--text-dim)] text-xs">{s.count} kayÄ±t</div>
                 </div>
                 <div
                   style={{
@@ -1396,12 +1385,12 @@ function ExcelExportPanel({ db }: { db: DB }) {
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleExport}
-          className={`${"settings-btn-primary"} ${"settings-btn-green"}`}
+          className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm"
         >
           ğŸ“Š Excel DosyasÄ±nÄ± Ä°ndir (.xlsx)
-        </button>
+        </Button>
       </Card>
     </div>
   );
@@ -1470,18 +1459,18 @@ function ActivityPanel({
 
   return (
     <Card title="ğŸ“‹ Aktivite GÃ¼nlÃ¼ÄŸÃ¼">
-      <div className={"settings-flex-wrap"}>
+      <div className="flex flex-wrap items-center gap-2">
         <input
           type="date"
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
-          style={{ ...inp, width: 160 }}
+          className={inpBase} style={{ width: 160 }}
           placeholder="Tarih filtrele"
         />
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          style={{ ...inp, flex: 1 }}
+          className={`${inpBase} flex-1`}
         >
           <option value="all">TÃ¼m Ä°ÅŸlemler</option>
           {actionTypes.map((t) => (
@@ -1491,41 +1480,41 @@ function ActivityPanel({
           ))}
         </select>
         {dateFilter && (
-          <button
+          <Button
             onClick={() => setDateFilter("")}
-            className={"settings-btn-gray"}
+            className="px-3 py-2 rounded-lg font-medium text-xs bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
           >
             âœ• Tarih
-          </button>
+          </Button>
         )}
-        <button onClick={clearLog} className={"settings-btn-danger-outline"}>
+        <Button onClick={clearLog} className="btn-danger-outline px-3 py-2 rounded-lg font-bold text-xs border border-red-500/30">
           ğŸ—‘ï¸ Temizle
-        </button>
+        </Button>
       </div>
 
-      <div className={"settings-text-dim-xs"}>
+      <div className="text-[var(--text-dim)] text-xs">
         {filtered.length} kayÄ±t (toplam {activityLog.length})
       </div>
 
-      <div className={"settings-scroll-list"}>
+      <div className="max-h-[400px] overflow-y-auto space-y-1">
         {filtered.length === 0 ? (
-          <div className={"settings-empty-state"}>
-            <div className={"settings-empty-icon"}>ğŸ“‹</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            <div className="text-3xl mb-2">ğŸ“‹</div>
             <p>Aktivite bulunamadÄ±</p>
           </div>
         ) : (
           filtered.map((a) => (
-            <div key={a.id} className={"settings-flex-start"}>
-              <div className={"settings-activity-icon"}>
+            <div key={a.id} className="flex items-start gap-2">
+              <div className="text-lg w-8 h-8 flex items-center justify-center">
                 {getIcon(a.action)}
               </div>
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-xs"}>{a.action}</div>
+              <div className="flex-1">
+                <div className="text-foreground text-xs">{a.action}</div>
                 {a.detail && (
-                  <div className={"settings-text-muted-xs"}>{a.detail}</div>
+                  <div className="text-muted-foreground text-xs">{a.detail}</div>
                 )}
               </div>
-              <div className={"settings-text-dim-sm"}>
+              <div className="text-[var(--text-dim)] text-xs">
                 {formatDate(a.time || a.createdAt || "")}
               </div>
             </div>
@@ -1688,6 +1677,7 @@ function FullRestorePanel({
             showToast(msg, "success");
             setTimeout(() => window.location.reload(), 1800);
           } catch {
+            logger.warn('settings', 'Yedek dosyası okunamadı veya geçersiz format');
             showToast("Dosya okunamadÄ± veya geÃ§ersiz format!", "error");
           }
         };
@@ -1699,7 +1689,7 @@ function FullRestorePanel({
 
   return (
     <Card title="ğŸ”„ Tam Geri YÃ¼kleme">
-      <div className={"settings-error-box"}>
+      <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
         <strong>Dikkat:</strong> Mevcut tÃ¼m veriler yedekteki verilerle
         deÄŸiÅŸtirilir. Ä°ÅŸlem Ã¶ncesi otomatik yedek alÄ±nÄ±r. Yedekten gelen
         geÃ§ersiz adlÄ± kayÄ±tlar (boÅŸ, tek haneli, sadece sayÄ±) gizlenir.
@@ -1709,11 +1699,11 @@ function FullRestorePanel({
         type="file"
         accept=".json"
         onChange={handleFile}
-        className={"settings-hidden"}
+        className="hidden"
       />
-      <button
+      <Button
         onClick={() => fileRef.current?.click()}
-        className={"settings-btn-danger-dashed"}
+        className="btn-danger-dashed w-full py-3 rounded-xl font-bold text-sm border-2 border-dashed border-red-500/30 bg-red-500/10"
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLButtonElement).style.background =
             "rgba(239,68,68,0.15)";
@@ -1724,15 +1714,15 @@ function FullRestorePanel({
         }}
       >
         ğŸ“‚ JSON Yedek DosyasÄ± SeÃ§ â€” Tam Geri YÃ¼kle
-      </button>
+      </Button>
 
       {lastReport && lastReport.warnings.length > 0 && (
-        <div className={"settings-warning-box"}>
-          <div className={"settings-text-warning-bold"}>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+          <div className="text-amber-400 font-bold text-sm">
             âš ï¸ Gizlenen KayÄ±tlar
           </div>
           {lastReport.warnings.map((w, i) => (
-            <div key={i} className={"settings-text-muted"}>
+            <div key={i} className="text-muted-foreground text-sm">
               â€¢ {w}
             </div>
           ))}
@@ -1808,6 +1798,7 @@ function SelectiveRestore({
         setAvailable(avail);
         setSelected(new Set(avail.map((a) => a.key)));
       } catch {
+        logger.warn('settings', 'JSON ayrıştırılamadı');
         showToast("JSON ayrÄ±ÅŸtÄ±rÄ±lamadÄ±!", "error");
       }
     };
@@ -1876,6 +1867,7 @@ function SelectiveRestore({
           );
           setTimeout(() => window.location.reload(), 2000);
         } catch {
+          logger.warn('settings', 'Geri yükleme sırasında hata oluştu');
           showToast("Geri yÃ¼kleme sÄ±rasÄ±nda hata oluÅŸtu!", "error");
         }
       },
@@ -1893,9 +1885,9 @@ function SelectiveRestore({
 
   return (
     <Card title="ğŸ“‚ SeÃ§imli Geri YÃ¼kleme">
-      <p className={"settings-text-muted"}>
+      <p className="text-muted-foreground text-sm">
         Yedek dosyanÄ±zdan{" "}
-        <strong className={"settings-text-orange"}>
+        <strong className="text-orange-400 font-semibold">
           istediÄŸiniz bÃ¶lÃ¼mleri seÃ§erek
         </strong>{" "}
         geri yÃ¼kleyin. TÃ¼m veriyi deÄŸiÅŸtirmek zorunda deÄŸilsiniz.
@@ -1908,11 +1900,11 @@ function SelectiveRestore({
             type="file"
             accept=".json"
             onChange={handleFile}
-            className={"settings-hidden"}
+            className="hidden"
           />
-          <button
+          <Button
             onClick={() => fileRef.current?.click()}
-            className={"settings-btn-info-dashed"}
+            className="px-4 py-3 rounded-xl font-bold text-sm border-2 border-dashed border-blue-500/30 bg-blue-500/10 w-full"
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background =
                 "rgba(59,130,246,0.15)";
@@ -1923,31 +1915,31 @@ function SelectiveRestore({
             }}
           >
             JSON Yedek DosyasÄ± SeÃ§
-          </button>
+          </Button>
         </>
       ) : (
-        <div className={"settings-grid-12"}>
-          <div className={"settings-success-row"}>
-            <span className={"settings-text-success-lg"}>ğŸ“„</span>
-            <span className={"settings-text-success-bold"}>{fileName}</span>
-            <span className={"settings-text-muted-xs"}>
+        <div className="grid gap-3">
+          <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-[10px] p-3">
+            <span className="text-green-400 text-lg">ğŸ“„</span>
+            <span className="text-green-400 font-bold">{fileName}</span>
+            <span className="text-muted-foreground text-xs">
               {available.length} bÃ¶lÃ¼m bulundu
             </span>
           </div>
 
-          <div className={"settings-flex-row-8"}>
-            <span className={"settings-text-primary-sm"}>
+          <div className="flex items-center gap-2">
+            <span className="text-foreground text-sm font-semibold">
               Geri YÃ¼klenecek BÃ¶lÃ¼mler:
             </span>
-            <button onClick={selectAll} className={"settings-btn-success-sm"}>
+            <Button onClick={selectAll} className="px-3 py-1.5 rounded-lg font-bold text-xs">
               TÃ¼mÃ¼nÃ¼ SeÃ§
-            </button>
-            <button onClick={selectNone} className={"settings-btn-danger-sm"}>
+            </Button>
+            <Button onClick={selectNone} className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs">
               HiÃ§birini SeÃ§me
-            </button>
+            </Button>
           </div>
 
-          <div className={"settings-grid-2-8"}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {available.map((section) => {
               const isSelected = selected.has(section.key);
               return (
@@ -1988,8 +1980,8 @@ function SelectiveRestore({
                   >
                     {isSelected ? "âœ“" : ""}
                   </div>
-                  <span className={"settings-text-md"}>{section.icon}</span>
-                  <div className={"settings-flex-1"}>
+                  <span className="text-base">{section.icon}</span>
+                  <div className="flex-1">
                     <div
                       style={{
                         color: isSelected ? "var(--text-primary)" : "var(--text-muted)",
@@ -1999,7 +1991,7 @@ function SelectiveRestore({
                     >
                       {section.label}
                     </div>
-                    <div className={"settings-text-dim"}>
+                    <div className="text-[var(--text-dim)] text-sm">
                       {section.isObject ? "Ayarlar" : `${section.count} kayÄ±t`}
                     </div>
                   </div>
@@ -2009,41 +2001,41 @@ function SelectiveRestore({
           </div>
 
           {selected.size > 0 && (
-            <div className={"settings-warning-box"}>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               Mevcut ID'ler korunur. GeÃ§ersiz adlar (boÅŸ, tek haneli, sadece
               sayÄ±) ve zorunlu alanÄ± eksik kayÄ±tlar atlanÄ±r.
             </div>
           )}
 
           {lastReport && lastReport.warnings.length > 0 && (
-            <div className={"settings-error-box"}>
-              <div className={"settings-text-danger-bold"}>
+            <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-red-400 font-bold text-sm">
                 âš ï¸ Atlanan KayÄ±tlar (
                 {lastReport.skippedDuplicate +
                   lastReport.skippedInvalidName +
                   lastReport.skippedMissingField}
                 )
               </div>
-              <div className={"settings-flex-wrap"}>
+              <div className="flex flex-wrap items-center gap-2">
                 {lastReport.skippedDuplicate > 0 && (
-                  <span className={"settings-badge-info"}>
+                  <span className="inline-flex items-center rounded-md border border-transparent bg-blue-500/20 text-blue-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
                     ğŸ” {lastReport.skippedDuplicate} tekrar ID
                   </span>
                 )}
                 {lastReport.skippedInvalidName > 0 && (
-                  <span className={"settings-badge-danger"}>
+                  <span className="inline-flex items-center rounded-md border border-transparent bg-red-500/20 text-red-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
                     âœ— {lastReport.skippedInvalidName} geÃ§ersiz ad
                   </span>
                 )}
                 {lastReport.skippedMissingField > 0 && (
-                  <span className={"settings-badge-warning"}>
+                  <span className="inline-flex items-center rounded-md border border-transparent bg-amber-500/20 text-amber-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
                     âš  {lastReport.skippedMissingField} eksik alan
                   </span>
                 )}
               </div>
-              <div className={"settings-scroll-sm"}>
+              <div className="max-h-[200px] overflow-y-auto">
                 {lastReport.warnings.map((w, i) => (
-                  <div key={i} className={"settings-text-muted"}>
+                  <div key={i} className="text-muted-foreground text-sm">
                     â€¢ {w}
                   </div>
                 ))}
@@ -2051,15 +2043,15 @@ function SelectiveRestore({
             </div>
           )}
 
-          <div className={"settings-flex-row-10"}>
+          <div className="flex items-center gap-2.5">
             {selected.size > 0 && (
-              <button onClick={doRestore} className={"settings-btn-blue"}>
+              <Button onClick={doRestore} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1">
                 {selected.size} BÃ¶lÃ¼mÃ¼ Geri YÃ¼kle
-              </button>
+              </Button>
             )}
-            <button onClick={reset} className={"settings-btn-gray-md"}>
+            <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
               SÄ±fÄ±rla
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -2433,6 +2425,7 @@ function SmartImportManager({
           proceedToPreview(data, {});
         }
       } catch {
+        logger.warn('settings', 'Dosya ayrıştırılamadı — JSON veya CSV formatı hatalı');
         setErrors([
           "Dosya ayrÄ±ÅŸtÄ±rÄ±lamadÄ± â€” JSON veya CSV formatÄ±nÄ± kontrol edin",
         ]);
@@ -2472,6 +2465,7 @@ function SmartImportManager({
           try {
             item.createdAt = new Date(val).toISOString();
           } catch {
+            logger.warn('settings', 'createdAt tarihi ayrıştırılamadı, varsayılan korundu');
             /* keep default */
           }
         } else {
@@ -2642,6 +2636,7 @@ function SmartImportManager({
           );
           setTimeout(() => window.location.reload(), 1200);
         } catch {
+          logger.warn('settings', 'İçe aktarma sırasında hata oluştu');
           showToast("Ä°Ã§e aktarma sÄ±rasÄ±nda hata oluÅŸtu!", "error");
         }
       },
@@ -2679,7 +2674,7 @@ function SmartImportManager({
 
   return (
     <Card title="ğŸ§  AkÄ±llÄ± Veri Ä°Ã§e Aktarma">
-      <p className={"settings-text-muted"}>
+      <p className="text-muted-foreground text-sm">
         JSON, CSV veya TXT dosyanÄ±zÄ± analiz eder; kolonlarÄ± otomatik eÅŸler
         (mÃ¼ÅŸteri, tarih, tutar vb.), manuel dÃ¼zeltme imkanÄ± sunar ve Ã§akÄ±ÅŸmalarÄ±
         Ã§Ã¶zerek gÃ¼venli aktarÄ±m yapar.
@@ -2692,17 +2687,17 @@ function SmartImportManager({
             type="file"
             accept=".json,.csv,.tsv,.txt"
             onChange={handleFile}
-            className={"settings-hidden"}
+            className="hidden"
           />
-          <button
+          <Button
             onClick={() => fileRef.current?.click()}
-            className={"settings-btn-accent-dashed"}
+            className="px-4 py-3 rounded-xl font-bold text-sm border-2 border-dashed border-purple-500/30 bg-purple-500/10 w-full"
           >
             Dosya SeÃ§ & AkÄ±llÄ± Analiz BaÅŸlat
-          </button>
-          <div className={"settings-flex-center"}>
+          </Button>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             {["JSON", "CSV", "TSV", "TXT"].map((f) => (
-              <span key={f} className={"settings-badge-accent"}>
+              <span key={f} className="inline-flex items-center rounded-md border border-transparent bg-purple-500/20 text-purple-400 px-2 py-0.5 text-xs font-semibold whitespace-nowrap">
                 .{f.toLowerCase()}
               </span>
             ))}
@@ -2711,19 +2706,19 @@ function SmartImportManager({
       )}
 
       {stage === "csvMapping" && csvRows.length > 0 && (
-        <div className={"settings-grid"}>
-          <div className={"settings-success-box"}>
-            <div className={"settings-text-success-bold"}>
+        <div className="grid gap-4">
+          <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+            <div className="text-green-400 font-bold">
               {csvRows.length} satÄ±r okundu
             </div>
-            <div className={"settings-text-muted-xs"}>
+            <div className="text-muted-foreground text-xs">
               Kolon eÅŸleÅŸmelerini kontrol edin ve gerekirse dÃ¼zeltin
             </div>
           </div>
 
           <div>
-            <div className={"settings-flex-row-10"}>
-              <span className={"settings-text-primary-sm"}>
+            <div className="flex items-center gap-2.5">
+              <span className="text-foreground text-sm font-semibold">
                 Hedef Veri TÃ¼rÃ¼:
               </span>
               {[
@@ -2731,7 +2726,7 @@ function SmartImportManager({
                 { id: "products", label: "ÃœrÃ¼n", icon: "ğŸ“¦" },
                 { id: "kasa", label: "Kasa", icon: "ğŸ’°" },
               ].map((t) => (
-                <button
+                <Button
                   key={t.id}
                   onClick={() => setCsvTarget(t.id)}
                   style={{
@@ -2749,14 +2744,14 @@ function SmartImportManager({
                   }}
                 >
                   {t.icon} {t.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
-          <div className={"settings-text-primary-sm"}>Kolon EÅŸleÅŸmeleri</div>
+          <div className="text-foreground text-sm font-semibold">Kolon EÅŸleÅŸmeleri</div>
           {csvMappings.map((m, i) => (
-            <div key={m.csvColumn} className={"settings-flex-row-10"}>
+            <div key={m.csvColumn} className="flex items-center gap-2.5">
               <div
                 style={{
                   minWidth: 140,
@@ -2771,10 +2766,10 @@ function SmartImportManager({
               >
                 {m.csvColumn}
                 {m.autoDetected && (
-                  <span className={"settings-text-success-sm"}>otomatik</span>
+                  <span className="text-green-400 text-xs">otomatik</span>
                 )}
               </div>
-              <span className={"settings-text-dim"}>â†’</span>
+              <span className="text-[var(--text-dim)] text-sm">â†’</span>
               <select
                 value={m.targetField}
                 onChange={(e) => {
@@ -2786,7 +2781,7 @@ function SmartImportManager({
                   };
                   setCsvMappings(next);
                 }}
-                className={"settings-select-sm"}
+                className="px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-xs font-mono"
               >
                 <option value="">â€” Yoksay â€”</option>
                 <option value="name">Ad / Ä°sim</option>
@@ -2808,15 +2803,15 @@ function SmartImportManager({
           ))}
 
           {csvRows.length > 0 && (
-            <div className={"settings-code-box"}>
-              <div className={"settings-text-muted-sm"}>
+            <div className="bg-[rgba(0,0,0,0.3)] rounded-[10px] p-3 overflow-x-auto">
+              <div className="text-muted-foreground text-xs">
                 Ã–nizleme (ilk 3 satÄ±r):
               </div>
-              <table className={"settings-table"}>
+              <table className="w-full text-xs">
                 <thead>
                   <tr>
                     {Object.keys(csvRows[0]).map((h) => (
-                      <th key={h} className={"settings-th"}>
+                      <th key={h} className="text-left p-1.5 font-semibold text-muted-foreground">
                         {h}
                       </th>
                     ))}
@@ -2826,7 +2821,7 @@ function SmartImportManager({
                   {csvRows.slice(0, 3).map((row, ri) => (
                     <tr key={ri}>
                       {Object.values(row).map((v, ci) => (
-                        <td key={ci} className={"settings-td"}>
+                        <td key={ci} className="p-1.5 text-foreground">
                           {v}
                         </td>
                       ))}
@@ -2837,33 +2832,33 @@ function SmartImportManager({
             </div>
           )}
 
-          <div className={"settings-flex-row-10"}>
-            <button onClick={applyCsvImport} className={"settings-btn-purple"}>
+          <div className="flex items-center gap-2.5">
+            <Button onClick={applyCsvImport} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">
               Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
-            </button>
-            <button onClick={reset} className={"settings-btn-gray-md"}>
+            </Button>
+            <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
               SÄ±fÄ±rla
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {stage === "mapping" && rawData && (
-        <div className={"settings-grid"}>
-          <div className={"settings-text-primary"}>
+        <div className="grid gap-4">
+          <div className="text-foreground text-sm">
             ğŸ—ºï¸ Alan EÅŸleme (Field Mapping)
           </div>
           {Object.keys(legacyMapped).length > 0 && (
-            <div className={"settings-success-box"}>
-              <div className={"settings-text-success-bold"}>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-green-400 font-bold">
                 âœ… Otomatik AlgÄ±lanan Eski Alanlar
               </div>
               {Object.entries(legacyMapped).map(([src, dst]) => (
-                <div key={src} className={"settings-flex-row-8"}>
-                  <span className={"settings-mono-warning"}>{src}</span>
-                  <span className={"settings-text-dim"}>â†’</span>
-                  <span className={"settings-mono-success"}>{dst}</span>
-                  <span className={"settings-text-dim-sm"}>
+                <div key={src} className="flex items-center gap-2">
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-warning)]">{src}</span>
+                  <span className="text-[var(--text-dim)] text-sm">â†’</span>
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-success)]">{dst}</span>
+                  <span className="text-[var(--text-dim)] text-xs">
                     ({KNOWN_ARRAYS[dst] || dst})
                   </span>
                 </div>
@@ -2871,14 +2866,14 @@ function SmartImportManager({
             </div>
           )}
           {unknownFields.length > 0 && (
-            <div className={"settings-warning-box"}>
-              <div className={"settings-text-warning-bold"}>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-amber-400 font-bold text-sm">
                 âš ï¸ TanÄ±nmayan Alanlar â€” EÅŸleme SeÃ§in
               </div>
               {unknownFields.map((field) => (
-                <div key={field} className={"settings-flex-row-10"}>
-                  <span className={"settings-mono-warning-md"}>{field}</span>
-                  <span className={"settings-text-dim"}>â†’</span>
+                <div key={field} className="flex items-center gap-2.5">
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2.5 py-1 rounded text-[var(--color-warning)] text-center min-w-[120px]">{field}</span>
+                  <span className="text-[var(--text-dim)] text-sm">â†’</span>
                   <select
                     value={fieldMappings[field] || ""}
                     onChange={(e) =>
@@ -2887,7 +2882,7 @@ function SmartImportManager({
                         [field]: e.target.value,
                       }))
                     }
-                    className={"settings-select-sm"}
+                    className="px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-xs font-mono"
                   >
                     <option value="">â€” Yoksay (aktarma)</option>
                     {Object.entries(KNOWN_ARRAYS).map(([k, label]) => (
@@ -2900,52 +2895,52 @@ function SmartImportManager({
               ))}
             </div>
           )}
-          <div className={"settings-flex-row-10"}>
-            <button
+          <div className="flex items-center gap-2.5">
+            <Button
               onClick={() => proceedToPreview(rawData, fieldMappings)}
-              className={"settings-btn-purple"}
+              className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
             >
               Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
-            </button>
-            <button onClick={reset} className={"settings-btn-gray-md"}>
+            </Button>
+            <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
               SÄ±fÄ±rla
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {stage === "preview" && (
-        <div className={"settings-grid-12"}>
+        <div className="grid gap-3">
           {errors.length > 0 && (
-            <div className={"settings-error-box"}>
-              <div className={"settings-text-danger-bold"}>âŒ Hatalar</div>
+            <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-red-400 font-bold text-sm">âŒ Hatalar</div>
               {errors.map((e, i) => (
-                <div key={i} className={"settings-text-danger-sm"}>
+                <div key={i} className="text-red-400 text-xs">
                   â€¢ {e}
                 </div>
               ))}
             </div>
           )}
           {warnings.length > 0 && (
-            <div className={"settings-warning-box"}>
-              <div className={"settings-text-warning-bold"}>âš ï¸ UyarÄ±lar</div>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-amber-400 font-bold text-sm">âš ï¸ UyarÄ±lar</div>
               {warnings.map((w, i) => (
-                <div key={i} className={"settings-text-warning-sm"}>
+                <div key={i} className="text-amber-400 text-xs">
                   â€¢ {w}
                 </div>
               ))}
             </div>
           )}
           {Object.keys(stats).length > 0 && (
-            <div className={"settings-info-box"}>
-              <div className={"settings-text-info-bold"}>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-blue-400 font-bold text-sm">
                 ğŸ“Š Ä°Ã§e AktarÄ±lacak KayÄ±tlar
               </div>
-              <div className={"settings-grid-auto-140"}>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {Object.entries(stats).map(([k, v]) => (
-                  <div key={k} className={"settings-stat-box-sm"}>
-                    <div className={"settings-text-primary-sm"}>{v}</div>
-                    <div className={"settings-text-dim"}>
+                  <div key={k} className="bg-[var(--bg-card)] rounded-lg p-2 text-center">
+                    <div className="text-foreground text-sm font-semibold">{v}</div>
+                    <div className="text-[var(--text-dim)] text-sm">
                       {KNOWN_ARRAYS[k] || k}
                     </div>
                   </div>
@@ -2954,20 +2949,20 @@ function SmartImportManager({
             </div>
           )}
           {conflicts.length > 0 && (
-            <div className={"settings-error-box"}>
-              <div className={"settings-text-danger-bold"}>
+            <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="text-red-400 font-bold text-sm">
                 âš¡ Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
               </div>
               {conflicts.map((c) => (
-                <div key={c.entity} className={"settings-border-bottom"}>
-                  <div className={"settings-text-danger-sm"}>
+                <div key={c.entity} className="border-b border-[var(--border)] pb-3 mb-3">
+                  <div className="text-red-400 text-xs">
                     <strong>{c.label}</strong>:{" "}
                     {c.byId > 0 && `${c.byId} aynÄ± ID`}
                     {c.byId > 0 && c.byName > 0 && ", "}
                     {c.byName > 0 && `${c.byName} aynÄ± isim`} Ã§akÄ±ÅŸmasÄ±
                   </div>
-                  <div className={"settings-flex-row-8"}>
-                    <button
+                  <div className="flex items-center gap-2">
+                    <Button
                       onClick={() =>
                         setResolutions((r) => ({
                           ...r,
@@ -2980,8 +2975,8 @@ function SmartImportManager({
                       )}
                     >
                       ğŸ”„ Ãœzerine Yaz
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() =>
                         setResolutions((r) => ({ ...r, [c.entity]: "skip" }))
                       }
@@ -2991,8 +2986,8 @@ function SmartImportManager({
                       )}
                     >
                       â­ï¸ Ã‡akÄ±ÅŸanlarÄ± Atla
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() =>
                         setResolutions((r) => ({ ...r, [c.entity]: "merge" }))
                       }
@@ -3002,9 +2997,9 @@ function SmartImportManager({
                       )}
                     >
                       ğŸ”€ BirleÅŸtir
-                    </button>
+                    </Button>
                   </div>
-                  <div className={"settings-text-dim-sm"}>
+                  <div className="text-[var(--text-dim)] text-xs">
                     {resolutions[c.entity] === "overwrite" &&
                       "Mevcut kayÄ±tlar yeni verilerle tamamen deÄŸiÅŸtirilir."}
                     {resolutions[c.entity] === "skip" &&
@@ -3016,26 +3011,26 @@ function SmartImportManager({
               ))}
             </div>
           )}
-          <div className={"settings-flex-row-10"}>
+          <div className="flex items-center gap-2.5">
             {mapped && errors.length === 0 && (
-              <button onClick={doImport} className={"settings-btn-purple"}>
+              <Button onClick={doImport} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">
                 âœ… AktarÄ±mÄ± Onayla & BaÅŸlat
-              </button>
+              </Button>
             )}
-            <button onClick={reset} className={"settings-btn-gray-md"}>
+            <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
               SÄ±fÄ±rla
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {stage === "done" && (
-        <div className={"settings-empty-state"}>
-          <div className={"settings-empty-icon-lg"}>âœ…</div>
-          <div className={"settings-text-success-bold"}>
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          <div className="text-4xl mb-3">âœ…</div>
+          <div className="text-green-400 font-bold">
             Veriler baÅŸarÄ±yla aktarÄ±ldÄ±!
           </div>
-          <div className={"settings-text-muted-xs"}>Sayfa yenileniyor...</div>
+          <div className="text-muted-foreground text-xs">Sayfa yenileniyor...</div>
         </div>
       )}
     </Card>
@@ -3231,34 +3226,34 @@ function VeriOnarim({
   };
 
   return (
-    <div className={"settings-grid"}>
+    <div className="grid gap-4">
       <Card title="ğŸ”§ Veri TutarlÄ±lÄ±k KontrolÃ¼">
-        <p className={"settings-text-muted"}>
+        <p className="text-muted-foreground text-sm">
           VeritabanÄ±nÄ±zÄ± analiz ederek tutarsÄ±z, eksik veya hatalÄ± kayÄ±tlarÄ±
           tespit edin.
         </p>
-        <div className={"settings-flex-row-10"}>
-          <button
+        <div className="flex items-center gap-2.5">
+          <Button
             onClick={diagnose}
-            className={"settings-btn-blue"}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1"
             style={{ flex: 1 }}
           >
             ğŸ” HÄ±zlÄ± Analiz
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleDetailedHealthCheck}
             disabled={checkingHealth}
-            className={"settings-btn-purple"}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
             style={{ flex: 1 }}
           >
             {checkingHealth
               ? "âŒ› Analiz Ediliyor..."
               : "ğŸ›¡ï¸ Tam Sistem TaramasÄ±"}
-          </button>
+          </Button>
         </div>
 
         {healthReport && (
-          <div className={"settings-mt-16 settings-grid-8"}>
+          <div className="mt-4 grid gap-2">
             <div
               style={{
                 padding: "12px",
@@ -3272,7 +3267,7 @@ function VeriOnarim({
               }}
             >
               <div
-                className="settings-text-primary-bold"
+                className="text-foreground font-extrabold text-lg"
                 style={{
                   color:
                     healthReport.overall === "healthy" ? "var(--color-success)" : "var(--color-danger)",
@@ -3288,16 +3283,14 @@ function VeriOnarim({
             {healthReport.metrics.map((m) => (
               <div
                 key={m.id}
-                className={
-                  "settings-flex-between settings-p-10 settings-border-bottom"
-                }
+                className="flex items-center justify-between gap-3 p-2.5 border-b border-[var(--border)]"
               >
-                <div className={"settings-flex-1"}>
-                  <div className="settings-text-primary-sm">{m.name}</div>
-                  <div className="settings-text-dim-xs">{m.detail}</div>
+                <div className="flex-1">
+                  <div className="text-foreground font-bold text-sm">{m.name}</div>
+                  <div className="text-[var(--text-dim)] text-xs">{m.detail}</div>
                 </div>
                 <div
-                  className={`settings-badge-${m.status === "healthy" ? "success" : m.status === "degraded" ? "warning" : "danger"}`}
+                  className={m.status === "healthy" ? "inline-flex items-center rounded-md border border-transparent bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-semibold" : m.status === "degraded" ? "inline-flex items-center rounded-md border border-transparent bg-amber-500/20 text-amber-400 px-2.5 py-0.5 text-xs font-semibold" : "inline-flex items-center rounded-md border border-transparent bg-red-500/20 text-red-400 px-2.5 py-0.5 text-xs font-semibold"}
                 >
                   {m.value}
                   {m.unit || ""}
@@ -3306,10 +3299,10 @@ function VeriOnarim({
             ))}
 
             {healthReport.recommendations.length > 0 && (
-              <div className="settings-info-box">
-                <div className="settings-text-info-bold">ğŸ’¡ Ã–neriler:</div>
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm">
+                <div className="text-blue-400 font-bold text-sm">ğŸ’¡ Ã–neriler:</div>
                 {healthReport.recommendations.map((rec, i) => (
-                  <div key={i} className="settings-text-muted-xs">
+                  <div key={i} className="text-muted-foreground text-xs">
                     â€¢ {rec}
                   </div>
                 ))}
@@ -3319,7 +3312,7 @@ function VeriOnarim({
         )}
 
         {results.length > 0 && (
-          <div className={"settings-grid-6"}>
+          <div className="grid gap-1.5">
             {results.map((r, i) => (
               <div
                 key={i}
@@ -3344,7 +3337,7 @@ function VeriOnarim({
       </Card>
 
       <Card title="ğŸ› ï¸ OnarÄ±m AraÃ§larÄ±">
-        <div className={"settings-grid-10"}>
+        <div className="grid gap-2.5">
           {[
             {
               label: "ğŸ“¦ Negatif StoklarÄ± SÄ±fÄ±rla",
@@ -3389,11 +3382,11 @@ function VeriOnarim({
                 border: `1px solid ${t.color}15`,
               }}
             >
-              <div className={"settings-flex-1"}>
-                <div className={"settings-text-primary-sm"}>{t.label}</div>
-                <div className={"settings-text-dim-sm"}>{t.desc}</div>
+              <div className="flex-1">
+                <div className="text-foreground text-sm font-semibold">{t.label}</div>
+                <div className="text-[var(--text-dim)] text-xs">{t.desc}</div>
               </div>
-              <button
+              <Button
                 onClick={t.action}
                 style={{
                   background: `${t.color}15`,
@@ -3408,14 +3401,14 @@ function VeriOnarim({
                 }}
               >
                 Uygula
-              </button>
+              </Button>
             </div>
           ))}
         </div>
       </Card>
 
       <Card title="ğŸ“‹ Sistem Bilgileri">
-        <div className={"settings-grid-2-10"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
             {
               label: "Toplam KayÄ±t",
@@ -3440,9 +3433,9 @@ function VeriOnarim({
                   : "-",
             },
           ].map((s) => (
-            <div key={s.label} className={"settings-stat-box"}>
-              <div className={"settings-text-dim-6"}>{s.label}</div>
-              <div className={"settings-text-primary-sm"}>{s.value}</div>
+            <div key={s.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
+              <div className="text-[var(--text-dim)] text-xs">{s.label}</div>
+              <div className="text-foreground text-sm font-semibold">{s.value}</div>
             </div>
           ))}
         </div>
@@ -3462,12 +3455,12 @@ function DangerAction({
 }) {
   const { showConfirm } = useConfirm();
   return (
-    <div className={"settings-flex-row-12"}>
-      <div className={"settings-flex-1"}>
-        <div className={"settings-text-primary-xs"}>{label}</div>
-        <div className={"settings-text-dim-sm"}>{desc}</div>
+    <div className="flex items-center gap-3">
+      <div className="flex-1">
+        <div className="text-foreground text-xs">{label}</div>
+        <div className="text-[var(--text-dim)] text-xs">{desc}</div>
       </div>
-      <button
+      <Button
         onClick={() =>
           showConfirm(
             label,
@@ -3476,10 +3469,10 @@ function DangerAction({
             true,
           )
         }
-        className={"settings-btn-danger-sm"}
+        className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs"
       >
         Temizle
-      </button>
+      </Button>
     </div>
   );
 }
@@ -3521,14 +3514,13 @@ function FV({
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
-    <div>
-      <label className={"settings-lbl"}>{label}</label>
-      <input
+    <div className="space-y-1.5">
+      <Label className="text-sm font-medium text-[var(--text-muted)]">{label}</Label>
+      <Input
         type={type}
         inputMode={inputMode}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={"settings-inp"}
       />
     </div>
   );
@@ -3624,12 +3616,12 @@ function KategoriYonetim({
 
   return (
     <Card title="ğŸ·ï¸ ÃœrÃ¼n Kategorileri">
-      <div className={"settings-flex-col-12"}>
+      <div className="flex flex-col gap-3">
         {cats.length === 0 && (
-          <div className={"settings-empty-state"}>HenÃ¼z kategori yok</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">HenÃ¼z kategori yok</div>
         )}
         {cats.map((c) => (
-          <div key={c.id} className={"settings-flex-row-10"}>
+          <div key={c.id} className="flex items-center gap-2.5">
             {editId === c.id ? (
               <>
                 <input
@@ -3637,13 +3629,7 @@ function KategoriYonetim({
                   onChange={(e) =>
                     setEditForm((f) => ({ ...f, icon: e.target.value }))
                   }
-                  style={{
-                    ...inp,
-                    width: 48,
-                    textAlign: "center",
-                    fontSize: "1.1rem",
-                    padding: "6px",
-                  }}
+                  className={`${inpBase} w-[48px] text-center text-lg`} style={{ padding: "6px" }}
                   maxLength={2}
                 />
                 <input
@@ -3651,59 +3637,59 @@ function KategoriYonetim({
                   onChange={(e) =>
                     setEditForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  style={{ ...inp, flex: 1, padding: "7px 10px" }}
+                  className={`${inpBase} flex-1 p-[7px_10px]`}
                   autoFocus
                 />
-                <button
+                <Button
                   onClick={() => saveEdit(c.id)}
-                  className={"settings-btn-green-sm"}
+                  className="px-3 py-1.5 rounded-lg font-bold text-xs bg-green-500/20 text-green-500 hover:bg-green-500/30"
                 >
                   âœ“
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setEditId(null)}
-                  className={"settings-btn-gray-sm"}
+                  className="px-2.5 py-1.5 rounded-lg font-medium text-xs bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
                 >
                   âœ•
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <span className={"settings-text-lg"}>{c.icon}</span>
-                <span className={"settings-text-primary-mid-2"}>{c.name}</span>
-                <span className={"settings-text-dim-9"}>{c.id}</span>
-                <span className={"settings-text-dim-12"}>
+                <span className="text-lg">{c.icon}</span>
+                <span className="text-foreground font-semibold">{c.name}</span>
+                <span className="text-[var(--text-dim)] text-xs font-mono">{c.id}</span>
+                <span className="text-[var(--text-dim)] text-xs">
                   {
                     db.products.filter((p) => !p.deleted && p.category === c.id)
                       .length
                   }{" "}
                   Ã¼rÃ¼n
                 </span>
-                <button
+                <Button
                   onClick={() => {
                     setEditId(c.id);
                     setEditForm({ name: c.name, icon: c.icon });
                   }}
-                  className={"settings-btn-info-sm"}
+                  className="px-2.5 py-1.5 rounded-lg font-bold text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                 >
                   âœï¸
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => deleteKat(c.id)}
-                  className={"settings-btn-danger-sm"}
+                  className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs"
                 >
                   ğŸ—‘ï¸
-                </button>
+                </Button>
               </>
             )}
           </div>
         ))}
       </div>
-      <div className={"settings-flex-row-8"}>
+      <div className="flex items-center gap-2">
         <input
           value={yeniIcon}
           onChange={(e) => setYeniIcon(e.target.value)}
-          style={{ ...inp, width: 52, textAlign: "center", fontSize: "1.2rem" }}
+          className={`${inpBase} w-[52px] text-center text-xl`}
           placeholder="ğŸ“¦"
           maxLength={2}
         />
@@ -3711,14 +3697,14 @@ function KategoriYonetim({
           value={yeniAd}
           onChange={(e) => setYeniAd(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addKat()}
-          style={{ ...inp, flex: 1 }}
+          className={`${inpBase} flex-1`}
           placeholder="Yeni kategori adÄ±..."
         />
-        <button onClick={addKat} className={"settings-btn-primary-sm"}>
+        <Button onClick={addKat} className="btn-primary px-4 py-2 rounded-xl font-bold text-sm">
           + Ekle
-        </button>
+        </Button>
       </div>
-      <p className={"settings-text-dim-10"}>
+      <p className="text-[var(--text-dim)] text-xs mt-2">
         ÃœrÃ¼nleri kullanan kategoriler silinemez.
       </p>
     </Card>
@@ -3772,16 +3758,16 @@ function AboutPanel({ db }: { db: DB }) {
   ];
 
   return (
-    <div className={"settings-grid-16"}>
+    <div className="grid gap-4">
       {/* Logo & BaÅŸlÄ±k */}
-      <div className={"settings-about-hero"}>
-        <div className={"settings-about-icon"}>{appCfg.appIcon}</div>
-        <h2 className={"settings-text-primary-lg"}>{appCfg.appName}</h2>
-        <p className={"settings-text-primary-mid"}>{APP_SUBTITLE}</p>
-        <div className={"settings-flex-center"}>
+      <div className="text-center py-6">
+        <div className="text-4xl mb-2">{appCfg.appIcon}</div>
+        <h2 className="text-foreground text-lg font-bold">{appCfg.appName}</h2>
+        <p className="text-foreground text-sm">{APP_SUBTITLE}</p>
+        <div className="flex items-center justify-center gap-2 flex-wrap">
           {/* Versiyon â€” tÄ±klanabilir */}
           {editVersion ? (
-            <div className={"settings-flex-row-6"}>
+            <div className="flex items-center gap-1.5">
               <input
                 value={versionInput}
                 onChange={(e) => {
@@ -3807,39 +3793,39 @@ function AboutPanel({ db }: { db: DB }) {
                 }}
                 autoFocus
               />
-              <button
+              <Button
                 onClick={saveVersion}
-                className={"settings-btn-success-sm"}
+                className="px-3 py-1.5 rounded-lg font-bold text-xs"
               >
                 âœ“
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => {
                   setEditVersion(false);
                   setVersionErr("");
                 }}
-                className={"settings-btn-gray-sm"}
+                className="px-2.5 py-1.5 rounded-lg font-medium text-xs bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
               >
                 âœ•
-              </button>
+              </Button>
               {versionErr && (
-                <span className={"settings-text-danger-sm"}>{versionErr}</span>
+                <span className="text-red-400 text-xs">{versionErr}</span>
               )}
             </div>
           ) : (
-            <button
+            <Button
               onClick={() => {
                 setEditVersion(true);
                 setVersionInput(appCfg.version);
               }}
               title="Versiyonu dÃ¼zenle"
-              className={"settings-badge-primary"}
+              className="inline-flex items-center rounded-md border border-transparent bg-primary/20 text-primary px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap"
             >
               v{appCfg.version} âœï¸
-            </button>
+            </Button>
           )}
-          <span className={"settings-badge-gray"}>DB v{db._version || 1}</span>
-          <span className={"settings-badge-success"}>
+          <span className="inline-flex items-center rounded-md border border-[var(--border)] px-2.5 py-0.5 text-xs font-semibold text-muted-foreground whitespace-nowrap">DB v{db._version || 1}</span>
+          <span className="inline-flex items-center rounded-md border border-transparent bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
             {totalRecords} kayÄ±t Â· {lsKB} KB
           </span>
         </div>
@@ -3847,7 +3833,7 @@ function AboutPanel({ db }: { db: DB }) {
 
       {/* Teknoloji Stack */}
       <Card title="âš™ï¸ Teknoloji">
-        <div className={"settings-flex-wrap-8"}>
+        <div className="flex flex-wrap gap-2">
           {techStack.map((t) => (
             <span
               key={t.name}
@@ -3869,7 +3855,7 @@ function AboutPanel({ db }: { db: DB }) {
 
       {/* VeritabanÄ± Ã–zeti */}
       <Card title="ğŸ—„ï¸ VeritabanÄ± Ã–zeti">
-        <div className={"settings-grid-auto-130"}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
             {
               icon: "ğŸ“¦",
@@ -3904,10 +3890,10 @@ function AboutPanel({ db }: { db: DB }) {
               count: db.stockMovements.length,
             },
           ].map((s) => (
-            <div key={s.label} className={"settings-stat-box"}>
-              <div className={"settings-stat-icon-lg"}>{s.icon}</div>
-              <div className={"settings-text-primary-bold"}>{s.count}</div>
-              <div className={"settings-text-dim-2"}>{s.label}</div>
+            <div key={s.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
+              <div className="text-xl mb-1">{s.icon}</div>
+              <div className="text-foreground text-sm font-bold">{s.count}</div>
+              <div className="text-[var(--text-dim)] text-xs">{s.label}</div>
             </div>
           ))}
         </div>
@@ -3915,7 +3901,7 @@ function AboutPanel({ db }: { db: DB }) {
 
       {/* SÃ¼rÃ¼m KitapÃ§Ä±ÄŸÄ± â€” Changelog */}
       <Card title="ğŸ“– SÃ¼rÃ¼m GeÃ§miÅŸi">
-        <div className={"settings-grid-8"}>
+        <div className="grid gap-2">
           {CHANGELOG.map((entry) => {
             const isExpanded = expandedVersion === entry.version;
             const isLatest = entry.version === CHANGELOG[0]?.version;
@@ -3933,11 +3919,11 @@ function AboutPanel({ db }: { db: DB }) {
                 }}
               >
                 {/* BaÅŸlÄ±k satÄ±rÄ± */}
-                <button
+                <Button
                   onClick={() =>
                     setExpandedVersion(isExpanded ? null : entry.version)
                   }
-                  className={"settings-changelog-btn"}
+                  className="w-full flex items-center gap-3 p-3 bg-transparent border-none cursor-pointer text-left"
                 >
                   <span
                     style={{
@@ -3951,13 +3937,13 @@ function AboutPanel({ db }: { db: DB }) {
                     v{entry.version}
                   </span>
                   {isLatest && (
-                    <span className={"settings-badge-primary"}>SON</span>
+                    <span className="inline-flex items-center rounded-md border border-transparent bg-primary/20 text-primary px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">SON</span>
                   )}
-                  <div className={"settings-flex-1"}>
-                    <div className={"settings-text-primary-sm"}>
+                  <div className="flex-1">
+                    <div className="text-foreground text-sm font-semibold">
                       {entry.title}
                     </div>
-                    <div className={"settings-text-dim-4"}>{entry.date}</div>
+                    <div className="text-[var(--text-dim)] text-xs">{entry.date}</div>
                   </div>
                   <span
                     style={{
@@ -3969,17 +3955,17 @@ function AboutPanel({ db }: { db: DB }) {
                   >
                     â–¼
                   </span>
-                </button>
+                </Button>
 
                 {/* Detay */}
                 {isExpanded && (
-                  <div className={"settings-changelog-body"}>
-                    <p className={"settings-text-muted-sm"}>{entry.summary}</p>
-                    <div className={"settings-grid-5"}>
+                  <div className="p-3 pt-0 space-y-2">
+                    <p className="text-muted-foreground text-xs">{entry.summary}</p>
+                    <div className="grid gap-2">
                       {entry.changes.map((change, i) => {
                         const cfg = CHANGE_TYPE_CONFIG[change.type];
                         return (
-                          <div key={i} className={"settings-flex-row-8"}>
+                          <div key={i} className="flex items-center gap-2">
                             <span
                               style={{
                                 background: cfg.bg,
@@ -3994,7 +3980,7 @@ function AboutPanel({ db }: { db: DB }) {
                             >
                               {cfg.label}
                             </span>
-                            <span className={"settings-text-muted"}>
+                            <span className="text-muted-foreground text-sm">
                               {change.text}
                             </span>
                           </div>
@@ -4011,16 +3997,16 @@ function AboutPanel({ db }: { db: DB }) {
 
       {/* Lisans */}
       <Card title="ğŸ“„ Lisans & GeliÅŸtirici">
-        <div className={"settings-grid-10"}>
+        <div className="grid gap-2.5">
           {[
             { label: "Uygulama", value: `${appCfg.appName} â€” ${APP_SUBTITLE}` },
             { label: "GeliÅŸtirici", value: "Pars Pelet" },
             { label: "Lisans", value: "Ã–zel KullanÄ±m â€” TÃ¼m haklarÄ± saklÄ±dÄ±r" },
             { label: "Platform", value: "Web (PWA) + Android (Capacitor)" },
           ].map((row) => (
-            <div key={row.label} className={"settings-flex-row-12"}>
-              <span className={"settings-text-dim-5"}>{row.label}</span>
-              <span className={"settings-text-primary-xs"}>{row.value}</span>
+            <div key={row.label} className="flex items-center gap-3">
+              <span className="text-[var(--text-dim)] text-xs">{row.label}</span>
+              <span className="text-foreground text-xs">{row.value}</span>
             </div>
           ))}
         </div>
@@ -4047,6 +4033,7 @@ function AgentSettingsPanel({
       const parsed = JSON.parse(raw);
       return parsed.agentSettings || getDefaultAgentSettings();
     } catch {
+      logger.warn('settings', 'Ajan ayarları localStorage\'dan okunamadı, varsayılan kullanıldı');
       return getDefaultAgentSettings();
     }
   });
@@ -4111,6 +4098,7 @@ function AgentSettingsPanel({
       localStorage.setItem("sobaYonetim", JSON.stringify(parsed));
       showToast("Ajan ayarlarÄ± kaydedildi!", "success");
     } catch {
+      logger.warn('settings', 'Ajan ayarları kaydedilemedi');
       showToast("Ayarlar kaydedilemedi!", "error");
     }
   };
@@ -4153,14 +4141,14 @@ function AgentSettingsPanel({
   };
 
   return (
-    <div className={"settings-grid"}>
+    <div className="grid gap-4">
       <Card title="ğŸ¤– Ajan YÃ¶netimi">
-        <p className={"settings-text-muted"}>
+        <p className="text-muted-foreground text-sm">
           Sistemdeki ajanlarÄ± etkinleÅŸtirin/devre dÄ±ÅŸÄ± bÄ±rakÄ±n ve izinlerini
           yÃ¶netin.
         </p>
 
-        <div className={"settings-grid-8"}>
+        <div className="grid gap-2">
           {agents.map((agent) => {
             const settings = (agentSettings[agent.id] as Record<
               string,
@@ -4186,15 +4174,15 @@ function AgentSettingsPanel({
                 }}
               >
                 {/* BaÅŸlÄ±k */}
-                <div className={"settings-flex-row-12"}>
+                <div className="flex items-center gap-3">
                   <span style={{ fontSize: "1.4rem" }}>{agent.icon}</span>
-                  <div className={"settings-flex-1"}>
-                    <div className={"settings-text-primary-sm"}>
+                  <div className="flex-1">
+                    <div className="text-foreground text-sm font-semibold">
                       {agent.name}
                     </div>
-                    <div className={"settings-text-dim-2"}>{agent.desc}</div>
+                    <div className="text-[var(--text-dim)] text-xs">{agent.desc}</div>
                   </div>
-                  <button
+                  <Button
                     onClick={() => toggleAgent(agent.id)}
                     style={{
                       padding: "6px 12px",
@@ -4210,13 +4198,13 @@ function AgentSettingsPanel({
                     }}
                   >
                     {enabled ? "âœ“ Aktif" : "âœ• Pasif"}
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Ä°zinler */}
                 {enabled && (
-                  <div className={"settings-grid-5"}>
-                    <div className={"settings-text-dim-3"}>Ä°zinler:</div>
+                  <div className="grid gap-2">
+                    <div className="text-[var(--text-dim)] text-xs">Ä°zinler:</div>
                     {agent.permissions.map((perm) => (
                       <label
                         key={perm}
@@ -4237,7 +4225,7 @@ function AgentSettingsPanel({
                             accentColor: "var(--color-danger)",
                           }}
                         />
-                        <span className={"settings-text-muted-xs"}>{perm}</span>
+                        <span className="text-muted-foreground text-xs">{perm}</span>
                       </label>
                     ))}
                   </div>
@@ -4247,25 +4235,25 @@ function AgentSettingsPanel({
           })}
         </div>
 
-        <div className={"settings-flex-row-10"}>
-          <button
+        <div className="flex items-center gap-2.5">
+          <Button
             onClick={saveAgentSettings}
-            className={"settings-btn-primary"}
+            className="btn-primary w-full py-3 rounded-xl font-bold text-sm"
           >
             ğŸ’¾ Ajan AyarlarÄ±nÄ± Kaydet
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={resetToDefaults}
-            className={"settings-btn-gray-md"}
+            className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
           >
             â†º VarsayÄ±lana DÃ¶n
-          </button>
+          </Button>
         </div>
       </Card>
 
       {/* Ajan Ä°statistikleri */}
       <Card title="ğŸ“Š Ajan Ä°statistikleri">
-        <div className={"settings-grid-auto-130"}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
             {
               label: "Aktif Ajanlar",
@@ -4318,7 +4306,7 @@ function AgentSettingsPanel({
               >
                 {stat.count}
               </div>
-              <div className={"settings-text-dim-2"}>{stat.label}</div>
+              <div className="text-[var(--text-dim)] text-xs">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -4326,32 +4314,32 @@ function AgentSettingsPanel({
 
       {/* Ajan AÃ§Ä±klamasÄ± */}
       <Card title="â„¹ï¸ Ajan AÃ§Ä±klamasÄ±">
-        <div className={"settings-grid-8"}>
-          <div className={"settings-info-box"}>
-            <div className={"settings-text-primary-sm"}>
+        <div className="grid gap-2">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+            <div className="text-foreground text-sm font-semibold">
               ğŸ¤– Ajanlar Nedir?
             </div>
-            <p className={"settings-text-muted-xs"}>
+            <p className="text-muted-foreground text-xs">
               Ajanlar, uygulamanÄ±n belirli gÃ¶revleri otomatik olarak yerine
               getirmesine yardÄ±mcÄ± olan yapay zeka bileÅŸenleridir. Her ajan
               belirli bir alan (stok, kasa, satÄ±ÅŸ vb.) Ã¼zerinde Ã§alÄ±ÅŸÄ±r.
             </p>
           </div>
-          <div className={"settings-info-box"}>
-            <div className={"settings-text-primary-sm"}>
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+            <div className="text-foreground text-sm font-semibold">
               ğŸ” Ä°zinler Nedir?
             </div>
-            <p className={"settings-text-muted-xs"}>
+            <p className="text-muted-foreground text-xs">
               Ä°zinler, her ajanÄ±n hangi iÅŸlemleri yapabileceÄŸini kontrol eder.
               "read" = okuma, "write" = yazma/deÄŸiÅŸtirme. GÃ¼venlik iÃ§in sadece
               gerekli izinleri verin.
             </p>
           </div>
-          <div className={"settings-info-box"}>
-            <div className={"settings-text-primary-sm"}>
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+            <div className="text-foreground text-sm font-semibold">
               âš¡ EtkinleÅŸtirme/Devre DÄ±ÅŸÄ± BÄ±rakma
             </div>
-            <p className={"settings-text-muted-xs"}>
+            <p className="text-muted-foreground text-xs">
               AjanlarÄ± geÃ§ici olarak devre dÄ±ÅŸÄ± bÄ±rakabilirsiniz. Devre dÄ±ÅŸÄ±
               bÄ±rakÄ±lan ajanlar hiÃ§bir iÅŸlem yapmaz ve sistem performansÄ±nÄ±
               etkilemez.

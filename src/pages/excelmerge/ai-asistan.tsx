@@ -15,6 +15,7 @@ import {
   type OfflineAnalysis,
   type LearnedPattern,
 } from "@/lib/offline-ai";
+import { logger } from "@/lib/logger";
 
 
 interface Message {
@@ -64,6 +65,7 @@ async function streamAIResponse(
           if (data.done) onDone();
           if (data.error) onError(data.error);
         } catch {
+          logger.warn('excel-ai', 'Stream verisi JSON ayrıştırılamadı');
           // stream'den gelen ara satirlar JSON olmayabilir
         }
       }
@@ -191,6 +193,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
         }
       );
     } catch {
+      logger.warn('excel-ai', 'API çağrısı başarısız, çevrimdışı analiz kullanılıyor');
       const offResult = analyzeOffline(files);
       setOfflineAnalysis(offResult);
       setMessages((prev) => {
@@ -255,6 +258,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
         }
       );
     } catch {
+      logger.warn('excel-ai', 'Sohbet mesajı gönderilemedi');
       setMessages((prev) => {
         const next = [...prev];
         next[next.length - 1] = { role: "assistant", content: "Baglantiyi kontrol edin veya tekrar deneyin." };

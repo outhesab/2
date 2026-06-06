@@ -10,6 +10,7 @@ import {
   type AnomalySeverity,
 } from "@/lib/anomalyEngine";
 import type { DB } from "@/types";
+import { logger } from "@/lib/logger";
 import { useCallback, useMemo, useState } from "react";
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -304,6 +305,7 @@ export default function AnomaliOneri({ db, save }: Props) {
         save(fix.apply);
         setResolvedIds((prev) => new Set([...prev, anomaly.id]));
       } catch {
+        logger.warn('anomali', 'Anomali düzeltme hatası');
         /* hata toast'u üst bileşen yönetir */
       } finally {
         setFixingId(null);
@@ -331,7 +333,7 @@ export default function AnomaliOneri({ db, save }: Props) {
     try {
       const raw = localStorage.getItem('anomalyTrend');
       if (raw) logs.push(...JSON.parse(raw));
-    } catch { /* ignore */ }
+    } catch { logger.warn('anomali', 'Anomali trend verisi localStorage\'dan okunamadı'); /* ignore */ }
     // Bugünkü sayıyı ekle
     const todayKey = new Date().toISOString().slice(0, 10);
     const existingIdx = logs.findIndex(l => l.date === todayKey);
@@ -340,7 +342,7 @@ export default function AnomaliOneri({ db, save }: Props) {
     // Son 30 günü tut
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
     const filtered = logs.filter(l => l.date >= cutoff).sort((a, b) => a.date.localeCompare(b.date));
-    try { localStorage.setItem('anomalyTrend', JSON.stringify(filtered)); } catch { /* ignore */ }
+    try { localStorage.setItem('anomalyTrend', JSON.stringify(filtered)); } catch { logger.warn('anomali', 'Anomali trend verisi localStorage\'a yazılamadı'); /* ignore */ }
     return filtered;
   }, [report.anomalies.length]);
 

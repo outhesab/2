@@ -58,7 +58,7 @@ let _writeBuffer: LogEntry[] = [];
 let _writeTimer: ReturnType<typeof setTimeout> | null = null;
 
 /** localStorage'a toplu yaz (debounced, 300ms) */
-import { safeReadJSON, safeWriteJSON, safeRemove } from './storageQuota';
+import { safeReadJSON, safeWriteJSON, safeRemove } from './safeIO';
 
 function flushBuffer() {
   if (!_writeBuffer.length) return;

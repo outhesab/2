@@ -34,7 +34,7 @@ export function loadAgentSettings(): AgentSettings {
   }
 }
 
-export function saveAgentSettings(next: AgentSettings) {
+function saveAgentSettings(next: AgentSettings) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? (JSON.parse(raw) as StoredShape) : ({} as StoredShape);
@@ -45,7 +45,7 @@ export function saveAgentSettings(next: AgentSettings) {
   }
 }
 
-export function setAgentEnabled(agentId: AgentId, enabled: boolean) {
+function setAgentEnabled(agentId: AgentId, enabled: boolean) {
   const current = loadAgentSettings();
   const next: AgentSettings = { ...current, [agentId]: enabled };
   saveAgentSettings(next);

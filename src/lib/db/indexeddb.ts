@@ -9,7 +9,7 @@ import type {
 } from "@/types";
 import Dexie, { type Table } from "dexie";
 
-export interface AgentAuditRecord {
+interface AgentAuditRecord {
   id: string;
   agent: string;
   islem: string;
@@ -17,13 +17,13 @@ export interface AgentAuditRecord {
   timestamp: string;
 }
 
-export interface DbSnapshot {
+interface DbSnapshot {
   id: string;
   data: string;
   updatedAt: string;
 }
 
-export class ParspelDB extends Dexie {
+class ParspelDB extends Dexie {
   urunler!: Table<Product, string>;
   satislar!: Table<Sale, string>;
   stokHareketleri!: Table<StockMovement, string>;

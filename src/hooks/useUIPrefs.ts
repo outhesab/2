@@ -64,6 +64,7 @@ export async function loadUIPrefsFromFirebase(): Promise<UIPrefs | null> {
     if (!raw) return null;
     return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
   } catch {
+    logger.warn('ui', 'Firebase\'den UI tercihleri yüklenemedi');
     return null;
   }
 }
@@ -82,6 +83,7 @@ async function saveUIPrefsToFirebase(prefs: UIPrefs): Promise<void> {
       signal: AbortSignal.timeout(8000),
     });
   } catch {
+    logger.warn('ui', 'UI tercihleri Firebase\'e kaydedilemedi');
     /* sessizce geç */
   }
 }
@@ -91,6 +93,7 @@ export function loadUIPrefs(): UIPrefs {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
   } catch {
+    logger.warn('ui', 'LocalStorage\'dan UI tercihleri okunamadı');
     /* localStorage okuma hatası */
   }
   return { ...DEFAULT_PREFS };
@@ -122,30 +125,46 @@ export function applyUIPrefs(prefs: UIPrefs): void {
   root.style.setProperty("--accent-soft", hexToRgba(prefs.accent, 0.12));
 
   if (isLight) {
-    // Açık tema — yüksek kontrast, güneş altında okunabilir
     const bg = prefs.bgBase;
     const isDarkAccent = isColorDark(prefs.accent);
 
     root.style.setProperty("--bg-base", bg);
     root.style.setProperty("--bg-card", "rgba(255,255,255,0.92)");
+    root.style.setProperty("--bg-card-hover", "rgba(255,255,255,0.96)");
+    root.style.setProperty("--bg-surface", adjustBrightness(bg, -8));
     root.style.setProperty("--bg-sidebar", adjustBrightness(bg, -12));
     root.style.setProperty("--bg-elevated", "#ffffff");
     root.style.setProperty("--border", "rgba(0,0,0,0.12)");
     root.style.setProperty("--border-strong", "rgba(0,0,0,0.22)");
-    // Metin renkleri — çok koyu, güneş altında net
     root.style.setProperty("--text-primary", "#0a0a0a");
     root.style.setProperty("--text-secondary", "#1e293b");
     root.style.setProperty("--text-muted", "#475569");
-    // Buton metin rengi — accent koyu ise beyaz, açık ise siyah
+    root.style.setProperty("--text-dim", "#64748b");
+    root.style.setProperty("--color-primary", prefs.accent);
+    root.style.setProperty("--color-primary-light", lighten(prefs.accent, 20));
+    root.style.setProperty("--color-primary-soft", hexToRgba(prefs.accent, 0.12));
+    root.style.setProperty("--color-primary-ultra", hexToRgba(prefs.accent, 0.05));
+    root.style.setProperty("--color-success", "#10b981");
+    root.style.setProperty("--color-success-soft", "rgba(16,185,129,0.12)");
+    root.style.setProperty("--color-danger", "#ef4444");
+    root.style.setProperty("--color-danger-soft", "rgba(239,68,68,0.12)");
+    root.style.setProperty("--color-warning", "#f59e0b");
+    root.style.setProperty("--color-warning-soft", "rgba(245,158,11,0.12)");
+    root.style.setProperty("--color-info", "#3b82f6");
+    root.style.setProperty("--color-info-soft", "rgba(59,130,246,0.12)");
+    root.style.setProperty("--color-accent", prefs.accent);
+    root.style.setProperty("--color-accent-soft", hexToRgba(prefs.accent, 0.12));
+    root.style.setProperty("--color-secondary", "#64748b");
     root.style.setProperty(
       "--accent-text",
       isDarkAccent ? "#ffffff" : "#0a0a0a",
     );
-    // Sidebar için biraz daha koyu zemin
     root.style.setProperty("--sidebar-text", "#0f172a");
   } else {
     root.style.setProperty("--bg-base", prefs.bgBase);
     root.style.setProperty("--bg-card", adjustBrightness(prefs.bgBase, 20));
+    root.style.setProperty("--bg-card-hover", adjustBrightness(prefs.bgBase, 28));
+    root.style.setProperty("--bg-surface", adjustBrightness(prefs.bgBase, 35));
     root.style.setProperty("--bg-sidebar", adjustBrightness(prefs.bgBase, -5));
     root.style.setProperty("--bg-elevated", adjustBrightness(prefs.bgBase, 30));
     root.style.setProperty("--border", "rgba(255,255,255,0.07)");
@@ -153,6 +172,22 @@ export function applyUIPrefs(prefs: UIPrefs): void {
     root.style.setProperty("--text-primary", "#f0f6ff");
     root.style.setProperty("--text-secondary", "#94a3b8");
     root.style.setProperty("--text-muted", "#475569");
+    root.style.setProperty("--text-dim", "#334155");
+    root.style.setProperty("--color-primary", prefs.accent);
+    root.style.setProperty("--color-primary-light", lighten(prefs.accent, 20));
+    root.style.setProperty("--color-primary-soft", hexToRgba(prefs.accent, 0.12));
+    root.style.setProperty("--color-primary-ultra", hexToRgba(prefs.accent, 0.05));
+    root.style.setProperty("--color-success", "#10b981");
+    root.style.setProperty("--color-success-soft", "rgba(16,185,129,0.12)");
+    root.style.setProperty("--color-danger", "#ef4444");
+    root.style.setProperty("--color-danger-soft", "rgba(239,68,68,0.12)");
+    root.style.setProperty("--color-warning", "#f59e0b");
+    root.style.setProperty("--color-warning-soft", "rgba(245,158,11,0.12)");
+    root.style.setProperty("--color-info", "#3b82f6");
+    root.style.setProperty("--color-info-soft", "rgba(59,130,246,0.12)");
+    root.style.setProperty("--color-accent", prefs.accent);
+    root.style.setProperty("--color-accent-soft", hexToRgba(prefs.accent, 0.12));
+    root.style.setProperty("--color-secondary", "#64748b");
     root.style.setProperty("--accent-text", "#ffffff");
     root.style.setProperty("--sidebar-text", "#f0f6ff");
   }

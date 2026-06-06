@@ -183,7 +183,7 @@ export class SatisAgent extends BaseAgent {
     return { ok: true };
   }
 
-  async iadeYap(saleId: string, qty?: number): Promise<AgentResponse<void>> {
+  async iadeYap(saleId: string, qty?: number | Record<string, number>): Promise<AgentResponse<void>> {
     if (!this.yetkiKontrolu("satis.write")) {
       return { ok: false, error: "satis.write yetkisi yok" };
     }
@@ -196,10 +196,20 @@ export class SatisAgent extends BaseAgent {
       const sale = prev.sales.find((s) => s.id === saleId);
       if (!sale) return prev;
 
+      const isPerItem = typeof qty === "object" && qty !== null;
+      const totalSaleQty = sale.items?.reduce((s, i) => s + i.quantity, 0) || 0;
+
       const products = prev.products.map((p) => {
-        const item = sale.items?.find((i) => i.productId === p.id);
-        if (!item) return p;
-        const iadeMiktar = qty !== undefined ? Math.min(qty, item.quantity) : item.quantity;
+        const items = sale.items?.filter((i) => i.productId === p.id);
+        if (!items || items.length === 0) return p;
+        const totalItemQty = items.reduce((s, i) => s + i.quantity, 0);
+        if (isPerItem) {
+          const iadeMiktar = Math.min((qty as Record<string, number>)[p.id] ?? totalItemQty, totalItemQty);
+          return { ...p, stock: p.stock + iadeMiktar };
+        }
+        const iadeMiktar = qty !== undefined
+          ? Math.round((totalItemQty / totalSaleQty) * qty)
+          : totalItemQty;
         return { ...p, stock: p.stock + iadeMiktar };
       });
 
@@ -263,7 +273,7 @@ export class SatisAgent extends BaseAgent {
     return { ok: true };
   }
 
-  async fiyatDuzelt(saleId: string, yeniFiyat: number): Promise<AgentResponse<void>> {
+  async fiyatDuzelt(saleId: string, yeniFiyat: number | Record<string, number>): Promise<AgentResponse<void>> {
     if (!this.yetkiKontrolu("satis.write")) {
       return { ok: false, error: "satis.write yetkisi yok" };
     }
@@ -276,16 +286,30 @@ export class SatisAgent extends BaseAgent {
       const sale = prev.sales.find((s) => s.id === saleId);
       if (!sale) return prev;
 
+      const isPerItem = typeof yeniFiyat === "object" && yeniFiyat !== null;
+
+      const updatedItems = (sale.items || []).map((item) => {
+        const itemPrice = isPerItem
+          ? (yeniFiyat as Record<string, number>)[item.productId] ?? item.unitPrice
+          : (yeniFiyat as number);
+        return { ...item, unitPrice: itemPrice };
+      });
+
+      const yeniTotal = updatedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+      const yeniProfit = updatedItems.reduce((s, i) => s + (i.unitPrice - i.cost) * i.quantity, 0);
+
+      const ilkItem = updatedItems[0];
       const eskiFiyat = sale.unitPrice;
-      const fark = yeniFiyat - eskiFiyat;
+      const gecerliYeniFiyat = isPerItem ? yeniTotal : (yeniFiyat as number);
 
       const sales = prev.sales.map((s) =>
         s.id === saleId
           ? {
               ...s,
-              unitPrice: yeniFiyat,
-              total: yeniFiyat * s.quantity - (s.discountAmount ?? 0),
-              profit: (yeniFiyat - s.cost) * s.quantity - (s.discountAmount ?? 0),
+              items: updatedItems,
+              unitPrice: ilkItem?.unitPrice ?? yeniFiyat,
+              total: yeniTotal - (s.discountAmount ?? 0),
+              profit: yeniProfit - (s.discountAmount ?? 0),
               updatedAt: nowIso,
             }
           : s,
@@ -294,7 +318,7 @@ export class SatisAgent extends BaseAgent {
       const activityLog = {
         id: genId(),
         action: "fiyat_duzeltme",
-        detail: `${sale.productName}: ${formatMoney(eskiFiyat)} → ${formatMoney(yeniFiyat)} (fark: ${formatMoney(fark)})`,
+        detail: `${sale.productName}: ${formatMoney(eskiFiyat)} → ${formatMoney(gecerliYeniFiyat)} (fark: ${formatMoney(gecerliYeniFiyat - eskiFiyat)})`,
         time: nowIso,
         relatedId: saleId,
       };

@@ -1,8 +1,10 @@
 import { isFirebaseReady, readDoc, writeDoc } from "@/lib/firebase";
+import { encrypt, decrypt } from "@/lib/crypto";
 
 // ── Firebase AI Key Yönetimi ────────────────────────────────────────────────
 // Tüm API key'leri Firebase Firestore'da `config/aikeys` dokümanında saklanır.
 // .env'deki değerler her zaman Firebase'dekilerden önceliklidir.
+// Değerler AES-GCM ile şifrelenir; şifreleme anahtarı cihaz localindedir.
 
 export interface AiKeys {
   claude: string;
@@ -28,15 +30,21 @@ const EMPTY_KEYS: AiKeys = {
 async function loadKeysFromFirebase(): Promise<AiKeys & { state: KeyState }> {
   if (!isFirebaseReady()) return { ...EMPTY_KEYS, state: "missing-config" };
   try {
-    const doc = await readDoc<AiKeys & { updatedAt?: string }>(["config", "aikeys"]);
+    const doc = await readDoc<Record<string, string> & { updatedAt?: string }>(["config", "aikeys"]);
     if (!doc) return { ...EMPTY_KEYS, state: "unavailable" };
+    const keys = ["claude", "gemini", "deepseek", "huggingface", "opencodeNvidia", "opencodeHf"] as const;
+    const result: Record<string, string> = {};
+    for (const k of keys) {
+      const raw = doc[k] ?? "";
+      result[k] = raw ? await decrypt(raw) : "";
+    }
     return {
-      claude: doc.claude ?? "",
-      gemini: doc.gemini ?? "",
-      deepseek: doc.deepseek ?? "",
-      huggingface: doc.huggingface ?? "",
-      opencodeNvidia: doc.opencodeNvidia ?? "",
-      opencodeHf: doc.opencodeHf ?? "",
+      claude: result.claude,
+      gemini: result.gemini,
+      deepseek: result.deepseek,
+      huggingface: result.huggingface,
+      opencodeNvidia: result.opencodeNvidia,
+      opencodeHf: result.opencodeHf,
       state: "ok",
     };
   } catch {
@@ -47,8 +55,12 @@ async function loadKeysFromFirebase(): Promise<AiKeys & { state: KeyState }> {
 async function saveKeysToFirebase(keys: AiKeys): Promise<boolean> {
   if (!isFirebaseReady()) return false;
   try {
+    const encrypted: Record<string, string> = {};
+    for (const [k, v] of Object.entries(keys)) {
+      encrypted[k] = await encrypt(v);
+    }
     return await writeDoc(["config", "aikeys"], {
-      ...keys,
+      ...encrypted,
       updatedAt: new Date().toISOString(),
     });
   } catch {

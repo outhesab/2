@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { logger } from '@/lib/logger';
 import type { SpecRule, SpecCheckResult } from "./types";
 
 const ROOT = process.cwd();
@@ -15,7 +16,10 @@ function listFiles(dir: string, ext: string, results: string[] = []): string[] {
         results.push(full);
       }
     }
-  } catch { /* skip */ }
+  } catch {
+    logger.warn('component', 'Klasör taranırken hata oluştu');
+    /* skip */
+  }
   return results;
 }
 
@@ -38,7 +42,10 @@ export const componentRules: SpecRule[] = [
               violations.push({ file, line: i + 1, message: `Relative import: ${lines[i].trim()}` });
             }
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('component', 'Relative import kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },
@@ -61,7 +68,10 @@ export const componentRules: SpecRule[] = [
               violations.push({ file, line: i + 1, message: `Statik inline style: ${m[0].slice(0, 60)}` });
             }
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('component', 'Inline style kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },
@@ -83,7 +93,10 @@ export const componentRules: SpecRule[] = [
           if (!content.includes("from '@/components/ui/empty'") && !content.includes("<Empty")) {
             violations.push({ file, message: "Empty component import edilmemiş — boş liste durumu yönetilmiyor olabilir" });
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('component', 'Empty import kontrolü sırasında dosya okunamadı');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },
@@ -107,7 +120,10 @@ export const componentRules: SpecRule[] = [
           if (lines > 200 || size > 8000) {
             violations.push({ file, message: `${lines} satır / ${size} bytes — değiştirilmiş olabilir` });
           }
-        } catch { /* skip */ }
+        } catch {
+          logger.warn('component', 'shadcn dosya kontrolü sırasında hata oluştu');
+          /* skip */
+        }
       }
       return { passed: violations.length === 0, violations };
     },

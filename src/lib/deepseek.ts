@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 const BASE_URL = "https://api.deepseek.com/chat/completions";
 
 function requireKey(key: string, name: string): void {
@@ -38,6 +40,7 @@ export async function askDeepSeek(
   const dec = new TextDecoder();
   let buf = "";
   let full = "";
+  let streamDone = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -48,7 +51,7 @@ export async function askDeepSeek(
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
       const data = line.slice(6).trim();
-      if (data === "[DONE]") break;
+      if (data === "[DONE]") { streamDone = true; break; }
       try {
         const d = JSON.parse(data);
         const content = d.choices?.[0]?.delta?.content;
@@ -57,9 +60,11 @@ export async function askDeepSeek(
           full += content;
         }
       } catch {
+        logger.warn("deepseek", "DeepSeek stream parse hatası");
         /* ignore */
       }
     }
+    if (streamDone) break;
   }
 
   return full;

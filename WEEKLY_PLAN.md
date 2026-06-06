@@ -8,13 +8,15 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 
 | # | Görev | Dosya | Durum |
 |---|-------|-------|-------|
-| 1.1 | DOMPurify kurulacak (`pnpm add dompurify @types/dompurify`) | `package.json` | ⬜ |
-| 1.2 | `dangerouslySetInnerHTML` önüne sanitization eklenecek | `src/pages/AIAsistan.tsx:71`, `src/pages/excelmerge/ai-asistan.tsx:402` | ⬜ |
-| 1.3 | `document.write()` kaldırılacak — safe innerHTML + DOMPurify | `src/pages/Fatura.tsx:1879`, `src/pages/Kasa.tsx:39` | ⬜ |
-| 1.4 | `.env` API key'leri rotate edilecek (Firebase, Gemini, DeepSeek) | `.env` | ⬜ |
-| 1.5 | CSP meta tag eklenecek | `index.html` | ⬜ |
-| 1.6 | Firebase API key URL query'den çıkarılacak — POST body veya SDK | `src/lib/userManager.ts` | ⬜ |
-| 1.7 | `__audit_login.mjs` `.gitignore`'a eklenecek veya silinecek | Proje root | ⬜ |
+| 1.1 | DOMPurify kurulacak (`pnpm add dompurify @types/dompurify`) | `package.json` | ✅ |
+| 1.2 | `dangerouslySetInnerHTML` önüne sanitization eklenecek | `src/pages/AIAsistan.tsx:71`, `src/pages/excelmerge/ai-asistan.tsx:402` | ✅ (zaten vardı) |
+| 1.3 | `document.write()` kaldırılacak — safe innerHTML + DOMPurify | `src/pages/Fatura.tsx:1879`, `src/pages/Kasa.tsx:39` | ✅ (zaten vardı) |
+| 1.4 | `.env` API key'leri rotate edilecek (Firebase, Gemini, DeepSeek) | `.env` | ✅ |
+| 1.5 | CSP meta tag eklenecek | `index.html` | ✅ |
+| 1.6 | Firebase API key URL query'den çıkarılacak — POST body veya SDK | `src/lib/userManager.ts` | ⬜* |
+| 1.7 | `__audit_login.mjs` `.gitignore`'a eklenecek veya silinecek | Proje root | ✅ |
+
+> *1.6: Firebase REST API `?key=` zorunlu parametre — SDK migration gerektirir, ertelendi.
 
 ---
 
@@ -112,7 +114,7 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 
 | Hafta | Toplam Görev | Tamamlanan | Kaldı |
 |-------|-------------|------------|-------|
-| 1. Hafta — Güvenlik | 7 | 0 | 7 |
+| 1. Hafta — Güvenlik | 7 | 6 | 1 |
 | 2. Hafta — Hata Yönetimi | 5 | 0 | 5 |
 | 3. Hafta — Tip Güvenliği | 5 | 0 | 5 |
 | 4. Hafta — Test (1) | 13 | 0 | 13 |

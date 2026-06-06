@@ -46,7 +46,7 @@ const BoruTed = lazy(() => import("@/pages/BoruTed"));
 const BugHunter = lazy(() => import("@/pages/BugHunter"));
 const Butce = lazy(() => import("@/pages/Butce"));
 const Cari = lazy(() => import("@/pages/Cari"));
-const CariDetail = lazy(() => import("@/pages/CariDetail"));
+
 const Cizelge = lazy(() => import("@/pages/Cizelge"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const DashboardFinans = lazy(() => import("@/pages/DashboardFinans"));
@@ -170,6 +170,7 @@ function AppContent({
         }, 1500);
       }
     } catch {
+      logger.warn('app', 'localStorage okuma/yazma hatası');
       void 0;
     }
   }, [showToast]);
@@ -477,7 +478,7 @@ function AppContent({
                   </Route>
                   <Route path="/urunler/:id"><ProductDetail db={db} save={save} /></Route>
                   <Route path="/satis/:id"><SaleDetail db={db} /></Route>
-                  <Route path="/cari/:id"><CariDetail db={db} /></Route>
+                  <Route path="/cari/:id"><Cari db={db} save={save} /></Route>
                   <Route path="/products"><Products db={db} save={save} /></Route>
                   <Route path="/sales"><Sales db={db} save={save} /></Route>
                   <Route path="/fatura"><Fatura db={db} save={save} /></Route>

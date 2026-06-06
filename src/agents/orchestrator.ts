@@ -4,7 +4,7 @@
  * çağrılır. Gelecek sürümde domain.intentEngine.processIntent() lehine kaldırılacak.
  */
 import { getAgent } from "@/agents/index";
-import { loadAgentSettings, type AgentId } from "@/lib/agentConfig";
+import { loadAgentSettings, type AgentId } from "@/config/agentConfig";
 
 export type OrchestratorAction = {
   type:

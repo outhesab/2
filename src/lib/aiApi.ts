@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 export interface Message {
   role: "user" | "assistant";
   content: string;
@@ -44,6 +46,7 @@ export async function askClaude(
   const reader = res.body!.getReader();
   const dec = new TextDecoder();
   let buf = "";
+  let streamDone = false;
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -53,14 +56,16 @@ export async function askClaude(
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
       const data = line.slice(6);
-      if (data === "[DONE]") break;
+      if (data === "[DONE]") { streamDone = true; break; }
       try {
         const d = JSON.parse(data);
         if (d.type === "content_block_delta") onChunk(d.delta?.text || "");
       } catch {
+        logger.warn("aiApi", "Claude stream parse hatası");
         /* ignore */
       }
     }
+    if (streamDone) break;
   }
 }
 
@@ -87,10 +92,10 @@ export async function askGemini(
       })),
   ];
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Goog-Api-Key": key },
       body: JSON.stringify({
         contents,
         systemInstruction: {
@@ -108,6 +113,7 @@ export async function askGemini(
   const reader = res.body!.getReader();
   const dec = new TextDecoder();
   let buf = "";
+  let streamDone = false;
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -117,14 +123,16 @@ export async function askGemini(
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
       const data = line.slice(6);
-      if (data === "[DONE]") break;
+      if (data === "[DONE]") { streamDone = true; break; }
       try {
         const d = JSON.parse(data);
         const text = d.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) onChunk(text);
       } catch {
+        logger.warn("aiApi", "Gemini stream parse hatası");
         /* ignore */
       }
     }
+    if (streamDone) break;
   }
 }

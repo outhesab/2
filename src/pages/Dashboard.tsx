@@ -127,7 +127,7 @@ function loadDashboardPrefs(): { leftWidgets: WidgetId[]; brightness: number } {
   try {
     const raw = localStorage.getItem('dashboardPrefs');
     if (raw) return JSON.parse(raw);
-  } catch { /* localStorage okuma hatası */ }
+  } catch { logger.warn('dashboard', 'Dashboard tercihleri localStorage\'dan okunamadı'); /* localStorage okuma hatası */ }
   return { leftWidgets: ['chart', 'recentSales', 'tips', 'excelBar'], brightness: 100 };
 }
 
@@ -160,7 +160,7 @@ async function loadDashboardPrefsFromFirebase(): Promise<{ leftWidgets: WidgetId
     const raw = json?.fields?.data?.stringValue;
     if (!raw) return null;
     return JSON.parse(raw);
-  } catch { return null; }
+  } catch { logger.warn('dashboard', 'Firebase\'den dashboard tercihleri alınamadı'); return null; }
 }
 
 const chartStyle = {
@@ -549,7 +549,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
                 <span className="dash-storage-pct">%{pct.toFixed(0)}</span>
               </div>
             );
-          } catch { return null; }
+          } catch { logger.warn('dashboard', 'Depolama yüzdesi hesaplanamadı'); return null; }
         })()}
         <motion.button
           onClick={openBackupPanel}

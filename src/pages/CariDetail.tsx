@@ -20,7 +20,7 @@ interface Props {
     type: "musteri" | "tedarikci",
     balance: number,
   ) => void;
-  showToast: (msg: string, type?: string) => void;
+  showToast: (msg: string, type?: "success" | "error" | "warning" | "info") => void;
 }
 
 export default function CariDetail({

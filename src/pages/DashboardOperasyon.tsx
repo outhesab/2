@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { formatMoney } from "@/lib/utils-tr";
 import type { DB } from "@/types";
 import { Empty, EmptyHeader, EmptyTitle, EmptyMedia } from "@/components/ui/empty";
+import { logger } from "@/lib/logger";
 
 interface Props { db: DB; onTabChange: (tab: string) => void; save: (updater: (prev: DB) => DB) => void; }
 
@@ -89,7 +90,7 @@ export default function DashboardOperasyon({ db, onTabChange: _onTabChange }: Pr
       const raw = localStorage.getItem("sobaYonetim") || "";
       const maxBytes = 10 * 1024 * 1024;
       storagePct = Math.min(100, (raw.length / maxBytes) * 100);
-    } catch { storagePct = 0; }
+    } catch { logger.warn('dashboard', 'localStorage okuma hatası, storagePct 0'); storagePct = 0; }
     const lastBackup = localStorage.getItem("sobaYonetim_lastBackup");
     const daysSinceBackup = lastBackup ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / 86400000) : null;
     const totalRecords = db.products.length + db.sales.length + db.cari.length + db.kasa.length + db.orders.length + db.suppliers.length;

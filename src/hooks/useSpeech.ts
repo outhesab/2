@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 // Android WebView'da Web Speech API her zaman çalışmayabilir.
 // SpeechRecognition varsa destekli kabul ediyoruz (mevcut fallback: getUserMedia izni).
@@ -41,6 +42,7 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
       } catch {
+        logger.warn('speech', 'Mikrofon izni alınamadı');
         setError('Mikrofon izni gerekli — Ayarlar > Uygulama İzinleri');
         setTimeout(() => setError(''), 4000);
         return;
@@ -70,7 +72,7 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
     };
 
     recRef.current = rec;
-    try { rec.start(); } catch { setError('Ses tanıma başlatılamadı'); }
+    try { rec.start(); } catch { logger.warn('speech', 'Ses tanıma başlatılamadı'); setError('Ses tanıma başlatılamadı'); }
   }, [onResult]);
 
   const stop = useCallback(() => {

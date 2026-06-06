@@ -1,4 +1,4 @@
-import { indexedDb } from "@/db/indexeddb";
+import { indexedDb } from "@/lib/db/indexeddb";
 import { createAuditEntry, trimAuditLog } from "@/lib/auditEngine";
 import { logger } from "@/lib/logger";
 import { validateTransaction } from "@/lib/ruleEngine";
@@ -178,6 +178,7 @@ function loadFromStorage(): DB {
     loadT.end({ version: merged._version });
     return merged;
   } catch {
+    logger.warn("db", "localStorage verisi ayrıştırılamadı, varsayılan DB kullanılıyor");
     loadT.end({ error: "parse" });
     return makeDefaultDB();
   }
@@ -218,35 +219,35 @@ export function useDB() {
   useEffect(() => {
     emitSync("loading");
     logger.info("db", "Uygulama DB yükleniyor", { localVersion: db._version });
-    loadFromFirebase().then((cloudDb) => {
-      if (!cloudDb) {
-        logger.info("db", "Firebase boş, yerel veri kullanılıyor");
-        return;
-      }
-      if ((cloudDb._version || 0) > (db._version || 0)) {
+
+    (async () => {
+      const cloudDb = await loadFromFirebase();
+      if (cloudDb && (cloudDb._version || 0) > (db._version || 0)) {
         logger.info("db", "Bulut verisi daha güncel — güncelleniyor", {
           local: db._version,
           cloud: cloudDb._version,
         });
         saveToStorage(cloudDb);
-        void saveToIndexedSnapshot(cloudDb);
+        await saveToIndexedSnapshot(cloudDb);
         setDb(cloudDb);
-      } else {
-        logger.info("db", "Yerel veri güncel", { version: db._version });
+        emitSync("idle");
+        return;
       }
-      emitSync("idle");
-    });
 
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      void loadFromIndexedSnapshot().then((snap) => {
-        if (!snap) return;
-        saveToStorage(snap);
-        setDb(snap);
-        logger.info("db", "IndexedDB snapshot geri yüklendi", {
-          version: snap._version,
-        });
-      });
-    }
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        const snap = await loadFromIndexedSnapshot();
+        if (snap) {
+          saveToStorage(snap);
+          setDb(snap);
+          logger.info("db", "IndexedDB snapshot geri yüklendi", {
+            version: snap._version,
+          });
+        }
+      }
+
+      emitSync("idle");
+    })();
+
     return () => {
       if (syncTimer.current) clearTimeout(syncTimer.current);
     };
@@ -462,6 +463,7 @@ export function useDB() {
           try {
             onViolation(violations);
           } catch {
+            logger.warn("db", "saveGuarded callback hatası");
             /* callback hatası uygulamayı çökertmez */
           }
         }
@@ -533,6 +535,7 @@ export function useDB() {
         return;
       }
     } catch {
+      logger.warn("db", "Capacitor dışa aktarma hatası, web fallback kullanılıyor");
       /* web fallback */
     }
 
@@ -596,6 +599,7 @@ export function useDB() {
           saveToFirebase(data);
           resolve(true);
         } catch {
+          logger.warn("db", "JSON içe aktarma başarısız");
           resolve(false);
         }
       };

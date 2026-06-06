@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import {
   formatCurrency,
   formatDateShort as formatDateShortIntl,
@@ -22,14 +23,18 @@ export function formatDate(iso: string): string {
   if (!iso) return '-';
   try {
     return formatDateTime(iso);
-  } catch { return iso; }
+  } catch {
+    logger.warn("utils-tr", "formatDateTime hatası");
+    return iso; }
 }
 
 export function formatDateShort(iso: string): string {
   if (!iso) return '-';
   try {
     return formatDateShortIntl(iso);
-  } catch { return iso; }
+  } catch {
+    logger.warn("utils-tr", "formatDateShort hatası");
+    return iso; }
 }
 
 export function getCategoryName(cat: string): string {

@@ -24,6 +24,7 @@ import {
   Wallet,
   Wrench,
 } from "lucide-react";
+import { logger } from '@/lib/logger';
 
 export const TABS = [
   { id: "dashboard", label: "Özet", icon: LayoutDashboard, group: "Ana" },
@@ -128,6 +129,7 @@ export function loadFavoriteTabs(): TabId[] {
     );
     return favorites.length > 0 ? favorites.slice(0, 6) : [...PRIORITY_TABS];
   } catch {
+    logger.warn('storage', 'Favori sekmeler yüklenirken hata oluştu');
     return [...PRIORITY_TABS];
   }
 }
@@ -136,6 +138,7 @@ export function saveFavoriteTabs(tabIds: readonly TabId[]) {
   try {
     localStorage.setItem(FAVORITE_TABS_KEY, JSON.stringify(tabIds.slice(0, 6)));
   } catch {
+    logger.warn('storage', 'Favori sekmeler kaydedilirken hata oluştu');
     void 0;
   }
 }

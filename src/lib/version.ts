@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { getBrandVersion } from "@/config/brand";
 import { CHANGELOG } from "./changelog";
 import { loadAppConfig, validateVersion } from "./appConfig";
@@ -28,6 +29,7 @@ export function getDBVersion(): number {
       return parsed._version || 0;
     }
   } catch {
+    logger.warn("version", "DB versiyonu okunamadı");
     // ignore
   }
   return 0;

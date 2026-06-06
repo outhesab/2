@@ -4,6 +4,7 @@
  * İzinler uygulama başlangıcında istenir.
  */
 
+import { logger } from '@/lib/logger';
 import { Capacitor } from '@capacitor/core';
 
 // ── Bildirim İzni ─────────────────────────────────────────────────────────────
@@ -22,6 +23,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const perm = await LocalNotifications.requestPermissions();
     return perm.display === 'granted';
   } catch {
+    logger.warn("permissions", "Bildirim izni alınamadı");
     return false;
   }
 }

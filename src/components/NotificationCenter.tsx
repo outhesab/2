@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { DB } from '@/types';
 import { generateNotifications, getUnreadCount, type AppNotification, type NotifSeverity, type NotifCategory } from '@/lib/notificationEngine';
+import { logger } from '@/lib/logger';
 
 const DISMISSED_KEY = 'sobaYonetim_dismissedNotifs';
 const REFRESH_MS = 5 * 60 * 1000; // 5 dakika
@@ -25,11 +26,11 @@ function loadDismissed(): Set<string> {
   try {
     const raw = sessionStorage.getItem(DISMISSED_KEY);
     return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch { return new Set(); }
+  } catch { logger.warn('notification', 'Bildirim gizleme verisi okunamadı'); return new Set(); }
 }
 
 function saveDismissed(set: Set<string>) {
-  try { sessionStorage.setItem(DISMISSED_KEY, JSON.stringify([...set])); } catch { /* sessizce geç */ }
+  try { sessionStorage.setItem(DISMISSED_KEY, JSON.stringify([...set])); } catch { logger.warn('notification', 'Bildirim gizleme verisi kaydedilemedi'); /* sessizce geç */ }
 }
 
 export default function NotificationCenter({ db, onNavigate }: Props) {

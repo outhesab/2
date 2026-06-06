@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [3.7.1] - 6 Haziran 2026
+
+### Güvenlik
+- B2 — Firebase'deki API key'ler artık AES-GCM ile şifreleniyor (Web Crypto API)
+- B4 — localStorage kullanıcı hash cache'i AES-GCM ile şifreleniyor
+
+### Bakım
+- 135 boş catch bloğuna `logger.warn` eklendi — sessiz hatalar artık loglanıyor
+- Circular dependency kırıldı: `safeReadJSON`/`safeWriteJSON`/`safeRemove` → `src/lib/safeIO.ts`
+- `storageQuota.ts` kaldırıldı (ölü kod): `listKeysBySize` kullanılmıyordu
+- `src/lib/agentConfig.ts` → `src/config/agentConfig.ts` taşındı
+- `src/db/indexeddb.ts` → `src/lib/db/indexeddb.ts` taşındı
+- 5 unused export kaldırıldı (`saveAgentSettings`, `setAgentEnabled`, `ParspelDB`, `AgentAuditRecord`, `DbSnapshot`)
+
+---
+
 ## [3.7.0] - 28 Mayıs 2026
 
 ### Eklenen

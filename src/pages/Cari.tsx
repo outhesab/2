@@ -1,4 +1,4 @@
-import { CariDetail } from "./CariDetail";
+import CariDetail from "./CariDetail";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
@@ -1236,7 +1236,7 @@ export default function Cari({ db, save }: Props) {
             totalPurchased={totalPurchased}
             histTab={histTab}
             setHistTab={setHistTab}
-            onQuickAction={(cariId, cariName, type, balance) => {
+            onQuickAction={(cariId: string, cariName: string, type: "musteri" | "tedarikci", balance: number) => {
               setIslemModal({ cariId, cariName, type });
               setIslemForm({ amount: String(balance), kasa: "nakit", description: "" });
             }}

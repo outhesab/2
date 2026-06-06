@@ -18,6 +18,7 @@ import {
 import { buildContext, offlineReply, QUICK_PROMPTS } from "@/lib/aiOffline";
 import { askDeepSeek } from "@/lib/deepseek";
 import { getUserSession } from "@/lib/userManager";
+import { logger } from "@/lib/logger";
 import { formatMoney, genId } from "@/lib/utils-tr";
 import type { AIActionLogEntry, DB } from "@/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -530,6 +531,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           setIsOnline(s.connected),
         );
       } catch {
+        logger.warn('ai', 'Capacitor Network algılanamadı, Web fallback kullanılıyor');
         // Web fallback
         setIsOnline(navigator.onLine);
         const handleOnline = () => setIsOnline(true);

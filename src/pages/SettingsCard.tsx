@@ -1,4 +1,10 @@
 import React from "react";
+import {
+  Card as ShadcnCard,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function Card({
   title,
@@ -8,11 +14,11 @@ export function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className={"settings-card"}>
-      <div className={"settings-card-header"}>
-        <h3 className={"settings-card-title"}>{title}</h3>
-      </div>
-      <div className={"settings-card-body"}>{children}</div>
-    </div>
+    <ShadcnCard className="w-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </ShadcnCard>
   );
 }

@@ -5,6 +5,7 @@ import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { assertSafeSpreadsheetFile, readSafeWorkbook } from '@/lib/safeXlsx';
 import { genId, formatMoney, parseBankDate } from '@/lib/utils-tr';
+import { logger } from '@/lib/logger';
 import type { DB, BudgetCategory } from '@/types';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
@@ -69,7 +70,7 @@ export default function Butce({ db, save }: Props) {
       const spent = monthExpenses.filter(k => {
         const cat = (k.category || '').toLowerCase();
         const desc = (k.description || '').toLowerCase();
-        return b.kasaCategories.some(kc => matchesKw(kc, cat, desc));
+        return (b.kasaCategories || []).some(kc => matchesKw(kc, cat, desc));
       }).reduce((s, k) => s + k.amount, 0);
       return { ...b, spent, remaining: b.monthlyLimit - spent, pct: b.monthlyLimit > 0 ? Math.min(100, (spent / b.monthlyLimit) * 100) : 0 };
     });
@@ -87,7 +88,7 @@ export default function Butce({ db, save }: Props) {
       monthExpenses.forEach(k => {
         const cat = (k.category || '').toLowerCase();
         const desc = (k.description || '').toLowerCase();
-        if (b.kasaCategories.some(kc => matchesKw(kc, cat, desc))) matchedIds.add(k.id);
+        if ((b.kasaCategories || []).some(kc => matchesKw(kc, cat, desc))) matchedIds.add(k.id);
       });
     });
     return monthExpenses.filter(k => !matchedIds.has(k.id));
@@ -105,7 +106,7 @@ export default function Butce({ db, save }: Props) {
   };
 
   const openAdd = () => { setForm({ name: '', icon: '📋', monthlyLimit: 0, color: 'var(--text-muted)', kasaCategories: [] }); setEditId(null); setModal(true); };
-  const openEdit = (b: BudgetCategory) => { setForm({ name: b.name, icon: b.icon, monthlyLimit: b.monthlyLimit, color: b.color, kasaCategories: [...b.kasaCategories] }); setEditId(b.id); setModal(true); };
+  const openEdit = (b: BudgetCategory) => { setForm({ name: b.name, icon: b.icon, monthlyLimit: b.monthlyLimit, color: b.color, kasaCategories: [...(b.kasaCategories || [])] }); setEditId(b.id); setModal(true); };
 
   const handleSave = () => {
     if (!form.name) { showToast('Kategori adı gerekli!', 'error'); return; }
@@ -150,7 +151,7 @@ export default function Butce({ db, save }: Props) {
   const parseXLSX = async (buf: ArrayBuffer): Promise<string> => {
     const wb = await readSafeWorkbook(buf, { sourceName: 'banka-ekstresi' });
     const rows: unknown[][] = wb.getSheetRows(wb.sheetNames[0], { defval: '' });
-    return rows.map(row => (row as unknown[]).map(cell => String(cell ?? '')).join(';')).join('\n');
+    return (rows || []).map(row => (row as unknown[]).map(cell => String(cell ?? '')).join(';')).join('\n');
   };
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,7 +176,7 @@ export default function Butce({ db, save }: Props) {
       let matched = 0;
       entries.forEach(e => {
         const matchesKw = (kc: string) => { const kl = kc.toLowerCase(); return e.desc.toLowerCase().split(/\s+/).some((w: string) => w === kl); };
-        const cat = budgets.find(b => b.kasaCategories.some(matchesKw));
+        const cat = budgets.find(b => (b.kasaCategories || []).some(matchesKw));
         if (cat) matched++;
       });
       setImportResult({ total: entries.length, matched, entries });
@@ -188,6 +189,7 @@ export default function Butce({ db, save }: Props) {
           const text = await parseXLSX(ev.target?.result as ArrayBuffer);
           processText(text);
         } catch {
+          logger.warn('butce', 'Excel dosyası okunamadı');
           showToast('Excel dosyası okunamadı. Farklı bir format deneyin.', 'error');
         }
       };
@@ -206,14 +208,14 @@ export default function Butce({ db, save }: Props) {
     let failedDateCount = 0;
     save(prev => {
       const newEntries = importResult.entries.map(e => {
-        const cat = budgets.find(b => b.kasaCategories.some(kc => {
+        const cat = budgets.find(b => (b.kasaCategories || []).some(kc => {
           const kl = kc.toLowerCase(); const dl = e.desc.toLowerCase();
           return dl.split(/\s+/).some((w: string) => w === kl);
         }));
         const parsedDate = e.date ? parseBankDate(e.date) : null;
         if (e.date && !parsedDate) failedDateCount++;
         return {
-          id: genId(), type: e.type, category: cat?.kasaCategories[0] || 'banka_ekstere', amount: e.amount, kasa: 'banka' as const,
+          id: genId(), type: e.type, category: (cat?.kasaCategories || [])[0] || 'banka_ekstere', amount: e.amount, kasa: 'banka' as const,
           description: `[Ekstre] ${e.desc}`.slice(0, 150),
           createdAt: parsedDate ? parsedDate.toISOString() : nowIso,
           updatedAt: nowIso,
@@ -303,7 +305,7 @@ export default function Butce({ db, save }: Props) {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
-          {categorySpend.map(b => (
+          {(categorySpend || []).map(b => (
             <div key={b.id} style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))', borderRadius: 14, border: '1px solid rgba(255,255,255,0.07)', padding: '16px 18px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
                 <div style={{ width: 40, height: 40, background: `${b.color}15`, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>{b.icon}</div>
@@ -325,7 +327,7 @@ export default function Butce({ db, save }: Props) {
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <span style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: '3px 8px', fontSize: '0.72rem', color: '#475569' }}>Kalan: <strong style={{ color: b.remaining >= 0 ? '#10b981' : '#ef4444' }}>{formatMoney(Math.abs(b.remaining))}{b.remaining < 0 ? ' aşıldı!' : ''}</strong></span>
                 <span style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6, padding: '3px 8px', fontSize: '0.72rem', color: '#475569' }}>%{b.pct.toFixed(0)} kullanıldı</span>
-                {b.kasaCategories.map(kc => <span key={kc} style={{ background: `${b.color}10`, color: b.color, borderRadius: 5, padding: '2px 7px', fontSize: '0.68rem', fontWeight: 600 }}>{kc}</span>)}
+                {(b.kasaCategories || []).map(kc => <span key={kc} style={{ background: `${b.color}10`, color: b.color, borderRadius: 5, padding: '2px 7px', fontSize: '0.68rem', fontWeight: 600 }}>{kc}</span>)}
               </div>
             </div>
           ))}
