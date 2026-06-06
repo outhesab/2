@@ -19,6 +19,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 - `src/lib/agentConfig.ts` → `src/config/agentConfig.ts` taşındı
 - `src/db/indexeddb.ts` → `src/lib/db/indexeddb.ts` taşındı
 - 5 unused export kaldırıldı (`saveAgentSettings`, `setAgentEnabled`, `ParspelDB`, `AgentAuditRecord`, `DbSnapshot`)
+- Notlar bölümüne seed API notu eklendi (LLM anahtarları)
 
 ---
 

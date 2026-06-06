@@ -130,7 +130,23 @@ function makeDefaultDB(): DB {
       { id: "boru", name: "Boru", icon: "🔩", createdAt: nowIso },
       { id: "pelet", name: "Pelet", icon: "🪵", createdAt: nowIso },
     ] as ProductCategory[],
-    notes: [],
+    notes: [{
+      id: genId(),
+      title: "🔑 Yerel API Anahtarları",
+      content: [
+        "LM Studio: http://127.0.0.1:1234",
+        "",
+        "cURL:",
+        "curl http://127.0.0.1:1234/v1/chat/completions",
+        "  -H \"Content-Type: application/json\"",
+        "  -H \"Authorization: Bearer <key>\"",
+      ].join("\n"),
+      color: "blue",
+      pinned: false,
+      tags: ["api", "yerel", "llm"],
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    }],
     _auditLog: [],
     aiActionLog: [],
   };
@@ -175,6 +191,29 @@ function loadFromStorage(): DB {
       merged.productCategories.length === 0
     )
       merged.productCategories = def.productCategories;
+
+    // Seed API notu
+    if (!(merged.notes || []).some(n => n.title === "🔑 Yerel API Anahtarları")) {
+      merged.notes = merged.notes || [];
+      merged.notes.unshift({
+        id: genId(),
+        title: "🔑 Yerel API Anahtarları",
+        content: [
+          "LM Studio: http://127.0.0.1:1234",
+          "",
+          "cURL:",
+          "curl http://127.0.0.1:1234/v1/chat/completions",
+          "  -H \"Content-Type: application/json\"",
+          "  -H \"Authorization: Bearer <key>\"",
+        ].join("\n"),
+        color: "blue",
+        pinned: false,
+        tags: ["api", "yerel", "llm"],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
     loadT.end({ version: merged._version });
     return merged;
   } catch {
