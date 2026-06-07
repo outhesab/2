@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.16.4',
+    date: '7 Haziran 2026',
+    title: 'data-rules.ts Syntax Hatası Düzeltmesi',
+    summary:
+      "src/lib/specs/data-rules.ts dosyasında fazladan süslü parantez '}' nedeniyle lint, typecheck ve spec-compliance testi kırılıyordu. Her iki kuraldaki brace hataları düzeltildi.",
+    changes: [
+      { type: 'duzeltme', text: 'NO_DIRECT_DB_WRITE kuralındaki fazladan } kaldırıldı' },
+      { type: 'duzeltme', text: 'NO_DB_JSON_PARSE_IN_PAGES kuralındaki fazladan } kaldırıldı' },
+    ],
+  },
+  {
     version: '3.16.3',
     date: '7 Haziran 2026',
     title: 'CI pnpm 11 Uyumsuzluğu Düzeltmesi',
