@@ -20,6 +20,14 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.16.2',
+    date: '7 Haziran 2026',
+    title: 'pnpm Build Script İznı',
+    summary:
+      "GitHub Actions CI'da fallow build script reddedilme hatası düzeltildi. pnpm.onlyBuiltDependencies eklendi.",
+    changes: [{ type: 'duzeltme', text: 'package.json\'a pnpm.onlyBuiltDependencies:["fallow"] eklendi' }],
+  },
+  {
     version: '3.16.1',
     date: '7 Haziran 2026',
     title: 'GitHub Actions pnpm/corepack Düzeltmesi',
