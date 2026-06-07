@@ -35,16 +35,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: local.properties oluştur
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/android/local.properties
-          ls -la $GITHUB_WORKSPACE/android/gradlew
-          file $GITHUB_WORKSPACE/android/gradlew
-          ls -la $GITHUB_WORKSPACE/android/gradle/wrapper/
-          which java || echo "java yok"
-          java -version 2>&1 || echo "java version yok"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -54,14 +44,19 @@ jobs:
       - name: Sync Capacitor
         run: pnpm exec cap sync android
 
+      - name: Android SDK + local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > ${{ github.workspace }}/android/local.properties
+          echo "✅ local.properties yazıldı: $(cat ${{ github.workspace }}/android/local.properties)"
+
       - name: Build debug APK
         run: |
-          cd android
-          ls -la gradlew
-          file gradlew
-          chmod +x gradlew gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
-          ls -la gradle/wrapper/
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ANDROID_DIR="${{ github.workspace }}/android"
+          echo "📂 Dizin: $ANDROID_DIR"
+          ls -la "$ANDROID_DIR/gradlew" 2>&1 || echo "⚠️ gradlew yok"
+          ls -la "$ANDROID_DIR/gradle/wrapper/" 2>&1 || echo "⚠️ gradle/wrapper/ yok"
+          chmod +x "$ANDROID_DIR/gradlew" "$ANDROID_DIR/gradle/wrapper/gradle-wrapper.jar" 2>/dev/null || true
+          "$ANDROID_DIR/gradlew" -p "$ANDROID_DIR" assembleDebug --no-daemon --stacktrace 2>&1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
