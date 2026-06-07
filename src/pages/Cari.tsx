@@ -13,7 +13,8 @@ import { FileSpreadsheet, HandCoins, UserRoundSearch } from 'lucide-react';
 import type { Cari as CariType, DB } from '@/types';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useDebounce, StatCard, ModalActions, FormField, FormTextArea, ActionButtons } from './pageHelpers.tsx';
+import { useDebounce } from './useDebounce';
+import { StatCard, ModalActions, FormField, FormTextArea, ActionButtons } from './pageHelpers';
 
 interface Props {
   db: DB;

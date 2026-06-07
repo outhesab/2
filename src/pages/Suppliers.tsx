@@ -1,27 +1,28 @@
-import { useConfirm } from "@/components/ConfirmDialog";
-import { Modal } from "@/components/Modal";
-import { useToast } from "@/components/Toast";
-import { similarity } from "@/lib/similarity";
-import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
-import type { Cari, DB, Order, OrderItem, Supplier } from "@/types";
-import { useState } from "react";
-import { lbl, inp } from "@/lib/formStyles";
-import { useDebounce, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers.tsx";
+import { useConfirm } from '@/components/ConfirmDialog';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/components/Toast';
+import { similarity } from '@/lib/similarity';
+import { formatDate, formatMoney, genId } from '@/lib/utils-tr';
+import type { Cari, DB, Order, OrderItem, Supplier } from '@/types';
+import { useState } from 'react';
+import { lbl, inp } from '@/lib/formStyles';
+import { useDebounce } from './useDebounce';
+import { ModalActions, FormField, FormTextArea, ActionButtons } from './pageHelpers';
 
 interface Props {
   db: DB;
   save: (fn: (prev: DB) => DB) => void;
 }
 
-const emptySupplier: Omit<Supplier, "id" | "createdAt" | "updatedAt"> = {
-  name: "",
-  category: "",
-  taxNo: "",
-  contact: "",
-  phone: "",
-  email: "",
-  address: "",
-  note: "",
+const emptySupplier: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'> = {
+  name: '',
+  category: '',
+  taxNo: '',
+  contact: '',
+  phone: '',
+  email: '',
+  address: '',
+  note: '',
   totalOrders: 0,
   totalAmount: 0,
 };
@@ -29,28 +30,24 @@ const emptySupplier: Omit<Supplier, "id" | "createdAt" | "updatedAt"> = {
 export default function Suppliers({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
-  const [tab, setTab] = useState<"suppliers" | "orders">("suppliers");
-  const [catFilter, setCatFilter] = useState<
-    "hepsi" | "genel" | "pelet" | "boru"
-  >("hepsi");
+  const [tab, setTab] = useState<'suppliers' | 'orders'>('suppliers');
+  const [catFilter, setCatFilter] = useState<'hepsi' | 'genel' | 'pelet' | 'boru'>('hepsi');
   const [supModal, setSupModal] = useState(false);
   const [orderModal, setOrderModal] = useState(false);
   const [form, setForm] = useState<Partial<Supplier>>(emptySupplier);
   const [editId, setEditId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
-  const [selectedSup, setSelectedSup] = useState("");
-  const [dupWarning, setDupWarning] = useState<
-    { name: string; score: number }[]
-  >([]);
+  const [selectedSup, setSelectedSup] = useState('');
+  const [dupWarning, setDupWarning] = useState<{ name: string; score: number }[]>([]);
   const [forceSave, setForceSave] = useState(false);
 
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const [orderSupplierId, setOrderSupplierId] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [orderNote, setOrderNote] = useState("");
+  const [orderSupplierId, setOrderSupplierId] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [orderNote, setOrderNote] = useState('');
   const [nakliye, setNakliye] = useState(0);
-  const [orderProductCat, setOrderProductCat] = useState("");
+  const [orderProductCat, setOrderProductCat] = useState('');
 
   const addOrderItem = (productId: string) => {
     const p = db.products.find((x) => x.id === productId);
@@ -59,9 +56,7 @@ export default function Suppliers({ db, save }: Props) {
       const ex = prev.find((i) => i.productId === productId);
       if (ex)
         return prev.map((i) =>
-          i.productId === productId
-            ? { ...i, qty: i.qty + 1, lineTotal: (i.qty + 1) * i.unitCost }
-            : i,
+          i.productId === productId ? { ...i, qty: i.qty + 1, lineTotal: (i.qty + 1) * i.unitCost } : i,
         );
       return [
         ...prev,
@@ -94,7 +89,7 @@ export default function Suppliers({ db, save }: Props) {
 
   const saveSupplier = () => {
     if (!form.name) {
-      showToast("Tedarikçi adı gerekli!", "error");
+      showToast('Tedarikçi adı gerekli!', 'error');
       return;
     }
     if (dupWarning.length > 0 && !forceSave) {
@@ -125,7 +120,7 @@ export default function Suppliers({ db, save }: Props) {
               updatedAt: nowIso,
             };
         }
-        showToast("Tedarikçi güncellendi!");
+        showToast('Tedarikçi güncellendi!');
       } else {
         const newId = genId();
         suppliers.push({
@@ -134,9 +129,9 @@ export default function Suppliers({ db, save }: Props) {
           updatedAt: nowIso,
           totalOrders: 0,
           totalAmount: 0,
-          name: "",
-          category: "",
-          phone: "",
+          name: '',
+          category: '',
+          phone: '',
           ...form,
         } as Supplier);
         // Otomatik cari kaydı aç
@@ -144,16 +139,16 @@ export default function Suppliers({ db, save }: Props) {
           id: newId,
           createdAt: nowIso,
           updatedAt: nowIso,
-          name: form.name || "",
-          type: "tedarikci",
-          phone: form.phone || "",
-          email: form.email || "",
-          address: form.address || "",
-          taxNo: form.taxNo || "",
+          name: form.name || '',
+          type: 'tedarikci',
+          phone: form.phone || '',
+          email: form.email || '',
+          address: form.address || '',
+          taxNo: form.taxNo || '',
           balance: 0,
         };
         cari.push(yeniCari);
-        showToast("Tedarikçi eklendi, cari kaydı otomatik açıldı!", "success");
+        showToast('Tedarikçi eklendi, cari kaydı otomatik açıldı!', 'success');
       }
       return { ...prev, suppliers, cari };
     });
@@ -163,21 +158,18 @@ export default function Suppliers({ db, save }: Props) {
   const saveOrder = () => {
     if (!orderSupplierId) {
       if (db.suppliers.length === 0) {
-        showToast(
-          "Önce tedarikçi ekleyin! Tedarikçiler sekmesine yönlendiriliyorsunuz...",
-          "error",
-        );
+        showToast('Önce tedarikçi ekleyin! Tedarikçiler sekmesine yönlendiriliyorsunuz...', 'error');
         setTimeout(() => {
           setOrderModal(false);
-          setTab("suppliers");
+          setTab('suppliers');
         }, 1500);
         return;
       }
-      showToast("Tedarikçi seçin!", "error");
+      showToast('Tedarikçi seçin!', 'error');
       return;
     }
     if (orderItems.length === 0) {
-      showToast("Ürün ekleyin!", "error");
+      showToast('Ürün ekleyin!', 'error');
       return;
     }
     const amount = orderItems.reduce((s, i) => s + i.lineTotal, 0);
@@ -193,7 +185,7 @@ export default function Suppliers({ db, save }: Props) {
       payments: [],
       deliveryDate,
       note: orderNote,
-      status: "bekliyor",
+      status: 'bekliyor',
       createdAt: nowIso,
       updatedAt: nowIso,
     };
@@ -209,38 +201,30 @@ export default function Suppliers({ db, save }: Props) {
       );
       return { ...prev, orders: [...prev.orders, order], suppliers };
     });
-    showToast("Sipariş oluşturuldu!");
+    showToast('Sipariş oluşturuldu!');
     setOrderItems([]);
-    setOrderSupplierId("");
-    setDeliveryDate("");
-    setOrderNote("");
+    setOrderSupplierId('');
+    setDeliveryDate('');
+    setOrderNote('');
     setNakliye(0);
-    setOrderProductCat("");
+    setOrderProductCat('');
     setOrderModal(false);
   };
 
   const deleteSupplier = (id: string) => {
-    showConfirm(
-      "Tedarikçi Sil",
-      "Tedarikçi ve ilişkili cari kaydı gizlenecek. Devam etmek istiyor musunuz?",
-      () => {
-        const nowIso = new Date().toISOString();
-        save((prev) => ({
-          ...prev,
-          suppliers: prev.suppliers.map((s) =>
-            s.id === id ? { ...s, deleted: true, updatedAt: nowIso } : s,
-          ),
-          // Aynı ID ile açılmış cari kaydını da soft-delete et
-          cari: prev.cari.map((c) =>
-            c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c,
-          ),
-        }));
-        showToast("Silindi!");
-      },
-    );
+    showConfirm('Tedarikçi Sil', 'Tedarikçi ve ilişkili cari kaydı gizlenecek. Devam etmek istiyor musunuz?', () => {
+      const nowIso = new Date().toISOString();
+      save((prev) => ({
+        ...prev,
+        suppliers: prev.suppliers.map((s) => (s.id === id ? { ...s, deleted: true, updatedAt: nowIso } : s)),
+        // Aynı ID ile açılmış cari kaydını da soft-delete et
+        cari: prev.cari.map((c) => (c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c)),
+      }));
+      showToast('Silindi!');
+    });
   };
 
-  const updateOrderStatus = (id: string, status: Order["status"]) => {
+  const updateOrderStatus = (id: string, status: Order['status']) => {
     save((prev) => {
       const order = prev.orders.find((o) => o.id === id);
       if (!order) return prev;
@@ -254,10 +238,10 @@ export default function Suppliers({ db, save }: Props) {
         orders: prev.orders.map((o) => (o.id === id ? updatedOrder : o)),
       };
 
-      if (status === "tamamlandi") {
+      if (status === 'tamamlandi') {
         // İdempotency: zaten tamamlandıysa stok tekrar artırılmaz
         if (order.stockCompleted) {
-          showToast("Sipariş tamamlandı!");
+          showToast('Sipariş tamamlandı!');
           return newState;
         }
 
@@ -271,18 +255,12 @@ export default function Suppliers({ db, save }: Props) {
         const products = prev.products.map((p) => {
           const item = order.items.find((i) => i.productId === p.id);
           if (!item) return p;
-          const nakliyePay =
-            nakliyeToplam > 0
-              ? ((item.lineTotal / totalOrderAmount) * nakliyeToplam) / item.qty
-              : 0;
+          const nakliyePay = nakliyeToplam > 0 ? ((item.lineTotal / totalOrderAmount) * nakliyeToplam) / item.qty : 0;
           const yeniMaliyet = item.unitCost + nakliyePay;
           // Ağırlıklı ortalama: (eski maliyet × eski stok + yeni maliyet × yeni adet) / toplam
           const mevcutStok = p.stock || 0;
           const toplamStok = mevcutStok + item.qty;
-          const ortMaliyet =
-            toplamStok > 0
-              ? (p.cost * mevcutStok + yeniMaliyet * item.qty) / toplamStok
-              : yeniMaliyet;
+          const ortMaliyet = toplamStok > 0 ? (p.cost * mevcutStok + yeniMaliyet * item.qty) / toplamStok : yeniMaliyet;
           return {
             ...p,
             stock: toplamStok,
@@ -292,8 +270,7 @@ export default function Suppliers({ db, save }: Props) {
 
         // Ürün bulunamayanları tespit et
         order.items.forEach((i) => {
-          if (!prev.products.find((p) => p.id === i.productId))
-            missingProducts.push(i.productName);
+          if (!prev.products.find((p) => p.id === i.productId)) missingProducts.push(i.productName);
         });
 
         const stockMovements = [
@@ -304,14 +281,11 @@ export default function Suppliers({ db, save }: Props) {
               id: genId(),
               productId: i.productId,
               productName: i.productName,
-              type: "giris" as const,
+              type: 'giris' as const,
               amount: i.qty,
-              before:
-                prev.products.find((p) => p.id === i.productId)?.stock || 0,
-              after:
-                (prev.products.find((p) => p.id === i.productId)?.stock || 0) +
-                i.qty,
-              note: `Sipariş #${id.slice(0, 8)}${supplier ? " — " + supplier.name : ""}`,
+              before: prev.products.find((p) => p.id === i.productId)?.stock || 0,
+              after: (prev.products.find((p) => p.id === i.productId)?.stock || 0) + i.qty,
+              note: `Sipariş #${id.slice(0, 8)}${supplier ? ' — ' + supplier.name : ''}`,
               date: new Date().toISOString(),
             })),
         ];
@@ -330,17 +304,13 @@ export default function Suppliers({ db, save }: Props) {
         });
 
         if (missingProducts.length > 0) {
-          showToast(
-            `Sipariş tamamlandı! ⚠️ Bulunamayan ürünler atlandı: ${missingProducts.join(", ")}`,
-          );
+          showToast(`Sipariş tamamlandı! ⚠️ Bulunamayan ürünler atlandı: ${missingProducts.join(', ')}`);
         } else {
-          showToast("Sipariş tamamlandı! Stok ve cari güncellendi.");
+          showToast('Sipariş tamamlandı! Stok ve cari güncellendi.');
         }
 
         // stockCompleted bayrağını true yap (idempotency)
-        const finalOrders = newState.orders.map((o) =>
-          o.id === id ? { ...o, stockCompleted: true } : o,
-        );
+        const finalOrders = newState.orders.map((o) => (o.id === id ? { ...o, stockCompleted: true } : o));
         newState = {
           ...newState,
           products,
@@ -355,12 +325,12 @@ export default function Suppliers({ db, save }: Props) {
 
   const revertOrder = (id: string) => {
     showConfirm(
-      "Sipariş Geri Al",
-      "Bu siparişi geri almak istiyor musunuz? Stok ve cari değişiklikleri geri alınacak.",
+      'Sipariş Geri Al',
+      'Bu siparişi geri almak istiyor musunuz? Stok ve cari değişiklikleri geri alınacak.',
       () => {
         save((prev) => {
           const order = prev.orders.find((o) => o.id === id);
-          if (!order || order.status !== "tamamlandi") return prev;
+          if (!order || order.status !== 'tamamlandi') return prev;
           const nowIso = new Date().toISOString();
 
           // Stokları geri düşür
@@ -377,16 +347,11 @@ export default function Suppliers({ db, save }: Props) {
               id: genId(),
               productId: i.productId,
               productName: i.productName,
-              type: "cikis" as const,
+              type: 'cikis' as const,
               amount: i.qty,
-              before:
-                prev.products.find((p) => p.id === i.productId)?.stock || 0,
-              after: Math.max(
-                0,
-                (prev.products.find((p) => p.id === i.productId)?.stock || 0) -
-                  i.qty,
-              ),
-              note: "Sipariş geri alındı",
+              before: prev.products.find((p) => p.id === i.productId)?.stock || 0,
+              after: Math.max(0, (prev.products.find((p) => p.id === i.productId)?.stock || 0) - i.qty),
+              note: 'Sipariş geri alındı',
               date: nowIso,
             })),
           ];
@@ -405,120 +370,111 @@ export default function Suppliers({ db, save }: Props) {
           });
 
           const orders = prev.orders.map((o) =>
-            o.id === id
-              ? { ...o, status: "bekliyor" as const, updatedAt: nowIso }
-              : o,
+            o.id === id ? { ...o, status: 'bekliyor' as const, updatedAt: nowIso } : o,
           );
 
           return { ...prev, orders, products, stockMovements, cari };
         });
-        showToast("Sipariş geri alındı! Stok ve cari güncellendi.");
+        showToast('Sipariş geri alındı! Stok ve cari güncellendi.');
       },
     );
   };
 
   // Tüm tedarikçileri birleştir (kategori etiketi ile)
   const allSuppliers = [
-    ...db.suppliers
-      .filter((s) => !s.deleted)
-      .map((s) => ({ ...s, _kat: "genel" as const })),
+    ...db.suppliers.filter((s) => !s.deleted).map((s) => ({ ...s, _kat: 'genel' as const })),
     ...(db.peletSuppliers || []).map((s) => ({
       id: s.id,
       name: s.name,
-      phone: s.phone || "",
-      email: s.email || "",
-      address: s.address || "",
-      category: "Pelet",
+      phone: s.phone || '',
+      email: s.email || '',
+      address: s.address || '',
+      category: 'Pelet',
       totalOrders: 0,
       totalAmount: 0,
       createdAt: s.createdAt,
       updatedAt: s.updatedAt,
-      _kat: "pelet" as const,
+      _kat: 'pelet' as const,
     })),
     ...(db.boruSuppliers || []).map((s) => ({
       id: s.id,
       name: s.name,
-      phone: s.phone || "",
-      email: s.email || "",
-      address: s.address || "",
-      category: "Boru",
+      phone: s.phone || '',
+      email: s.email || '',
+      address: s.address || '',
+      category: 'Boru',
       totalOrders: 0,
       totalAmount: 0,
       createdAt: s.createdAt,
       updatedAt: s.updatedAt,
-      _kat: "boru" as const,
+      _kat: 'boru' as const,
     })),
   ];
 
   let filteredSuppliers = allSuppliers;
-  if (catFilter !== "hepsi")
-    filteredSuppliers = filteredSuppliers.filter((s) => s._kat === catFilter);
+  if (catFilter !== 'hepsi') filteredSuppliers = filteredSuppliers.filter((s) => s._kat === catFilter);
   if (debouncedSearch)
     filteredSuppliers = filteredSuppliers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (s.phone || "").includes(debouncedSearch),
+      (s) => s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || (s.phone || '').includes(debouncedSearch),
     );
 
   let orders = db.orders;
   if (selectedSup) orders = orders.filter((o) => o.supplierId === selectedSup);
-  const sortedOrders = [...orders].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+  const sortedOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const statusColor: Record<string, string> = {
-    bekliyor: "#f59e0b",
-    yolda: "#3b82f6",
-    tamamlandi: "#10b981",
-    iptal: "#ef4444",
+    bekliyor: '#f59e0b',
+    yolda: '#3b82f6',
+    tamamlandi: '#10b981',
+    iptal: '#ef4444',
   };
   const statusLabel: Record<string, string> = {
-    bekliyor: "⏳ Bekliyor",
-    yolda: "🚚 Yolda",
-    tamamlandi: "✓ Tamamlandı",
-    iptal: "✕ İptal",
+    bekliyor: '⏳ Bekliyor',
+    yolda: '🚚 Yolda',
+    tamamlandi: '✓ Tamamlandı',
+    iptal: '✕ İptal',
   };
   const catColors: Record<string, string> = {
-    genel: "#ff5722",
-    pelet: "#f59e0b",
-    boru: "#3b82f6",
+    genel: '#ff5722',
+    pelet: '#f59e0b',
+    boru: '#3b82f6',
   };
   const catLabels: Record<string, string> = {
-    genel: "🏭 Genel",
-    pelet: "🌾 Pelet",
-    boru: "🔧 Boru",
+    genel: '🏭 Genel',
+    pelet: '🌾 Pelet',
+    boru: '🔧 Boru',
   };
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        {(["suppliers", "orders"] as const).map((t) => (
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {(['suppliers', 'orders'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             style={{
-              padding: "10px 20px",
-              border: "none",
+              padding: '10px 20px',
+              border: 'none',
               borderRadius: 10,
-              cursor: "pointer",
+              cursor: 'pointer',
               fontWeight: 700,
-              background: tab === t ? "#ff5722" : "#273548",
-              color: tab === t ? "#fff" : "#94a3b8",
+              background: tab === t ? '#ff5722' : '#273548',
+              color: tab === t ? '#fff' : '#94a3b8',
             }}
           >
-            {t === "suppliers" ? "🏭 Tedarikçiler" : "📦 Siparişler"}
+            {t === 'suppliers' ? '🏭 Tedarikçiler' : '📦 Siparişler'}
           </button>
         ))}
       </div>
 
-      {tab === "suppliers" && (
+      {tab === 'suppliers' && (
         <>
           <div
             style={{
-              display: "flex",
+              display: 'flex',
               gap: 10,
               marginBottom: 16,
-              flexWrap: "wrap",
+              flexWrap: 'wrap',
             }}
           >
             <button
@@ -528,13 +484,13 @@ export default function Suppliers({ db, save }: Props) {
                 setSupModal(true);
               }}
               style={{
-                background: "#ff5722",
-                border: "none",
+                background: '#ff5722',
+                border: 'none',
                 borderRadius: 10,
-                color: "#fff",
-                padding: "10px 20px",
+                color: '#fff',
+                padding: '10px 20px',
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: 'pointer',
               }}
             >
               + Yeni Tedarikçi
@@ -542,13 +498,13 @@ export default function Suppliers({ db, save }: Props) {
             <button
               onClick={() => setOrderModal(true)}
               style={{
-                background: "rgba(59,130,246,0.15)",
-                border: "1px solid rgba(59,130,246,0.3)",
+                background: 'rgba(59,130,246,0.15)',
+                border: '1px solid rgba(59,130,246,0.3)',
                 borderRadius: 10,
-                color: "#60a5fa",
-                padding: "10px 18px",
+                color: '#60a5fa',
+                padding: '10px 18px',
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: 'pointer',
               }}
             >
               📦 Sipariş Ver
@@ -559,49 +515,49 @@ export default function Suppliers({ db, save }: Props) {
               placeholder="🔍 Ara..."
               style={{
                 flex: 1,
-                padding: "9px 13px",
-                background: "#1e293b",
-                border: "1px solid #334155",
+                padding: '9px 13px',
+                background: '#1e293b',
+                border: '1px solid #334155',
                 borderRadius: 10,
-                color: "var(--text-primary)",
+                color: 'var(--text-primary)',
               }}
             />
           </div>
           {/* Kategori filtresi */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-            {(["hepsi", "genel", "pelet", "boru"] as const).map((f) => (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            {(['hepsi', 'genel', 'pelet', 'boru'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setCatFilter(f)}
                 style={{
-                  padding: "6px 14px",
-                  border: "none",
+                  padding: '6px 14px',
+                  border: 'none',
                   borderRadius: 8,
-                  cursor: "pointer",
+                  cursor: 'pointer',
                   fontWeight: 600,
-                  fontSize: "0.82rem",
-                  background: catFilter === f ? "#ff5722" : "#273548",
-                  color: catFilter === f ? "#fff" : "#94a3b8",
+                  fontSize: '0.82rem',
+                  background: catFilter === f ? '#ff5722' : '#273548',
+                  color: catFilter === f ? '#fff' : '#94a3b8',
                 }}
               >
-                {f === "hepsi" ? "🔍 Hepsi" : catLabels[f]}
+                {f === 'hepsi' ? '🔍 Hepsi' : catLabels[f]}
               </button>
             ))}
           </div>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
               gap: 14,
             }}
           >
             {filteredSuppliers.length === 0 ? (
               <div
                 style={{
-                  gridColumn: "1/-1",
-                  textAlign: "center",
+                  gridColumn: '1/-1',
+                  textAlign: 'center',
                   padding: 48,
-                  color: "var(--text-muted)",
+                  color: 'var(--text-muted)',
                 }}
               >
                 Tedarikçi bulunamadı
@@ -611,30 +567,28 @@ export default function Suppliers({ db, save }: Props) {
                 <div
                   key={s.id}
                   style={{
-                    background: "#1e293b",
+                    background: '#1e293b',
                     borderRadius: 12,
-                    border: "1px solid #334155",
+                    border: '1px solid #334155',
                     padding: 18,
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
                       marginBottom: 4,
                     }}
                   >
-                    <h4 style={{ fontWeight: 700, color: "var(--text-primary)" }}>
-                      {s.name}
-                    </h4>
+                    <h4 style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</h4>
                     <span
                       style={{
                         background: `${catColors[s._kat]}22`,
                         color: catColors[s._kat],
                         borderRadius: 6,
-                        padding: "2px 8px",
-                        fontSize: "0.75rem",
+                        padding: '2px 8px',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
                       }}
                     >
@@ -643,18 +597,18 @@ export default function Suppliers({ db, save }: Props) {
                   </div>
                   <p
                     style={{
-                      color: "var(--text-muted)",
-                      fontSize: "0.82rem",
+                      color: 'var(--text-muted)',
+                      fontSize: '0.82rem',
                       marginBottom: 10,
                     }}
                   >
-                    {s.category || "Genel"}
+                    {s.category || 'Genel'}
                   </p>
                   {s.phone && (
                     <p
                       style={{
-                        color: "var(--text-dim)",
-                        fontSize: "0.85rem",
+                        color: 'var(--text-dim)',
+                        fontSize: '0.85rem',
                         marginBottom: 4,
                       }}
                     >
@@ -664,8 +618,8 @@ export default function Suppliers({ db, save }: Props) {
                   {s.email && (
                     <p
                       style={{
-                        color: "var(--text-dim)",
-                        fontSize: "0.82rem",
+                        color: 'var(--text-dim)',
+                        fontSize: '0.82rem',
                         marginBottom: 4,
                       }}
                     >
@@ -676,18 +630,16 @@ export default function Suppliers({ db, save }: Props) {
                     style={{
                       marginTop: 10,
                       paddingTop: 10,
-                      borderTop: "1px solid #334155",
-                      display: "flex",
-                      justifyContent: "space-between",
+                      borderTop: '1px solid #334155',
+                      display: 'flex',
+                      justifyContent: 'space-between',
                     }}
                   >
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-                      {s.totalOrders || 0} sipariş
-                    </span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{s.totalOrders || 0} sipariş</span>
                     <span
                       style={{
-                        color: "#10b981",
-                        fontSize: "0.85rem",
+                        color: '#10b981',
+                        fontSize: '0.85rem',
                         fontWeight: 700,
                       }}
                     >
@@ -695,14 +647,15 @@ export default function Suppliers({ db, save }: Props) {
                     </span>
                   </div>
                   {(() => {
-                    const supplierOrders = db.orders.filter(o => o.supplierId === s.id && o.status !== 'iptal');
-                    const completedOnTime = supplierOrders.filter(o => {
+                    const supplierOrders = db.orders.filter((o) => o.supplierId === s.id && o.status !== 'iptal');
+                    const completedOnTime = supplierOrders.filter((o) => {
                       if (o.status !== 'tamamlandi') return false;
                       if (!o.deliveryDate || !o.createdAt) return true;
                       const diff = (new Date(o.deliveryDate).getTime() - new Date(o.createdAt).getTime()) / 86400000;
                       return diff <= 7;
                     });
-                    const onTimeRate = supplierOrders.length > 0 ? (completedOnTime.length / supplierOrders.length) * 100 : 0;
+                    const onTimeRate =
+                      supplierOrders.length > 0 ? (completedOnTime.length / supplierOrders.length) * 100 : 0;
                     const orderScore = Math.min(30, (s.totalOrders || 0) * 3);
                     const amountScore = Math.min(30, ((s.totalAmount || 0) / 10000) * 10);
                     const deliveryScore = onTimeRate * 0.4;
@@ -711,34 +664,59 @@ export default function Suppliers({ db, save }: Props) {
                     return (
                       <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ flex: 1, height: 6, background: '#273548', borderRadius: 3 }}>
-                          <div style={{ width: `${totalScore}%`, height: '100%', background: scoreColor, borderRadius: 3, transition: 'width 0.4s' }} />
+                          <div
+                            style={{
+                              width: `${totalScore}%`,
+                              height: '100%',
+                              background: scoreColor,
+                              borderRadius: 3,
+                              transition: 'width 0.4s',
+                            }}
+                          />
                         </div>
-                        <span style={{ color: scoreColor, fontSize: '0.78rem', fontWeight: 800, minWidth: 32, textAlign: 'right' }}>{totalScore}</span>
+                        <span
+                          style={{
+                            color: scoreColor,
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            minWidth: 32,
+                            textAlign: 'right',
+                          }}
+                        >
+                          {totalScore}
+                        </span>
                       </div>
                     );
                   })()}
-                  {s._kat === "genel" && (
-                    <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  {s._kat === 'genel' && (
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                       <button
                         onClick={() => {
                           setSelectedSup(s.id);
-                          setTab("orders");
+                          setTab('orders');
                         }}
                         style={{
                           flex: 1,
-                          background: "rgba(59,130,246,0.1)",
-                          border: "none",
+                          background: 'rgba(59,130,246,0.1)',
+                          border: 'none',
                           borderRadius: 8,
-                          color: "#60a5fa",
-                          padding: "7px 0",
-                          cursor: "pointer",
-                          fontSize: "0.82rem",
+                          color: '#60a5fa',
+                          padding: '7px 0',
+                          cursor: 'pointer',
+                          fontSize: '0.82rem',
                           fontWeight: 600,
                         }}
                       >
                         📦 Siparişler
                       </button>
-                      <ActionButtons onEdit={() => { setForm({ ...s }); setEditId(s.id); setSupModal(true); }} onDelete={() => deleteSupplier(s.id)} />
+                      <ActionButtons
+                        onEdit={() => {
+                          setForm({ ...s });
+                          setEditId(s.id);
+                          setSupModal(true);
+                        }}
+                        onDelete={() => deleteSupplier(s.id)}
+                      />
                     </div>
                   )}
                 </div>
@@ -748,27 +726,27 @@ export default function Suppliers({ db, save }: Props) {
         </>
       )}
 
-      {tab === "orders" && (
+      {tab === 'orders' && (
         <>
           <div
             style={{
-              display: "flex",
+              display: 'flex',
               gap: 10,
               marginBottom: 16,
-              flexWrap: "wrap",
-              alignItems: "center",
+              flexWrap: 'wrap',
+              alignItems: 'center',
             }}
           >
             <button
               onClick={() => setOrderModal(true)}
               style={{
-                background: "#ff5722",
-                border: "none",
+                background: '#ff5722',
+                border: 'none',
                 borderRadius: 10,
-                color: "#fff",
-                padding: "10px 20px",
+                color: '#fff',
+                padding: '10px 20px',
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: 'pointer',
               }}
             >
               + Sipariş Ver
@@ -777,11 +755,11 @@ export default function Suppliers({ db, save }: Props) {
               value={selectedSup}
               onChange={(e) => setSelectedSup(e.target.value)}
               style={{
-                padding: "9px 13px",
-                background: "#1e293b",
-                border: "1px solid #334155",
+                padding: '9px 13px',
+                background: '#1e293b',
+                border: '1px solid #334155',
                 borderRadius: 10,
-                color: "var(--text-primary)",
+                color: 'var(--text-primary)',
               }}
             >
               <option value="">Tüm Tedarikçiler</option>
@@ -795,38 +773,36 @@ export default function Suppliers({ db, save }: Props) {
           <div
             className="responsive-table-wrap"
             style={{
-              background: "#1e293b",
+              background: '#1e293b',
               borderRadius: 14,
-              border: "1px solid #334155",
-              overflowX: "auto",
+              border: '1px solid #334155',
+              overflowX: 'auto',
             }}
           >
             <table
               style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                whiteSpace: "nowrap",
+                width: '100%',
+                borderCollapse: 'collapse',
+                whiteSpace: 'nowrap',
               }}
             >
               <thead>
-                <tr style={{ background: "rgba(15,23,42,0.6)" }}>
-                  {["Tarih", "Tedarikçi", "Ürünler", "Tutar", "Durum", ""].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "12px 16px",
-                          textAlign: "left",
-                          color: "var(--text-muted)",
-                          fontSize: "0.78rem",
-                          fontWeight: 600,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
+                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                  {['Tarih', 'Tedarikçi', 'Ürünler', 'Tutar', 'Durum', ''].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: '12px 16px',
+                        textAlign: 'left',
+                        color: 'var(--text-muted)',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -835,9 +811,9 @@ export default function Suppliers({ db, save }: Props) {
                     <td
                       colSpan={6}
                       style={{
-                        textAlign: "center",
+                        textAlign: 'center',
                         padding: 40,
-                        color: "var(--text-muted)",
+                        color: 'var(--text-muted)',
                       }}
                     >
                       Sipariş bulunamadı
@@ -848,15 +824,15 @@ export default function Suppliers({ db, save }: Props) {
                     <tr
                       key={o.id}
                       style={{
-                        borderBottom: "1px solid rgba(255,255,255,0.04)",
+                        borderBottom: '1px solid rgba(255,255,255,0.04)',
                       }}
                     >
                       <td
                         data-label="Tarih"
                         style={{
-                          padding: "12px 16px",
-                          color: "var(--text-muted)",
-                          fontSize: "0.82rem",
+                          padding: '12px 16px',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.82rem',
                         }}
                       >
                         {formatDate(o.createdAt)}
@@ -864,117 +840,110 @@ export default function Suppliers({ db, save }: Props) {
                       <td
                         data-label="Tedarikçi"
                         style={{
-                          padding: "12px 16px",
-                          color: "var(--text-primary)",
+                          padding: '12px 16px',
+                          color: 'var(--text-primary)',
                           fontWeight: 600,
                         }}
                       >
-                        {db.suppliers.find((s) => s.id === o.supplierId)
-                          ?.name || "-"}
+                        {db.suppliers.find((s) => s.id === o.supplierId)?.name || '-'}
                       </td>
                       <td
                         data-label="Ürünler"
                         style={{
-                          padding: "12px 16px",
-                          color: "var(--text-dim)",
-                          fontSize: "0.85rem",
+                          padding: '12px 16px',
+                          color: 'var(--text-dim)',
+                          fontSize: '0.85rem',
                           maxWidth: 200,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                         }}
                       >
-                        {o.items
-                          .map((i) => `${i.productName}×${i.qty}`)
-                          .join(", ")}
+                        {o.items.map((i) => `${i.productName}×${i.qty}`).join(', ')}
                       </td>
                       <td
                         data-label="Tutar"
                         style={{
-                          padding: "12px 16px",
-                          color: "#10b981",
+                          padding: '12px 16px',
+                          color: '#10b981',
                           fontWeight: 700,
                         }}
                       >
                         {formatMoney(o.amount)}
                       </td>
-                      <td data-label="Durum" style={{ padding: "12px 16px" }}>
+                      <td data-label="Durum" style={{ padding: '12px 16px' }}>
                         <span
                           style={{
                             background: `${statusColor[o.status]}22`,
                             color: statusColor[o.status],
                             borderRadius: 6,
-                            padding: "2px 8px",
-                            fontSize: "0.8rem",
+                            padding: '2px 8px',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                           }}
                         >
                           {statusLabel[o.status]}
                         </span>
                       </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        {o.status === "bekliyor" && (
-                          <div style={{ display: "flex", gap: 6 }}>
+                      <td style={{ padding: '12px 16px' }}>
+                        {o.status === 'bekliyor' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
                             <button
-                              onClick={() => updateOrderStatus(o.id, "yolda")}
+                              onClick={() => updateOrderStatus(o.id, 'yolda')}
                               style={{
-                                background: "rgba(59,130,246,0.1)",
-                                border: "none",
+                                background: 'rgba(59,130,246,0.1)',
+                                border: 'none',
                                 borderRadius: 6,
-                                color: "#60a5fa",
-                                padding: "4px 8px",
-                                cursor: "pointer",
-                                fontSize: "0.78rem",
+                                color: '#60a5fa',
+                                padding: '4px 8px',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
                               }}
                             >
                               🚚 Yolda
                             </button>
                             <button
-                              onClick={() =>
-                                updateOrderStatus(o.id, "tamamlandi")
-                              }
+                              onClick={() => updateOrderStatus(o.id, 'tamamlandi')}
                               style={{
-                                background: "rgba(16,185,129,0.1)",
-                                border: "none",
+                                background: 'rgba(16,185,129,0.1)',
+                                border: 'none',
                                 borderRadius: 6,
-                                color: "#10b981",
-                                padding: "4px 8px",
-                                cursor: "pointer",
-                                fontSize: "0.78rem",
+                                color: '#10b981',
+                                padding: '4px 8px',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem',
                               }}
                             >
                               ✓ Tamamla
                             </button>
                           </div>
                         )}
-                        {o.status === "yolda" && (
+                        {o.status === 'yolda' && (
                           <button
-                            onClick={() =>
-                              updateOrderStatus(o.id, "tamamlandi")
-                            }
+                            onClick={() => updateOrderStatus(o.id, 'tamamlandi')}
                             style={{
-                              background: "rgba(16,185,129,0.1)",
-                              border: "none",
+                              background: 'rgba(16,185,129,0.1)',
+                              border: 'none',
                               borderRadius: 6,
-                              color: "#10b981",
-                              padding: "4px 8px",
-                              cursor: "pointer",
-                              fontSize: "0.78rem",
+                              color: '#10b981',
+                              padding: '4px 8px',
+                              cursor: 'pointer',
+                              fontSize: '0.78rem',
                             }}
                           >
                             ✓ Tamamla
                           </button>
                         )}
-                        {o.status === "tamamlandi" && (
+                        {o.status === 'tamamlandi' && (
                           <button
                             onClick={() => revertOrder(o.id)}
                             style={{
-                              background: "rgba(245,158,11,0.1)",
-                              border: "none",
+                              background: 'rgba(245,158,11,0.1)',
+                              border: 'none',
                               borderRadius: 6,
-                              color: "#f59e0b",
-                              padding: "4px 8px",
-                              cursor: "pointer",
-                              fontSize: "0.78rem",
+                              color: '#f59e0b',
+                              padding: '4px 8px',
+                              cursor: 'pointer',
+                              fontSize: '0.78rem',
                             }}
                           >
                             ↩ Geri Al
@@ -993,15 +962,13 @@ export default function Suppliers({ db, save }: Props) {
       <Modal
         open={supModal}
         onClose={() => setSupModal(false)}
-        title={editId ? "✏️ Tedarikçi Düzenle" : "➕ Yeni Tedarikçi"}
+        title={editId ? '✏️ Tedarikçi Düzenle' : '➕ Yeni Tedarikçi'}
       >
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
-        >
-          <div style={{ gridColumn: "1/-1" }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ gridColumn: '1/-1' }}>
             <label style={lbl}>Ad *</label>
             <input
-              value={form.name || ""}
+              value={form.name || ''}
               onChange={(e) => {
                 setForm((f) => ({ ...f, name: e.target.value }));
                 setDupWarning([]);
@@ -1014,39 +981,37 @@ export default function Suppliers({ db, save }: Props) {
               <div
                 style={{
                   marginTop: 8,
-                  background: forceSave
-                    ? "rgba(245,158,11,0.08)"
-                    : "rgba(239,68,68,0.08)",
-                  border: `1px solid ${forceSave ? "rgba(245,158,11,0.4)" : "rgba(239,68,68,0.4)"}`,
+                  background: forceSave ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
+                  border: `1px solid ${forceSave ? 'rgba(245,158,11,0.4)' : 'rgba(239,68,68,0.4)'}`,
                   borderRadius: 8,
-                  padding: "10px 12px",
+                  padding: '10px 12px',
                 }}
               >
                 <p
                   style={{
-                    color: forceSave ? "#f59e0b" : "#ef4444",
+                    color: forceSave ? '#f59e0b' : '#ef4444',
                     fontWeight: 700,
-                    fontSize: "0.82rem",
+                    fontSize: '0.82rem',
                     marginBottom: 4,
                   }}
                 >
                   {forceSave
                     ? '⚠️ Yine de kaydetmek için tekrar "Kaydet" a tıklayın'
-                    : "🔴 Benzer tedarikçiler bulundu:"}
+                    : '🔴 Benzer tedarikçiler bulundu:'}
                 </p>
                 {dupWarning.map((d, i) => (
                   <p
                     key={i}
                     style={{
-                      color: "var(--text-dim)",
-                      fontSize: "0.8rem",
-                      margin: "2px 0",
+                      color: 'var(--text-dim)',
+                      fontSize: '0.8rem',
+                      margin: '2px 0',
                     }}
                   >
-                    • {d.name}{" "}
+                    • {d.name}{' '}
                     <span
                       style={{
-                        color: d.score >= 90 ? "#ef4444" : "#f59e0b",
+                        color: d.score >= 90 ? '#ef4444' : '#f59e0b',
                         fontWeight: 700,
                       }}
                     >
@@ -1057,45 +1022,51 @@ export default function Suppliers({ db, save }: Props) {
               </div>
             )}
           </div>
-          <FormField label="Kategori" value={form.category || ""} onChange={(v) => setForm((f) => ({ ...f, category: v }))} />
-          <FormField label="Telefon" value={form.phone || ""} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
-          <FormField label="E-posta" value={form.email || ""} onChange={(v) => setForm((f) => ({ ...f, email: v }))} type="email" />
+          <FormField
+            label="Kategori"
+            value={form.category || ''}
+            onChange={(v) => setForm((f) => ({ ...f, category: v }))}
+          />
+          <FormField label="Telefon" value={form.phone || ''} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+          <FormField
+            label="E-posta"
+            value={form.email || ''}
+            onChange={(v) => setForm((f) => ({ ...f, email: v }))}
+            type="email"
+          />
           <div>
             <label style={lbl}>Yetkili</label>
             <input
-              value={form.contact || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, contact: e.target.value }))
-              }
+              value={form.contact || ''}
+              onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
               style={inp}
             />
           </div>
-          <div style={{ gridColumn: "1/-1" }}>
+          <div style={{ gridColumn: '1/-1' }}>
             <label style={lbl}>Adres</label>
             <textarea
-              value={form.address || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, address: e.target.value }))
-              }
+              value={form.address || ''}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
               style={{ ...inp, minHeight: 60 }}
             />
           </div>
-          <FormTextArea label="Not" value={form.note || ""} onChange={(v) => setForm((f) => ({ ...f, note: v }))} minHeight={60} gridColumn="1/-1" />
+          <FormTextArea
+            label="Not"
+            value={form.note || ''}
+            onChange={(v) => setForm((f) => ({ ...f, note: v }))}
+            minHeight={60}
+            gridColumn="1/-1"
+          />
         </div>
         <ModalActions
           onSave={saveSupplier}
           onCancel={() => setSupModal(false)}
-          saveColor={forceSave ? "#f59e0b" : "#10b981"}
-          saveLabel={forceSave ? "⚠️ Yine de Kaydet" : "💾 Kaydet"}
+          saveColor={forceSave ? '#f59e0b' : '#10b981'}
+          saveLabel={forceSave ? '⚠️ Yine de Kaydet' : '💾 Kaydet'}
         />
       </Modal>
 
-      <Modal
-        open={orderModal}
-        onClose={() => setOrderModal(false)}
-        title="📦 Sipariş Ver"
-        maxWidth={620}
-      >
+      <Modal open={orderModal} onClose={() => setOrderModal(false)} title="📦 Sipariş Ver" maxWidth={620}>
         <div>
           <label style={lbl}>Tedarikçi *</label>
           <select
@@ -1111,11 +1082,11 @@ export default function Suppliers({ db, save }: Props) {
             ))}
           </select>
           <label style={lbl}>Ürün Ekle</label>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
             <select
               value={orderProductCat}
               onChange={(e) => setOrderProductCat(e.target.value)}
-              style={{ ...inp, flex: "0 0 120px" }}
+              style={{ ...inp, flex: '0 0 120px' }}
             >
               <option value="">Tüm Kat.</option>
               {[
@@ -1135,18 +1106,14 @@ export default function Suppliers({ db, save }: Props) {
               onChange={(e) => {
                 if (e.target.value) {
                   addOrderItem(e.target.value);
-                  e.target.value = "";
+                  e.target.value = '';
                 }
               }}
               style={{ ...inp, flex: 1 }}
             >
               <option value="">-- Ürün Seç --</option>
               {db.products
-                .filter(
-                  (p) =>
-                    !p.deleted &&
-                    (!orderProductCat || p.category === orderProductCat),
-                )
+                .filter((p) => !p.deleted && (!orderProductCat || p.category === orderProductCat))
                 .map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -1158,18 +1125,16 @@ export default function Suppliers({ db, save }: Props) {
             <div
               key={item.productId}
               style={{
-                display: "flex",
+                display: 'flex',
                 gap: 8,
-                alignItems: "center",
+                alignItems: 'center',
                 marginBottom: 8,
-                background: "#0f172a",
+                background: '#0f172a',
                 borderRadius: 8,
-                padding: "8px 10px",
+                padding: '8px 10px',
               }}
             >
-              <span style={{ flex: 1, color: "var(--text-primary)", fontSize: "0.88rem" }}>
-                {item.productName}
-              </span>
+              <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.88rem' }}>{item.productName}</span>
               <input
                 type="number"
                 inputMode="decimal"
@@ -1178,21 +1143,17 @@ export default function Suppliers({ db, save }: Props) {
                 onChange={(e) => {
                   const qty = parseInt(e.target.value) || 1;
                   setOrderItems((prev) =>
-                    prev.map((i) =>
-                      i.productId === item.productId
-                        ? { ...i, qty, lineTotal: qty * i.unitCost }
-                        : i,
-                    ),
+                    prev.map((i) => (i.productId === item.productId ? { ...i, qty, lineTotal: qty * i.unitCost } : i)),
                   );
                 }}
                 style={{
                   width: 55,
-                  background: "#1e293b",
-                  border: "1px solid #334155",
+                  background: '#1e293b',
+                  border: '1px solid #334155',
                   borderRadius: 6,
-                  color: "var(--text-primary)",
-                  padding: "4px 6px",
-                  textAlign: "center",
+                  color: 'var(--text-primary)',
+                  padding: '4px 6px',
+                  textAlign: 'center',
                 }}
               />
               <input
@@ -1204,32 +1165,26 @@ export default function Suppliers({ db, save }: Props) {
                   const cost = parseFloat(e.target.value) || 0;
                   setOrderItems((prev) =>
                     prev.map((i) =>
-                      i.productId === item.productId
-                        ? { ...i, unitCost: cost, lineTotal: i.qty * cost }
-                        : i,
+                      i.productId === item.productId ? { ...i, unitCost: cost, lineTotal: i.qty * cost } : i,
                     ),
                   );
                 }}
                 style={{
                   width: 80,
-                  background: "#1e293b",
-                  border: "1px solid #334155",
+                  background: '#1e293b',
+                  border: '1px solid #334155',
                   borderRadius: 6,
-                  color: "var(--text-primary)",
-                  padding: "4px 6px",
+                  color: 'var(--text-primary)',
+                  padding: '4px 6px',
                 }}
               />
               <button
-                onClick={() =>
-                  setOrderItems((prev) =>
-                    prev.filter((i) => i.productId !== item.productId),
-                  )
-                }
+                onClick={() => setOrderItems((prev) => prev.filter((i) => i.productId !== item.productId))}
                 style={{
-                  background: "none",
-                  border: "none",
-                  color: "#ef4444",
-                  cursor: "pointer",
+                  background: 'none',
+                  border: 'none',
+                  color: '#ef4444',
+                  cursor: 'pointer',
                 }}
               >
                 ✕
@@ -1238,27 +1193,22 @@ export default function Suppliers({ db, save }: Props) {
           ))}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
               gap: 12,
               marginTop: 12,
             }}
           >
             <div>
               <label style={lbl}>Teslim Tarihi</label>
-              <input
-                type="date"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                style={inp}
-              />
+              <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} style={inp} />
             </div>
             <div>
               <label style={lbl}>Nakliye Maliyeti (₺)</label>
               <input
                 type="number"
                 inputMode="decimal"
-                value={nakliye || ""}
+                value={nakliye || ''}
                 min={0}
                 step={0.01}
                 placeholder="0,00"
@@ -1278,40 +1228,38 @@ export default function Suppliers({ db, save }: Props) {
           {orderItems.length > 0 && (
             <div
               style={{
-                background: "#0f172a",
+                background: '#0f172a',
                 borderRadius: 8,
-                padding: "12px 14px",
+                padding: '12px 14px',
                 marginTop: 12,
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   marginBottom: 4,
                 }}
               >
-                <span style={{ color: "var(--text-dim)" }}>Ürün Toplamı</span>
-                <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>
+                <span style={{ color: 'var(--text-dim)' }}>Ürün Toplamı</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
                   {formatMoney(orderItems.reduce((s, i) => s + i.lineTotal, 0))}
                 </span>
               </div>
               {nakliye > 0 && (
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     marginBottom: 4,
                   }}
                 >
-                  <span style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
-                    + Nakliye
-                  </span>
+                  <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>+ Nakliye</span>
                   <span
                     style={{
-                      color: "#f59e0b",
+                      color: '#f59e0b',
                       fontWeight: 600,
-                      fontSize: "0.85rem",
+                      fontSize: '0.85rem',
                     }}
                   >
                     {formatMoney(nakliye)}
@@ -1320,23 +1268,21 @@ export default function Suppliers({ db, save }: Props) {
               )}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: "1px solid #1e3a5f",
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  borderTop: '1px solid #1e3a5f',
                   paddingTop: 8,
                 }}
               >
-                <span style={{ color: "var(--text-dim)" }}>Genel Toplam</span>
+                <span style={{ color: 'var(--text-dim)' }}>Genel Toplam</span>
                 <span
                   style={{
-                    color: "#10b981",
+                    color: '#10b981',
                     fontWeight: 800,
-                    fontSize: "1.1rem",
+                    fontSize: '1.1rem',
                   }}
                 >
-                  {formatMoney(
-                    orderItems.reduce((s, i) => s + i.lineTotal, 0) + nakliye,
-                  )}
+                  {formatMoney(orderItems.reduce((s, i) => s + i.lineTotal, 0) + nakliye)}
                 </span>
               </div>
             </div>

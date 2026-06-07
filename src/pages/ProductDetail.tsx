@@ -1,9 +1,10 @@
-import { useToast } from "@/components/Toast";
-import { formatDate, formatMoney } from "@/lib/utils-tr";
-import type { DB, Sale, SaleItem } from "@/types";
-import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "wouter";
-import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers.tsx";
+import { useToast } from '@/components/Toast';
+import { formatDate, formatMoney } from '@/lib/utils-tr';
+import type { DB, Sale, SaleItem } from '@/types';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'wouter';
+import { cardStyle, mutedText, sectionTitleStyle, rowStyle } from '@/pages/pageStyles';
+import { Metric } from '@/pages/pageHelpers';
 
 interface Props {
   db: DB;
@@ -11,7 +12,7 @@ interface Props {
 }
 
 function currentIdFromPath(location: string): string {
-  const value = location.split("/").filter(Boolean).pop() || "";
+  const value = location.split('/').filter(Boolean).pop() || '';
   return decodeURIComponent(value);
 }
 
@@ -46,28 +47,21 @@ export default function ProductDetail({ db, save }: Props) {
 
   const stats = useMemo(() => {
     const productSales = db.sales
-      .filter((sale) => !sale.deleted && sale.status === "tamamlandi")
+      .filter((sale) => !sale.deleted && sale.status === 'tamamlandi')
       .map((sale) => ({ sale, items: productItems(sale, productId) }))
       .filter((row) => row.items.length > 0);
 
     const qty = productSales.reduce(
-      (sum, row) =>
-        sum + row.items.reduce((itemSum, item) => itemSum + item.quantity, 0),
+      (sum, row) => sum + row.items.reduce((itemSum, item) => itemSum + item.quantity, 0),
       0,
     );
     const revenue = productSales.reduce(
-      (sum, row) =>
-        sum + row.items.reduce((itemSum, item) => itemSum + item.total, 0),
+      (sum, row) => sum + row.items.reduce((itemSum, item) => itemSum + item.total, 0),
       0,
     );
     const profit = productSales.reduce(
       (sum, row) =>
-        sum +
-        row.items.reduce(
-          (itemSum, item) =>
-            itemSum + item.quantity * (item.unitPrice - item.cost),
-          0,
-        ),
+        sum + row.items.reduce((itemSum, item) => itemSum + item.quantity * (item.unitPrice - item.cost), 0),
       0,
     );
 
@@ -83,10 +77,10 @@ export default function ProductDetail({ db, save }: Props) {
   if (!product) {
     return (
       <div style={cardStyle}>
-        <button onClick={() => setLocation("/products")} style={backButton}>
+        <button onClick={() => setLocation('/products')} style={backButton}>
           ← Ürünlere dön
         </button>
-        <h2 style={{ color: "#f1f5f9", marginTop: 16 }}>Ürün bulunamadı</h2>
+        <h2 style={{ color: '#f1f5f9', marginTop: 16 }}>Ürün bulunamadı</h2>
         <p style={mutedText}>Bu ürün silinmiş olabilir veya bağlantı eski olabilir.</p>
       </div>
     );
@@ -113,52 +107,64 @@ export default function ProductDetail({ db, save }: Props) {
           : item,
       ),
     }));
-    showToast("Minimum stok eşiği güncellendi.", "success");
+    showToast('Minimum stok eşiği güncellendi.', 'success');
   };
 
   return (
     <div>
-      <button onClick={() => setLocation("/products")} style={backButton}>
+      <button onClick={() => setLocation('/products')} style={backButton}>
         ← Ürünlere dön
       </button>
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.4fr) minmax(260px, 0.6fr)",
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.4fr) minmax(260px, 0.6fr)',
           gap: 16,
           marginTop: 16,
         }}
       >
         <section style={cardStyle}>
-          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <div style={{ fontSize: "2.7rem" }}>{category?.icon || "📦"}</div>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{ fontSize: '2.7rem' }}>{category?.icon || '📦'}</div>
             <div>
-              <h2 style={{ margin: 0, color: "#f8fafc" }}>{product.name}</h2>
+              <h2 style={{ margin: 0, color: '#f8fafc' }}>{product.name}</h2>
               <div style={mutedText}>
-                {[product.brand, category?.name || product.category, supplier?.name]
-                  .filter(Boolean)
-                  .join(" · ") || "Kategori yok"}
+                {[product.brand, category?.name || product.category, supplier?.name].filter(Boolean).join(' · ') ||
+                  'Kategori yok'}
               </div>
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 10, marginTop: 18 }}>
-            <Metric label="Stok" value={`${product.stock} adet`} color={product.stock <= product.minStock ? "#f59e0b" : "#10b981"} />
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))',
+              gap: 10,
+              marginTop: 18,
+            }}
+          >
+            <Metric
+              label="Stok"
+              value={`${product.stock} adet`}
+              color={product.stock <= product.minStock ? '#f59e0b' : '#10b981'}
+            />
             <Metric label="Satış Fiyatı" value={formatMoney(product.price)} color="#60a5fa" />
             <Metric label="Stok Değeri" value={formatMoney(stockValue)} color="#10b981" />
-            <Metric label="Toplam Kâr" value={formatMoney(stats.profit)} color={stats.profit >= 0 ? "#10b981" : "#ef4444"} />
+            <Metric
+              label="Toplam Kâr"
+              value={formatMoney(stats.profit)}
+              color={stats.profit >= 0 ? '#10b981' : '#ef4444'}
+            />
           </div>
 
-          {product.description && (
-            <p style={{ ...mutedText, marginTop: 18 }}>{product.description}</p>
-          )}
+          {product.description && <p style={{ ...mutedText, marginTop: 18 }}>{product.description}</p>}
         </section>
 
         <section style={cardStyle}>
           <h3 style={sectionTitleStyle}>Stok Alarmı</h3>
           <label style={label}>Minimum stok eşiği</label>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             <input
               type="number"
               min={0}
@@ -171,18 +177,20 @@ export default function ProductDetail({ db, save }: Props) {
             </button>
           </div>
           <div style={{ ...mutedText, marginTop: 12 }}>
-            Güncel durum:{" "}
-            <strong style={{ color: product.stock <= product.minStock ? "#f59e0b" : "#10b981" }}>
-              {product.stock <= product.minStock ? "Sipariş gerekiyor" : "Normal"}
+            Güncel durum:{' '}
+            <strong style={{ color: product.stock <= product.minStock ? '#f59e0b' : '#10b981' }}>
+              {product.stock <= product.minStock ? 'Sipariş gerekiyor' : 'Normal'}
             </strong>
           </div>
         </section>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16, marginTop: 16 }}>
+      <div
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 16, marginTop: 16 }}
+      >
         <section style={cardStyle}>
           <h3 style={sectionTitleStyle}>Satış Kâr Analizi</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 14 }}>
             <Metric label="Satılan" value={`${stats.qty}`} color="#60a5fa" />
             <Metric label="Ciro" value={formatMoney(stats.revenue)} color="#10b981" />
             <Metric label="Kâr" value={formatMoney(stats.profit)} color="#10b981" />
@@ -191,22 +199,20 @@ export default function ProductDetail({ db, save }: Props) {
           {stats.productSales.length === 0 ? (
             <p style={mutedText}>Bu ürün için tamamlanmış satış bulunmuyor.</p>
           ) : (
-            <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: 'grid', gap: 8 }}>
               {stats.productSales.slice(0, 12).map(({ sale, items }) => {
-                const saleProfit = items.reduce(
-                  (sum, item) =>
-                    sum + item.quantity * (item.unitPrice - item.cost),
-                  0,
-                );
+                const saleProfit = items.reduce((sum, item) => sum + item.quantity * (item.unitPrice - item.cost), 0);
                 return (
                   <div key={sale.id} style={rowStyle}>
                     <div>
-                      <strong style={{ color: "#f1f5f9" }}>{formatDate(sale.createdAt)}</strong>
+                      <strong style={{ color: '#f1f5f9' }}>{formatDate(sale.createdAt)}</strong>
                       <div style={mutedText}>{items.reduce((sum, item) => sum + item.quantity, 0)} adet</div>
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ color: "#10b981", fontWeight: 700 }}>{formatMoney(saleProfit)}</div>
-                      <button onClick={() => setLocation(`/satis/${sale.id}`)} style={linkButton}>Satış detayı</button>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ color: '#10b981', fontWeight: 700 }}>{formatMoney(saleProfit)}</div>
+                      <button onClick={() => setLocation(`/satis/${sale.id}`)} style={linkButton}>
+                        Satış detayı
+                      </button>
                     </div>
                   </div>
                 );
@@ -220,15 +226,15 @@ export default function ProductDetail({ db, save }: Props) {
           {movements.length === 0 ? (
             <p style={mutedText}>Stok hareketi yok.</p>
           ) : (
-            <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: 'grid', gap: 8 }}>
               {movements.slice(0, 16).map((movement) => (
                 <div key={movement.id} style={rowStyle}>
                   <div>
-                    <strong style={{ color: "#f1f5f9" }}>{movement.type}</strong>
-                    <div style={mutedText}>{movement.note || "Açıklama yok"}</div>
+                    <strong style={{ color: '#f1f5f9' }}>{movement.type}</strong>
+                    <div style={mutedText}>{movement.note || 'Açıklama yok'}</div>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ color: movement.amount >= 0 ? "#10b981" : "#ef4444", fontWeight: 700 }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: movement.amount >= 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>
                       {movement.before} → {movement.after}
                     </div>
                     <div style={mutedText}>{formatDate(movement.date)}</div>
@@ -243,50 +249,48 @@ export default function ProductDetail({ db, save }: Props) {
   );
 }
 
-
-
 const label: React.CSSProperties = {
-  display: "block",
-  color: "#94a3b8",
-  fontSize: "0.82rem",
+  display: 'block',
+  color: '#94a3b8',
+  fontSize: '0.82rem',
   marginBottom: 6,
 };
 
 const input: React.CSSProperties = {
   flex: 1,
   minWidth: 80,
-  background: "#0f172a",
-  border: "1px solid #334155",
+  background: '#0f172a',
+  border: '1px solid #334155',
   borderRadius: 9,
-  color: "#f8fafc",
-  padding: "9px 10px",
+  color: '#f8fafc',
+  padding: '9px 10px',
 };
 
 const primaryButton: React.CSSProperties = {
-  background: "#10b981",
-  border: "none",
+  background: '#10b981',
+  border: 'none',
   borderRadius: 9,
-  color: "#fff",
-  cursor: "pointer",
+  color: '#fff',
+  cursor: 'pointer',
   fontWeight: 700,
-  padding: "9px 14px",
+  padding: '9px 14px',
 };
 
 const backButton: React.CSSProperties = {
-  background: "rgba(148,163,184,0.12)",
-  border: "1px solid rgba(148,163,184,0.24)",
+  background: 'rgba(148,163,184,0.12)',
+  border: '1px solid rgba(148,163,184,0.24)',
   borderRadius: 9,
-  color: "#cbd5e1",
-  cursor: "pointer",
+  color: '#cbd5e1',
+  cursor: 'pointer',
   fontWeight: 700,
-  padding: "8px 12px",
+  padding: '8px 12px',
 };
 
 const linkButton: React.CSSProperties = {
-  background: "transparent",
-  border: "none",
-  color: "#60a5fa",
-  cursor: "pointer",
-  fontSize: "0.78rem",
+  background: 'transparent',
+  border: 'none',
+  color: '#60a5fa',
+  cursor: 'pointer',
+  fontSize: '0.78rem',
   padding: 0,
 };

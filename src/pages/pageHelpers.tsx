@@ -1,20 +1,13 @@
-import { type ReactNode, type CSSProperties, useState, useEffect } from "react";
+import { type ReactNode, type CSSProperties } from 'react';
 
-export function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
-}
+import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL } from './pageStyles';
 
 export function ModalActions({
   onSave,
   onCancel,
-  saveLabel = "💾 Kaydet",
-  saveColor = "#10b981",
-  cancelLabel = "İptal",
+  saveLabel = '💾 Kaydet',
+  saveColor = '#10b981',
+  cancelLabel = 'İptal',
 }: {
   onSave: () => void;
   onCancel: () => void;
@@ -25,23 +18,23 @@ export function ModalActions({
   return (
     <div
       style={{
-        display: "flex",
+        display: 'flex',
         gap: 10,
-        justifyContent: "flex-end",
+        justifyContent: 'flex-end',
         marginTop: 18,
       }}
     >
       <button
         onClick={onCancel}
         style={{
-          background: "#273548",
-          border: "1px solid var(--border)",
+          background: '#273548',
+          border: '1px solid var(--border)',
           borderRadius: 10,
-          color: "#94a3b8",
-          padding: "10px 20px",
-          cursor: "pointer",
+          color: '#94a3b8',
+          padding: '10px 20px',
+          cursor: 'pointer',
           fontWeight: 600,
-          fontSize: "0.85rem",
+          fontSize: '0.85rem',
         }}
       >
         {cancelLabel}
@@ -50,13 +43,13 @@ export function ModalActions({
         onClick={onSave}
         style={{
           background: saveColor,
-          border: "none",
+          border: 'none',
           borderRadius: 10,
-          color: "#fff",
-          padding: "10px 24px",
-          cursor: "pointer",
+          color: '#fff',
+          padding: '10px 24px',
+          cursor: 'pointer',
           fontWeight: 700,
-          fontSize: "0.85rem",
+          fontSize: '0.85rem',
         }}
       >
         {saveLabel}
@@ -65,35 +58,19 @@ export function ModalActions({
   );
 }
 
-export function StatCard({
-  label,
-  value,
-  sub,
-  color,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  color: string;
-}) {
+export function StatCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color: string }) {
   return (
     <div
       style={{
-        background: "var(--bg-card)",
+        background: 'var(--bg-card)',
         borderRadius: 12,
-        padding: "16px 18px",
+        padding: '16px 18px',
         border: `1px solid ${color}22`,
       }}
     >
-      <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
-        {label}
-      </div>
-      {sub && (
-        <div style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: 2 }}>
-          {sub}
-        </div>
-      )}
+      <div style={{ fontSize: '1.4rem', fontWeight: 800, color }}>{value}</div>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>{label}</div>
+      {sub && <div style={{ color: 'var(--text-dim)', fontSize: '0.82rem', marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -102,7 +79,7 @@ export function FormField({
   label,
   value,
   onChange,
-  type = "text",
+  type = 'text',
   placeholder,
   style,
   autoFocus,
@@ -121,10 +98,10 @@ export function FormField({
     <div style={gridColumn ? { gridColumn } : undefined}>
       <label
         style={{
-          display: "block",
+          display: 'block',
           marginBottom: 6,
-          color: "var(--text-dim)",
-          fontSize: "0.85rem",
+          color: 'var(--text-dim)',
+          fontSize: '0.85rem',
           fontWeight: 500,
         }}
       >
@@ -137,12 +114,12 @@ export function FormField({
         placeholder={placeholder}
         autoFocus={autoFocus}
         style={{
-          padding: "9px 13px",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border)",
+          padding: '9px 13px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: 10,
-          color: "var(--text-primary)",
-          fontSize: "0.9rem",
+          color: 'var(--text-primary)',
+          fontSize: '0.9rem',
           ...style,
         }}
       />
@@ -169,10 +146,10 @@ export function FormTextArea({
     <div style={gridColumn ? { gridColumn } : undefined}>
       <label
         style={{
-          display: "block",
+          display: 'block',
           marginBottom: 6,
-          color: "var(--text-dim)",
-          fontSize: "0.85rem",
+          color: 'var(--text-dim)',
+          fontSize: '0.85rem',
           fontWeight: 500,
         }}
       >
@@ -183,14 +160,14 @@ export function FormTextArea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         style={{
-          padding: "9px 13px",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border)",
+          padding: '9px 13px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
           borderRadius: 10,
-          color: "var(--text-primary)",
-          fontSize: "0.9rem",
+          color: 'var(--text-primary)',
+          fontSize: '0.9rem',
           minHeight,
-          resize: "vertical",
+          resize: 'vertical',
         }}
       />
     </div>
@@ -201,7 +178,7 @@ export function CheckboxField({
   checked,
   onChange,
   label,
-  accentColor = "#ff5722",
+  accentColor = '#ff5722',
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
@@ -211,12 +188,12 @@ export function CheckboxField({
   return (
     <label
       style={{
-        display: "flex",
-        alignItems: "center",
+        display: 'flex',
+        alignItems: 'center',
         gap: 8,
-        cursor: "pointer",
-        color: "var(--text-dim)",
-        fontSize: "0.85rem",
+        cursor: 'pointer',
+        color: 'var(--text-dim)',
+        fontSize: '0.85rem',
       }}
     >
       <input
@@ -233,39 +210,39 @@ export function CheckboxField({
 export function ActionButtons({
   onEdit,
   onDelete,
-  size = "normal",
+  size = 'normal',
 }: {
   onEdit: () => void;
   onDelete: () => void;
-  size?: "normal" | "small";
+  size?: 'normal' | 'small';
 }) {
   const btnBase: CSSProperties =
-    size === "small"
+    size === 'small'
       ? {
-          background: "rgba(59,130,246,0.1)",
-          border: "none",
+          background: 'rgba(59,130,246,0.1)',
+          border: 'none',
           borderRadius: 6,
-          color: "#60a5fa",
-          padding: "5px 10px",
-          cursor: "pointer",
-          fontSize: "0.82rem",
+          color: '#60a5fa',
+          padding: '5px 10px',
+          cursor: 'pointer',
+          fontSize: '0.82rem',
         }
       : {
-          background: "rgba(59,130,246,0.1)",
-          border: "none",
+          background: 'rgba(59,130,246,0.1)',
+          border: 'none',
           borderRadius: 8,
-          color: "#60a5fa",
-          padding: "7px 10px",
-          cursor: "pointer",
-          fontSize: "0.82rem",
+          color: '#60a5fa',
+          padding: '7px 10px',
+          cursor: 'pointer',
+          fontSize: '0.82rem',
         };
   const delBase: CSSProperties =
-    size === "small"
-      ? { ...btnBase, background: "rgba(239,68,68,0.1)", color: "#ef4444" }
-      : { ...btnBase, background: "rgba(239,68,68,0.1)", color: "#ef4444" };
+    size === 'small'
+      ? { ...btnBase, background: 'rgba(239,68,68,0.1)', color: '#ef4444' }
+      : { ...btnBase, background: 'rgba(239,68,68,0.1)', color: '#ef4444' };
 
   return (
-    <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
+    <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
       <button onClick={onEdit} style={btnBase}>
         ✏️
       </button>
@@ -276,29 +253,11 @@ export function ActionButtons({
   );
 }
 
-export function MiniStatCard({
-  value,
-  label,
-  color,
-}: {
-  value: string;
-  label: string;
-  color: string;
-}) {
+export function MiniStatCard({ value, label, color }: { value: string; label: string; color: string }) {
   return (
-    <div style={{ textAlign: "center" }}>
-      <div
-        style={{
-          color,
-          fontWeight: 700,
-          fontSize: "0.85rem",
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ color: "var(--text-secondary)", fontSize: "0.65rem" }}>
-        {label}
-      </div>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ color, fontWeight: 700, fontSize: '0.85rem' }}>{value}</div>
+      <div style={{ color: 'var(--text-secondary)', fontSize: '0.65rem' }}>{label}</div>
     </div>
   );
 }
@@ -316,21 +275,19 @@ export function AdminModeButton({
     <button
       onClick={onToggle}
       style={{
-        padding: compact ? "6px 10px" : "7px 14px",
+        padding: compact ? '6px 10px' : '7px 14px',
         borderRadius: 8,
-        border: `1px solid ${adminMode ? "rgba(239,68,68,0.5)" : "var(--border)"}`,
-        background: adminMode
-          ? "rgba(239,68,68,0.12)"
-          : "var(--bg-card)",
-        color: adminMode ? "#ef4444" : "var(--text-secondary)",
-        cursor: "pointer",
+        border: `1px solid ${adminMode ? 'rgba(239,68,68,0.5)' : 'var(--border)'}`,
+        background: adminMode ? 'rgba(239,68,68,0.12)' : 'var(--bg-card)',
+        color: adminMode ? '#ef4444' : 'var(--text-secondary)',
+        cursor: 'pointer',
         fontWeight: 700,
-        fontSize: compact ? "0.72rem" : "0.82rem",
-        whiteSpace: "nowrap",
-        transition: "all 0.2s",
+        fontSize: compact ? '0.72rem' : '0.82rem',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
       }}
     >
-      {adminMode ? "🛡️ Admin" : "🔒 Admin"}
+      {adminMode ? '🛡️ Admin' : '🔒 Admin'}
     </button>
   );
 }
@@ -348,21 +305,19 @@ export function AutoApplyButton({
     <button
       onClick={onToggle}
       style={{
-        padding: compact ? "6px 10px" : "7px 14px",
+        padding: compact ? '6px 10px' : '7px 14px',
         borderRadius: 8,
-        border: `1px solid ${autoApplyActions ? "rgba(16,185,129,0.5)" : "var(--border)"}`,
-        background: autoApplyActions
-          ? "rgba(16,185,129,0.12)"
-          : "var(--bg-card)",
-        color: autoApplyActions ? "#10b981" : "var(--text-secondary)",
-        cursor: "pointer",
+        border: `1px solid ${autoApplyActions ? 'rgba(16,185,129,0.5)' : 'var(--border)'}`,
+        background: autoApplyActions ? 'rgba(16,185,129,0.12)' : 'var(--bg-card)',
+        color: autoApplyActions ? '#10b981' : 'var(--text-secondary)',
+        cursor: 'pointer',
         fontWeight: 700,
-        fontSize: compact ? "0.72rem" : "0.82rem",
-        whiteSpace: "nowrap",
-        transition: "all 0.2s",
+        fontSize: compact ? '0.72rem' : '0.82rem',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
       }}
     >
-      {autoApplyActions ? "⚡ Otomatik" : "🤖 Manuel"}
+      {autoApplyActions ? '⚡ Otomatik' : '🤖 Manuel'}
     </button>
   );
 }
@@ -379,39 +334,28 @@ export function MaxActionsControl({
   compact?: boolean;
 }) {
   const btnStyle: CSSProperties = {
-    background: "rgba(99,102,241,0.1)",
-    border: "1px solid rgba(99,102,241,0.3)",
+    background: 'rgba(99,102,241,0.1)',
+    border: '1px solid rgba(99,102,241,0.3)',
     borderRadius: 6,
-    color: "#818cf8",
-    cursor: "pointer",
+    color: '#818cf8',
+    cursor: 'pointer',
     fontWeight: 700,
-    fontSize: compact ? "0.72rem" : "0.82rem",
-    padding: compact ? "2px 8px" : "4px 10px",
+    fontSize: compact ? '0.72rem' : '0.82rem',
+    padding: compact ? '2px 8px' : '4px 10px',
     lineHeight: 1,
   };
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-      }}
-    >
-      <button
-        onClick={onDecrement}
-        style={btnStyle}
-        disabled={value <= 1}
-        title="Azalt"
-      >
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <button onClick={onDecrement} style={btnStyle} disabled={value <= 1} title="Azalt">
         −
       </button>
       <span
         style={{
-          color: "var(--text-secondary)",
+          color: 'var(--text-secondary)',
           fontWeight: 700,
-          fontSize: compact ? "0.72rem" : "0.82rem",
+          fontSize: compact ? '0.72rem' : '0.82rem',
           minWidth: compact ? 16 : 20,
-          textAlign: "center",
+          textAlign: 'center',
         }}
       >
         {value}
@@ -435,40 +379,26 @@ export function StopOnViolationButton({
   return (
     <button
       onClick={onToggle}
-      title={
-        stopOnViolation
-          ? "Kural ihlalinde dur"
-          : "İhlallere rağmen devam et"
-      }
+      title={stopOnViolation ? 'Kural ihlalinde dur' : 'İhlallere rağmen devam et'}
       style={{
-        padding: compact ? "6px 10px" : "7px 14px",
+        padding: compact ? '6px 10px' : '7px 14px',
         borderRadius: 8,
-        border: `1px solid ${stopOnViolation ? "rgba(245,158,11,0.5)" : "var(--border)"}`,
-        background: stopOnViolation
-          ? "rgba(245,158,11,0.12)"
-          : "var(--bg-card)",
-        color: stopOnViolation ? "#f59e0b" : "var(--text-secondary)",
-        cursor: "pointer",
+        border: `1px solid ${stopOnViolation ? 'rgba(245,158,11,0.5)' : 'var(--border)'}`,
+        background: stopOnViolation ? 'rgba(245,158,11,0.12)' : 'var(--bg-card)',
+        color: stopOnViolation ? '#f59e0b' : 'var(--text-secondary)',
+        cursor: 'pointer',
         fontWeight: 700,
-        fontSize: compact ? "0.65rem" : "0.72rem",
-        whiteSpace: "nowrap",
-        transition: "all 0.2s",
+        fontSize: compact ? '0.65rem' : '0.72rem',
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s',
       }}
     >
-      {stopOnViolation ? "🛑 Durdur" : "▶ Devam"}
+      {stopOnViolation ? '🛑 Durdur' : '▶ Devam'}
     </button>
   );
 }
 
-export function EmbeddedStatCard({
-  value,
-  label,
-  color,
-}: {
-  value: string;
-  label: string;
-  color: string;
-}) {
+export function EmbeddedStatCard({ value, label, color }: { value: string; label: string; color: string }) {
   return (
     <div
       style={{
@@ -476,28 +406,12 @@ export function EmbeddedStatCard({
         background: `${color}10`,
         border: `1px solid ${color}20`,
         borderRadius: 8,
-        padding: "6px 10px",
-        textAlign: "center",
+        padding: '6px 10px',
+        textAlign: 'center',
       }}
     >
-      <div
-        style={{
-          color,
-          fontWeight: 700,
-          fontSize: "0.82rem",
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          color: "var(--text-secondary)",
-          fontSize: "0.62rem",
-          marginTop: 1,
-        }}
-      >
-        {label}
-      </div>
+      <div style={{ color, fontWeight: 700, fontSize: '0.82rem' }}>{value}</div>
+      <div style={{ color: 'var(--text-secondary)', fontSize: '0.62rem', marginTop: 1 }}>{label}</div>
     </div>
   );
 }
@@ -517,15 +431,15 @@ export function TabButton<T extends string>({
     <button
       onClick={() => onSelect(id)}
       style={{
-        padding: "8px 16px",
-        border: "none",
+        padding: '8px 16px',
+        border: 'none',
         borderRadius: 10,
-        cursor: "pointer",
+        cursor: 'pointer',
         fontWeight: 700,
-        fontSize: "0.83rem",
-        background: active ? "#ff5722" : "#273548",
-        color: active ? "#fff" : "#94a3b8",
-        transition: "all 0.15s",
+        fontSize: '0.83rem',
+        background: active ? '#ff5722' : '#273548',
+        color: active ? '#fff' : '#94a3b8',
+        transition: 'all 0.15s',
       }}
     >
       {label}
@@ -551,12 +465,12 @@ export function TableFilterBar({
   onClearDates: () => void;
 }) {
   const inputStyle: CSSProperties = {
-    padding: "9px 13px",
-    background: "var(--bg-card)",
-    border: "1px solid var(--border)",
+    padding: '9px 13px',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
     borderRadius: 10,
-    color: "var(--text-primary)",
-    fontSize: "0.9rem",
+    color: 'var(--text-primary)',
+    fontSize: '0.9rem',
   };
   return (
     <>
@@ -570,25 +484,25 @@ export function TableFilterBar({
         type="date"
         value={dateFrom}
         onChange={(e) => onDateFromChange(e.target.value)}
-        style={{ ...inputStyle, fontSize: "0.85rem", width: "auto" }}
+        style={{ ...inputStyle, fontSize: '0.85rem', width: 'auto' }}
       />
       <input
         type="date"
         value={dateTo}
         onChange={(e) => onDateToChange(e.target.value)}
-        style={{ ...inputStyle, fontSize: "0.85rem", width: "auto" }}
+        style={{ ...inputStyle, fontSize: '0.85rem', width: 'auto' }}
       />
       {(dateFrom || dateTo) && (
         <button
           onClick={onClearDates}
           style={{
-            padding: "8px 10px",
-            border: "none",
+            padding: '8px 10px',
+            border: 'none',
             borderRadius: 8,
-            background: "#334155",
-            color: "var(--text-dim)",
-            cursor: "pointer",
-            fontSize: "0.82rem",
+            background: '#334155',
+            color: 'var(--text-dim)',
+            cursor: 'pointer',
+            fontSize: '0.82rem',
           }}
         >
           ✕
@@ -610,26 +524,26 @@ export function TableWrapper({
   colSpan: number;
 }) {
   const thStyle: CSSProperties = {
-    padding: "12px 16px",
-    textAlign: "left",
-    color: "var(--text-muted)",
-    fontSize: "0.78rem",
+    padding: '12px 16px',
+    textAlign: 'left',
+    color: 'var(--text-muted)',
+    fontSize: '0.78rem',
     fontWeight: 600,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   };
   return (
     <div
       className="responsive-table-wrap"
       style={{
-        background: "var(--bg-card)",
+        background: 'var(--bg-card)',
         borderRadius: 14,
-        border: "1px solid var(--border)",
-        overflowX: "auto",
+        border: '1px solid var(--border)',
+        overflowX: 'auto',
       }}
     >
-      <table style={{ width: "100%", borderCollapse: "collapse", whiteSpace: "nowrap" }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
         <thead>
-          <tr style={{ background: "rgba(15,23,42,0.6)" }}>
+          <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
             {columns.map((h) => (
               <th key={h} style={thStyle}>
                 {h}
@@ -640,10 +554,7 @@ export function TableWrapper({
         <tbody>
           {noData ? (
             <tr>
-              <td
-                colSpan={colSpan}
-                style={{ textAlign: "center", padding: 48, color: "#334155" }}
-              >
+              <td colSpan={colSpan} style={{ textAlign: 'center', padding: 48, color: '#334155' }}>
                 {noData}
               </td>
             </tr>
@@ -656,75 +567,27 @@ export function TableWrapper({
   );
 }
 
-// ── Common Style Objects ──────────────────────────────────────────────
-
-export const cardStyle: CSSProperties = {
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 12,
-  padding: 16,
-};
-
-export const mutedText: CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "0.86rem",
-};
-
-export const sectionTitleStyle: CSSProperties = {
-  color: "#f8fafc",
-  margin: "0 0 12px",
-  fontSize: "1rem",
-};
-
-export const rowStyle: CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  background: "#0f172a",
-  border: "1px solid rgba(148,163,184,0.12)",
-  borderRadius: 10,
-  padding: "10px 12px",
-};
-
-// ── Order Status Helpers ──────────────────────────────────────────────
-
-export const ORDER_STATUS_COLOR: Record<string, string> = {
-  bekliyor: '#f59e0b',
-  yolda: '#3b82f6',
-  tamamlandi: '#10b981',
-  iptal: '#ef4444',
-};
-
-export const ORDER_STATUS_LABEL: Record<string, string> = {
-  bekliyor: '⏳ Bekliyor',
-  yolda: '🚚 Yolda',
-  tamamlandi: '✓ Tamamlandı',
-  iptal: '✕ İptal',
-};
-
-// ── Metric Component ──────────────────────────────────────────────────
-
 export function Metric({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ background: "#0f172a", borderRadius: 10, padding: "12px 14px", border: `1px solid ${color}33` }}>
-      <div style={{ color, fontWeight: 800, fontSize: "1rem" }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: 3 }}>{label}</div>
+    <div style={{ background: '#0f172a', borderRadius: 10, padding: '12px 14px', border: `1px solid ${color}33` }}>
+      <div style={{ color, fontWeight: 800, fontSize: '1rem' }}>{value}</div>
+      <div style={{ color: '#64748b', fontSize: '0.75rem', marginTop: 3 }}>{label}</div>
     </div>
   );
 }
 
-// ── StatusBadge Component ────────────────────────────────────────────
-
 export function StatusBadge({ status }: { status: string }) {
   return (
-    <span style={{
-      background: `${ORDER_STATUS_COLOR[status]}18`,
-      color: ORDER_STATUS_COLOR[status],
-      borderRadius: 6,
-      padding: "2px 8px",
-      fontSize: "0.8rem",
-      fontWeight: 600,
-    }}>
+    <span
+      style={{
+        background: `${ORDER_STATUS_COLOR[status]}18`,
+        color: ORDER_STATUS_COLOR[status],
+        borderRadius: 6,
+        padding: '2px 8px',
+        fontSize: '0.8rem',
+        fontWeight: 600,
+      }}
+    >
       {ORDER_STATUS_LABEL[status]}
     </span>
   );

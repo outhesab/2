@@ -20,6 +20,28 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.2',
+    date: '7 Haziran 2026',
+    title: 'Görünüm Encoding Temizliği ve Lint Uyarıları',
+    summary:
+      'Proje genelindeki UTF-8 encoding bozuklukları düzeltildi. Tüm lint uyarıları giderildi (11 -> 0). Utility fonksiyonları bileşenlerden ayrı dosyalara taşındı.',
+    changes: [
+      { type: 'duzeltme', text: 'Global UTF-8 encoding temizliği (Fatura.tsx, Settings.tsx)' },
+      {
+        type: 'duzeltme',
+        text: 'Settings.tsx parçalandı: SettingsCompany, SettingsSound, SettingsArayuz, SettingsBaglanti',
+      },
+      { type: 'duzeltme', text: 'SettingsArayuz: Duplicate Premium Temalar bloğu kaldırıldı' },
+      { type: 'duzeltme', text: 'Settings.tsx tab listesi mobil için scrollable hale getirildi' },
+      { type: 'duzeltme', text: 'Debug CSS outline kaldırıldı' },
+      { type: 'duzeltme', text: 'ThemeSection.tsx PREMIUM_THEMES import hatası düzeltildi' },
+      { type: 'iyilestirme', text: 'Lint warnings: 11 -> 0 (tamamen temiz)' },
+      { type: 'iyilestirme', text: 'pageHelpers.tsx: styles ve constants ayrı dosyalara taşındı (pageStyles.ts)' },
+      { type: 'iyilestirme', text: 'SalesHelpers.tsx: utilities ayrı dosyaya taşındı (salesStyles.ts)' },
+      { type: 'iyilestirme', text: 'useDebounce hook ayrı dosyaya taşındı (useDebounce.ts)' },
+    ],
+  },
+  {
     version: '3.18.1',
     date: '7 Haziran 2026',
     title: 'Lint Uyarıları ve Kod Temizliği',
