@@ -55,12 +55,20 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "✅ $(cat local.properties)"
 
+      - name: Gradle wrapper oluştur (eksikse)
+        run: |
+          if [ ! -f "gradlew" ] || [ ! -x "gradlew" ]; then
+            echo "⚠️ gradlew eksik veya çalıştırılamıyor — yeniden oluşturuluyor..."
+            gradle wrapper --gradle-version 8.10
+            chmod +x gradlew gradle/wrapper/gradle-wrapper.jar
+            ls -la gradlew gradle/wrapper/gradle-wrapper.jar
+          else
+            echo "✅ gradlew mevcut ve çalıştırılabilir"
+          fi
+
       - name: Build debug APK
         run: |
-          pwd
-          ls -la gradlew 2>&1 || echo "⚠️ gradlew yok"
-          ls -la gradle/wrapper/ 2>&1 || echo "⚠️ gradle/wrapper/ yok"
-          chmod +x gradlew gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
+          echo "📦 APK derleniyor..."
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
 
       - name: Upload APK
