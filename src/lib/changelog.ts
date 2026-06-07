@@ -22,12 +22,13 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: '3.18.3',
     date: '7 Haziran 2026',
-    title: 'Spec Compliance ve CI Pipeline Düzeltmeleri',
+    title: 'Spec Compliance Düzeltmeleri',
     summary:
-      'Spec compliance testleri düzeltildi (relative import, useDB hook). Version sabitleri güncellendi. SettingsSound localStorage erişimi useDB() ile değiştirildi.',
+      'SettingsSound useDB() hook geri yüklendi. Version 3.18.3 güncellendi. Tüm spec compliance testleri geçiyor.',
     changes: [
-      { type: 'duzeltme', text: 'package.json version: 3.17.0 -> 3.18.2' },
-      { type: 'duzeltme', text: 'SettingsSound.tsx: localStorage direkt erişim -> useDB() hook kullanımı' },
+      { type: 'duzeltme', text: 'package.json version: 3.18.2 -> 3.18.3' },
+      { type: 'duzeltme', text: 'SettingsSound.tsx: useDB() hook ile DB erişimi' },
+      { type: 'duzeltme', text: 'Card import yolu: @/pages/SettingsCard' },
       {
         type: 'duzeltme',
         text: 'Relative import (../) -> @/ path alias: SettingsCompany, SettingsExcel, SettingsSecurity, SettingsSound',

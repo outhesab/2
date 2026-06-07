@@ -1,9 +1,20 @@
-﻿import { formatDate } from '@/lib/utils-tr';
+﻿import { useConfirm } from '@/components/ConfirmDialog';
+import { SystemMap } from '@/components/SystemMap';
+import { useToast } from '@/components/Toast';
+import { mergeRestoreDB, saveBackupToFirebase, type RestoreReport } from '@/hooks/useDB';
+import { useSoundFeedback } from '@/hooks/useSoundFeedback';
+import { applyUIPrefs, loadUIPrefs, saveUIPrefs, type UIPrefs } from '@/hooks/useUIPrefs';
+import { APP_SUBTITLE, loadAppConfig, saveAppConfig, validateVersion } from '@/lib/appConfig';
+import { CHANGE_TYPE_CONFIG, CHANGELOG } from '@/lib/changelog';
+import { loadConnConfig, saveConnConfig, type ConnConfig } from '@/lib/connConfig';
+import { runHealthCheck, type HealthReport } from '@/lib/healthCheck';
+import { logger } from '@/lib/logger';
+import { formatDate } from '@/lib/utils-tr';
 import ExcelImport from '@/pages/ExcelImport';
 import type { DB } from '@/types';
 import { WIDGET_OPTIONS, type WidgetId } from '@/config/widgets';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { SettingsCompany } from './settings/SettingsCompany';
 import { SoundSettingsPanel } from './settings/SettingsSound';
 import { SecurityPanel } from './settings/SettingsSecurity';

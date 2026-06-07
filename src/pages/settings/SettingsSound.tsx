@@ -93,19 +93,19 @@ export function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType)
             <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Ses Teması</label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {themes.map((t) => (
-                <Button
+                <button
                   key={t.id}
                   onClick={() => updateSettings({ theme: t.id })}
                   disabled={!settings.enabled}
-                  className={`p-3 rounded-[10px] cursor-pointer text-center transition-all ${
+                  className={`p-3 rounded-[10px] cursor-pointer text-center transition-all border-2 ${
                     settings.theme === t.id
-                      ? 'border-2 border-[#ff5722] bg-[rgba(255,87,34,0.1)] text-[var(--color-danger)]'
-                      : 'border-2 border-white/8 bg-[var(--bg-card)] text-[var(--text-muted)]'
+                      ? 'border-[#ff5722] bg-[rgba(255,87,34,0.1)] text-[var(--color-danger)]'
+                      : 'border-white/8 bg-[var(--bg-card)] text-[var(--text-muted)]'
                   } ${settings.enabled ? 'opacity-100' : 'opacity-50'}`}
                 >
                   <div className="text-foreground text-sm font-semibold">{t.label}</div>
                   <div className="text-[0.72rem] mt-1 text-[var(--text-dim)]">{t.desc}</div>
-                </Button>
+                </button>
               ))}
             </div>
           </div>
