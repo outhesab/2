@@ -5,17 +5,19 @@ on:
       - dev
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'pnpm'
 
       - uses: pnpm/action-setup@v4
         with:
@@ -25,11 +27,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
 
-      - name: Accept Android licenses
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: android-actions/setup-android@v3
+        with:
+          api-level: 36
+          ndk-version: r27c
+          emulator: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
