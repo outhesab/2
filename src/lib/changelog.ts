@@ -20,6 +20,27 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.0',
+    date: '7 Haziran 2026',
+    title: 'Settings Bileşen Refactoring ve CI İyileştirmeleri',
+    summary:
+      "Code review sonrası tespit edilen kritik sorunlar düzeltildi. SettingsArayuz 452 satırdan 31 satıra indirildi, 6 alt bileşene ayrıldı. CI pipeline'da quality gate geri eklendi.",
+    changes: [
+      {
+        type: 'duzeltme',
+        text: 'build-apk.yml: needs: quality geri eklendi — APK artık sadece lint/typecheck/test geçerse build ediliyor',
+      },
+      { type: 'duzeltme', text: 'SettingsArayuz.tsx: localStorage.removeItem() yerine saveUIPrefs() kullanılıyor' },
+      { type: 'duzeltme', text: 'gradle-wrapper.properties: 8.13 -> 8.14.3 sürüm tutarlılığı sağlandı' },
+      { type: 'iyilestirme', text: 'SettingsArayuz: 452 satır -> 31 satır (6 alt bileşene ayrıldı)' },
+      {
+        type: 'iyilestirme',
+        text: 'Yeni bileşenler: ThemeSection, TypographySection, AnimationSection, DashboardSection, FloatingButtonsSection, SettingsActionButtons',
+      },
+      { type: 'iyilestirme', text: 'Inline style temizliği — Tailwind + CSS değişkenleri kullanılıyor' },
+    ],
+  },
+  {
     version: '3.17.0',
     date: '7 Haziran 2026',
     title: 'Güvenlik, Performans ve Bakım İyileştirmeleri',

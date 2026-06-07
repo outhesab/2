@@ -3,6 +3,7 @@ import { PREMIUM_THEMES } from '@/theme/themes';
 import { WIDGET_OPTIONS, type WidgetId } from '@/config/widgets';
 import { Card } from './SettingsCard';
 import { ThemeButton } from '@/components/ThemeButton';
+import { Button } from '@/components/ui/button';
 
 export function ArayuzAyarlari({
   prefs,
@@ -20,16 +21,16 @@ export function ArayuzAyarlari({
   const set = (patch: Partial<UIPrefs>) => onChange({ ...prefs, ...patch });
 
   const fontLabels: Record<number, string> = {
-    0.85: 'KÃ¼Ã§Ã¼k',
+    0.85: 'Küçük',
     1: 'Normal',
-    1.1: 'BÃ¼yÃ¼k',
-    1.2: 'Ã‡ok BÃ¼yÃ¼k',
+    1.1: 'Büyük',
+    1.2: 'Çok Büyük',
   };
   const animLabels: Record<string, string> = {
-    hizli: 'âš¡ HÄ±zlÄ±',
-    normal: 'âœ¨ Normal',
-    yavas: 'ğŸ¢ YavaÅŸ',
-    yok: 'ğŸš« Yok',
+    hizli: '⚡ Hızlı',
+    normal: '✨ Normal',
+    yavas: '🐢 Yavaş',
+    yok: '🚫 Yok',
   };
   const radiusLabels: Record<number, string> = {
     6: 'Keskin',
@@ -40,8 +41,8 @@ export function ArayuzAyarlari({
 
   return (
     <div className="grid gap-4">
-      {/* HazÄ±r Temalar */}
-      <Card title="ğŸŽ¨ Temalar">
+      {/* Hazır Temalar */}
+      <Card title="🎨 Temalar">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
           {THEMES.map((t) => {
             const isActive = prefs.accent === t.accent && prefs.bgBase === t.bg && prefs.lightMode === t.light;
@@ -56,7 +57,7 @@ export function ArayuzAyarlari({
                 isActive={isActive}
                 onSelect={() => {
                   set({ accent: t.accent, bgBase: t.bg, lightMode: t.light });
-                  showToast(`${t.label} temasÄ± uygulandÄ±!`, 'success');
+                  showToast(`${t.label} teması uygulandı!`, 'success');
                 }}
               />
             );
@@ -65,7 +66,7 @@ export function ArayuzAyarlari({
       </Card>
 
       {/* Premium Temalar */}
-      <Card title="ğŸ’Ž Premium Temalar">
+      <Card title="💎 Premium Temalar">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
           {PREMIUM_THEMES.map((t) => {
             const isActive = prefs.themeId === t.id;
@@ -80,7 +81,7 @@ export function ArayuzAyarlari({
                 isActive={isActive}
                 onSelect={() => {
                   set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === 'light' });
-                  showToast(`âœ¨ ${t.label} temasÄ± uygulandÄ±!`, 'success');
+                  showToast(`✨ ${t.label} teması uygulandı!`, 'success');
                 }}
               />
             );
@@ -88,104 +89,20 @@ export function ArayuzAyarlari({
         </div>
       </Card>
 
-      {/* Premium Temalar */}
-      <Card title="ğŸ’ Premium Temalar">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
-          {PREMIUM_THEMES.map((t) => {
-            const isActive = prefs.themeId === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => {
-                  set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === 'light' });
-                  showToast(`âœ¨ ${t.label} temasÄ± uygulandÄ±!`, 'success');
-                }}
-                style={{
-                  padding: '12px 10px',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  background: isActive ? `${t.accent}18` : 'rgba(0,0,0,0.3)',
-                  border: `2px solid ${isActive ? t.accent : 'rgba(255,255,255,0.07)'}`,
-                  transition: 'all 0.15s',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    height: 42,
-                    marginBottom: 8,
-                    borderRadius: 10,
-                    border: `1px solid ${t.type === 'light' ? 'rgba(15,23,42,0.08)' : 'rgba(255,255,255,0.08)'}`,
-                    background: `linear-gradient(135deg, ${t.bg} 0%, ${t.accent} 100%)`,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div className={'settings-theme-blob-1'} />
-                  <div className={'settings-theme-blob-2'} />
-                  <div className={'settings-theme-overlay'}>
-                    <span className={'settings-theme-dot'} />
-                    <span className={'settings-theme-bar'} />
-                    <span className={'settings-theme-bar-sm'} />
-                  </div>
-                </div>
-                <div
-                  style={{ fontWeight: 700, color: isActive ? t.accent : 'var(--text-primary)', fontSize: '0.82rem' }}
-                >
-                  {t.label}
-                </div>
-                <div className="text-[var(--text-dim)] text-[0.7rem] mt-0.5">{t.desc}</div>
-                {isActive && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 7,
-                      right: 7,
-                      width: 16,
-                      height: 16,
-                      borderRadius: '50%',
-                      background: t.accent,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.6rem',
-                      color: 'var(--text-primary)',
-                      fontWeight: 900,
-                    }}
-                  >
-                    âœ“
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
-
-      {/* YazÄ± & Boyut */}
-      <Card title="ğŸ”¤ YazÄ± & Boyut">
+      {/* Yazı & Boyut */}
+      <Card title="🔤 Yazı & Boyut">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">YazÄ± Boyutu</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Yazı Boyutu</label>
             <div className="flex items-center gap-1.5">
               {([0.85, 1, 1.1, 1.2] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => set({ fontScale: s })}
-                  style={{
-                    flex: 1,
-                    padding: '9px 4px',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    background: prefs.fontScale === s ? prefs.accent : 'rgba(255,255,255,0.05)',
-                    color: prefs.fontScale === s ? 'var(--text-primary)' : 'var(--text-muted)',
-                    transition: 'all 0.15s',
-                  }}
+                  className={`flex-1 py-2.5 px-1 border-none rounded-lg cursor-pointer font-semibold text-[0.8rem] transition-all ${
+                    prefs.fontScale === s ? 'bg-[var(--color-primary)] text-white' : 'bg-white/5 text-muted-foreground'
+                  }`}
+                  style={prefs.fontScale === s ? { backgroundColor: prefs.accent } : {}}
                 >
                   {fontLabels[s]}
                 </button>
@@ -193,23 +110,18 @@ export function ArayuzAyarlari({
             </div>
           </div>
           <div>
-            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">KÃ¶ÅŸe Yuvarlama</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Köşe Yuvarlama</label>
             <div className="flex items-center gap-1.5">
               {([6, 10, 14, 20] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => set({ cardRadius: r })}
+                  className={`flex-1 py-2.5 px-1 border-none cursor-pointer font-semibold text-[0.75rem] transition-all ${
+                    prefs.cardRadius === r ? 'bg-[var(--color-primary)] text-white' : 'bg-white/5 text-muted-foreground'
+                  }`}
                   style={{
-                    flex: 1,
-                    padding: '9px 4px',
-                    border: 'none',
-                    borderRadius: r,
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    background: prefs.cardRadius === r ? prefs.accent : 'rgba(255,255,255,0.05)',
-                    color: prefs.cardRadius === r ? 'var(--text-primary)' : 'var(--text-muted)',
-                    transition: 'all 0.15s',
+                    borderRadius: `${r}px`,
+                    ...(prefs.cardRadius === r ? { backgroundColor: prefs.accent } : {}),
                   }}
                 >
                   {radiusLabels[r]}
@@ -221,28 +133,19 @@ export function ArayuzAyarlari({
       </Card>
 
       {/* Animasyon & Mod */}
-      <Card title="âš¡ Animasyon & GÃ¶rÃ¼nÃ¼m">
+      <Card title="⚡ Animasyon & Görünüm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Animasyon HÄ±zÄ±</label>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Animasyon Hızı</label>
             <div className="flex flex-wrap items-center gap-1.5">
               {(['hizli', 'normal', 'yavas', 'yok'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => set({ animSpeed: s })}
-                  style={{
-                    flex: 1,
-                    padding: '9px 6px',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.78rem',
-                    background: prefs.animSpeed === s ? prefs.accent : 'rgba(255,255,255,0.05)',
-                    color: prefs.animSpeed === s ? 'var(--text-primary)' : 'var(--text-muted)',
-                    transition: 'all 0.15s',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`flex-1 py-2.5 px-1.5 border-none rounded-lg cursor-pointer font-semibold text-[0.78rem] transition-all whitespace-nowrap ${
+                    prefs.animSpeed === s ? 'bg-[var(--color-primary)] text-white' : 'bg-white/5 text-muted-foreground'
+                  }`}
+                  style={prefs.animSpeed === s ? { backgroundColor: prefs.accent } : {}}
                 >
                   {animLabels[s]}
                 </button>
@@ -253,35 +156,20 @@ export function ArayuzAyarlari({
             <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Kompakt Mod</label>
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <div className="text-foreground text-sm font-semibold">SÄ±kÄ±ÅŸÄ±k GÃ¶rÃ¼nÃ¼m</div>
-                <div className="text-[var(--text-dim)] text-xs mt-0.5">Tablo ve padding'leri kÃ¼Ã§Ã¼ltÃ¼r</div>
+                <div className="text-foreground text-sm font-semibold">Sıkışık Görünüm</div>
+                <div className="text-[var(--text-dim)] text-xs mt-0.5">Tablo ve padding'leri küçültür</div>
               </div>
               <button
                 onClick={() => set({ compactMode: !prefs.compactMode })}
-                style={{
-                  width: 48,
-                  height: 26,
-                  borderRadius: 13,
-                  border: 'none',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  background: prefs.compactMode ? prefs.accent : 'var(--text-dim)',
-                  transition: 'background 0.2s',
-                  flexShrink: 0,
-                }}
+                className={`w-12 h-6.5 rounded-full border-none cursor-pointer relative transition-all ${
+                  prefs.compactMode ? 'bg-[var(--color-success)]' : 'bg-muted-foreground/30'
+                }`}
+                style={prefs.compactMode ? { backgroundColor: prefs.accent } : {}}
               >
                 <div
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    background: 'var(--bg-elevated)',
-                    position: 'absolute',
-                    top: 4,
-                    left: prefs.compactMode ? 26 : 4,
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                  }}
+                  className={`w-4.5 h-4.5 rounded-full bg-white absolute top-1 transition-all shadow-sm ${
+                    prefs.compactMode ? 'left-6.5' : 'left-1'
+                  }`}
                 />
               </button>
             </div>
@@ -289,37 +177,29 @@ export function ArayuzAyarlari({
         </div>
       </Card>
 
-      <Card title="ğŸ§© Dashboard DÃ¼zenleme">
+      <Card title="🧩 Dashboard Düzenleme">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">ParlaklÄ±k</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Parlaklık</label>
+            <div className="flex items-center gap-2.5">
               <input
                 type="range"
                 min="50"
                 max="150"
                 value={dashboardPrefs.brightness}
                 onChange={(e) => saveDashboardPrefs({ brightness: Number(e.target.value) })}
-                style={{ flex: 1, accentColor: 'var(--color-primary)' }}
+                className="flex-1 accent-[var(--color-primary)]"
+                style={{ accentColor: prefs.accent }}
               />
-              <span
-                style={{
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  color: 'var(--text-secondary)',
-                  minWidth: 36,
-                  textAlign: 'right',
-                }}
-              >
+              <span className="text-[0.82rem] font-bold text-[var(--text-secondary)] min-w-[36px] text-right">
                 %{dashboardPrefs.brightness}
               </span>
             </div>
           </div>
-          <div />
         </div>
-        <div style={{ marginTop: 14 }}>
+        <div className="mt-3.5">
           <label className="block mb-1.5 text-sm font-semibold text-[var(--text-secondary)]">Widget'lar</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div className="flex flex-col gap-1.5">
             {WIDGET_OPTIONS.map((w) => {
               const idx = dashboardPrefs.leftWidgets.indexOf(w.id);
               const enabled = idx >= 0;
@@ -345,69 +225,40 @@ export function ArayuzAyarlari({
               return (
                 <div
                   key={w.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '5px 8px',
-                    borderRadius: 8,
-                    background: enabled ? 'var(--bg-card)' : 'transparent',
-                    border: '1px solid var(--border)',
-                    opacity: enabled ? 1 : 0.5,
-                  }}
+                  className={`flex items-center gap-2 p-1.5 rounded-lg border border-border transition-all ${
+                    enabled ? 'bg-card' : 'opacity-50'
+                  }`}
                 >
-                  <span style={{ fontSize: '1rem', width: 22, textAlign: 'center' }}>{w.icon}</span>
-                  <span style={{ flex: 1, fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    {w.label}
-                  </span>
+                  <span className="text-base w-5.5 text-center">{w.icon}</span>
+                  <span className="flex-1 text-[0.82rem] font-semibold text-[var(--text-primary)]">{w.label}</span>
                   {enabled && (
-                    <>
+                    <div className="flex gap-1">
                       <button
                         onClick={moveUp}
                         disabled={idx === 0}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: idx === 0 ? 'default' : 'pointer',
-                          color: idx === 0 ? 'var(--text-dim)' : 'var(--text-secondary)',
-                          fontSize: '0.85rem',
-                          padding: '2px 4px',
-                        }}
-                        title="YukarÄ± taÅŸÄ±"
+                        className="bg-none border-none cursor-pointer text-muted-foreground hover:text-foreground text-[0.85rem] p-1 disabled:opacity-20"
+                        title="Yukarı taşı"
                       >
-                        â†‘
+                        ↑
                       </button>
                       <button
                         onClick={moveDown}
                         disabled={idx === dashboardPrefs.leftWidgets.length - 1}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: idx === dashboardPrefs.leftWidgets.length - 1 ? 'default' : 'pointer',
-                          color:
-                            idx === dashboardPrefs.leftWidgets.length - 1 ? 'var(--text-dim)' : 'var(--text-secondary)',
-                          fontSize: '0.85rem',
-                          padding: '2px 4px',
-                        }}
-                        title="AÅŸaÄŸÄ± taÅŸÄ±"
+                        className="bg-none border-none cursor-pointer text-muted-foreground hover:text-foreground text-[0.85rem] p-1 disabled:opacity-20"
+                        title="Aşağı taşı"
                       >
-                        â†“
+                        ↓
                       </button>
-                    </>
+                    </div>
                   )}
                   <button
                     onClick={toggle}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      padding: '2px 4px',
-                      color: enabled ? '#ef4444' : 'var(--color-success)',
-                    }}
-                    title={enabled ? 'Gizle' : 'GÃ¶ster'}
+                    className={`bg-none border-none cursor-pointer text-base p-1 ${
+                      enabled ? 'text-red-500' : 'text-green-500'
+                    }`}
+                    title={enabled ? 'Gizle' : 'Göster'}
                   >
-                    {enabled ? 'âœ•' : '+'}
+                    {enabled ? '✖' : '+'}
                   </button>
                 </div>
               );
@@ -416,57 +267,50 @@ export function ArayuzAyarlari({
         </div>
       </Card>
 
-      {/* SÄ±fÄ±rla */}
+      {/* Sıfırla */}
       <div className="flex items-center gap-2.5">
         <button
           onClick={() => {
             onChange(DEFAULT_PREFS);
-            showToast('VarsayÄ±lan tema geri yÃ¼klendi!', 'success');
+            showToast('Varsayılan tema geri yüklendi!', 'success');
           }}
-          className="flex-1 py-[11px] px-0 rounded-[10px] font-bold text-sm border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
+          className="flex-1 py-3 px-0 rounded-lg font-bold text-sm border border-strong bg-transparent cursor-pointer whitespace-nowrap"
         >
-          â†º VarsayÄ±lana SÄ±fÄ±rla
+          ↺ Varsayılana Sıfırla
         </button>
         <button
           onClick={() => showToast('Tema kaydedildi!', 'success')}
+          className="flex-[2] py-3 rounded-lg text-white font-extrabold cursor-pointer text-[0.88rem] border-none"
           style={{
-            flex: 2,
-            padding: '11px 0',
             background: `linear-gradient(135deg, ${prefs.accent}, ${prefs.accent}cc)`,
-            border: 'none',
-            borderRadius: 10,
-            color: 'var(--text-primary)',
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontSize: '0.88rem',
           }}
         >
-          ğŸ’¾ TemayÄ± Kaydet
+          💾 Temayı Kaydet
         </button>
       </div>
 
-      {/* Floating Buton AyarlarÄ± */}
-      <Card title="ğŸ”˜ Kayan Buton AyarlarÄ±">
+      {/* Floating Buton Ayarları */}
+      <Card title="💠 Kayan Buton Ayarları">
         <p className="text-muted-foreground text-sm mb-4">
-          Ekrandaki kayan butonlarÄ± gÃ¶ster/gizle. ButonlarÄ± istediÄŸiniz yere sÃ¼rÃ¼kleyebilirsiniz.
+          Ekrandaki kayan butonları göster/gizle. Butonları istediğiniz yere sürükleyebilirsiniz.
         </p>
         <div className="grid gap-2.5">
           {[
             {
               key: 'showAIButton' as const,
-              icon: 'ğŸ¤–',
+              icon: '🤖',
               label: 'AI Asistan Butonu',
               desc: 'Sol alttaki yapay zeka butonu',
             },
             {
               key: 'showFABButton' as const,
-              icon: 'â•',
-              label: 'HÄ±zlÄ± Ä°ÅŸlem Butonu',
-              desc: 'SaÄŸ alttaki hÄ±zlÄ± satÄ±ÅŸ/gelir/gider butonu',
+              icon: '➕',
+              label: 'Hızlı İşlem Butonu',
+              desc: 'Sağ alttaki hızlı satış/gelir/gider butonu',
             },
             {
               key: 'showReportButton' as const,
-              icon: 'ğŸ›',
+              icon: '📝',
               label: 'Hata Bildirme Butonu',
               desc: 'Hata bildirme, not alma ve takip butonu',
             },
@@ -479,29 +323,15 @@ export function ArayuzAyarlari({
               </div>
               <div
                 onClick={() => onChange({ ...prefs, [item.key]: !prefs[item.key] })}
-                style={{
-                  width: 48,
-                  height: 26,
-                  borderRadius: 13,
-                  background: prefs[item.key] ? prefs.accent : 'var(--text-dim)',
-                  position: 'relative',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
-                  flexShrink: 0,
-                }}
+                className={`w-12 h-6.5 rounded-full relative cursor-pointer transition-all ${
+                  prefs[item.key] ? 'bg-[var(--color-primary)]' : 'bg-muted-foreground/30'
+                }`}
+                style={prefs[item.key] ? { backgroundColor: prefs.accent } : {}}
               >
                 <div
-                  style={{
-                    position: 'absolute',
-                    top: 3,
-                    left: prefs[item.key] ? 25 : 3,
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    background: 'var(--bg-elevated)',
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                  }}
+                  className={`w-5 h-5 rounded-full bg-white absolute top-0.75 transition-all shadow-sm ${
+                    prefs[item.key] ? 'left-6' : 'left-0.75'
+                  }`}
                 />
               </div>
             </div>
@@ -511,11 +341,11 @@ export function ArayuzAyarlari({
               localStorage.removeItem('aiBtnPos');
               localStorage.removeItem('fabBtnPos');
               localStorage.removeItem('reportBtnPos');
-              showToast('Buton konumlarÄ± sÄ±fÄ±rlandÄ±!', 'success');
+              showToast('Buton konumları sıfırlandı!', 'success');
             }}
-            className="py-2 px-4 rounded-lg font-semibold text-xs border border-[var(--border-strong)] bg-transparent cursor-pointer whitespace-nowrap"
+            className="py-2 px-4 rounded-lg font-semibold text-xs border border-strong bg-transparent cursor-pointer whitespace-nowrap"
           >
-            ğŸ“ Buton KonumlarÄ±nÄ± SÄ±fÄ±rla
+            📍 Buton Konumlarını Sıfırla
           </button>
         </div>
       </Card>
