@@ -39,7 +39,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --config.onlyBuiltDependencies=fallow
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build

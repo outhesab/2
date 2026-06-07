@@ -27,7 +27,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --config.onlyBuiltDependencies=fallow
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm run lint
