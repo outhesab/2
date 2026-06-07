@@ -45,6 +45,11 @@ jobs:
       - name: Gradle executable yap
         run: chmod +x android/gradlew
 
+      - name: Android SDK yapılandırması
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "✅ local.properties oluşturuldu: sdk.dir=$ANDROID_HOME"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
