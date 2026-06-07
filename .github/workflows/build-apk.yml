@@ -8,6 +8,8 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
 
@@ -24,6 +26,11 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Accept Android licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -36,7 +43,7 @@ jobs:
       - name: Build debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --build-cache --parallel
+          ./gradlew assembleDebug --build-cache --parallel --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
