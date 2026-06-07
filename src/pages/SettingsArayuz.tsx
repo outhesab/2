@@ -3,7 +3,6 @@ import { PREMIUM_THEMES } from '@/theme/themes';
 import { WIDGET_OPTIONS, type WidgetId } from '@/config/widgets';
 import { Card } from './SettingsCard';
 import { ThemeButton } from '@/components/ThemeButton';
-import { Button } from '@/components/ui/button';
 
 export function ArayuzAyarlari({
   prefs,

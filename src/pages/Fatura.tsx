@@ -104,7 +104,7 @@ export default function Fatura({ db, save }: Props) {
     saleId: "",
   });
 
-  // Taksit planÄ± state
+  // Taksit planı state
   const [instForm, setInstForm] = useState({
     count: 3,
     firstDueDate: new Date().toISOString().slice(0, 10),
@@ -215,7 +215,7 @@ export default function Fatura({ db, save }: Props) {
 
   const handleSave = () => {
     if (!form.cariName) {
-      showToast("MÃ¼ÅŸteri/TedarikÃ§i adÄ± gerekli!", "error");
+      showToast("MüÅŸteri/Tedarikçi adı gerekli!", "error");
       return;
     }
     if (form.items.length === 0 || form.items.every((it) => !it.description)) {
@@ -231,7 +231,7 @@ export default function Fatura({ db, save }: Props) {
       if (editId) {
         const i = invoices.findIndex((inv) => inv.id === editId);
         if (i >= 0) {
-          // Mevcut kasaEntryId ve cariUpdated'Ä± koru (durum geÃ§iÅŸlerinde kullanÄ±lÄ±yor)
+          // Mevcut kasaEntryId ve cariUpdated'ı koru (durum geçiÅŸlerinde kullanılıyor)
           const { kasaEntryId, cariUpdated } = invoices[i];
           invoices[i] = {
             ...invoices[i],
@@ -245,7 +245,7 @@ export default function Fatura({ db, save }: Props) {
             updatedAt: nowIso,
           };
         }
-        showToast("Fatura gÃ¼ncellendi!");
+        showToast("Fatura güncellendi!");
       } else {
         invoices.push({
           id: genId(),
@@ -321,7 +321,7 @@ export default function Fatura({ db, save }: Props) {
       }
 
       if (status === "iptal") {
-        // Kasa kaydÄ±nÄ± soft-delete et
+        // Kasa kaydını soft-delete et
         if (inv.kasaEntryId) {
           kasa = kasa.map((k) =>
             k.id === inv.kasaEntryId
@@ -330,7 +330,7 @@ export default function Fatura({ db, save }: Props) {
           );
           kasaEntryId = undefined;
         }
-        // Cari bakiyeyi geri al (onaylandi + cari Ã¶deme ile gÃ¼ncellenmiÅŸse)
+        // Cari bakiyeyi geri al (onaylandi + cari ödeme ile güncellenmiÅŸse)
         if (inv.cariUpdated && inv.cariId && inv.payment === "cari") {
           const delta = inv.type === "satis" ? inv.total : -inv.total;
           cari = cari.map((c) =>
@@ -348,7 +348,7 @@ export default function Fatura({ db, save }: Props) {
       }
 
       if (status === "taslak") {
-        // Kasa kaydÄ±nÄ± soft-delete et
+        // Kasa kaydını soft-delete et
         if (inv.kasaEntryId) {
           kasa = kasa.map((k) =>
             k.id === inv.kasaEntryId
@@ -357,7 +357,7 @@ export default function Fatura({ db, save }: Props) {
           );
           kasaEntryId = undefined;
         }
-        // Cari bakiyeyi geri al (onaylandi ile gÃ¼ncellenmiÅŸse)
+        // Cari bakiyeyi geri al (onaylandi ile güncellenmiÅŸse)
         if (inv.cariUpdated && inv.cariId && inv.payment === "cari") {
           const delta = inv.type === "satis" ? inv.total : -inv.total;
           cari = cari.map((c) =>
@@ -382,13 +382,13 @@ export default function Fatura({ db, save }: Props) {
       return { ...prev, invoices, kasa, cari };
     });
     if (status !== "odendi" && status !== "onaylandi")
-      showToast("Durum gÃ¼ncellendi!");
+      showToast("Durum güncellendi!");
   };
 
   const deleteInvoice = (id: string) => {
     showConfirm(
       "Fatura Sil",
-      "Bu fatura silinecek. Kasa ve cari etkileri de geri alÄ±nacak.",
+      "Bu fatura silinecek. Kasa ve cari etkileri de geri alınacak.",
       () => {
         const nowIso = new Date().toISOString();
         save((prev) => {
@@ -398,7 +398,7 @@ export default function Fatura({ db, save }: Props) {
           let kasa = prev.kasa;
           let cari = prev.cari;
 
-          // Kasa kaydÄ±nÄ± soft-delete et
+          // Kasa kaydını soft-delete et
           if (inv.kasaEntryId) {
             kasa = kasa.map((k) =>
               k.id === inv.kasaEntryId
@@ -407,7 +407,7 @@ export default function Fatura({ db, save }: Props) {
             );
           }
 
-          // Cari gÃ¼ncellenmiÅŸse geri al
+          // Cari güncellenmiÅŸse geri al
           if (inv.cariUpdated && inv.cariId && inv.payment === "cari") {
             const delta = inv.type === "satis" ? inv.total : -inv.total;
             cari = cari.map((c) =>
@@ -422,7 +422,7 @@ export default function Fatura({ db, save }: Props) {
             );
           }
 
-          // FaturayÄ± soft-delete et
+          // Faturayı soft-delete et
           const invoices = (prev.invoices || []).map((i) =>
             i.id === id ? { ...i, deleted: true, updatedAt: nowIso } : i,
           );
@@ -456,7 +456,7 @@ export default function Fatura({ db, save }: Props) {
         category: "taksit",
         amount: inst.amount,
         kasa: "nakit" as const,
-        description: `Taksit Ã¶demesi â€” ${inv?.invoiceNo || inst.invoiceId}`,
+        description: `Taksit ödemesi â€” ${inv?.invoiceNo || inst.invoiceId}`,
         relatedId: inst.invoiceId,
         cariId: inv?.cariId,
         createdAt: nowIso,
@@ -487,7 +487,7 @@ export default function Fatura({ db, save }: Props) {
 
       return { ...prev, installments, kasa, cari };
     });
-    showToast("âœ… Taksit Ã¶dendi!");
+    showToast("âœ… Taksit ödendi!");
   };
 
   const createInstallments = (invoiceId: string, total: number) => {
@@ -612,7 +612,7 @@ export default function Fatura({ db, save }: Props) {
             boxShadow: "0 4px 16px rgba(255,87,34,0.3)",
           }}
         >
-          + SatÄ±ÅŸ FaturasÄ±
+          + SatıÅŸ Faturası
         </button>
         <button
           onClick={() => openNew("alis")}
@@ -627,7 +627,7 @@ export default function Fatura({ db, save }: Props) {
             fontSize: "0.88rem",
           }}
         >
-          + AlÄ±ÅŸ FaturasÄ±
+          + AlıÅŸ Faturası
         </button>
         <div
           style={{
@@ -664,9 +664,9 @@ export default function Fatura({ db, save }: Props) {
               fontSize: "0.82rem",
             }}
           >
-            <option value="all">TÃ¼mÃ¼</option>
-            <option value="satis">SatÄ±ÅŸ</option>
-            <option value="alis">AlÄ±ÅŸ</option>
+            <option value="all">Tümü</option>
+            <option value="satis">SatıÅŸ</option>
+            <option value="alis">AlıÅŸ</option>
           </select>
           <select
             value={statusFilter}
@@ -680,11 +680,11 @@ export default function Fatura({ db, save }: Props) {
               fontSize: "0.82rem",
             }}
           >
-            <option value="all">TÃ¼m Durumlar</option>
+            <option value="all">Tüm Durumlar</option>
             <option value="taslak">Taslak</option>
-            <option value="onaylandi">OnaylandÄ±</option>
+            <option value="onaylandi">Onaylandı</option>
             <option value="odendi">Ã–dendi</option>
-            <option value="iptal">Ä°ptal</option>
+            <option value="iptal">İptal</option>
           </select>
         </div>
       </div>
@@ -918,26 +918,26 @@ export default function Fatura({ db, save }: Props) {
         onClose={() => setModal(false)}
         title={
           editId
-            ? "âœï¸ Fatura DÃ¼zenle"
-            : `ğŸ“„ Yeni ${form.type === "satis" ? "SatÄ±ÅŸ" : "AlÄ±ÅŸ"} FaturasÄ±`
+            ? "âœï¸ Fatura Düzenle"
+            : `ğŸ“„ Yeni ${form.type === "satis" ? "SatıÅŸ" : "AlıÅŸ"} Faturası`
         }
         maxWidth={720}
       >
         <div style={{ display: "grid", gap: 14 }}>
-          {/* Cari seÃ§imi */}
+          {/* Cari seçimi */}
           <div
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
           >
             <div>
               <label style={lbl}>
-                {form.type === "satis" ? "MÃ¼ÅŸteri" : "TedarikÃ§i"} *
+                {form.type === "satis" ? "MüÅŸteri" : "Tedarikçi"} *
               </label>
               <select
                 value={form.cariId}
                 onChange={(e) => selectCari(e.target.value)}
                 style={inp}
               >
-                <option value="">-- Cari SeÃ§ veya elle yazÄ±n --</option>
+                <option value="">-- Cari Seç veya elle yazın --</option>
                 {db.cari
                   .filter((c) =>
                     form.type === "satis"
@@ -1213,9 +1213,9 @@ export default function Fatura({ db, save }: Props) {
                     style={inp}
                   >
                     <option value="taslak">ğŸ“ Taslak</option>
-                    <option value="onaylandi">âœ… OnaylandÄ±</option>
+                    <option value="onaylandi">âœ… Onaylandı</option>
                     <option value="odendi">ğŸ’° Ã–dendi</option>
-                    <option value="iptal">âŒ Ä°ptal</option>
+                    <option value="iptal">âŒ İptal</option>
                   </select>
                 </div>
                 <div>
@@ -1229,7 +1229,7 @@ export default function Fatura({ db, save }: Props) {
                   />
                 </div>
                 <div>
-                  <label style={lbl}>Ä°lgili SatÄ±ÅŸ (opsiyonel)</label>
+                  <label style={lbl}>İlgili SatıÅŸ (opsiyonel)</label>
                   <select
                     value={form.saleId}
                     onChange={(e) =>
@@ -1237,7 +1237,7 @@ export default function Fatura({ db, save }: Props) {
                     }
                     style={inp}
                   >
-                    <option value="">-- SatÄ±ÅŸ SeÃ§ --</option>
+                    <option value="">-- SatıÅŸ Seç --</option>
                     {(db.sales || [])
                       .filter((s) => !s.deleted)
                       .map((s) => (
@@ -1367,7 +1367,7 @@ export default function Fatura({ db, save }: Props) {
                     marginBottom: 4,
                   }}
                 >
-                  {db.company.name || "Åirketiniz"}
+                  {db.company.name || "Şirketiniz"}
                 </h3>
                 {db.company.taxNo && (
                   <p style={{ color: "#475569", fontSize: "0.82rem" }}>
@@ -1418,7 +1418,7 @@ export default function Fatura({ db, save }: Props) {
                   marginBottom: 4,
                 }}
               >
-                {previewInv.type === "satis" ? "MÃœÅTERÄ°" : "TEDARÄ°KÃ‡Ä°"}
+                {previewInv.type === "satis" ? "MÃœŞTERİ" : "TEDARİKÃ‡İ"}
               </p>
               <p style={{ color: "var(--text-primary)", fontWeight: 700 }}>
                 {previewInv.cariName}
@@ -1445,7 +1445,7 @@ export default function Fatura({ db, save }: Props) {
                 <tr
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
                 >
-                  {["AÃ§Ä±klama", "Adet", "Birim", "KDV", "Toplam"].map((h) => (
+                  {["Açıklama", "Adet", "Birim", "KDV", "Toplam"].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -1534,7 +1534,7 @@ export default function Fatura({ db, save }: Props) {
               />
               {previewInv.discount > 0 && (
                 <TotalRow
-                  label="Ä°skonto"
+                  label="İskonto"
                   value={`-${formatMoney(previewInv.discount)}`}
                   color="#ef4444"
                 />
@@ -1568,7 +1568,7 @@ export default function Fatura({ db, save }: Props) {
             )}
           </div>
 
-          {/* Taksit PlanÄ± BÃ¶lÃ¼mÃ¼ */}
+          {/* Taksit Planı Bölümü */}
           {(() => {
             const installments = (db.installments || []).filter(
               (i) => i.invoiceId === previewInv.id,
@@ -1599,7 +1599,7 @@ export default function Fatura({ db, save }: Props) {
                       fontSize: "0.88rem",
                     }}
                   >
-                    ğŸ“… Taksit PlanÄ±
+                    ğŸ“… Taksit Planı
                   </span>
                   {installments.length === 0 && (
                     <button
@@ -1615,7 +1615,7 @@ export default function Fatura({ db, save }: Props) {
                         fontSize: "0.8rem",
                       }}
                     >
-                      ğŸ“… Taksit PlanÄ± OluÅŸtur
+                      ğŸ“… Taksit Planı OluÅŸtur
                     </button>
                   )}
                 </div>
@@ -1639,7 +1639,7 @@ export default function Fatura({ db, save }: Props) {
                       }}
                     >
                       <div>
-                        <label style={lbl}>Taksit SayÄ±sÄ± (2-24)</label>
+                        <label style={lbl}>Taksit Sayısı (2-24)</label>
                         <input
                           type="number"
                           min={2}
@@ -1658,7 +1658,7 @@ export default function Fatura({ db, save }: Props) {
                         />
                       </div>
                       <div>
-                        <label style={lbl}>Ä°lk Vade Tarihi</label>
+                        <label style={lbl}>İlk Vade Tarihi</label>
                         <input
                           type="date"
                           value={instForm.firstDueDate}
@@ -1704,7 +1704,7 @@ export default function Fatura({ db, save }: Props) {
                           fontSize: "0.85rem",
                         }}
                       >
-                        Ä°ptal
+                        İptal
                       </button>
                     </div>
                   </div>
@@ -1756,8 +1756,8 @@ export default function Fatura({ db, save }: Props) {
                           : isOverdue
                             ? "âš ï¸ GecikmiÅŸ"
                             : isToday
-                              ? "ğŸ”” BugÃ¼n"
-                              : "â³ Bekliyor";
+                              ? "ğŸ”” Bugün"
+                              : "⏳ Bekliyor";
                         return (
                           <tr
                             key={inst.id}
@@ -1839,7 +1839,7 @@ export default function Fatura({ db, save }: Props) {
                         padding: "10px 0",
                       }}
                     >
-                      HenÃ¼z taksit planÄ± yok
+                      Henüz taksit planı yok
                     </p>
                   )
                 )}

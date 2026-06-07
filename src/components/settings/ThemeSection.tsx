@@ -1,4 +1,5 @@
-import { THEMES, PREMIUM_THEMES } from '@/hooks/useUIPrefs';
+import { THEMES } from '@/hooks/useUIPrefs';
+import { PREMIUM_THEMES } from '@/theme/themes';
 import type { UIPrefs } from '@/hooks/useUIPrefs';
 import { Card } from '@/pages/SettingsCard';
 import { ThemeButton } from '@/components/ThemeButton';
@@ -41,24 +42,26 @@ export function ThemeSection({ prefs, onChange, showToast }: Props) {
       {/* Premium Temalar */}
       <Card title="💎 Premium Temalar">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-min">
-          {PREMIUM_THEMES.map((t) => {
-            const isActive = prefs.themeId === t.id;
-            return (
-              <ThemeButton
-                key={t.id}
-                accent={t.accent}
-                bg={t.bg}
-                label={t.label}
-                desc={t.desc}
-                isLight={t.type === 'light'}
-                isActive={isActive}
-                onSelect={() => {
-                  set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === 'light' });
-                  showToast(`✨ ${t.label} teması uygulandı!`, 'success');
-                }}
-              />
-            );
-          })}
+          {PREMIUM_THEMES.map(
+            (t: { id: string; label: string; desc: string; accent: string; bg: string; type: string }) => {
+              const isActive = prefs.themeId === t.id;
+              return (
+                <ThemeButton
+                  key={t.id}
+                  accent={t.accent}
+                  bg={t.bg}
+                  label={t.label}
+                  desc={t.desc}
+                  isLight={t.type === 'light'}
+                  isActive={isActive}
+                  onSelect={() => {
+                    set({ themeId: t.id, accent: t.accent, bgBase: t.bg, lightMode: t.type === 'light' });
+                    showToast(`✨ ${t.label} teması uygulandı!`, 'success');
+                  }}
+                />
+              );
+            },
+          )}
         </div>
       </Card>
     </>

@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.1',
+    date: '7 Haziran 2026',
+    title: 'Lint Uyarıları ve Kod Temizliği',
+    summary:
+      'Code review sonrası tespit edilen lint uyarıları düzeltildi. Kullanılmayan değişkenler ve importlar temizlendi.',
+    changes: [
+      { type: 'duzeltme', text: 'Settings.tsx: unused company state, setCompany, saveCompany kaldırıldı' },
+      { type: 'duzeltme', text: 'Settings.tsx: unused SoundType import kaldırıldı' },
+      { type: 'duzeltme', text: 'SettingsArayuz.tsx: unused Button import kaldırıldı' },
+      { type: 'iyilestirme', text: 'Lint warnings: 15 -> 11 azaltıldı' },
+    ],
+  },
+  {
     version: '3.18.0',
     date: '7 Haziran 2026',
     title: 'Settings Bileşen Refactoring ve CI İyileştirmeleri',

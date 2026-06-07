@@ -2,7 +2,6 @@
 import { SystemMap } from '@/components/SystemMap';
 import { useToast } from '@/components/Toast';
 import { mergeRestoreDB, saveBackupToFirebase, type RestoreReport } from '@/hooks/useDB';
-import type { SoundSettings, SoundTheme, SoundType } from '@/hooks/useSoundFeedback';
 import { useSoundFeedback } from '@/hooks/useSoundFeedback';
 import { applyUIPrefs, loadUIPrefs, saveUIPrefs, type UIPrefs } from '@/hooks/useUIPrefs';
 import { isPremiumTheme as _isPremiumTheme } from '@/theme/themes';
@@ -31,6 +30,8 @@ import type { DB } from '@/types';
 import { WIDGET_OPTIONS, type WidgetId } from '@/config/widgets';
 
 import { useEffect, useRef, useState } from 'react';
+import { SettingsCompany } from './settings/SettingsCompany';
+import { SoundSettingsPanel } from './settings/SettingsSound';
 import { ArayuzAyarlari } from './SettingsArayuz';
 import { BaglantiAyarlari } from './SettingsBaglanti';
 import { Card } from './SettingsCard';
@@ -68,49 +69,11 @@ type Tab =
 const inpBase =
   'w-full rounded-[10px] border px-3.5 py-2.5 text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border)] box-border';
 
-function loadSoundSettings(): SoundSettings {
-  try {
-    const raw = localStorage.getItem('sobaYonetim');
-    if (!raw) return { enabled: true, volume: 0.5, theme: 'standart' };
-    const parsed = JSON.parse(raw);
-    return {
-      enabled: true,
-      volume: 0.5,
-      theme: 'standart',
-      ...(parsed.soundSettings || {}),
-    };
-  } catch {
-    logger.warn('settings', "Ses ayarları localStorage'dan okunamadı, varsayılan kullanıldı");
-    return { enabled: true, volume: 0.5, theme: 'standart' };
-  }
-}
-
-function saveSoundSettingsToStorage(settings: SoundSettings) {
-  try {
-    const raw = localStorage.getItem('sobaYonetim');
-    const parsed = raw ? JSON.parse(raw) : {};
-    parsed.soundSettings = settings;
-    localStorage.setItem('sobaYonetim', JSON.stringify(parsed));
-  } catch {
-    logger.warn('settings', "Ses ayarları localStorage'a yazılamadı");
-    /* localStorage yazma hatasÄ± â€” sessizce geÃ§ */
-  }
-}
-
 export default function Settings({ db, save, exportJSON, importJSON: _importJSON }: Props) {
   const { showToast: _showToast } = useToast();
   const showToast = _showToast as (m: string, t?: string) => void;
   const { showConfirm } = useConfirm();
   const { playSound } = useSoundFeedback();
-  const [company, setCompany] = useState(() => {
-    // db.company boÅŸsa db.settings'den doldur (setup wizard buraya yazar)
-    const s = (db.settings || {}) as Record<string, string>;
-    return {
-      ...db.company,
-      name: db.company.name || s.companyName || '',
-      city: (db.company as { city?: string }).city || s.city || '',
-    };
-  });
   const [pellet, setPellet] = useState({ ...db.pelletSettings });
   const [tab, setTab] = useState<Tab>('arayuz');
   const [uiPrefs, setUiPrefs] = useState<UIPrefs>(loadUIPrefs);
@@ -144,32 +107,15 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
     }
   };
 
-  const saveCompany = () => {
-    save((prev) => ({
-      ...prev,
-      company: {
-        ...company,
-        id: prev.company.id,
-        createdAt: prev.company.createdAt,
-      },
-      settings: {
-        ...prev.settings,
-        companyName: company.name,
-        city: (company as { city?: string }).city || '',
-      },
-    }));
-    showToast('Åirket bilgileri kaydedildi!', 'success');
-  };
-
   const savePellet = () => {
     save((prev) => ({ ...prev, pelletSettings: { ...pellet } }));
-    showToast('Pelet ayarlarÄ± kaydedildi!', 'success');
+    showToast('Pelet ayarları kaydedildi!', 'success');
   };
 
   const clearData = () => {
     showConfirm(
-      'TÃ¼m Verileri Sil',
-      'TÃœM verileriniz kalÄ±cÄ± olarak silinecek! Bu iÅŸlem geri alÄ±namaz. Emin misiniz?',
+      'Tüm Verileri Sil',
+      'TÃœM verileriniz kalıcı olarak silinecek! Bu iÅŸlem geri alınamaz. Emin misiniz?',
       () => {
         localStorage.removeItem('sobaYonetim');
         window.location.reload();
@@ -179,49 +125,83 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
   };
 
   const dataStats = [
-    { label: 'ÃœrÃ¼nler', count: db.products.length, icon: 'ğŸ“¦' },
-    { label: 'SatÄ±ÅŸlar', count: db.sales.length, icon: 'ğŸ›’' },
-    { label: 'TedarikÃ§iler', count: db.suppliers.length, icon: 'ğŸ­' },
+    { label: 'Ãœrünler', count: db.products.length, icon: 'ğŸ“¦' },
+    { label: 'SatıÅŸlar', count: db.sales.length, icon: 'ğŸ›’' },
+    { label: 'Tedarikçiler', count: db.suppliers.length, icon: 'ğŸ­' },
     { label: 'Cari Hesaplar', count: db.cari.length, icon: 'ğŸ‘¤' },
-    { label: 'Kasa Ä°ÅŸlemleri', count: db.kasa.length, icon: 'ğŸ’°' },
-    { label: 'Banka Ä°ÅŸlemleri', count: db.bankTransactions.length, icon: 'ğŸ¦' },
-    { label: 'Pelet TedarikÃ§i', count: db.peletSuppliers.length, icon: 'ğŸªµ' },
-    { label: 'Boru TedarikÃ§i', count: db.boruSuppliers.length, icon: 'ğŸ”©' },
+    { label: 'Kasa İÅŸlemleri', count: db.kasa.length, icon: 'ğŸ’°' },
+    { label: 'Banka İÅŸlemleri', count: db.bankTransactions.length, icon: 'ğŸ¦' },
+    { label: 'Pelet Tedarikçi', count: db.peletSuppliers.length, icon: 'ğŸªµ' },
+    { label: 'Boru Tedarikçi', count: db.boruSuppliers.length, icon: 'ğŸ”©' },
   ];
 
   const totalRecords = dataStats.reduce((s, d) => s + d.count, 0);
 
   const shortcuts = [
     { key: 'Ctrl + 1', desc: 'Ã–zet (Dashboard)' },
-    { key: 'Ctrl + 2', desc: 'ÃœrÃ¼nler' },
-    { key: 'Ctrl + 3', desc: 'SatÄ±ÅŸ' },
+    { key: 'Ctrl + 2', desc: 'Ãœrünler' },
+    { key: 'Ctrl + 3', desc: 'SatıÅŸ' },
     { key: 'Ctrl + 4', desc: 'Kasa' },
     { key: 'Ctrl + 5', desc: 'Raporlar' },
-    { key: '+ Butonu', desc: 'HÄ±zlÄ± Eylem MenÃ¼sÃ¼ (saÄŸ alt)' },
-    { key: 'Ctrl + Z', desc: 'Geri Al (tarayÄ±cÄ± dÃ¼zeyi)' },
+    { key: '+ Butonu', desc: 'Hızlı Eylem Menüsü (saÄŸ alt)' },
+    { key: 'Ctrl + Z', desc: 'Geri Al (tarayıcı düzeyi)' },
   ];
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full">
-        <TabsList className="flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
-          <TabsTrigger value="arayuz">ğŸŽ¨ ArayÃ¼z</TabsTrigger>
-          <TabsTrigger value="baglantilar">ğŸ”Œ BaÄŸlantÄ±lar</TabsTrigger>
-          <TabsTrigger value="company">ğŸ¢ Åirket</TabsTrigger>
-          <TabsTrigger value="categories">ğŸ·ï¸ Kategoriler</TabsTrigger>
-          <TabsTrigger value="pellet">ğŸªµ Pelet</TabsTrigger>
-          <TabsTrigger value="sound">ğŸ”Š Ses</TabsTrigger>
-          <TabsTrigger value="agent">ğŸ¤– Agentlar</TabsTrigger>
-          <TabsTrigger value="backup">ğŸ’¾ Yedek</TabsTrigger>
-          <TabsTrigger value="excel_export">ğŸ“Š Excel</TabsTrigger>
-          <TabsTrigger value="activity">ğŸ“‹ Aktivite</TabsTrigger>
-          <TabsTrigger value="shortcuts">âŒ¨ KÄ±sayollar</TabsTrigger>
-          <TabsTrigger value="repair">ğŸ”§ OnarÄ±m</TabsTrigger>
-          <TabsTrigger value="excel">ğŸ“¥ Ä°Ã§e Aktar</TabsTrigger>
-          <TabsTrigger value="data">ğŸ—„ Veri</TabsTrigger>
-          <TabsTrigger value="security">ğŸ” GÃ¼venlik</TabsTrigger>
-          <TabsTrigger value="sysmap">ğŸ—º Harita</TabsTrigger>
-          <TabsTrigger value="about">â„¹ HakkÄ±nda</TabsTrigger>
+        <TabsList className="flex-nowrap overflow-x-auto justify-start h-auto gap-1 bg-transparent p-0 mb-4 no-scrollbar">
+          <TabsTrigger value="arayuz" className="whitespace-nowrap">
+            🎨 Arayüz
+          </TabsTrigger>
+          <TabsTrigger value="baglantilar" className="whitespace-nowrap">
+            🔌 Bağlantılar
+          </TabsTrigger>
+          <TabsTrigger value="company" className="whitespace-nowrap">
+            🏢 Şirket
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="whitespace-nowrap">
+            🏷️ Kategoriler
+          </TabsTrigger>
+          <TabsTrigger value="pellet" className="whitespace-nowrap">
+            🪵 Pelet
+          </TabsTrigger>
+          <TabsTrigger value="sound" className="whitespace-nowrap">
+            🔊 Ses
+          </TabsTrigger>
+          <TabsTrigger value="agent" className="whitespace-nowrap">
+            🤖 Agentlar
+          </TabsTrigger>
+          <TabsTrigger value="backup" className="whitespace-nowrap">
+            💾 Yedek
+          </TabsTrigger>
+          <TabsTrigger value="excel_export" className="whitespace-nowrap">
+            📊 Excel
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="whitespace-nowrap">
+            📋 Aktivite
+          </TabsTrigger>
+          <TabsTrigger value="shortcuts" className="whitespace-nowrap">
+            ⌨ Kısayollar
+          </TabsTrigger>
+          <TabsTrigger value="repair" className="whitespace-nowrap">
+            🔧 Onarım
+          </TabsTrigger>
+          <TabsTrigger value="excel" className="whitespace-nowrap">
+            📥 İçe Aktar
+          </TabsTrigger>
+          <TabsTrigger value="data" className="whitespace-nowrap">
+            📂 Veri
+          </TabsTrigger>
+          <TabsTrigger value="security" className="whitespace-nowrap">
+            🔒 Güvenlik
+          </TabsTrigger>
+          <TabsTrigger value="sysmap" className="whitespace-nowrap">
+            🗺️ Harita
+          </TabsTrigger>
+          <TabsTrigger value="about" className="whitespace-nowrap">
+            ℹ️ Hakkında
+          </TabsTrigger>
         </TabsList>
 
         {tab === 'arayuz' && (
@@ -249,54 +229,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           />
         )}
 
-        {tab === 'company' && (
-          <Card title="ğŸ¢ Åirket Bilgileri">
-            <div className="grid gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FV
-                  label="Åirket AdÄ±"
-                  value={company.name || ''}
-                  onChange={(v) => setCompany((c) => ({ ...c, name: v }))}
-                />
-                <FV
-                  label="Åehir"
-                  value={(company as { city?: string }).city || ''}
-                  onChange={(v) => setCompany((c) => ({ ...c, city: v }))}
-                />
-                <FV
-                  label="Vergi No"
-                  value={company.taxNo || ''}
-                  onChange={(v) => setCompany((c) => ({ ...c, taxNo: v }))}
-                />
-                <FV
-                  label="Telefon"
-                  value={company.phone || ''}
-                  onChange={(v) => setCompany((c) => ({ ...c, phone: v }))}
-                />
-                <FV
-                  label="E-posta"
-                  type="email"
-                  value={company.email || ''}
-                  onChange={(v) => setCompany((c) => ({ ...c, email: v }))}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Adres</label>
-                <textarea
-                  value={company.address || ''}
-                  onChange={(e) => setCompany((c) => ({ ...c, address: e.target.value }))}
-                  className={`${inpBase} min-h-[70px]`}
-                />
-              </div>
-              <Button onClick={saveCompany} className="w-full mt-4">
-                ğŸ’¾ ÅŸirket Bilgilerini Kaydet
-              </Button>
-            </div>
-          </Card>
-        )}
+        {tab === 'company' && <SettingsCompany db={db} save={save} showToast={showToast} />}
 
         {tab === 'pellet' && (
-          <Card title="ğŸªµ Pelet AyarlarÄ±">
+          <Card title="🪵 Pelet Ayarları">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FV
                 label="Gramaj (gr/torba)"
@@ -306,7 +242,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
                 onChange={(v) => setPellet((p) => ({ ...p, gramaj: parseFloat(v) || 0 }))}
               />
               <FV
-                label="Kg FiyatÄ± (â‚º)"
+                label="Kg Fiyatı (₺)"
                 type="number"
                 inputMode="decimal"
                 value={String(pellet.kgFiyat)}
@@ -320,7 +256,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
                 onChange={(v) => setPellet((p) => ({ ...p, cuvalKg: parseFloat(v) || 0 }))}
               />
               <FV
-                label="Kritik GÃ¼n SayÄ±sÄ±"
+                label="Kritik Gün Sayısı"
                 type="number"
                 inputMode="decimal"
                 value={String(pellet.critDays)}
@@ -328,10 +264,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
               />
             </div>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              ğŸ’¡ Mevcut deÄŸerler: {pellet.cuvalKg}kg Ã§uval Â· â‚º{pellet.kgFiyat}/kg Â· {pellet.gramaj}gr/torba
+              💡 Mevcut değerler: {pellet.cuvalKg}kg çuval · ₺{pellet.kgFiyat}/kg · {pellet.gramaj}gr/torba
             </div>
             <Button onClick={savePellet} className="btn-primary w-full py-3 rounded-xl font-bold text-sm mt-4">
-              ğŸ’¾ Pelet AyarlarÄ±nÄ± Kaydet
+              💾 Pelet Ayarlarını Kaydet
             </Button>
           </Card>
         )}
@@ -344,8 +280,8 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           <div className="grid gap-4">
             <Card title="ğŸ“¤ Yedek Al">
               <p className="text-muted-foreground text-sm">
-                TÃ¼m verilerinizi <strong className="text-orange-400 font-semibold">JSON formatÄ±nda</strong> dÄ±ÅŸa
-                aktarÄ±n.
+                Tüm verilerinizi <strong className="text-orange-400 font-semibold">JSON formatında</strong> dıÅŸa
+                aktarın.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {dataStats.slice(0, 4).map((d) => (
@@ -357,10 +293,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
                 ))}
               </div>
               <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-                Toplam {totalRecords} kayÄ±t yedeklenecek
+                Toplam {totalRecords} kayıt yedeklenecek
               </div>
               <Button onClick={exportJSON} className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm">
-                YedeÄŸi Ä°ndir (.json)
+                YedeÄŸi İndir (.json)
               </Button>
             </Card>
 
@@ -399,9 +335,9 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
         )}
 
         {tab === 'shortcuts' && (
-          <Card title="âŒ¨ï¸ Klavye KÄ±sayollarÄ±">
+          <Card title="âŒ¨ï¸ Klavye Kısayolları">
             <p className="text-muted-foreground text-sm">
-              UygulamayÄ± daha hÄ±zlÄ± kullanmak iÃ§in aÅŸaÄŸÄ±daki kÄ±sayollarÄ± kullanabilirsiniz.
+              Uygulamayı daha hızlı kullanmak için aÅŸaÄŸıdaki kısayolları kullanabilirsiniz.
             </p>
             <div className="grid gap-2">
               {shortcuts.map((s, i) => (
@@ -431,7 +367,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
 
         {tab === 'data' && (
           <div className="grid gap-4">
-            <Card title="ğŸ—„ï¸ Veri Ä°statistikleri">
+            <Card title="ğŸ—„ï¸ Veri İstatistikleri">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {dataStats.map((d) => (
                   <div key={d.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
@@ -450,42 +386,42 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
                 ))}
               </div>
               <div className="text-center">
-                Toplam <strong className="text-white">{totalRecords}</strong> kayÄ±t Â· localStorage'da saklanÄ±yor
+                Toplam <strong className="text-white">{totalRecords}</strong> kayıt Â· localStorage'da saklanıyor
               </div>
             </Card>
 
             <Card title="ğŸ—‘ï¸ Tehlikeli Alan">
               <p className="text-muted-foreground text-sm">
-                AÅŸaÄŸÄ±daki iÅŸlemler <strong className="text-red-400 font-semibold">geri alÄ±namaz</strong>. Ã–nce
-                yedek almanÄ±zÄ± ÅŸiddetle tavsiye ederiz.
+                AÅŸaÄŸıdaki iÅŸlemler <strong className="text-red-400 font-semibold">geri alınamaz</strong>. Ã–nce yedek
+                almanızı ÅŸiddetle tavsiye ederiz.
               </p>
               <div className="grid gap-2.5">
                 <DangerAction
-                  label="SatÄ±ÅŸ GeÃ§miÅŸini Temizle"
-                  desc={`${db.sales.length} satÄ±ÅŸ kaydÄ± silinecek`}
+                  label="SatıÅŸ GeçmiÅŸini Temizle"
+                  desc={`${db.sales.length} satıÅŸ kaydı silinecek`}
                   onConfirm={() => {
                     save((prev) => ({ ...prev, sales: [] }));
-                    showToast('SatÄ±ÅŸ geÃ§miÅŸi temizlendi!');
+                    showToast('SatıÅŸ geçmiÅŸi temizlendi!');
                   }}
                 />
                 <DangerAction
-                  label="Kasa Ä°ÅŸlemlerini Temizle"
-                  desc={`${db.kasa.length} kasa kaydÄ± silinecek`}
+                  label="Kasa İÅŸlemlerini Temizle"
+                  desc={`${db.kasa.length} kasa kaydı silinecek`}
                   onConfirm={() => {
                     save((prev) => ({ ...prev, kasa: [] }));
                     showToast('Kasa temizlendi!');
                   }}
                 />
                 <DangerAction
-                  label="Aktivite GÃ¼nlÃ¼ÄŸÃ¼nÃ¼ Temizle"
-                  desc={`${db._activityLog.length} kayÄ±t silinecek`}
+                  label="Aktivite GünlüÄŸünü Temizle"
+                  desc={`${db._activityLog.length} kayıt silinecek`}
                   onConfirm={() => {
                     save((prev) => ({ ...prev, _activityLog: [] }));
-                    showToast('Aktivite gÃ¼nlÃ¼ÄŸÃ¼ temizlendi!');
+                    showToast('Aktivite günlüÄŸü temizlendi!');
                   }}
                 />
                 <Button onClick={clearData} className="btn-danger w-full py-3 rounded-xl font-bold text-sm">
-                  â˜ ï¸ TÃœM VERÄ°LERÄ° SÄ°L ve SÄ±fÄ±rla
+                  â˜ ï¸ TÃœM VERİLERİ SİL ve Sıfırla
                 </Button>
               </div>
             </Card>
@@ -496,10 +432,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
 
         {tab === 'sysmap' && (
           <div className="grid gap-4">
-            <Card title="ğŸ—ºï¸ Sistem HaritasÄ± â€” ModÃ¼ller ArasÄ± Ä°liÅŸkiler">
+            <Card title="ğŸ—ºï¸ Sistem Haritası â€” Modüller Arası İliÅŸkiler">
               <p className="text-muted-foreground text-sm">
-                Her modÃ¼lÃ¼n diÄŸer modÃ¼lleri nasÄ±l etkilediÄŸini gÃ¶steren akÄ±ÅŸ diyagramÄ±. DÃ¼z Ã§izgi =
-                doÄŸrudan veri etkisi, kesik Ã§izgi = veri saÄŸlar.
+                Her modülün diÄŸer modülleri nasıl etkilediÄŸini gösteren akıÅŸ diyagramı. Düz çizgi = doÄŸrudan veri
+                etkisi, kesik çizgi = veri saÄŸlar.
               </p>
               <SystemMap />
             </Card>
@@ -523,11 +459,11 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
 
   const handleChange = async () => {
     if (!oldPass) {
-      showToast('Mevcut parolayÄ± girin!', 'error');
+      showToast('Mevcut parolayı girin!', 'error');
       return;
     }
     if (newPass.length < 4) {
-      showToast('Yeni parola en az 4 karakter olmalÄ±!', 'error');
+      showToast('Yeni parola en az 4 karakter olmalı!', 'error');
       return;
     }
     if (newPass !== newPass2) {
@@ -535,20 +471,20 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
       return;
     }
     if (!session) {
-      showToast('Oturum bulunamadÄ±!', 'error');
+      showToast('Oturum bulunamadı!', 'error');
       return;
     }
     setLoading(true);
     const users = await loadUsers();
     const me = users.find((u) => u.id === session.userId);
     if (!me) {
-      showToast('KullanÄ±cÄ± bulunamadÄ±!', 'error');
+      showToast('Kullanıcı bulunamadı!', 'error');
       setLoading(false);
       return;
     }
     const oldHash = await hashPass(oldPass);
     if (oldHash !== me.passwordHash) {
-      showToast('Mevcut parola yanlÄ±ÅŸ!', 'error');
+      showToast('Mevcut parola yanlıÅŸ!', 'error');
       setOldPass('');
       setLoading(false);
       return;
@@ -558,21 +494,21 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
       setOldPass('');
       setNewPass('');
       setNewPass2('');
-      showToast('Parola baÅŸarÄ±yla gÃ¼ncellendi!', 'success');
+      showToast('Parola baÅŸarıyla güncellendi!', 'success');
     } else {
-      showToast('Firebase kayÄ±t hatasÄ±!', 'error');
+      showToast('Firebase kayıt hatası!', 'error');
     }
     setLoading(false);
   };
 
   return (
     <div className="grid gap-4">
-      <Card title="ğŸ” Åifremi DeÄŸiÅŸtir">
+      <Card title="ğŸ” Şifremi DeÄŸiÅŸtir">
         <div className="grid gap-3">
           {session && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               ğŸ‘¤ GiriÅŸ yapan: <strong>{session.username}</strong> (
-              {session.role === 'admin' ? 'YÃ¶netici' : 'KullanÄ±cÄ±'})
+              {session.role === 'admin' ? 'Yönetici' : 'Kullanıcı'})
             </div>
           )}
           <div>
@@ -582,7 +518,7 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
                 type={showOld ? 'text' : 'password'}
                 value={oldPass}
                 onChange={(e) => setOldPass(e.target.value)}
-                placeholder="Mevcut parolanÄ±z"
+                placeholder="Mevcut parolanız"
                 className={inpBase}
                 style={{ paddingRight: 44 }}
               />
@@ -619,7 +555,7 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
               type={showNew ? 'text' : 'password'}
               value={newPass2}
               onChange={(e) => setNewPass2(e.target.value)}
-              placeholder="Yeni parolayÄ± tekrar girin"
+              placeholder="Yeni parolayı tekrar girin"
               className={inpBase}
               onKeyDown={(e) => e.key === 'Enter' && handleChange()}
             />
@@ -629,18 +565,18 @@ function SecurityPanel({ showToast }: { showToast: (msg: string, type?: 'success
             disabled={loading}
             className="btn-primary w-full py-3 rounded-xl font-bold text-sm"
           >
-            {loading ? 'â³ DeÄŸiÅŸtiriliyor...' : 'ğŸ” ParolayÄ± DeÄŸiÅŸtir'}
+            {loading ? '⏳ DeÄŸiÅŸtiriliyor...' : 'ğŸ” Parolayı DeÄŸiÅŸtir'}
           </Button>
         </div>
       </Card>
 
-      {/* YÃ¶netici Paneli â€” sadece admin gÃ¶rÃ¼r */}
+      {/* Yönetici Paneli â€” sadece admin görür */}
       {session?.role === 'admin' && <AdminPanel showToast={showToast} />}
     </div>
   );
 }
 
-// â”€â”€ YÃ¶netici Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Yönetici Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' | 'error' | 'info') => void }) {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -663,11 +599,11 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
 
   const handleCreate = async () => {
     if (!newUsername.trim()) {
-      showToast('KullanÄ±cÄ± adÄ± gerekli!', 'error');
+      showToast('Kullanıcı adı gerekli!', 'error');
       return;
     }
     if (newPass.length < 4) {
-      showToast('Åifre en az 4 karakter!', 'error');
+      showToast('Şifre en az 4 karakter!', 'error');
       return;
     }
     setSaving(true);
@@ -685,12 +621,12 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
 
   const handleToggle = async (userId: string, username: string, active: boolean) => {
     await toggleUserActive(userId);
-    showToast(`${username} ${active ? 'devre dÄ±ÅŸÄ± bÄ±rakÄ±ldÄ±' : 'aktif edildi'}`, 'info');
+    showToast(`${username} ${active ? 'devre dıÅŸı bırakıldı' : 'aktif edildi'}`, 'info');
     await refresh();
   };
 
   const handleDelete = async (userId: string, username: string) => {
-    if (!confirm(`"${username}" kullanÄ±cÄ±sÄ±nÄ± silmek istediÄŸinizden emin misiniz?`)) return;
+    if (!confirm(`"${username}" kullanıcısını silmek istediÄŸinizden emin misiniz?`)) return;
     await deleteUser(userId);
     showToast(`${username} silindi`, 'info');
     await refresh();
@@ -698,17 +634,17 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
 
   const handleRoleChange = async (userId: string, role: UserRole) => {
     await updateUserRole(userId, role);
-    showToast('Rol gÃ¼ncellendi', 'success');
+    showToast('Rol güncellendi', 'success');
     await refresh();
   };
 
   const handleResetPass = async (userId: string) => {
     if (resetPassVal.length < 4) {
-      showToast('Åifre en az 4 karakter!', 'error');
+      showToast('Şifre en az 4 karakter!', 'error');
       return;
     }
     await updateUserPassword(userId, resetPassVal);
-    showToast('Åifre sÄ±fÄ±rlandÄ±', 'success');
+    showToast('Şifre sıfırlandı', 'success');
     setResetPassId(null);
     setResetPassVal('');
     await refresh();
@@ -720,13 +656,13 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
   };
 
   return (
-    <Card title="ğŸ‘¥ KullanÄ±cÄ± YÃ¶netimi">
-      {/* Yeni kullanÄ±cÄ± ekle */}
+    <Card title="ğŸ‘¥ Kullanıcı Yönetimi">
+      {/* Yeni kullanıcı ekle */}
       <div className="bg-[var(--bg-card)] rounded-xl p-4 mb-4">
-        <div className="text-sm font-semibold text-foreground mb-3">â• Yeni KullanÄ±cÄ± Ekle</div>
+        <div className="text-sm font-semibold text-foreground mb-3">â• Yeni Kullanıcı Ekle</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           <div>
-            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">KullanÄ±cÄ± AdÄ± *</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Kullanıcı Adı *</label>
             <input
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
@@ -735,7 +671,7 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Åifre *</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Şifre *</label>
             <input
               type="password"
               value={newPass}
@@ -749,8 +685,8 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
           <div className="flex-1">
             <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Rol</label>
             <select value={newRole} onChange={(e) => setNewRole(e.target.value as UserRole)} className={inpBase}>
-              <option value="user">ğŸ‘¤ KullanÄ±cÄ±</option>
-              <option value="admin">â­ YÃ¶netici</option>
+              <option value="user">ğŸ‘¤ Kullanıcı</option>
+              <option value="admin">â­ Yönetici</option>
             </select>
           </div>
           <Button
@@ -763,11 +699,11 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
         </div>
       </div>
 
-      {/* KullanÄ±cÄ± listesi */}
+      {/* Kullanıcı listesi */}
       {loading ? (
-        <div className="text-center py-8 text-muted-foreground text-sm">YÃ¼kleniyor...</div>
+        <div className="text-center py-8 text-muted-foreground text-sm">Yükleniyor...</div>
       ) : users.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground text-sm">KullanÄ±cÄ± bulunamadÄ±</div>
+        <div className="text-center py-8 text-muted-foreground text-sm">Kullanıcı bulunamadı</div>
       ) : (
         <div className="flex flex-col gap-2">
           {users.map((u) => (
@@ -811,10 +747,10 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
                   <div className="text-[var(--text-dim)] text-xs">
                     {u.lastLogin
                       ? `Son giriÅŸ: ${new Date(u.lastLogin).toLocaleString('tr-TR')}`
-                      : 'HiÃ§ giriÅŸ yapÄ±lmadÄ±'}
+                      : 'Hiç giriÅŸ yapılmadı'}
                   </div>
                 </div>
-                {/* Rol seÃ§ici */}
+                {/* Rol seçici */}
                 <select
                   value={u.role}
                   onChange={(e) => handleRoleChange(u.id, e.target.value as UserRole)}
@@ -829,16 +765,16 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
                     cursor: 'pointer',
                   }}
                 >
-                  <option value="user">KullanÄ±cÄ±</option>
-                  <option value="admin">YÃ¶netici</option>
+                  <option value="user">Kullanıcı</option>
+                  <option value="admin">Yönetici</option>
                 </select>
-                {/* Åifre sÄ±fÄ±rla */}
+                {/* Şifre sıfırla */}
                 <Button
                   onClick={() => {
                     setResetPassId(resetPassId === u.id ? null : u.id);
                     setResetPassVal('');
                   }}
-                  title="Åifre SÄ±fÄ±rla"
+                  title="Şifre Sıfırla"
                   className="px-2.5 py-1.5 rounded-lg font-bold text-xs bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
                 >
                   ğŸ”‘
@@ -846,7 +782,7 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
                 {/* Aktif/Pasif */}
                 <Button
                   onClick={() => handleToggle(u.id, u.username, u.active)}
-                  title={u.active ? 'Devre DÄ±ÅŸÄ± BÄ±rak' : 'Aktif Et'}
+                  title={u.active ? 'Devre DıÅŸı Bırak' : 'Aktif Et'}
                   style={{
                     padding: '5px 9px',
                     background: u.active ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
@@ -862,13 +798,13 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
                 {/* Sil */}
                 <Button
                   onClick={() => handleDelete(u.id, u.username)}
-                  title="KullanÄ±cÄ±yÄ± Sil"
+                  title="Kullanıcıyı Sil"
                   className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs"
                 >
                   ğŸ—‘ï¸
                 </Button>
               </div>
-              {/* Åifre sÄ±fÄ±rlama alanÄ± */}
+              {/* Şifre sıfırlama alanı */}
               {resetPassId === u.id && (
                 <div className="flex items-center gap-2">
                   <input
@@ -895,234 +831,8 @@ function AdminPanel({ showToast }: { showToast: (msg: string, type?: 'success' |
   );
 }
 
-function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType) => void }) {
-  const [settings, setSettings] = useState<SoundSettings>(loadSoundSettings);
-  const [speechEnabled, setSpeechEnabled] = useState<boolean>(() => {
-    try {
-      const d = JSON.parse(localStorage.getItem('sobaYonetim') || '{}');
-      return d.soundSettings?.speechEnabled !== false;
-    } catch {
-      logger.warn('settings', 'Ses ayarları okunamadı, varsayılan true');
-      return true;
-    }
-  });
-
-  const updateSettings = (patch: Partial<SoundSettings>) => {
-    const next = { ...settings, ...patch };
-    setSettings(next);
-    saveSoundSettingsToStorage(next);
-  };
-
-  const toggleSpeech = () => {
-    const next = !speechEnabled;
-    setSpeechEnabled(next);
-    const key = 'sobaYonetim';
-    const raw = localStorage.getItem(key);
-    const data = raw ? JSON.parse(raw) : {};
-    data.soundSettings = { ...(data.soundSettings || {}), speechEnabled: next };
-    localStorage.setItem(key, JSON.stringify(data));
-    if (next && 'speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance('Sesli bildirim aktif edildi');
-      u.lang = 'tr-TR';
-      u.rate = 1.05;
-      window.speechSynthesis.speak(u);
-    }
-  };
-
-  const themes: { id: SoundTheme; label: string; desc: string }[] = [
-    { id: 'standart', label: 'ğŸµ Standart', desc: 'Dengeli ve sade sesler' },
-    { id: 'minimal', label: 'ğŸ”‡ Minimal', desc: 'KÄ±sa ve hafif sesler' },
-    { id: 'yogun', label: 'ğŸ”Š YoÄŸun', desc: 'Belirgin ve gÃ¼Ã§lÃ¼ sesler' },
-  ];
-
-  const soundTypes: { type: SoundType; label: string }[] = [
-    { type: 'success', label: 'âœ… BaÅŸarÄ±' },
-    { type: 'error', label: 'âŒ Hata' },
-    { type: 'warning', label: 'âš ï¸ UyarÄ±' },
-    { type: 'sale', label: 'ğŸ›’ SatÄ±ÅŸ' },
-    { type: 'notification', label: 'ğŸ”” Bildirim' },
-  ];
-
-  return (
-    <div className="grid gap-4">
-      <Card title="ğŸ”Š Ses AyarlarÄ±">
-        <div className="grid gap-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-foreground text-sm">Sesli Geri Bildirim</div>
-              <div className="text-muted-foreground text-xs">Ä°ÅŸlem seslerini aÃ§Ä±n veya kapatÄ±n</div>
-            </div>
-            <Button
-              onClick={() => updateSettings({ enabled: !settings.enabled })}
-              style={{
-                width: 52,
-                height: 28,
-                borderRadius: 14,
-                border: 'none',
-                cursor: 'pointer',
-                position: 'relative',
-                background: settings.enabled ? 'var(--color-success)' : 'var(--text-dim)',
-                transition: 'background 0.2s',
-              }}
-            >
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: 'var(--bg-elevated)',
-                  position: 'absolute',
-                  top: 4,
-                  left: settings.enabled ? 28 : 4,
-                  transition: 'left 0.2s',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                }}
-              />
-            </Button>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Ses Seviyesi</label>
-              <span className="text-foreground text-sm">{Math.round(settings.volume * 100)}%</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={settings.volume}
-              onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-[var(--border)] accent-[var(--color-primary)]"
-              disabled={!settings.enabled}
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">Ses TemasÄ±</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {themes.map((t) => (
-                <Button
-                  key={t.id}
-                  onClick={() => updateSettings({ theme: t.id })}
-                  disabled={!settings.enabled}
-                  style={{
-                    padding: '12px 10px',
-                    border: `2px solid ${settings.theme === t.id ? '#ff5722' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius: 10,
-                    cursor: 'pointer',
-                    background: settings.theme === t.id ? 'rgba(255,87,34,0.1)' : 'var(--bg-card)',
-                    color: settings.theme === t.id ? 'var(--color-danger)' : 'var(--text-muted)',
-                    textAlign: 'center',
-                    transition: 'all 0.15s',
-                    opacity: settings.enabled ? 1 : 0.5,
-                  }}
-                >
-                  <div className="text-foreground text-sm font-semibold">{t.label}</div>
-                  <div
-                    style={{
-                      fontSize: '0.72rem',
-                      marginTop: 4,
-                      color: settings.theme === t.id ? 'var(--color-danger)' : 'var(--text-dim)',
-                    }}
-                  >
-                    {t.desc}
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <Card title="ğŸ—£ï¸ Sesli KonuÅŸma (TTS)">
-        <div className="grid gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-foreground text-sm">Sesli Bildirim</div>
-              <div className="text-muted-foreground text-xs">Hata ve uyarÄ±larda sesli konuÅŸma</div>
-            </div>
-            <Button
-              onClick={toggleSpeech}
-              style={{
-                width: 52,
-                height: 28,
-                borderRadius: 14,
-                border: 'none',
-                cursor: 'pointer',
-                position: 'relative',
-                background: speechEnabled ? 'var(--color-success)' : 'var(--text-dim)',
-                transition: 'background 0.2s',
-              }}
-            >
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: 'var(--bg-elevated)',
-                  position: 'absolute',
-                  top: 4,
-                  left: speechEnabled ? 28 : 4,
-                  transition: 'left 0.2s',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                }}
-              />
-            </Button>
-          </div>
-          <Button
-            onClick={() => {
-              if ('speechSynthesis' in window) {
-                const u = new SpeechSynthesisUtterance(
-                  'Merhaba! Bu bir test konuÅŸmasÄ±dÄ±r. Ã–nemli bildirimlerde sesli uyarÄ± alacaksÄ±nÄ±z.',
-                );
-                u.lang = 'tr-TR';
-                u.rate = 1.05;
-                window.speechSynthesis.speak(u);
-              }
-            }}
-            className="px-3 py-2 rounded-xl font-bold text-sm border border-[var(--button-outline)]"
-          >
-            ğŸ—£ï¸ Test KonuÅŸma
-          </Button>
-        </div>
-      </Card>
-
-      <Card title="ğŸ§ Sesleri Dinle">
-        <p className="text-muted-foreground text-sm">Her ses tipini aÅŸaÄŸÄ±dan test edebilirsiniz.</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {soundTypes.map((s) => (
-            <Button
-              key={s.type}
-              onClick={() => playSound(s.type)}
-              disabled={!settings.enabled}
-              style={{
-                padding: '10px 14px',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                cursor: 'pointer',
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                transition: 'all 0.15s',
-                opacity: settings.enabled ? 1 : 0.5,
-              }}
-              onMouseEnter={(e) => {
-                if (settings.enabled) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,87,34,0.1)';
-              }}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(0,0,0,0.3)')}
-            >
-              {s.label}
-            </Button>
-          ))}
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-// AgentSettingsPanel â€” ÅŸu an kullanÄ±lmÄ±yor, gerektiÄŸinde eklenebilir
+// SoundSettingsPanel moved to ./settings/SettingsSound
+// AgentSettingsPanel â€” ÅŸu an kullanılmıyor, gerektiÄŸinde eklenebilir
 
 function ExcelExportPanel({ db }: { db: DB }) {
   const { showToast } = useToast();
@@ -1147,7 +857,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
       | 'kasa'
     )[];
     if (selectedSheets.length === 0) {
-      showToast('En az bir sekme seÃ§in!', 'warning');
+      showToast('En az bir sekme seçin!', 'warning');
       return;
     }
     try {
@@ -1156,10 +866,10 @@ function ExcelExportPanel({ db }: { db: DB }) {
         dateTo: dateTo || undefined,
         sheets: selectedSheets,
       });
-      showToast(`Excel dosyasÄ± oluÅŸturuldu! (${selectedSheets.length} sekme)`, 'success');
+      showToast(`Excel dosyası oluÅŸturuldu! (${selectedSheets.length} sekme)`, 'success');
     } catch {
       logger.warn('settings', 'Excel oluşturulamadı');
-      showToast('Excel oluÅŸturulamadÄ±!', 'error');
+      showToast('Excel oluÅŸturulamadı!', 'error');
     }
   };
 
@@ -1171,30 +881,30 @@ function ExcelExportPanel({ db }: { db: DB }) {
   }[] = [
     {
       key: 'stok',
-      label: 'Stok / ÃœrÃ¼nler',
+      label: 'Stok / Ãœrünler',
       icon: 'ğŸ“¦',
       count: db.products.length,
     },
-    { key: 'satislar', label: 'SatÄ±ÅŸlar', icon: 'ğŸ›’', count: db.sales.length },
+    { key: 'satislar', label: 'SatıÅŸlar', icon: 'ğŸ›’', count: db.sales.length },
     { key: 'cari', label: 'Cari Hesaplar', icon: 'ğŸ‘¤', count: db.cari.length },
-    { key: 'kasa', label: 'Kasa Ä°ÅŸlemleri', icon: 'ğŸ’°', count: db.kasa.length },
+    { key: 'kasa', label: 'Kasa İÅŸlemleri', icon: 'ğŸ’°', count: db.kasa.length },
   ];
 
   return (
     <div className="grid gap-4">
-      <Card title="ğŸ“Š Excel DÄ±ÅŸa Aktarma">
+      <Card title="ğŸ“Š Excel DıÅŸa Aktarma">
         <p className="text-muted-foreground text-sm">
-          SeÃ§tiÄŸiniz veri gruplarÄ±nÄ± TÃ¼rkÃ§e baÅŸlÄ±klÄ±, tarih ve para birimi formatlarÄ±yla{' '}
-          <strong className="text-green-400 font-semibold">.xlsx</strong> dosyasÄ±na aktarÄ±n.
+          SeçtiÄŸiniz veri gruplarını Türkçe baÅŸlıklı, tarih ve para birimi formatlarıyla{' '}
+          <strong className="text-green-400 font-semibold">.xlsx</strong> dosyasına aktarın.
         </p>
 
         <div className="mb-4">
           <label className="text-sm font-medium text-[var(--text-muted)] mb-1.5 block">
-            Tarih AralÄ±ÄŸÄ± (SatÄ±ÅŸ ve Kasa iÃ§in)
+            Tarih AralıÄŸı (SatıÅŸ ve Kasa için)
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             <div>
-              <label style={{ ...lbl, fontSize: '0.78rem' }}>BaÅŸlangÄ±Ã§</label>
+              <label style={{ ...lbl, fontSize: '0.78rem' }}>BaÅŸlangıç</label>
               <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className={inpBase} />
             </div>
             <div>
@@ -1234,7 +944,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
                   >
                     {s.label}
                   </div>
-                  <div className="text-[var(--text-dim)] text-xs">{s.count} kayÄ±t</div>
+                  <div className="text-[var(--text-dim)] text-xs">{s.count} kayıt</div>
                 </div>
                 <div
                   style={{
@@ -1258,7 +968,7 @@ function ExcelExportPanel({ db }: { db: DB }) {
         </div>
 
         <Button onClick={handleExport} className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm">
-          ğŸ“Š Excel DosyasÄ±nÄ± Ä°ndir (.xlsx)
+          ğŸ“Š Excel Dosyasını İndir (.xlsx)
         </Button>
       </Card>
     </div>
@@ -1298,10 +1008,10 @@ function ActivityPanel({
 
   const getIcon = (action: string) => {
     const a = action.toLowerCase();
-    if (a.includes('satÄ±ÅŸ') || a.includes('satis')) return 'ğŸ›’';
-    if (a.includes('Ã¼rÃ¼n') || a.includes('urun') || a.includes('stok')) return 'ğŸ“¦';
+    if (a.includes('satıÅŸ') || a.includes('satis')) return 'ğŸ›’';
+    if (a.includes('ürün') || a.includes('urun') || a.includes('stok')) return 'ğŸ“¦';
     if (a.includes('kasa') || a.includes('gelir') || a.includes('gider')) return 'ğŸ’°';
-    if (a.includes('cari') || a.includes('mÃ¼ÅŸteri')) return 'ğŸ‘¤';
+    if (a.includes('cari') || a.includes('müÅŸteri')) return 'ğŸ‘¤';
     if (a.includes('fatura')) return 'ğŸ§¾';
     if (a.includes('sipariÅŸ')) return 'ğŸ“‹';
     if (a.includes('sil') || a.includes('iptal')) return 'ğŸ—‘ï¸';
@@ -1310,18 +1020,18 @@ function ActivityPanel({
 
   const clearLog = () => {
     showConfirm(
-      'Aktivite GÃ¼nlÃ¼ÄŸÃ¼nÃ¼ Temizle',
-      `${db._activityLog.length} kayÄ±t silinecek. Devam edilsin mi?`,
+      'Aktivite GünlüÄŸünü Temizle',
+      `${db._activityLog.length} kayıt silinecek. Devam edilsin mi?`,
       () => {
         save((prev) => ({ ...prev, _activityLog: [] }));
-        showToast('Aktivite gÃ¼nlÃ¼ÄŸÃ¼ temizlendi!');
+        showToast('Aktivite günlüÄŸü temizlendi!');
       },
       true,
     );
   };
 
   return (
-    <Card title="ğŸ“‹ Aktivite GÃ¼nlÃ¼ÄŸÃ¼">
+    <Card title="ğŸ“‹ Aktivite GünlüÄŸü">
       <div className="flex flex-wrap items-center gap-2">
         <input
           type="date"
@@ -1332,7 +1042,7 @@ function ActivityPanel({
           placeholder="Tarih filtrele"
         />
         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={`${inpBase} flex-1`}>
-          <option value="all">TÃ¼m Ä°ÅŸlemler</option>
+          <option value="all">Tüm İÅŸlemler</option>
           {actionTypes.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -1356,14 +1066,14 @@ function ActivityPanel({
       </div>
 
       <div className="text-[var(--text-dim)] text-xs">
-        {filtered.length} kayÄ±t (toplam {activityLog.length})
+        {filtered.length} kayıt (toplam {activityLog.length})
       </div>
 
       <div className="max-h-[400px] overflow-y-auto space-y-1">
         {filtered.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground text-sm">
             <div className="text-3xl mb-2">ğŸ“‹</div>
-            <p>Aktivite bulunamadÄ±</p>
+            <p>Aktivite bulunamadı</p>
           </div>
         ) : (
           filtered.map((a) => (
@@ -1383,31 +1093,31 @@ function ActivityPanel({
 }
 
 const RESTORE_SECTIONS = [
-  { key: 'products', label: 'ÃœrÃ¼nler', icon: 'ğŸ“¦' },
-  { key: 'sales', label: 'SatÄ±ÅŸlar', icon: 'ğŸ›’' },
-  { key: 'suppliers', label: 'TedarikÃ§iler', icon: 'ğŸ­' },
+  { key: 'products', label: 'Ãœrünler', icon: 'ğŸ“¦' },
+  { key: 'sales', label: 'SatıÅŸlar', icon: 'ğŸ›’' },
+  { key: 'suppliers', label: 'Tedarikçiler', icon: 'ğŸ­' },
   { key: 'cari', label: 'Cari Hesaplar', icon: 'ğŸ‘¤' },
-  { key: 'kasa', label: 'Kasa Ä°ÅŸlemleri', icon: 'ğŸ’°' },
-  { key: 'bankTransactions', label: 'Banka Ä°ÅŸlemleri', icon: 'ğŸ¦' },
+  { key: 'kasa', label: 'Kasa İÅŸlemleri', icon: 'ğŸ’°' },
+  { key: 'bankTransactions', label: 'Banka İÅŸlemleri', icon: 'ğŸ¦' },
   { key: 'invoices', label: 'Faturalar', icon: 'ğŸ§¾' },
   { key: 'orders', label: 'SipariÅŸler', icon: 'ğŸ“‹' },
   { key: 'stockMovements', label: 'Stok Hareketleri', icon: 'ğŸ“Š' },
-  { key: 'peletSuppliers', label: 'Pelet TedarikÃ§i', icon: 'ğŸªµ' },
+  { key: 'peletSuppliers', label: 'Pelet Tedarikçi', icon: 'ğŸªµ' },
   { key: 'peletOrders', label: 'Pelet SipariÅŸ', icon: 'ğŸªµ' },
-  { key: 'boruSuppliers', label: 'Boru TedarikÃ§i', icon: 'ğŸ”©' },
+  { key: 'boruSuppliers', label: 'Boru Tedarikçi', icon: 'ğŸ”©' },
   { key: 'boruOrders', label: 'Boru SipariÅŸ', icon: 'ğŸ”©' },
-  { key: 'budgets', label: 'BÃ¼tÃ§e', icon: 'ğŸ“Š' },
-  { key: 'returns', label: 'Ä°adeler', icon: 'â†©ï¸' },
-  { key: 'company', label: 'Åirket Bilgileri', icon: 'ğŸ¢', isObject: true },
+  { key: 'budgets', label: 'Bütçe', icon: 'ğŸ“Š' },
+  { key: 'returns', label: 'İadeler', icon: 'â†©ï¸' },
+  { key: 'company', label: 'Şirket Bilgileri', icon: 'ğŸ¢', isObject: true },
   {
     key: 'pelletSettings',
-    label: 'Pelet AyarlarÄ±',
+    label: 'Pelet Ayarları',
     icon: 'âš™ï¸',
     isObject: true,
   },
 ] as const;
 
-// â”€â”€ Tam Geri YÃ¼kleme Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Tam Geri Yükleme Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FullRestorePanel({
   showToast,
   showConfirm,
@@ -1428,26 +1138,26 @@ function FullRestorePanel({
     if (fileRef.current) fileRef.current.value = '';
 
     showConfirm(
-      'âš ï¸ Tam Geri YÃ¼kleme',
-      `"${file.name}" dosyasÄ±ndaki veriler yÃ¼kleniyor. Mevcut tÃ¼m veriler bu yedekle deÄŸiÅŸtirilecek. Ã–nceki veri otomatik yedeklenir. Devam edilsin mi?`,
+      'âš ï¸ Tam Geri Yükleme',
+      `"${file.name}" dosyasındaki veriler yükleniyor. Mevcut tüm veriler bu yedekle deÄŸiÅŸtirilecek. Ã–nceki veri otomatik yedeklenir. Devam edilsin mi?`,
       () => {
         // Ã–nce mevcut veriyi yedekle
         saveBackupToFirebase(
           db,
           `onceki_${new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')}`,
-        ).catch(() => logger.error('db', 'Tam geri yÃ¼kleme Ã¶ncesi yedek alÄ±namadÄ±'));
+        ).catch(() => logger.error('db', 'Tam geri yükleme öncesi yedek alınamadı'));
 
         const reader = new FileReader();
         reader.onload = (ev) => {
           try {
             const raw = JSON.parse(ev.target?.result as string) as DB;
-            // fullRestoreDB'yi doÄŸrudan import etmek yerine save iÃ§inde Ã§aÄŸÄ±rÄ±yoruz
+            // fullRestoreDB'yi doÄŸrudan import etmek yerine save içinde çaÄŸırıyoruz
             save((prev) => {
               // makeDefaultDB'ye eriÅŸim yok burada â€” prev'i default olarak kullan
               const def = { ...prev };
-              // Temel yapÄ±yÄ± koru, yedekteki veriyi Ã¼zerine yaz
+              // Temel yapıyı koru, yedekteki veriyi üzerine yaz
               const merged: DB = { ...def, ...raw };
-              // Zorunlu array alanlarÄ±
+              // Zorunlu array alanları
               const arrayKeys = [
                 'products',
                 'sales',
@@ -1491,30 +1201,30 @@ function FullRestorePanel({
               skippedMissingField: 0,
               warnings: [],
             };
-            // Ad kalite kontrolÃ¼ raporu
+            // Ad kalite kontrolü raporu
             (raw.cari || []).forEach((c: { name?: unknown }) => {
               if (typeof c.name !== 'string' || c.name.trim().length < 2 || /^\d+$/.test(c.name.trim())) {
                 report.skippedInvalidName++;
-                report.warnings.push(`Cari gizlendi: "${c.name}" â€” geÃ§ersiz ad`);
+                report.warnings.push(`Cari gizlendi: "${c.name}" â€” geçersiz ad`);
               }
             });
             (raw.products || []).forEach((p: { name?: unknown }) => {
               if (typeof p.name !== 'string' || p.name.trim().length < 2 || /^\d+$/.test(p.name.trim())) {
                 report.skippedInvalidName++;
-                report.warnings.push(`ÃœrÃ¼n gizlendi: "${p.name}" â€” geÃ§ersiz ad`);
+                report.warnings.push(`Ãœrün gizlendi: "${p.name}" â€” geçersiz ad`);
               }
             });
             setLastReport(report);
 
             const msg =
               report.skippedInvalidName > 0
-                ? `âœ… Geri yÃ¼kleme tamamlandÄ±. ${report.skippedInvalidName} geÃ§ersiz kayÄ±t gizlendi.`
-                : 'âœ… Tam geri yÃ¼kleme baÅŸarÄ±lÄ±! Ã–nceki veri yedeklendi.';
+                ? `âœ… Geri yükleme tamamlandı. ${report.skippedInvalidName} geçersiz kayıt gizlendi.`
+                : 'âœ… Tam geri yükleme baÅŸarılı! Ã–nceki veri yedeklendi.';
             showToast(msg, 'success');
             setTimeout(() => window.location.reload(), 1800);
           } catch {
             logger.warn('settings', 'Yedek dosyası okunamadı veya geçersiz format');
-            showToast('Dosya okunamadÄ± veya geÃ§ersiz format!', 'error');
+            showToast('Dosya okunamadı veya geçersiz format!', 'error');
           }
         };
         reader.readAsText(file);
@@ -1524,10 +1234,10 @@ function FullRestorePanel({
   };
 
   return (
-    <Card title="ğŸ”„ Tam Geri YÃ¼kleme">
+    <Card title="ğŸ”„ Tam Geri Yükleme">
       <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-        <strong>Dikkat:</strong> Mevcut tÃ¼m veriler yedekteki verilerle deÄŸiÅŸtirilir. Ä°ÅŸlem Ã¶ncesi otomatik yedek
-        alÄ±nÄ±r. Yedekten gelen geÃ§ersiz adlÄ± kayÄ±tlar (boÅŸ, tek haneli, sadece sayÄ±) gizlenir.
+        <strong>Dikkat:</strong> Mevcut tüm veriler yedekteki verilerle deÄŸiÅŸtirilir. İÅŸlem öncesi otomatik yedek
+        alınır. Yedekten gelen geçersiz adlı kayıtlar (boÅŸ, tek haneli, sadece sayı) gizlenir.
       </div>
       <input ref={fileRef} type="file" accept=".json" onChange={handleFile} className="hidden" />
       <Button
@@ -1540,12 +1250,12 @@ function FullRestorePanel({
           (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)';
         }}
       >
-        ğŸ“‚ JSON Yedek DosyasÄ± SeÃ§ â€” Tam Geri YÃ¼kle
+        ğŸ“‚ JSON Yedek Dosyası Seç â€” Tam Geri Yükle
       </Button>
 
       {lastReport && lastReport.warnings.length > 0 && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-          <div className="text-amber-400 font-bold text-sm">âš ï¸ Gizlenen KayÄ±tlar</div>
+          <div className="text-amber-400 font-bold text-sm">âš ï¸ Gizlenen Kayıtlar</div>
           {lastReport.warnings.map((w, i) => (
             <div key={i} className="text-muted-foreground text-sm">
               â€¢ {w}
@@ -1592,7 +1302,7 @@ function SelectiveRestore({
       try {
         const data = JSON.parse(ev.target?.result as string);
         if (typeof data !== 'object' || Array.isArray(data)) {
-          showToast('GeÃ§ersiz JSON formatÄ±!', 'error');
+          showToast('Geçersiz JSON formatı!', 'error');
           return;
         }
         setFileData(data);
@@ -1622,7 +1332,7 @@ function SelectiveRestore({
         setSelected(new Set(avail.map((a) => a.key)));
       } catch {
         logger.warn('settings', 'JSON ayrıştırılamadı');
-        showToast('JSON ayrÄ±ÅŸtÄ±rÄ±lamadÄ±!', 'error');
+        showToast('JSON ayrıÅŸtırılamadı!', 'error');
       }
     };
     reader.readAsText(file);
@@ -1645,27 +1355,27 @@ function SelectiveRestore({
     if (!fileData || selected.size === 0) return;
     const selCount = available.filter((a) => selected.has(a.key)).reduce((s, a) => s + a.count, 0);
     showConfirm(
-      'SeÃ§imli Geri YÃ¼kleme',
-      `${selected.size} bÃ¶lÃ¼m (${selCount} kayÄ±t) iÅŸlenecek. Mevcut ID'ler korunur, geÃ§ersiz adlar atlanÄ±r. Devam edilsin mi?`,
+      'Seçimli Geri Yükleme',
+      `${selected.size} bölüm (${selCount} kayıt) iÅŸlenecek. Mevcut ID'ler korunur, geçersiz adlar atlanır. Devam edilsin mi?`,
       () => {
         try {
-          // Geri yÃ¼kleme Ã¶ncesi mevcut veriyi otomatik yedekle
+          // Geri yükleme öncesi mevcut veriyi otomatik yedekle
           const preLabel = `onceki_${new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')}`;
           saveBackupToFirebase(db, preLabel).catch(() =>
-            logger.error('db', 'SeÃ§imli geri yÃ¼kleme Ã¶ncesi yedek alÄ±namadÄ±'),
+            logger.error('db', 'Seçimli geri yükleme öncesi yedek alınamadı'),
           );
 
-          // AkÄ±llÄ± birleÅŸtirme â€” ID kontrolÃ¼ + ad kalite kontrolÃ¼
+          // Akıllı birleÅŸtirme â€” ID kontrolü + ad kalite kontrolü
           const { db: mergedDb, report } = mergeRestoreDB(db, fileData as Partial<DB>, selected);
           setLastReport(report);
 
           save(() => mergedDb);
 
           const msg = [
-            `âœ… ${report.added} kayÄ±t eklendi.`,
-            report.skippedDuplicate > 0 ? `${report.skippedDuplicate} tekrar (ID Ã§akÄ±ÅŸmasÄ±) atlandÄ±.` : '',
-            report.skippedInvalidName > 0 ? `${report.skippedInvalidName} geÃ§ersiz adlÄ± kayÄ±t atlandÄ±.` : '',
-            report.skippedMissingField > 0 ? `${report.skippedMissingField} eksik alanlÄ± kayÄ±t atlandÄ±.` : '',
+            `âœ… ${report.added} kayıt eklendi.`,
+            report.skippedDuplicate > 0 ? `${report.skippedDuplicate} tekrar (ID çakıÅŸması) atlandı.` : '',
+            report.skippedInvalidName > 0 ? `${report.skippedInvalidName} geçersiz adlı kayıt atlandı.` : '',
+            report.skippedMissingField > 0 ? `${report.skippedMissingField} eksik alanlı kayıt atlandı.` : '',
           ]
             .filter(Boolean)
             .join(' ');
@@ -1674,7 +1384,7 @@ function SelectiveRestore({
           setTimeout(() => window.location.reload(), 2000);
         } catch {
           logger.warn('settings', 'Geri yükleme sırasında hata oluştu');
-          showToast('Geri yÃ¼kleme sÄ±rasÄ±nda hata oluÅŸtu!', 'error');
+          showToast('Geri yükleme sırasında hata oluÅŸtu!', 'error');
         }
       },
       true,
@@ -1690,10 +1400,10 @@ function SelectiveRestore({
   };
 
   return (
-    <Card title="ğŸ“‚ SeÃ§imli Geri YÃ¼kleme">
+    <Card title="ğŸ“‚ Seçimli Geri Yükleme">
       <p className="text-muted-foreground text-sm">
-        Yedek dosyanÄ±zdan <strong className="text-orange-400 font-semibold">istediÄŸiniz bÃ¶lÃ¼mleri seÃ§erek</strong>{' '}
-        geri yÃ¼kleyin. TÃ¼m veriyi deÄŸiÅŸtirmek zorunda deÄŸilsiniz.
+        Yedek dosyanızdan <strong className="text-orange-400 font-semibold">istediÄŸiniz bölümleri seçerek</strong> geri
+        yükleyin. Tüm veriyi deÄŸiÅŸtirmek zorunda deÄŸilsiniz.
       </p>
 
       {!fileData ? (
@@ -1709,7 +1419,7 @@ function SelectiveRestore({
               (e.currentTarget as HTMLButtonElement).style.background = 'rgba(59,130,246,0.08)';
             }}
           >
-            JSON Yedek DosyasÄ± SeÃ§
+            JSON Yedek Dosyası Seç
           </Button>
         </>
       ) : (
@@ -1717,16 +1427,16 @@ function SelectiveRestore({
           <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-[10px] p-3">
             <span className="text-green-400 text-lg">ğŸ“„</span>
             <span className="text-green-400 font-bold">{fileName}</span>
-            <span className="text-muted-foreground text-xs">{available.length} bÃ¶lÃ¼m bulundu</span>
+            <span className="text-muted-foreground text-xs">{available.length} bölüm bulundu</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-foreground text-sm font-semibold">Geri YÃ¼klenecek BÃ¶lÃ¼mler:</span>
+            <span className="text-foreground text-sm font-semibold">Geri Yüklenecek Bölümler:</span>
             <Button onClick={selectAll} className="px-3 py-1.5 rounded-lg font-bold text-xs">
-              TÃ¼mÃ¼nÃ¼ SeÃ§
+              Tümünü Seç
             </Button>
             <Button onClick={selectNone} className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs">
-              HiÃ§birini SeÃ§me
+              Hiçbirini Seçme
             </Button>
           </div>
 
@@ -1779,7 +1489,7 @@ function SelectiveRestore({
                       {section.label}
                     </div>
                     <div className="text-[var(--text-dim)] text-sm">
-                      {section.isObject ? 'Ayarlar' : `${section.count} kayÄ±t`}
+                      {section.isObject ? 'Ayarlar' : `${section.count} kayıt`}
                     </div>
                   </div>
                 </div>
@@ -1789,15 +1499,15 @@ function SelectiveRestore({
 
           {selected.size > 0 && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              Mevcut ID'ler korunur. GeÃ§ersiz adlar (boÅŸ, tek haneli, sadece sayÄ±) ve zorunlu alanÄ± eksik kayÄ±tlar
-              atlanÄ±r.
+              Mevcut ID'ler korunur. Geçersiz adlar (boÅŸ, tek haneli, sadece sayı) ve zorunlu alanı eksik kayıtlar
+              atlanır.
             </div>
           )}
 
           {lastReport && lastReport.warnings.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               <div className="text-red-400 font-bold text-sm">
-                âš ï¸ Atlanan KayÄ±tlar (
+                âš ï¸ Atlanan Kayıtlar (
                 {lastReport.skippedDuplicate + lastReport.skippedInvalidName + lastReport.skippedMissingField})
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -1808,7 +1518,7 @@ function SelectiveRestore({
                 )}
                 {lastReport.skippedInvalidName > 0 && (
                   <span className="inline-flex items-center rounded-md border border-transparent bg-red-500/20 text-red-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
-                    âœ— {lastReport.skippedInvalidName} geÃ§ersiz ad
+                    âœ— {lastReport.skippedInvalidName} geçersiz ad
                   </span>
                 )}
                 {lastReport.skippedMissingField > 0 && (
@@ -1833,14 +1543,14 @@ function SelectiveRestore({
                 onClick={doRestore}
                 className="px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1"
               >
-                {selected.size} BÃ¶lÃ¼mÃ¼ Geri YÃ¼kle
+                {selected.size} Bölümü Geri Yükle
               </Button>
             )}
             <Button
               onClick={reset}
               className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
             >
-              SÄ±fÄ±rla
+              Sıfırla
             </Button>
           </div>
         </div>
@@ -1850,21 +1560,21 @@ function SelectiveRestore({
 }
 
 const KNOWN_ARRAYS: Record<string, string> = {
-  products: 'ÃœrÃ¼nler',
-  sales: 'SatÄ±ÅŸlar',
-  suppliers: 'TedarikÃ§iler',
-  cari: 'Cari MÃ¼ÅŸteriler',
+  products: 'Ãœrünler',
+  sales: 'SatıÅŸlar',
+  suppliers: 'Tedarikçiler',
+  cari: 'Cari MüÅŸteriler',
   kasa: 'Kasa Hareketleri',
-  bankTransactions: 'Banka Ä°ÅŸlemleri',
+  bankTransactions: 'Banka İÅŸlemleri',
   orders: 'SipariÅŸler',
   invoices: 'Faturalar',
   stockMovements: 'Stok Hareketleri',
-  peletSuppliers: 'Pelet TedarikÃ§i',
+  peletSuppliers: 'Pelet Tedarikçi',
   peletOrders: 'Pelet SipariÅŸ',
-  boruSuppliers: 'Boru TedarikÃ§i',
+  boruSuppliers: 'Boru Tedarikçi',
   boruOrders: 'Boru SipariÅŸ',
-  budgets: 'BÃ¼tÃ§e',
-  returns: 'Ä°adeler',
+  budgets: 'Bütçe',
+  returns: 'İadeler',
   ortakEmanetler: 'Ortak Emanet',
   installments: 'Taksitler',
 };
@@ -1898,7 +1608,7 @@ interface ConflictInfo {
 const CSV_COLUMN_MAP: Record<string, { target: string; field: string }> = {
   müşteri: { target: 'cari', field: 'name' },
   musteri: { target: 'cari', field: 'name' },
-  'mÃ¼ÅŸteri adÄ±': { target: 'cari', field: 'name' },
+  'müÅŸteri adı': { target: 'cari', field: 'name' },
   ad: { target: 'cari', field: 'name' },
   isim: { target: 'cari', field: 'name' },
   'ad soyad': { target: 'cari', field: 'name' },
@@ -2062,25 +1772,25 @@ function SmartImportManager({
     }> = [
       {
         entity: 'products',
-        label: 'ÃœrÃ¼n',
+        label: 'Ãœrün',
         dbItems: db.products,
         importKey: 'products',
       },
       {
         entity: 'sales',
-        label: 'SatÄ±ÅŸ',
+        label: 'SatıÅŸ',
         dbItems: db.sales,
         importKey: 'sales',
       },
       {
         entity: 'cari',
-        label: 'Cari MÃ¼ÅŸteri',
+        label: 'Cari MüÅŸteri',
         dbItems: db.cari,
         importKey: 'cari',
       },
       {
         entity: 'suppliers',
-        label: 'TedarikÃ§i',
+        label: 'Tedarikçi',
         dbItems: db.suppliers || [],
         importKey: 'suppliers',
       },
@@ -2114,18 +1824,18 @@ function SmartImportManager({
       const val = data[key];
       if (Array.isArray(val)) {
         if (val.length > 0) st[key] = val.length;
-        if (val.length === 0) warns.push(`"${KNOWN_ARRAYS[key]}" alanÄ± boÅŸ`);
+        if (val.length === 0) warns.push(`"${KNOWN_ARRAYS[key]}" alanı boÅŸ`);
       } else if (val !== undefined) {
-        errs.push(`"${key}" alanÄ± geÃ§ersiz format â€” dizi bekleniyor`);
+        errs.push(`"${key}" alanı geçersiz format â€” dizi bekleniyor`);
       }
     });
 
     if (!data.company || typeof data.company !== 'object')
-      warns.push('Åirket bilgisi bulunamadÄ± â€” varsayÄ±lan oluÅŸturulacak');
-    if (!data.pelletSettings) warns.push('Pelet ayarlarÄ± bulunamadÄ± â€” varsayÄ±lan kullanÄ±lacak');
-    if (!data._version) warns.push('Versiyon bilgisi yok â€” eski format olabilir, lÃ¼tfen kontrol edin');
+      warns.push('Şirket bilgisi bulunamadı â€” varsayılan oluÅŸturulacak');
+    if (!data.pelletSettings) warns.push('Pelet ayarları bulunamadı â€” varsayılan kullanılacak');
+    if (!data._version) warns.push('Versiyon bilgisi yok â€” eski format olabilir, lütfen kontrol edin');
     else if ((data._version as number) < 1)
-      warns.push(`Eski versiyon (${data._version}) â€” bazÄ± alanlar eksik olabilir`);
+      warns.push(`Eski versiyon (${data._version}) â€” bazı alanlar eksik olabilir`);
 
     return { errs, warns, st };
   };
@@ -2141,7 +1851,7 @@ function SmartImportManager({
       if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
         const rows = parseCSV(text);
         if (rows.length === 0) {
-          setErrors(['CSV dosyasÄ± boÅŸ veya geÃ§ersiz format']);
+          setErrors(['CSV dosyası boÅŸ veya geçersiz format']);
           setStage('preview');
           return;
         }
@@ -2159,7 +1869,7 @@ function SmartImportManager({
       try {
         const data = JSON.parse(text);
         if (typeof data !== 'object' || Array.isArray(data)) {
-          setErrors(['GeÃ§ersiz JSON formatÄ± â€” nesne bekleniyor']);
+          setErrors(['Geçersiz JSON formatı â€” nesne bekleniyor']);
           setStage('preview');
           setRawData(null);
           return;
@@ -2181,7 +1891,7 @@ function SmartImportManager({
         }
       } catch {
         logger.warn('settings', 'Dosya ayrıştırılamadı — JSON veya CSV formatı hatalı');
-        setErrors(['Dosya ayrÄ±ÅŸtÄ±rÄ±lamadÄ± â€” JSON veya CSV formatÄ±nÄ± kontrol edin']);
+        setErrors(['Dosya ayrıÅŸtırılamadı â€” JSON veya CSV formatını kontrol edin']);
         setStage('preview');
         setRawData(null);
       }
@@ -2232,7 +1942,7 @@ function SmartImportManager({
         if (!item.type) item.type = 'gider';
         if (!item.kasa) item.kasa = 'nakit';
         if (!item.amount) item.amount = 0;
-        if (!item.description) item.description = (item.name as string) || 'CSV Ä°Ã§e Aktarma';
+        if (!item.description) item.description = (item.name as string) || 'CSV İçe Aktarma';
         if (!item.category) item.category = 'diger';
       }
       return item;
@@ -2265,8 +1975,8 @@ function SmartImportManager({
   const doImport = () => {
     if (!mapped) return;
     showConfirm(
-      'Veri AktarÄ±mÄ±nÄ± Onayla',
-      'SeÃ§ilen Ã§akÄ±ÅŸma Ã§Ã¶zÃ¼mleri uygulanacak ve veriler iÃ§e aktarÄ±lacak. Mevcut veriler etkilenebilir. OnaylÄ±yor musunuz?',
+      'Veri Aktarımını Onayla',
+      'Seçilen çakıÅŸma çözümleri uygulanacak ve veriler içe aktarılacak. Mevcut veriler etkilenebilir. Onaylıyor musunuz?',
       () => {
         try {
           const raw = localStorage.getItem('sobaYonetim');
@@ -2349,11 +2059,11 @@ function SmartImportManager({
 
           localStorage.setItem('sobaYonetim', JSON.stringify(finalData));
           setStage('done');
-          showToast('Veriler baÅŸarÄ±yla aktarÄ±ldÄ±! Sayfa yenilenecek...', 'success');
+          showToast('Veriler baÅŸarıyla aktarıldı! Sayfa yenilenecek...', 'success');
           setTimeout(() => window.location.reload(), 1200);
         } catch {
           logger.warn('settings', 'İçe aktarma sırasında hata oluştu');
-          showToast('Ä°Ã§e aktarma sÄ±rasÄ±nda hata oluÅŸtu!', 'error');
+          showToast('İçe aktarma sırasında hata oluÅŸtu!', 'error');
         }
       },
       true,
@@ -2389,10 +2099,10 @@ function SmartImportManager({
   });
 
   return (
-    <Card title="ğŸ§  AkÄ±llÄ± Veri Ä°Ã§e Aktarma">
+    <Card title="ğŸ§  Akıllı Veri İçe Aktarma">
       <p className="text-muted-foreground text-sm">
-        JSON, CSV veya TXT dosyanÄ±zÄ± analiz eder; kolonlarÄ± otomatik eÅŸler (mÃ¼ÅŸteri, tarih, tutar vb.), manuel
-        dÃ¼zeltme imkanÄ± sunar ve Ã§akÄ±ÅŸmalarÄ± Ã§Ã¶zerek gÃ¼venli aktarÄ±m yapar.
+        JSON, CSV veya TXT dosyanızı analiz eder; kolonları otomatik eÅŸler (müÅŸteri, tarih, tutar vb.), manuel
+        düzeltme imkanı sunar ve çakıÅŸmaları çözerek güvenli aktarım yapar.
       </p>
 
       {stage === 'idle' && (
@@ -2402,7 +2112,7 @@ function SmartImportManager({
             onClick={() => fileRef.current?.click()}
             className="px-4 py-3 rounded-xl font-bold text-sm border-2 border-dashed border-purple-500/30 bg-purple-500/10 w-full"
           >
-            Dosya SeÃ§ & AkÄ±llÄ± Analiz BaÅŸlat
+            Dosya Seç & Akıllı Analiz BaÅŸlat
           </Button>
           <div className="flex items-center justify-center gap-2 flex-wrap">
             {['JSON', 'CSV', 'TSV', 'TXT'].map((f) => (
@@ -2420,18 +2130,18 @@ function SmartImportManager({
       {stage === 'csvMapping' && csvRows.length > 0 && (
         <div className="grid gap-4">
           <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-            <div className="text-green-400 font-bold">{csvRows.length} satÄ±r okundu</div>
+            <div className="text-green-400 font-bold">{csvRows.length} satır okundu</div>
             <div className="text-muted-foreground text-xs">
-              Kolon eÅŸleÅŸmelerini kontrol edin ve gerekirse dÃ¼zeltin
+              Kolon eÅŸleÅŸmelerini kontrol edin ve gerekirse düzeltin
             </div>
           </div>
 
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-foreground text-sm font-semibold">Hedef Veri TÃ¼rÃ¼:</span>
+              <span className="text-foreground text-sm font-semibold">Hedef Veri Türü:</span>
               {[
-                { id: 'cari', label: 'Cari MÃ¼ÅŸteri', icon: 'ğŸ‘¤' },
-                { id: 'products', label: 'ÃœrÃ¼n', icon: 'ğŸ“¦' },
+                { id: 'cari', label: 'Cari MüÅŸteri', icon: 'ğŸ‘¤' },
+                { id: 'products', label: 'Ãœrün', icon: 'ğŸ“¦' },
                 { id: 'kasa', label: 'Kasa', icon: 'ğŸ’°' },
               ].map((t) => (
                 <Button
@@ -2487,18 +2197,18 @@ function SmartImportManager({
                 className="px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-xs font-mono"
               >
                 <option value="">â€” Yoksay â€”</option>
-                <option value="name">Ad / Ä°sim</option>
+                <option value="name">Ad / İsim</option>
                 <option value="phone">Telefon</option>
                 <option value="email">E-posta</option>
                 <option value="address">Adres</option>
-                <option value="balance">Bakiye / BorÃ§</option>
+                <option value="balance">Bakiye / Borç</option>
                 <option value="amount">Tutar</option>
                 <option value="total">Toplam</option>
                 <option value="price">Fiyat</option>
                 <option value="cost">Maliyet</option>
                 <option value="stock">Stok</option>
                 <option value="category">Kategori</option>
-                <option value="description">AÃ§Ä±klama</option>
+                <option value="description">Açıklama</option>
                 <option value="note">Not</option>
                 <option value="createdAt">Tarih</option>
               </select>
@@ -2507,7 +2217,7 @@ function SmartImportManager({
 
           {csvRows.length > 0 && (
             <div className="bg-[rgba(0,0,0,0.3)] rounded-[10px] p-3 overflow-x-auto">
-              <div className="text-muted-foreground text-xs">Ã–nizleme (ilk 3 satÄ±r):</div>
+              <div className="text-muted-foreground text-xs">Ã–nizleme (ilk 3 satır):</div>
               <table className="w-full text-xs">
                 <thead>
                   <tr>
@@ -2538,13 +2248,13 @@ function SmartImportManager({
               onClick={applyCsvImport}
               className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
             >
-              Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
+              Devam â†’ Ã–nizleme & Ã‡akıÅŸma Ã‡özümü
             </Button>
             <Button
               onClick={reset}
               className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
             >
-              SÄ±fÄ±rla
+              Sıfırla
             </Button>
           </div>
         </div>
@@ -2555,7 +2265,7 @@ function SmartImportManager({
           <div className="text-foreground text-sm">ğŸ—ºï¸ Alan EÅŸleme (Field Mapping)</div>
           {Object.keys(legacyMapped).length > 0 && (
             <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              <div className="text-green-400 font-bold">âœ… Otomatik AlgÄ±lanan Eski Alanlar</div>
+              <div className="text-green-400 font-bold">âœ… Otomatik Algılanan Eski Alanlar</div>
               {Object.entries(legacyMapped).map(([src, dst]) => (
                 <div key={src} className="flex items-center gap-2">
                   <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-warning)]">
@@ -2572,7 +2282,7 @@ function SmartImportManager({
           )}
           {unknownFields.length > 0 && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              <div className="text-amber-400 font-bold text-sm">âš ï¸ TanÄ±nmayan Alanlar â€” EÅŸleme SeÃ§in</div>
+              <div className="text-amber-400 font-bold text-sm">âš ï¸ Tanınmayan Alanlar â€” EÅŸleme Seçin</div>
               {unknownFields.map((field) => (
                 <div key={field} className="flex items-center gap-2.5">
                   <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2.5 py-1 rounded text-[var(--color-warning)] text-center min-w-[120px]">
@@ -2605,13 +2315,13 @@ function SmartImportManager({
               onClick={() => proceedToPreview(rawData, fieldMappings)}
               className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
             >
-              Devam â†’ Ã–nizleme & Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼
+              Devam â†’ Ã–nizleme & Ã‡akıÅŸma Ã‡özümü
             </Button>
             <Button
               onClick={reset}
               className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
             >
-              SÄ±fÄ±rla
+              Sıfırla
             </Button>
           </div>
         </div>
@@ -2631,7 +2341,7 @@ function SmartImportManager({
           )}
           {warnings.length > 0 && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              <div className="text-amber-400 font-bold text-sm">âš ï¸ UyarÄ±lar</div>
+              <div className="text-amber-400 font-bold text-sm">âš ï¸ Uyarılar</div>
               {warnings.map((w, i) => (
                 <div key={i} className="text-amber-400 text-xs">
                   â€¢ {w}
@@ -2641,7 +2351,7 @@ function SmartImportManager({
           )}
           {Object.keys(stats).length > 0 && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              <div className="text-blue-400 font-bold text-sm">ğŸ“Š Ä°Ã§e AktarÄ±lacak KayÄ±tlar</div>
+              <div className="text-blue-400 font-bold text-sm">ğŸ“Š İçe Aktarılacak Kayıtlar</div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {Object.entries(stats).map(([k, v]) => (
                   <div key={k} className="bg-[var(--bg-card)] rounded-lg p-2 text-center">
@@ -2654,13 +2364,13 @@ function SmartImportManager({
           )}
           {conflicts.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              <div className="text-red-400 font-bold text-sm">âš¡ Ã‡akÄ±ÅŸma Ã‡Ã¶zÃ¼mÃ¼</div>
+              <div className="text-red-400 font-bold text-sm">âš¡ Ã‡akıÅŸma Ã‡özümü</div>
               {conflicts.map((c) => (
                 <div key={c.entity} className="border-b border-[var(--border)] pb-3 mb-3">
                   <div className="text-red-400 text-xs">
-                    <strong>{c.label}</strong>: {c.byId > 0 && `${c.byId} aynÄ± ID`}
+                    <strong>{c.label}</strong>: {c.byId > 0 && `${c.byId} aynı ID`}
                     {c.byId > 0 && c.byName > 0 && ', '}
-                    {c.byName > 0 && `${c.byName} aynÄ± isim`} Ã§akÄ±ÅŸmasÄ±
+                    {c.byName > 0 && `${c.byName} aynı isim`} çakıÅŸması
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -2678,7 +2388,7 @@ function SmartImportManager({
                       onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'skip' }))}
                       style={btnStyle(resolutions[c.entity] === 'skip', '#f59e0b')}
                     >
-                      â­ï¸ Ã‡akÄ±ÅŸanlarÄ± Atla
+                      â­ï¸ Ã‡akıÅŸanları Atla
                     </Button>
                     <Button
                       onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'merge' }))}
@@ -2688,11 +2398,11 @@ function SmartImportManager({
                     </Button>
                   </div>
                   <div className="text-[var(--text-dim)] text-xs">
-                    {resolutions[c.entity] === 'overwrite' && 'Mevcut kayÄ±tlar yeni verilerle tamamen deÄŸiÅŸtirilir.'}
+                    {resolutions[c.entity] === 'overwrite' && 'Mevcut kayıtlar yeni verilerle tamamen deÄŸiÅŸtirilir.'}
                     {resolutions[c.entity] === 'skip' &&
-                      'Ã‡akÄ±ÅŸan kayÄ±tlar atlanÄ±r; mevcut veriler korunur, yeni olanlar eklenir.'}
+                      'Ã‡akıÅŸan kayıtlar atlanır; mevcut veriler korunur, yeni olanlar eklenir.'}
                     {resolutions[c.entity] === 'merge' &&
-                      'Mevcut kayÄ±tlar yeni alanlarla gÃ¼ncellenir; hiÃ§ kayÄ±p olmaz.'}
+                      'Mevcut kayıtlar yeni alanlarla güncellenir; hiç kayıp olmaz.'}
                   </div>
                 </div>
               ))}
@@ -2704,14 +2414,14 @@ function SmartImportManager({
                 onClick={doImport}
                 className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
               >
-                âœ… AktarÄ±mÄ± Onayla & BaÅŸlat
+                âœ… Aktarımı Onayla & BaÅŸlat
               </Button>
             )}
             <Button
               onClick={reset}
               className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
             >
-              SÄ±fÄ±rla
+              Sıfırla
             </Button>
           </div>
         </div>
@@ -2720,7 +2430,7 @@ function SmartImportManager({
       {stage === 'done' && (
         <div className="text-center py-8 text-muted-foreground text-sm">
           <div className="text-4xl mb-3">âœ…</div>
-          <div className="text-green-400 font-bold">Veriler baÅŸarÄ±yla aktarÄ±ldÄ±!</div>
+          <div className="text-green-400 font-bold">Veriler baÅŸarıyla aktarıldı!</div>
           <div className="text-muted-foreground text-xs">Sayfa yenileniyor...</div>
         </div>
       )}
@@ -2754,33 +2464,33 @@ function VeriOnarim({
     const issues: string[] = [];
     const saleIds = db.sales.map((s) => s.id);
     const dupSales = saleIds.length - new Set(saleIds).size;
-    if (dupSales > 0) issues.push(`âš ï¸ ${dupSales} tekrarlanan satÄ±ÅŸ kaydÄ±`);
+    if (dupSales > 0) issues.push(`âš ï¸ ${dupSales} tekrarlanan satıÅŸ kaydı`);
     const negStock = db.products.filter((p) => p.stock < 0).length;
-    if (negStock > 0) issues.push(`âš ï¸ ${negStock} Ã¼rÃ¼nÃ¼n stok deÄŸeri negatif`);
+    if (negStock > 0) issues.push(`âš ï¸ ${negStock} ürünün stok deÄŸeri negatif`);
     const cariIds = new Set(db.cari.map((c) => c.id));
     const orphanKasa = db.kasa.filter((k) => k.cariId && !cariIds.has(k.cariId)).length;
-    if (orphanKasa > 0) issues.push(`âš ï¸ ${orphanKasa} kasa kaydÄ± silinmiÅŸ cariye baÄŸlÄ±`);
+    if (orphanKasa > 0) issues.push(`âš ï¸ ${orphanKasa} kasa kaydı silinmiÅŸ cariye baÄŸlı`);
     const soldProductIds = new Set(
       db.sales.flatMap((s) => s.items?.map((i: { productId: string }) => i.productId) || [s.productId]).filter(Boolean),
     );
     const stocklessProducts = db.products.filter((p) => soldProductIds.has(p.id) && p.stock === 0).length;
-    if (stocklessProducts > 0) issues.push(`â„¹ï¸ ${stocklessProducts} Ã¼rÃ¼n satÄ±ldÄ± ama stok sÄ±fÄ±r`);
-    if (!db.company.name) issues.push('â„¹ï¸ Åirket adÄ± girilmemiÅŸ');
+    if (stocklessProducts > 0) issues.push(`â„¹ï¸ ${stocklessProducts} ürün satıldı ama stok sıfır`);
+    if (!db.company.name) issues.push('â„¹ï¸ Şirket adı girilmemiÅŸ');
     const lsSize = new Blob([localStorage.getItem('sobaYonetim') || '']).size;
     const lsKB = Math.round(lsSize / 1024);
     issues.push(`ğŸ“Š localStorage boyutu: ${lsKB} KB (limit ~5MB)`);
     const orphanInvoices = (db.invoices || []).filter((inv) => inv.cariId && !cariIds.has(inv.cariId)).length;
-    if (orphanInvoices > 0) issues.push(`âš ï¸ ${orphanInvoices} fatura silinmiÅŸ cariye baÄŸlÄ±`);
-    setResults(issues.length === 0 ? ['âœ… Veri tutarlÄ±lÄ±k kontrolÃ¼ tamam. Sorun bulunamadÄ±!'] : issues);
+    if (orphanInvoices > 0) issues.push(`âš ï¸ ${orphanInvoices} fatura silinmiÅŸ cariye baÄŸlı`);
+    setResults(issues.length === 0 ? ['âœ… Veri tutarlılık kontrolü tamam. Sorun bulunamadı!'] : issues);
   };
 
   const fixNegativeStock = () => {
-    showConfirm('Stok DÃ¼zelt', 'Negatif stoklar sÄ±fÄ±ra Ã§ekilecek. Devam edilsin mi?', () => {
+    showConfirm('Stok Düzelt', 'Negatif stoklar sıfıra çekilecek. Devam edilsin mi?', () => {
       save((prev) => ({
         ...prev,
         products: prev.products.map((p) => (p.stock < 0 ? { ...p, stock: 0 } : p)),
       }));
-      showToast('Negatif stoklar dÃ¼zeltildi!');
+      showToast('Negatif stoklar düzeltildi!');
       diagnose();
     });
   };
@@ -2788,14 +2498,14 @@ function VeriOnarim({
   const fixOrphanKasa = () => {
     showConfirm(
       'Orphan Temizle',
-      'SilinmiÅŸ cariye ait kasa kayÄ±tlarÄ±ndaki cari baÄŸlantÄ±sÄ± kaldÄ±rÄ±lacak. Devam?',
+      'SilinmiÅŸ cariye ait kasa kayıtlarındaki cari baÄŸlantısı kaldırılacak. Devam?',
       () => {
         const cariIds = new Set(db.cari.map((c) => c.id));
         save((prev) => ({
           ...prev,
           kasa: prev.kasa.map((k) => (k.cariId && !cariIds.has(k.cariId) ? { ...k, cariId: undefined } : k)),
         }));
-        showToast('Orphan kasa kayÄ±tlarÄ± dÃ¼zeltildi!');
+        showToast('Orphan kasa kayıtları düzeltildi!');
         diagnose();
       },
     );
@@ -2804,7 +2514,7 @@ function VeriOnarim({
   const recalcCariBalance = () => {
     showConfirm(
       'Bakiye Yeniden Hesapla',
-      'TÃ¼m cari bakiyeleri kasa iÅŸlemlerine gÃ¶re sÄ±fÄ±rdan hesaplanacak. Mevcut bakiyeler SIFIRLANACAK!',
+      'Tüm cari bakiyeleri kasa iÅŸlemlerine göre sıfırdan hesaplanacak. Mevcut bakiyeler SIFIRLANACAK!',
       () => {
         save((prev) => {
           const cari = prev.cari.map((c) => {
@@ -2814,7 +2524,7 @@ function VeriOnarim({
           });
           return { ...prev, cari };
         });
-        showToast('Cari bakiyeler yeniden hesaplandÄ±!');
+        showToast('Cari bakiyeler yeniden hesaplandı!');
         diagnose();
       },
       true,
@@ -2822,25 +2532,21 @@ function VeriOnarim({
   };
 
   const removeDupSales = () => {
-    showConfirm(
-      'TekrarlarÄ± Temizle',
-      "AynÄ± ID'li tekrarlanan satÄ±ÅŸ kayÄ±tlarÄ± silinecek. Devam edilsin mi?",
-      () => {
-        save((prev) => {
-          const seen = new Set<string>();
-          return {
-            ...prev,
-            sales: prev.sales.filter((s) => {
-              if (seen.has(s.id)) return false;
-              seen.add(s.id);
-              return true;
-            }),
-          };
-        });
-        showToast('Tekrarlanan satÄ±ÅŸlar temizlendi!');
-        diagnose();
-      },
-    );
+    showConfirm('Tekrarları Temizle', "Aynı ID'li tekrarlanan satıÅŸ kayıtları silinecek. Devam edilsin mi?", () => {
+      save((prev) => {
+        const seen = new Set<string>();
+        return {
+          ...prev,
+          sales: prev.sales.filter((s) => {
+            if (seen.has(s.id)) return false;
+            seen.add(s.id);
+            return true;
+          }),
+        };
+      });
+      showToast('Tekrarlanan satıÅŸlar temizlendi!');
+      diagnose();
+    });
   };
 
   const mergeduplicateCari = () => {
@@ -2852,12 +2558,12 @@ function VeriOnarim({
     });
     const dups = Object.entries(nameCounts).filter(([, ids]) => ids.length > 1);
     if (dups.length === 0) {
-      showToast('Tekrarlanan cari bulunamadÄ±!');
+      showToast('Tekrarlanan cari bulunamadı!');
       return;
     }
     showConfirm(
       'Cari BirleÅŸtir',
-      `${dups.length} isimde tekrar var. Ä°lk kayÄ±t korunacak. Devam?`,
+      `${dups.length} isimde tekrar var. İlk kayıt korunacak. Devam?`,
       () => {
         save((prev) => {
           const toRemove = new Set<string>();
@@ -2876,9 +2582,9 @@ function VeriOnarim({
 
   return (
     <div className="grid gap-4">
-      <Card title="ğŸ”§ Veri TutarlÄ±lÄ±k KontrolÃ¼">
+      <Card title="ğŸ”§ Veri Tutarlılık Kontrolü">
         <p className="text-muted-foreground text-sm">
-          VeritabanÄ±nÄ±zÄ± analiz ederek tutarsÄ±z, eksik veya hatalÄ± kayÄ±tlarÄ± tespit edin.
+          Veritabanınızı analiz ederek tutarsız, eksik veya hatalı kayıtları tespit edin.
         </p>
         <div className="flex items-center gap-2.5">
           <Button
@@ -2886,7 +2592,7 @@ function VeriOnarim({
             className="px-3 py-2.5 rounded-xl font-bold text-sm bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1"
             style={{ flex: 1 }}
           >
-            ğŸ” HÄ±zlÄ± Analiz
+            ğŸ” Hızlı Analiz
           </Button>
           <Button
             onClick={handleDetailedHealthCheck}
@@ -2894,7 +2600,7 @@ function VeriOnarim({
             className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
             style={{ flex: 1 }}
           >
-            {checkingHealth ? 'âŒ› Analiz Ediliyor...' : 'ğŸ›¡ï¸ Tam Sistem TaramasÄ±'}
+            {checkingHealth ? 'âŒ› Analiz Ediliyor...' : 'ğŸ›¡ï¸ Tam Sistem Taraması'}
           </Button>
         </div>
 
@@ -2915,7 +2621,7 @@ function VeriOnarim({
                   color: healthReport.overall === 'healthy' ? 'var(--color-success)' : 'var(--color-danger)',
                 }}
               >
-                {healthReport.overall === 'healthy' ? 'âœ… Sistem SaÄŸlÄ±klÄ±' : 'âš ï¸ Sistemde Sorunlar Var'}(
+                {healthReport.overall === 'healthy' ? 'âœ… Sistem SaÄŸlıklı' : 'âš ï¸ Sistemde Sorunlar Var'}(
                 {healthReport.score}/100)
               </div>
             </div>
@@ -2979,36 +2685,36 @@ function VeriOnarim({
         )}
       </Card>
 
-      <Card title="ğŸ› ï¸ OnarÄ±m AraÃ§larÄ±">
+      <Card title="ğŸ› ï¸ Onarım Araçları">
         <div className="grid gap-2.5">
           {[
             {
-              label: 'ğŸ“¦ Negatif StoklarÄ± SÄ±fÄ±rla',
-              desc: "Stok deÄŸeri 0'Ä±n altÄ±na dÃ¼ÅŸmÃ¼ÅŸ Ã¼rÃ¼nleri sÄ±fÄ±ra Ã§eker",
+              label: 'ğŸ“¦ Negatif Stokları Sıfırla',
+              desc: "Stok deÄŸeri 0'ın altına düÅŸmüÅŸ ürünleri sıfıra çeker",
               action: fixNegativeStock,
               color: '#f59e0b',
             },
             {
-              label: 'ğŸ”— Orphan Kasa BaÄŸlantÄ±larÄ±nÄ± Temizle',
-              desc: 'SilinmiÅŸ cariye baÄŸlÄ± kasa kayÄ±tlarÄ±ndaki baÄŸlantÄ±yÄ± kaldÄ±rÄ±r',
+              label: 'ğŸ”— Orphan Kasa BaÄŸlantılarını Temizle',
+              desc: 'SilinmiÅŸ cariye baÄŸlı kasa kayıtlarındaki baÄŸlantıyı kaldırır',
               action: fixOrphanKasa,
               color: '#3b82f6',
             },
             {
               label: 'âš–ï¸ Cari Bakiyeleri Yeniden Hesapla',
-              desc: 'TÃ¼m bakiyeleri kasa iÅŸlemlerine gÃ¶re baÅŸtan hesaplar',
+              desc: 'Tüm bakiyeleri kasa iÅŸlemlerine göre baÅŸtan hesaplar',
               action: recalcCariBalance,
               color: '#8b5cf6',
             },
             {
-              label: 'ğŸ—‘ï¸ Tekrarlayan SatÄ±ÅŸ KayÄ±tlarÄ±nÄ± Temizle',
-              desc: 'AynÄ± ID ile Ã§ift kaydedilmiÅŸ satÄ±ÅŸlarÄ± siler',
+              label: 'ğŸ—‘ï¸ Tekrarlayan SatıÅŸ Kayıtlarını Temizle',
+              desc: 'Aynı ID ile çift kaydedilmiÅŸ satıÅŸları siler',
               action: removeDupSales,
               color: '#10b981',
             },
             {
-              label: 'ğŸ¤ AynÄ± Ä°simli Cari HesaplarÄ± BirleÅŸtir',
-              desc: 'AynÄ± isimde birden fazla cari varsa tek kayÄ±t bÄ±rakÄ±r',
+              label: 'ğŸ¤ Aynı İsimli Cari Hesapları BirleÅŸtir',
+              desc: 'Aynı isimde birden fazla cari varsa tek kayıt bırakır',
               action: mergeduplicateCari,
               color: '#ef4444',
             },
@@ -3054,8 +2760,8 @@ function VeriOnarim({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
             {
-              label: 'Toplam KayÄ±t',
-              value: `${[db.products, db.sales, db.cari, db.kasa, db.invoices || [], db.budgets || []].reduce((s, a) => s + a.length, 0)} kayÄ±t`,
+              label: 'Toplam Kayıt',
+              value: `${[db.products, db.sales, db.cari, db.kasa, db.invoices || [], db.budgets || []].reduce((s, a) => s + a.length, 0)} kayıt`,
             },
             {
               label: 'localStorage Boyutu',
@@ -3063,7 +2769,7 @@ function VeriOnarim({
             },
             { label: 'Uygulama Versiyonu', value: `v${db._version || 1}` },
             {
-              label: 'Son Veri GÃ¼ncellemesi',
+              label: 'Son Veri Güncellemesi',
               value:
                 db.kasa.length > 0
                   ? new Date(
@@ -3092,7 +2798,7 @@ function DangerAction({ label, desc, onConfirm }: { label: string; desc: string;
         <div className="text-[var(--text-dim)] text-xs">{desc}</div>
       </div>
       <Button
-        onClick={() => showConfirm(label, `${desc}. Bu iÅŸlem geri alÄ±namaz!`, onConfirm, true)}
+        onClick={() => showConfirm(label, `${desc}. Bu iÅŸlem geri alınamaz!`, onConfirm, true)}
         className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs"
       >
         Temizle
@@ -3134,7 +2840,7 @@ function FV({
   );
 }
 
-// â”€â”€ Kategori YÃ¶netim Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Kategori Yönetim Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) => void }) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
@@ -3147,17 +2853,17 @@ function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) =>
   const addKat = () => {
     const ad = yeniAd.trim();
     if (!ad) {
-      showToast('Kategori adÄ± gerekli!', 'error');
+      showToast('Kategori adı gerekli!', 'error');
       return;
     }
     const id = ad
       .toLowerCase()
       .replace(/ÄŸ/g, 'g')
-      .replace(/Ã¼/g, 'u')
+      .replace(/ü/g, 'u')
       .replace(/ÅŸ/g, 's')
-      .replace(/Ä±/g, 'i')
-      .replace(/Ã¶/g, 'o')
-      .replace(/Ã§/g, 'c')
+      .replace(/ı/g, 'i')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c')
       .replace(/[^a-z0-9]/g, '_')
       .replace(/_+/g, '_');
     if (cats.find((c) => c.id === id)) {
@@ -3186,13 +2892,13 @@ function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) =>
       ),
     }));
     setEditId(null);
-    showToast('GÃ¼ncellendi!', 'success');
+    showToast('Güncellendi!', 'success');
   };
 
   const deleteKat = (id: string) => {
     const used = db.products.filter((p) => !p.deleted && p.category === id).length;
     if (used > 0) {
-      showToast(`${used} Ã¼rÃ¼n bu kategoriyi kullanÄ±yor, silemezsiniz!`, 'error');
+      showToast(`${used} ürün bu kategoriyi kullanıyor, silemezsiniz!`, 'error');
       return;
     }
     showConfirm('Kategori Sil', 'Bu kategoriyi silmek istiyor musunuz?', () => {
@@ -3205,9 +2911,9 @@ function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) =>
   };
 
   return (
-    <Card title="ğŸ·ï¸ ÃœrÃ¼n Kategorileri">
+    <Card title="ğŸ·ï¸ Ãœrün Kategorileri">
       <div className="flex flex-col gap-3">
-        {cats.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">HenÃ¼z kategori yok</div>}
+        {cats.length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">Henüz kategori yok</div>}
         {cats.map((c) => (
           <div key={c.id} className="flex items-center gap-2.5">
             {editId === c.id ? (
@@ -3244,7 +2950,7 @@ function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) =>
                 <span className="text-foreground font-semibold">{c.name}</span>
                 <span className="text-[var(--text-dim)] text-xs font-mono">{c.id}</span>
                 <span className="text-[var(--text-dim)] text-xs">
-                  {db.products.filter((p) => !p.deleted && p.category === c.id).length} Ã¼rÃ¼n
+                  {db.products.filter((p) => !p.deleted && p.category === c.id).length} ürün
                 </span>
                 <Button
                   onClick={() => {
@@ -3279,18 +2985,18 @@ function KategoriYonetim({ db, save }: { db: DB; save: (fn: (prev: DB) => DB) =>
           onChange={(e) => setYeniAd(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addKat()}
           className={`${inpBase} flex-1`}
-          placeholder="Yeni kategori adÄ±..."
+          placeholder="Yeni kategori adı..."
         />
         <Button onClick={addKat} className="btn-primary px-4 py-2 rounded-xl font-bold text-sm">
           + Ekle
         </Button>
       </div>
-      <p className="text-[var(--text-dim)] text-xs mt-2">ÃœrÃ¼nleri kullanan kategoriler silinemez.</p>
+      <p className="text-[var(--text-dim)] text-xs mt-2">Ãœrünleri kullanan kategoriler silinemez.</p>
     </Card>
   );
 }
 
-// â”€â”€ HakkÄ±nda Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Hakkında Paneli â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AboutPanel({ db }: { db: DB }) {
   const totalRecords = [db.products, db.sales, db.cari, db.kasa, db.invoices || [], db.orders, db.suppliers].reduce(
     (s, a) => s + a.length,
@@ -3329,13 +3035,13 @@ function AboutPanel({ db }: { db: DB }) {
 
   return (
     <div className="grid gap-4">
-      {/* Logo & BaÅŸlÄ±k */}
+      {/* Logo & BaÅŸlık */}
       <div className="text-center py-6">
         <div className="text-4xl mb-2">{appCfg.appIcon}</div>
         <h2 className="text-foreground text-lg font-bold">{appCfg.appName}</h2>
         <p className="text-foreground text-sm">{APP_SUBTITLE}</p>
         <div className="flex items-center justify-center gap-2 flex-wrap">
-          {/* Versiyon â€” tÄ±klanabilir */}
+          {/* Versiyon â€” tıklanabilir */}
           {editVersion ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -3383,7 +3089,7 @@ function AboutPanel({ db }: { db: DB }) {
                 setEditVersion(true);
                 setVersionInput(appCfg.version);
               }}
-              title="Versiyonu dÃ¼zenle"
+              title="Versiyonu düzenle"
               className="inline-flex items-center rounded-md border border-transparent bg-primary/20 text-primary px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap"
             >
               v{appCfg.version} âœï¸
@@ -3393,7 +3099,7 @@ function AboutPanel({ db }: { db: DB }) {
             DB v{db._version || 1}
           </span>
           <span className="inline-flex items-center rounded-md border border-transparent bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap">
-            {totalRecords} kayÄ±t Â· {lsKB} KB
+            {totalRecords} kayıt Â· {lsKB} KB
           </span>
         </div>
       </div>
@@ -3420,18 +3126,18 @@ function AboutPanel({ db }: { db: DB }) {
         </div>
       </Card>
 
-      {/* VeritabanÄ± Ã–zeti */}
-      <Card title="ğŸ—„ï¸ VeritabanÄ± Ã–zeti">
+      {/* Veritabanı Ã–zeti */}
+      <Card title="ğŸ—„ï¸ Veritabanı Ã–zeti">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
             {
               icon: 'ğŸ“¦',
-              label: 'ÃœrÃ¼nler',
+              label: 'Ãœrünler',
               count: db.products.filter((p) => !p.deleted).length,
             },
             {
               icon: 'ğŸ›’',
-              label: 'SatÄ±ÅŸlar',
+              label: 'SatıÅŸlar',
               count: db.sales.filter((s) => !s.deleted).length,
             },
             {
@@ -3441,7 +3147,7 @@ function AboutPanel({ db }: { db: DB }) {
             },
             {
               icon: 'ğŸ’°',
-              label: 'Kasa KayÄ±tlarÄ±',
+              label: 'Kasa Kayıtları',
               count: db.kasa.filter((k) => !k.deleted).length,
             },
             {
@@ -3449,7 +3155,7 @@ function AboutPanel({ db }: { db: DB }) {
               label: 'Faturalar',
               count: (db.invoices || []).filter((i) => !i.deleted).length,
             },
-            { icon: 'ğŸ­', label: 'TedarikÃ§iler', count: db.suppliers.length },
+            { icon: 'ğŸ­', label: 'Tedarikçiler', count: db.suppliers.length },
             { icon: 'ğŸ“‹', label: 'SipariÅŸler', count: db.orders.length },
             {
               icon: 'ğŸ“ˆ',
@@ -3466,8 +3172,8 @@ function AboutPanel({ db }: { db: DB }) {
         </div>
       </Card>
 
-      {/* SÃ¼rÃ¼m KitapÃ§Ä±ÄŸÄ± â€” Changelog */}
-      <Card title="ğŸ“– SÃ¼rÃ¼m GeÃ§miÅŸi">
+      {/* Sürüm KitapçıÄŸı â€” Changelog */}
+      <Card title="ğŸ“– Sürüm GeçmiÅŸi">
         <div className="grid gap-2">
           {CHANGELOG.map((entry) => {
             const isExpanded = expandedVersion === entry.version;
@@ -3483,7 +3189,7 @@ function AboutPanel({ db }: { db: DB }) {
                   transition: 'all 0.2s',
                 }}
               >
-                {/* BaÅŸlÄ±k satÄ±rÄ± */}
+                {/* BaÅŸlık satırı */}
                 <Button
                   onClick={() => setExpandedVersion(isExpanded ? null : entry.version)}
                   className="w-full flex items-center gap-3 p-3 bg-transparent border-none cursor-pointer text-left"
@@ -3562,7 +3268,7 @@ function AboutPanel({ db }: { db: DB }) {
           {[
             { label: 'Uygulama', value: `${appCfg.appName} â€” ${APP_SUBTITLE}` },
             { label: 'GeliÅŸtirici', value: 'Pars Pelet' },
-            { label: 'Lisans', value: 'Ã–zel KullanÄ±m â€” TÃ¼m haklarÄ± saklÄ±dÄ±r' },
+            { label: 'Lisans', value: 'Ã–zel Kullanım â€” Tüm hakları saklıdır' },
             { label: 'Platform', value: 'Web (PWA) + Android (Capacitor)' },
           ].map((row) => (
             <div key={row.label} className="flex items-center gap-3">
@@ -3595,51 +3301,51 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
   const agents = [
     {
       id: 'stok',
-      name: 'Stok AjanÄ±',
+      name: 'Stok Ajanı',
       icon: 'ğŸ“¦',
-      desc: 'ÃœrÃ¼n stok yÃ¶netimi ve uyarÄ±larÄ±',
+      desc: 'Ãœrün stok yönetimi ve uyarıları',
       permissions: ['stok.read', 'stok.write'],
     },
     {
       id: 'kasa',
-      name: 'Kasa AjanÄ±',
+      name: 'Kasa Ajanı',
       icon: 'ğŸ’°',
-      desc: 'Kasa iÅŸlemleri ve nakit yÃ¶netimi',
+      desc: 'Kasa iÅŸlemleri ve nakit yönetimi',
       permissions: ['kasa.read', 'kasa.write'],
     },
     {
       id: 'cari',
-      name: 'Cari AjanÄ±',
+      name: 'Cari Ajanı',
       icon: 'ğŸ‘¤',
-      desc: 'MÃ¼ÅŸteri ve tedarikÃ§i yÃ¶netimi',
+      desc: 'MüÅŸteri ve tedarikçi yönetimi',
       permissions: ['cari.read', 'cari.write'],
     },
     {
       id: 'satis',
-      name: 'SatÄ±ÅŸ AjanÄ±',
+      name: 'SatıÅŸ Ajanı',
       icon: 'ğŸ›’',
-      desc: 'SatÄ±ÅŸ iÅŸlemleri ve raporlama',
+      desc: 'SatıÅŸ iÅŸlemleri ve raporlama',
       permissions: ['satis.read', 'satis.write'],
     },
     {
       id: 'fatura',
-      name: 'Fatura AjanÄ±',
+      name: 'Fatura Ajanı',
       icon: 'ğŸ§¾',
-      desc: 'Fatura oluÅŸturma ve yÃ¶netimi',
+      desc: 'Fatura oluÅŸturma ve yönetimi',
       permissions: ['fatura.read', 'fatura.write'],
     },
     {
       id: 'rapor',
-      name: 'Rapor AjanÄ±',
+      name: 'Rapor Ajanı',
       icon: 'ğŸ“Š',
       desc: 'Raporlar ve analitik',
       permissions: ['rapor.read'],
     },
     {
       id: 'deep_seek',
-      name: 'DeepSeek AjanÄ±',
+      name: 'DeepSeek Ajanı',
       icon: 'ğŸ¤–',
-      desc: 'Yapay zeka destekli analiz ve Ã¶neriler',
+      desc: 'Yapay zeka destekli analiz ve öneriler',
       permissions: ['deep_seek.read', 'deep_seek.write'],
     },
   ];
@@ -3650,7 +3356,7 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
       const parsed = raw ? JSON.parse(raw) : {};
       parsed.agentSettings = agentSettings;
       localStorage.setItem('sobaYonetim', JSON.stringify(parsed));
-      showToast('Ajan ayarlarÄ± kaydedildi!', 'success');
+      showToast('Ajan ayarları kaydedildi!', 'success');
     } catch {
       logger.warn('settings', 'Ajan ayarları kaydedilemedi');
       showToast('Ayarlar kaydedilemedi!', 'error');
@@ -3681,20 +3387,20 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
 
   const resetToDefaults = () => {
     showConfirm(
-      'VarsayÄ±lan Ayarlara DÃ¶n',
-      'TÃ¼m ajan ayarlarÄ± varsayÄ±lan deÄŸerlere sÄ±fÄ±rlanacak. Emin misiniz?',
+      'Varsayılan Ayarlara Dön',
+      'Tüm ajan ayarları varsayılan deÄŸerlere sıfırlanacak. Emin misiniz?',
       () => {
         setAgentSettings(getDefaultAgentSettings());
-        showToast('VarsayÄ±lan ayarlara dÃ¶ndÃ¼!', 'success');
+        showToast('Varsayılan ayarlara döndü!', 'success');
       },
     );
   };
 
   return (
     <div className="grid gap-4">
-      <Card title="ğŸ¤– Ajan YÃ¶netimi">
+      <Card title="ğŸ¤– Ajan Yönetimi">
         <p className="text-muted-foreground text-sm">
-          Sistemdeki ajanlarÄ± etkinleÅŸtirin/devre dÄ±ÅŸÄ± bÄ±rakÄ±n ve izinlerini yÃ¶netin.
+          Sistemdeki ajanları etkinleÅŸtirin/devre dıÅŸı bırakın ve izinlerini yönetin.
         </p>
 
         <div className="grid gap-2">
@@ -3717,7 +3423,7 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
                   opacity: enabled ? 1 : 0.6,
                 }}
               >
-                {/* BaÅŸlÄ±k */}
+                {/* BaÅŸlık */}
                 <div className="flex items-center gap-3">
                   <span style={{ fontSize: '1.4rem' }}>{agent.icon}</span>
                   <div className="flex-1">
@@ -3741,10 +3447,10 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
                   </Button>
                 </div>
 
-                {/* Ä°zinler */}
+                {/* İzinler */}
                 {enabled && (
                   <div className="grid gap-2">
-                    <div className="text-[var(--text-dim)] text-xs">Ä°zinler:</div>
+                    <div className="text-[var(--text-dim)] text-xs">İzinler:</div>
                     {agent.permissions.map((perm) => (
                       <label
                         key={perm}
@@ -3777,19 +3483,19 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
 
         <div className="flex items-center gap-2.5">
           <Button onClick={saveAgentSettings} className="btn-primary w-full py-3 rounded-xl font-bold text-sm">
-            ğŸ’¾ Ajan AyarlarÄ±nÄ± Kaydet
+            ğŸ’¾ Ajan Ayarlarını Kaydet
           </Button>
           <Button
             onClick={resetToDefaults}
             className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
           >
-            â†º VarsayÄ±lana DÃ¶n
+            â†º Varsayılana Dön
           </Button>
         </div>
       </Card>
 
-      {/* Ajan Ä°statistikleri */}
-      <Card title="ğŸ“Š Ajan Ä°statistikleri">
+      {/* Ajan İstatistikleri */}
+      <Card title="ğŸ“Š Ajan İstatistikleri">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
             {
@@ -3799,7 +3505,7 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
               color: '#10b981',
             },
             {
-              label: 'Toplam Ä°zin',
+              label: 'Toplam İzin',
               count: Object.values(agentSettings).reduce(
                 (sum: number, agent) =>
                   sum + ((agent as Record<string, unknown>)?.permissions as string[])?.length || 0,
@@ -3809,7 +3515,7 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
               color: '#f59e0b',
             },
             {
-              label: 'YapÄ±landÄ±rÄ±lan',
+              label: 'Yapılandırılan',
               count: Object.keys(agentSettings).length,
               icon: 'âš™ï¸',
               color: '#3b82f6',
@@ -3841,28 +3547,28 @@ function AgentSettingsPanel({ db: _db, save: _save }: { db: DB; save: (fn: (prev
         </div>
       </Card>
 
-      {/* Ajan AÃ§Ä±klamasÄ± */}
-      <Card title="â„¹ï¸ Ajan AÃ§Ä±klamasÄ±">
+      {/* Ajan Açıklaması */}
+      <Card title="â„¹ï¸ Ajan Açıklaması">
         <div className="grid gap-2">
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
             <div className="text-foreground text-sm font-semibold">ğŸ¤– Ajanlar Nedir?</div>
             <p className="text-muted-foreground text-xs">
-              Ajanlar, uygulamanÄ±n belirli gÃ¶revleri otomatik olarak yerine getirmesine yardÄ±mcÄ± olan yapay zeka
-              bileÅŸenleridir. Her ajan belirli bir alan (stok, kasa, satÄ±ÅŸ vb.) Ã¼zerinde Ã§alÄ±ÅŸÄ±r.
+              Ajanlar, uygulamanın belirli görevleri otomatik olarak yerine getirmesine yardımcı olan yapay zeka
+              bileÅŸenleridir. Her ajan belirli bir alan (stok, kasa, satıÅŸ vb.) üzerinde çalıÅŸır.
             </p>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-            <div className="text-foreground text-sm font-semibold">ğŸ” Ä°zinler Nedir?</div>
+            <div className="text-foreground text-sm font-semibold">ğŸ” İzinler Nedir?</div>
             <p className="text-muted-foreground text-xs">
-              Ä°zinler, her ajanÄ±n hangi iÅŸlemleri yapabileceÄŸini kontrol eder. "read" = okuma, "write" =
-              yazma/deÄŸiÅŸtirme. GÃ¼venlik iÃ§in sadece gerekli izinleri verin.
+              İzinler, her ajanın hangi iÅŸlemleri yapabileceÄŸini kontrol eder. "read" = okuma, "write" =
+              yazma/deÄŸiÅŸtirme. Güvenlik için sadece gerekli izinleri verin.
             </p>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-            <div className="text-foreground text-sm font-semibold">âš¡ EtkinleÅŸtirme/Devre DÄ±ÅŸÄ± BÄ±rakma</div>
+            <div className="text-foreground text-sm font-semibold">âš¡ EtkinleÅŸtirme/Devre DıÅŸı Bırakma</div>
             <p className="text-muted-foreground text-xs">
-              AjanlarÄ± geÃ§ici olarak devre dÄ±ÅŸÄ± bÄ±rakabilirsiniz. Devre dÄ±ÅŸÄ± bÄ±rakÄ±lan ajanlar hiÃ§bir iÅŸlem
-              yapmaz ve sistem performansÄ±nÄ± etkilemez.
+              Ajanları geçici olarak devre dıÅŸı bırakabilirsiniz. Devre dıÅŸı bırakılan ajanlar hiçbir iÅŸlem yapmaz ve
+              sistem performansını etkilemez.
             </p>
           </div>
         </div>
