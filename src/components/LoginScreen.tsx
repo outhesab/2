@@ -101,6 +101,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
   // Kayıt modu
   const [registerMode, setRegisterMode] = useState(false);
   const [pass2, setPass2] = useState('');
+  const [capsLock, setCapsLock] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -178,11 +179,14 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
     setLoading(false);
   };
 
-  const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (registerMode) handleRegister();
-      else handleLogin();
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (registerMode) handleRegister();
+    else handleLogin();
+  };
+
+  const handleCapsLock = (e: React.KeyboardEvent) => {
+    setCapsLock(e.getModifierState('CapsLock'));
   };
 
   const fbDots = { connecting: '◌', ready: '●', error: '✕' };
@@ -246,7 +250,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
             </div>
           )}
 
-          {/* Hata */}
+          {/* Hata + misafir */}
           {fbStatus === 'error' && (
             <div className="login-error-box">
               <div className="login-error-title"><AlertTriangle size={14} /> Bağlantı Hatası</div>
@@ -263,7 +267,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
           {/* Form */}
           {(fbStatus === 'ready' || fbStatus === 'error') && (
-            <div className="login-form">
+            <form className="login-form" onSubmit={handleSubmit}>
               {/* Kullanıcı adı */}
               <div className="login-field">
                 <User className="login-field-icon" size={18} />
@@ -273,7 +277,6 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                   type="text"
                   value={username}
                   onChange={e => { setUsername(e.target.value); setError(''); }}
-                  onKeyDown={handleKey}
                   placeholder="Kullanıcı adı"
                   autoComplete="username"
                 />
@@ -287,7 +290,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                   type={showPass ? 'text' : 'password'}
                   value={pass}
                   onChange={e => { setPass(e.target.value); setError(''); }}
-                  onKeyDown={handleKey}
+                  onKeyDown={handleCapsLock}
                   placeholder="Şifre (en az 4 karakter)"
                   autoComplete={registerMode ? 'new-password' : 'current-password'}
                 />
@@ -305,10 +308,17 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                     type={showPass ? 'text' : 'password'}
                     value={pass2}
                     onChange={e => { setPass2(e.target.value); setError(''); }}
-                    onKeyDown={handleKey}
+                    onKeyDown={handleCapsLock}
                     placeholder="Şifreyi tekrar girin"
                     autoComplete="new-password"
                   />
+                </div>
+              )}
+
+              {/* Caps Lock uyarısı */}
+              {capsLock && (
+                <div className="login-capslock-warn">
+                  <AlertTriangle size={14} /> Caps Lock açık!
                 </div>
               )}
 
@@ -330,6 +340,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               {/* Demo hızlı giriş */}
               {!registerMode && (
                 <button
+                  type="button"
                   className="login-demo-btn"
                   onClick={() => handleLogin('demo29605', 'demo1234')}
                   disabled={loading}
@@ -340,8 +351,8 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
               {/* Buton */}
               <button
+                type="submit"
                 className="login-btn"
-                onClick={registerMode ? handleRegister : handleLogin}
                 disabled={loading}
               >
                 {loading
@@ -355,16 +366,29 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
               {/* Kayıt / Giriş geçiş linki */}
               <div className="login-switch-row">
-                <button className="login-switch-btn" onClick={() => { setRegisterMode(v => !v); setError(''); setPass(''); setPass2(''); }}>
+                <button type="button" className="login-switch-btn" onClick={() => { setRegisterMode(v => !v); setError(''); setPass(''); setPass2(''); }}>
                   {registerMode ? 'Zaten hesabın var mı? Giriş Yap' : 'Hesabın yok mu? Kayıt Ol'}
                 </button>
               </div>
-            </div>
+
+              {/* Misafir girişi (ready modunda da göster) */}
+              {!registerMode && (
+                <div className="login-guest-row">
+                  <button type="button" className="login-guest-link" onClick={() => {
+                    const guest = startGuestSession();
+                    setSuccess(true);
+                    setTimeout(() => onLogin(guest, false), 900);
+                  }}>
+                    <Zap size={14} /> 15dk Misafir Girişi
+                  </button>
+                </div>
+              )}
+            </form>
           )}
 
           {/* Yeniden bağlan */}
           {fbStatus === 'error' && (
-            <button className="login-retry-btn" onClick={checkUsers}>
+            <button className="login-retry-btn" onClick={checkUsers} disabled={loading}>
               <RefreshCw size={16} /> Yeniden Bağlan
             </button>
           )}

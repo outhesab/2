@@ -23,6 +23,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [3.7.3] - 7 Haziran 2026
+
+### Hata Düzeltmeleri
+- `<form>` onSubmit yapısına geçirildi — native form davranışı, password manager uyumu iyileşti
+- Caps Lock uyarısı eklendi (şifre alanında `getModifierState`)
+- Misafir giriş butonu artık sadece hata durumunda değil, `ready` modunda da gösteriliyor
+- Retry butonuna `disabled={loading}` eklendi — çift tıklama koruması
+- Ölü CSS sınıfları temizlendi (`.login-connecting-dot`, `.login-connecting-row`)
+- Demo/kayıt butonlarına `type="button"`, giriş butonuna `type="submit"` eklendi
+- Remote URL `parspel/parspel` → `outhesab/2` düzeltildi (push hatası giderildi)
+
+---
+
 ## [3.7.2] - 7 Haziran 2026
 
 ### Hata Düzeltmeleri
