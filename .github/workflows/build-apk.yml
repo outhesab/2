@@ -35,11 +35,15 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Gradle wrapper izni
-        run: chmod +x android/gradlew android/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
-
       - name: local.properties oluştur
-        run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/android/local.properties
+          ls -la $GITHUB_WORKSPACE/android/gradlew
+          file $GITHUB_WORKSPACE/android/gradlew
+          ls -la $GITHUB_WORKSPACE/android/gradle/wrapper/
+          which java || echo "java yok"
+          java -version 2>&1 || echo "java version yok"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -53,6 +57,10 @@ jobs:
       - name: Build debug APK
         run: |
           cd android
+          ls -la gradlew
+          file gradlew
+          chmod +x gradlew gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
+          ls -la gradle/wrapper/
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
