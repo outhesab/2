@@ -4,6 +4,7 @@ on:
     branches:
       - dev
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   quality:
