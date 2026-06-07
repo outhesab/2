@@ -1,57 +1,34 @@
 import { useState } from 'react';
 import type { SoundSettings, SoundTheme, SoundType } from '@/hooks/useSoundFeedback';
-import { Card } from '../SettingsCard';
+import { Card } from '@/pages/SettingsCard';
 import { Button } from '@/components/ui/button';
-import { logger } from '@/lib/logger';
-
-function loadSoundSettings(): SoundSettings {
-  try {
-    const raw = localStorage.getItem('sobaYonetim');
-    if (!raw) return { enabled: true, volume: 0.5, theme: 'standart' };
-    const parsed = JSON.parse(raw);
-    return { enabled: true, volume: 0.5, theme: 'standart', ...(parsed.soundSettings || {}) };
-  } catch {
-    logger.warn('settings', 'Ses ayarlari okunamadi');
-    return { enabled: true, volume: 0.5, theme: 'standart' };
-  }
-}
-
-function saveSoundSettingsToStorage(settings: SoundSettings) {
-  try {
-    const raw = localStorage.getItem('sobaYonetim');
-    const parsed = raw ? JSON.parse(raw) : {};
-    parsed.soundSettings = settings;
-    localStorage.setItem('sobaYonetim', JSON.stringify(parsed));
-  } catch {
-    logger.warn('settings', 'Ses ayarlari kaydedilemedi');
-  }
-}
+import { useDB } from '@/hooks/db/core';
 
 export function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType) => void }) {
-  const [settings, setSettings] = useState<SoundSettings>(loadSoundSettings);
+  const { db, save } = useDB();
+  const [settings, setSettings] = useState<SoundSettings>(() => {
+    return db.soundSettings || { enabled: true, volume: 0.5, theme: 'standart' };
+  });
   const [speechEnabled, setSpeechEnabled] = useState<boolean>(() => {
-    try {
-      const d = JSON.parse(localStorage.getItem('sobaYonetim') || '{}');
-      return d.soundSettings?.speechEnabled !== false;
-    } catch {
-      return true;
-    }
+    return db.soundSettings?.speechEnabled !== false;
   });
 
   const updateSettings = (patch: Partial<SoundSettings>) => {
     const next = { ...settings, ...patch };
     setSettings(next);
-    saveSoundSettingsToStorage(next);
+    save((prev) => ({ ...prev, soundSettings: next }));
   };
 
   const toggleSpeech = () => {
     const next = !speechEnabled;
     setSpeechEnabled(next);
-    const key = 'sobaYonetim';
-    const raw = localStorage.getItem(key);
-    const data = raw ? JSON.parse(raw) : {};
-    data.soundSettings = { ...(data.soundSettings || {}), speechEnabled: next };
-    localStorage.setItem(key, JSON.stringify(data));
+    save((prev) => ({
+      ...prev,
+      soundSettings: {
+        ...(prev.soundSettings || { enabled: true, volume: 0.5, theme: 'standart' }),
+        speechEnabled: next,
+      },
+    }));
     if (next && 'speechSynthesis' in window) {
       const u = new SpeechSynthesisUtterance('Sesli bildirim aktif edildi');
       u.lang = 'tr-TR';

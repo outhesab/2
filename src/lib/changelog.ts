@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.3',
+    date: '7 Haziran 2026',
+    title: 'Spec Compliance ve CI Pipeline Düzeltmeleri',
+    summary:
+      'Spec compliance testleri düzeltildi (relative import, useDB hook). Version sabitleri güncellendi. SettingsSound localStorage erişimi useDB() ile değiştirildi.',
+    changes: [
+      { type: 'duzeltme', text: 'package.json version: 3.17.0 -> 3.18.2' },
+      { type: 'duzeltme', text: 'SettingsSound.tsx: localStorage direkt erişim -> useDB() hook kullanımı' },
+      {
+        type: 'duzeltme',
+        text: 'Relative import (../) -> @/ path alias: SettingsCompany, SettingsExcel, SettingsSecurity, SettingsSound',
+      },
+      { type: 'duzeltme', text: 'Settings.tsx: unused lbl değişkeni kaldırıldı' },
+      { type: 'iyilestirme', text: 'CI pipeline: lint (0 warnings), tests (271 passed), build (success)' },
+    ],
+  },
+  {
     version: '3.18.2',
     date: '7 Haziran 2026',
     title: 'Görünüm Encoding Temizliği ve Lint Uyarıları',
