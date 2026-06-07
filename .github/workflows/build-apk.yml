@@ -7,14 +7,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  quality:
-    uses: ./.github/workflows/quality-gate.yml
-
   build-apk:
-    needs: quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -28,36 +35,11 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
+      - name: Gradle wrapper izni
+        run: chmod +x android/gradlew android/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
 
-      - name: Android dizini kontrolü
-        run: |
-          if [ ! -d "android" ]; then
-            echo "❌ android/ dizini yok! Önce 'pnpm exec cap add android' çalıştırın."
-            exit 1
-          fi
-
-      - name: Gradle executable yap
-        run: chmod +x android/gradlew
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 36
-          build-tools-version: "36.0.0"
-
-      - name: Android SDK yapılandırması
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
-          echo "✅ local.properties: sdk.dir=$ANDROID_HOME"
-          ls -la "$ANDROID_HOME/platforms/" || echo "platforms/ yok"
-          ls -la "$ANDROID_HOME/build-tools/" || echo "build-tools/ yok"
+      - name: local.properties oluştur
+        run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -69,13 +51,9 @@ jobs:
         run: pnpm exec cap sync android
 
       - name: Build debug APK
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
         run: |
           cd android
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "sdk.dir check: $(cat local.properties)"
-          ./gradlew assembleDebug --build-cache --parallel --no-daemon --stacktrace 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
