@@ -15,7 +15,9 @@ export { manualChunks };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const isDev = mode === "development" || mode === "dev";
+  return {
   base: "./",
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
@@ -32,14 +34,14 @@ export default defineConfig(({ mode }) => ({
           brotliSize: true,
         })
       : null,
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" || isDev
       ? null
       : Inspect({
           build: false,
           open: false,
         }),
-    VitePWA({
-      registerType: "autoUpdate",
+    // PWA plugin'ini dev build'de atla (hız kazancı)
+    isDev ? null : VitePWA({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}"],
         runtimeCaching: [
@@ -105,9 +107,9 @@ export default defineConfig(({ mode }) => ({
       },
       external: [],
     },
-    minify: "esbuild",
+    minify: isDev ? false : "esbuild",
     chunkSizeWarningLimit: 500,
-    sourcemap: false,
+    sourcemap: isDev,
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
@@ -170,4 +172,5 @@ export default defineConfig(({ mode }) => ({
       "qa-toolkit/**",
     ],
   },
+  };
 }));
