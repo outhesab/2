@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+export { StatCard } from "./pageHelpers";
 
 export const paymentLabels: Record<string, string> = {
   nakit: "Nakit",
@@ -34,39 +35,6 @@ export const sinpStyle: CSSProperties = {
   fontSize: "0.9rem",
   boxSizing: "border-box",
 };
-
-export function StatCard({
-  label,
-  value,
-  sub,
-  color,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  color: string;
-}) {
-  return (
-    <div
-      style={{
-        background: "var(--bg-card)",
-        borderRadius: 12,
-        padding: "16px 18px",
-        border: `1px solid ${color}22`,
-      }}
-    >
-      <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
-        {label}
-      </div>
-      {sub && (
-        <div style={{ color: "var(--text-dim)", fontSize: "0.82rem", marginTop: 2 }}>
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function Row({
   label,
