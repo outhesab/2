@@ -20,6 +20,15 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.16.1',
+    date: '7 Haziran 2026',
+    title: 'GitHub Actions pnpm/corepack Düzeltmesi',
+    summary: "GitHub Actions workflow'larında pnpm PATH hatası düzeltildi. corepack enable adımı eklendi.",
+    changes: [
+      { type: 'duzeltme', text: "build-apk, quality-gate, deploy workflow'larına corepack enable adımı eklendi" },
+    ],
+  },
+  {
     version: '3.16.0',
     date: '7 Haziran 2026',
     title: 'OpenRouter Multi-Agent Yapılandırması',

@@ -3,37 +3,50 @@ on:
   push:
     branches:
       - dev
+      - main
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
+  quality:
+    uses: ./.github/workflows/quality-gate.yml
+
   build-apk:
+    needs: quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Enable corepack
+        run: corepack enable
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
           cache: gradle
 
-      - uses: android-actions/setup-android@v3
-        with:
-          api-level: 36
-          ndk-version: r27c
-          emulator: false
+      - name: Android dizini kontrolü
+        run: |
+          if [ ! -d "android" ]; then
+            echo "❌ android/ dizini yok! Önce 'pnpm exec cap add android' çalıştırın."
+            exit 1
+          fi
+
+      - name: Gradle executable yap
+        run: chmod +x android/gradlew
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
