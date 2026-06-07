@@ -19,7 +19,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 9.15.4
           run_install: false
 
       - name: Setup Node.js
@@ -32,7 +32,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --config.onlyBuiltDependencies=fallow
 
       - name: Lint
         run: pnpm run lint

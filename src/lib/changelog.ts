@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.16.3',
+    date: '7 Haziran 2026',
+    title: 'CI pnpm 11 Uyumsuzluğu Düzeltmesi',
+    summary:
+      "GitHub Actions'ta pnpm 11.5.2 kullanıldığı için package.json'daki pnpm.onlyBuiltDependencies okunmuyordu. pnpm 9.15.4'e sabitlendi ve --config.onlyBuiltDependencies flag'ı eklendi.",
+    changes: [
+      { type: 'duzeltme', text: "pnpm version 9'a sabitlendi (9.15.4)" },
+      { type: 'duzeltme', text: 'CI install komutuna --config.onlyBuiltDependencies=fallow eklendi' },
+    ],
+  },
+  {
     version: '3.16.2',
     date: '7 Haziran 2026',
     title: 'pnpm Build Script İznı',
