@@ -47,11 +47,17 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 36
+          build-tools-version: "36.0.0"
 
       - name: Android SDK yapılandırması
         run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           echo "✅ local.properties: sdk.dir=$ANDROID_HOME"
+          ls -la "$ANDROID_HOME/platforms/" || echo "platforms/ yok"
+          ls -la "$ANDROID_HOME/build-tools/" || echo "build-tools/ yok"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -63,9 +69,13 @@ jobs:
         run: pnpm exec cap sync android
 
       - name: Build debug APK
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
         run: |
           cd android
-          ./gradlew assembleDebug --build-cache --parallel --no-daemon --stacktrace
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "sdk.dir check: $(cat local.properties)"
+          ./gradlew assembleDebug --build-cache --parallel --no-daemon --stacktrace 2>&1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
