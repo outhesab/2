@@ -11,6 +11,8 @@ import {
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { AuditEntry, DB, MonitorRule } from "@/types";
 import { useMemo, useState } from "react";
+import { lbl, inp } from "@/lib/formStyles";
+import { ModalActions, CheckboxField, TabButton } from "./pageHelpers";
 
 interface Props {
   db: DB;
@@ -372,22 +374,7 @@ export default function Monitor({ db, save }: Props) {
             ["audit", `🔒 Denetim Logu (${auditLog.length})`],
           ] as const
         ).map(([id, label]) => (
-          <button
-            key={id}
-            onClick={() => setTab(id as typeof tab)}
-            style={{
-              padding: "8px 16px",
-              border: "none",
-              borderRadius: 10,
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: "0.83rem",
-              background: tab === id ? "#ff5722" : "#273548",
-              color: tab === id ? "#fff" : "#94a3b8",
-            }}
-          >
-            {label}
-          </button>
+          <TabButton key={id} id={id} label={label} active={tab === id} onSelect={(v) => setTab(v)} />
         ))}
       </div>
 
@@ -1179,56 +1166,11 @@ export default function Monitor({ db, save }: Props) {
             />
           </div>
           <div style={{ display: "flex", gap: 20, alignItems: "center", marginTop: 4 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-dim)", fontSize: "0.85rem" }}>
-              <input
-                type="checkbox"
-                checked={form.popup ?? true}
-                onChange={(e) => setForm((f) => ({ ...f, popup: e.target.checked }))}
-                style={{ width: 16, height: 16, accentColor: "#ff5722" }}
-              />
-              Popup Bildirim
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-dim)", fontSize: "0.85rem" }}>
-              <input
-                type="checkbox"
-                checked={form.active ?? true}
-                onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
-                style={{ width: 16, height: 16, accentColor: "#10b981" }}
-              />
-              Aktif
-            </label>
+            <CheckboxField checked={form.popup ?? true} onChange={(v) => setForm((f) => ({ ...f, popup: v }))} label="Popup Bildirim" />
+            <CheckboxField checked={form.active ?? true} onChange={(v) => setForm((f) => ({ ...f, active: v }))} label="Aktif" accentColor="#10b981" />
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button
-            onClick={handleSave}
-            style={{
-              flex: 1,
-              background: "#10b981",
-              border: "none",
-              borderRadius: 10,
-              color: "#fff",
-              padding: "11px 0",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            💾 Kaydet
-          </button>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              background: "#273548",
-              border: "1px solid #334155",
-              borderRadius: 10,
-              color: "var(--text-dim)",
-              padding: "11px 20px",
-              cursor: "pointer",
-            }}
-          >
-            İptal
-          </button>
-        </div>
+        <ModalActions onSave={handleSave} onCancel={() => setModalOpen(false)} />
       </Modal>
     </div>
   );
@@ -1248,20 +1190,4 @@ function getActionIcon(action: string): string {
   return "📝";
 }
 
-const lbl: React.CSSProperties = {
-  display: "block",
-  marginBottom: 6,
-  color: "var(--text-dim)",
-  fontSize: "0.85rem",
-  fontWeight: 500,
-};
-const inp: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 14px",
-  background: "rgba(15,23,42,0.6)",
-  border: "1px solid #334155",
-  borderRadius: 10,
-  color: "var(--text-primary)",
-  fontSize: "0.9rem",
-  boxSizing: "border-box",
-};
+

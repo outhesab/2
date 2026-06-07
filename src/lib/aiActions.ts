@@ -48,6 +48,38 @@ export function stripActions(text: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Lookup helpers
+// ---------------------------------------------------------------------------
+
+function hasDuplicate(items: Array<{ name: string; deleted?: boolean }>, name: string): boolean {
+  return items.some((x) => !x.deleted && x.name.toLowerCase() === name.toLowerCase());
+}
+
+function findBySimpleRef(
+  items: any[],
+  idKey: string,
+  nameKey: string,
+  payload: Record<string, unknown>,
+) {
+  const idRef = String(payload[idKey] || "").trim();
+  const nameRef = String(payload[nameKey] || "").trim();
+  if (idRef) {
+    const byId = items.find((x: any) => x.id === idRef);
+    if (byId) return byId;
+  }
+  if (nameRef) return items.find((x: any) => x.name === nameRef);
+  return null;
+}
+
+function findProduct(products: any[], payload: Record<string, unknown>) {
+  return findBySimpleRef(products, "productId", "productName", payload);
+}
+
+function findCari(cari: any[], payload: Record<string, unknown>) {
+  return findBySimpleRef(cari, "cariId", "cariName", payload);
+}
+
+// ---------------------------------------------------------------------------
 // Validasyon — işlemin DB'ye uygulanabilir olup olmadığını kontrol eder
 // ---------------------------------------------------------------------------
 
@@ -55,9 +87,7 @@ export function validateAction(prev: DB, action: DBAction): string | null {
   const p = action.payload;
 
   if (action.type === "sale") {
-    const product = prev.products.find(
-      (pr) => pr.id === p.productId || pr.name === p.productName,
-    );
+    const product = findProduct(prev.products, p);
     if (!product)
       return `Ürün bulunamadı: ${String(p.productName || p.productId || "")}`;
     const qty = Number(p.quantity);
@@ -79,9 +109,7 @@ export function validateAction(prev: DB, action: DBAction): string | null {
   }
 
   if (action.type === "stok_guncelle") {
-    const product = prev.products.find(
-      (pr) => pr.id === p.productId || pr.name === p.productName,
-    );
+    const product = findProduct(prev.products, p);
     if (!product)
       return `Ürün bulunamadı: ${String(p.productName || p.productId || "")}`;
     const stock = Number(p.stock);
@@ -90,9 +118,7 @@ export function validateAction(prev: DB, action: DBAction): string | null {
   }
 
   if (action.type === "cari_tahsilat") {
-    const cari = prev.cari.find(
-      (c) => c.id === p.cariId || c.name === p.cariName,
-    );
+    const cari = findCari(prev.cari, p);
     if (!cari)
       return `Cari bulunamadı: ${String(p.cariName || p.cariId || "")}`;
     const amount = Number(p.amount);
@@ -106,10 +132,7 @@ export function validateAction(prev: DB, action: DBAction): string | null {
   if (action.type === "urun_ekle") {
     const name = String(p.name || "").trim();
     if (!name) return "Ürün adı zorunlu";
-    const exists = prev.products.some(
-      (pr) => !pr.deleted && pr.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (exists) return `Aynı isimde ürün zaten var: ${name}`;
+    if (hasDuplicate(prev.products, name)) return `Aynı isimde ürün zaten var: ${name}`;
     const cost = Number(p.cost);
     const price = Number(p.price);
     const stock = Number(p.stock);
@@ -123,10 +146,7 @@ export function validateAction(prev: DB, action: DBAction): string | null {
   if (action.type === "cari_ekle") {
     const name = String(p.name || "").trim();
     if (!name) return "Cari adı zorunlu";
-    const exists = prev.cari.some(
-      (c) => !c.deleted && c.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (exists) return `Aynı isimde cari zaten var: ${name}`;
+    if (hasDuplicate(prev.cari, name)) return `Aynı isimde cari zaten var: ${name}`;
     const balance = Number(p.balance);
     if (Number.isFinite(balance) && balance < 0)
       return "Başlangıç bakiyesi negatif olamaz";
@@ -140,46 +160,38 @@ export function validateAction(prev: DB, action: DBAction): string | null {
 // Referans çözümleyiciler — payload'daki ürün/cari referanslarını DB'de bul
 // ---------------------------------------------------------------------------
 
-export function findProductByRef(db: DB, payload: Record<string, unknown>) {
-  const idRef = String(payload.productId || "").trim();
-  const nameRef = String(payload.productName || "").trim();
+function findByRef(
+  items: Array<{ id: string; name: string; deleted?: boolean }>,
+  idKey: string,
+  nameKey: string,
+  payload: Record<string, unknown>,
+) {
+  const idRef = String(payload[idKey] || "").trim();
+  const nameRef = String(payload[nameKey] || "").trim();
   if (idRef) {
-    const byId = db.products.find((p) => !p.deleted && p.id === idRef);
+    const byId = items.find((x) => !x.deleted && x.id === idRef);
     if (byId) return byId;
   }
   if (nameRef) {
     const lowered = nameRef.toLowerCase();
-    const exact = db.products.find(
-      (p) => !p.deleted && p.name.toLowerCase() === lowered,
+    const exact = items.find(
+      (x) => !x.deleted && x.name.toLowerCase() === lowered,
     );
     if (exact) return exact;
-    const candidates = db.products.filter(
-      (p) => !p.deleted && p.name.toLowerCase().includes(lowered),
+    const candidates = items.filter(
+      (x) => !x.deleted && x.name.toLowerCase().includes(lowered),
     );
     if (candidates.length === 1) return candidates[0];
   }
   return null;
 }
 
+export function findProductByRef(db: DB, payload: Record<string, unknown>) {
+  return findByRef(db.products, "productId", "productName", payload);
+}
+
 export function findCariByRef(db: DB, payload: Record<string, unknown>) {
-  const idRef = String(payload.cariId || "").trim();
-  const nameRef = String(payload.cariName || "").trim();
-  if (idRef) {
-    const byId = db.cari.find((c) => !c.deleted && c.id === idRef);
-    if (byId) return byId;
-  }
-  if (nameRef) {
-    const lowered = nameRef.toLowerCase();
-    const exact = db.cari.find(
-      (c) => !c.deleted && c.name.toLowerCase() === lowered,
-    );
-    if (exact) return exact;
-    const candidates = db.cari.filter(
-      (c) => !c.deleted && c.name.toLowerCase().includes(lowered),
-    );
-    if (candidates.length === 1) return candidates[0];
-  }
-  return null;
+  return findByRef(db.cari, "cariId", "cariName", payload);
 }
 
 // ---------------------------------------------------------------------------
@@ -377,9 +389,7 @@ export function applyAction(prev: DB, action: DBAction): DB {
   const p = action.payload;
 
   if (action.type === "sale") {
-    const product = prev.products.find(
-      (pr) => pr.id === p.productId || pr.name === p.productName,
-    );
+    const product = findProduct(prev.products, p);
     if (!product) throw new Error(`Ürün bulunamadı: ${p.productName}`);
     const qty = Number(p.quantity) || 1;
     const unitPrice = Number(p.unitPrice) || product.price;
@@ -387,9 +397,7 @@ export function applyAction(prev: DB, action: DBAction): DB {
     const total = unitPrice * qty - discount;
     const profit = (unitPrice - product.cost) * qty - discount;
     const payment = (p.payment as string) || "nakit";
-    const cari = prev.cari.find(
-      (c) => c.id === p.cariId || c.name === p.cariName,
-    );
+    const cari = findCari(prev.cari, p);
 
     const sale = {
       id: genId(),
@@ -495,9 +503,7 @@ export function applyAction(prev: DB, action: DBAction): DB {
   }
 
   if (action.type === "stok_guncelle") {
-    const product = prev.products.find(
-      (pr) => pr.id === p.productId || pr.name === p.productName,
-    );
+    const product = findProduct(prev.products, p);
     if (!product) throw new Error(`Ürün bulunamadı: ${p.productName}`);
     const newStock = Number(p.stock);
     const movement = {
@@ -521,9 +527,7 @@ export function applyAction(prev: DB, action: DBAction): DB {
   }
 
   if (action.type === "cari_tahsilat") {
-    const cari = prev.cari.find(
-      (c) => c.id === p.cariId || c.name === p.cariName,
-    );
+    const cari = findCari(prev.cari, p);
     if (!cari) throw new Error(`Cari bulunamadı: ${p.cariName}`);
     const amount = Number(p.amount);
     const kasaEntry = {
@@ -556,10 +560,8 @@ export function applyAction(prev: DB, action: DBAction): DB {
   if (action.type === "urun_ekle") {
     const name = String(p.name || "").trim();
     if (!name) throw new Error("Ürün adı zorunlu");
-    const exists = prev.products.some(
-      (pr) => !pr.deleted && pr.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (exists) throw new Error(`Aynı isimde ürün zaten var: ${name}`);
+    if (hasDuplicate(prev.products, name))
+      throw new Error(`Aynı isimde ürün zaten var: ${name}`);
     const product = {
       id: genId(),
       name,
@@ -578,10 +580,8 @@ export function applyAction(prev: DB, action: DBAction): DB {
   if (action.type === "cari_ekle") {
     const name = String(p.name || "").trim();
     if (!name) throw new Error("Cari adı zorunlu");
-    const exists = prev.cari.some(
-      (c) => !c.deleted && c.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (exists) throw new Error(`Aynı isimde cari zaten var: ${name}`);
+    if (hasDuplicate(prev.cari, name))
+      throw new Error(`Aynı isimde cari zaten var: ${name}`);
     const cari = {
       id: genId(),
       name,

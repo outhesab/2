@@ -3,6 +3,7 @@ import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { DB, Sale, SaleItem } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
+import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers";
 
 interface Props {
   db: DB;
@@ -31,18 +32,6 @@ function productItems(sale: Sale, productId: string): SaleItem[] {
   }
   return [];
 }
-
-const card: React.CSSProperties = {
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 12,
-  padding: 16,
-};
-
-const muted: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "0.86rem",
-};
 
 export default function ProductDetail({ db, save }: Props) {
   const [location, setLocation] = useLocation();
@@ -93,12 +82,12 @@ export default function ProductDetail({ db, save }: Props) {
 
   if (!product) {
     return (
-      <div style={card}>
+      <div style={cardStyle}>
         <button onClick={() => setLocation("/products")} style={backButton}>
           ← Ürünlere dön
         </button>
         <h2 style={{ color: "#f1f5f9", marginTop: 16 }}>Ürün bulunamadı</h2>
-        <p style={muted}>Bu ürün silinmiş olabilir veya bağlantı eski olabilir.</p>
+        <p style={mutedText}>Bu ürün silinmiş olabilir veya bağlantı eski olabilir.</p>
       </div>
     );
   }
@@ -141,12 +130,12 @@ export default function ProductDetail({ db, save }: Props) {
           marginTop: 16,
         }}
       >
-        <section style={card}>
+        <section style={cardStyle}>
           <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
             <div style={{ fontSize: "2.7rem" }}>{category?.icon || "📦"}</div>
             <div>
               <h2 style={{ margin: 0, color: "#f8fafc" }}>{product.name}</h2>
-              <div style={muted}>
+              <div style={mutedText}>
                 {[product.brand, category?.name || product.category, supplier?.name]
                   .filter(Boolean)
                   .join(" · ") || "Kategori yok"}
@@ -162,12 +151,12 @@ export default function ProductDetail({ db, save }: Props) {
           </div>
 
           {product.description && (
-            <p style={{ ...muted, marginTop: 18 }}>{product.description}</p>
+            <p style={{ ...mutedText, marginTop: 18 }}>{product.description}</p>
           )}
         </section>
 
-        <section style={card}>
-          <h3 style={sectionTitle}>Stok Alarmı</h3>
+        <section style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Stok Alarmı</h3>
           <label style={label}>Minimum stok eşiği</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
@@ -181,7 +170,7 @@ export default function ProductDetail({ db, save }: Props) {
               Kaydet
             </button>
           </div>
-          <div style={{ ...muted, marginTop: 12 }}>
+          <div style={{ ...mutedText, marginTop: 12 }}>
             Güncel durum:{" "}
             <strong style={{ color: product.stock <= product.minStock ? "#f59e0b" : "#10b981" }}>
               {product.stock <= product.minStock ? "Sipariş gerekiyor" : "Normal"}
@@ -191,8 +180,8 @@ export default function ProductDetail({ db, save }: Props) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16, marginTop: 16 }}>
-        <section style={card}>
-          <h3 style={sectionTitle}>Satış Kâr Analizi</h3>
+        <section style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Satış Kâr Analizi</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
             <Metric label="Satılan" value={`${stats.qty}`} color="#60a5fa" />
             <Metric label="Ciro" value={formatMoney(stats.revenue)} color="#10b981" />
@@ -200,7 +189,7 @@ export default function ProductDetail({ db, save }: Props) {
             <Metric label="Marj" value={`%${stats.margin}`} color="#f59e0b" />
           </div>
           {stats.productSales.length === 0 ? (
-            <p style={muted}>Bu ürün için tamamlanmış satış bulunmuyor.</p>
+            <p style={mutedText}>Bu ürün için tamamlanmış satış bulunmuyor.</p>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {stats.productSales.slice(0, 12).map(({ sale, items }) => {
@@ -210,10 +199,10 @@ export default function ProductDetail({ db, save }: Props) {
                   0,
                 );
                 return (
-                  <div key={sale.id} style={row}>
+                  <div key={sale.id} style={rowStyle}>
                     <div>
                       <strong style={{ color: "#f1f5f9" }}>{formatDate(sale.createdAt)}</strong>
-                      <div style={muted}>{items.reduce((sum, item) => sum + item.quantity, 0)} adet</div>
+                      <div style={mutedText}>{items.reduce((sum, item) => sum + item.quantity, 0)} adet</div>
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <div style={{ color: "#10b981", fontWeight: 700 }}>{formatMoney(saleProfit)}</div>
@@ -226,23 +215,23 @@ export default function ProductDetail({ db, save }: Props) {
           )}
         </section>
 
-        <section style={card}>
-          <h3 style={sectionTitle}>Stok Hareketleri</h3>
+        <section style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Stok Hareketleri</h3>
           {movements.length === 0 ? (
-            <p style={muted}>Stok hareketi yok.</p>
+            <p style={mutedText}>Stok hareketi yok.</p>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {movements.slice(0, 16).map((movement) => (
-                <div key={movement.id} style={row}>
+                <div key={movement.id} style={rowStyle}>
                   <div>
                     <strong style={{ color: "#f1f5f9" }}>{movement.type}</strong>
-                    <div style={muted}>{movement.note || "Açıklama yok"}</div>
+                    <div style={mutedText}>{movement.note || "Açıklama yok"}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ color: movement.amount >= 0 ? "#10b981" : "#ef4444", fontWeight: 700 }}>
                       {movement.before} → {movement.after}
                     </div>
-                    <div style={muted}>{formatDate(movement.date)}</div>
+                    <div style={mutedText}>{formatDate(movement.date)}</div>
                   </div>
                 </div>
               ))}
@@ -254,38 +243,7 @@ export default function ProductDetail({ db, save }: Props) {
   );
 }
 
-function Metric({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
-  return (
-    <div style={{ background: "#0f172a", borderRadius: 10, padding: "12px 14px", border: `1px solid ${color}33` }}>
-      <div style={{ color, fontWeight: 800, fontSize: "1rem" }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: 3 }}>{label}</div>
-    </div>
-  );
-}
 
-const sectionTitle: React.CSSProperties = {
-  color: "#f8fafc",
-  margin: "0 0 12px",
-  fontSize: "1rem",
-};
-
-const row: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  background: "#0f172a",
-  border: "1px solid rgba(148,163,184,0.12)",
-  borderRadius: 10,
-  padding: "10px 12px",
-};
 
 const label: React.CSSProperties = {
   display: "block",

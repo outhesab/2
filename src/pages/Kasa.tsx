@@ -25,6 +25,7 @@ import { exportToExcel } from '@/lib/excelExport';
 import { genId, formatMoney, formatDate } from '@/lib/utils-tr';
 import type { DB } from '@/types';
 import DOMPurify from 'dompurify';
+import { TableFilterBar, TableWrapper } from '@/pages/pageHelpers';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -277,10 +278,15 @@ export default function Kasa({ db, save }: Props) {
           <Download />
           Excel İndir
         </Button>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ara..." style={{ padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', flex: 1 }} />
-        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
-        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ padding: '9px 10px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.85rem' }} />
-        {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(''); setDateTo(''); }} style={{ padding: '8px 10px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕</button>}
+        <TableFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          dateFrom={dateFrom}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo}
+          onDateToChange={setDateTo}
+          onClearDates={() => { setDateFrom(''); setDateTo(''); }}
+        />
         <Tabs value={filter} onValueChange={setFilter}>
           <TabsList>
             <TabsTrigger value="all">Tümü</TabsTrigger>
@@ -291,54 +297,45 @@ export default function Kasa({ db, save }: Props) {
         {kasaFilter !== 'all' && <button onClick={() => setKasaFilter('all')} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕ Filtre Kaldır</button>}
       </div>
 
-      <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
-          <thead>
-            <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
-              {['Tarih', 'Açıklama', 'Kategori', 'Kasa', 'Tutar', 'Tür', ''].map(h => (
-                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#64748b', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.length === 0 ? (
-              <tr><td colSpan={7} style={{ padding: 24 }}>
-                <EmptyState
-                  icon={WalletCards}
-                  title="Kasa kaydı bulunamadı"
-                  description="Seçili filtrelerle eşleşen gelir veya gider hareketi yok."
-                  actionLabel="Filtreleri temizle"
-                  onAction={() => {
-                    setFilter("all");
-                    setKasaFilter("all");
-                    setSearch("");
-                    setDateFrom("");
-                    setDateTo("");
-                  }}
-                />
-              </td></tr>
-            ) : sorted.map(e => (
-              <tr key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(e.createdAt)}</td>
-                <td data-label="Açıklama" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.description || '-'}</td>
-                <td data-label="Kategori" style={{ padding: '11px 16px', color: 'var(--text-dim)', fontSize: '0.82rem' }}>{catLabels[e.category] || e.category || '-'}</td>
-                <td data-label="Kasa" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}</td>
-                <td data-label="Tutar" style={{ padding: '11px 16px', fontWeight: 700, color: e.type === 'gelir' ? '#10b981' : '#ef4444' }}>
-                  {e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}
-                </td>
-                <td data-label="Tür" style={{ padding: '11px 16px' }}>
-                  <span style={{ background: e.type === 'gelir' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: e.type === 'gelir' ? '#10b981' : '#ef4444', borderRadius: 6, padding: '2px 8px', fontSize: '0.8rem', fontWeight: 600 }}>
-                    {e.type === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
-                  </span>
-                </td>
-                <td style={{ padding: '11px 16px' }}>
-                  <button onClick={() => deleteEntry(e.id)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <TableWrapper
+        columns={['Tarih', 'Açıklama', 'Kategori', 'Kasa', 'Tutar', 'Tür', '']}
+        noData={sorted.length === 0 ? (
+          <EmptyState
+            icon={WalletCards}
+            title="Kasa kaydı bulunamadı"
+            description="Seçili filtrelerle eşleşen gelir veya gider hareketi yok."
+            actionLabel="Filtreleri temizle"
+            onAction={() => {
+              setFilter("all");
+              setKasaFilter("all");
+              setSearch("");
+              setDateFrom("");
+              setDateTo("");
+            }}
+          />
+        ) : undefined}
+        colSpan={7}
+      >
+        {sorted.map(e => (
+          <tr key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(e.createdAt)}</td>
+            <td data-label="Açıklama" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.description || '-'}</td>
+            <td data-label="Kategori" style={{ padding: '11px 16px', color: 'var(--text-dim)', fontSize: '0.82rem' }}>{catLabels[e.category] || e.category || '-'}</td>
+            <td data-label="Kasa" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}</td>
+            <td data-label="Tutar" style={{ padding: '11px 16px', fontWeight: 700, color: e.type === 'gelir' ? '#10b981' : '#ef4444' }}>
+              {e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}
+            </td>
+            <td data-label="Tür" style={{ padding: '11px 16px' }}>
+              <span style={{ background: e.type === 'gelir' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: e.type === 'gelir' ? '#10b981' : '#ef4444', borderRadius: 6, padding: '2px 8px', fontSize: '0.8rem', fontWeight: 600 }}>
+                {e.type === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
+              </span>
+            </td>
+            <td style={{ padding: '11px 16px' }}>
+              <button onClick={() => deleteEntry(e.id)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
+            </td>
+          </tr>
+        ))}
+      </TableWrapper>
 
       <EntryModal type="gelir" open={incomeModal} onClose={() => setIncomeModal(false)} />
       <EntryModal type="gider" open={expenseModal} onClose={() => setExpenseModal(false)} />

@@ -2,16 +2,57 @@ import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse, SatisSonuc, YeniSatisParams } from "@/agents/types";
 import { formatMoney, genId } from "@/lib/utils-tr";
 import { completeSale } from "@/domain/services/saleCompletion";
-import type { Sale } from "@/types";
-import { checkSatisWritePermission, buildRefundKasaEntries, updateCariForRefund } from "./satisHelpers";
+import type { DB, Sale } from "@/types";
+import { requireSatisWrite, applyRefundToDB } from "./satisHelpers";
+
+function mapProductStock(
+  products: DB["products"],
+  getMatch: (p: DB["products"][number]) => { quantity: number } | undefined | null,
+  updateStock: (p: DB["products"][number], match: { quantity: number }) => number,
+): DB["products"] {
+  return products.map((p) => {
+    const match = getMatch(p);
+    if (!match) return p;
+    return { ...p, stock: updateStock(p, match) };
+  });
+}
+
+function checkWritePermission(
+  yetkiKontrolu: (y: string) => boolean,
+  ctx: unknown,
+  msg?: string,
+): { ok: false; error: string } | void {
+  const err = requireSatisWrite(yetkiKontrolu, ctx, msg);
+  if (err) return err;
+}
+
+function processSaleRefund(
+  save: (fn: (prev: DB) => DB) => void,
+  saleId: string,
+  nowIso: string,
+  status: "iptal" | "iade",
+  getProducts: (prev: DB, sale: Sale) => DB["products"],
+) {
+  save((prev) => {
+    const sale = prev.sales.find((s) => s.id === saleId);
+    if (!sale) return prev;
+    const products = getProducts(prev, sale);
+    const extra = status === "iade" ? { returnedAt: nowIso } : {};
+    const sales = prev.sales.map((s) =>
+      s.id === saleId ? { ...s, status, updatedAt: nowIso, ...extra } : s,
+    );
+    const { kasa, cari } = applyRefundToDB(prev.kasa, prev.cari, sale, nowIso, status);
+    return { ...prev, sales, products, kasa, cari };
+  });
+}
 
 export class SatisAgent extends BaseAgent {
   readonly id = "satis" as const;
   readonly yetkiler = ["satis.read", "satis.write", "rapor.read"] as const;
 
   async yeniSatis(params: YeniSatisParams): Promise<AgentResponse<SatisSonuc>> {
-    const yetkiErr1 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx, "Agent bağlanmadı — önce bagla() çağırın");
-    if (yetkiErr1) return yetkiErr1;
+    const permErr = checkWritePermission(this.yetkiKontrolu, this.ctx, "Agent bağlanmadı — önce bagla() çağırın");
+    if (permErr) return permErr;
 
     const db = this.db;
     const result = completeSale({
@@ -36,11 +77,11 @@ export class SatisAgent extends BaseAgent {
     const { sale: cs, stockMovements, cashTransaction, cariUpdate, events } = result.data;
 
     this.save((prev) => {
-      const products = prev.products.map((p) => {
-        const sm = stockMovements.find((s) => s.productId === p.id);
-        if (!sm) return p;
-        return { ...p, stock: Math.max(0, sm.after) };
-      });
+      const products = mapProductStock(
+        prev.products,
+        (p) => stockMovements.find((s) => s.productId === p.id),
+        (p, sm) => Math.max(0, sm.after),
+      );
 
       const sale: Sale = {
         ...cs,
@@ -107,98 +148,58 @@ export class SatisAgent extends BaseAgent {
   }
 
   async iptalEt(saleId: string): Promise<AgentResponse<void>> {
-    const yetkiErr2 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
-    if (yetkiErr2) return yetkiErr2;
+    const permErr = checkWritePermission(this.yetkiKontrolu, this.ctx);
+    if (permErr) return permErr;
 
     const nowIso = new Date().toISOString();
-    this.save((prev) => {
-      const sale = prev.sales.find((s) => s.id === saleId);
-      if (!sale) return prev;
-
-      const products = prev.products.map((p) => {
-        const item = sale.items?.find((i) => i.productId === p.id);
-        if (!item) return p;
-        return { ...p, stock: p.stock + item.quantity };
-      });
-
-      const sales = prev.sales.map((s) =>
-        s.id === saleId
-          ? { ...s, status: "iptal" as const, updatedAt: nowIso }
-          : s,
-      );
-
-      let kasa = prev.kasa;
-      let cari = prev.cari;
-
-      const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
-        kasa, sale.id, sale.productName, sale.payment, nowIso, "iptal",
-      );
-      kasa = updatedKasa;
-      cari = updateCariForRefund(cari, sale.cariId, sale.total, tahsilEdilen, nowIso);
-
-      return { ...prev, sales, products, kasa, cari };
-    });
+    processSaleRefund(
+      (fn) => this.save(fn),
+      saleId, nowIso, "iptal",
+      (prev, sale) => mapProductStock(
+        prev.products,
+        (p) => sale.items?.find((i) => i.productId === p.id),
+        (p, item) => p.stock + item.quantity,
+      ),
+    );
 
     this.yayinla("satis.iptal", { saleId });
     return { ok: true };
   }
 
   async iadeYap(saleId: string, qty?: number | Record<string, number>): Promise<AgentResponse<void>> {
-    const yetkiErr3 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
-    if (yetkiErr3) return yetkiErr3;
+    const permErr = checkWritePermission(this.yetkiKontrolu, this.ctx);
+    if (permErr) return permErr;
 
     const nowIso = new Date().toISOString();
-    this.save((prev) => {
-      const sale = prev.sales.find((s) => s.id === saleId);
-      if (!sale) return prev;
-
-      const isPerItem = typeof qty === "object" && qty !== null;
-      const totalSaleQty = sale.items?.reduce((s, i) => s + i.quantity, 0) || 0;
-
-      const products = prev.products.map((p) => {
-        const items = sale.items?.filter((i) => i.productId === p.id);
-        if (!items || items.length === 0) return p;
-        const totalItemQty = items.reduce((s, i) => s + i.quantity, 0);
-        if (isPerItem) {
-          const iadeMiktar = Math.min((qty as Record<string, number>)[p.id] ?? totalItemQty, totalItemQty);
+    processSaleRefund(
+      (fn) => this.save(fn),
+      saleId, nowIso, "iade",
+      (prev, sale) => {
+        const isPerItem = typeof qty === "object" && qty !== null;
+        const totalSaleQty = sale.items?.reduce((s, i) => s + i.quantity, 0) || 0;
+        return prev.products.map((p) => {
+          const items = sale.items?.filter((i) => i.productId === p.id);
+          if (!items || items.length === 0) return p;
+          const totalItemQty = items.reduce((s, i) => s + i.quantity, 0);
+          if (isPerItem) {
+            const iadeMiktar = Math.min((qty as Record<string, number>)[p.id] ?? totalItemQty, totalItemQty);
+            return { ...p, stock: p.stock + iadeMiktar };
+          }
+          const iadeMiktar = qty !== undefined
+            ? Math.round((totalItemQty / totalSaleQty) * qty)
+            : totalItemQty;
           return { ...p, stock: p.stock + iadeMiktar };
-        }
-        const iadeMiktar = qty !== undefined
-          ? Math.round((totalItemQty / totalSaleQty) * qty)
-          : totalItemQty;
-        return { ...p, stock: p.stock + iadeMiktar };
-      });
-
-      const sales = prev.sales.map((s) =>
-        s.id === saleId
-          ? {
-              ...s,
-              status: "iade" as const,
-              returnedAt: nowIso,
-              updatedAt: nowIso,
-            }
-          : s,
-      );
-
-      let kasa = prev.kasa;
-      let cari = prev.cari;
-
-      const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
-        kasa, sale.id, sale.productName, sale.payment, nowIso, "iade",
-      );
-      kasa = updatedKasa;
-      cari = updateCariForRefund(cari, sale.cariId, sale.total, tahsilEdilen, nowIso);
-
-      return { ...prev, sales, products, kasa, cari };
-    });
+        });
+      },
+    );
 
     this.yayinla("satis.iade", { saleId, qty });
     return { ok: true };
   }
 
   async fiyatDuzelt(saleId: string, yeniFiyat: number | Record<string, number>): Promise<AgentResponse<void>> {
-    const yetkiErr4 = checkSatisWritePermission(this.yetkiKontrolu("satis.write"), this.ctx);
-    if (yetkiErr4) return yetkiErr4;
+    const permErr = checkWritePermission(this.yetkiKontrolu, this.ctx);
+    if (permErr) return permErr;
 
     const nowIso = new Date().toISOString();
     this.save((prev) => {

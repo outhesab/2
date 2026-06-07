@@ -101,7 +101,80 @@ export interface CleanResult {
   trimmedCells: number;
 }
 
-export function detectRecoveryFile(fileName: string): boolean {
+function buildExcelResult(file: File, sheets: SheetData[], fileType: ExcelFile['fileType']): ExcelFile {
+  return {
+    id: crypto.randomUUID(),
+    name: file.name,
+    size: file.size,
+    uploadedAt: new Date(),
+    sheets,
+    isRecovery: detectRecoveryFile(file.name),
+    fileType,
+  };
+}
+
+function headersToRow(
+  headers: string[],
+  arr: (string | number | boolean | null)[],
+  transform?: (val: string | number | boolean | null | Date, i: number) => string | number | boolean | null,
+): Record<string, string | number | boolean | null> {
+  const obj: Record<string, string | number | boolean | null> = {};
+  headers.forEach((header, i) => {
+    const val = arr[i] ?? null;
+    obj[header] = transform ? transform(val, i) : (val as string | number | boolean | null);
+  });
+  return obj;
+}
+
+function mergeRowsByStrategy(
+  rowA: Record<string, string | number | boolean | null>,
+  rowB: Record<string, string | number | boolean | null>,
+  strategy: MergeOptions['strategy'],
+): Record<string, string | number | boolean | null> {
+  if (strategy === "latest") return { ...rowA, ...rowB };
+  if (strategy === "first") return { ...rowB, ...rowA };
+  if (strategy === "union") {
+    const merged = { ...rowA };
+    Object.entries(rowB).forEach(([k, v]) => {
+      if (merged[k] == null || merged[k] === "") merged[k] = v;
+    });
+    return merged;
+  }
+  return { ...rowA };
+}
+
+export function buildRowsAndSource(
+  allSheets: { sheet: SheetData; file: ExcelFile }[],
+): {
+  rows: Record<string, string | number | boolean | null>[];
+  sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }>;
+} {
+  const rows: Record<string, string | number | boolean | null>[] = [];
+  const sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }> = {};
+  allSheets.forEach(({ sheet, file }) => {
+    sheet.rows.forEach((row) => {
+      const idx = rows.length;
+      rows.push(row);
+      sourceInfo[idx] = { fileId: file.id, fileName: file.name, sheetName: sheet.name };
+    });
+  });
+  return { rows, sourceInfo };
+}
+
+function applyCleanAndReport(
+  rows: Record<string, string | number | boolean | null>[],
+  headers: string[],
+  cleanOptions: CleanOptions,
+  report: MergeReport,
+): { rows: Record<string, string | number | boolean | null>[] } {
+  const cleanResult = applyCleanOptions(rows, headers, cleanOptions);
+  report.duplicatesRemoved = cleanResult.duplicatesRemoved;
+  report.nullsFilled = cleanResult.nullsFilled;
+  report.totalOutputRows = cleanResult.rows.length;
+  return { rows: cleanResult.rows };
+}
+
+function detectRecoveryFile(fileName: string): boolean {
   const lower = fileName.toLowerCase();
   return (
     lower.includes("kurtarma") ||
@@ -139,28 +212,14 @@ export async function parseExcelFile(file: File): Promise<ExcelFile> {
     const headers = makeSafeHeaders(headerRow);
 
     const rows = rawData.slice(1).map((rawRow) => {
-      const arr = rawRow as (string | number | boolean | null | Date)[];
-      const obj: Record<string, string | number | boolean | null> = {};
-      headers.forEach((header, i) => {
-        const val = arr[i] ?? null;
-        obj[header] = val instanceof Date ? val.toLocaleDateString("tr-TR") : (val as string | number | boolean | null);
-      });
-      return obj;
+      return headersToRow(headers, rawRow, (val) => val instanceof Date ? val.toLocaleDateString("tr-TR") : val);
     });
 
     const rawRows = rawData.slice(1) as (string | number | boolean | null)[][];
     return { name: sheetName, headers, rows, rawRows };
   });
 
-  return {
-    id: crypto.randomUUID(),
-    name: file.name,
-    size: file.size,
-    uploadedAt: new Date(),
-    sheets,
-    isRecovery: detectRecoveryFile(file.name),
-    fileType: "excel",
-  };
+  return buildExcelResult(file, sheets, "excel");
 }
 
 export async function parseCsvFile(file: File): Promise<ExcelFile> {
@@ -173,24 +232,9 @@ export async function parseCsvFile(file: File): Promise<ExcelFile> {
       ? makeSafeHeaders(rawData[0] as (string | number | boolean | null)[])
       : [];
 
-  const rows = rawData.slice(1).map((rawRow) => {
-    const arr = rawRow as (string | number | boolean | null)[];
-    const obj: Record<string, string | number | boolean | null> = {};
-    headers.forEach((header, i) => {
-      obj[header] = arr[i] ?? null;
-    });
-    return obj;
-  });
+  const rows = rawData.slice(1).map((rawRow) => headersToRow(headers, rawRow));
 
-  return {
-    id: crypto.randomUUID(),
-    name: file.name,
-    size: file.size,
-    uploadedAt: new Date(),
-    sheets: [{ name: "Sayfa1", headers, rows, rawRows: rawData.slice(1) as (string | number | boolean | null)[][] }],
-    isRecovery: detectRecoveryFile(file.name),
-    fileType: "csv",
-  };
+  return buildExcelResult(file, [{ name: "Sayfa1", headers, rows, rawRows: rawData.slice(1) as (string | number | boolean | null)[][] }], "csv");
 }
 
 export async function parseJsonFile(file: File): Promise<ExcelFile> {
@@ -216,15 +260,7 @@ export async function parseJsonFile(file: File): Promise<ExcelFile> {
     return row;
   });
 
-  return {
-    id: crypto.randomUUID(),
-    name: file.name,
-    size: file.size,
-    uploadedAt: new Date(),
-    sheets: [{ name: "JSON Veri", headers, rows, rawRows: [] }],
-    isRecovery: detectRecoveryFile(file.name),
-    fileType: "json",
-  };
+  return buildExcelResult(file, [{ name: "JSON Veri", headers, rows, rawRows: [] }], "json");
 }
 
 export async function parseXmlFile(file: File): Promise<ExcelFile> {
@@ -238,15 +274,7 @@ export async function parseXmlFile(file: File): Promise<ExcelFile> {
   const children = Array.from(root.children);
 
   if (children.length === 0) {
-    return {
-      id: crypto.randomUUID(),
-      name: file.name,
-      size: file.size,
-      uploadedAt: new Date(),
-      sheets: [{ name: "XML Veri", headers: [], rows: [], rawRows: [] }],
-      isRecovery: detectRecoveryFile(file.name),
-      fileType: "xml",
-    };
+    return buildExcelResult(file, [{ name: "XML Veri", headers: [], rows: [], rawRows: [] }], "xml");
   }
 
   const headerSet = new Set<string>();
@@ -269,15 +297,7 @@ export async function parseXmlFile(file: File): Promise<ExcelFile> {
     return row;
   });
 
-  return {
-    id: crypto.randomUUID(),
-    name: file.name,
-    size: file.size,
-    uploadedAt: new Date(),
-    sheets: [{ name: "XML Veri", headers, rows, rawRows: [] }],
-    isRecovery: detectRecoveryFile(file.name),
-    fileType: "xml",
-  };
+  return buildExcelResult(file, [{ name: "XML Veri", headers, rows, rawRows: [] }], "xml");
 }
 
 function cellToString(val: string | number | boolean | null): string {
@@ -556,37 +576,15 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
   const allHeaders = Array.from(new Set(allSheets.flatMap(({ sheet }) => sheet.headers)));
 
   if (joinType === "verticalUnion") {
-    const rows: Record<string, string | number | boolean | null>[] = [];
-    const sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }> = {};
-    allSheets.forEach(({ sheet, file }) => {
-      sheet.rows.forEach((row) => {
-        const idx = rows.length;
-        rows.push(row);
-        sourceInfo[idx] = { fileId: file.id, fileName: file.name, sheetName: sheet.name };
-      });
-    });
-
-    const cleanResult = applyCleanOptions(rows, allHeaders, cleanOptions);
-    report.duplicatesRemoved = cleanResult.duplicatesRemoved;
-    report.nullsFilled = cleanResult.nullsFilled;
-    report.totalOutputRows = cleanResult.rows.length;
-
+    const { rows, sourceInfo } = buildRowsAndSource(allSheets);
+    const { rows: cleaned } = applyCleanAndReport(rows, allHeaders, cleanOptions, report);
     const newSourceInfo: typeof sourceInfo = {};
-    cleanResult.rows.forEach((_, i) => { newSourceInfo[i] = sourceInfo[i]; });
-
-    return { headers: allHeaders, rows: cleanResult.rows, sourceInfo: newSourceInfo, report };
+    cleaned.forEach((_, i) => { newSourceInfo[i] = sourceInfo[i]; });
+    return { headers: allHeaders, rows: cleaned, sourceInfo: newSourceInfo, report };
   }
 
   if (!keyColumn || !allSheets[0].sheet.headers.includes(keyColumn)) {
-    const rows: Record<string, string | number | boolean | null>[] = [];
-    const sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }> = {};
-    allSheets.forEach(({ sheet, file }) => {
-      sheet.rows.forEach((row) => {
-        const idx = rows.length;
-        rows.push(row);
-        sourceInfo[idx] = { fileId: file.id, fileName: file.name, sheetName: sheet.name };
-      });
-    });
+    const { rows, sourceInfo } = buildRowsAndSource(allSheets);
     report.totalOutputRows = rows.length;
     return { headers: allHeaders, rows, sourceInfo, report };
   }
@@ -652,19 +650,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
       matchedBKeys.add(entryB.originalKey);
       report.matchedRows++;
 
-      let merged: Record<string, string | number | boolean | null>;
-      if (strategy === "latest") {
-        merged = { ...entryA.row, ...entryB.row };
-      } else if (strategy === "first") {
-        merged = { ...entryB.row, ...entryA.row };
-      } else if (strategy === "union") {
-        merged = { ...entryA.row };
-        Object.entries(entryB.row).forEach(([k, v]) => {
-          if (merged[k] == null || merged[k] === "") merged[k] = v;
-        });
-      } else {
-        merged = { ...entryA.row };
-      }
+      const merged = mergeRowsByStrategy(entryA.row, entryB.row, strategy);
 
       const idx = rows.length;
       rows.push(merged);
@@ -705,15 +691,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
     keyMapB.forEach((entryB) => {
       const entryA = keyMapA.get(entryB.originalKey);
       if (entryA) {
-        let merged: Record<string, string | number | boolean | null>;
-        if (strategy === "latest") merged = { ...entryA.row, ...entryB.row };
-        else if (strategy === "first") merged = { ...entryB.row, ...entryA.row };
-        else if (strategy === "union") {
-          merged = { ...entryA.row };
-          Object.entries(entryB.row).forEach(([k, v]) => {
-            if (merged[k] == null || merged[k] === "") merged[k] = v;
-          });
-        } else merged = { ...entryA.row };
+        const merged = mergeRowsByStrategy(entryA.row, entryB.row, strategy);
         const idx = newRows.length;
         newRows.push(merged);
         newSourceInfo[idx] = entryA.source;
@@ -723,19 +701,12 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
         newSourceInfo[idx] = entryB.source;
       }
     });
-    const cleanResult = applyCleanOptions(newRows, allHeaders, cleanOptions);
-    report.duplicatesRemoved = cleanResult.duplicatesRemoved;
-    report.nullsFilled = cleanResult.nullsFilled;
-    report.totalOutputRows = cleanResult.rows.length;
-    return { headers: allHeaders, rows: cleanResult.rows, sourceInfo: newSourceInfo, report };
+    const { rows: cleaned } = applyCleanAndReport(newRows, allHeaders, cleanOptions, report);
+    return { headers: allHeaders, rows: cleaned, sourceInfo: newSourceInfo, report };
   }
 
-  const cleanResult = applyCleanOptions(rows, allHeaders, cleanOptions);
-  report.duplicatesRemoved = cleanResult.duplicatesRemoved;
-  report.nullsFilled = cleanResult.nullsFilled;
-  report.totalOutputRows = cleanResult.rows.length;
-
-  return { headers: allHeaders, rows: cleanResult.rows, sourceInfo, report };
+  const { rows: cleaned } = applyCleanAndReport(rows, allHeaders, cleanOptions, report);
+  return { headers: allHeaders, rows: cleaned, sourceInfo, report };
 }
 
 export function exportToExcel(

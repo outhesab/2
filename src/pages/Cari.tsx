@@ -11,14 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileSpreadsheet, HandCoins, UserRoundSearch } from "lucide-react";
 import type { Cari as CariType, DB } from "@/types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => { const t = setTimeout(() => setDebounced(value), delay); return () => clearTimeout(t); }, [value, delay]);
-  return debounced;
-}
+import { useDebounce, StatCard, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers";
 
 interface Props {
   db: DB;
@@ -962,34 +957,7 @@ export default function Cari({ db, save }: Props) {
                             {c.type === "musteri" ? "💰 Tahsilat" : "💸 Öde"}
                           </button>
                         )}
-                        <button
-                          onClick={() => openEdit(c)}
-                          style={{
-                            background: "rgba(59,130,246,0.1)",
-                            border: "none",
-                            borderRadius: 6,
-                            color: "#60a5fa",
-                            padding: "5px 10px",
-                            cursor: "pointer",
-                            fontSize: "0.82rem",
-                          }}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDelete(c.id)}
-                          style={{
-                            background: "rgba(239,68,68,0.1)",
-                            border: "none",
-                            borderRadius: 6,
-                            color: "#ef4444",
-                            padding: "5px 10px",
-                            cursor: "pointer",
-                            fontSize: "0.82rem",
-                          }}
-                        >
-                          🗑️
-                        </button>
+                        <ActionButtons onEdit={() => openEdit(c)} onDelete={() => handleDelete(c.id)} size="small" />
                       </div>
                     </td>
                   </tr>
@@ -1032,37 +1000,9 @@ export default function Cari({ db, save }: Props) {
               <option value="tedarikci">🏭 Tedarikçi</option>
             </select>
           </div>
-          <div>
-            <label style={lbl}>Telefon</label>
-            <input
-              value={form.phone || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, phone: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
-          <div>
-            <label style={lbl}>Vergi No</label>
-            <input
-              value={form.taxNo || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, taxNo: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
-          <div>
-            <label style={lbl}>E-posta</label>
-            <input
-              type="email"
-              value={form.email || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, email: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
+          <FormField label="Telefon" value={form.phone || ""} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+          <FormField label="Vergi No" value={form.taxNo || ""} onChange={(v) => setForm((f) => ({ ...f, taxNo: v }))} />
+          <FormField label="E-posta" value={form.email || ""} onChange={(v) => setForm((f) => ({ ...f, email: v }))} type="email" />
           <div style={{ gridColumn: "1/-1" }}>
             <label style={lbl}>Adres</label>
             <textarea
@@ -1073,47 +1013,9 @@ export default function Cari({ db, save }: Props) {
               style={{ ...inp, minHeight: 60 }}
             />
           </div>
-          <div style={{ gridColumn: "1/-1" }}>
-            <label style={lbl}>Not / Açıklama</label>
-            <textarea
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              value={(form as any).note || ""}
-              onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-              style={{ ...inp, minHeight: 50 }}
-              placeholder="Müşteri hakkında notlar..."
-            />
-          </div>
+          <FormTextArea label="Not / Açıklama" value={(form as any).note || ""} onChange={(v) => setForm((f) => ({ ...f, note: v }))} placeholder="Müşteri hakkında notlar..." minHeight={50} gridColumn="1/-1" />
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button
-            onClick={handleSave}
-            style={{
-              flex: 1,
-              background: "#10b981",
-              border: "none",
-              borderRadius: 10,
-              color: "#fff",
-              padding: "11px 0",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            💾 Kaydet
-          </button>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              background: "#273548",
-              border: "1px solid #334155",
-              borderRadius: 10,
-              color: "#94a3b8",
-              padding: "11px 20px",
-              cursor: "pointer",
-            }}
-          >
-            İptal
-          </button>
-        </div>
+        <ModalActions onSave={handleSave} onCancel={() => setModalOpen(false)} />
       </Modal>
 
       {/* Tahsilat / Ödeme Modalı */}
@@ -1181,40 +1083,12 @@ export default function Cari({ db, save }: Props) {
               />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-            <button
-              onClick={handleIslem}
-              style={{
-                flex: 1,
-                background:
-                  islemModal.type === "musteri" ? "#10b981" : "#f59e0b",
-                border: "none",
-                borderRadius: 10,
-                color: "#fff",
-                padding: "11px 0",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              💾{" "}
-              {islemModal.type === "musteri"
-                ? "Tahsilatı Kaydet"
-                : "Ödemeyi Kaydet"}
-            </button>
-            <button
-              onClick={() => setIslemModal(null)}
-              style={{
-                background: "#273548",
-                border: "1px solid #334155",
-                borderRadius: 10,
-                color: "#94a3b8",
-                padding: "11px 20px",
-                cursor: "pointer",
-              }}
-            >
-              İptal
-            </button>
-          </div>
+          <ModalActions
+            onSave={handleIslem}
+            onCancel={() => setIslemModal(null)}
+            saveLabel={islemModal.type === "musteri" ? "💾 Tahsilatı Kaydet" : "💾 Ödemeyi Kaydet"}
+            saveColor={islemModal.type === "musteri" ? "#10b981" : "#f59e0b"}
+          />
         </Modal>
       )}
 
@@ -1252,36 +1126,5 @@ export default function Cari({ db, save }: Props) {
 
 
 
-function StatCard({
-  label,
-  value,
-  color,
-  sub,
-}: {
-  label: string;
-  value: string;
-  color: string;
-  sub?: string;
-}) {
-  return (
-    <div
-      style={{
-        background: "var(--bg-card)",
-        borderRadius: 12,
-        padding: "16px 18px",
-        border: `1px solid ${color}22`,
-      }}
-    >
-      <div style={{ fontSize: "1.4rem", fontWeight: 800, color }}>{value}</div>
-      <div style={{ color: "var(--text-muted)", fontSize: "0.78rem", marginTop: 4 }}>
-        {label}
-      </div>
-      {sub && (
-        <div style={{ color: "var(--text-secondary)", fontSize: "0.75rem", marginTop: 2 }}>
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}
+
 

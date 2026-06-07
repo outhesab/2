@@ -11,6 +11,18 @@ import { logger } from '@/lib/logger';
 import { getAppVersion } from '@/lib/version';
 import { BRAND_NAME } from '@/config/brand';
 import type { WidgetId } from '@/config/widgets';
+import {
+  getMonthSales,
+  computeKasaToplam,
+  computeKasaByType,
+  computeAlacak,
+  computeBorc,
+  computeStokDeger,
+  getCategorySales,
+  getOutOfStockProducts,
+  getLowStockProducts,
+  getOverdueMusteri,
+} from '@/lib/dbUtils';
 
 interface Props {
   db: DB;
@@ -260,25 +272,21 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
     const yestRevenue = yestSales.reduce((s, sale) => s + sale.total, 0);
     const revTrend = yestRevenue > 0 ? ((todayRevenue - yestRevenue) / yestRevenue) * 100 : 0;
 
-    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
-    const monthSales = db.sales.filter(s => !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt) >= monthStart);
-    const monthRevenue = monthSales.reduce((s, sale) => s + sale.total, 0);
-    const monthProfit = monthSales.reduce((s, sale) => s + sale.profit, 0);
+    const { ciro: monthRevenue, kar: monthProfit } = getMonthSales(db);
 
-    const outOfStock = db.products.filter(p => !p.deleted && p.stock === 0).length;
-    const lowStock = db.products.filter(p => !p.deleted && p.stock > 0 && p.stock <= p.minStock).length;
+    const outOfStock = getOutOfStockProducts(db).length;
+    const lowStock = getLowStockProducts(db).length;
 
-    const activeKasa = db.kasa.filter(k => !k.deleted);
-    const totalKasa = activeKasa.reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
-    const nakit = activeKasa.filter(k => k.kasa === 'nakit').reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
-    const banka = activeKasa.filter(k => k.kasa === 'banka').reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
+    const totalKasa = computeKasaToplam(db);
+    const nakit = computeKasaByType(db, "nakit");
+    const banka = computeKasaByType(db, "banka");
 
     const pendingOrders = db.orders.filter(o => o.status === 'bekliyor').length;
-    const totalReceivable = db.cari.filter(c => !c.deleted && c.type === 'musteri' && c.balance > 0).reduce((s, c) => s + c.balance, 0);
-    const totalPayable = db.cari.filter(c => !c.deleted && c.type === 'tedarikci' && c.balance > 0).reduce((s, c) => s + c.balance, 0);
-    const posToplamı = activeKasa.filter(k => ['pos_ziraat', 'pos_is', 'pos_yk'].includes(k.kasa)).reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
+    const totalReceivable = computeAlacak(db);
+    const totalPayable = computeBorc(db);
+    const posToplamı = db.kasa.filter(k => !k.deleted && ['pos_ziraat', 'pos_is', 'pos_yk'].includes(k.kasa)).reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
     const netSermaye = nakit + banka + posToplamı + totalReceivable - totalPayable;
-    const stokDeger = db.products.filter(p => !p.deleted).reduce((s, p) => s + p.cost * p.stock, 0);
+    const stokDeger = computeStokDeger(db);
 
     return { todayRevenue, todayProfit, todaySalesCount: todaySales.length, monthRevenue, monthProfit, outOfStock, lowStock, totalKasa, nakit, banka, pendingOrders, totalReceivable, totalPayable, netSermaye, stokDeger, revTrend };
   }, [db]);
@@ -313,15 +321,11 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
   }, [db.sales]);
 
   const categoryRevenue = useMemo(() => {
-    const map: Record<string, number> = {};
-    db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').forEach(s => {
-      const cat = s.productCategory || 'Diğer';
-      map[cat] = (map[cat] || 0) + s.total;
-    });
+    const catSales = getCategorySales(db);
     const cats = db.productCategories || [];
-    return Object.entries(map).map(([id, value]) => ({
+    return Object.entries(catSales).map(([id, v]) => ({
       name: cats.find(c => c.id === id)?.name || id,
-      value,
+      value: v.ciro,
     }));
   }, [db.sales, db.productCategories]);
 
@@ -870,20 +874,12 @@ function WidgetCard({ title, subtitle, children, extra }: { title: string; subti
 function Oneriler({ db, onTabChange }: { db: DB; onTabChange: (tab: string) => void }) {
   const tips = useMemo(() => {
     const list: { icon: string; text: string; action: string; tab: string; level: 'warn' | 'info' | 'ok' }[] = [];
-    const outStock = db.products.filter(p => !p.deleted && p.stock === 0);
-    const lowStock = db.products.filter(p => !p.deleted && p.stock > 0 && p.stock <= p.minStock);
+    const outStock = getOutOfStockProducts(db);
+    const lowStock = getLowStockProducts(db);
     if (outStock.length > 0) list.push({ icon: '⚠️', text: `${outStock.length} ürün stok bitti: ${outStock.slice(0, 2).map(p => p.name).join(', ')}${outStock.length > 2 ? '...' : ''}`, action: 'Ürünlere Git', tab: 'products', level: 'warn' });
     if (lowStock.length > 0) list.push({ icon: '📦', text: `${lowStock.length} üründe az stok uyarısı var`, action: 'Stoka Git', tab: 'stock', level: 'warn' });
 
-    // Gecikmiş alacak kontrolü (30+ gün)
-    const overdueMusteri = db.cari.filter(c => !c.deleted && c.type === 'musteri' && c.balance > 0).map(c => {
-      const lastPay = db.kasa.filter(k => !k.deleted && k.cariId === c.id && k.type === 'gelir').sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-      const lastPayDate = lastPay ? new Date(lastPay.createdAt) : null;
-      const unpaidSale = db.sales.filter(s => !s.deleted && s.status === 'tamamlandi' && (s.cariId === c.id)).filter(s => !lastPayDate || new Date(s.createdAt) > lastPayDate).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
-      const refDate = unpaidSale ? new Date(unpaidSale.createdAt) : c.lastTransaction ? new Date(c.lastTransaction) : null;
-      const days = refDate ? Math.floor((Date.now() - refDate.getTime()) / 86400000) : null;
-      return { ...c, days };
-    }).filter(c => c.days !== null && c.days >= 30);
+    const overdueMusteri = getOverdueMusteri(db);
 
     if (overdueMusteri.length > 0) {
       const toplam = overdueMusteri.reduce((s, c) => s + c.balance, 0);

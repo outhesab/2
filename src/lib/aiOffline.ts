@@ -6,33 +6,21 @@ import {
   computeKasaByType,
   computeKasaToplam,
   computeStokDeger,
+  getCategorySales,
   getLowStockProducts,
+  getMonthSales,
   getOutOfStockProducts,
+  getOverdueMusteri,
+  getProductSalesAgg,
+  getTopBorclu,
 } from "@/lib/dbUtils";
 
 export function offlineReply(db: DB, query: string): string {
   const q = query.toLowerCase();
-  const today = new Date();
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const monthSales = db.sales.filter(
-    (s) =>
-      !s.deleted &&
-      s.status === "tamamlandi" &&
-      new Date(s.createdAt) >= monthStart,
-  );
-  const ciro = monthSales.reduce((s, x) => s + x.total, 0);
-  const kar = monthSales.reduce((s, x) => s + x.profit, 0);
-  const activeKasa = db.kasa.filter((k) => !k.deleted);
-  const kasaToplam = activeKasa.reduce(
-    (s, k) => s + (k.type === "gelir" ? k.amount : -k.amount),
-    0,
-  );
-  const nakit = activeKasa
-    .filter((k) => k.kasa === "nakit")
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
-  const banka = activeKasa
-    .filter((k) => k.kasa === "banka")
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
+  const { sales: monthSales, ciro, kar } = getMonthSales(db);
+  const kasaToplam = computeKasaToplam(db);
+  const nakit = computeKasaByType(db, "nakit");
+  const banka = computeKasaByType(db, "banka");
 
   if (q.includes("stok") || q.includes("ürün") || q.includes("sipariş")) {
     const out = getOutOfStockProducts(db);
@@ -75,34 +63,9 @@ export function offlineReply(db: DB, query: string): string {
     q.includes("müşteri") ||
     q.includes("tahsilat")
   ) {
-    const activeCari = db.cari.filter((c) => !c.deleted);
     const alacak = computeAlacak(db);
-    const topBorclu = [...activeCari]
-      .filter((c) => c.type === "musteri" && c.balance > 0)
-      .sort((a, b) => b.balance - a.balance)
-      .slice(0, 5);
-    // Gecikmiş alacaklar
-    const overdue = activeCari
-      .filter((c) => c.type === "musteri" && c.balance > 0)
-      .map((c) => {
-        const lastPay = db.kasa
-          .filter((k) => !k.deleted && k.cariId === c.id && k.type === "gelir")
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )[0];
-        const refDate = lastPay
-          ? new Date(lastPay.createdAt)
-          : c.lastTransaction
-            ? new Date(c.lastTransaction)
-            : null;
-        const days = refDate
-          ? Math.floor((Date.now() - refDate.getTime()) / 86400000)
-          : null;
-        return { ...c, days };
-      })
-      .filter((c) => c.days !== null && c.days >= 30)
-      .sort((a, b) => (b.days ?? 0) - (a.days ?? 0));
+    const topBorclu = getTopBorclu(db);
+    const overdue = getOverdueMusteri(db);
     return `👤 **Cari ve Alacak Ozeti**\n- Toplam alacak: ${formatMoney(alacak)}\n- Alacakli musteri: ${topBorclu.length}\n\n**En Yuksek 5 Alacak:**\n${topBorclu.map((c) => `- ${c.name}: ${formatMoney(c.balance)}`).join("\n") || "Yok"}${
       overdue.length > 0
         ? `\n\n⚠️ **Gecikmis Alacaklar (30+ gun):**\n${overdue
@@ -175,15 +138,9 @@ export function buildContext(
   stopOnViolation: boolean,
 ): string {
   const today = new Date();
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  const monthSales = db.sales.filter(
-    (s) =>
-      !s.deleted &&
-      s.status === "tamamlandi" &&
-      new Date(s.createdAt) >= monthStart,
-  );
+  const { sales: monthSales, ciro: monthCiro, kar: monthKar } = getMonthSales(db);
   const lastMonthSales = db.sales.filter(
     (s) =>
       !s.deleted &&
@@ -199,19 +156,7 @@ export function buildContext(
   const stokDeger = computeStokDeger(db);
 
   // Top ürünler — satış adedi ve ciro bazlı
-  const productSales: Record<
-    string,
-    { ciro: number; adet: number; kar: number }
-  > = {};
-  db.sales
-    .filter((s) => !s.deleted && s.status === "tamamlandi")
-    .forEach((s) => {
-      const id = s.productId || s.productName;
-      if (!productSales[id]) productSales[id] = { ciro: 0, adet: 0, kar: 0 };
-      productSales[id].ciro += s.total;
-      productSales[id].adet += s.quantity;
-      productSales[id].kar += s.profit;
-    });
+  const productSales = getProductSalesAgg(db);
   const topProducts = db.products
     .filter((p) => !p.deleted)
     .map((p) => ({
@@ -222,57 +167,15 @@ export function buildContext(
     .slice(0, 5);
 
   // Gecikmiş alacaklar
-  const overdueMusteri = db.cari
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-    .map((c) => {
-      const lastPay = db.kasa
-        .filter((k) => !k.deleted && k.cariId === c.id && k.type === "gelir")
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )[0];
-      const lastPayDate = lastPay ? new Date(lastPay.createdAt) : null;
-      const unpaidSale = db.sales
-        .filter(
-          (s) =>
-            !s.deleted &&
-            s.status === "tamamlandi" &&
-            (s.cariId === c.id),
-        )
-        .filter((s) => !lastPayDate || new Date(s.createdAt) > lastPayDate)
-        .sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        )[0];
-      const refDate = unpaidSale
-        ? new Date(unpaidSale.createdAt)
-        : c.lastTransaction
-          ? new Date(c.lastTransaction)
-          : null;
-      const days = refDate
-        ? Math.floor((Date.now() - refDate.getTime()) / 86400000)
-        : null;
-      return { name: c.name, balance: c.balance, days, phone: c.phone };
-    })
-    .filter((c) => c.days !== null && c.days >= 30)
-    .sort((a, b) => (b.days ?? 0) - (a.days ?? 0));
+  const overdueMusteri = getOverdueMusteri(db).map((c) => ({
+    name: c.name, balance: c.balance, days: c.days, phone: c.phone,
+  }));
 
   const alacak = computeAlacak(db);
   const borc = computeBorc(db);
-  const topBorclu = [...db.cari]
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
-    .sort((a, b) => b.balance - a.balance)
-    .slice(0, 5);
+  const topBorclu = getTopBorclu(db);
 
-  const catSales: Record<string, { ciro: number; kar: number }> = {};
-  db.sales
-    .filter((s) => !s.deleted && s.status === "tamamlandi")
-    .forEach((s) => {
-      const c = s.productCategory || "Diğer";
-      if (!catSales[c]) catSales[c] = { ciro: 0, kar: 0 };
-      catSales[c].ciro += s.total;
-      catSales[c].kar += s.profit;
-    });
+  const catSales = getCategorySales(db);
 
   // Aylık trend (son 6 ay)
   const monthlyTrend: Record<string, number> = {};
@@ -295,8 +198,6 @@ export function buildContext(
       if (monthlyTrend[key] !== undefined) monthlyTrend[key] += s.total;
     });
 
-  const monthCiro = monthSales.reduce((s, x) => s + x.total, 0);
-  const monthKar = monthSales.reduce((s, x) => s + x.profit, 0);
   const lastMonthCiro = lastMonthSales.reduce((s, x) => s + x.total, 0);
   const buyumePct =
     lastMonthCiro > 0

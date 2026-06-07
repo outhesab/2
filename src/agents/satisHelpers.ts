@@ -1,7 +1,7 @@
 import type { KasaEntry, Cari } from "@/types";
 import { genId } from "@/lib/utils-tr";
 
-export function checkSatisWritePermission(
+function checkSatisWritePermission(
   yetkiVar: boolean,
   ctx: unknown,
   ctxMsg?: string,
@@ -15,7 +15,7 @@ export function checkSatisWritePermission(
   return null;
 }
 
-export function buildRefundKasaEntries(
+function buildRefundKasaEntries(
   kasa: KasaEntry[],
   saleId: string,
   productName: string,
@@ -49,7 +49,7 @@ export function buildRefundKasaEntries(
   return { updatedKasa, tahsilEdilen };
 }
 
-export function updateCariForRefund(
+function updateCariForRefund(
   cari: Cari[],
   cariId: string | undefined,
   total: number,
@@ -69,4 +69,28 @@ export function updateCariForRefund(
         }
       : c,
   );
+}
+
+export function requireSatisWrite(
+  yetkiKontrolu: (y: string) => boolean,
+  ctx: unknown,
+  ctxMsg?: string,
+): { ok: false; error: string } | null {
+  return checkSatisWritePermission(yetkiKontrolu("satis.write"), ctx, ctxMsg);
+}
+
+export function applyRefundToDB(
+  kasa: KasaEntry[],
+  cari: Cari[],
+  sale: { id: string; productName: string; payment: string; cariId?: string; total: number },
+  nowIso: string,
+  type: "iptal" | "iade",
+): { kasa: KasaEntry[]; cari: Cari[] } {
+  const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
+    kasa, sale.id, sale.productName, sale.payment, nowIso, type,
+  );
+  return {
+    kasa: updatedKasa,
+    cari: updateCariForRefund(cari, sale.cariId, sale.total, tahsilEdilen, nowIso),
+  };
 }

@@ -73,6 +73,56 @@ const DEFAULT_KATEGORILER: KategoriDef[] = [
 const emptyUrun = (): UrunDef => ({ name: '', category: 'soba', cost: 0, price: 0, stock: 0, minStock: 5 });
 const emptyOrtak = (): OrtakDef => ({ name: '', share: undefined, phone: '' });
 
+function FormCard({ label, onRemove, showRemove, children }: {
+  label: string; onRemove: () => void; showRemove: boolean; children: React.ReactNode;
+}) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>{label}</span>
+        {showRemove && <button onClick={onRemove} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AddButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button onClick={onClick} style={{ width: '100%', marginTop: 10, padding: '10px 0', background: 'rgba(255,87,34,0.08)', border: '1px dashed rgba(255,87,34,0.3)', borderRadius: 10, color: '#ff7043', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }}>
+      + {label}
+    </button>
+  );
+}
+
+function ToggleItemRow({ icon, name, enabled, onToggle }: { icon: string; name: string; enabled: boolean; onToggle: () => void }) {
+  return (
+    <div onClick={onToggle} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderRadius: 12, cursor: 'pointer', border: `1px solid ${enabled ? 'rgba(255,87,34,0.4)' : 'rgba(255,255,255,0.07)'}`, background: enabled ? 'rgba(255,87,34,0.08)' : 'rgba(255,255,255,0.02)', transition: 'all 0.2s' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: '1.3rem' }}>{icon}</span>
+        <span style={{ color: enabled ? '#f1f5f9' : '#64748b', fontWeight: 600 }}>{name}</span>
+      </div>
+      <div style={{ width: 20, height: 20, borderRadius: '50%', background: enabled ? '#ff5722' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: '#fff', transition: 'all 0.2s' }}>
+        {enabled ? '✓' : ''}
+      </div>
+    </div>
+  );
+}
+
+function createFieldArrayActions<T>(
+  setItems: React.Dispatch<React.SetStateAction<T[]>>,
+  factory: () => T,
+) {
+  return {
+    add: () => setItems(prev => [...prev, factory()]),
+    remove: (i: number) => setItems(prev => prev.filter((_, idx) => idx !== i)),
+    update: (i: number, field: keyof T, value: any) =>
+      setItems(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: value } : item)),
+  };
+}
+
 export default function SetupWizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -294,15 +344,7 @@ function StepKasa({ kasalar, setKasalar }: { kasalar: KasaDef[]; setKasalar: Rea
       <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.82rem', marginBottom: 14 }}>Kullanacağınız kasa/hesap türlerini seçin. Sonradan değiştirilebilir.</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {kasalar.map((k, i) => (
-          <div key={k.name} onClick={() => toggle(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderRadius: 12, cursor: 'pointer', border: `1px solid ${k.enabled ? 'rgba(255,87,34,0.4)' : 'rgba(255,255,255,0.07)'}`, background: k.enabled ? 'rgba(255,87,34,0.08)' : 'rgba(255,255,255,0.02)', transition: 'all 0.2s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: '1.3rem' }}>{k.icon}</span>
-              <span style={{ color: k.enabled ? '#f1f5f9' : '#64748b', fontWeight: 600 }}>{k.name}</span>
-            </div>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: k.enabled ? '#ff5722' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: '#fff', transition: 'all 0.2s' }}>
-              {k.enabled ? '✓' : ''}
-            </div>
-          </div>
+          <ToggleItemRow key={k.name} icon={k.icon} name={k.name} enabled={k.enabled} onToggle={() => toggle(i)} />
         ))}
       </div>
     </div>
@@ -326,15 +368,7 @@ function StepKategoriler({ kategoriler, setKategoriler }: { kategoriler: Kategor
       <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.82rem', marginBottom: 14 }}>Hangi ürün kategorilerini kullanacaksınız? Sonradan değiştirilebilir.</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
         {kategoriler.map((k, i) => (
-          <div key={k.id} onClick={() => toggle(i)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 12, cursor: 'pointer', border: `1px solid ${k.enabled ? 'rgba(255,87,34,0.4)' : 'rgba(255,255,255,0.07)'}`, background: k.enabled ? 'rgba(255,87,34,0.08)' : 'rgba(255,255,255,0.02)', transition: 'all 0.2s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: '1.3rem' }}>{k.icon}</span>
-              <span style={{ color: k.enabled ? '#f1f5f9' : '#64748b', fontWeight: 600 }}>{k.name}</span>
-            </div>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: k.enabled ? '#ff5722' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: '#fff', transition: 'all 0.2s' }}>
-              {k.enabled ? '✓' : ''}
-            </div>
-          </div>
+          <ToggleItemRow key={k.id} icon={k.icon} name={k.name} enabled={k.enabled} onToggle={() => toggle(i)} />
         ))}
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -348,10 +382,7 @@ function StepKategoriler({ kategoriler, setKategoriler }: { kategoriler: Kategor
 
 // ── Adım 4: Ürünler ──
 function StepUrunler({ urunler, setUrunler, kategoriler }: { urunler: UrunDef[]; setUrunler: React.Dispatch<React.SetStateAction<UrunDef[]>>; kategoriler: KategoriDef[] }) {
-  const update = (i: number, field: keyof UrunDef, value: string | number) =>
-    setUrunler(prev => prev.map((u, idx) => idx === i ? { ...u, [field]: value } : u));
-  const add = () => setUrunler(prev => [...prev, emptyUrun()]);
-  const remove = (i: number) => setUrunler(prev => prev.filter((_, idx) => idx !== i));
+  const { add, remove, update } = createFieldArrayActions(setUrunler, emptyUrun);
   const cats = kategoriler.length > 0 ? kategoriler : DEFAULT_KATEGORILER;
 
   return (
@@ -359,36 +390,28 @@ function StepUrunler({ urunler, setUrunler, kategoriler }: { urunler: UrunDef[];
       <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.82rem', marginBottom: 14 }}>Başlangıç ürünlerinizi ekleyin. İsim boş bırakılan satırlar atlanır.</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: 320, overflowY: 'auto', paddingRight: 4 }}>
         {urunler.map((u, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>ÜRÜN {i + 1}</span>
-              {urunler.length > 1 && <button onClick={() => remove(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>}
+          <FormCard key={i} label={`ÜRÜN ${i + 1}`} onRemove={() => remove(i)} showRemove={urunler.length > 1}>
+            <div style={{ gridColumn: '1/-1' }}>
+              <input value={u.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Ürün adı" style={inp} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div style={{ gridColumn: '1/-1' }}>
-                <input value={u.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Ürün adı" style={inp} />
-              </div>
-              <div>
-                <select value={u.category} onChange={e => update(i, 'category', e.target.value)} style={inp}>
-                  {cats.map(k => <option key={k.id} value={k.id}>{k.icon} {k.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <input type="number" value={u.stock || ''} onChange={e => update(i, 'stock', parseFloat(e.target.value) || 0)} placeholder="Stok adedi" style={inp} min={0} />
-              </div>
-              <div>
-                <input type="number" value={u.cost || ''} onChange={e => update(i, 'cost', parseFloat(e.target.value) || 0)} placeholder="Alış fiyatı ₺" style={inp} min={0} />
-              </div>
-              <div>
-                <input type="number" value={u.price || ''} onChange={e => update(i, 'price', parseFloat(e.target.value) || 0)} placeholder="Satış fiyatı ₺" style={inp} min={0} />
-              </div>
+            <div>
+              <select value={u.category} onChange={e => update(i, 'category', e.target.value)} style={inp}>
+                {cats.map(k => <option key={k.id} value={k.id}>{k.icon} {k.name}</option>)}
+              </select>
             </div>
-          </div>
+            <div>
+              <input type="number" value={u.stock || ''} onChange={e => update(i, 'stock', parseFloat(e.target.value) || 0)} placeholder="Stok adedi" style={inp} min={0} />
+            </div>
+            <div>
+              <input type="number" value={u.cost || ''} onChange={e => update(i, 'cost', parseFloat(e.target.value) || 0)} placeholder="Alış fiyatı ₺" style={inp} min={0} />
+            </div>
+            <div>
+              <input type="number" value={u.price || ''} onChange={e => update(i, 'price', parseFloat(e.target.value) || 0)} placeholder="Satış fiyatı ₺" style={inp} min={0} />
+            </div>
+          </FormCard>
         ))}
       </div>
-      <button onClick={add} style={{ width: '100%', marginTop: 10, padding: '10px 0', background: 'rgba(255,87,34,0.08)', border: '1px dashed rgba(255,87,34,0.3)', borderRadius: 10, color: '#ff7043', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }}>
-        + Ürün Ekle
-      </button>
+      <AddButton onClick={add} label="Ürün Ekle" />
     </div>
   );
 }
@@ -400,12 +423,11 @@ function StepOrtaklar({ ortaklar, setOrtaklar, ortakCariAc, setOrtakCariAc }: {
   ortakCariAc: boolean[];
   setOrtakCariAc: React.Dispatch<React.SetStateAction<boolean[]>>;
 }) {
-  const update = (i: number, field: keyof OrtakDef, value: string | number | undefined) =>
-    setOrtaklar(prev => prev.map((o, idx) => idx === i ? { ...o, [field]: value } : o));
+  const { add, remove, update } = createFieldArrayActions(setOrtaklar, emptyOrtak);
   const toggleCari = (i: number) =>
     setOrtakCariAc(prev => { const next = [...prev]; next[i] = !(next[i] ?? true); return next; });
-  const add = () => { setOrtaklar(prev => [...prev, emptyOrtak()]); setOrtakCariAc(prev => [...prev, true]); };
-  const remove = (i: number) => { setOrtaklar(prev => prev.filter((_, idx) => idx !== i)); setOrtakCariAc(prev => prev.filter((_, idx) => idx !== i)); };
+  const addWithCari = () => { add(); setOrtakCariAc(prev => [...prev, true]); };
+  const removeWithCari = (i: number) => { remove(i); setOrtakCariAc(prev => prev.filter((_, idx) => idx !== i)); };
 
   return (
     <div>
@@ -420,38 +442,30 @@ function StepOrtaklar({ ortaklar, setOrtaklar, ortakCariAc, setOrtakCariAc }: {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 300, overflowY: 'auto', paddingRight: 4 }}>
           {ortaklar.map((o, i) => (
-            <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>ORTAK {i + 1}</span>
-                <button onClick={() => remove(i)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>✕</button>
+            <FormCard key={i} label={`ORTAK ${i + 1}`} onRemove={() => removeWithCari(i)} showRemove={true}>
+              <div style={{ gridColumn: '1/-1' }}>
+                <input value={o.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Ortak adı *" style={inp} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <div style={{ gridColumn: '1/-1' }}>
-                  <input value={o.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Ortak adı *" style={inp} />
-                </div>
-                <div>
-                  <input type="number" value={o.share ?? ''} onChange={e => update(i, 'share', e.target.value === '' ? undefined : parseFloat(e.target.value))} placeholder="Hisse % (opsiyonel)" style={inp} min={0} max={100} />
-                </div>
-                <div>
-                  <input value={o.phone} onChange={e => update(i, 'phone', e.target.value)} placeholder="Telefon (opsiyonel)" style={inp} />
+              <div>
+                <input type="number" value={o.share ?? ''} onChange={e => update(i, 'share', e.target.value === '' ? undefined : parseFloat(e.target.value))} placeholder="Hisse % (opsiyonel)" style={inp} min={0} max={100} />
+              </div>
+              <div>
+                <input value={o.phone} onChange={e => update(i, 'phone', e.target.value)} placeholder="Telefon (opsiyonel)" style={inp} />
+              </div>
+              <div style={{ gridColumn: '1/-1' }}>
+                <div onClick={() => toggleCari(i)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer', userSelect: 'none' }}>
+                  <div style={{ width: 36, height: 20, borderRadius: 10, background: (ortakCariAc[i] ?? true) ? '#ff5722' : '#334155', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                    <div style={{ position: 'absolute', top: 3, left: (ortakCariAc[i] ?? true) ? 18 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+                  </div>
+                  <span style={{ fontSize: '0.82rem', color: (ortakCariAc[i] ?? true) ? '#ff7043' : '#475569', fontWeight: 600 }}>
+                    {(ortakCariAc[i] ?? true) ? '✓ Otomatik cari hesap açılacak' : 'Cari hesap açılmayacak'}
+                  </span>
                 </div>
               </div>
-              {/* Cari aç toggle */}
-              <div onClick={() => toggleCari(i)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer', userSelect: 'none' }}>
-                <div style={{ width: 36, height: 20, borderRadius: 10, background: (ortakCariAc[i] ?? true) ? '#ff5722' : '#334155', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                  <div style={{ position: 'absolute', top: 3, left: (ortakCariAc[i] ?? true) ? 18 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
-                </div>
-                <span style={{ fontSize: '0.82rem', color: (ortakCariAc[i] ?? true) ? '#ff7043' : '#475569', fontWeight: 600 }}>
-                  {(ortakCariAc[i] ?? true) ? '✓ Otomatik cari hesap açılacak' : 'Cari hesap açılmayacak'}
-                </span>
-              </div>
-            </div>
+            </FormCard>
           ))}
         </div>
-      )}
-      <button onClick={add} style={{ width: '100%', marginTop: 10, padding: '10px 0', background: 'rgba(255,87,34,0.08)', border: '1px dashed rgba(255,87,34,0.3)', borderRadius: 10, color: '#ff7043', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem' }}>
-        + Ortak Ekle
-      </button>
+        <AddButton onClick={addWithCari} label="Ortak Ekle" />
     </div>
   );
 }

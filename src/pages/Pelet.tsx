@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
-import { genId, formatMoney, formatDate } from '@/lib/utils-tr';
+import { formatMoney, formatDate } from '@/lib/utils-tr';
+import { upsertSupplier, addOrder, removeById, updateStatusInDB } from '@/lib/pageHelpers';
+import { StatusBadge } from '@/pages/pageHelpers';
 import type { DB, PeletSupplier, PeletOrder } from '@/types';
 import { lbl, inp } from '@/lib/formStyles';
 
@@ -22,16 +24,9 @@ export default function Pelet({ db, save }: Props) {
     if (!supForm.name) { showToast('Ad gerekli!', 'error'); return; }
     const nowIso = new Date().toISOString();
     save(prev => {
-      const arr = [...prev.peletSuppliers];
-      if (editSupId) {
-        const i = arr.findIndex(s => s.id === editSupId);
-        if (i >= 0) arr[i] = { ...arr[i], ...supForm, updatedAt: nowIso } as PeletSupplier;
-        showToast('Güncellendi!');
-      } else {
-        arr.push({ id: genId(), createdAt: nowIso, updatedAt: nowIso, name: '', ...supForm } as PeletSupplier);
-        showToast('Eklendi!');
-      }
-      return { ...prev, peletSuppliers: arr };
+      const result = upsertSupplier<PeletSupplier>(prev, 'peletSuppliers', supForm, editSupId, nowIso, { name: '' });
+      showToast(editSupId ? 'Güncellendi!' : 'Eklendi!');
+      return result;
     });
     setSupModal(false);
   };
@@ -42,13 +37,10 @@ export default function Pelet({ db, save }: Props) {
     const unitPrice = parseFloat(orderForm.unitPrice);
     if (!qty || !unitPrice) { showToast('Miktar ve fiyat girin!', 'error'); return; }
     const nowIso = new Date().toISOString();
-    save(prev => ({
-      ...prev,
-      peletOrders: [...prev.peletOrders, {
-        id: genId(), supplierId: orderForm.supplierId, qty, unitPrice, totalAmount: qty * unitPrice,
-        deliveryDate: orderForm.deliveryDate, note: orderForm.note, status: 'bekliyor', createdAt: nowIso, updatedAt: nowIso,
-      }],
-    }));
+    save(prev => addOrder(prev, 'peletOrders', {
+      supplierId: orderForm.supplierId, qty, unitPrice, totalAmount: qty * unitPrice,
+      deliveryDate: orderForm.deliveryDate, note: orderForm.note, status: 'bekliyor',
+    }, nowIso));
     showToast('Sipariş oluşturuldu!');
     setOrderForm({ supplierId: '', qty: '', unitPrice: '', deliveryDate: '', note: '' });
     setOrderModal(false);
@@ -56,19 +48,16 @@ export default function Pelet({ db, save }: Props) {
 
   const deleteSupplier = (id: string) => {
     showConfirm('Sil', 'Emin misiniz?', () => {
-      save(prev => ({ ...prev, peletSuppliers: prev.peletSuppliers.filter(s => s.id !== id) }));
+      save(prev => removeById(prev, 'peletSuppliers', id));
       showToast('Silindi!');
     });
   };
 
   const updateOrderStatus = (id: string, status: PeletOrder['status']) => {
-    save(prev => ({ ...prev, peletOrders: prev.peletOrders.map(o => o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o) }));
+    save(prev => updateStatusInDB(prev, 'peletOrders', id, status));
   };
 
   const pellet = db.pelletSettings || { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 };
-  const statusColor: Record<string, string> = { bekliyor: '#f59e0b', yolda: '#3b82f6', tamamlandi: '#10b981', iptal: '#ef4444' };
-  const statusLabel: Record<string, string> = { bekliyor: '⏳ Bekliyor', yolda: '🚚 Yolda', tamamlandi: '✓ Tamamlandı', iptal: '✕ İptal' };
-
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: 20 }}>
@@ -173,7 +162,7 @@ export default function Pelet({ db, save }: Props) {
                   <td data-label="Birim Fiyat" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>₺{o.unitPrice}/ton</td>
                   <td data-label="Toplam" style={{ padding: '12px 16px', color: '#10b981', fontWeight: 700 }}>{formatMoney(o.totalAmount)}</td>
                   <td data-label="Durum" style={{ padding: '12px 16px' }}>
-                    <span style={{ background: `${statusColor[o.status]}22`, color: statusColor[o.status], borderRadius: 6, padding: '2px 8px', fontSize: '0.8rem', fontWeight: 600 }}>{statusLabel[o.status]}</span>
+                    <StatusBadge status={o.status} />
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {o.status !== 'tamamlandi' && o.status !== 'iptal' && (

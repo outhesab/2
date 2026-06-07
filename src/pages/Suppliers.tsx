@@ -4,8 +4,9 @@ import { useToast } from "@/components/Toast";
 import { similarity } from "@/lib/similarity";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { Cari, DB, Order, OrderItem, Supplier } from "@/types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { lbl, inp } from "@/lib/formStyles";
+import { useDebounce, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers";
 
 interface Props {
   db: DB;
@@ -37,8 +38,7 @@ export default function Suppliers({ db, save }: Props) {
   const [form, setForm] = useState<Partial<Supplier>>(emptySupplier);
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  useEffect(() => { const t = setTimeout(() => setDebouncedSearch(search), 200); return () => clearTimeout(t); }, [search]);
+  const debouncedSearch = useDebounce(search, 200);
   const [selectedSup, setSelectedSup] = useState("");
   const [dupWarning, setDupWarning] = useState<
     { name: string; score: number }[]
@@ -738,36 +738,7 @@ export default function Suppliers({ db, save }: Props) {
                       >
                         📦 Siparişler
                       </button>
-                      <button
-                        onClick={() => {
-                          setForm({ ...s });
-                          setEditId(s.id);
-                          setSupModal(true);
-                        }}
-                        style={{
-                          background: "rgba(59,130,246,0.1)",
-                          border: "none",
-                          borderRadius: 8,
-                          color: "#60a5fa",
-                          padding: "7px 10px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => deleteSupplier(s.id)}
-                        style={{
-                          background: "rgba(239,68,68,0.1)",
-                          border: "none",
-                          borderRadius: 8,
-                          color: "#ef4444",
-                          padding: "7px 10px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        🗑️
-                      </button>
+                      <ActionButtons onEdit={() => { setForm({ ...s }); setEditId(s.id); setSupModal(true); }} onDelete={() => deleteSupplier(s.id)} />
                     </div>
                   )}
                 </div>
@@ -1086,37 +1057,9 @@ export default function Suppliers({ db, save }: Props) {
               </div>
             )}
           </div>
-          <div>
-            <label style={lbl}>Kategori</label>
-            <input
-              value={form.category || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, category: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
-          <div>
-            <label style={lbl}>Telefon</label>
-            <input
-              value={form.phone || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, phone: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
-          <div>
-            <label style={lbl}>E-posta</label>
-            <input
-              type="email"
-              value={form.email || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, email: e.target.value }))
-              }
-              style={inp}
-            />
-          </div>
+          <FormField label="Kategori" value={form.category || ""} onChange={(v) => setForm((f) => ({ ...f, category: v }))} />
+          <FormField label="Telefon" value={form.phone || ""} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+          <FormField label="E-posta" value={form.email || ""} onChange={(v) => setForm((f) => ({ ...f, email: v }))} type="email" />
           <div>
             <label style={lbl}>Yetkili</label>
             <input
@@ -1137,45 +1080,14 @@ export default function Suppliers({ db, save }: Props) {
               style={{ ...inp, minHeight: 60 }}
             />
           </div>
-          <div style={{ gridColumn: "1/-1" }}>
-            <label style={lbl}>Not</label>
-            <textarea
-              value={form.note || ""}
-              onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-              style={{ ...inp, minHeight: 60 }}
-            />
-          </div>
+          <FormTextArea label="Not" value={form.note || ""} onChange={(v) => setForm((f) => ({ ...f, note: v }))} minHeight={60} gridColumn="1/-1" />
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button
-            onClick={saveSupplier}
-            style={{
-              flex: 1,
-              background: forceSave ? "#f59e0b" : "#10b981",
-              border: "none",
-              borderRadius: 10,
-              color: "#fff",
-              padding: "11px 0",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {forceSave ? "⚠️ Yine de Kaydet" : "💾 Kaydet"}
-          </button>
-          <button
-            onClick={() => setSupModal(false)}
-            style={{
-              background: "#273548",
-              border: "1px solid #334155",
-              borderRadius: 10,
-              color: "var(--text-dim)",
-              padding: "11px 20px",
-              cursor: "pointer",
-            }}
-          >
-            İptal
-          </button>
-        </div>
+        <ModalActions
+          onSave={saveSupplier}
+          onCancel={() => setSupModal(false)}
+          saveColor={forceSave ? "#f59e0b" : "#10b981"}
+          saveLabel={forceSave ? "⚠️ Yine de Kaydet" : "💾 Kaydet"}
+        />
       </Modal>
 
       <Modal
@@ -1430,36 +1342,12 @@ export default function Suppliers({ db, save }: Props) {
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-          <button
-            onClick={saveOrder}
-            style={{
-              flex: 1,
-              background: "#ff5722",
-              border: "none",
-              borderRadius: 10,
-              color: "#fff",
-              padding: "11px 0",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            📦 Sipariş Ver
-          </button>
-          <button
-            onClick={() => setOrderModal(false)}
-            style={{
-              background: "#273548",
-              border: "1px solid #334155",
-              borderRadius: 10,
-              color: "var(--text-dim)",
-              padding: "11px 20px",
-              cursor: "pointer",
-            }}
-          >
-            İptal
-          </button>
-        </div>
+        <ModalActions
+          onSave={saveOrder}
+          onCancel={() => setOrderModal(false)}
+          saveLabel="📦 Sipariş Ver"
+          saveColor="#ff5722"
+        />
       </Modal>
     </div>
   );

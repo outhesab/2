@@ -5,6 +5,7 @@ import { downloadObjectSheetsAsXlsx } from "@/lib/safeXlsx";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { BankTransaction, DB } from "@/types";
 import { useMemo, useState } from "react";
+import { TableFilterBar, TableWrapper } from "@/pages/pageHelpers";
 
 interface Props {
   db: DB;
@@ -623,64 +624,15 @@ export default function Bank({ db, save }: Props) {
         >
           🤖 AI Eşle
         </button>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="🔍 Ara..."
-          style={{
-            flex: 1,
-            padding: "9px 13px",
-            background: "var(--bg-card)",
-            border: "1px solid #334155",
-            borderRadius: 10,
-            color: "var(--text-primary)",
-            minWidth: 120,
-          }}
+        <TableFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          dateFrom={dateFrom}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo}
+          onDateToChange={setDateTo}
+          onClearDates={() => { setDateFrom(""); setDateTo(""); }}
         />
-        <input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          style={{
-            padding: "9px 10px",
-            background: "var(--bg-card)",
-            border: "1px solid #334155",
-            borderRadius: 10,
-            color: "var(--text-primary)",
-            fontSize: "0.85rem",
-          }}
-        />
-        <input
-          type="date"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          style={{
-            padding: "9px 10px",
-            background: "var(--bg-card)",
-            border: "1px solid #334155",
-            borderRadius: 10,
-            color: "var(--text-primary)",
-            fontSize: "0.85rem",
-          }}
-        />
-        {(dateFrom || dateTo) && (
-          <button
-            onClick={() => {
-              setDateFrom("");
-              setDateTo("");
-            }}
-            style={{
-              padding: "8px 10px",
-              border: "none",
-              borderRadius: 8,
-              background: "#334155",
-              color: "var(--text-dim)",
-              cursor: "pointer",
-            }}
-          >
-            ✕
-          </button>
-        )}
       </div>
 
       {/* Filtre butonları */}
@@ -747,57 +699,16 @@ export default function Bank({ db, save }: Props) {
         </div>
       </div>
 
-      {/* Tablo */}
-      <div
-        className="responsive-table-wrap"
-        style={{
-          background: "var(--bg-card)",
-          borderRadius: 14,
-          border: "1px solid #334155",
-          overflowX: "auto",
-        }}
+      <TableWrapper
+        columns={["Tarih", "Açıklama", "Tutar", "Cari Eşleşme", "Durum", ""]}
+        noData={sorted.length === 0 ? (
+          <>
+            <div style={{ fontSize: "2.5rem", marginBottom: 10 }}>🏦</div>
+            <div>İşlem bulunamadı</div>
+          </>
+        ) : undefined}
+        colSpan={6}
       >
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <thead>
-            <tr style={{ background: "rgba(15,23,42,0.6)" }}>
-              {["Tarih", "Açıklama", "Tutar", "Cari Eşleşme", "Durum", ""].map(
-                (h) => (
-                  <th
-                    key={h}
-                    style={{
-                      padding: "11px 14px",
-                      textAlign: "left",
-                      color: "var(--text-muted)",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  style={{ textAlign: "center", padding: 48, color: "#334155" }}
-                >
-                  <div style={{ fontSize: "2.5rem", marginBottom: 10 }}>🏦</div>
-                  <div>İşlem bulunamadı</div>
-                </td>
-              </tr>
-            ) : (
               sorted.map((t) => {
                 const isGelir = t.type === "income" || t.type === "credit";
                 const st = STATUS_LABEL[t.status || "unmatched"];
@@ -968,9 +879,7 @@ export default function Bank({ db, save }: Props) {
                 );
               })
             )}
-          </tbody>
-        </table>
-      </div>
+      </TableWrapper>
 
       {/* İşlem Ekle Modalı */}
       <Modal

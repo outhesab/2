@@ -2,23 +2,12 @@ import { useToast } from "@/components/Toast";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { DB, OrtakEmanet as OrtakEmanetType } from "@/types";
 import { useMemo, useState } from "react";
+import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers";
 
 interface Props {
   db: DB;
   save: (fn: (prev: DB) => DB) => void;
 }
-
-const card: React.CSSProperties = {
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 12,
-  padding: 16,
-};
-
-const muted: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: "0.86rem",
-};
 
 export default function OrtakEmanet({ db, save }: Props) {
   const { showToast } = useToast();
@@ -137,9 +126,9 @@ export default function OrtakEmanet({ db, save }: Props) {
 
   return (
     <div>
-      <section style={card}>
+      <section style={cardStyle}>
         <h2 style={{ color: "#f8fafc", margin: 0 }}>İş Ortağı Emanet Takibi</h2>
-        <p style={{ ...muted, marginTop: 6 }}>
+        <p style={{ ...mutedText, marginTop: 6 }}>
           Ortaklara verilen emanet ve iade kayıtları kasa ve cari bakiyeyle birlikte izlenir.
         </p>
 
@@ -151,8 +140,8 @@ export default function OrtakEmanet({ db, save }: Props) {
         </div>
       </section>
 
-      <section style={{ ...card, marginTop: 16 }}>
-        <h3 style={sectionTitle}>Yeni Kayıt</h3>
+      <section style={{ ...cardStyle, marginTop: 16 }}>
+        <h3 style={sectionTitleStyle}>Yeni Kayıt</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10 }}>
           <Field label="Ortak">
             <select value={form.partnerId} onChange={(event) => setForm((prev) => ({ ...prev, partnerId: event.target.value }))} style={input}>
@@ -190,17 +179,17 @@ export default function OrtakEmanet({ db, save }: Props) {
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16, marginTop: 16 }}>
-        <section style={card}>
-          <h3 style={sectionTitle}>Ortak Bakiyeleri</h3>
+        <section style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Ortak Bakiyeleri</h3>
           {partnerRows.length === 0 ? (
-            <p style={muted}>Ortak kaydı yok. Önce Ortaklar sayfasından ortak ekleyin.</p>
+            <p style={mutedText}>Ortak kaydı yok. Önce Ortaklar sayfasından ortak ekleyin.</p>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {partnerRows.map((rowItem) => (
-                <div key={rowItem.partner.id} style={row}>
+                <div key={rowItem.partner.id} style={rowStyle}>
                   <div>
                     <strong style={{ color: "#f8fafc" }}>{rowItem.partner.name}</strong>
-                    <div style={muted}>
+                    <div style={mutedText}>
                       Emanet {formatMoney(rowItem.emanet)} · İade {formatMoney(rowItem.iade)}
                     </div>
                     {rowItem.mismatch && (
@@ -218,10 +207,10 @@ export default function OrtakEmanet({ db, save }: Props) {
           )}
         </section>
 
-        <section style={card}>
-          <h3 style={sectionTitle}>Son Hareketler</h3>
+        <section style={cardStyle}>
+          <h3 style={sectionTitleStyle}>Son Hareketler</h3>
           {activeEntries.length === 0 ? (
-            <p style={muted}>Emanet hareketi yok.</p>
+            <p style={mutedText}>Emanet hareketi yok.</p>
           ) : (
             <div style={{ display: "grid", gap: 8 }}>
               {[...activeEntries]
@@ -230,11 +219,11 @@ export default function OrtakEmanet({ db, save }: Props) {
                 .map((entry) => {
                   const partner = activePartners.find((item) => item.id === entry.partnerId);
                   return (
-                    <div key={entry.id} style={row}>
+                    <div key={entry.id} style={rowStyle}>
                       <div>
                         <strong style={{ color: "#f8fafc" }}>{partner?.name || "Ortak yok"}</strong>
-                        <div style={muted}>{entry.description || entry.note || "Açıklama yok"}</div>
-                        <div style={muted}>{formatDate(entry.createdAt)}</div>
+                        <div style={mutedText}>{entry.description || entry.note || "Açıklama yok"}</div>
+                        <div style={mutedText}>{formatDate(entry.createdAt)}</div>
                       </div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ color: entry.type === "emanet" ? "#f59e0b" : "#10b981", fontWeight: 800 }}>
@@ -264,30 +253,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div style={{ background: "#0f172a", borderRadius: 10, border: `1px solid ${color}33`, padding: "12px 14px" }}>
-      <div style={{ color, fontWeight: 800 }}>{value}</div>
-      <div style={{ color: "#64748b", fontSize: "0.75rem", marginTop: 3 }}>{label}</div>
-    </div>
-  );
-}
 
-const sectionTitle: React.CSSProperties = {
-  color: "#f8fafc",
-  margin: "0 0 12px",
-  fontSize: "1rem",
-};
-
-const row: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 12,
-  background: "#0f172a",
-  border: "1px solid rgba(148,163,184,0.12)",
-  borderRadius: 10,
-  padding: "10px 12px",
-};
 
 const input: React.CSSProperties = {
   width: "100%",

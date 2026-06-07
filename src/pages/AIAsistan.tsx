@@ -22,6 +22,14 @@ import { logger } from "@/lib/logger";
 import { formatMoney, genId } from "@/lib/utils-tr";
 import type { AIActionLogEntry, DB } from "@/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  AdminModeButton,
+  AutoApplyButton,
+  MaxActionsControl,
+  StopOnViolationButton,
+  MiniStatCard,
+  EmbeddedStatCard,
+} from "./pageHelpers";
 
 interface Props {
   db: DB;
@@ -929,40 +937,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           </div>
           {/* Anlık Özet */}
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            {[
-              {
-                label: "Bu Ay",
-                value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)),
-                color: "#10b981",
-              },
-              {
-                label: "Kasa",
-                value: formatMoney(kasaToplam),
-                color: "#06b6d4",
-              },
-              {
-                label: "Alacak",
-                value: formatMoney(alacakToplam),
-                color: "#f59e0b",
-              },
-            ].map((s) => (
-              <div
-                key={s.label}
-                style={{ textAlign: "center", display: "none" }}
-                className="ai-stat"
-              >
-                <div
-                  style={{
-                    color: s.color,
-                    fontWeight: 700,
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  {s.value}
-                </div>
-                <div style={{ color: "var(--text-secondary)", fontSize: "0.65rem" }}>
-                  {s.label}
-                </div>
+            {([
+              { label: "Bu Ay", value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)), color: "#10b981" },
+              { label: "Kasa", value: formatMoney(kasaToplam), color: "#06b6d4" },
+              { label: "Alacak", value: formatMoney(alacakToplam), color: "#f59e0b" },
+            ] as const).map((s) => (
+              <div key={s.label} style={{ display: "none" }} className="ai-stat">
+                <MiniStatCard {...s} />
               </div>
             ))}
           </div>
@@ -975,130 +956,20 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             }}
           >
             {isAdminUser && (
-              <button
-                onClick={() => setAdminMode((v) => !v)}
-                title="Yönetici DB Yazma Modu"
-                style={{
-                  background: adminMode
-                    ? "rgba(16,185,129,0.2)"
-                    : "var(--bg-card)",
-                  border: `1px solid ${adminMode ? "rgba(16,185,129,0.5)" : "var(--border)"}`,
-                  borderRadius: 8,
-                  color: adminMode ? "#10b981" : "var(--text-secondary)",
-                  padding: "7px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                }}
-              >
-                {adminMode ? "ADMIN AKTİF" : "OKUMA MODU"}
-              </button>
+              <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} />
             )}
             {isAdminUser && adminMode && (
-              <button
-                onClick={() => setAutoApplyActions((v) => !v)}
-                title="Aksiyonları otomatik uygula"
-                style={{
-                  background: autoApplyActions
-                    ? "rgba(245,158,11,0.2)"
-                    : "var(--bg-card)",
-                  border: `1px solid ${autoApplyActions ? "rgba(245,158,11,0.45)" : "var(--border)"}`,
-                  borderRadius: 8,
-                  color: autoApplyActions ? "#f59e0b" : "var(--text-secondary)",
-                  padding: "7px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.78rem",
-                  fontWeight: 700,
-                }}
-              >
-                {autoApplyActions ? "OTO-KAYIT" : "MANUEL-ONAY"}
-              </button>
+              <AutoApplyButton autoApplyActions={autoApplyActions} onToggle={() => setAutoApplyActions((v) => !v)} />
             )}
             {isAdminUser && adminMode && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "6px 8px",
-                  borderRadius: 8,
-                  border: "1px solid rgba(148,163,184,0.25)",
-                  background: "rgba(15,23,42,0.35)",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#94a3b8",
-                    fontSize: "0.72rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  MAX
-                </span>
-                <button
-                  onClick={() => setMaxAutoActions((v) => Math.max(1, v - 1))}
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "none",
-                    borderRadius: 6,
-                    color: "#cbd5e1",
-                    width: 20,
-                    height: 20,
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    lineHeight: "20px",
-                  }}
-                >
-                  -
-                </button>
-                <span
-                  style={{
-                    minWidth: 16,
-                    textAlign: "center",
-                    color: "#f1f5f9",
-                    fontSize: "0.76rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  {maxAutoActions}
-                </span>
-                <button
-                  onClick={() => setMaxAutoActions((v) => Math.min(20, v + 1))}
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "none",
-                    borderRadius: 6,
-                    color: "#cbd5e1",
-                    width: 20,
-                    height: 20,
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    lineHeight: "20px",
-                  }}
-                >
-                  +
-                </button>
-              </div>
+              <MaxActionsControl
+                value={maxAutoActions}
+                onDecrement={() => setMaxAutoActions((v) => Math.max(1, v - 1))}
+                onIncrement={() => setMaxAutoActions((v) => Math.min(20, v + 1))}
+              />
             )}
             {isAdminUser && adminMode && (
-              <button
-                onClick={() => setStopOnViolation((v) => !v)}
-                title="Kural ihlalinde davranış"
-                style={{
-                  background: stopOnViolation
-                    ? "rgba(239,68,68,0.16)"
-                    : "rgba(16,185,129,0.14)",
-                  border: `1px solid ${stopOnViolation ? "rgba(239,68,68,0.45)" : "rgba(16,185,129,0.45)"}`,
-                  borderRadius: 8,
-                  color: stopOnViolation ? "#f87171" : "#34d399",
-                  padding: "7px 8px",
-                  cursor: "pointer",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                }}
-              >
-                {stopOnViolation ? "HATA-DUR" : "HATA-GEÇ"}
-              </button>
+              <StopOnViolationButton stopOnViolation={stopOnViolation} onToggle={() => setStopOnViolation((v) => !v)} />
             )}
             {messages.length > 0 && (
               <button
@@ -1149,53 +1020,12 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           }}
         >
           <div style={{ flex: 1, display: "flex", gap: 8 }}>
-            {[
-              {
-                label: "Bu Ay Ciro",
-                value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)),
-                color: "#10b981",
-              },
-              {
-                label: "Kasa",
-                value: formatMoney(kasaToplam),
-                color: "#06b6d4",
-              },
-              {
-                label: "Alacak",
-                value: formatMoney(alacakToplam),
-                color: "#f59e0b",
-              },
-            ].map((s) => (
-              <div
-                key={s.label}
-                style={{
-                  flex: 1,
-                  background: `${s.color}10`,
-                  border: `1px solid ${s.color}20`,
-                  borderRadius: 8,
-                  padding: "6px 10px",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    color: s.color,
-                    fontWeight: 700,
-                    fontSize: "0.82rem",
-                  }}
-                >
-                  {s.value}
-                </div>
-                <div
-                  style={{
-                    color: "var(--text-secondary)",
-                    fontSize: "0.62rem",
-                    marginTop: 1,
-                  }}
-                >
-                  {s.label}
-                </div>
-              </div>
+            {([
+              { label: "Bu Ay Ciro", value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)), color: "#10b981" },
+              { label: "Kasa", value: formatMoney(kasaToplam), color: "#06b6d4" },
+              { label: "Alacak", value: formatMoney(alacakToplam), color: "#f59e0b" },
+            ] as const).map((s) => (
+              <EmbeddedStatCard key={s.label} {...s} />
             ))}
           </div>
           <select
@@ -1221,122 +1051,21 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <option value="offline">🔌 Çevrimdışı</option>
           </select>
           {isAdminUser && (
-            <button
-              onClick={() => setAdminMode((v) => !v)}
-              title="Yönetici DB Yazma Modu"
-              style={{
-                background: adminMode
-                  ? "rgba(16,185,129,0.18)"
-                  : "rgba(99,102,241,0.1)",
-                border: `1px solid ${adminMode ? "rgba(16,185,129,0.45)" : "rgba(99,102,241,0.2)"}`,
-                borderRadius: 8,
-                color: adminMode ? "#10b981" : "#818cf8",
-                padding: "6px 8px",
-                cursor: "pointer",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-              }}
-            >
-              {adminMode ? "ADMIN" : "READ"}
-            </button>
+            <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} compact />
           )}
           {isAdminUser && adminMode && (
-            <button
-              onClick={() => setAutoApplyActions((v) => !v)}
-              title="Aksiyonları otomatik uygula"
-              style={{
-                background: autoApplyActions
-                  ? "rgba(245,158,11,0.18)"
-                  : "rgba(99,102,241,0.1)",
-                border: `1px solid ${autoApplyActions ? "rgba(245,158,11,0.45)" : "rgba(99,102,241,0.2)"}`,
-                borderRadius: 8,
-                color: autoApplyActions ? "#f59e0b" : "#818cf8",
-                padding: "6px 8px",
-                cursor: "pointer",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-              }}
-            >
-              {autoApplyActions ? "AUTO" : "MANUAL"}
-            </button>
+            <AutoApplyButton autoApplyActions={autoApplyActions} onToggle={() => setAutoApplyActions((v) => !v)} compact />
           )}
           {isAdminUser && adminMode && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "4px 6px",
-                borderRadius: 8,
-                border: "1px solid rgba(148,163,184,0.2)",
-                background: "rgba(15,23,42,0.3)",
-              }}
-            >
-              <button
-                onClick={() => setMaxAutoActions((v) => Math.max(1, v - 1))}
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "none",
-                  borderRadius: 5,
-                  color: "#cbd5e1",
-                  width: 16,
-                  height: 16,
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  lineHeight: "16px",
-                  fontSize: "0.65rem",
-                }}
-              >
-                -
-              </button>
-              <span
-                style={{
-                  color: "#f1f5f9",
-                  fontSize: "0.65rem",
-                  minWidth: 12,
-                  textAlign: "center",
-                }}
-              >
-                {maxAutoActions}
-              </span>
-              <button
-                onClick={() => setMaxAutoActions((v) => Math.min(20, v + 1))}
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "none",
-                  borderRadius: 5,
-                  color: "#cbd5e1",
-                  width: 16,
-                  height: 16,
-                  cursor: "pointer",
-                  fontWeight: 700,
-                  lineHeight: "16px",
-                  fontSize: "0.65rem",
-                }}
-              >
-                +
-              </button>
-            </div>
+            <MaxActionsControl
+              value={maxAutoActions}
+              onDecrement={() => setMaxAutoActions((v) => Math.max(1, v - 1))}
+              onIncrement={() => setMaxAutoActions((v) => Math.min(20, v + 1))}
+              compact
+            />
           )}
           {isAdminUser && adminMode && (
-            <button
-              onClick={() => setStopOnViolation((v) => !v)}
-              title="Kural ihlalinde davranış"
-              style={{
-                background: stopOnViolation
-                  ? "rgba(239,68,68,0.16)"
-                  : "rgba(16,185,129,0.14)",
-                border: `1px solid ${stopOnViolation ? "rgba(239,68,68,0.45)" : "rgba(16,185,129,0.45)"}`,
-                borderRadius: 8,
-                color: stopOnViolation ? "#f87171" : "#34d399",
-                padding: "6px 8px",
-                cursor: "pointer",
-                fontSize: "0.62rem",
-                fontWeight: 700,
-              }}
-            >
-              {stopOnViolation ? "STOP" : "SKIP"}
-            </button>
+            <StopOnViolationButton stopOnViolation={stopOnViolation} onToggle={() => setStopOnViolation((v) => !v)} compact />
           )}
           <button
             onClick={() => setShowSettings((s) => !s)}
