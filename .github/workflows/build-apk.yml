@@ -45,14 +45,13 @@ jobs:
       - name: Gradle executable yap
         run: chmod +x android/gradlew
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Android SDK yapılandırması
         run: |
-          echo "ANDROID_HOME: $ANDROID_HOME"
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           echo "✅ local.properties: sdk.dir=$ANDROID_HOME"
-          ls -la "$ANDROID_HOME" || echo "⚠️ ANDROID_HOME dizini yok"
-          ls -la "$ANDROID_HOME/platforms/" 2>/dev/null || echo "⚠️ platforms/ dizini yok"
-          ls -la "$ANDROID_HOME/build-tools/" 2>/dev/null || echo "⚠️ build-tools/ dizini yok"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -64,11 +63,8 @@ jobs:
         run: pnpm exec cap sync android
 
       - name: Build debug APK
-        env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
           cd android
-          echo "ANDROID_HOME=$ANDROID_HOME"
           ./gradlew assembleDebug --build-cache --parallel --no-daemon --stacktrace
 
       - name: Upload APK
