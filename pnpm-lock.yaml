@@ -134,18 +134,12 @@ importers:
       cmdk:
         specifier: ^1.0.0
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      concat-map:
-        specifier: ^0.0.1
-        version: 0.0.1
       dexie:
         specifier: ^4.0.11
         version: 4.4.2
       dompurify:
         specifier: ^3.4.7
         version: 3.4.7
-      fast-check:
-        specifier: ^4.1.1
-        version: 4.8.0
       firebase:
         specifier: ^12.13.0
         version: 12.13.0
@@ -158,21 +152,12 @@ importers:
       lightningcss:
         specifier: ^1.32.0
         version: 1.32.0
-      lightningcss-win32-x64-msvc:
-        specifier: ^1.32.0
-        version: 1.32.0
       lucide-react:
         specifier: ^0.487.0
         version: 0.487.0(react@19.2.6)
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
-      motion-dom:
-        specifier: ^12.40.0
-        version: 12.40.0
-      motion-utils:
-        specifier: ^12.39.0
-        version: 12.39.0
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -249,12 +234,21 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.20
         version: 0.4.26(eslint@9.39.4(jiti@2.7.0))
+      fallow:
+        specifier: ^0.1.5
+        version: 0.1.6
+      fast-check:
+        specifier: ^4.1.1
+        version: 4.8.0
       globals:
         specifier: ^16.0.0
         version: 16.5.0
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1
+      lightningcss-win32-x64-msvc:
+        specifier: ^1.32.0
+        version: 1.32.0
       playwright:
         specifier: ^1.52.0
         version: 1.60.0
@@ -1155,6 +1149,41 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fallow-cli/darwin-arm64@0.1.6':
+    resolution: {integrity: sha512-JrSMZWMbFvQfcViTNYHi+JH+c3JGAHN72Jldy6p3ej7dqwrPpHC5Dq5i2CgULfAFljk4cLuVRUyU5R5U3qFxqQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@fallow-cli/darwin-x64@0.1.6':
+    resolution: {integrity: sha512-jF0iWoeKAFWSbmB/AUbeyNHZI+2wHrIHlIBnrOZedr1hf7iaX/mtH/EJ7ZS3wL+RU2pZVhsVaTqtkU1x7DLx/A==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@fallow-cli/linux-arm64-gnu@0.1.6':
+    resolution: {integrity: sha512-T90f1HoNugCYt1eu7VuUimzekOelxZPUzv0Lx5fLdeS/EhFNCLeePrHZowwEdLlFijJwtTqBP2Mgr3RfLVmLsA==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@fallow-cli/linux-arm64-musl@0.1.6':
+    resolution: {integrity: sha512-vGq6d+2WGJdgIutMOOqa+9dHQyfnLCr56bvqKKi0LuBuXLrub2v72QAIshT8klMzUCQVht8pntGCvhU+j0jcKA==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@fallow-cli/linux-x64-gnu@0.1.6':
+    resolution: {integrity: sha512-lgMOuUuHg+t+I4ILBhFrkODrGVFAmLQZYrWo6NJ8+yJEw4pHW+Zh1xpq+N8b+Yq1Oc2G/oCqgCvCEOWXt3cvOA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@fallow-cli/linux-x64-musl@0.1.6':
+    resolution: {integrity: sha512-6F7T/duGufhZfbZxonqsQvlZIC1CwNBwufM4h+NeaEibFKa9WCIo6QedleghHbVe599PefuJIGooBgl0h03l5Q==}
+    cpu: [x64]
+    os: [linux]
+
+  '@fallow-cli/win32-x64-msvc@0.1.6':
+    resolution: {integrity: sha512-ZJIjoERGyGmY6uvtDfSGMK3GGjeArrkQd83inWE4mf0sY3Kh2zRDuBL4jMVfr2lTkhRRkp3jWUHrLRXxL4n1Nw==}
+    cpu: [x64]
+    os: [win32]
 
   '@firebase/ai@2.12.0':
     resolution: {integrity: sha512-b+OL4vdyiSLZL/7dLd67V55CjKJvU9MpNmwnday7eA6GG2+J4iwUEsEHgw0/jKY3A41FfkF0SrnYFvtKbQZ65A==}
@@ -3819,6 +3848,11 @@ packages:
   expect-type@1.3.0:
     resolution: {integrity: sha512-knvyeauYhqjOYvQ66MznSMs83wmHrCycNEN6Ao+2AeYEfxUIkuiVxdEa1qlGEPK+We3n0THiDciYSsCcgW/DoA==}
     engines: {node: '>=12.0.0'}
+
+  fallow@0.1.6:
+    resolution: {integrity: sha512-uZVKizQPPYIbeu9WCjcuFp2WCkrRAwX1zowGuSFURhbfzMDvBwrERdcxGM/pQwW54gRmwyxWBnNRyF0O5qsYXw==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   fast-check@4.8.0:
     resolution: {integrity: sha512-GOJ158CUMnN6cSahsv4+ExARvIDuzzinFjkp0E9WtiBa5zcVeLozVkWaE4IzFcc+Y48Wp1EDlUZsXRyAztQcSg==}
@@ -6843,6 +6877,27 @@ snapshots:
 
   '@exodus/bytes@1.15.1': {}
 
+  '@fallow-cli/darwin-arm64@0.1.6':
+    optional: true
+
+  '@fallow-cli/darwin-x64@0.1.6':
+    optional: true
+
+  '@fallow-cli/linux-arm64-gnu@0.1.6':
+    optional: true
+
+  '@fallow-cli/linux-arm64-musl@0.1.6':
+    optional: true
+
+  '@fallow-cli/linux-x64-gnu@0.1.6':
+    optional: true
+
+  '@fallow-cli/linux-x64-musl@0.1.6':
+    optional: true
+
+  '@fallow-cli/win32-x64-msvc@0.1.6':
+    optional: true
+
   '@firebase/ai@2.12.0(@firebase/app-types@0.9.5)(@firebase/app@0.14.12)':
     dependencies:
       '@firebase/app': 0.14.12
@@ -9572,6 +9627,18 @@ snapshots:
   eventemitter3@4.0.7: {}
 
   expect-type@1.3.0: {}
+
+  fallow@0.1.6:
+    dependencies:
+      detect-libc: 2.1.2
+    optionalDependencies:
+      '@fallow-cli/darwin-arm64': 0.1.6
+      '@fallow-cli/darwin-x64': 0.1.6
+      '@fallow-cli/linux-arm64-gnu': 0.1.6
+      '@fallow-cli/linux-arm64-musl': 0.1.6
+      '@fallow-cli/linux-x64-gnu': 0.1.6
+      '@fallow-cli/linux-x64-musl': 0.1.6
+      '@fallow-cli/win32-x64-msvc': 0.1.6
 
   fast-check@4.8.0:
     dependencies:
