@@ -28,9 +28,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Enable corepack
-        run: corepack enable
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
