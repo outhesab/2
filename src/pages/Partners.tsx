@@ -136,8 +136,7 @@ export default function Partners({ db, save }: Props) {
           ortak: true,
           partnerId: newId,
           balance: 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          phone: (form as any).phone || "",
+          phone: form.phone || "",
           taxNo: "",
           email: "",
           address: "",

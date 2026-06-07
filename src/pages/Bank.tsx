@@ -5,7 +5,7 @@ import { downloadObjectSheetsAsXlsx } from "@/lib/safeXlsx";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { BankTransaction, DB } from "@/types";
 import { useMemo, useState } from "react";
-import { TableFilterBar, TableWrapper } from "@/pages/pageHelpers";
+import { TableFilterBar, TableWrapper } from "@/pages/pageHelpers.tsx";
 
 interface Props {
   db: DB;
@@ -709,13 +709,13 @@ export default function Bank({ db, save }: Props) {
         ) : undefined}
         colSpan={6}
       >
-              sorted.map((t) => {
-                const isGelir = t.type === "income" || t.type === "credit";
-                const st = STATUS_LABEL[t.status || "unmatched"];
-                const matchedCari = t.matchedCariId
-                  ? db.cari.find((c) => c.id === t.matchedCariId)
-                  : null;
-                return (
+        {sorted.map((t) => {
+          const isGelir = t.type === "income" || t.type === "credit";
+          const st = STATUS_LABEL[t.status || "unmatched"];
+          const matchedCari = t.matchedCariId
+            ? db.cari.find((c) => c.id === t.matchedCariId)
+            : null;
+          return (
                   <tr
                     key={t.id}
                     style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
@@ -878,7 +878,7 @@ export default function Bank({ db, save }: Props) {
                   </tr>
                 );
               })
-            )}
+            }
       </TableWrapper>
 
       {/* İşlem Ekle Modalı */}

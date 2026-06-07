@@ -1,23 +1,37 @@
-import { indexedDb } from "@/lib/db/indexeddb";
-import { createAuditEntry, trimAuditLog } from "@/lib/auditEngine";
-import { logger } from "@/lib/logger";
-import { validateTransaction } from "@/lib/ruleEngine";
-import { genId } from "@/lib/utils-tr";
-import { isGuestSession } from "@/lib/userManager";
-import { safeClone } from "@/lib/safeClone";
-import type { DB, Kasa, ProductCategory, RuleViolation } from "@/types";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { saveToFirebase, loadFromFirebase, emitSync, type SyncStatus } from "./sync";
-import { saveBackupToFirebase, restoreBackupFromFirebase, listBackupsFromFirebase, fullRestoreDB, type RestoreReport } from "./backup";
-import { validateAndClassify, computeAuditStatus, saveBlockedState, saveAppliedState } from "./dbHelpers";
+import { indexedDb } from '@/lib/db/indexeddb';
+import { createAuditEntry, trimAuditLog } from '@/lib/auditEngine';
+import { logger } from '@/lib/logger';
+
+import { genId } from '@/lib/utils-tr';
+import { isGuestSession } from '@/lib/userManager';
+import { safeClone } from '@/lib/safeClone';
+import type { DB, Kasa, ProductCategory, RuleViolation } from '@/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { saveToFirebase, loadFromFirebase, emitSync, type SyncStatus } from './sync';
+import {
+  saveBackupToFirebase,
+  restoreBackupFromFirebase,
+  listBackupsFromFirebase,
+  fullRestoreDB,
+  type RestoreReport,
+} from './backup';
+import { validateAndClassify, computeAuditStatus, saveBlockedState, saveAppliedState } from './dbHelpers';
+
+export interface DBError {
+  message: string;
+  code: string;
+  timestamp: string;
+  recoverable: boolean;
+  context?: Record<string, unknown>;
+}
 
 export type { SyncStatus, RestoreReport };
 
-const STORAGE_KEY = "sobaYonetim";
-const INDEXED_SNAPSHOT_KEY = "primary";
+const STORAGE_KEY = 'sobaYonetim';
+const INDEXED_SNAPSHOT_KEY = 'primary';
 
 async function saveToIndexedSnapshot(db: DB): Promise<void> {
-  const t = logger.time("db", "IndexedSnapshot yaz");
+  const t = logger.time('db', 'IndexedSnapshot yaz');
   try {
     const data = JSON.stringify(db);
     await indexedDb.snapshots.put({
@@ -28,21 +42,24 @@ async function saveToIndexedSnapshot(db: DB): Promise<void> {
     t.end({ size: data.length });
   } catch (e) {
     t.end({ error: String(e) });
-    logger.warn("db", "IndexedDB snapshot yazılamadı", { error: String(e) });
+    logger.warn('db', 'IndexedDB snapshot yazılamadı', { error: String(e) });
   }
 }
 
 async function loadFromIndexedSnapshot(): Promise<DB | null> {
-  const t = logger.time("db", "IndexedSnapshot oku");
+  const t = logger.time('db', 'IndexedSnapshot oku');
   try {
     const snap = await indexedDb.snapshots.get(INDEXED_SNAPSHOT_KEY);
-    if (!snap?.data) { t.end({ empty: true }); return null; }
+    if (!snap?.data) {
+      t.end({ empty: true });
+      return null;
+    }
     const result = JSON.parse(snap.data) as DB;
     t.end({ version: result._version });
     return result;
   } catch (e) {
     t.end({ error: String(e) });
-    logger.warn("db", "IndexedDB snapshot okunamadı", { error: String(e) });
+    logger.warn('db', 'IndexedDB snapshot okunamadı', { error: String(e) });
     return null;
   }
 }
@@ -58,11 +75,11 @@ function makeDefaultDB(): DB {
     cari: [],
     kasa: [],
     kasalar: [
-      { id: "nakit", name: "Nakit", icon: "💵" },
-      { id: "banka", name: "Banka", icon: "🏦" },
-      { id: "pos_ziraat", name: "POS Ziraat", icon: "🏧" },
-      { id: "pos_is", name: "POS İş", icon: "🏧" },
-      { id: "pos_yk", name: "POS YapıKredi", icon: "🏧" },
+      { id: 'nakit', name: 'Nakit', icon: '💵' },
+      { id: 'banka', name: 'Banka', icon: '🏦' },
+      { id: 'pos_ziraat', name: 'POS Ziraat', icon: '🏧' },
+      { id: 'pos_is', name: 'POS İş', icon: '🏧' },
+      { id: 'pos_yk', name: 'POS YapıKredi', icon: '🏧' },
     ] as Kasa[],
     bankTransactions: [],
     matchRules: [],
@@ -72,9 +89,9 @@ function makeDefaultDB(): DB {
         isDefault: true,
         createdAt: nowIso,
         updatedAt: nowIso,
-        name: "Stok Tükendi Uyarısı",
-        type: "stok_sifir",
-        level: "critical",
+        name: 'Stok Tükendi Uyarısı',
+        type: 'stok_sifir',
+        level: 'critical',
         interval: 30,
         popup: true,
         active: true,
@@ -85,9 +102,9 @@ function makeDefaultDB(): DB {
         isDefault: true,
         createdAt: nowIso,
         updatedAt: nowIso,
-        name: "Düşük Stok Uyarısı",
-        type: "stok_min",
-        level: "warning",
+        name: 'Düşük Stok Uyarısı',
+        type: 'stok_min',
+        level: 'warning',
         interval: 60,
         popup: true,
         active: true,
@@ -98,14 +115,14 @@ function makeDefaultDB(): DB {
         isDefault: true,
         createdAt: nowIso,
         updatedAt: nowIso,
-        name: "Düşük Kasa Bakiyesi",
-        type: "kasa_min",
-        level: "warning",
+        name: 'Düşük Kasa Bakiyesi',
+        type: 'kasa_min',
+        level: 'warning',
         interval: 300,
         popup: true,
         active: true,
         threshold: 1000,
-        kasa: "nakit",
+        kasa: 'nakit',
       },
     ],
     monitorLog: [],
@@ -125,91 +142,106 @@ function makeDefaultDB(): DB {
     installments: [],
     partners: [],
     productCategories: [
-      { id: "soba", name: "Soba", icon: "🔥", createdAt: nowIso },
-      { id: "aksesuar", name: "Aksesuar", icon: "🔧", createdAt: nowIso },
-      { id: "yedek", name: "Yedek Parça", icon: "⚙️", createdAt: nowIso },
-      { id: "boru", name: "Boru", icon: "🔩", createdAt: nowIso },
-      { id: "pelet", name: "Pelet", icon: "🪵", createdAt: nowIso },
+      { id: 'soba', name: 'Soba', icon: '🔥', createdAt: nowIso },
+      { id: 'aksesuar', name: 'Aksesuar', icon: '🔧', createdAt: nowIso },
+      { id: 'yedek', name: 'Yedek Parça', icon: '⚙️', createdAt: nowIso },
+      { id: 'boru', name: 'Boru', icon: '🔩', createdAt: nowIso },
+      { id: 'pelet', name: 'Pelet', icon: '🪵', createdAt: nowIso },
     ] as ProductCategory[],
-    notes: [{
-      id: genId(),
-      title: "🔑 Yerel API Anahtarları",
-      content: [
-        "LM Studio: http://127.0.0.1:1234",
-        "",
-        "cURL:",
-        "curl http://127.0.0.1:1234/v1/chat/completions",
-        "  -H \"Content-Type: application/json\"",
-        "  -H \"Authorization: Bearer <key>\"",
-      ].join("\n"),
-      color: "blue",
-      pinned: false,
-      tags: ["api", "yerel", "llm"],
-      createdAt: nowIso,
-      updatedAt: nowIso,
-    }],
+    notes: [
+      {
+        id: genId(),
+        title: '🔑 Yerel API Anahtarları',
+        content: [
+          'LM Studio: http://127.0.0.1:1234',
+          '',
+          'cURL:',
+          'curl http://127.0.0.1:1234/v1/chat/completions',
+          '  -H "Content-Type: application/json"',
+          '  -H "Authorization: Bearer <key>"',
+        ].join('\n'),
+        color: 'blue',
+        pinned: false,
+        tags: ['api', 'yerel', 'llm'],
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      },
+    ],
     _auditLog: [],
     aiActionLog: [],
   };
 }
 
 function loadFromStorage(): DB {
-  const loadT = logger.time("db", "localStorage yükle");
+  const loadT = logger.time('db', 'localStorage yükle');
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return makeDefaultDB();
     const parsed = JSON.parse(raw);
     const def = makeDefaultDB();
     const merged = { ...def, ...parsed };
-    if (!merged.kasalar || merged.kasalar.length === 0)
-      merged.kasalar = def.kasalar;
-    const posIds = ["pos_ziraat", "pos_is", "pos_yk"];
+    if (!merged.kasalar || merged.kasalar.length === 0) merged.kasalar = def.kasalar;
+    const posIds = ['pos_ziraat', 'pos_is', 'pos_yk'];
     posIds.forEach((pid) => {
       if (!merged.kasalar.find((k: Kasa) => k.id === pid)) {
         const defKasa = def.kasalar.find((k) => k.id === pid);
         if (defKasa) merged.kasalar.push(defKasa);
       }
     });
-    if (!merged.monitorRules || merged.monitorRules.length === 0)
-      merged.monitorRules = def.monitorRules;
+    if (!merged.monitorRules || merged.monitorRules.length === 0) merged.monitorRules = def.monitorRules;
     if (!merged.pelletSettings) merged.pelletSettings = def.pelletSettings;
-    if (!merged.company || typeof merged.company !== "object")
-      merged.company = def.company;
+    if (!merged.company || typeof merged.company !== 'object') merged.company = def.company;
 
     const arrayKeys: (keyof DB)[] = [
-      "products", "sales", "suppliers", "orders", "cari", "kasa",
-      "bankTransactions", "matchRules", "monitorLog", "stockMovements",
-      "peletSuppliers", "peletOrders", "boruSuppliers", "boruOrders",
-      "invoices", "budgets", "returns", "_activityLog", "ortakEmanetler",
-      "installments", "partners", "notes", "_auditLog", "aiActionLog"
+      'products',
+      'sales',
+      'suppliers',
+      'orders',
+      'cari',
+      'kasa',
+      'bankTransactions',
+      'matchRules',
+      'monitorLog',
+      'stockMovements',
+      'peletSuppliers',
+      'peletOrders',
+      'boruSuppliers',
+      'boruOrders',
+      'invoices',
+      'budgets',
+      'returns',
+      '_activityLog',
+      'ortakEmanetler',
+      'installments',
+      'partners',
+      'notes',
+      '_auditLog',
+      'aiActionLog',
     ];
     arrayKeys.forEach((key) => {
       if (!Array.isArray(merged[key])) (merged as Record<string, unknown>)[key] = [];
     });
 
-    if (
-      !Array.isArray(merged.productCategories) ||
-      merged.productCategories.length === 0
-    )
+    if (!Array.isArray(merged.productCategories) || merged.productCategories.length === 0)
       merged.productCategories = def.productCategories;
 
     // Seed API notu
-    if (!(merged.notes || []).some(n => n.title === "🔑 Yerel API Anahtarları")) {
+    if (!(merged.notes || []).some((n: { title: string }) => n.title === '🔑 Yerel API Anahtarları')) {
       merged.notes = merged.notes || [];
       merged.notes.unshift({
         id: genId(),
-        title: "🔑 Yerel API Anahtarları",
+        title: '🔑 Yerel API Anahtarları',
         content: [
-          "LM Studio: http://127.0.0.1:1234",
-          "",
-          "cURL:",
-          "curl http://127.0.0.1:1234/v1/chat/completions",
-          "  -H \"Content-Type: application/json\"",
-          "  -H \"Authorization: Bearer <key>\"",
-        ].join("\n"),
-        color: "blue",
+          'LM Studio: http://127.0.0.1:1234',
+          '',
+          'cURL:',
+          'curl http://127.0.0.1:1234/v1/chat/completions',
+          '  -H "Content-Type: application/json"',
+          '  -H "Authorization: Bearer <key>"',
+        ].join('\n'),
+        color: 'blue',
         pinned: false,
-        tags: ["api", "yerel", "llm"],
+        tags: ['api', 'yerel', 'llm'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -218,8 +250,8 @@ function loadFromStorage(): DB {
     loadT.end({ version: merged._version });
     return merged;
   } catch {
-    logger.warn("db", "localStorage verisi ayrıştırılamadı, varsayılan DB kullanılıyor");
-    loadT.end({ error: "parse" });
+    logger.warn('db', 'localStorage verisi ayrıştırılamadı, varsayılan DB kullanılıyor');
+    loadT.end({ error: 'parse' });
     return makeDefaultDB();
   }
 }
@@ -228,16 +260,19 @@ let _isSaving = false;
 let _pendingDb: DB | null = null;
 
 function saveToStorage(db: DB): boolean {
-  const t = logger.time("db", "localStorage yaz");
+  const t = logger.time('db', 'localStorage yaz');
   if (_isSaving) {
     _pendingDb = db;
     return false;
   }
   _isSaving = true;
   try {
-    db._version = (db._version || 0) + 1;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-    t.end({ version: db._version });
+    // Mutasyon yok — JSON.stringify öncesi version artır
+    const versioned = { ...db, _version: (db._version || 0) + 1 };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(versioned));
+    // State senkronizasyonu için orijinal objeye version geri yaz
+    db._version = versioned._version;
+    t.end({ version: versioned._version });
     return true;
   } catch (e) {
     t.end({ error: String(e) });
@@ -254,23 +289,26 @@ function saveToStorage(db: DB): boolean {
 
 export function useDB() {
   const [db, setDb] = useState<DB>(loadFromStorage);
+  const [dbError, setDbError] = useState<DBError | null>(null);
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const clearError = useCallback(() => setDbError(null), []);
+
   useEffect(() => {
-    emitSync("loading");
-    logger.info("db", "Uygulama DB yükleniyor", { localVersion: db._version });
+    emitSync('loading');
+    logger.info('db', 'Uygulama DB yükleniyor', { localVersion: db._version });
 
     (async () => {
       const cloudDb = await loadFromFirebase();
       if (cloudDb && (cloudDb._version || 0) > (db._version || 0)) {
-        logger.info("db", "Bulut verisi daha güncel — güncelleniyor", {
+        logger.info('db', 'Bulut verisi daha güncel — güncelleniyor', {
           local: db._version,
           cloud: cloudDb._version,
         });
         saveToStorage(cloudDb);
         await saveToIndexedSnapshot(cloudDb);
         setDb(cloudDb);
-        emitSync("idle");
+        emitSync('idle');
         return;
       }
 
@@ -279,13 +317,13 @@ export function useDB() {
         if (snap) {
           saveToStorage(snap);
           setDb(snap);
-          logger.info("db", "IndexedDB snapshot geri yüklendi", {
+          logger.info('db', 'IndexedDB snapshot geri yüklendi', {
             version: snap._version,
           });
         }
       }
 
-      emitSync("idle");
+      emitSync('idle');
     })();
 
     return () => {
@@ -297,74 +335,135 @@ export function useDB() {
   const undoStackRef = useRef<DB[]>([]);
   const MAX_UNDO = 30;
 
-  const save = useCallback((updater: (prev: DB) => DB) => {
-    setDb((prev) => {
-      const t = logger.time("db", "save()");
+  // Ortak save mantığı — save ve saveGuarded için
+  const processSave = useCallback(
+    (
+      prev: DB,
+      updater: (prev: DB) => DB,
+      opts: {
+        action: string;
+        entity: string;
+        entityId?: string;
+        detail?: string;
+        blockMsg: string;
+        captureUndo?: boolean;
+        onViolation?: (violations: RuleViolation[]) => void;
+      },
+    ): DB => {
+      const t = logger.time('db', opts.action);
 
       if (isGuestSession()) {
         t.end({ version: prev._version, guestBlocked: true });
-        logger.warn("db", "Misafir oturumunda kayıt engellendi");
+        logger.warn('db', 'Misafir oturumunda kayıt engellendi');
         return prev;
       }
 
-      let next = updater(prev);
-      (next as DB & { _lastSyncAt?: string })._lastSyncAt =
-        new Date().toISOString();
-      if (next.stockMovements && next.stockMovements.length > 1000) {
-        next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
+      try {
+        let next = updater(prev);
+        (next as DB & { _lastSyncAt?: string })._lastSyncAt = new Date().toISOString();
+        if (next.stockMovements && next.stockMovements.length > 1000) {
+          next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
+        }
+
+        const { violations, hasBlock, hasWarn } = validateAndClassify(
+          prev,
+          next,
+          `${opts.action}: Rule Engine hatası — atlandı`,
+        );
+
+        if ((hasBlock || hasWarn) && opts.onViolation) {
+          try {
+            opts.onViolation(violations);
+          } catch {
+            logger.warn('db', `${opts.action} callback hatası`);
+          }
+        }
+
+        const auditStatus = computeAuditStatus(hasBlock, hasWarn);
+        const entry = createAuditEntry({
+          action: opts.action,
+          entity: opts.entity,
+          entityId: opts.entityId,
+          prevDB: Object.freeze({ ...prev }),
+          nextDB: next,
+          status: auditStatus,
+          violations: violations.length > 0 ? violations : undefined,
+          detail: opts.detail,
+        });
+
+        if (hasBlock) {
+          return saveBlockedState(
+            prev,
+            entry,
+            violations,
+            saveToStorage,
+            saveToIndexedSnapshot,
+            (meta) => t.end(meta),
+            opts.blockMsg,
+          );
+        }
+
+        if (opts.captureUndo) {
+          const stack = undoStackRef.current;
+          undoStackRef.current = [...stack.slice(-(MAX_UNDO - 1)), safeClone(prev)];
+        }
+
+        return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, (meta) => t.end(meta), {
+          warned: hasWarn,
+        });
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        t.end({ error: error.message });
+        setDbError({
+          message: error.message,
+          code: `${opts.action.toUpperCase()}_FAILED`,
+          timestamp: new Date().toISOString(),
+          recoverable: true,
+          context: { operation: opts.action },
+        });
+        logger.error('db', `${opts.action} işlemi başarısız`, { error: error.message, stack: error.stack });
+        return prev;
       }
+    },
+    [],
+  );
 
-      const { violations, hasBlock, hasWarn } = validateAndClassify(prev, next, "Rule Engine değerlendirme hatası — atlandı");
-      const auditStatus = computeAuditStatus(hasBlock, hasWarn);
-
-      const entry = createAuditEntry({
-        action: "save",
-        entity: "DB",
-        prevDB: Object.freeze({ ...prev }),
-        nextDB: next,
-        status: auditStatus,
-        violations: violations.length > 0 ? violations : undefined,
-      });
-
-      if (hasBlock) {
-        return saveBlockedState(prev, entry, violations, saveToStorage, saveToIndexedSnapshot, t, "İşlem engellendi (block ihlali)");
-      }
-
-      // Capture prev snapshot for undo before applying the save
-      {
-        const stack = undoStackRef.current;
-        undoStackRef.current = [
-          ...stack.slice(-(MAX_UNDO - 1)),
-          safeClone(prev),
-        ];
-      }
-
-      return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, t, { warned: hasWarn });
-    });
-  }, []);
+  const save = useCallback(
+    (updater: (prev: DB) => DB) => {
+      setDb((prev) =>
+        processSave(prev, updater, {
+          action: 'save',
+          entity: 'DB',
+          blockMsg: 'İşlem engellendi (block ihlali)',
+          captureUndo: true,
+        }),
+      );
+    },
+    [processSave],
+  );
 
   const undo = useCallback((): boolean => {
     if (isGuestSession()) {
-      logger.warn("db", "Misafir oturumunda geri alma engellendi");
+      logger.warn('db', 'Misafir oturumunda geri alma engellendi');
       return false;
     }
 
     const stack = undoStackRef.current;
     if (stack.length === 0) return false;
-    const target = stack.pop()!; 
+    const target = stack.pop()!;
 
     setDb((prev) => {
-      const ut = logger.time("db", "undo()");
+      const ut = logger.time('db', 'undo()');
       const restored: DB = {
         ...target,
         _version: (prev._version || 0) + 1,
         _auditLog: trimAuditLog([
           createAuditEntry({
-            action: "undo",
-            entity: "DB",
+            action: 'undo',
+            entity: 'DB',
             prevDB: prev,
             nextDB: target,
-            status: "applied",
+            status: 'applied',
           }),
           ...(prev._auditLog || []),
         ]),
@@ -392,7 +491,7 @@ export function useDB() {
           {
             id: genId(),
             action,
-            detail: detail || "",
+            detail: detail || '',
             time: new Date().toISOString(),
           },
           ...(prev._activityLog || []),
@@ -412,7 +511,7 @@ export function useDB() {
             {
               id: genId(),
               action,
-              detail: detail || "",
+              detail: detail || '',
               time: new Date().toISOString(),
             },
             ...(next._activityLog || []),
@@ -436,54 +535,18 @@ export function useDB() {
         detail?: string;
       },
     ) => {
-      if (isGuestSession()) {
-        logger.warn("db", "Misafir oturumunda saveGuarded engellendi");
-        return;
-      }
-
-      setDb((prev) => {
-        const st = logger.time("db", "saveGuarded()");
-        let next = updater(prev);
-        (next as DB & { _lastSyncAt?: string })._lastSyncAt =
-          new Date().toISOString();
-        if (next.stockMovements && next.stockMovements.length > 1000) {
-          next = {
-            ...next,
-            stockMovements: next.stockMovements.slice(0, 1000),
-          };
-        }
-
-        const { violations, hasBlock, hasWarn } = validateAndClassify(prev, next, "saveGuarded: Rule Engine hatası — atlandı");
-
-        if ((hasBlock || hasWarn) && onViolation) {
-          try {
-            onViolation(violations);
-          } catch {
-            logger.warn("db", "saveGuarded callback hatası");
-            /* callback hatası uygulamayı çökertmez */
-          }
-        }
-
-        const auditStatus = computeAuditStatus(hasBlock, hasWarn);
-        const entry = createAuditEntry({
-          action: auditMeta?.action ?? "saveGuarded",
-          entity: auditMeta?.entity ?? "DB",
+      setDb((prev) =>
+        processSave(prev, updater, {
+          action: auditMeta?.action ?? 'saveGuarded',
+          entity: auditMeta?.entity ?? 'DB',
           entityId: auditMeta?.entityId,
-          prevDB: Object.freeze({ ...prev }),
-          nextDB: next,
-          status: auditStatus,
-          violations: violations.length > 0 ? violations : undefined,
           detail: auditMeta?.detail,
-        });
-
-        if (hasBlock) {
-          return saveBlockedState(prev, entry, violations, saveToStorage, saveToIndexedSnapshot, st, "saveGuarded: İşlem engellendi");
-        }
-
-        return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, st);
-      });
+          blockMsg: 'saveGuarded: İşlem engellendi',
+          onViolation,
+        }),
+      );
     },
-    [],
+    [processSave],
   );
 
   const exportJSON = useCallback(async () => {
@@ -491,29 +554,29 @@ export function useDB() {
     const filename = `soba-yedek-${new Date().toISOString().slice(0, 10)}.json`;
 
     try {
-      const { Capacitor } = await import("@capacitor/core");
+      const { Capacitor } = await import('@capacitor/core');
       if (Capacitor.isNativePlatform()) {
-        const { Filesystem, Directory } = await import("@capacitor/filesystem");
+        const { Filesystem, Directory } = await import('@capacitor/filesystem');
         await Filesystem.writeFile({
           path: filename,
           data,
           directory: Directory.Documents,
-          encoding: "utf8" as never,
+          encoding: 'utf8' as never,
         });
         alert(`✅ Yedek kaydedildi!\nKonum: Belgeler/${filename}`);
         return;
       }
     } catch {
-      logger.warn("db", "Capacitor dışa aktarma hatası, web fallback kullanılıyor");
+      logger.warn('db', 'Capacitor dışa aktarma hatası, web fallback kullanılıyor');
       /* web fallback */
     }
 
-    const blob = new Blob([data], { type: "application/json" });
+    const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = filename;
-    a.style.display = "none";
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -524,8 +587,7 @@ export function useDB() {
     async (label?: string): Promise<boolean> => {
       return saveBackupToFirebase(
         db,
-        label ||
-          `manuel_${new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "-")}`,
+        label || `manuel_${new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')}`,
       );
     },
     [db],
@@ -534,10 +596,8 @@ export function useDB() {
   const listBackups = useCallback(() => listBackupsFromFirebase(), []);
 
   const restoreBackup = useCallback(
-    async (
-      backupId: string,
-    ): Promise<{ ok: boolean; report?: RestoreReport }> => {
-      const preLabel = `onceki_${new Date().toISOString().slice(0, 16).replace("T", "_").replace(":", "-")}`;
+    async (backupId: string): Promise<{ ok: boolean; report?: RestoreReport }> => {
+      const preLabel = `onceki_${new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')}`;
       await saveBackupToFirebase(db, preLabel).catch(() => logger.error('db', 'Geri yükleme öncesi yedek alınamadı'));
 
       const restored = await restoreBackupFromFirebase(backupId);
@@ -560,6 +620,39 @@ export function useDB() {
       reader.onload = (e) => {
         try {
           const raw = JSON.parse(e.target?.result as string);
+
+          // Temel şema doğrulama — beklenen yapının kontrolü
+          if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+            logger.warn('db', 'JSON içe aktarma başarısız: geçersiz veri yapısı');
+            resolve(false);
+            return;
+          }
+
+          // Prototype pollution kontrolü
+          if ('__proto__' in raw || 'constructor' in raw || 'prototype' in raw) {
+            logger.warn('db', 'JSON içe aktarma başarısız: tehlikeli anahtar tespit edildi');
+            resolve(false);
+            return;
+          }
+
+          // Boyut kontrolü — 10MB üstü reddet
+          const jsonStr = JSON.stringify(raw);
+          if (jsonStr.length > 10 * 1024 * 1024) {
+            logger.warn('db', 'JSON içe aktarma başarısız: dosya çok büyük', { size: jsonStr.length });
+            resolve(false);
+            return;
+          }
+
+          // Kritik array alanlarının array olduğunu doğrula
+          const arrayKeys = ['products', 'sales', 'suppliers', 'kasa', 'cari', 'invoices'];
+          for (const key of arrayKeys) {
+            if (key in raw && !Array.isArray(raw[key])) {
+              logger.warn('db', `JSON içe aktarma başarısız: ${key} array olmalı`);
+              resolve(false);
+              return;
+            }
+          }
+
           const def = makeDefaultDB();
           const { db: data } = fullRestoreDB(raw as DB, def);
           setDb(data);
@@ -568,7 +661,7 @@ export function useDB() {
           saveToFirebase(data);
           resolve(true);
         } catch {
-          logger.warn("db", "JSON içe aktarma başarısız");
+          logger.warn('db', 'JSON içe aktarma başarısız');
           resolve(false);
         }
       };
@@ -581,33 +674,56 @@ export function useDB() {
       return db.kasa
         .filter((k) => !k.deleted && k.kasa === kasaId)
         .reduce((sum, k) => {
-          return sum + (k.type === "gelir" ? k.amount : -k.amount);
+          return sum + (k.type === 'gelir' ? k.amount : -k.amount);
         }, 0);
     },
     [db.kasa],
   );
 
   const getTotalKasa = useCallback(() => {
-    return db.kasa
-      .filter((k) => !k.deleted)
-      .reduce((sum, k) => sum + (k.type === "gelir" ? k.amount : -k.amount), 0);
+    return db.kasa.filter((k) => !k.deleted).reduce((sum, k) => sum + (k.type === 'gelir' ? k.amount : -k.amount), 0);
   }, [db.kasa]);
 
-  return {
-    db,
-    save,
-    saveWithLog,
-    saveGuarded,
-    logActivity,
-    exportJSON,
-    importJSON,
-    getKasaBakiye,
-    getTotalKasa,
-    emitSync,
-    manualBackup,
-    listBackups,
-    restoreBackup,
-    undo,
-    clearUndoStack,
-  };
+  // Return değerini stabilize et — gereksiz re-render'ları önle
+  const returnValue = useMemo(
+    () => ({
+      db,
+      save,
+      saveWithLog,
+      saveGuarded,
+      logActivity,
+      exportJSON,
+      importJSON,
+      getKasaBakiye,
+      getTotalKasa,
+      emitSync,
+      manualBackup,
+      listBackups,
+      restoreBackup,
+      undo,
+      clearUndoStack,
+      dbError,
+      clearError,
+    }),
+    [
+      db,
+      save,
+      saveWithLog,
+      saveGuarded,
+      logActivity,
+      exportJSON,
+      importJSON,
+      getKasaBakiye,
+      getTotalKasa,
+      listBackups,
+      manualBackup,
+      restoreBackup,
+      undo,
+      clearUndoStack,
+      dbError,
+      clearError,
+    ],
+  );
+
+  return returnValue;
 }

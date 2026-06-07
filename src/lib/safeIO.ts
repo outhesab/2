@@ -10,6 +10,15 @@ function isQuotaError(e: unknown) {
   return /quota/i.test(String(e));
 }
 
+/** Bu key'ler asla evict edilmemeli — güvenlik kritik veri */
+const PROTECTED_KEYS = new Set([
+  'sobaUser_session',
+  'sobaUser_remember',
+  'soba_users_cache',
+  'parspel_crypto_key',
+  'sobaConnConfig',
+]);
+
 export function safeReadJSON<T = unknown>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
@@ -20,7 +29,11 @@ export function safeReadJSON<T = unknown>(key: string): T | null {
   }
 }
 
-export function safeWriteJSON(key: string, value: unknown, opts?: { maxAttempts?: number; minItems?: number }): boolean {
+export function safeWriteJSON(
+  key: string,
+  value: unknown,
+  opts?: { maxAttempts?: number; minItems?: number },
+): boolean {
   const attempts = opts?.maxAttempts ?? 5;
   const minItems = opts?.minItems ?? 10;
 
@@ -53,19 +66,32 @@ export function safeWriteJSON(key: string, value: unknown, opts?: { maxAttempts?
           const v = localStorage.getItem(k) || '';
           sizes.push({ key: k, size: new Blob([v]).size });
         } catch {
+          console.warn('[safeIO] localStorage boyut okuma hatası:', k);
           sizes.push({ key: k, size: 0 });
         }
       }
       sizes.sort((a, b) => b.size - a.size);
-      const candidates = sizes.filter(s => /log|cache|temp|big_fill/i.test(s.key) && s.key !== key);
+      const candidates = sizes.filter(
+        (s) => /log|cache|temp|big_fill/i.test(s.key) && s.key !== key && !PROTECTED_KEYS.has(s.key),
+      );
       let cleaned = 0;
       for (const c of candidates) {
-        try { localStorage.removeItem(c.key); cleaned++; } catch { /* ignore */ }
+        try {
+          localStorage.removeItem(c.key);
+          cleaned++;
+        } catch {
+          console.warn('[safeIO] Önbellek temizleme hatası:', c.key); /* ignore */
+        }
       }
       if (cleaned === 0) {
         for (const s of sizes.slice(0, 20)) {
-          if (s.key === key) continue;
-          try { localStorage.removeItem(s.key); cleaned++; } catch { /* ignore */ }
+          if (s.key === key || PROTECTED_KEYS.has(s.key)) continue;
+          try {
+            localStorage.removeItem(s.key);
+            cleaned++;
+          } catch {
+            console.warn('[safeIO] Genel temizleme hatası:', s.key); /* ignore */
+          }
           if (cleaned >= 10) break;
         }
       }
@@ -73,11 +99,17 @@ export function safeWriteJSON(key: string, value: unknown, opts?: { maxAttempts?
         localStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch {
+        console.warn('[safeIO] Temizleme sonrası yazma hatası, sentinel deneniyor:', key);
         try {
-          const sentinel = { __truncated__: true, ts: new Date().toISOString(), originalLength: Array.isArray(value) ? (value as unknown[]).length : undefined };
+          const sentinel = {
+            __truncated__: true,
+            ts: new Date().toISOString(),
+            originalLength: Array.isArray(value) ? (value as unknown[]).length : undefined,
+          };
           localStorage.setItem(key, JSON.stringify(sentinel));
           return true;
         } catch {
+          console.warn('[safeIO] Sentinel yazma hatası:', key);
           return false;
         }
       }

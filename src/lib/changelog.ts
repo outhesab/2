@@ -20,6 +20,72 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.17.0',
+    date: '7 Haziran 2026',
+    title: 'Güvenlik, Performans ve Bakım İyileştirmeleri',
+    summary:
+      'Kapsamlı code review sonrası tespit edilen 25 güvenlik, 10 performans ve 14 bakım sorunu düzeltildi. AES anahtar yönetimi, brute-force koruması, memoization, lazy import ve kod konsolidasyonu uygulandı.',
+    changes: [
+      // Güvenlik
+      { type: 'duzeltme', text: "crypto.ts: AES-256-GCM anahtarı artık non-exportable ve IndexedDB'de saklanıyor" },
+      { type: 'duzeltme', text: 'crypto.ts: localStorage plaintext anahtar kaldırıldı — migration otomatik' },
+      {
+        type: 'duzeltme',
+        text: 'logger.ts: Hassas alanlar (password, token, apikey) artık persist öncesi de maskeleniyor',
+      },
+      { type: 'duzeltme', text: "safeIO.ts: Güvenlik kritik key'ler (session, crypto, config) evict edilmiyor" },
+      {
+        type: 'duzeltme',
+        text: 'core.ts: importJSON artık şema doğrulama, boyut kontrolü ve prototype pollution koruması yapıyor',
+      },
+      { type: 'duzeltme', text: 'connConfig.ts: Config kayıt öncesi tip ve injection doğrulaması eklendi' },
+      { type: 'duzeltme', text: 'userManager.ts: Math.random() yerine crypto.randomUUID() kullanılıyor' },
+      { type: 'duzeltme', text: 'userManager.ts: Brute-force koruması — 5 başarısız denemeden sonra 1 dakika kilit' },
+      {
+        type: 'duzeltme',
+        text: 'userManager.ts: Misafir oturumu integrity hash artık crypto.randomUUID ile üretiliyor',
+      },
+      { type: 'duzeltme', text: 'core.ts: saveToStorage artık version artışını mutasyon olmadan yapıyor' },
+      // Performans
+      { type: 'iyilestirme', text: 'core.ts: save() ve saveGuarded() ortak processSave() fonksiyonuna birleştirildi' },
+      {
+        type: 'iyilestirme',
+        text: 'core.ts: useDB() return değeri useMemo ile stabilize edildi — gereksiz re-render önlendi',
+      },
+      { type: 'iyilestirme', text: 'Dashboard.tsx: recentSales ve recentActivity useMemo ile memoize edildi' },
+      {
+        type: 'iyilestirme',
+        text: 'Dashboard.tsx: exportToExcel lazy import ile sadece tıklanınca yükleniyor (~1MB chunk)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'index.css: background-attachment: fixed kaldırıldı — mobilde GPU performansı arttı',
+      },
+      { type: 'iyilestirme', text: "vite-manual-chunks.ts: dexie, exceljs, zustand, mitt için ayrı chunk'lar eklendi" },
+      // Bakım
+      {
+        type: 'iyilestirme',
+        text: 'anomalyEngine + dataIntegrityChecker: Sağlık skoru formülü tekilleştirildi (computeHealthScore)',
+      },
+      { type: 'iyilestirme', text: 'anomalyEngine + dataIntegrityChecker: console.warn yerine logger kullanılıyor' },
+      { type: 'duzeltme', text: 'dataIntegrityChecker: Çelişkili boyut eşikleri olan mükerrer bölüm 9 kaldırıldı' },
+      {
+        type: 'iyilestirme',
+        text: 'data-rules.ts: walkFiles artık birden fazla uzantı alıyor ve tam dosya adı eşleşmesi yapıyor',
+      },
+      { type: 'duzeltme', text: 'SetupWizard.tsx: value: any yerine T[keyof T] kullanıldı' },
+      // CI Pipeline Recovery
+      { type: 'duzeltme', text: 'LogCategory tipi 30+ kategori ile genişletildi (83 TS hatası çözüldü)' },
+      { type: 'duzeltme', text: 'Kullanılmayan import/değişkenler temizlendi (19 TS6133 hatası)' },
+      { type: 'duzeltme', text: 'SatisAgent.ts: this bağlamı hatası düzeltildi (yetkiKontrolu bağlam kaybı)' },
+      { type: 'duzeltme', text: 'aiActions.ts/crypto.ts/aiApi.ts/deepseek.ts: ESLint no-explicit-any fix' },
+      { type: 'duzeltme', text: 'aiOffline.ts: monthStart tanımlandı, undefined referans hatası düzeltildi' },
+      { type: 'duzeltme', text: 'KontrolHalkasi.tsx: as unknown as Record double cast eklendi' },
+      { type: 'iyilestirme', text: 'scripts/version-utils.ts: resolveVersionCode fonksiyonu eklendi' },
+      { type: 'duzeltme', text: 'quality-gate.yml: push trigger sadece dev branch olacak şekilde düzeltildi' },
+    ],
+  },
+  {
     version: '3.16.4',
     date: '7 Haziran 2026',
     title: 'data-rules.ts Syntax Hatası Düzeltmesi',

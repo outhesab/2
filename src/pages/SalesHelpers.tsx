@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-export { StatCard } from "./pageHelpers";
+export { StatCard } from "./pageHelpers.tsx";
 
 export const paymentLabels: Record<string, string> = {
   nakit: "Nakit",

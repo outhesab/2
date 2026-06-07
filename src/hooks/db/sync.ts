@@ -13,7 +13,9 @@ export function emitSync(status: SyncStatus, detail?: string) {
   _syncListeners.forEach((fn) => {
     try {
       fn(status, detail);
-    } catch { /* ignore */ }
+    } catch {
+      logger.warn('sync', 'Senkron dinleyici hatası');
+    }
   });
 }
 

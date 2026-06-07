@@ -6,7 +6,7 @@ import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { Cari, DB, Order, OrderItem, Supplier } from "@/types";
 import { useState } from "react";
 import { lbl, inp } from "@/lib/formStyles";
-import { useDebounce, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers";
+import { useDebounce, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers.tsx";
 
 interface Props {
   db: DB;

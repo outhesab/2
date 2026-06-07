@@ -3,7 +3,7 @@ import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { DB, Sale, SaleItem } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers";
+import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers.tsx";
 
 interface Props {
   db: DB;

@@ -4,30 +4,18 @@
  * dataIntegrityChecker.ts'i genişletir — statik kural kontrollerinin ötesinde
  * örüntü tabanlı ve istatistiksel anomaliler tespit eder.
  */
-import type { DB } from "@/types";
-import { runIntegrityCheck } from "./dataIntegrityChecker";
-import { formatMoney, genId } from "./utils-tr";
+import type { DB } from '@/types';
+import { runIntegrityCheck, computeHealthScore } from './dataIntegrityChecker';
+import { formatMoney, genId } from './utils-tr';
+import { logger } from './logger';
 
 // ── Tipler ──────────────────────────────────────────────────────────────────
 
-export type AnomalyCategory =
-  | "fiyat"
-  | "tutar"
-  | "stok"
-  | "kasa"
-  | "cari"
-  | "siparis"
-  | "veri"
-  | "supheli";
+export type AnomalyCategory = 'fiyat' | 'tutar' | 'stok' | 'kasa' | 'cari' | 'siparis' | 'veri' | 'supheli';
 
-export type AnomalySeverity = "critical" | "warning" | "info";
+export type AnomalySeverity = 'critical' | 'warning' | 'info';
 
-export type FixType =
-  | "stok_guncelle"
-  | "kasa_duzelt"
-  | "cari_duzelt"
-  | "satis_iptal"
-  | "manuel";
+export type FixType = 'stok_guncelle' | 'kasa_duzelt' | 'cari_duzelt' | 'satis_iptal' | 'manuel';
 
 export interface QuickFix {
   type: FixType;
@@ -98,27 +86,21 @@ function makeAnomaly(
 function zeroPriceSalesDetector(db: DB): AnomalyResult[] {
   const results: AnomalyResult[] = [];
   db.sales
-    .filter(
-      (s) =>
-        !s.deleted &&
-        s.status === "tamamlandi" &&
-        (s.total <= 0 || s.unitPrice <= 0),
-    )
+    .filter((s) => !s.deleted && s.status === 'tamamlandi' && (s.total <= 0 || s.unitPrice <= 0))
     .forEach((s) => {
       results.push(
         makeAnomaly(
-          "critical",
-          "fiyat",
-          "Sıfır/Negatif Fiyatlı Satış",
-          `"${s.productName}" ${new Date(s.createdAt).toLocaleDateString("tr-TR")} tarihinde ${formatMoney(s.total)} tutarında satıldı.`,
-          "Satışı iptal edip doğru fiyatla yeniden kaydedin.",
+          'critical',
+          'fiyat',
+          'Sıfır/Negatif Fiyatlı Satış',
+          `"${s.productName}" ${new Date(s.createdAt).toLocaleDateString('tr-TR')} tarihinde ${formatMoney(s.total)} tutarında satıldı.`,
+          'Satışı iptal edip doğru fiyatla yeniden kaydedin.',
           [s.id],
           [
             {
-              type: "satis_iptal",
-              label: "🗑️ Satışı İptal Et",
-              description:
-                'Satış durumunu "iptal" olarak işaretler, stok geri yüklenir.',
+              type: 'satis_iptal',
+              label: '🗑️ Satışı İptal Et',
+              description: 'Satış durumunu "iptal" olarak işaretler, stok geri yüklenir.',
               canAutoFix: true,
               apply: (prev: DB): DB => ({
                 ...prev,
@@ -126,7 +108,7 @@ function zeroPriceSalesDetector(db: DB): AnomalyResult[] {
                   x.id === s.id
                     ? {
                         ...x,
-                        status: "iptal" as const,
+                        status: 'iptal' as const,
                         updatedAt: new Date().toISOString(),
                       }
                     : x,
@@ -154,20 +136,20 @@ function zeroPriceSalesDetector(db: DB): AnomalyResult[] {
 function zeroQuantitySalesDetector(db: DB): AnomalyResult[] {
   const results: AnomalyResult[] = [];
   db.sales
-    .filter((s) => !s.deleted && s.status === "tamamlandi" && s.quantity <= 0)
+    .filter((s) => !s.deleted && s.status === 'tamamlandi' && s.quantity <= 0)
     .forEach((s) => {
       results.push(
         makeAnomaly(
-          "critical",
-          "veri",
-          "Sıfır/Negatif Adetli Satış",
+          'critical',
+          'veri',
+          'Sıfır/Negatif Adetli Satış',
           `"${s.productName}" satışında adet: ${s.quantity}.`,
-          "Satışı iptal edip doğru adetle yeniden kaydedin.",
+          'Satışı iptal edip doğru adetle yeniden kaydedin.',
           [s.id],
           [
             {
-              type: "satis_iptal",
-              label: "🗑️ Satışı İptal Et",
+              type: 'satis_iptal',
+              label: '🗑️ Satışı İptal Et',
               description: 'Satış durumunu "iptal" olarak işaretler.',
               canAutoFix: true,
               apply: (prev: DB): DB => ({
@@ -176,7 +158,7 @@ function zeroQuantitySalesDetector(db: DB): AnomalyResult[] {
                   x.id === s.id
                     ? {
                         ...x,
-                        status: "iptal" as const,
+                        status: 'iptal' as const,
                         updatedAt: new Date().toISOString(),
                       }
                     : x,
@@ -202,10 +184,7 @@ function abnormalAmountDetector(db: DB): AnomalyResult[] {
   db.sales
     .filter(
       (s) =>
-        !s.deleted &&
-        s.status === "tamamlandi" &&
-        new Date(s.createdAt).getTime() >= thirtyDaysAgo &&
-        s.unitPrice > 0,
+        !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt).getTime() >= thirtyDaysAgo && s.unitPrice > 0,
     )
     .forEach((s) => {
       const productId = s.productId;
@@ -216,25 +195,24 @@ function abnormalAmountDetector(db: DB): AnomalyResult[] {
 
   // En az 3 satışı olan ürünlerde sapma kontrol et
   db.sales
-    .filter((s) => !s.deleted && s.status === "tamamlandi" && s.unitPrice > 0)
+    .filter((s) => !s.deleted && s.status === 'tamamlandi' && s.unitPrice > 0)
     .forEach((s) => {
       const productId = s.productId;
       if (!productId) return;
       const prices = productSales[productId];
       if (!prices || prices.length < 3) return;
-      const avg =
-        prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
+      const avg = prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
       const isHigh = s.unitPrice > avg * 3;
       const isLow = s.unitPrice < avg / 3;
       if (!isHigh && !isLow) return;
       const pct = Math.round((Math.abs(s.unitPrice - avg) / avg) * 100);
       results.push(
         makeAnomaly(
-          "warning",
-          "tutar",
-          `Anormal Satış Fiyatı (${isHigh ? "+" : "-"}%${pct})`,
+          'warning',
+          'tutar',
+          `Anormal Satış Fiyatı (${isHigh ? '+' : '-'}%${pct})`,
           `"${s.productName}" ${formatMoney(s.unitPrice)} fiyatıyla satıldı. 30 günlük ortalama: ${formatMoney(Math.round(avg))}.`,
-          "Fiyat girişini kontrol edin. Yanlış birim veya sıfır fazlası olabilir.",
+          'Fiyat girişini kontrol edin. Yanlış birim veya sıfır fazlası olabilir.',
           [s.id],
           [],
           `Anormal fiyat: ${s.productName}, fiyat: ${s.unitPrice}, ort: ${avg.toFixed(0)}, sapma: %${pct}`,
@@ -255,11 +233,9 @@ function stockConsistencyDetector(db: DB): AnomalyResult[] {
 
       // Hareketlerden beklenen stoğu hesapla
       const calculated = movements.reduce((acc, m) => {
-        if (m.type === "giris" || m.type === "iade")
-          return acc + Math.abs(m.amount);
-        if (m.type === "satis" || m.type === "cikis")
-          return acc - Math.abs(m.amount);
-        if (m.type === "duzeltme") return acc + m.amount; // signed
+        if (m.type === 'giris' || m.type === 'iade') return acc + Math.abs(m.amount);
+        if (m.type === 'satis' || m.type === 'cikis') return acc - Math.abs(m.amount);
+        if (m.type === 'duzeltme') return acc + m.amount; // signed
         return acc;
       }, 0);
 
@@ -268,16 +244,16 @@ function stockConsistencyDetector(db: DB): AnomalyResult[] {
         // küsurat toleransı
         results.push(
           makeAnomaly(
-            diff > 5 ? "critical" : "warning",
-            "stok",
-            "Stok Tutarsızlığı",
+            diff > 5 ? 'critical' : 'warning',
+            'stok',
+            'Stok Tutarsızlığı',
             `"${p.name}" mevcut stok: ${p.stock}, hareketlerden hesaplanan: ${calculated} (fark: ${diff}).`,
-            "Stok düzeltme hareketi ekleyin veya hareketleri kontrol edin.",
+            'Stok düzeltme hareketi ekleyin veya hareketleri kontrol edin.',
             [p.id],
             [
               {
-                type: "stok_guncelle",
-                label: "🔧 Stoğu Düzelt",
+                type: 'stok_guncelle',
+                label: '🔧 Stoğu Düzelt',
                 description: `Stoğu ${calculated} olarak günceller.`,
                 canAutoFix: true,
                 apply: (prev: DB): DB => ({
@@ -297,11 +273,11 @@ function stockConsistencyDetector(db: DB): AnomalyResult[] {
                       id: genId(),
                       productId: p.id,
                       productName: p.name,
-                      type: "duzeltme" as const,
+                      type: 'duzeltme' as const,
                       amount: calculated - p.stock,
                       before: p.stock,
                       after: Math.max(0, calculated),
-                      note: "Anomali motoru otomatik düzeltme",
+                      note: 'Anomali motoru otomatik düzeltme',
                       date: new Date().toISOString(),
                     },
                   ],
@@ -329,10 +305,7 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
 
   kasaIds.forEach((kasaId) => {
     const giderler = activeKasa.filter(
-      (k) =>
-        k.kasa === kasaId &&
-        k.type === "gider" &&
-        new Date(k.createdAt).getTime() >= thirtyDaysAgo,
+      (k) => k.kasa === kasaId && k.type === 'gider' && new Date(k.createdAt).getTime() >= thirtyDaysAgo,
     );
     const totalGider = giderler.reduce((s, k) => s + k.amount, 0);
     kasaAvgGider[kasaId] = totalGider / 30;
@@ -341,7 +314,7 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
   // Aynı gün 5+ gider kaydı
   const giderByDay: Record<string, Record<string, number>> = {};
   activeKasa
-    .filter((k) => k.type === "gider")
+    .filter((k) => k.type === 'gider')
     .forEach((k) => {
       const day = k.createdAt.slice(0, 10);
       if (!giderByDay[day]) giderByDay[day] = {};
@@ -352,18 +325,15 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
     Object.entries(kasaMap).forEach(([kasaId, count]) => {
       if (count >= 5) {
         const entries = activeKasa.filter(
-          (k) =>
-            k.type === "gider" &&
-            k.kasa === kasaId &&
-            k.createdAt.startsWith(day),
+          (k) => k.type === 'gider' && k.kasa === kasaId && k.createdAt.startsWith(day),
         );
         results.push(
           makeAnomaly(
-            "warning",
-            "kasa",
-            "Aynı Günde Çok Sayıda Gider",
+            'warning',
+            'kasa',
+            'Aynı Günde Çok Sayıda Gider',
             `${kasaId} kasasında ${day} tarihinde ${count} gider kaydı var.`,
-            "İşlemlerin doğruluğunu kontrol edin.",
+            'İşlemlerin doğruluğunu kontrol edin.',
             entries.map((e) => e.id),
             [],
             `Şüpheli kasa: ${kasaId}, tarih: ${day}, gider sayısı: ${count}`,
@@ -375,17 +345,17 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
 
   // Ortalamadan 20x büyük tek gider
   activeKasa
-    .filter((k) => k.type === "gider")
+    .filter((k) => k.type === 'gider')
     .forEach((k) => {
       const avg = kasaAvgGider[k.kasa] || 0;
       if (avg > 0 && k.amount > avg * 20) {
         results.push(
           makeAnomaly(
-            "critical",
-            "kasa",
-            "Anormal Büyük Gider",
+            'critical',
+            'kasa',
+            'Anormal Büyük Gider',
             `${k.kasa} kasasında ${formatMoney(k.amount)} gider kaydı. 30 günlük günlük ort: ${formatMoney(Math.round(avg))}.`,
-            "Bu gider kaydının doğruluğunu kontrol edin.",
+            'Bu gider kaydının doğruluğunu kontrol edin.',
             [k.id],
             [],
             `Anormal gider: kasa=${k.kasa}, tutar=${k.amount}, ort=${avg.toFixed(0)}`,
@@ -407,14 +377,14 @@ function cariBalanceAnomalyDetector(db: DB): AnomalyResult[] {
     .filter((c) => !c.deleted)
     .forEach((c) => {
       // Tedarikçi bakiyesi negatif (fazla ödeme)
-      if (c.type === "tedarikci" && c.balance < 0) {
+      if (c.type === 'tedarikci' && c.balance < 0) {
         results.push(
           makeAnomaly(
-            "warning",
-            "cari",
-            "Tedarikçi Fazla Ödemesi",
+            'warning',
+            'cari',
+            'Tedarikçi Fazla Ödemesi',
             `"${c.name}" tedarikçisine fazla ödeme yapılmış. Bakiye: ${formatMoney(c.balance)}.`,
-            "Tedarikçi ile mutabakat yapın veya bakiyeyi düzeltin.",
+            'Tedarikçi ile mutabakat yapın veya bakiyeyi düzeltin.',
             [c.id],
             [],
             `Tedarikçi fazla ödeme: ${c.name}, bakiye: ${c.balance}`,
@@ -423,19 +393,17 @@ function cariBalanceAnomalyDetector(db: DB): AnomalyResult[] {
       }
 
       // Müşteri yüksek alacak + 90 gün hareketsiz
-      if (c.type === "musteri" && c.balance > 100000) {
-        const lastTx = c.lastTransaction
-          ? new Date(c.lastTransaction).getTime()
-          : 0;
+      if (c.type === 'musteri' && c.balance > 100000) {
+        const lastTx = c.lastTransaction ? new Date(c.lastTransaction).getTime() : 0;
         if (lastTx > 0 && lastTx < ninetyDaysAgo) {
           const days = Math.floor((now - lastTx) / 86400000);
           results.push(
             makeAnomaly(
-              "critical",
-              "cari",
-              "Yüksek Alacak — Uzun Süredir Hareketsiz",
+              'critical',
+              'cari',
+              'Yüksek Alacak — Uzun Süredir Hareketsiz',
               `"${c.name}" müşterisinin ${formatMoney(c.balance)} alacağı ${days} gündür tahsil edilmemiş.`,
-              "Müşteriyle iletişime geçin ve tahsilat planı yapın.",
+              'Müşteriyle iletişime geçin ve tahsilat planı yapın.',
               [c.id],
               [],
               `Gecikmiş alacak: ${c.name}, bakiye: ${c.balance}, gün: ${days}`,
@@ -455,7 +423,7 @@ function negativeProfitDetector(db: DB): AnomalyResult[] {
     .filter(
       (s) =>
         !s.deleted &&
-        s.status === "tamamlandi" &&
+        s.status === 'tamamlandi' &&
         s.profit < 0 &&
         s.total > 0 &&
         (!s.discountAmount || s.discountAmount === 0),
@@ -463,11 +431,11 @@ function negativeProfitDetector(db: DB): AnomalyResult[] {
     .forEach((s) => {
       results.push(
         makeAnomaly(
-          "warning",
-          "fiyat",
-          "Zararına Satış (İskontosuz)",
+          'warning',
+          'fiyat',
+          'Zararına Satış (İskontosuz)',
           `"${s.productName}" ${formatMoney(s.total)} satıldı, kâr: ${formatMoney(s.profit)}.`,
-          "Ürün maliyetini veya satış fiyatını kontrol edin.",
+          'Ürün maliyetini veya satış fiyatını kontrol edin.',
           [s.id],
           [],
           `Zararına satış: ${s.productName}, tutar: ${s.total}, kâr: ${s.profit}`,
@@ -480,12 +448,8 @@ function negativeProfitDetector(db: DB): AnomalyResult[] {
 /** Kural 8: Yetim kayıtlar — silinmiş ilişkili kayıtlara bağlı girişler */
 function orphanRecordDetector(db: DB): AnomalyResult[] {
   const results: AnomalyResult[] = [];
-  const deletedSaleIds = new Set(
-    db.sales.filter((s) => s.deleted).map((s) => s.id),
-  );
-  const deletedProductIds = new Set(
-    db.products.filter((p) => p.deleted).map((p) => p.id),
-  );
+  const deletedSaleIds = new Set(db.sales.filter((s) => s.deleted).map((s) => s.id));
+  const deletedProductIds = new Set(db.products.filter((p) => p.deleted).map((p) => p.id));
 
   // Silinmiş satışa bağlı kasa kaydı
   db.kasa
@@ -493,11 +457,11 @@ function orphanRecordDetector(db: DB): AnomalyResult[] {
     .forEach((k) => {
       results.push(
         makeAnomaly(
-          "info",
-          "veri",
-          "Yetim Kasa Kaydı",
+          'info',
+          'veri',
+          'Yetim Kasa Kaydı',
           `Kasa kaydı (${formatMoney(k.amount)}) silinmiş bir satışa (${k.relatedId}) bağlı.`,
-          "Kasa kaydını silin veya doğru satışla ilişkilendirin.",
+          'Kasa kaydını silin veya doğru satışla ilişkilendirin.',
           [k.id],
           [],
           `Yetim kasa: id=${k.id}, relatedId=${k.relatedId}`,
@@ -511,11 +475,11 @@ function orphanRecordDetector(db: DB): AnomalyResult[] {
     .forEach((m) => {
       results.push(
         makeAnomaly(
-          "info",
-          "veri",
-          "Yetim Stok Hareketi",
+          'info',
+          'veri',
+          'Yetim Stok Hareketi',
           `Stok hareketi silinmiş bir ürüne (${m.productName}) bağlı.`,
-          "Stok hareketini temizleyin.",
+          'Stok hareketini temizleyin.',
           [m.id],
           [],
           `Yetim stok hareketi: ${m.productName}`,
@@ -533,10 +497,10 @@ function convertIntegrityToAnomalies(db: DB): AnomalyResult[] {
   return issues.map((issue) =>
     makeAnomaly(
       issue.severity,
-      (issue.category as AnomalyCategory) || "veri",
+      (issue.category as AnomalyCategory) || 'veri',
       issue.title,
       issue.detail,
-      issue.suggestion || "Veri bütünlüğünü kontrol edin.",
+      issue.suggestion || 'Veri bütünlüğünü kontrol edin.',
       issue.relatedIds || [],
       [],
       `${issue.category}: ${issue.title} — ${issue.detail}`,
@@ -549,7 +513,7 @@ function convertIntegrityToAnomalies(db: DB): AnomalyResult[] {
 function deduplicateAnomalies(anomalies: AnomalyResult[]): AnomalyResult[] {
   const seen = new Set<string>();
   return anomalies.filter((a) => {
-    const key = `${a.category}:${a.title}:${a.relatedIds.sort().join(",")}`;
+    const key = `${a.category}:${a.title}:${a.relatedIds.sort().join(',')}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -560,14 +524,10 @@ function deduplicateAnomalies(anomalies: AnomalyResult[]): AnomalyResult[] {
 
 function calculateHealthScore(anomalies: AnomalyResult[]): number {
   if (anomalies.length === 0) return 100;
-  const criticalPenalty =
-    anomalies.filter((a) => a.severity === "critical").length * 15;
-  const warningPenalty =
-    anomalies.filter((a) => a.severity === "warning").length * 5;
-  const infoPenalty = anomalies.filter((a) => a.severity === "info").length * 1;
-  return Math.max(
-    0,
-    Math.min(100, 100 - criticalPenalty - warningPenalty - infoPenalty),
+  return computeHealthScore(
+    anomalies.filter((a) => a.severity === 'critical').length,
+    anomalies.filter((a) => a.severity === 'warning').length,
+    anomalies.filter((a) => a.severity === 'info').length,
   );
 }
 
@@ -583,7 +543,7 @@ export function runAnomalyDetection(db: DB): AnomalyReport {
   try {
     allAnomalies = [...allAnomalies, ...convertIntegrityToAnomalies(db)];
   } catch {
-    /* sessizce geç */
+    logger.warn('anomali', 'convertIntegrityToAnomalies hatası');
   }
 
   const detectors = [
@@ -605,7 +565,7 @@ export function runAnomalyDetection(db: DB): AnomalyReport {
     try {
       allAnomalies = [...allAnomalies, ...detector(db)];
     } catch {
-      /* dedektör hatası tüm sistemi çökertmez */
+      logger.warn('anomali', 'Dedektör çalıştırma hatası');
     }
   }
 
@@ -625,9 +585,9 @@ export function runAnomalyDetection(db: DB): AnomalyReport {
     healthScore: calculateHealthScore(sorted),
     summary: {
       total: sorted.length,
-      critical: sorted.filter((a) => a.severity === "critical").length,
-      warning: sorted.filter((a) => a.severity === "warning").length,
-      info: sorted.filter((a) => a.severity === "info").length,
+      critical: sorted.filter((a) => a.severity === 'critical').length,
+      warning: sorted.filter((a) => a.severity === 'warning').length,
+      info: sorted.filter((a) => a.severity === 'info').length,
       byCategory,
     },
     generatedAt: new Date().toISOString(),

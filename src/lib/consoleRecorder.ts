@@ -23,6 +23,7 @@ function loadRecords(): ConsoleRecord[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
+    console.warn("consoleRecorder", "loadRecords: kayıtlar yüklenemedi");
     return [];
   }
 }
@@ -31,12 +32,13 @@ function saveRecords() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records.slice(0, MAX_RECORDS)));
   } catch {
+    console.warn("consoleRecorder", "saveRecords: kayıtlar kaydedilemedi");
     try {
       const trimmed = records.slice(0, Math.floor(MAX_RECORDS / 2));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
       records = trimmed;
     } catch {
-      // silently fail
+      console.warn("consoleRecorder", "saveRecords: ikinci kayıt denemesi de başarısız");
     }
   }
 }
@@ -49,6 +51,7 @@ function stringifyArgs(args: unknown[]): string {
         if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack?.slice(0, 200) || ""}`;
         return JSON.stringify(a, null, 1);
       } catch {
+        console.warn("consoleRecorder", "stringifyArgs: dönüştürme hatası");
         return String(a);
       }
     })
@@ -80,7 +83,7 @@ function capture(level: ConsoleLevel, args: unknown[]) {
     try {
       fn(record);
     } catch {
-      // ignore
+      console.warn("consoleRecorder", "capture: listener hatası");
     }
   });
 }
@@ -180,7 +183,7 @@ export const consoleRecorder = {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
-      // ignore
+      console.warn("consoleRecorder", "clear: localStorage temizleme hatası");
     }
   },
 

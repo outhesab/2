@@ -13,10 +13,9 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 | 1.3 | `document.write()` kaldırılacak — safe innerHTML + DOMPurify | `src/pages/Fatura.tsx:1879`, `src/pages/Kasa.tsx:39` | ✅ (zaten vardı) |
 | 1.4 | `.env` API key'leri rotate edilecek (Firebase, Gemini, DeepSeek) | `.env` | ✅ |
 | 1.5 | CSP meta tag eklenecek | `index.html` | ✅ |
-| 1.6 | Firebase API key URL query'den çıkarılacak — POST body veya SDK | `src/lib/userManager.ts` | ⬜* |
+| 1.6 | Firebase API key URL query'den çıkarılacak — POST body veya SDK | `src/lib/userManager.ts` | ✅ |
 | 1.7 | `__audit_login.mjs` `.gitignore`'a eklenecek veya silinecek | Proje root | ✅ |
 
-> *1.6: Firebase REST API `?key=` zorunlu parametre — SDK migration gerektirir, ertelendi.
 
 ---
 
@@ -26,9 +25,9 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 |---|-------|-------|-------|
 | 2.1 | Boş `catch {}` bloklarına `console.error` eklenecek (109 adet) | Tüm proje | ⬜ |
 | 2.2 | `catch (e) {}` bloklarına logger entegre edilecek (40 adet) | Tüm proje | ⬜ |
-| 2.3 | `logger.ts`'e crash reporting fonksiyonu eklenecek | `src/lib/logger.ts` | ⬜ |
-| 2.4 | DB katmanına error boundary eklenecek | `src/hooks/db/core.ts`, `src/hooks/db/backup.ts` | ⬜ |
-| 2.5 | `/* ignore */` yorumlu catch blokları gözden geçirilecek (5 dosya) | `dataIntegrityChecker.ts`, `offline-ai.ts`, `appConfig.ts`, `db/sync.ts`, `AnomaliOneri.tsx` | ⬜ |
+| 2.3 | `logger.ts`'e crash reporting fonksiyonu eklenecek | `src/lib/logger.ts` | ✅ |
+| 2.4 | DB katmanına error boundary eklenecek | `src/hooks/db/core.ts`, `src/hooks/db/backup.ts` | ✅ |
+| 2.5 | `/* ignore */` yorumlu catch blokları gözden geçirilecek (5 dosya) | `dataIntegrityChecker.ts`, `offline-ai.ts`, `appConfig.ts`, `db/sync.ts`, `AnomaliOneri.tsx` | ✅ |
 
 ---
 
@@ -36,11 +35,11 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 
 | # | Görev | Dosya | Durum |
 |---|-------|-------|-------|
-| 3.1 | `Cari.tsx` `note` alanı type tanımlamasına eklenecek | `src/types/index.ts`, `src/pages/Cari.tsx` | ⬜ |
-| 3.2 | SpeechRecognition için `window` type genişletme | `src/types/index.ts` veya yeni `.d.ts` | ⬜ |
-| 3.3 | `eslint-disable no-explicit-any` azaltılacak (34 → 10 hedef) | 11 dosya | ⬜ |
-| 3.4 | `tsconfig.json`'a `noUnusedLocals: true` eklenecek | `tsconfig.json` | ⬜ |
-| 3.5 | `KontrolHalkasi.tsx` `as any` cast'leri temizlenecek (4 adet) | `src/pages/KontrolHalkasi.tsx` | ⬜ |
+| 3.1 | `Cari.tsx` `note` alanı type tanımlamasına eklenecek | `src/types/index.ts`, `src/pages/Cari.tsx` | ✅ |
+| 3.2 | SpeechRecognition için `window` type genişletme | `src/types/global.d.ts`, `src/lib/audio.ts`, `src/hooks/useSpeech.ts` | ✅ |
+| 3.3 | `eslint-disable no-explicit-any` azaltılacak (34 → 10 hedef) | 11 dosya | ✅ |
+| 3.4 | `tsconfig.json`'a `noUnusedLocals: true` eklenecek | `tsconfig.json` | ✅ |
+| 3.5 | `KontrolHalkasi.tsx` `as any` cast'leri temizlenecek (4 adet) | `src/pages/KontrolHalkasi.tsx` | ✅ |
 
 ---
 
@@ -115,7 +114,7 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 | Hafta | Toplam Görev | Tamamlanan | Kaldı |
 |-------|-------------|------------|-------|
 | 1. Hafta — Güvenlik | 7 | 6 | 1 |
-| 2. Hafta — Hata Yönetimi | 5 | 0 | 5 |
+| 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
 | 3. Hafta — Tip Güvenliği | 5 | 0 | 5 |
 | 4. Hafta — Test (1) | 13 | 0 | 13 |
 | 5. Hafta — Test (2) | 12 | 0 | 12 |

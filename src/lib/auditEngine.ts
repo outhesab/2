@@ -41,7 +41,7 @@ export function getSessionId(): string {
     }
     return id;
   } catch {
-    // sessionStorage erişim hatası (private mode vb.)
+    logger.warn("auditEngine", "sessionStorage erişim hatası, fallback ID kullanılıyor");
     return genId();
   }
 }

@@ -1,27 +1,18 @@
-import { dispatchAgentFlow } from "@/agents/orchestrator";
-import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
-import type { DBAction, SaveFn } from "@/lib/aiActions";
-import {
-  applyActionWithFallback,
-  parseActions,
-  stripActions,
-} from "@/lib/aiActions";
-import type { Message as ApiMessage } from "@/lib/aiApi";
-import { askClaude, askGemini } from "@/lib/aiApi";
+import { dispatchAgentFlow } from '@/agents/orchestrator';
+import { useSpeechRecognition, useSpeechSynthesis } from '@/hooks/useSpeech';
+import type { DBAction, SaveFn } from '@/lib/aiActions';
+import { applyActionWithFallback, parseActions, stripActions } from '@/lib/aiActions';
+import type { Message as ApiMessage } from '@/lib/aiApi';
+import { askClaude, askGemini } from '@/lib/aiApi';
 import DOMPurify from 'dompurify';
-import {
-  getKeys,
-  invalidateKeyCache,
-  loadKeysFromFirebase,
-  saveKeysToFirebase,
-} from "@/lib/aiKeys";
-import { buildContext, offlineReply, QUICK_PROMPTS } from "@/lib/aiOffline";
-import { askDeepSeek } from "@/lib/deepseek";
-import { getUserSession } from "@/lib/userManager";
-import { logger } from "@/lib/logger";
-import { formatMoney, genId } from "@/lib/utils-tr";
-import type { AIActionLogEntry, DB } from "@/types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getKeys, invalidateKeyCache, loadKeysFromFirebase, saveKeysToFirebase } from '@/lib/aiKeys';
+import { buildContext, offlineReply, QUICK_PROMPTS } from '@/lib/aiOffline';
+import { askDeepSeek } from '@/lib/deepseek';
+import { getUserSession } from '@/lib/userManager';
+import { logger } from '@/lib/logger';
+import { formatMoney, genId } from '@/lib/utils-tr';
+import type { AIActionLogEntry, DB } from '@/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AdminModeButton,
   AutoApplyButton,
@@ -29,7 +20,7 @@ import {
   StopOnViolationButton,
   MiniStatCard,
   EmbeddedStatCard,
-} from "./pageHelpers";
+} from './pageHelpers.tsx';
 
 interface Props {
   db: DB;
@@ -42,18 +33,18 @@ type Message = ApiMessage;
 
 function escapeHtml(unsafe: string): string {
   return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-const ALLOWED_TAGS = new Set(["strong", "h3", "h4", "li", "ul", "br", "span"]);
+const ALLOWED_TAGS = new Set(['strong', 'h3', 'h4', 'li', 'ul', 'br', 'span']);
 function sanitize(html: string): string {
   return html.replace(/<(\/?)(\w+)[^>]*>/g, (match, slash, tag) => {
     if (ALLOWED_TAGS.has(tag.toLowerCase())) return match;
-    const escaped = match.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const escaped = match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return escaped;
   });
 }
@@ -61,7 +52,7 @@ function sanitize(html: string): string {
 function MarkdownText({ text }: { text: string }) {
   const html = sanitize(
     escapeHtml(text)
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(
         /^### (.+)$/gm,
         '<h4 style="color:var(--accent);font-size:0.9rem;margin:10px 0 4px;font-weight:700">$1</h4>',
@@ -71,12 +62,9 @@ function MarkdownText({ text }: { text: string }) {
         '<h3 style="color:var(--text-primary);font-size:1rem;margin:12px 0 6px;font-weight:800">$1</h3>',
       )
       .replace(/^- (.+)$/gm, '<li style="margin:3px 0;padding-left:4px">$1</li>')
-      .replace(
-        /(<li[^>]*>.*<\/li>\n?)+/gs,
-        '<ul style="list-style:none;padding:0;margin:6px 0">$&</ul>',
-      )
-      .replace(/\n\n/g, "<br/>")
-      .replace(/\n/g, "<br/>"),
+      .replace(/(<li[^>]*>.*<\/li>\n?)+/gs, '<ul style="list-style:none;padding:0;margin:6px 0">$&</ul>')
+      .replace(/\n\n/g, '<br/>')
+      .replace(/\n/g, '<br/>'),
   );
   return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
 }
@@ -84,29 +72,25 @@ function MarkdownText({ text }: { text: string }) {
 function getActionAffectedIds(action: DBAction): string[] {
   const ids = new Set<string>();
   const payload = action.payload || {};
-  ["id", "productId", "cariId", "saleId", "invoiceId", "kasaEntryId"].forEach(
-    (key) => {
-      const value = payload[key];
-      if (typeof value === "string" && value.trim()) ids.add(value.trim());
-    },
-  );
+  ['id', 'productId', 'cariId', 'saleId', 'invoiceId', 'kasaEntryId'].forEach((key) => {
+    const value = payload[key];
+    if (typeof value === 'string' && value.trim()) ids.add(value.trim());
+  });
   return [...ids];
 }
 
 function isDangerousAction(action: DBAction): boolean {
-  return ["sale", "kasa_gider", "stok_guncelle", "cari_tahsilat"].includes(
-    action.type,
-  );
+  return ['sale', 'kasa_gider', 'stok_guncelle', 'cari_tahsilat'].includes(action.type);
 }
 
 function ApiSettings({ onClose }: { onClose: () => void }) {
-  const [ck, setCk] = useState("");
-  const [gk, setGk] = useState("");
-  const [dk, setDk] = useState("");
-  const [hk, setHk] = useState("");
+  const [ck, setCk] = useState('');
+  const [gk, setGk] = useState('');
+  const [dk, setDk] = useState('');
+  const [hk, setHk] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     loadKeysFromFirebase().then((keys) => {
@@ -125,60 +109,59 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
       gemini: gk.trim(),
       deepseek: dk.trim(),
       huggingface: hk.trim(),
-      opencodeNvidia: "",
-      opencodeHf: "",
+      opencodeNvidia: '',
+      opencodeHf: '',
     });
     if (ok) {
       invalidateKeyCache();
       setMsg("✅ Firebase'e kaydedildi");
       setTimeout(() => {
-        setMsg("");
+        setMsg('');
         onClose();
       }, 1200);
     } else {
-      setMsg("❌ Kayıt başarısız — Firebase bağlantısını kontrol edin");
+      setMsg('❌ Kayıt başarısız — Firebase bağlantısını kontrol edin');
     }
     setSaving(false);
   };
 
   const inp: React.CSSProperties = {
-    width: "100%",
-    padding: "9px 12px",
-    background: "#0f172a",
-    border: "1px solid var(--border)",
+    width: '100%',
+    padding: '9px 12px',
+    background: '#0f172a',
+    border: '1px solid var(--border)',
     borderRadius: 8,
-    color: "#f1f5f9",
-    fontSize: "0.85rem",
-    boxSizing: "border-box",
-    fontFamily: "monospace",
+    color: '#f1f5f9',
+    fontSize: '0.85rem',
+    boxSizing: 'border-box',
+    fontFamily: 'monospace',
   };
   return (
-    <div style={{ padding: "16px 0" }}>
+    <div style={{ padding: '16px 0' }}>
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 8,
           marginBottom: 14,
-          padding: "8px 12px",
-          background: "rgba(16,185,129,0.08)",
-          border: "1px solid rgba(16,185,129,0.2)",
+          padding: '8px 12px',
+          background: 'rgba(16,185,129,0.08)',
+          border: '1px solid rgba(16,185,129,0.2)',
           borderRadius: 8,
         }}
       >
         <span>☁️</span>
-        <p style={{ color: "#10b981", fontSize: "0.82rem", margin: 0 }}>
-          API anahtarları Firebase'de şifreli saklanır — tüm cihazlarda
-          geçerlidir.
+        <p style={{ color: '#10b981', fontSize: '0.82rem', margin: 0 }}>
+          API anahtarları Firebase'de şifreli saklanır — tüm cihazlarda geçerlidir.
         </p>
       </div>
       {loading ? (
         <div
           style={{
-            color: "#64748b",
-            fontSize: "0.85rem",
-            textAlign: "center",
-            padding: "20px 0",
+            color: '#64748b',
+            fontSize: '0.85rem',
+            textAlign: 'center',
+            padding: '20px 0',
           }}
         >
           Firebase'den yükleniyor...
@@ -187,9 +170,9 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
         <>
           <label
             style={{
-              display: "block",
-              color: "#94a3b8",
-              fontSize: "0.82rem",
+              display: 'block',
+              color: '#94a3b8',
+              fontSize: '0.82rem',
               marginBottom: 4,
             }}
           >
@@ -204,9 +187,9 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
           />
           <label
             style={{
-              display: "block",
-              color: "#94a3b8",
-              fontSize: "0.82rem",
+              display: 'block',
+              color: '#94a3b8',
+              fontSize: '0.82rem',
               marginBottom: 4,
             }}
           >
@@ -221,9 +204,9 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
           />
           <label
             style={{
-              display: "block",
-              color: "#94a3b8",
-              fontSize: "0.82rem",
+              display: 'block',
+              color: '#94a3b8',
+              fontSize: '0.82rem',
               marginBottom: 4,
             }}
           >
@@ -238,9 +221,9 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
           />
           <label
             style={{
-              display: "block",
-              color: "#94a3b8",
-              fontSize: "0.82rem",
+              display: 'block',
+              color: '#94a3b8',
+              fontSize: '0.82rem',
               marginBottom: 4,
             }}
           >
@@ -257,40 +240,40 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
             <div
               style={{
                 marginBottom: 12,
-                fontSize: "0.82rem",
-                color: msg.startsWith("✅") ? "#10b981" : "#ef4444",
+                fontSize: '0.82rem',
+                color: msg.startsWith('✅') ? '#10b981' : '#ef4444',
                 fontWeight: 600,
               }}
             >
               {msg}
             </div>
           )}
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             <button
               onClick={save}
               disabled={saving}
               style={{
                 flex: 1,
-                background: "#10b981",
-                border: "none",
+                background: '#10b981',
+                border: 'none',
                 borderRadius: 8,
-                color: "#fff",
-                padding: "10px 0",
+                color: '#fff',
+                padding: '10px 0',
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: 'pointer',
               }}
             >
-              {saving ? "Kaydediliyor..." : "☁️ Firebase'e Kaydet"}
+              {saving ? 'Kaydediliyor...' : "☁️ Firebase'e Kaydet"}
             </button>
             <button
               onClick={onClose}
               style={{
-                background: "#273548",
-                border: "1px solid var(--border)",
+                background: '#273548',
+                border: '1px solid var(--border)',
                 borderRadius: 8,
-                color: "#94a3b8",
-                padding: "10px 16px",
-                cursor: "pointer",
+                color: '#94a3b8',
+                padding: '10px 16px',
+                cursor: 'pointer',
               }}
             >
               İptal
@@ -304,18 +287,14 @@ function ApiSettings({ onClose }: { onClose: () => void }) {
 
 export default function AIAsistan({ db, save, embedded = false }: Props) {
   const session = getUserSession();
-  const isAdminUser = session?.role === "admin";
+  const isAdminUser = session?.role === 'admin';
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiStatus, setApiStatus] = useState<
-    "idle" | "deepseek" | "claude" | "gemini" | "offline"
-  >("idle");
+  const [apiStatus, setApiStatus] = useState<'idle' | 'deepseek' | 'claude' | 'gemini' | 'offline'>('idle');
   const [showSettings, setShowSettings] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
-  const [modelSource, setModelSource] = useState<
-    "deepseek" | "claude" | "gemini" | "offline"
-  >("claude");
+  const [modelSource, setModelSource] = useState<'deepseek' | 'claude' | 'gemini' | 'offline'>('claude');
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [autoApplyActions, setAutoApplyActions] = useState(false);
@@ -331,12 +310,8 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     success: boolean;
     msg: string;
   } | null>(null);
-  const actionMode: "read-only" | "manual" | "auto" =
-    !isAdminUser || !adminMode
-      ? "read-only"
-      : autoApplyActions
-        ? "auto"
-        : "manual";
+  const actionMode: 'read-only' | 'manual' | 'auto' =
+    !isAdminUser || !adminMode ? 'read-only' : autoApplyActions ? 'auto' : 'manual';
   const context = useMemo(
     () => buildContext(db, actionMode, maxAutoActions, stopOnViolation),
     [db, actionMode, maxAutoActions, stopOnViolation],
@@ -355,16 +330,14 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     (msgIdx: number, actions: DBAction[]) => {
       if (!save) return;
       try {
-        let summary = "";
+        let summary = '';
         save((prev) => {
           let next = prev;
           let appliedCount = 0;
           const violations: string[] = [];
           const fallbackNotes: string[] = [];
           const actionLogs: AIActionLogEntry[] = [];
-          const actionLimit = autoApplyActions
-            ? Math.max(1, maxAutoActions)
-            : Number.MAX_SAFE_INTEGER;
+          const actionLimit = autoApplyActions ? Math.max(1, maxAutoActions) : Number.MAX_SAFE_INTEGER;
 
           for (let i = 0; i < actions.length; i++) {
             if (appliedCount >= actionLimit) {
@@ -379,30 +352,24 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               appliedCount += 1;
               dispatchAgentFlow(appliedAction as Parameters<typeof dispatchAgentFlow>[0]);
               fallbackNotes.push(`AgentAkisi:${action.label}`);
-              if (
-                attempted.appliedAction &&
-                attempted.appliedAction !== action
-              ) {
-                fallbackNotes.push(
-                  `${action.label} => ${attempted.appliedAction.label}`,
-                );
+              if (attempted.appliedAction && attempted.appliedAction !== action) {
+                fallbackNotes.push(`${action.label} => ${attempted.appliedAction.label}`);
               }
               actionLogs.push({
                 id: genId(),
                 createdAt: new Date().toISOString(),
                 model: modelSource,
-                mode: autoApplyActions ? "auto" : "manual",
+                mode: autoApplyActions ? 'auto' : 'manual',
                 messageIndex: msgIdx,
                 actionType: appliedAction.type,
                 label: appliedAction.label,
-                status: "applied",
+                status: 'applied',
                 dangerous: isDangerousAction(appliedAction),
                 affectedIds: getActionAffectedIds(appliedAction),
                 notes: attempted.notes,
               });
             } else {
-              const error =
-                attempted.notes[0] || `${action.label}: İşlem uygulanamadı`;
+              const error = attempted.notes[0] || `${action.label}: İşlem uygulanamadı`;
               violations.push(error);
               if (attempted.notes.length > 1) {
                 fallbackNotes.push(...attempted.notes.slice(1));
@@ -411,11 +378,11 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 id: genId(),
                 createdAt: new Date().toISOString(),
                 model: modelSource,
-                mode: autoApplyActions ? "auto" : "manual",
+                mode: autoApplyActions ? 'auto' : 'manual',
                 messageIndex: msgIdx,
                 actionType: action.type,
                 label: action.label,
-                status: "failed",
+                status: 'failed',
                 dangerous: isDangerousAction(action),
                 affectedIds: getActionAffectedIds(action),
                 notes: attempted.notes,
@@ -427,49 +394,43 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
 
           const aiLog = {
             id: genId(),
-            action: autoApplyActions ? "ai_auto_action" : "ai_manual_action",
+            action: autoApplyActions ? 'ai_auto_action' : 'ai_manual_action',
             detail: [
               `Uygulanan:${appliedCount}`,
               `Toplam:${actions.length}`,
-              actions.map((a) => a.label).join(" | "),
-              violations.length ? `İhlal:${violations.join(" ; ")}` : "",
-              fallbackNotes.length
-                ? `Fallback:${fallbackNotes.join(" ; ")}`
-                : "",
+              actions.map((a) => a.label).join(' | '),
+              violations.length ? `İhlal:${violations.join(' ; ')}` : '',
+              fallbackNotes.length ? `Fallback:${fallbackNotes.join(' ; ')}` : '',
             ]
               .filter(Boolean)
-              .join(" || "),
+              .join(' || '),
             time: new Date().toISOString(),
           };
           summary = violations.length
             ? `${appliedCount}/${actions.length} işlendi. ${violations.length} kural ihlali var.`
             : autoApplyActions
               ? `${appliedCount} işlem otomatik işlendi`
-              : "Kaydedildi!";
+              : 'Kaydedildi!';
           return {
             ...next,
             _activityLog: [...(next._activityLog || []), aiLog],
-            aiActionLog: [...actionLogs, ...(next.aiActionLog || [])].slice(
-              0,
-              200,
-            ),
+            aiActionLog: [...actionLogs, ...(next.aiActionLog || [])].slice(0, 200),
           };
         });
         setActionResult({
           msgIdx,
           success: true,
-          msg: summary || "Kaydedildi!",
+          msg: summary || 'Kaydedildi!',
         });
         setTimeout(() => {
           setPendingActions(null);
           setActionResult(null);
         }, 1200);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
+      } catch (err) {
         setActionResult({
           msgIdx,
           success: false,
-          msg: err.message || "Hata oluştu",
+          msg: err instanceof Error ? err.message : 'Hata oluştu',
         });
       }
     },
@@ -491,22 +452,19 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   });
 
   useEffect(() => {
-    if (chatRef.current)
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages, loading]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [keysLoaded, setKeysLoaded] = useState(false);
   const [hasKeys, setHasKeys] = useState(false);
   const [keyLoadError, setKeyLoadError] = useState(false);
   const [keyAccessForbidden, setKeyAccessForbidden] = useState(false);
   const keysRef = useRef({
-    claude: "",
-    gemini: "",
-    deepseek: "",
-    huggingface: "",
-    opencodeNvidia: "",
-    opencodeHf: "",
+    claude: '',
+    gemini: '',
+    deepseek: '',
+    huggingface: '',
+    opencodeNvidia: '',
+    opencodeHf: '',
   });
 
   useEffect(() => {
@@ -515,14 +473,12 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         keysRef.current = keys;
         const loaded = !!(keys.claude || keys.gemini);
         setHasKeys(loaded);
-        setKeyAccessForbidden(keys.state === "forbidden");
-        setKeyLoadError(keys.state === "unavailable");
-        setKeysLoaded(true);
+        setKeyAccessForbidden(keys.state === 'forbidden');
+        setKeyLoadError(keys.state === 'unavailable');
       })
       .catch(() => {
         setKeyLoadError(true);
         setKeyAccessForbidden(false);
-        setKeysLoaded(true);
       });
   }, []);
 
@@ -532,20 +488,18 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     // Capacitor Network plugin (Android WebView'da navigator.onLine güvenilmez)
     const initNetwork = async () => {
       try {
-        const { Network } = await import("@capacitor/network");
+        const { Network } = await import('@capacitor/network');
         const status = await Network.getStatus();
         setIsOnline(status.connected);
-        Network.addListener("networkStatusChange", (s) =>
-          setIsOnline(s.connected),
-        );
+        Network.addListener('networkStatusChange', (s) => setIsOnline(s.connected));
       } catch {
         logger.warn('ai', 'Capacitor Network algılanamadı, Web fallback kullanılıyor');
         // Web fallback
         setIsOnline(navigator.onLine);
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
-        window.addEventListener("online", handleOnline);
-        window.addEventListener("offline", handleOffline);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
       }
     };
     initNetwork();
@@ -565,40 +519,37 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
 
       // Rate limit koruması: son istekten en az 3 saniye geçmeli
       const now = Date.now();
-      const lastReq = parseInt(sessionStorage.getItem("ai_last_req") || "0");
+      const lastReq = parseInt(sessionStorage.getItem('ai_last_req') || '0');
       const elapsed = now - lastReq;
       if (elapsed < 3000 && lastReq > 0) {
         const wait = Math.ceil((3000 - elapsed) / 1000);
         setMessages((prev) => [
           ...prev,
-          { role: "user", content: userMsg },
+          { role: 'user', content: userMsg },
           {
-            role: "assistant",
+            role: 'assistant',
             content: `⏳ Çok hızlı istek gönderiyorsunuz. Lütfen ${wait} saniye bekleyin.`,
-            source: "offline",
+            source: 'offline',
           },
         ]);
         return;
       }
-      sessionStorage.setItem("ai_last_req", String(now));
+      sessionStorage.setItem('ai_last_req', String(now));
 
-      setInput("");
+      setInput('');
       setLoading(true);
-      const newMessages: Message[] = [
-        ...messages,
-        { role: "user", content: userMsg },
-      ];
+      const newMessages: Message[] = [...messages, { role: 'user', content: userMsg }];
       setMessages(newMessages);
-      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
       if (!isOnline) {
         const reply = offlineReply(db, userMsg);
         setMessages((prev) => {
           const u = [...prev];
           u[u.length - 1] = {
-            role: "assistant",
+            role: 'assistant',
             content: reply,
-            source: "offline",
+            source: 'offline',
           };
           return u;
         });
@@ -610,10 +561,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             setMessages((prev) => [
               ...prev,
               {
-                role: "assistant",
-                content:
-                  "⚠️ Action üretildi ancak Yönetici Modu kapalı olduğu için DB yazma yapılmadı.",
-                source: "offline",
+                role: 'assistant',
+                content: '⚠️ Action üretildi ancak Yönetici Modu kapalı olduğu için DB yazma yapılmadı.',
+                source: 'offline',
               },
             ]);
           } else if (autoApplyActions) {
@@ -622,7 +572,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             setPendingActions({ msgIdx: newMessages.length, actions });
           }
         }
-        setApiStatus("offline");
+        setApiStatus('offline');
         setLoading(false);
         return;
       }
@@ -657,10 +607,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           if (actions.length > 0 && save) {
             if (!isAdminUser || !adminMode) {
               updated.push({
-                role: "assistant",
-                content:
-                  "⚠️ Action üretildi ancak Yönetici Modu kapalı olduğu için DB yazma yapılmadı.",
-                source: "offline",
+                role: 'assistant',
+                content: '⚠️ Action üretildi ancak Yönetici Modu kapalı olduğu için DB yazma yapılmadı.',
+                source: 'offline',
               });
             } else if (autoApplyActions) {
               setTimeout(() => runActions(msgIndex, actions), 0);
@@ -680,14 +629,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       const apiMessages = newMessages.slice(-10);
 
       const tryApi = async (
-        source: "deepseek" | "claude" | "gemini",
+        source: 'deepseek' | 'claude' | 'gemini',
         key: string,
-        askFn: (
-          msgs: typeof apiMessages,
-          ctx: string,
-          k: string,
-          onChunk: (t: string) => void,
-        ) => Promise<void>,
+        askFn: (msgs: typeof apiMessages, ctx: string, k: string, onChunk: (t: string) => void) => Promise<void>,
       ) => {
         try {
           setApiStatus(source);
@@ -699,8 +643,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           await askFn(apiMessages, context, key, appendChunk);
           if (autoSpeak) {
             setMessages((prev) => {
-              if (prev[prev.length - 1]?.content)
-                speak(prev[prev.length - 1].content);
+              if (prev[prev.length - 1]?.content) speak(prev[prev.length - 1].content);
               return prev;
             });
           }
@@ -709,20 +652,14 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           return true;
         } catch (e: unknown) {
           const err = e as { message?: string } | undefined;
-          const msg = String(err?.message || e || "");
-          if (
-            msg.includes("429") ||
-            msg.toLowerCase().includes("too many") ||
-            msg.toLowerCase().includes("rate")
-          ) {
+          const msg = String(err?.message || e || '');
+          if (msg.includes('429') || msg.toLowerCase().includes('too many') || msg.toLowerCase().includes('rate')) {
             setMessages((prev) => {
               const u = [...prev];
               u[u.length - 1] = {
-                role: "assistant",
-                content: rateLimitMsg(
-                  source.charAt(0).toUpperCase() + source.slice(1),
-                ),
-                source: "offline",
+                role: 'assistant',
+                content: rateLimitMsg(source.charAt(0).toUpperCase() + source.slice(1)),
+                source: 'offline',
               };
               return u;
             });
@@ -734,58 +671,50 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         }
       };
 
-      if (modelSource !== "offline") {
+      if (modelSource !== 'offline') {
         let success = false;
-        if (modelSource === "deepseek" && deepseekKey) {
-          success = await tryApi(
-            "deepseek",
-            deepseekKey,
-            async (msgs, ctx, key, cb) => {
-              const systemMsg = {
-                role: "system" as const,
-                content: `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\n\n${ctx}`,
-              };
-              const userMsgs = msgs
-                .filter((m) => m.content)
-                .map((m) => ({
-                  role: m.role as "user" | "assistant",
-                  content: m.content,
-                }));
-              await askDeepSeek([systemMsg, ...userMsgs], key, cb);
-            },
-          );
-        } else if (modelSource === "claude" && claudeKey) {
-          success = await tryApi("claude", claudeKey, askClaude);
-        } else if (modelSource === "gemini" && geminiKey) {
-          success = await tryApi("gemini", geminiKey, askGemini);
+        if (modelSource === 'deepseek' && deepseekKey) {
+          success = await tryApi('deepseek', deepseekKey, async (msgs, ctx, key, cb) => {
+            const systemMsg = {
+              role: 'system' as const,
+              content: `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\n\n${ctx}`,
+            };
+            const userMsgs = msgs
+              .filter((m) => m.content)
+              .map((m) => ({
+                role: m.role as 'user' | 'assistant',
+                content: m.content,
+              }));
+            await askDeepSeek([systemMsg, ...userMsgs], key, cb);
+          });
+        } else if (modelSource === 'claude' && claudeKey) {
+          success = await tryApi('claude', claudeKey, askClaude);
+        } else if (modelSource === 'gemini' && geminiKey) {
+          success = await tryApi('gemini', geminiKey, askGemini);
         }
         if (success) return;
       }
 
       const noKeyMsg =
-        modelSource === "deepseek"
+        modelSource === 'deepseek'
           ? "?? DeepSeek API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
-          : modelSource === "claude"
+          : modelSource === 'claude'
             ? "?? Claude API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
-            : modelSource === "gemini"
+            : modelSource === 'gemini'
               ? "? Gemini API anahtarı girilmemiş. Ayarlar'dan ekleyin veya farklı bir kaynak seçin."
-              : "?? Çevrimdışı mod — temel sorulara yanıt verir.";
+              : '?? Çevrimdışı mod — temel sorulara yanıt verir.';
       const reply = offlineReply(db, userMsg);
       setMessages((prev) => {
         const u = [...prev];
         u[u.length - 1] = {
-          role: "assistant",
-          content:
-            noKeyMsg +
-            (modelSource === "offline"
-              ? `\n\n${reply}`
-              : `\n\n?? Çevrimdışı yanıt:\n${reply}`),
-          source: "offline",
+          role: 'assistant',
+          content: noKeyMsg + (modelSource === 'offline' ? `\n\n${reply}` : `\n\n?? Çevrimdışı yanıt:\n${reply}`),
+          source: 'offline',
         };
         return u;
       });
       if (autoSpeak) speak(reply);
-      setApiStatus("offline");
+      setApiStatus('offline');
       setLoading(false);
     },
     [
@@ -810,7 +739,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   const sendText = useCallback(
     (text: string) => {
       if (!text.trim() || loading) return;
-      setInput("");
+      setInput('');
       // send fonksiyonunu text parametresiyle çağır
       send(text);
     },
@@ -818,35 +747,32 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   );
 
   const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       send();
     }
   };
 
-  const sourceLabel: Record<
-    string,
-    { label: string; color: string; bg: string }
-  > = {
+  const sourceLabel: Record<string, { label: string; color: string; bg: string }> = {
     deepseek: {
-      label: "🧠 DeepSeek",
-      color: "var(--color-success)",
-      bg: "var(--color-success-soft)",
+      label: '🧠 DeepSeek',
+      color: 'var(--color-success)',
+      bg: 'var(--color-success-soft)',
     },
     claude: {
-      label: "🤖 Claude",
-      color: "var(--color-accent)",
-      bg: "var(--color-accent-soft)",
+      label: '🤖 Claude',
+      color: 'var(--color-accent)',
+      bg: 'var(--color-accent-soft)',
     },
     gemini: {
-      label: "✨ Gemini",
-      color: "var(--color-primary-light)",
-      bg: "var(--color-primary-ultra)",
+      label: '✨ Gemini',
+      color: 'var(--color-primary-light)',
+      bg: 'var(--color-primary-ultra)',
     },
     offline: {
-      label: "🔌 Çevrimdışı",
-      color: "var(--text-muted)",
-      bg: "var(--bg-card)",
+      label: '🔌 Çevrimdışı',
+      color: 'var(--text-muted)',
+      bg: 'var(--bg-card)',
     },
   };
 
@@ -855,53 +781,49 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
   const monthSales = db.sales.filter(
-    (s) =>
-      !s.deleted &&
-      s.status === "tamamlandi" &&
-      new Date(s.createdAt) >= monthStart,
+    (s) => !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt) >= monthStart,
   );
   const kasaToplam = db.kasa
     .filter((k) => !k.deleted)
-    .reduce((s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0);
+    .reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
   const alacakToplam = db.cari
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
+    .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
 
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        height: embedded ? "100%" : "calc(100vh - 140px)",
+        display: 'flex',
+        flexDirection: 'column',
+        height: embedded ? '100%' : 'calc(100vh - 140px)',
       }}
     >
       {/* Header — sadece standalone modda */}
       {!embedded && (
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 14,
             marginBottom: 16,
-            padding: "16px 20px",
-            background:
-              "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.06))",
+            padding: '16px 20px',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.06))',
             borderRadius: 16,
-            border: "1px solid rgba(99,102,241,0.2)",
+            border: '1px solid rgba(99,102,241,0.2)',
           }}
         >
           <div
             style={{
               width: 48,
               height: 48,
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               borderRadius: 14,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "1.4rem",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.4rem',
               flexShrink: 0,
-              boxShadow: "0 4px 20px rgba(99,102,241,0.4)",
+              boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
             }}
           >
             🤖
@@ -910,8 +832,8 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <h2
               style={{
                 fontWeight: 800,
-                color: "var(--text-primary)",
-                fontSize: "1.1rem",
+                color: 'var(--text-primary)',
+                fontSize: '1.1rem',
                 margin: 0,
               }}
             >
@@ -919,45 +841,45 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             </h2>
             <p
               style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.78rem",
-                margin: "3px 0 0",
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                margin: '3px 0 0',
               }}
             >
               {!isOnline
-                ? "🔌 Çevrimdışı — temel sorulara yanıt verir"
+                ? '🔌 Çevrimdışı — temel sorulara yanıt verir'
                 : hasKeys
-                  ? `✅ ${keysRef.current.deepseek ? "DeepSeek " : ""}${keysRef.current.claude ? "Claude " : ""}${keysRef.current.gemini ? "Gemini" : ""} hazır`
+                  ? `✅ ${keysRef.current.deepseek ? 'DeepSeek ' : ''}${keysRef.current.claude ? 'Claude ' : ''}${keysRef.current.gemini ? 'Gemini' : ''} hazır`
                   : keyAccessForbidden
-                    ? "🚫 Firebase anahtar erişimi kısıtlı (403) — yerel/env anahtar kullanın"
+                    ? '🚫 Firebase anahtar erişimi kısıtlı (403) — yerel/env anahtar kullanın'
                     : keyLoadError
                       ? "⚠️ Anahtarlar yüklenemedi - Ayarlar'a girin"
                       : "⚠️ API anahtarı girilmemiş - Ayarlar'a girin"}
             </p>
           </div>
           {/* Anlık Özet */}
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            {([
-              { label: "Bu Ay", value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)), color: "#10b981" },
-              { label: "Kasa", value: formatMoney(kasaToplam), color: "#06b6d4" },
-              { label: "Alacak", value: formatMoney(alacakToplam), color: "#f59e0b" },
-            ] as const).map((s) => (
-              <div key={s.label} style={{ display: "none" }} className="ai-stat">
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            {(
+              [
+                { label: 'Bu Ay', value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)), color: '#10b981' },
+                { label: 'Kasa', value: formatMoney(kasaToplam), color: '#06b6d4' },
+                { label: 'Alacak', value: formatMoney(alacakToplam), color: '#f59e0b' },
+              ] as const
+            ).map((s) => (
+              <div key={s.label} style={{ display: 'none' }} className="ai-stat">
                 <MiniStatCard {...s} />
               </div>
             ))}
           </div>
           <div
             style={{
-              display: "flex",
+              display: 'flex',
               gap: 8,
-              alignItems: "center",
+              alignItems: 'center',
               flexShrink: 0,
             }}
           >
-            {isAdminUser && (
-              <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} />
-            )}
+            {isAdminUser && <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} />}
             {isAdminUser && adminMode && (
               <AutoApplyButton autoApplyActions={autoApplyActions} onToggle={() => setAutoApplyActions((v) => !v)} />
             )}
@@ -976,13 +898,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 onClick={() => setMessages([])}
                 title="Sohbeti Temizle"
                 style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.07)',
                   borderRadius: 8,
-                  color: "var(--text-secondary)",
-                  padding: "7px 12px",
-                  cursor: "pointer",
-                  fontSize: "0.82rem",
+                  color: 'var(--text-secondary)',
+                  padding: '7px 12px',
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
                 }}
               >
                 🗑️
@@ -992,15 +914,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               onClick={() => setShowSettings((s) => !s)}
               title="API Ayarları"
               style={{
-                background: showSettings
-                  ? "rgba(99,102,241,0.2)"
-                  : "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(99,102,241,0.3)",
+                background: showSettings ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(99,102,241,0.3)',
                 borderRadius: 8,
-                color: "#818cf8",
-                padding: "7px 12px",
-                cursor: "pointer",
-                fontSize: "0.9rem",
+                color: '#818cf8',
+                padding: '7px 12px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
               }}
             >
               ⚙️
@@ -1013,35 +933,39 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       {embedded && (
         <div
           style={{
-            display: "flex",
+            display: 'flex',
             gap: 8,
             marginBottom: 12,
-            alignItems: "center",
+            alignItems: 'center',
           }}
         >
-          <div style={{ flex: 1, display: "flex", gap: 8 }}>
-            {([
-              { label: "Bu Ay Ciro", value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)), color: "#10b981" },
-              { label: "Kasa", value: formatMoney(kasaToplam), color: "#06b6d4" },
-              { label: "Alacak", value: formatMoney(alacakToplam), color: "#f59e0b" },
-            ] as const).map((s) => (
+          <div style={{ flex: 1, display: 'flex', gap: 8 }}>
+            {(
+              [
+                {
+                  label: 'Bu Ay Ciro',
+                  value: formatMoney(monthSales.reduce((s, x) => s + x.total, 0)),
+                  color: '#10b981',
+                },
+                { label: 'Kasa', value: formatMoney(kasaToplam), color: '#06b6d4' },
+                { label: 'Alacak', value: formatMoney(alacakToplam), color: '#f59e0b' },
+              ] as const
+            ).map((s) => (
               <EmbeddedStatCard key={s.label} {...s} />
             ))}
           </div>
           <select
             value={modelSource}
-            onChange={(e) =>
-              setModelSource(e.target.value as typeof modelSource)
-            }
+            onChange={(e) => setModelSource(e.target.value as typeof modelSource)}
             style={{
-              background: "rgba(15,23,42,0.6)",
-              border: "1px solid var(--border)",
+              background: 'rgba(15,23,42,0.6)',
+              border: '1px solid var(--border)',
               borderRadius: 8,
-              color: "#f1f5f9",
-              padding: "6px 8px",
-              fontSize: "0.72rem",
+              color: '#f1f5f9',
+              padding: '6px 8px',
+              fontSize: '0.72rem',
               fontWeight: 600,
-              cursor: "pointer",
+              cursor: 'pointer',
             }}
             aria-label="AI kaynağı seçimi"
           >
@@ -1050,11 +974,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <option value="gemini">✨ Gemini</option>
             <option value="offline">🔌 Çevrimdışı</option>
           </select>
-          {isAdminUser && (
-            <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} compact />
-          )}
+          {isAdminUser && <AdminModeButton adminMode={adminMode} onToggle={() => setAdminMode((v) => !v)} compact />}
           {isAdminUser && adminMode && (
-            <AutoApplyButton autoApplyActions={autoApplyActions} onToggle={() => setAutoApplyActions((v) => !v)} compact />
+            <AutoApplyButton
+              autoApplyActions={autoApplyActions}
+              onToggle={() => setAutoApplyActions((v) => !v)}
+              compact
+            />
           )}
           {isAdminUser && adminMode && (
             <MaxActionsControl
@@ -1065,18 +991,22 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             />
           )}
           {isAdminUser && adminMode && (
-            <StopOnViolationButton stopOnViolation={stopOnViolation} onToggle={() => setStopOnViolation((v) => !v)} compact />
+            <StopOnViolationButton
+              stopOnViolation={stopOnViolation}
+              onToggle={() => setStopOnViolation((v) => !v)}
+              compact
+            />
           )}
           <button
             onClick={() => setShowSettings((s) => !s)}
             style={{
-              background: "rgba(99,102,241,0.1)",
-              border: "1px solid rgba(99,102,241,0.2)",
+              background: 'rgba(99,102,241,0.1)',
+              border: '1px solid rgba(99,102,241,0.2)',
               borderRadius: 8,
-              color: "#818cf8",
-              padding: "6px 10px",
-              cursor: "pointer",
-              fontSize: "0.85rem",
+              color: '#818cf8',
+              padding: '6px 10px',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
             }}
           >
             ⚙️
@@ -1085,13 +1015,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             <button
               onClick={() => setMessages([])}
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "none",
+                background: 'rgba(255,255,255,0.04)',
+                border: 'none',
                 borderRadius: 8,
-                color: "var(--text-secondary)",
-                padding: "6px 10px",
-                cursor: "pointer",
-                fontSize: "0.85rem",
+                color: 'var(--text-secondary)',
+                padding: '6px 10px',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
               }}
             >
               🗑️
@@ -1104,37 +1034,33 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       {showSettings && (
         <div
           style={{
-            background: "rgba(15,23,42,0.8)",
-            border: "1px solid rgba(99,102,241,0.2)",
+            background: 'rgba(15,23,42,0.8)',
+            border: '1px solid rgba(99,102,241,0.2)',
             borderRadius: 14,
-            padding: "16px 20px",
+            padding: '16px 20px',
             marginBottom: 14,
           }}
         >
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               marginBottom: 4,
             }}
           >
-            <h3
-              style={{ color: "#f1f5f9", fontWeight: 700, fontSize: "0.95rem" }}
-            >
-              ⚙️ API Ayarları
-            </h3>
+            <h3 style={{ color: '#f1f5f9', fontWeight: 700, fontSize: '0.95rem' }}>⚙️ API Ayarları</h3>
             <button
               onClick={() => {
                 invalidateKeyCache();
                 setShowSettings(false);
               }}
               style={{
-                background: "none",
-                border: "none",
-                color: "#64748b",
-                cursor: "pointer",
-                fontSize: "1.1rem",
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                cursor: 'pointer',
+                fontSize: '1.1rem',
               }}
             >
               ✕
@@ -1155,44 +1081,42 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           <div
             style={{
               flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              padding: "20px 0 16px",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '20px 0 16px',
             }}
           >
-            <div style={{ fontSize: "3rem", marginBottom: 10, opacity: 0.5 }}>
-              🤖
-            </div>
+            <div style={{ fontSize: '3rem', marginBottom: 10, opacity: 0.5 }}>🤖</div>
             <h3
               style={{
-                color: "var(--text-secondary)",
+                color: 'var(--text-secondary)',
                 fontWeight: 700,
                 marginBottom: 6,
-                fontSize: "0.95rem",
+                fontSize: '0.95rem',
               }}
             >
               İşletmenizle ilgili her şeyi sorabilirsiniz
             </h3>
             <p
               style={{
-                color: "var(--text-secondary)",
-                fontSize: "0.8rem",
+                color: 'var(--text-secondary)',
+                fontSize: '0.8rem',
                 maxWidth: 360,
                 lineHeight: 1.6,
               }}
             >
               {hasKeys
-                ? "Gerçek verilerinizi analiz ederek yanıt verir."
+                ? 'Gerçek verilerinizi analiz ederek yanıt verir.'
                 : "🔌 Ayarlar'dan API anahtarını girin. Internetsiz de temel sorulara yanıt verir."}
             </p>
           </div>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
               gap: 8,
             }}
           >
@@ -1202,31 +1126,27 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 onClick={() => send(p.prompt)}
                 disabled={loading}
                 style={{
-                  background: "rgba(99,102,241,0.06)",
-                  border: "1px solid rgba(99,102,241,0.15)",
+                  background: 'rgba(99,102,241,0.06)',
+                  border: '1px solid rgba(99,102,241,0.15)',
                   borderRadius: 10,
-                  color: "#818cf8",
-                  padding: "10px 14px",
-                  cursor: "pointer",
-                  fontSize: "0.82rem",
+                  color: '#818cf8',
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
                   fontWeight: 600,
-                  textAlign: "left",
-                  transition: "all 0.15s",
+                  textAlign: 'left',
+                  transition: 'all 0.15s',
                   opacity: loading ? 0.5 : 1,
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "rgba(99,102,241,0.14)";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor =
-                      "rgba(99,102,241,0.35)";
+                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.14)';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(99,102,241,0.35)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "rgba(99,102,241,0.06)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor =
-                    "rgba(99,102,241,0.15)";
+                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(99,102,241,0.06)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(99,102,241,0.15)';
                 }}
               >
                 {p.label}
@@ -1241,21 +1161,21 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         ref={chatRef}
         style={{
           flex: 1,
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
           gap: 12,
-          padding: "2px 4px",
+          padding: '2px 4px',
         }}
       >
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
-              display: "flex",
+              display: 'flex',
               gap: 10,
-              flexDirection: msg.role === "user" ? "row-reverse" : "row",
-              alignItems: "flex-start",
+              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
+              alignItems: 'flex-start',
             }}
           >
             <div
@@ -1264,53 +1184,46 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 height: 34,
                 borderRadius: 10,
                 background:
-                  msg.role === "user"
-                    ? "linear-gradient(135deg,#ff5722,#ff7043)"
-                    : "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.9rem",
+                  msg.role === 'user'
+                    ? 'linear-gradient(135deg,#ff5722,#ff7043)'
+                    : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.9rem',
                 flexShrink: 0,
-                boxShadow:
-                  msg.role === "user"
-                    ? "0 2px 10px rgba(255,87,34,0.3)"
-                    : "0 2px 10px rgba(99,102,241,0.3)",
+                boxShadow: msg.role === 'user' ? '0 2px 10px rgba(255,87,34,0.3)' : '0 2px 10px rgba(99,102,241,0.3)',
               }}
             >
-              {msg.role === "user" ? "👤" : "🤖"}
+              {msg.role === 'user' ? '👤' : '🤖'}
             </div>
-            <div style={{ maxWidth: "80%", minWidth: 0 }}>
+            <div style={{ maxWidth: '80%', minWidth: 0 }}>
               <div
                 style={{
                   background:
-                    msg.role === "user"
-                      ? "linear-gradient(135deg,rgba(255,87,34,0.12),rgba(255,87,34,0.06))"
-                      : "linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04))",
-                  border: `1px solid ${msg.role === "user" ? "rgba(255,87,34,0.2)" : "rgba(99,102,241,0.15)"}`,
+                    msg.role === 'user'
+                      ? 'linear-gradient(135deg,rgba(255,87,34,0.12),rgba(255,87,34,0.06))'
+                      : 'linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04))',
+                  border: `1px solid ${msg.role === 'user' ? 'rgba(255,87,34,0.2)' : 'rgba(99,102,241,0.15)'}`,
                   borderRadius: 14,
-                  padding: "12px 15px",
+                  padding: '12px 15px',
                 }}
               >
                 <div
                   style={{
-                     color: "var(--text-primary)",
-                    fontSize: "0.87rem",
+                    color: 'var(--text-primary)',
+                    fontSize: '0.87rem',
                     lineHeight: 1.7,
                   }}
                 >
-                  {msg.role === "assistant" ? (
-                    <MarkdownText text={msg.content || "..."} />
-                  ) : (
-                    msg.content
-                  )}
+                  {msg.role === 'assistant' ? <MarkdownText text={msg.content || '...'} /> : msg.content}
                 </div>
               </div>
-              {msg.role === "assistant" && msg.content && (
+              {msg.role === 'assistant' && msg.content && (
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 8,
                     marginTop: 4,
                   }}
@@ -1318,12 +1231,12 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   {msg.source && (
                     <span
                       style={{
-                        fontSize: "0.7rem",
-                        color: sourceLabel[msg.source]?.color || "#64748b",
+                        fontSize: '0.7rem',
+                        color: sourceLabel[msg.source]?.color || '#64748b',
                         fontWeight: 600,
                         background: sourceLabel[msg.source]?.bg,
                         borderRadius: 5,
-                        padding: "2px 7px",
+                        padding: '2px 7px',
                       }}
                     >
                       {sourceLabel[msg.source]?.label}
@@ -1332,17 +1245,17 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   <button
                     onClick={() => copyMsg(msg.content, i)}
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: copiedIdx === i ? "var(--color-success)" : "var(--text-secondary)",
-                      cursor: "pointer",
-                      fontSize: "0.72rem",
-                      padding: "2px 6px",
+                      background: 'none',
+                      border: 'none',
+                      color: copiedIdx === i ? 'var(--color-success)' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontSize: '0.72rem',
+                      padding: '2px 6px',
                       borderRadius: 5,
-                      transition: "color 0.2s",
+                      transition: 'color 0.2s',
                     }}
                   >
-                    {copiedIdx === i ? "✓ Kopyalandı" : "📋 Kopyala"}
+                    {copiedIdx === i ? '✓ Kopyalandı' : '📋 Kopyala'}
                   </button>
                 </div>
               )}
@@ -1353,32 +1266,31 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         {pendingActions && !loading && (
           <div
             style={{
-              background:
-                "linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.04))",
-              border: "1px solid rgba(16,185,129,0.3)",
+              background: 'linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.04))',
+              border: '1px solid rgba(16,185,129,0.3)',
               borderRadius: 14,
-              padding: "14px 16px",
-              display: "flex",
-              flexDirection: "column",
+              padding: '14px 16px',
+              display: 'flex',
+              flexDirection: 'column',
               gap: 10,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: "1.1rem" }}>⚡</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '1.1rem' }}>⚡</span>
               <span
                 style={{
-                  color: "var(--color-success)",
+                  color: 'var(--color-success)',
                   fontWeight: 700,
-                  fontSize: "0.88rem",
+                  fontSize: '0.88rem',
                 }}
               >
                 İşlem Onayı
               </span>
               <span
                 style={{
-                  color: "var(--text-muted)",
-                  fontSize: "0.78rem",
-                  marginLeft: "auto",
+                  color: 'var(--text-muted)',
+                  fontSize: '0.78rem',
+                  marginLeft: 'auto',
                 }}
               >
                 Kaydetmek istiyor musunuz?
@@ -1388,64 +1300,58 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               <div
                 key={i}
                 style={{
-                  background: "rgba(0,0,0,0.2)",
+                  background: 'rgba(0,0,0,0.2)',
                   borderRadius: 8,
-                  padding: "8px 12px",
-                  display: "flex",
-                  alignItems: "center",
+                  padding: '8px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 8,
                 }}
               >
-                <span style={{ fontSize: "0.85rem" }}>
-                  {a.type === "sale"
-                    ? "🛒"
-                    : a.type === "kasa_gelir"
-                      ? "💚"
-                      : a.type === "kasa_gider"
-                        ? "🔴"
-                        : a.type === "stok_guncelle"
-                          ? "📦"
-                          : a.type === "urun_ekle"
-                            ? "?"
-                            : a.type === "cari_ekle"
-                              ? "??"
-                              : "💳"}
+                <span style={{ fontSize: '0.85rem' }}>
+                  {a.type === 'sale'
+                    ? '🛒'
+                    : a.type === 'kasa_gelir'
+                      ? '💚'
+                      : a.type === 'kasa_gider'
+                        ? '🔴'
+                        : a.type === 'stok_guncelle'
+                          ? '📦'
+                          : a.type === 'urun_ekle'
+                            ? '?'
+                            : a.type === 'cari_ekle'
+                              ? '??'
+                              : '💳'}
                 </span>
-                <span
-                  style={{ color: "var(--text-primary)", fontSize: "0.83rem", flex: 1 }}
-                >
-                  {a.label}
-                </span>
+                <span style={{ color: 'var(--text-primary)', fontSize: '0.83rem', flex: 1 }}>{a.label}</span>
               </div>
             ))}
             {actionResult && actionResult.msgIdx === pendingActions.msgIdx && (
               <div
                 style={{
-                  color: actionResult.success ? "var(--color-success)" : "var(--color-danger)",
-                  fontSize: "0.82rem",
+                  color: actionResult.success ? 'var(--color-success)' : 'var(--color-danger)',
+                  fontSize: '0.82rem',
                   fontWeight: 600,
-                  textAlign: "center",
+                  textAlign: 'center',
                 }}
               >
-                {actionResult.success ? "✅ " : "❌ "}
+                {actionResult.success ? '✅ ' : '❌ '}
                 {actionResult.msg}
               </div>
             )}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
               <button
-                onClick={() =>
-                  runActions(pendingActions.msgIdx, pendingActions.actions)
-                }
+                onClick={() => runActions(pendingActions.msgIdx, pendingActions.actions)}
                 style={{
                   flex: 1,
-                  background: "linear-gradient(135deg,#059669,#10b981)",
-                  border: "none",
+                  background: 'linear-gradient(135deg,#059669,#10b981)',
+                  border: 'none',
                   borderRadius: 9,
-                  color: "#fff",
-                  padding: "9px 0",
+                  color: '#fff',
+                  padding: '9px 0',
                   fontWeight: 700,
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
                 }}
               >
                 ✅ Onayla & Kaydet
@@ -1456,13 +1362,13 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                   setActionResult(null);
                 }}
                 style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRadius: 9,
-                  color: "var(--text-secondary)",
-                  padding: "9px 16px",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
+                  color: 'var(--text-secondary)',
+                  padding: '9px 16px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
                 }}
               >
                 İptal
@@ -1471,53 +1377,53 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           </div>
         )}
         {loading && (
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <div
               style={{
                 width: 34,
                 height: 34,
                 borderRadius: 10,
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               🤖
             </div>
             <div
               style={{
-                background: "rgba(99,102,241,0.1)",
-                border: "1px solid rgba(99,102,241,0.15)",
+                background: 'rgba(99,102,241,0.1)',
+                border: '1px solid rgba(99,102,241,0.15)',
                 borderRadius: 14,
-                padding: "12px 18px",
+                padding: '12px 18px',
               }}
             >
-              <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     style={{
                       width: 7,
                       height: 7,
-                      borderRadius: "50%",
-                      background: "#6366f1",
+                      borderRadius: '50%',
+                      background: '#6366f1',
                       animation: `pulse 1.2s ease ${i * 0.2}s infinite`,
                     }}
                   />
                 ))}
                 <span
                   style={{
-                    color: "var(--text-secondary)",
-                    fontSize: "0.75rem",
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.75rem',
                     marginLeft: 6,
                   }}
                 >
-                  {apiStatus === "claude"
-                    ? "Claude düşünüyor..."
-                    : apiStatus === "gemini"
-                      ? "Gemini yanıtlıyor..."
-                      : "Yanıt hazırlanıyor..."}
+                  {apiStatus === 'claude'
+                    ? 'Claude düşünüyor...'
+                    : apiStatus === 'gemini'
+                      ? 'Gemini yanıtlıyor...'
+                      : 'Yanıt hazırlanıyor...'}
                 </span>
               </div>
             </div>
@@ -1529,56 +1435,47 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       <div
         style={{
           marginTop: 12,
-          display: "flex",
+          display: 'flex',
           gap: 8,
-          alignItems: "flex-end",
+          alignItems: 'flex-end',
         }}
       >
-        <div style={{ flex: 1, position: "relative" }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={
-              listening
-                ? "🎤 Dinleniyor..."
-                : "Sorunuzu yazın veya 🎤 mikrofona basın..."
-            }
+            placeholder={listening ? '🎤 Dinleniyor...' : 'Sorunuzu yazın veya 🎤 mikrofona basın...'}
             rows={2}
             disabled={loading || listening}
             style={{
-              width: "100%",
-              padding: "11px 15px",
-              background: listening
-                ? "rgba(239,68,68,0.08)"
-                : "var(--bg-card)",
-              border: `1px solid ${listening ? "rgba(239,68,68,0.4)" : "var(--border)"}`,
+              width: '100%',
+              padding: '11px 15px',
+              background: listening ? 'rgba(239,68,68,0.08)' : 'var(--bg-card)',
+              border: `1px solid ${listening ? 'rgba(239,68,68,0.4)' : 'var(--border)'}`,
               borderRadius: 12,
-              color: "var(--text-primary)",
-              fontSize: "0.88rem",
-              resize: "none",
-              boxSizing: "border-box",
-              outline: "none",
+              color: 'var(--text-primary)',
+              fontSize: '0.88rem',
+              resize: 'none',
+              boxSizing: 'border-box',
+              outline: 'none',
               lineHeight: 1.5,
-              fontFamily: "inherit",
-              transition: "all 0.2s",
+              fontFamily: 'inherit',
+              transition: 'all 0.2s',
             }}
-            onFocus={(e) =>
-              (e.target.style.borderColor = "var(--border-strong)")
-            }
+            onFocus={(e) => (e.target.style.borderColor = 'var(--border-strong)')}
             onBlur={(e) => {
-              if (!listening)
-                e.target.style.borderColor = "var(--border)";
+              if (!listening) e.target.style.borderColor = 'var(--border)';
             }}
           />
           {micError && (
             <div
               style={{
-                position: "absolute",
+                position: 'absolute',
                 bottom: -20,
                 left: 0,
-                fontSize: "0.72rem",
-                color: "#f87171",
+                fontSize: '0.72rem',
+                color: '#f87171',
               }}
             >
               {micError}
@@ -1604,22 +1501,18 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
               width: 46,
               height: 46,
               flexShrink: 0,
-              background: listening
-                ? "linear-gradient(135deg,#ef4444,#dc2626)"
-                : "rgba(239,68,68,0.1)",
-              border: `1px solid ${listening ? "rgba(239,68,68,0.6)" : "rgba(239,68,68,0.2)"}`,
+              background: listening ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'rgba(239,68,68,0.1)',
+              border: `1px solid ${listening ? 'rgba(239,68,68,0.6)' : 'rgba(239,68,68,0.2)'}`,
               borderRadius: 12,
-              color: listening ? "#fff" : "#f87171",
-              cursor: "pointer",
-              fontSize: "1.2rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: listening ? "0 0 20px rgba(239,68,68,0.5)" : "none",
-              animation: listening
-                ? "micPulse 1s ease-in-out infinite"
-                : "none",
-              transition: "all 0.2s",
+              color: listening ? '#fff' : '#f87171',
+              cursor: 'pointer',
+              fontSize: '1.2rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: listening ? '0 0 20px rgba(239,68,68,0.5)' : 'none',
+              animation: listening ? 'micPulse 1s ease-in-out infinite' : 'none',
+              transition: 'all 0.2s',
             }}
           >
             🎤
@@ -1634,66 +1527,54 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             width: 46,
             height: 46,
             flexShrink: 0,
-            background:
-              loading || !input.trim()
-                ? "var(--bg-card)"
-                : "linear-gradient(135deg,#6366f1,#8b5cf6)",
-            border: loading || !input.trim() ? "1px solid var(--border)" : "none",
+            background: loading || !input.trim() ? 'var(--bg-card)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+            border: loading || !input.trim() ? '1px solid var(--border)' : 'none',
             borderRadius: 12,
-            color: loading || !input.trim() ? "var(--text-dim)" : "#fff",
-            cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-            fontSize: "1.1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow:
-              loading || !input.trim()
-                ? "none"
-                : "0 4px 16px rgba(99,102,241,0.4)",
-            transition: "all 0.2s",
+            color: loading || !input.trim() ? 'var(--text-dim)' : '#fff',
+            cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+            fontSize: '1.1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: loading || !input.trim() ? 'none' : '0 4px 16px rgba(99,102,241,0.4)',
+            transition: 'all 0.2s',
           }}
         >
-          {loading ? "⏳" : "↑"}
+          {loading ? '⏳' : '↑'}
         </button>
       </div>
 
       {/* Sesli okuma & ayar çubuğu */}
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
         {/* Otomatik sesli okuma toggle */}
         <button
           onClick={() => {
             if (speaking) stopSpeak();
             setAutoSpeak((a) => !a);
           }}
-          title={
-            autoSpeak ? "Sesli okuma açık — kapat" : "Sesli okuma kapalı — aç"
-          }
+          title={autoSpeak ? 'Sesli okuma açık — kapat' : 'Sesli okuma kapalı — aç'}
           style={{
-            padding: "5px 12px",
+            padding: '5px 12px',
             borderRadius: 8,
-            border: `1px solid ${autoSpeak ? "rgba(16,185,129,0.4)" : "var(--border)"}`,
-            background: autoSpeak
-              ? "rgba(16,185,129,0.1)"
-              : "var(--bg-card)",
-            color: autoSpeak ? "#10b981" : "var(--text-secondary)",
-            cursor: "pointer",
-            fontSize: "0.78rem",
+            border: `1px solid ${autoSpeak ? 'rgba(16,185,129,0.4)' : 'var(--border)'}`,
+            background: autoSpeak ? 'rgba(16,185,129,0.1)' : 'var(--bg-card)',
+            color: autoSpeak ? '#10b981' : 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontSize: '0.78rem',
             fontWeight: 600,
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 5,
-            transition: "all 0.2s",
+            transition: 'all 0.2s',
           }}
         >
-          {speaking ? "🔊" : autoSpeak ? "🔈" : "🔇"}
-          <span>{autoSpeak ? "Sesli Açık" : "Sesli Kapalı"}</span>
+          {speaking ? '🔊' : autoSpeak ? '🔈' : '🔇'}
+          <span>{autoSpeak ? 'Sesli Açık' : 'Sesli Kapalı'}</span>
         </button>
 
         {/* Son cevabı sesli oku */}
         {messages.length > 0 &&
-          messages[messages.length - 1]?.role === "assistant" &&
+          messages[messages.length - 1]?.role === 'assistant' &&
           messages[messages.length - 1]?.content && (
             <button
               onClick={() => {
@@ -1701,28 +1582,26 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
                 else speak(messages[messages.length - 1].content);
               }}
               style={{
-                padding: "5px 12px",
+                padding: '5px 12px',
                 borderRadius: 8,
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-                color: speaking ? "var(--color-accent)" : "var(--text-secondary)",
-                cursor: "pointer",
-                fontSize: "0.78rem",
+                border: '1px solid var(--border)',
+                background: 'var(--bg-card)',
+                color: speaking ? 'var(--color-accent)' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
                 fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
+                display: 'flex',
+                alignItems: 'center',
                 gap: 5,
-                transition: "all 0.2s",
+                transition: 'all 0.2s',
               }}
             >
-              {speaking ? "⏹ Durdur" : "▶ Son Cevabı Oku"}
+              {speaking ? '⏹ Durdur' : '▶ Son Cevabı Oku'}
             </button>
           )}
 
         {micSupported && (
-          <span
-            style={{ color: "var(--text-muted)", fontSize: "0.7rem", marginLeft: "auto" }}
-          >
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginLeft: 'auto' }}>
             🎤 Basılı tut → konuş → bırak
           </span>
         )}
@@ -1730,34 +1609,30 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
 
       {/* Konuşma devam ederken mini quick prompts */}
       {messages.length > 0 && !loading && (
-        <div
-          style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}
-        >
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
           {QUICK_PROMPTS.slice(0, 5).map((p) => (
             <button
               key={p.label}
               onClick={() => send(p.prompt)}
               disabled={loading}
               style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border)",
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
                 borderRadius: 7,
-                color: "var(--text-secondary)",
-                padding: "4px 10px",
-                cursor: "pointer",
-                fontSize: "0.75rem",
+                color: 'var(--text-secondary)',
+                padding: '4px 10px',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
                 fontWeight: 600,
-                transition: "all 0.15s",
+                transition: 'all 0.15s',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-accent)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor =
-                  "var(--border-strong)";
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-accent)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-strong)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
-                (e.currentTarget as HTMLButtonElement).style.borderColor =
-                  "var(--border)";
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
               }}
             >
               {p.label}

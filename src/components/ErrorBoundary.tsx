@@ -25,13 +25,18 @@ function logError(error: Error, errorInfo: string) {
     });
     // Son 100 hata kaydı tut
     localStorage.setItem('sobaErrorLog', JSON.stringify(logs.slice(0, 100)));
-  } catch { /* localStorage dolu olabilir */ }
+  } catch {
+    console.warn('ErrorBoundary', 'localStorage hata logu yazılamadı');
+  }
 }
 
 export function getErrorLogs(): Array<{ id: string; message: string; stack?: string; component: string; time: string; url: string }> {
   try {
     return JSON.parse(localStorage.getItem('sobaErrorLog') || '[]');
-  } catch { return []; }
+  } catch {
+    console.warn('ErrorBoundary', 'localStorage hata logu okunamadı');
+    return [];
+  }
 }
 
 export function clearErrorLogs() {

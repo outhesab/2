@@ -9,7 +9,7 @@ export function useDraggableButton(
       const raw = localStorage.getItem(storageKey);
       if (raw) return JSON.parse(raw);
     } catch {
-      /* localStorage okuma hatası */
+      console.warn('useDraggableButton', 'localStorage okuma hatası');
     }
     return defaultPos;
   });

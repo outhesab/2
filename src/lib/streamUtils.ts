@@ -30,6 +30,7 @@ export async function readSSEStream(
           full += text;
         }
       } catch {
+        logger.warn("streamUtils", "SSE akışı JSON parse hatası");
         onError?.();
       }
     }

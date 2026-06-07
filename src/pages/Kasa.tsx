@@ -25,7 +25,7 @@ import { exportToExcel } from '@/lib/excelExport';
 import { genId, formatMoney, formatDate } from '@/lib/utils-tr';
 import type { DB } from '@/types';
 import DOMPurify from 'dompurify';
-import { TableFilterBar, TableWrapper } from '@/pages/pageHelpers';
+import { TableFilterBar, TableWrapper } from '@/pages/pageHelpers.tsx';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 

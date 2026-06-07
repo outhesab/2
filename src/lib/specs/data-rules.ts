@@ -1,11 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import { logger } from '@/lib/logger';
 import type { SpecRule, SpecCheckResult } from './types';
 
 const ROOT = process.cwd();
 
-const SYSTEM_FILES = [
+// Tam dosya adı eşleşmesi için Set — false positive'i önler
+const SYSTEM_FILENAMES = new Set([
   'useDB.ts',
   'useUIPrefs.ts',
   'appConfig.ts',
@@ -15,7 +16,6 @@ const SYSTEM_FILES = [
   'firebase.ts',
   'tabs.ts',
   'version.ts',
-  'specs',
   'ErrorBoundary.tsx',
   'SetupWizard.tsx',
   'QuantumLink.tsx',
@@ -24,23 +24,31 @@ const SYSTEM_FILES = [
   'agentConfig.ts',
   'healthCheck.ts',
   'userManager.ts',
-  'db/core.ts',
   'Settings.tsx',
-];
+]);
 
-function walkFiles(dir: string, ext: string, results: string[] = []): string[] {
+// Dizin bazlı hariç tutmalar (yol sonu eşleşmesi)
+const SYSTEM_DIRS = ['specs', 'db/core.ts'];
+
+function isSystemFile(filePath: string): boolean {
+  const name = basename(filePath);
+  if (SYSTEM_FILENAMES.has(name)) return true;
+  return SYSTEM_DIRS.some((dir) => filePath.includes(dir));
+}
+
+function walkFiles(dir: string, exts: string[], results: string[] = []): string[] {
   try {
     const entries = readdirSync(join(ROOT, dir), { withFileTypes: true });
     for (const entry of entries) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith('.') && entry.name !== 'node_modules') walkFiles(full, ext, results);
-      } else if (entry.name.endsWith(ext)) {
+        if (!entry.name.startsWith('.') && entry.name !== 'node_modules') walkFiles(full, exts, results);
+      } else if (exts.some((ext) => entry.name.endsWith(ext))) {
         results.push(full);
       }
     }
-  } catch {
-    logger.warn('data', 'Klasör taranırken hata oluştu');
+  } catch (e) {
+    logger.warn('data', 'Klasör taranırken hata oluştu', { dir, error: String(e) });
     /* skip */
   }
   return results;
@@ -53,10 +61,10 @@ export const dataRules: SpecRule[] = [
     title: "doğrudan sobaYonetim DB key'ine yazmak yasak — save() kullanılmalı",
     severity: 'error',
     check: (): SpecCheckResult => {
-      const files = walkFiles('src', '.tsx').concat(walkFiles('src', '.ts'));
+      const files = walkFiles('src', ['.tsx', '.ts']);
       const violations: SpecCheckResult['violations'] = [];
       for (const file of files) {
-        if (SYSTEM_FILES.some((a) => file.includes(a))) continue;
+        if (isSystemFile(file)) continue;
         try {
           const content = readFileSync(join(ROOT, file), 'utf-8');
           const lines = content.split('\n');
@@ -68,8 +76,8 @@ export const dataRules: SpecRule[] = [
               violations.push({ file, line: i + 1, message: 'save() kullanılmalı, doğrudan DB yazımı yasak' });
             }
           }
-        } catch {
-          logger.warn('data', 'DB yazma kontrolü sırasında dosya okunamadı');
+        } catch (e) {
+          logger.warn('data', 'DB yazma kontrolü sırasında dosya okunamadı', { file, error: String(e) });
           /* skip */
         }
       }
@@ -82,7 +90,7 @@ export const dataRules: SpecRule[] = [
     title: 'Sayfalarda doğrudan sobaYonetim JSON parse etmek yasak',
     severity: 'error',
     check: (): SpecCheckResult => {
-      const files = walkFiles('src/pages', '.tsx');
+      const files = walkFiles('src/pages', ['.tsx']);
       const allowed = ['Settings.tsx', 'Dashboard.tsx', 'DashboardOperasyon.tsx'];
       const violations: SpecCheckResult['violations'] = [];
       for (const file of files) {
@@ -93,8 +101,8 @@ export const dataRules: SpecRule[] = [
           if (content.includes('getItem("sobaYonetim"') || content.includes("getItem('sobaYonetim'")) {
             violations.push({ file, message: 'Sayfada doğrudan DB localStorage erişimi — useDB() kullanılmalı' });
           }
-        } catch {
-          logger.warn('data', 'DB parse kontrolü sırasında dosya okunamadı');
+        } catch (e) {
+          logger.warn('data', 'DB parse kontrolü sırasında dosya okunamadı', { file, error: String(e) });
           /* skip */
         }
       }

@@ -9,8 +9,7 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
   const [error, setError] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recRef = useRef<any>(null);
+  const recRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     // Android WebView'da her zaman çalışmayabilir; ama plugin/uygulama bazında
@@ -57,16 +56,14 @@ export function useSpeechRecognition(onResult: (text: string) => void) {
 
     rec.onstart = () => { setListening(true); setError(''); };
     rec.onend = () => setListening(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rec.onerror = (e: any) => {
+    rec.onerror = (e: SpeechRecognitionErrorEvent) => {
       setListening(false);
       if (e.error === 'no-speech') setError('Ses algılanamadı, tekrar deneyin');
       else if (e.error === 'not-allowed') setError('Mikrofon izni gerekli');
       else setError('Ses tanıma hatası: ' + e.error);
       setTimeout(() => setError(''), 3000);
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rec.onresult = (e: any) => {
+    rec.onresult = (e: SpeechRecognitionEvent) => {
       const text = e.results[0][0].transcript;
       if (text.trim()) onResult(text.trim());
     };

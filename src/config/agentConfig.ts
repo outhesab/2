@@ -1,8 +1,8 @@
-export type AgentId = "satis" | "stok" | "cari" | "kasa" | "fatura" | "rapor";
+export type AgentId = 'satis' | 'stok' | 'cari' | 'kasa' | 'fatura' | 'rapor';
 
 export type AgentSettings = Record<AgentId, boolean>;
 
-const STORAGE_KEY = "sobaYonetim";
+const STORAGE_KEY = 'sobaYonetim';
 
 const defaultAgentSettings: AgentSettings = {
   satis: true,
@@ -30,24 +30,9 @@ export function loadAgentSettings(): AgentSettings {
       ...partial,
     };
   } catch {
+    console.warn('AgentConfig', 'loadAgentSettings localStorage parse hatası');
     return { ...defaultAgentSettings };
   }
 }
 
-function saveAgentSettings(next: AgentSettings) {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as StoredShape) : ({} as StoredShape);
-    parsed.agentSettings = next;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-  } catch {
-    // localStorage hatası: sessiz geç
-  }
-}
-
-function setAgentEnabled(agentId: AgentId, enabled: boolean) {
-  const current = loadAgentSettings();
-  const next: AgentSettings = { ...current, [agentId]: enabled };
-  saveAgentSettings(next);
-  return next;
-}
+/* saveAgentSettings + setAgentEnabled kaldırıldı — kullanılmıyor */

@@ -4,7 +4,7 @@ import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { formatMoney, formatDate } from '@/lib/utils-tr';
 import { upsertSupplier, addOrder, removeById, updateStatusInDB } from '@/lib/pageHelpers';
-import { StatusBadge } from '@/pages/pageHelpers';
+import { StatusBadge } from '@/pages/pageHelpers.tsx';
 import type { DB, PeletSupplier, PeletOrder } from '@/types';
 import { lbl, inp } from '@/lib/formStyles';
 

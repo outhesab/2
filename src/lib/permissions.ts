@@ -23,7 +23,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const perm = await LocalNotifications.requestPermissions();
     return perm.display === 'granted';
   } catch {
-    logger.warn("permissions", "Bildirim izni alınamadı");
+    logger.warn('permissions', 'Bildirim izni alınamadı');
     return false;
   }
 }
@@ -41,16 +41,18 @@ export async function sendLocalNotification(title: string, body: string, id = Da
   try {
     const { LocalNotifications } = await import('@capacitor/local-notifications');
     await LocalNotifications.schedule({
-      notifications: [{
-        id,
-        title,
-        body,
-        schedule: { at: new Date(Date.now() + 100) },
-        sound: undefined,
-        attachments: undefined,
-        actionTypeId: '',
-        extra: null,
-      }],
+      notifications: [
+        {
+          id,
+          title,
+          body,
+          schedule: { at: new Date(Date.now() + 100) },
+          sound: undefined,
+          attachments: undefined,
+          actionTypeId: '',
+          extra: null,
+        },
+      ],
     });
   } catch (e) {
     console.warn('Bildirim gönderilemedi:', e);
@@ -58,7 +60,11 @@ export async function sendLocalNotification(title: string, body: string, id = Da
 }
 
 // ── Dosya Kaydetme (Filesystem) ───────────────────────────────────────────────
-export async function saveFileToDevice(filename: string, data: string, mimeType = 'application/octet-stream'): Promise<boolean> {
+export async function saveFileToDevice(
+  filename: string,
+  data: string,
+  mimeType = 'application/octet-stream',
+): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) {
     // Web: blob download
     const blob = new Blob([data], { type: mimeType });
@@ -96,19 +102,18 @@ export async function requestAllPermissions(): Promise<void> {
   // Mikrofon izni (sesli AI asistan için)
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(t => t.stop()); // hemen kapat, sadece izin al
+    stream.getTracks().forEach((t) => t.stop()); // hemen kapat, sadece izin al
     console.info('[permissions] Mikrofon izni verildi');
   } catch {
-    console.warn('[permissions] Mikrofon izni reddedildi');
+    logger.warn('permissions', 'Mikrofon izni reddedildi');
   }
 
   // Depolama izni (Excel export için)
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { Filesystem, Directory } = await import('@capacitor/filesystem');
+    const { Filesystem } = await import('@capacitor/filesystem');
     await Filesystem.requestPermissions();
     console.info('[permissions] Depolama izni verildi');
   } catch {
-    console.warn('[permissions] Depolama izni reddedildi');
+    logger.warn('permissions', 'Depolama izni reddedildi');
   }
 }

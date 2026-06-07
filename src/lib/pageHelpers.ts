@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { genId } from './utils-tr';
 
 export function upsertSupplier<T extends { id: string }>(
@@ -18,36 +19,20 @@ export function upsertSupplier<T extends { id: string }>(
   return { ...prev, [dbKey]: arr };
 }
 
-export function addOrder(
-  prev: Record<string, any>,
-  dbKey: string,
-  order: Record<string, any>,
-  nowIso: string,
-): any {
+export function addOrder(prev: Record<string, any>, dbKey: string, order: Record<string, any>, nowIso: string): any {
   return {
     ...prev,
     [dbKey]: [...prev[dbKey], { id: genId(), createdAt: nowIso, updatedAt: nowIso, ...order }],
   };
 }
 
-export function removeById(
-  prev: Record<string, any>,
-  dbKey: string,
-  id: string,
-): any {
+export function removeById(prev: Record<string, any>, dbKey: string, id: string): any {
   return { ...prev, [dbKey]: prev[dbKey].filter((s: any) => s.id !== id) };
 }
 
-export function updateStatusInDB(
-  prev: Record<string, any>,
-  dbKey: string,
-  id: string,
-  status: string,
-): any {
+export function updateStatusInDB(prev: Record<string, any>, dbKey: string, id: string, status: string): any {
   return {
     ...prev,
-    [dbKey]: prev[dbKey].map((o: any) =>
-      o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o,
-    ),
+    [dbKey]: prev[dbKey].map((o: any) => (o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o)),
   };
 }

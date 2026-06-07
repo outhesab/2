@@ -7,18 +7,63 @@
  * - Performans zamanlayıcıları
  */
 
-export type LogLevel = "debug" | "info" | "warn" | "error" | "critical";
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
 export type LogCategory =
-  | "auth"
-  | "firebase"
-  | "db"
-  | "ui"
-  | "sync"
-  | "health"
-  | "perf"
-  | "system"
-  | "auditEngine"
-  | "ruleEngine";
+  | 'auth'
+  | 'firebase'
+  | 'db'
+  | 'ui'
+  | 'sync'
+  | 'health'
+  | 'perf'
+  | 'system'
+  | 'auditEngine'
+  | 'ruleEngine'
+  | 'crash'
+  | 'ai'
+  | 'aiApi'
+  | 'anomali'
+  | 'app'
+  | 'appConfig'
+  | 'butce'
+  | 'component'
+  | 'connConfig'
+  | 'dashboard'
+  | 'data'
+  | 'deepseek'
+  | 'error'
+  | 'excel-ai'
+  | 'excelExport'
+  | 'excelMerge'
+  | 'healthCheck'
+  | 'navigation'
+  | 'notification'
+  | 'permissions'
+  | 'safeClone'
+  | 'sale'
+  | 'settings'
+  | 'setup'
+  | 'sound'
+  | 'speech'
+  | 'storage'
+  | 'streamUtils'
+  | 'userManager'
+  | 'utils-tr'
+  | 'version';
+
+export interface CrashReport {
+  id: string;
+  ts: string;
+  message: string;
+  stack?: string;
+  filename?: string;
+  line?: number;
+  col?: number;
+  sessionId: string;
+  userAgent: string;
+  url: string;
+  context?: Record<string, unknown>;
+}
 
 export interface LogEntry {
   id: string;
@@ -31,7 +76,7 @@ export interface LogEntry {
   ms?: number;
 }
 
-const LOG_KEY = "sobaLogs_v2";
+const LOG_KEY = 'sobaLogs_v2';
 const MAX_LOGS = 500;
 const SESSION_ID = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -44,15 +89,15 @@ const LEVEL_WEIGHT: Record<LogLevel, number> = {
 };
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  debug: "#64748b",
-  info: "#3b82f6",
-  warn: "#f59e0b",
-  error: "#ef4444",
-  critical: "#dc2626",
+  debug: '#64748b',
+  info: '#3b82f6',
+  warn: '#f59e0b',
+  error: '#ef4444',
+  critical: '#dc2626',
 };
 
 const IS_PROD = Boolean(import.meta.env.PROD);
-let _minLevel: LogLevel = import.meta.env.DEV ? "debug" : IS_PROD ? "warn" : "info";
+let _minLevel: LogLevel = import.meta.env.DEV ? 'debug' : IS_PROD ? 'warn' : 'info';
 let _listeners: Array<(entry: LogEntry) => void> = [];
 let _writeBuffer: LogEntry[] = [];
 let _writeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -76,6 +121,7 @@ function flushBuffer() {
         const newArchive = [...overflow, ...oldArchive].slice(0, 2000);
         safeWriteJSON(archiveKey, newArchive, { maxAttempts: 3, minItems: 100 });
       } catch {
+        console.warn('[logger] Arşiv yazma hatası');
         // ignore archive failure
       }
     }
@@ -90,12 +136,14 @@ function flushBuffer() {
           const base = (safeReadJSON<LogEntry[]>(LOG_KEY) || []) as LogEntry[];
           safeWriteJSON(LOG_KEY, chunk.concat(base), { maxAttempts: 3, minItems: 10 });
         } catch {
+          console.warn('[logger] Parça yazma hatası');
           // ignore per-chunk failure
         }
       }
     }
     _writeBuffer = [];
   } catch {
+    console.warn('[logger] Buffer flush hatası');
     _writeBuffer = [];
   }
 }
@@ -105,13 +153,33 @@ function scheduleFlush() {
   _writeTimer = setTimeout(flushBuffer, 300);
 }
 
-function emit(
-  level: LogLevel,
-  cat: LogCategory,
-  msg: string,
-  data?: unknown,
-  ms?: number,
-): LogEntry {
+/** Hassas alanları maskele — hem console hem localStorage için */
+function sanitize(d: unknown): unknown {
+  try {
+    if (!d || typeof d !== 'object') return d;
+    const sensitive = /pass|password|token|secret|apikey|api_key|hash|claude|gemini/i;
+    const clone: Record<string, unknown> | unknown[] = Array.isArray(d) ? [] : {};
+    const asRecord = d as Record<string, unknown>;
+    for (const k of Object.keys(asRecord)) {
+      const v = asRecord[k];
+      if (sensitive.test(k)) (clone as Record<string, unknown>)[k] = '***';
+      else if (typeof v === 'object' && v !== null) {
+        // Nested objeleri de rekürsif temizle
+        (clone as Record<string, unknown>)[k] = sanitize(v);
+      } else {
+        (clone as Record<string, unknown>)[k] = v;
+      }
+    }
+    return clone;
+  } catch {
+    return '[unserializable]';
+  }
+}
+
+function emit(level: LogLevel, cat: LogCategory, msg: string, data?: unknown, ms?: number): LogEntry {
+  // Veriyi hem console hem localStorage için temizle
+  const sanitizedData = data !== undefined ? sanitize(data) : undefined;
+
   const entry: LogEntry = {
     id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
     ts: new Date().toISOString(),
@@ -119,29 +187,11 @@ function emit(
     cat,
     msg,
     sessionId: SESSION_ID,
-    ...(data !== undefined ? { data } : {}),
+    ...(sanitizedData !== undefined ? { data: sanitizedData } : {}),
     ...(ms !== undefined ? { ms } : {}),
   };
 
   if (LEVEL_WEIGHT[level] >= LEVEL_WEIGHT[_minLevel]) {
-    // Sanitize sensitive fields from data when printing to console
-    const sanitize = (d: unknown) => {
-      try {
-        if (!d || typeof d !== 'object') return d;
-        const sensitive = /pass|password|token|secret|apikey|api_key|hash|claude|gemini/i;
-        const clone: Record<string, unknown> | unknown[] = Array.isArray(d) ? [] : {};
-        const asRecord = d as Record<string, unknown>;
-        for (const k of Object.keys(asRecord)) {
-          const v = asRecord[k];
-          if (sensitive.test(k)) (clone as Record<string, unknown>)[k] = '***';
-          else (clone as Record<string, unknown>)[k] = typeof v === 'object' && v !== null ? '[Object]' : (v as unknown);
-        }
-        return clone;
-      } catch {
-        return '[unserializable]';
-      }
-    };
-
     // In production, only output warnings and errors to the console to avoid leaking info.
     const shouldConsole = IS_PROD ? LEVEL_WEIGHT[level] >= LEVEL_WEIGHT['warn'] : true;
     if (shouldConsole) {
@@ -151,7 +201,7 @@ function emit(
         'color:#8b5cf6; font-weight:600',
         'color:#cbd5e1',
       ];
-      const outData = data ? sanitize(data) : '';
+      const outData = sanitizedData ?? '';
       if (level === 'debug' || level === 'info') console.info(prefix, ...styles, outData);
       else if (level === 'warn') console.warn(prefix, ...styles, outData);
       else console.error(prefix, ...styles, outData);
@@ -165,6 +215,7 @@ function emit(
     try {
       fn(entry);
     } catch {
+      console.warn('[logger] Listener hatası');
       /* listener hatası ana akışı etkilemesin */
     }
   });
@@ -173,16 +224,11 @@ function emit(
 }
 
 export const logger = {
-  debug: (cat: LogCategory, msg: string, data?: unknown) =>
-    emit("debug", cat, msg, data),
-  info: (cat: LogCategory, msg: string, data?: unknown) =>
-    emit("info", cat, msg, data),
-  warn: (cat: LogCategory, msg: string, data?: unknown) =>
-    emit("warn", cat, msg, data),
-  error: (cat: LogCategory, msg: string, data?: unknown) =>
-    emit("error", cat, msg, data),
-  critical: (cat: LogCategory, msg: string, data?: unknown) =>
-    emit("critical", cat, msg, data),
+  debug: (cat: LogCategory, msg: string, data?: unknown) => emit('debug', cat, msg, data),
+  info: (cat: LogCategory, msg: string, data?: unknown) => emit('info', cat, msg, data),
+  warn: (cat: LogCategory, msg: string, data?: unknown) => emit('warn', cat, msg, data),
+  error: (cat: LogCategory, msg: string, data?: unknown) => emit('error', cat, msg, data),
+  critical: (cat: LogCategory, msg: string, data?: unknown) => emit('critical', cat, msg, data),
 
   /** Performans zamanlayıcısı: const t = logger.time('perf','etiket'); ... t.end() */
   time(cat: LogCategory, label: string) {
@@ -190,7 +236,7 @@ export const logger = {
     return {
       end(data?: unknown) {
         const ms = Math.round(performance.now() - start);
-        emit("debug", cat, `⏱ ${label} [${ms}ms]`, data, ms);
+        emit('debug', cat, `⏱ ${label} [${ms}ms]`, data, ms);
         return ms;
       },
     };
@@ -210,12 +256,7 @@ export const logger = {
   },
 
   /** Kayıtlı logları al — opsiyonel filtre ile */
-  getLogs(filter?: {
-    level?: LogLevel;
-    cat?: LogCategory;
-    limit?: number;
-    since?: string;
-  }): LogEntry[] {
+  getLogs(filter?: { level?: LogLevel; cat?: LogCategory; limit?: number; since?: string }): LogEntry[] {
     flushBuffer();
     try {
       let logs: LogEntry[] = safeReadJSON<LogEntry[]>(LOG_KEY) || [];
@@ -228,6 +269,7 @@ export const logger = {
       if (filter?.limit) logs = logs.slice(0, filter.limit);
       return logs;
     } catch {
+      console.warn('[logger] Loglar okunurken hata');
       return [];
     }
   },
@@ -243,6 +285,7 @@ export const logger = {
     try {
       safeRemove(LOG_KEY);
     } catch {
+      console.warn('[logger] Loglar temizlenirken hata');
       /* ignore */
     }
   },
@@ -255,29 +298,76 @@ export const logger = {
     flushBuffer();
     const logs = this.getLogs();
     const blob = new Blob([JSON.stringify(logs, null, 2)], {
-      type: "application/json",
+      type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `soba-logs-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    logger.info("system", "Loglar dışa aktarıldı", { count: logs.length });
+    logger.info('system', 'Loglar dışa aktarıldı', { count: logs.length });
+  },
+
+  /** Çökme raporu oluştur ve kaydet */
+  reportCrash(error: Error | unknown, context?: Record<string, unknown>): CrashReport {
+    const err = error instanceof Error ? error : new Error(String(error));
+    const report: CrashReport = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      ts: new Date().toISOString(),
+      message: err.message,
+      stack: err.stack,
+      sessionId: SESSION_ID,
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      context,
+    };
+
+    try {
+      const existing = safeReadJSON<CrashReport[]>('soba_crashes') || [];
+      const updated = [report, ...existing].slice(0, 50);
+      safeWriteJSON('soba_crashes', updated, { maxAttempts: 3, minItems: 1 });
+    } catch {
+      console.warn('[logger] Crash raporu kaydedilemedi');
+    }
+
+    emit('critical', 'crash', `Crash: ${err.message}`, {
+      ...context,
+      stack: err.stack?.slice(0, 1000),
+    });
+
+    return report;
+  },
+
+  /** Kaydedilmiş çökme raporlarını al */
+  getCrashReports(): CrashReport[] {
+    try {
+      return safeReadJSON<CrashReport[]>('soba_crashes') || [];
+    } catch {
+      return [];
+    }
+  },
+
+  /** Çökme raporlarını temizle */
+  clearCrashReports(): void {
+    try {
+      safeRemove('soba_crashes');
+    } catch {
+      console.warn('[logger] Crash raporları temizlenemedi');
+    }
   },
 };
 
 // ── Global hata yakalayıcılar ──────────────────────────────────────────────
-window.addEventListener("unhandledrejection", (e) => {
-  emit("error", "system", "Yakalanmamış Promise reddi", {
+window.addEventListener('unhandledrejection', (e) => {
+  emit('error', 'system', 'Yakalanmamış Promise reddi', {
     reason: e.reason instanceof Error ? e.reason.message : String(e.reason),
-    stack:
-      e.reason instanceof Error ? e.reason.stack?.slice(0, 300) : undefined,
+    stack: e.reason instanceof Error ? e.reason.stack?.slice(0, 300) : undefined,
   });
 });
 
-window.addEventListener("error", (e) => {
-  emit("error", "system", e.message || "Script hatası", {
+window.addEventListener('error', (e) => {
+  emit('error', 'system', e.message || 'Script hatası', {
     filename: e.filename,
     line: e.lineno,
     col: e.colno,
@@ -285,7 +375,7 @@ window.addEventListener("error", (e) => {
 });
 
 // Başlangıç kaydı
-emit("info", "system", "Uygulama başlatıldı", {
+emit('info', 'system', 'Uygulama başlatıldı', {
   sessionId: SESSION_ID,
   url: window.location.href,
   ua: navigator.userAgent.slice(0, 80),

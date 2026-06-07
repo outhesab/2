@@ -1,67 +1,53 @@
-import CariDetail from "./CariDetail";
-import { useConfirm } from "@/components/ConfirmDialog";
-import { Modal } from "@/components/Modal";
-import { useToast } from "@/components/Toast";
-import { exportArrayToExcel, exportToExcel } from "@/lib/excelExport";
-import { isExactMatch, similarity } from "@/lib/similarity";
-import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
-import { lblMuted as lbl, inpCard as inp } from "@/lib/formStyles";
-import EmptyState from "@/components/EmptyState";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileSpreadsheet, HandCoins, UserRoundSearch } from "lucide-react";
-import type { Cari as CariType, DB } from "@/types";
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useDebounce, StatCard, ModalActions, FormField, FormTextArea, ActionButtons } from "./pageHelpers";
+import CariDetail from './CariDetail';
+import { useConfirm } from '@/components/ConfirmDialog';
+import { Modal } from '@/components/Modal';
+import { useToast } from '@/components/Toast';
+import { exportArrayToExcel, exportToExcel } from '@/lib/excelExport';
+import { isExactMatch, similarity } from '@/lib/similarity';
+import { formatDate, formatMoney, genId } from '@/lib/utils-tr';
+import { lblMuted as lbl, inpCard as inp } from '@/lib/formStyles';
+import EmptyState from '@/components/EmptyState';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileSpreadsheet, HandCoins, UserRoundSearch } from 'lucide-react';
+import type { Cari as CariType, DB } from '@/types';
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { useDebounce, StatCard, ModalActions, FormField, FormTextArea, ActionButtons } from './pageHelpers.tsx';
 
 interface Props {
   db: DB;
   save: (fn: (prev: DB) => DB) => void;
 }
 
-const empty: Omit<CariType, "id" | "createdAt" | "updatedAt"> = {
-  name: "",
-  type: "musteri",
-  taxNo: "",
-  phone: "",
-  email: "",
-  address: "",
+const empty: Omit<CariType, 'id' | 'createdAt' | 'updatedAt'> = {
+  name: '',
+  type: 'musteri',
+  taxNo: '',
+  phone: '',
+  email: '',
+  address: '',
   balance: 0,
-  note: "",
+  note: '',
 };
 
 // Bir carinin borcunun kaç gündür beklendiğini hesapla
 function calcDebtDays(
   cari: CariType,
-  db: { sales: import("@/types").Sale[]; kasa: import("@/types").KasaEntry[] },
+  db: { sales: import('@/types').Sale[]; kasa: import('@/types').KasaEntry[] },
 ): number | null {
   if (cari.balance <= 0) return null;
   const lastPayment = db.kasa
-    .filter((k) => !k.deleted && k.cariId === cari.id && k.type === "gelir")
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )[0];
+    .filter((k) => !k.deleted && k.cariId === cari.id && k.type === 'gelir')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
   const lastPaymentDate = lastPayment ? new Date(lastPayment.createdAt) : null;
   const unpaidSales = db.sales
-    .filter(
-      (s) => !s.deleted && s.status === "tamamlandi" && s.cariId === cari.id,
-    )
+    .filter((s) => !s.deleted && s.status === 'tamamlandi' && s.cariId === cari.id)
     .filter((s) => !lastPaymentDate || new Date(s.createdAt) > lastPaymentDate)
-    .sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    );
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   const oldestUnpaid = unpaidSales[0];
-  if (oldestUnpaid)
-    return Math.floor(
-      (Date.now() - new Date(oldestUnpaid.createdAt).getTime()) / 86400000,
-    );
-  if (cari.lastTransaction)
-    return Math.floor(
-      (Date.now() - new Date(cari.lastTransaction).getTime()) / 86400000,
-    );
+  if (oldestUnpaid) return Math.floor((Date.now() - new Date(oldestUnpaid.createdAt).getTime()) / 86400000);
+  if (cari.lastTransaction) return Math.floor((Date.now() - new Date(cari.lastTransaction).getTime()) / 86400000);
   return null;
 }
 
@@ -70,20 +56,18 @@ function debtColor(days: number | null): {
   bg: string;
   label: string;
 } {
-  if (days === null) return { color: "#64748b", bg: "transparent", label: "" };
-  if (days <= 7)
-    return { color: "#10b981", bg: "rgba(16,185,129,0.1)", label: `${days}g` };
-  if (days <= 30)
-    return { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", label: `${days}g` };
+  if (days === null) return { color: '#64748b', bg: 'transparent', label: '' };
+  if (days <= 7) return { color: '#10b981', bg: 'rgba(16,185,129,0.1)', label: `${days}g` };
+  if (days <= 30) return { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: `${days}g` };
   if (days <= 60)
     return {
-      color: "#ef4444",
-      bg: "rgba(239,68,68,0.12)",
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.12)',
       label: `${days}g ⚠️`,
     };
   return {
-    color: "#dc2626",
-    bg: "rgba(220,38,38,0.18)",
+    color: '#dc2626',
+    bg: 'rgba(220,38,38,0.18)',
     label: `${days}g gecikmiş`,
   };
 }
@@ -93,12 +77,10 @@ export default function Cari({ db, save }: Props) {
   const { showConfirm } = useConfirm();
   const [, setLocation] = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
-  const [filter, setFilter] = useState<"all" | "musteri" | "tedarikci">("all");
-  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<'all' | 'musteri' | 'tedarikci'>('all');
+  const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
-  const [sortBy, setSortBy] = useState<"name" | "balance" | "debt_days">(
-    "name",
-  );
+  const [sortBy, setSortBy] = useState<'name' | 'balance' | 'debt_days'>('name');
   const [showOnlyDebt, setShowOnlyDebt] = useState(false);
   const [form, setForm] = useState<Partial<CariType>>(empty);
   const [editId, setEditId] = useState<string | null>(null);
@@ -106,22 +88,20 @@ export default function Cari({ db, save }: Props) {
   const [islemModal, setIslemModal] = useState<{
     cariId: string;
     cariName: string;
-    type: "musteri" | "tedarikci";
+    type: 'musteri' | 'tedarikci';
   } | null>(null);
   const [islemForm, setIslemForm] = useState({
-    amount: "",
-    kasa: "nakit",
-    description: "",
+    amount: '',
+    kasa: 'nakit',
+    description: '',
   });
 
   let cari = db.cari.filter((c) => !c.deleted);
-  if (filter !== "all") cari = cari.filter((c) => c.type === filter);
+  if (filter !== 'all') cari = cari.filter((c) => c.type === filter);
   if (showOnlyDebt) cari = cari.filter((c) => c.balance > 0);
   if (debouncedSearch)
     cari = cari.filter(
-      (c) =>
-        c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (c.phone || "").includes(debouncedSearch),
+      (c) => c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || (c.phone || '').includes(debouncedSearch),
     );
 
   const cariWithDays = cari.map((c) => ({
@@ -129,39 +109,27 @@ export default function Cari({ db, save }: Props) {
     debtDays: calcDebtDays(c, db),
   }));
   const sorted = [...cariWithDays].sort((a, b) => {
-    if (sortBy === "balance") return b.balance - a.balance;
-    if (sortBy === "debt_days") return (b.debtDays ?? -1) - (a.debtDays ?? -1);
-    return (a.name || "").localeCompare(b.name || "", "tr");
+    if (sortBy === 'balance') return b.balance - a.balance;
+    if (sortBy === 'debt_days') return (b.debtDays ?? -1) - (a.debtDays ?? -1);
+    return (a.name || '').localeCompare(b.name || '', 'tr');
   });
 
   const aging = {
-    "0-7": cariWithDays.filter(
-      (c) => c.type === "musteri" && c.debtDays !== null && c.debtDays <= 7,
+    '0-7': cariWithDays.filter((c) => c.type === 'musteri' && c.debtDays !== null && c.debtDays <= 7),
+    '8-30': cariWithDays.filter(
+      (c) => c.type === 'musteri' && c.debtDays !== null && c.debtDays > 7 && c.debtDays <= 30,
     ),
-    "8-30": cariWithDays.filter(
-      (c) =>
-        c.type === "musteri" &&
-        c.debtDays !== null &&
-        c.debtDays > 7 &&
-        c.debtDays <= 30,
+    '31-60': cariWithDays.filter(
+      (c) => c.type === 'musteri' && c.debtDays !== null && c.debtDays > 30 && c.debtDays <= 60,
     ),
-    "31-60": cariWithDays.filter(
-      (c) =>
-        c.type === "musteri" &&
-        c.debtDays !== null &&
-        c.debtDays > 30 &&
-        c.debtDays <= 60,
-    ),
-    "60+": cariWithDays.filter(
-      (c) => c.type === "musteri" && c.debtDays !== null && c.debtDays > 60,
-    ),
+    '60+': cariWithDays.filter((c) => c.type === 'musteri' && c.debtDays !== null && c.debtDays > 60),
   };
 
   const totalReceivable = db.cari
-    .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
+    .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
   const totalPayable = db.cari
-    .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
+    .filter((c) => !c.deleted && c.type === 'tedarikci' && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
 
   const openAdd = () => {
@@ -176,34 +144,21 @@ export default function Cari({ db, save }: Props) {
   };
 
   const handleSave = () => {
-    const trimmedName = (form.name || "").trim();
+    const trimmedName = (form.name || '').trim();
     if (!trimmedName) {
-      showToast("Ad gerekli!", "error");
+      showToast('Ad gerekli!', 'error');
       return;
     }
     const nowIso = new Date().toISOString();
 
-    if (
-      !editId ||
-      !isExactMatch(
-        trimmedName,
-        db.cari.find((c) => c.id === editId)?.name || "",
-      )
-    ) {
+    if (!editId || !isExactMatch(trimmedName, db.cari.find((c) => c.id === editId)?.name || '')) {
       const aktifCari = db.cari.filter((c) => !c.deleted && c.id !== editId);
-      const tamEslesme = aktifCari.find((c) =>
-        isExactMatch(c.name, trimmedName),
-      );
+      const tamEslesme = aktifCari.find((c) => isExactMatch(c.name, trimmedName));
       if (tamEslesme) {
-        showToast(
-          `"${tamEslesme.name}" adında cari zaten var! Kayıt engellendi.`,
-          "error",
-        );
+        showToast(`"${tamEslesme.name}" adında cari zaten var! Kayıt engellendi.`, 'error');
         return;
       }
-      const benzer = aktifCari.find(
-        (c) => similarity(c.name, trimmedName) >= 70,
-      );
+      const benzer = aktifCari.find((c) => similarity(c.name, trimmedName) >= 70);
       if (benzer) {
         const devamEt = window.confirm(
           `⚠️ "${benzer.name}" adında benzer bir cari mevcut.\nYine de kaydetmek istiyor musunuz?`,
@@ -223,18 +178,18 @@ export default function Cari({ db, save }: Props) {
             name: trimmedName,
             updatedAt: nowIso,
           } as CariType;
-        showToast("Cari güncellendi!", "success");
+        showToast('Cari güncellendi!', 'success');
       } else {
         cari.push({
           id: genId(),
           createdAt: nowIso,
           updatedAt: nowIso,
           name: trimmedName,
-          type: "musteri",
+          type: 'musteri',
           balance: 0,
           ...form,
         } as CariType);
-        showToast("Cari eklendi!", "success");
+        showToast('Cari eklendi!', 'success');
       }
       return { ...prev, cari };
     });
@@ -245,18 +200,15 @@ export default function Cari({ db, save }: Props) {
     if (!islemModal) return;
     const amount = parseFloat(islemForm.amount);
     if (!amount || amount <= 0) {
-      showToast("Geçerli tutar girin!", "error");
+      showToast('Geçerli tutar girin!', 'error');
       return;
     }
     const nowIso = new Date().toISOString();
-    const isTahsilat = islemModal.type === "musteri"; // müşteriden tahsilat = gelir; tedarikçiye ödeme = gider
-    const kasaType = isTahsilat ? ("gelir" as const) : ("gider" as const);
-    const category = isTahsilat ? "tahsilat" : "tedarik";
+    const isTahsilat = islemModal.type === 'musteri'; // müşteriden tahsilat = gelir; tedarikçiye ödeme = gider
+    const kasaType = isTahsilat ? ('gelir' as const) : ('gider' as const);
+    const category = isTahsilat ? 'tahsilat' : 'tedarik';
     const desc =
-      islemForm.description ||
-      (isTahsilat
-        ? `Tahsilat: ${islemModal.cariName}`
-        : `Ödeme: ${islemModal.cariName}`);
+      islemForm.description || (isTahsilat ? `Tahsilat: ${islemModal.cariName}` : `Ödeme: ${islemModal.cariName}`);
 
     save((prev) => {
       const kasaEntry = {
@@ -286,7 +238,7 @@ export default function Cari({ db, save }: Props) {
       // Ortak cari ise → kasadan çekim ortakEmanetler'e de yazılır
       const cariRec = prev.cari.find((c) => c.id === islemModal.cariId);
       let ortakEmanetler = prev.ortakEmanetler || [];
-      if (cariRec?.ortak && cariRec?.partnerId && kasaType === "gider") {
+      if (cariRec?.ortak && cariRec?.partnerId && kasaType === 'gider') {
         ortakEmanetler = [
           ...ortakEmanetler,
           {
@@ -295,7 +247,7 @@ export default function Cari({ db, save }: Props) {
             description: desc || `Kasadan çekim: ${islemModal.cariName}`,
             amount,
             note: `Kasa: ${islemForm.kasa}`,
-            type: "emanet" as const,
+            type: 'emanet' as const,
             createdAt: nowIso,
             updatedAt: nowIso,
           },
@@ -306,13 +258,11 @@ export default function Cari({ db, save }: Props) {
     });
 
     showToast(
-      isTahsilat
-        ? `Tahsilat kaydedildi: ${formatMoney(amount)}`
-        : `Ödeme kaydedildi: ${formatMoney(amount)}`,
-      "success",
+      isTahsilat ? `Tahsilat kaydedildi: ${formatMoney(amount)}` : `Ödeme kaydedildi: ${formatMoney(amount)}`,
+      'success',
     );
     setIslemModal(null);
-    setIslemForm({ amount: "", kasa: "nakit", description: "" });
+    setIslemForm({ amount: '', kasa: 'nakit', description: '' });
   };
 
   const handleDelete = (id: string) => {
@@ -322,171 +272,130 @@ export default function Cari({ db, save }: Props) {
     const hasRelated = relatedSales.length > 0 || relatedKasa.length > 0;
     const msg = hasRelated
       ? `Bu cariye ait ${relatedSales.length} satış ve ${relatedKasa.length} kasa kaydı var. Silinen cari gizlenecek ancak geçmiş kayıtlar korunacak.`
-      : "Bu cari kaydını silmek istediğinizden emin misiniz?";
-    showConfirm("Cari Sil", msg, () => {
+      : 'Bu cari kaydını silmek istediğinizden emin misiniz?';
+    showConfirm('Cari Sil', msg, () => {
       const nowIso = new Date().toISOString();
       save((prev) => ({
         ...prev,
-        cari: prev.cari.map((c) =>
-          c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c,
-        ),
+        cari: prev.cari.map((c) => (c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c)),
       }));
-      showToast("Cari silindi!", "success");
+      showToast('Cari silindi!', 'success');
     });
   };
 
   const detail = detailId ? db.cari.find((c) => c.id === detailId) : null;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const detailDebtDays = detail ? calcDebtDays(detail, db) : null;
   const detailKasa = detailId
     ? db.kasa
         .filter((k) => !k.deleted && k.cariId === detailId)
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 30)
     : [];
   const detailSales =
     detailId && detail
       ? db.sales
-          .filter(
-            (s) =>
-              s.cariId === detailId ||
-              s.cariName === detail.name ||
-              s.customerName === detail.name,
-          )
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )
+          .filter((s) => s.cariId === detailId || s.cariName === detail.name || s.customerName === detail.name)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 20)
       : [];
   const detailInvoices = detailId
     ? (db.invoices || [])
-        .filter(
-          (inv) =>
-            inv.cariId === detailId || (detail && inv.cariName === detail.name),
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
+        .filter((inv) => inv.cariId === detailId || (detail && inv.cariName === detail.name))
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 20)
     : [];
-  const totalPaid = detailKasa
-    .filter((k) => k.type === "gelir")
-    .reduce((s, k) => s + k.amount, 0);
+  const totalPaid = detailKasa.filter((k) => k.type === 'gelir').reduce((s, k) => s + k.amount, 0);
   const totalPurchased =
     detailSales.reduce((s, s2) => s + s2.total, 0) +
-    detailInvoices
-      .filter((i) => i.type === "satis")
-      .reduce((s, i) => s + i.total, 0);
-  const [histTab, setHistTab] = useState<"kasa" | "satis" | "fatura">("kasa");
+    detailInvoices.filter((i) => i.type === 'satis').reduce((s, i) => s + i.total, 0);
+  const [histTab, setHistTab] = useState<'kasa' | 'satis' | 'fatura'>('kasa');
 
   return (
     <div>
       {/* Stat kartları */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
           gap: 12,
           marginBottom: 16,
         }}
       >
-        <StatCard
-          label="Toplam Cari"
-          value={String(db.cari.filter((c) => !c.deleted).length)}
-          color="#3b82f6"
-        />
-        <StatCard
-          label="Alacak"
-          value={formatMoney(totalReceivable)}
-          color="#10b981"
-          sub="Müşterilerden"
-        />
-        <StatCard
-          label="Borç"
-          value={formatMoney(totalPayable)}
-          color="#ef4444"
-          sub="Tedarikçilere"
-        />
+        <StatCard label="Toplam Cari" value={String(db.cari.filter((c) => !c.deleted).length)} color="#3b82f6" />
+        <StatCard label="Alacak" value={formatMoney(totalReceivable)} color="#10b981" sub="Müşterilerden" />
+        <StatCard label="Borç" value={formatMoney(totalPayable)} color="#ef4444" sub="Tedarikçilere" />
       </div>
 
       {/* Alacak Yaşlandırma Bandı */}
-      {(aging["8-30"].length > 0 ||
-        aging["31-60"].length > 0 ||
-        aging["60+"].length > 0) && (
+      {(aging['8-30'].length > 0 || aging['31-60'].length > 0 || aging['60+'].length > 0) && (
         <div
           style={{
-            background: "rgba(15,23,42,0.6)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: 'rgba(15,23,42,0.6)',
+            border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 14,
-            padding: "14px 18px",
+            padding: '14px 18px',
             marginBottom: 16,
           }}
         >
           <div
             style={{
-              color: "#94a3b8",
-              fontSize: "0.72rem",
+              color: '#94a3b8',
+              fontSize: '0.72rem',
               fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.07em",
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
               marginBottom: 12,
             }}
           >
             ⏱️ Alacak Yaşlandırma
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {[
               {
-                label: "0–7 gün",
-                items: aging["0-7"],
-                color: "#10b981",
-                bg: "rgba(16,185,129,0.1)",
+                label: '0–7 gün',
+                items: aging['0-7'],
+                color: '#10b981',
+                bg: 'rgba(16,185,129,0.1)',
               },
               {
-                label: "8–30 gün",
-                items: aging["8-30"],
-                color: "#f59e0b",
-                bg: "rgba(245,158,11,0.1)",
+                label: '8–30 gün',
+                items: aging['8-30'],
+                color: '#f59e0b',
+                bg: 'rgba(245,158,11,0.1)',
               },
               {
-                label: "31–60 gün",
-                items: aging["31-60"],
-                color: "#ef4444",
-                bg: "rgba(239,68,68,0.12)",
+                label: '31–60 gün',
+                items: aging['31-60'],
+                color: '#ef4444',
+                bg: 'rgba(239,68,68,0.12)',
               },
               {
-                label: "60+ gün",
-                items: aging["60+"],
-                color: "#dc2626",
-                bg: "rgba(220,38,38,0.18)",
+                label: '60+ gün',
+                items: aging['60+'],
+                color: '#dc2626',
+                bg: 'rgba(220,38,38,0.18)',
               },
             ].map((bucket) => (
               <div
                 key={bucket.label}
                 onClick={() => {
-                  setFilter("musteri");
+                  setFilter('musteri');
                   setShowOnlyDebt(true);
-                  setSortBy("debt_days");
+                  setSortBy('debt_days');
                 }}
                 style={{
-                  flex: "1 1 120px",
+                  flex: '1 1 120px',
                   background: bucket.bg,
                   border: `1px solid ${bucket.color}30`,
                   borderRadius: 10,
-                  padding: "10px 14px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
+                  padding: '10px 14px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
                 <div
                   style={{
                     color: bucket.color,
-                    fontSize: "1.2rem",
+                    fontSize: '1.2rem',
                     fontWeight: 900,
                     lineHeight: 1,
                   }}
@@ -494,7 +403,7 @@ export default function Cari({ db, save }: Props) {
                   {bucket.items.length}
                   <span
                     style={{
-                      fontSize: "0.72rem",
+                      fontSize: '0.72rem',
                       fontWeight: 600,
                       marginLeft: 4,
                     }}
@@ -505,7 +414,7 @@ export default function Cari({ db, save }: Props) {
                 <div
                   style={{
                     color: bucket.color,
-                    fontSize: "0.75rem",
+                    fontSize: '0.75rem',
                     fontWeight: 700,
                     marginTop: 3,
                   }}
@@ -514,8 +423,8 @@ export default function Cari({ db, save }: Props) {
                 </div>
                 <div
                   style={{
-                    color: "#475569",
-                    fontSize: "0.65rem",
+                    color: '#475569',
+                    fontSize: '0.65rem',
                     marginTop: 2,
                   }}
                 >
@@ -524,68 +433,64 @@ export default function Cari({ db, save }: Props) {
               </div>
             ))}
           </div>
-          {aging["60+"].length > 0 && (
+          {aging['60+'].length > 0 && (
             <div
               style={{
                 marginTop: 12,
-                display: "flex",
-                flexDirection: "column",
+                display: 'flex',
+                flexDirection: 'column',
                 gap: 6,
               }}
             >
               <div
                 style={{
-                  color: "#dc2626",
-                  fontSize: "0.72rem",
+                  color: '#dc2626',
+                  fontSize: '0.72rem',
                   fontWeight: 700,
                 }}
               >
                 60+ gün bekleyen alacaklar:
               </div>
-              {aging["60+"].slice(0, 5).map((c) => (
+              {aging['60+'].slice(0, 5).map((c) => (
                 <div
                   key={c.id}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 10,
-                    background: "rgba(220,38,38,0.08)",
+                    background: 'rgba(220,38,38,0.08)',
                     borderRadius: 8,
-                    padding: "7px 12px",
+                    padding: '7px 12px',
                   }}
                 >
                   <span
                     style={{
-                      color: "var(--text-primary)",
+                      color: 'var(--text-primary)',
                       fontWeight: 600,
-                      fontSize: "0.85rem",
+                      fontSize: '0.85rem',
                       flex: 1,
                     }}
                   >
                     {c.name}
                   </span>
-                  {c.phone && (
-                    <span style={{ color: "#64748b", fontSize: "0.78rem" }}>
-                      📞 {c.phone}
-                    </span>
-                  )}
+                  {c.phone && <span style={{ color: '#64748b', fontSize: '0.78rem' }}>📞 {c.phone}</span>}
                   <span
                     style={{
-                      color: "#ef4444",
+                      color: '#ef4444',
                       fontWeight: 700,
-                      fontSize: "0.85rem",
+                      fontSize: '0.85rem',
                     }}
                   >
                     {formatMoney(c.balance)}
                   </span>
                   <span
                     style={{
-                      color: "#dc2626",
-                      fontSize: "0.72rem",
+                      color: '#dc2626',
+                      fontSize: '0.72rem',
                       fontWeight: 700,
-                      background: "rgba(220,38,38,0.2)",
+                      background: 'rgba(220,38,38,0.2)',
                       borderRadius: 5,
-                      padding: "2px 7px",
+                      padding: '2px 7px',
                     }}
                   >
                     {c.debtDays}g
@@ -596,24 +501,24 @@ export default function Cari({ db, save }: Props) {
                       setIslemModal({
                         cariId: c.id,
                         cariName: c.name,
-                        type: "musteri",
+                        type: 'musteri',
                       });
                       setIslemForm({
                         amount: String(c.balance),
-                        kasa: "nakit",
-                        description: "",
+                        kasa: 'nakit',
+                        description: '',
                       });
                     }}
                     style={{
-                      background: "rgba(16,185,129,0.15)",
-                      border: "none",
+                      background: 'rgba(16,185,129,0.15)',
+                      border: 'none',
                       borderRadius: 6,
-                      color: "#10b981",
-                      padding: "4px 10px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
+                      color: '#10b981',
+                      padding: '4px 10px',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
                       fontWeight: 700,
-                      whiteSpace: "nowrap",
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     💰 Tahsil Et
@@ -627,23 +532,23 @@ export default function Cari({ db, save }: Props) {
 
       <div
         style={{
-          display: "flex",
+          display: 'flex',
           gap: 10,
           marginBottom: 16,
-          flexWrap: "wrap",
-          alignItems: "center",
+          flexWrap: 'wrap',
+          alignItems: 'center',
         }}
       >
         <button
           onClick={openAdd}
           style={{
-            background: "#ff5722",
-            border: "none",
+            background: '#ff5722',
+            border: 'none',
             borderRadius: 10,
-            color: "#fff",
-            padding: "10px 20px",
+            color: '#fff',
+            padding: '10px 20px',
             fontWeight: 700,
-            cursor: "pointer",
+            cursor: 'pointer',
           }}
         >
           + Yeni Cari
@@ -651,8 +556,8 @@ export default function Cari({ db, save }: Props) {
         <Button
           variant="outline"
           onClick={() => {
-            exportToExcel(db, { sheets: ["cari"] });
-            showToast("Excel indirildi!", "success");
+            exportToExcel(db, { sheets: ['cari'] });
+            showToast('Excel indirildi!', 'success');
           }}
         >
           <FileSpreadsheet />
@@ -663,19 +568,18 @@ export default function Cari({ db, save }: Props) {
           onClick={() => {
             const rows = sorted.map((c) => ({
               Ad: c.name,
-              Tür: c.type === "musteri" ? "Müşteri" : "Tedarikçi",
+              Tür: c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
               Bakiye: c.balance,
-              "Borç Gün": c.debtDays ?? "",
-              Telefon: c.phone || "",
-              "E-posta": c.email || "",
-              "Vergi No": c.taxNo || "",
-              Adres: c.address || "",
+              'Borç Gün': c.debtDays ?? '',
+              Telefon: c.phone || '',
+              'E-posta': c.email || '',
+              'Vergi No': c.taxNo || '',
+              Adres: c.address || '',
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              Not: (c as any).note || "",
+              Not: c.note || '',
             }));
-            exportArrayToExcel(rows, "cari-listesi");
-            showToast("Ekstre indirildi!", "success");
+            exportArrayToExcel(rows, 'cari-listesi');
+            showToast('Ekstre indirildi!', 'success');
           }}
         >
           <HandCoins />
@@ -687,14 +591,14 @@ export default function Cari({ db, save }: Props) {
           placeholder="🔍 Ara..."
           style={{
             flex: 1,
-            padding: "9px 13px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
+            padding: '9px 13px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: 10,
-            color: "var(--text-primary)",
+            color: 'var(--text-primary)',
           }}
         />
-        <Tabs value={filter} onValueChange={(value) => setFilter(value as "all" | "musteri" | "tedarikci")}>
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as 'all' | 'musteri' | 'tedarikci')}>
           <TabsList>
             <TabsTrigger value="all">Tümü</TabsTrigger>
             <TabsTrigger value="musteri">Müşteri</TabsTrigger>
@@ -704,29 +608,29 @@ export default function Cari({ db, save }: Props) {
         <button
           onClick={() => setShowOnlyDebt((v) => !v)}
           style={{
-            padding: "8px 14px",
-            border: "none",
+            padding: '8px 14px',
+            border: 'none',
             borderRadius: 8,
-            cursor: "pointer",
+            cursor: 'pointer',
             fontWeight: 600,
-            fontSize: "0.82rem",
-            background: showOnlyDebt ? "#ef4444" : "#273548",
-            color: showOnlyDebt ? "#fff" : "#94a3b8",
+            fontSize: '0.82rem',
+            background: showOnlyDebt ? '#ef4444' : '#273548',
+            color: showOnlyDebt ? '#fff' : '#94a3b8',
           }}
         >
-          {showOnlyDebt ? "🚨 Borçlular" : "Borçlular"}
+          {showOnlyDebt ? '🚨 Borçlular' : 'Borçlular'}
         </button>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           style={{
-            padding: "8px 12px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
+            padding: '8px 12px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
             borderRadius: 8,
-            color: "var(--text-muted)",
-            fontSize: "0.82rem",
-            cursor: "pointer",
+            color: 'var(--text-muted)',
+            fontSize: '0.82rem',
+            cursor: 'pointer',
           }}
         >
           <option value="name">A–Z</option>
@@ -738,33 +642,25 @@ export default function Cari({ db, save }: Props) {
       <div
         className="responsive-table-wrap"
         style={{
-          background: "var(--bg-card)",
+          background: 'var(--bg-card)',
           borderRadius: 14,
-          border: "1px solid var(--border)",
-          overflowX: "auto",
+          border: '1px solid var(--border)',
+          overflowX: 'auto',
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ background: "rgba(15,23,42,0.6)" }}>
-              {[
-                "Ad",
-                "Tür",
-                "Telefon",
-                "Bakiye",
-                "Borç Süresi",
-                "Son İşlem",
-                "",
-              ].map((h) => (
+            <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+              {['Ad', 'Tür', 'Telefon', 'Bakiye', 'Borç Süresi', 'Son İşlem', ''].map((h) => (
                 <th
                   key={h}
                   style={{
-                    padding: "12px 16px",
-                    textAlign: "left",
-                    color: "var(--text-muted)",
-                    fontSize: "0.78rem",
+                    padding: '12px 16px',
+                    textAlign: 'left',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.78rem',
                     fontWeight: 600,
-                    textTransform: "uppercase",
+                    textTransform: 'uppercase',
                   }}
                 >
                   {h}
@@ -775,20 +671,17 @@ export default function Cari({ db, save }: Props) {
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td
-                  colSpan={7}
-                  style={{ padding: 24 }}
-                >
+                <td colSpan={7} style={{ padding: 24 }}>
                   <EmptyState
                     icon={UserRoundSearch}
                     title="Cari bulunamadı"
                     description="Arama veya filtrelere göre eşleşen müşteri/tedarikçi kaydı yok."
                     actionLabel="Filtreleri sıfırla"
                     onAction={() => {
-                      setFilter("all");
+                      setFilter('all');
                       setShowOnlyDebt(false);
-                      setSortBy("name");
-                      setSearch("");
+                      setSortBy('name');
+                      setSearch('');
                     }}
                   />
                 </td>
@@ -800,56 +693,70 @@ export default function Cari({ db, save }: Props) {
                   <tr
                     key={c.id}
                     style={{
-                      borderBottom: "1px solid rgba(255,255,255,0.04)",
-                      cursor: "pointer",
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      cursor: 'pointer',
                     }}
                     onClick={() => setLocation(`/cari/${c.id}`)}
                   >
                     <td
                       data-label="Ad"
                       style={{
-                        padding: "12px 16px",
-                        color: "var(--text-primary)",
+                        padding: '12px 16px',
+                        color: 'var(--text-primary)',
                         fontWeight: 600,
                       }}
                     >
                       {c.name}
                       {(() => {
-                        const seg = c.type === 'musteri' && c.balance > 50000 ? { label: 'VIP', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' }
-                          : c.type === 'musteri' && c.balance >= 0 ? { label: 'Normal', color: '#10b981', bg: 'rgba(16,185,129,0.12)' }
-                          : c.balance < -10000 ? { label: 'Riskli', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' }
-                          : null;
+                        const seg =
+                          c.type === 'musteri' && c.balance > 50000
+                            ? { label: 'VIP', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' }
+                            : c.type === 'musteri' && c.balance >= 0
+                              ? { label: 'Normal', color: '#10b981', bg: 'rgba(16,185,129,0.12)' }
+                              : c.balance < -10000
+                                ? { label: 'Riskli', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' }
+                                : null;
                         if (!seg) return null;
-                        return <span style={{ marginLeft: 8, background: seg.bg, color: seg.color, borderRadius: 5, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 700, verticalAlign: 'middle' }}>{seg.label}</span>;
+                        return (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              background: seg.bg,
+                              color: seg.color,
+                              borderRadius: 5,
+                              padding: '1px 7px',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              verticalAlign: 'middle',
+                            }}
+                          >
+                            {seg.label}
+                          </span>
+                        );
                       })()}
                     </td>
-                    <td data-label="Tür" style={{ padding: "12px 16px" }}>
+                    <td data-label="Tür" style={{ padding: '12px 16px' }}>
                       <span
                         style={{
-                          background:
-                            c.type === "musteri"
-                              ? "rgba(59,130,246,0.15)"
-                              : "rgba(245,158,11,0.15)",
-                          color: c.type === "musteri" ? "#60a5fa" : "#f59e0b",
+                          background: c.type === 'musteri' ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: c.type === 'musteri' ? '#60a5fa' : '#f59e0b',
                           borderRadius: 6,
-                          padding: "2px 8px",
-                          fontSize: "0.8rem",
+                          padding: '2px 8px',
+                          fontSize: '0.8rem',
                           fontWeight: 600,
                         }}
                       >
-                        {c.type === "musteri"
-                          ? "👥 Müşteri"
-                          : "🏭 Tedarikçi"}
+                        {c.type === 'musteri' ? '👥 Müşteri' : '🏭 Tedarikçi'}
                       </span>
                       {c.ortak && (
                         <span
                           style={{
                             marginLeft: 6,
-                            background: "rgba(168,85,247,0.15)",
-                            color: "#a78bfa",
+                            background: 'rgba(168,85,247,0.15)',
+                            color: '#a78bfa',
                             borderRadius: 6,
-                            padding: "2px 7px",
-                            fontSize: "0.75rem",
+                            padding: '2px 7px',
+                            fontSize: '0.75rem',
                             fontWeight: 600,
                           }}
                         >
@@ -857,74 +764,57 @@ export default function Cari({ db, save }: Props) {
                         </span>
                       )}
                     </td>
-                    <td
-                      data-label="Telefon"
-                      style={{ padding: "12px 16px", color: "#94a3b8" }}
-                    >
-                      {c.phone || "-"}
+                    <td data-label="Telefon" style={{ padding: '12px 16px', color: '#94a3b8' }}>
+                      {c.phone || '-'}
                     </td>
                     <td
                       data-label="Bakiye"
                       style={{
-                        padding: "12px 16px",
+                        padding: '12px 16px',
                         fontWeight: 700,
                         color:
                           c.balance > 0
-                            ? c.type === "musteri"
-                              ? "#10b981"
-                              : "#f59e0b"
+                            ? c.type === 'musteri'
+                              ? '#10b981'
+                              : '#f59e0b'
                             : c.balance < 0
-                              ? "#ef4444"
-                              : "#64748b",
+                              ? '#ef4444'
+                              : '#64748b',
                       }}
                     >
                       {formatMoney(Math.abs(c.balance))}
-                      {c.balance > 0
-                        ? c.type === "musteri"
-                          ? " ↑ alacak"
-                          : " ↑ borç"
-                        : c.balance < 0
-                          ? " ↓"
-                          : ""}
+                      {c.balance > 0 ? (c.type === 'musteri' ? ' ↑ alacak' : ' ↑ borç') : c.balance < 0 ? ' ↓' : ''}
                     </td>
-                    <td
-                      data-label="Borç Süresi"
-                      style={{ padding: "12px 16px" }}
-                    >
+                    <td data-label="Borç Süresi" style={{ padding: '12px 16px' }}>
                       {c.balance > 0 && c.debtDays !== null ? (
                         <span
                           style={{
                             background: dc.bg,
                             color: dc.color,
                             borderRadius: 6,
-                            padding: "3px 9px",
-                            fontSize: "0.78rem",
+                            padding: '3px 9px',
+                            fontSize: '0.78rem',
                             fontWeight: 700,
                           }}
                         >
                           {dc.label}
                         </span>
                       ) : (
-                        <span style={{ color: "#334155", fontSize: "0.78rem" }}>
-                          —
-                        </span>
+                        <span style={{ color: '#334155', fontSize: '0.78rem' }}>—</span>
                       )}
                     </td>
                     <td
                       data-label="Son İşlem"
                       style={{
-                        padding: "12px 16px",
-                        color: "#64748b",
-                        fontSize: "0.82rem",
+                        padding: '12px 16px',
+                        color: '#64748b',
+                        fontSize: '0.82rem',
                       }}
                     >
-                      {c.lastTransaction ? formatDate(c.lastTransaction) : "-"}
+                      {c.lastTransaction ? formatDate(c.lastTransaction) : '-'}
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
-                      <div
-                        style={{ display: "flex", gap: 6 }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                    <td style={{ padding: '12px 16px' }}>
+                      <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
                         {c.balance > 0 && (
                           <button
                             onClick={() => {
@@ -934,27 +824,23 @@ export default function Cari({ db, save }: Props) {
                                 type: c.type,
                               });
                               setIslemForm({
-                                amount: "",
-                                kasa: "nakit",
-                                description: "",
+                                amount: '',
+                                kasa: 'nakit',
+                                description: '',
                               });
                             }}
                             style={{
-                              background:
-                                c.type === "musteri"
-                                  ? "rgba(16,185,129,0.15)"
-                                  : "rgba(245,158,11,0.15)",
-                              border: "none",
+                              background: c.type === 'musteri' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                              border: 'none',
                               borderRadius: 6,
-                              color:
-                                c.type === "musteri" ? "#10b981" : "#f59e0b",
-                              padding: "5px 10px",
-                              cursor: "pointer",
-                              fontSize: "0.78rem",
+                              color: c.type === 'musteri' ? '#10b981' : '#f59e0b',
+                              padding: '5px 10px',
+                              cursor: 'pointer',
+                              fontSize: '0.78rem',
                               fontWeight: 700,
                             }}
                           >
-                            {c.type === "musteri" ? "💰 Tahsilat" : "💸 Öde"}
+                            {c.type === 'musteri' ? '💰 Tahsilat' : '💸 Öde'}
                           </button>
                         )}
                         <ActionButtons onEdit={() => openEdit(c)} onDelete={() => handleDelete(c.id)} size="small" />
@@ -968,18 +854,12 @@ export default function Cari({ db, save }: Props) {
         </table>
       </div>
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editId ? "✏️ Cari Düzenle" : "🆕 Yeni Cari"}
-      >
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
-        >
-          <div style={{ gridColumn: "1/-1" }}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? '✏️ Cari Düzenle' : '🆕 Yeni Cari'}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ gridColumn: '1/-1' }}>
             <label style={lbl}>Ad *</label>
             <input
-              value={form.name || ""}
+              value={form.name || ''}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               style={inp}
             />
@@ -987,11 +867,11 @@ export default function Cari({ db, save }: Props) {
           <div>
             <label style={lbl}>Tür</label>
             <select
-              value={form.type || "musteri"}
+              value={form.type || 'musteri'}
               onChange={(e) =>
                 setForm((f) => ({
                   ...f,
-                  type: e.target.value as "musteri" | "tedarikci",
+                  type: e.target.value as 'musteri' | 'tedarikci',
                 }))
               }
               style={inp}
@@ -1000,20 +880,30 @@ export default function Cari({ db, save }: Props) {
               <option value="tedarikci">🏭 Tedarikçi</option>
             </select>
           </div>
-          <FormField label="Telefon" value={form.phone || ""} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
-          <FormField label="Vergi No" value={form.taxNo || ""} onChange={(v) => setForm((f) => ({ ...f, taxNo: v }))} />
-          <FormField label="E-posta" value={form.email || ""} onChange={(v) => setForm((f) => ({ ...f, email: v }))} type="email" />
-          <div style={{ gridColumn: "1/-1" }}>
+          <FormField label="Telefon" value={form.phone || ''} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+          <FormField label="Vergi No" value={form.taxNo || ''} onChange={(v) => setForm((f) => ({ ...f, taxNo: v }))} />
+          <FormField
+            label="E-posta"
+            value={form.email || ''}
+            onChange={(v) => setForm((f) => ({ ...f, email: v }))}
+            type="email"
+          />
+          <div style={{ gridColumn: '1/-1' }}>
             <label style={lbl}>Adres</label>
             <textarea
-              value={form.address || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, address: e.target.value }))
-              }
+              value={form.address || ''}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
               style={{ ...inp, minHeight: 60 }}
             />
           </div>
-          <FormTextArea label="Not / Açıklama" value={(form as any).note || ""} onChange={(v) => setForm((f) => ({ ...f, note: v }))} placeholder="Müşteri hakkında notlar..." minHeight={50} gridColumn="1/-1" />
+          <FormTextArea
+            label="Not / Açıklama"
+            value={form.note || ''}
+            onChange={(v) => setForm((f) => ({ ...f, note: v }))}
+            placeholder="Müşteri hakkında notlar..."
+            minHeight={50}
+            gridColumn="1/-1"
+          />
         </div>
         <ModalActions onSave={handleSave} onCancel={() => setModalOpen(false)} />
       </Modal>
@@ -1024,12 +914,10 @@ export default function Cari({ db, save }: Props) {
           open={!!islemModal}
           onClose={() => setIslemModal(null)}
           title={
-            islemModal.type === "musteri"
-              ? `💰 Tahsilat — ${islemModal.cariName}`
-              : `💸 Ödeme — ${islemModal.cariName}`
+            islemModal.type === 'musteri' ? `💰 Tahsilat — ${islemModal.cariName}` : `💸 Ödeme — ${islemModal.cariName}`
           }
         >
-          <div style={{ display: "grid", gap: 14 }}>
+          <div style={{ display: 'grid', gap: 14 }}>
             <div>
               <label style={lbl}>Tutar (₺) *</label>
               <input
@@ -1039,9 +927,7 @@ export default function Cari({ db, save }: Props) {
                 min={0}
                 step={0.01}
                 placeholder="0,00"
-                onChange={(e) =>
-                  setIslemForm((f) => ({ ...f, amount: e.target.value }))
-                }
+                onChange={(e) => setIslemForm((f) => ({ ...f, amount: e.target.value }))}
                 style={inp}
                 autoFocus
               />
@@ -1050,15 +936,13 @@ export default function Cari({ db, save }: Props) {
               <label style={lbl}>Kasa / Hesap</label>
               <select
                 value={islemForm.kasa}
-                onChange={(e) =>
-                  setIslemForm((f) => ({ ...f, kasa: e.target.value }))
-                }
+                onChange={(e) => setIslemForm((f) => ({ ...f, kasa: e.target.value }))}
                 style={inp}
               >
                 {(
                   db.kasalar || [
-                    { id: "nakit", name: "Nakit", icon: "💵" },
-                    { id: "banka", name: "Banka", icon: "🏦" },
+                    { id: 'nakit', name: 'Nakit', icon: '💵' },
+                    { id: 'banka', name: 'Banka', icon: '🏦' },
                   ]
                 ).map((k) => (
                   <option key={k.id} value={k.id}>
@@ -1071,23 +955,17 @@ export default function Cari({ db, save }: Props) {
               <label style={lbl}>Açıklama</label>
               <input
                 value={islemForm.description}
-                onChange={(e) =>
-                  setIslemForm((f) => ({ ...f, description: e.target.value }))
-                }
+                onChange={(e) => setIslemForm((f) => ({ ...f, description: e.target.value }))}
                 style={inp}
-                placeholder={
-                  islemModal.type === "musteri"
-                    ? "Tahsilat açıklaması..."
-                    : "Ödeme açıklaması..."
-                }
+                placeholder={islemModal.type === 'musteri' ? 'Tahsilat açıklaması...' : 'Ödeme açıklaması...'}
               />
             </div>
           </div>
           <ModalActions
             onSave={handleIslem}
             onCancel={() => setIslemModal(null)}
-            saveLabel={islemModal.type === "musteri" ? "💾 Tahsilatı Kaydet" : "💾 Ödemeyi Kaydet"}
-            saveColor={islemModal.type === "musteri" ? "#10b981" : "#f59e0b"}
+            saveLabel={islemModal.type === 'musteri' ? '💾 Tahsilatı Kaydet' : '💾 Ödemeyi Kaydet'}
+            saveColor={islemModal.type === 'musteri' ? '#10b981' : '#f59e0b'}
           />
         </Modal>
       )}
@@ -1097,7 +975,7 @@ export default function Cari({ db, save }: Props) {
           open={!!detailId}
           onClose={() => {
             setDetailId(null);
-            setHistTab("kasa");
+            setHistTab('kasa');
           }}
           title={`👥 ${detail.name}`}
           maxWidth={680}
@@ -1111,9 +989,9 @@ export default function Cari({ db, save }: Props) {
             totalPurchased={totalPurchased}
             histTab={histTab}
             setHistTab={setHistTab}
-            onQuickAction={(cariId: string, cariName: string, type: "musteri" | "tedarikci", balance: number) => {
+            onQuickAction={(cariId: string, cariName: string, type: 'musteri' | 'tedarikci', balance: number) => {
               setIslemModal({ cariId, cariName, type });
-              setIslemForm({ amount: String(balance), kasa: "nakit", description: "" });
+              setIslemForm({ amount: String(balance), kasa: 'nakit', description: '' });
             }}
             showToast={showToast}
           />
@@ -1122,9 +1000,3 @@ export default function Cari({ db, save }: Props) {
     </div>
   );
 }
-
-
-
-
-
-

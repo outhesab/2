@@ -22,6 +22,7 @@ export default function UserMenu({ username, onLogout, isMobile, guestTimeLeft =
       const { App: CapApp } = await import('@capacitor/app');
       await CapApp.exitApp();
     } catch {
+      console.warn('UserMenu', 'exitApp hatası');
       window.close();
     }
   };

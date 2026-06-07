@@ -95,6 +95,7 @@ function checkLocalStorage(): HealthMetric {
       localStorage.setItem('__healthcheck__', '1');
       localStorage.removeItem('__healthcheck__');
     } catch {
+      logger.warn("healthCheck", "localStorage yazma testi başarısız");
       return { id: 'localStorage', name: 'Yerel Depolama', status: 'critical', value: pct, unit: '%', detail: 'Yazma başarısız — depolama dolu!', checkedAt };
     }
 
@@ -107,6 +108,7 @@ function checkLocalStorage(): HealthMetric {
       checkedAt,
     };
   } catch {
+    logger.warn("healthCheck", "localStorage okuma hatası");
     return { id: 'localStorage', name: 'Yerel Depolama', status: 'critical', value: '?', detail: 'localStorage erişim hatası', checkedAt };
   }
 }

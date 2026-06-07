@@ -48,6 +48,7 @@ async function loadKeysFromFirebase(): Promise<AiKeys & { state: KeyState }> {
       state: "ok",
     };
   } catch {
+    console.warn("aiKeys", "loadKeysFromFirebase: Firebase key yüklenemedi");
     return { ...EMPTY_KEYS, state: "unavailable" };
   }
 }
@@ -64,6 +65,7 @@ async function saveKeysToFirebase(keys: AiKeys): Promise<boolean> {
       updatedAt: new Date().toISOString(),
     });
   } catch {
+    console.warn("aiKeys", "saveKeysToFirebase: Firebase key kaydedilemedi");
     return false;
   }
 }

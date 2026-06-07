@@ -83,6 +83,7 @@ async function loadPatterns(): Promise<LearnedPattern> {
         });
     });
   } catch {
+    console.warn("offlineAI", "loadPatterns: IndexedDB yüklenemedi, varsayılan döndürülüyor");
     return {
       columnNamePatterns: {},
       keyColumnPreferences: {},

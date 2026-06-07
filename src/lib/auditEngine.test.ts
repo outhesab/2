@@ -5,16 +5,10 @@
  * Test framework: Vitest + fast-check
  */
 
-import type { AuditEntry, Cari, DB, KasaEntry, RuleViolation } from "@/types";
-import * as fc from "fast-check";
-import { beforeEach, describe, expect, it } from "vitest";
-import {
-  computeDiff,
-  createAuditEntry,
-  getSessionId,
-  runFullAudit,
-  trimAuditLog,
-} from "./auditEngine";
+import type { AuditEntry, DB, KasaEntry, RuleViolation } from '@/types';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { computeDiff, createAuditEntry, getSessionId, runFullAudit, trimAuditLog } from './auditEngine';
 
 // ─── Test Yardımcıları ────────────────────────────────────────────────────────
 
@@ -28,7 +22,7 @@ function makeDB(overrides: Partial<DB> = {}): DB {
     orders: [],
     cari: [],
     kasa: [],
-    kasalar: [{ id: "nakit", name: "Nakit", icon: "💵" }],
+    kasalar: [{ id: 'nakit', name: 'Nakit', icon: '💵' }],
     bankTransactions: [],
     matchRules: [],
     monitorRules: [],
@@ -43,7 +37,7 @@ function makeDB(overrides: Partial<DB> = {}): DB {
     returns: [],
     _activityLog: [],
     _auditLog: [],
-    company: { id: "c1", createdAt: now },
+    company: { id: 'c1', createdAt: now },
     settings: {},
     pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
     ortakEmanetler: [],
@@ -58,25 +52,11 @@ function makeDB(overrides: Partial<DB> = {}): DB {
 function makeKasaEntry(overrides: Partial<KasaEntry> = {}): KasaEntry {
   const now = new Date().toISOString();
   return {
-    id: "k1",
-    type: "gelir",
-    category: "satis",
+    id: 'k1',
+    type: 'gelir',
+    category: 'satis',
     amount: 500,
-    kasa: "nakit",
-    deleted: false,
-    createdAt: now,
-    updatedAt: now,
-    ...overrides,
-  };
-}
-
-function _makeCariHelper(overrides: Partial<Cari> = {}): Cari {
-  const now = new Date().toISOString();
-  return {
-    id: "cari1",
-    name: "Test Müşteri",
-    type: "musteri",
-    balance: 0,
+    kasa: 'nakit',
     deleted: false,
     createdAt: now,
     updatedAt: now,
@@ -87,10 +67,10 @@ function _makeCariHelper(overrides: Partial<Cari> = {}): Cari {
 function makeAuditEntry(overrides: Partial<AuditEntry> = {}): AuditEntry {
   return {
     id: `ae_${Math.random().toString(36).slice(2)}`,
-    action: "save",
-    entity: "DB",
-    sessionId: "test-session",
-    status: "applied",
+    action: 'save',
+    entity: 'DB',
+    sessionId: 'test-session',
+    status: 'applied',
     time: new Date().toISOString(),
     ...overrides,
   };
@@ -98,15 +78,15 @@ function makeAuditEntry(overrides: Partial<AuditEntry> = {}): AuditEntry {
 
 // ─── computeDiff Testleri ─────────────────────────────────────────────────────
 
-describe("computeDiff", () => {
+describe('computeDiff', () => {
   it("değişen alanlar diff'te yer alır", () => {
     const prev = makeDB({ products: [] });
     const next = makeDB({
       products: [
         {
-          id: "p1",
-          name: "Ürün",
-          category: "soba",
+          id: 'p1',
+          name: 'Ürün',
+          category: 'soba',
           cost: 100,
           price: 150,
           stock: 10,
@@ -118,8 +98,8 @@ describe("computeDiff", () => {
       ],
     });
     const { prevValue, nextValue } = computeDiff(prev, next);
-    expect(prevValue).toHaveProperty("products");
-    expect(nextValue).toHaveProperty("products");
+    expect(prevValue).toHaveProperty('products');
+    expect(nextValue).toHaveProperty('products');
   });
 
   it("değişmeyen alanlar diff'te yer almaz", () => {
@@ -133,11 +113,11 @@ describe("computeDiff", () => {
     const prev = makeDB({ _auditLog: [] });
     const next = makeDB({ _auditLog: [makeAuditEntry()] });
     const { prevValue, nextValue } = computeDiff(prev, next);
-    expect(prevValue).not.toHaveProperty("_auditLog");
-    expect(nextValue).not.toHaveProperty("_auditLog");
+    expect(prevValue).not.toHaveProperty('_auditLog');
+    expect(nextValue).not.toHaveProperty('_auditLog');
   });
 
-  it("hata durumunda boş diff döner", () => {
+  it('hata durumunda boş diff döner', () => {
     // null geçilse bile exception fırlatmamalı
     expect(() => computeDiff(null as unknown as DB, makeDB())).not.toThrow();
   });
@@ -145,87 +125,87 @@ describe("computeDiff", () => {
 
 // ─── createAuditEntry Testleri ────────────────────────────────────────────────
 
-describe("createAuditEntry", () => {
-  it("applied durumu için doğru status üretir", () => {
+describe('createAuditEntry', () => {
+  it('applied durumu için doğru status üretir', () => {
     const db = makeDB();
     const entry = createAuditEntry({
-      action: "save",
-      entity: "DB",
+      action: 'save',
+      entity: 'DB',
       prevDB: db,
       nextDB: db,
-      status: "applied",
+      status: 'applied',
     });
-    expect(entry.status).toBe("applied");
+    expect(entry.status).toBe('applied');
     expect(entry.violations).toBeUndefined();
   });
 
-  it("blocked durumu için violations içerir", () => {
+  it('blocked durumu için violations içerir', () => {
     const db = makeDB();
     const violations: RuleViolation[] = [
       {
-        ruleId: "negative_stock",
-        ruleName: "Negatif Stok",
-        message: "Stok negatif",
-        severity: "block",
+        ruleId: 'negative_stock',
+        ruleName: 'Negatif Stok',
+        message: 'Stok negatif',
+        severity: 'block',
       },
     ];
     const entry = createAuditEntry({
-      action: "save",
-      entity: "DB",
+      action: 'save',
+      entity: 'DB',
       prevDB: db,
       nextDB: db,
-      status: "blocked",
+      status: 'blocked',
       violations,
     });
-    expect(entry.status).toBe("blocked");
+    expect(entry.status).toBe('blocked');
     expect(entry.violations).toHaveLength(1);
-    expect(entry.violations![0].ruleId).toBe("negative_stock");
+    expect(entry.violations![0].ruleId).toBe('negative_stock');
   });
 
-  it("warned durumu için doğru status üretir", () => {
+  it('warned durumu için doğru status üretir', () => {
     const db = makeDB();
     const violations: RuleViolation[] = [
       {
-        ruleId: "duplicate_transaction",
-        ruleName: "Mükerrer",
-        message: "Mükerrer işlem",
-        severity: "warn",
+        ruleId: 'duplicate_transaction',
+        ruleName: 'Mükerrer',
+        message: 'Mükerrer işlem',
+        severity: 'warn',
       },
     ];
     const entry = createAuditEntry({
-      action: "save",
-      entity: "DB",
+      action: 'save',
+      entity: 'DB',
       prevDB: db,
       nextDB: db,
-      status: "warned",
+      status: 'warned',
       violations,
     });
-    expect(entry.status).toBe("warned");
+    expect(entry.status).toBe('warned');
   });
 
-  it("gerekli alanları içerir (id, time, sessionId)", () => {
+  it('gerekli alanları içerir (id, time, sessionId)', () => {
     const db = makeDB();
     const entry = createAuditEntry({
-      action: "test",
-      entity: "DB",
+      action: 'test',
+      entity: 'DB',
       prevDB: db,
       nextDB: db,
-      status: "applied",
+      status: 'applied',
     });
-    expect(typeof entry.id).toBe("string");
+    expect(typeof entry.id).toBe('string');
     expect(entry.id.length).toBeGreaterThan(0);
-    expect(typeof entry.time).toBe("string");
-    expect(typeof entry.sessionId).toBe("string");
+    expect(typeof entry.time).toBe('string');
+    expect(typeof entry.sessionId).toBe('string');
   });
 
-  it("boş violations dizisi → violations undefined olur", () => {
+  it('boş violations dizisi → violations undefined olur', () => {
     const db = makeDB();
     const entry = createAuditEntry({
-      action: "save",
-      entity: "DB",
+      action: 'save',
+      entity: 'DB',
       prevDB: db,
       nextDB: db,
-      status: "applied",
+      status: 'applied',
       violations: [],
     });
     expect(entry.violations).toBeUndefined();
@@ -234,37 +214,29 @@ describe("createAuditEntry", () => {
 
 // ─── trimAuditLog Testleri ────────────────────────────────────────────────────
 
-describe("trimAuditLog", () => {
-  it("500 kayıt sınırını aşmaz", () => {
-    const entries = Array.from({ length: 600 }, (_, i) =>
-      makeAuditEntry({ id: `ae_${i}` }),
-    );
+describe('trimAuditLog', () => {
+  it('500 kayıt sınırını aşmaz', () => {
+    const entries = Array.from({ length: 600 }, (_, i) => makeAuditEntry({ id: `ae_${i}` }));
     const trimmed = trimAuditLog(entries);
     expect(trimmed.length).toBeLessThanOrEqual(500);
   });
 
   it("500'den az kayıt → değişmeden döner", () => {
-    const entries = Array.from({ length: 100 }, (_, i) =>
-      makeAuditEntry({ id: `ae_${i}` }),
-    );
+    const entries = Array.from({ length: 100 }, (_, i) => makeAuditEntry({ id: `ae_${i}` }));
     const trimmed = trimAuditLog(entries);
     expect(trimmed).toHaveLength(100);
   });
 
-  it("500 kayıt aşıldığında en eski kayıtlar silinir (ilk kayıtlar korunur)", () => {
-    const entries = Array.from({ length: 600 }, (_, i) =>
-      makeAuditEntry({ id: `ae_${i}` }),
-    );
+  it('500 kayıt aşıldığında en eski kayıtlar silinir (ilk kayıtlar korunur)', () => {
+    const entries = Array.from({ length: 600 }, (_, i) => makeAuditEntry({ id: `ae_${i}` }));
     const trimmed = trimAuditLog(entries);
     // İlk 500 kayıt korunmalı (en yeni = başta)
-    expect(trimmed[0].id).toBe("ae_0");
-    expect(trimmed[499].id).toBe("ae_499");
+    expect(trimmed[0].id).toBe('ae_0');
+    expect(trimmed[499].id).toBe('ae_499');
   });
 
-  it("tam 500 kayıt → değişmeden döner", () => {
-    const entries = Array.from({ length: 500 }, (_, i) =>
-      makeAuditEntry({ id: `ae_${i}` }),
-    );
+  it('tam 500 kayıt → değişmeden döner', () => {
+    const entries = Array.from({ length: 500 }, (_, i) => makeAuditEntry({ id: `ae_${i}` }));
     const trimmed = trimAuditLog(entries);
     expect(trimmed).toHaveLength(500);
   });
@@ -272,24 +244,24 @@ describe("trimAuditLog", () => {
 
 // ─── getSessionId Testleri ────────────────────────────────────────────────────
 
-describe("getSessionId", () => {
+describe('getSessionId', () => {
   beforeEach(() => {
     sessionStorage.clear();
   });
 
-  it("string döner", () => {
+  it('string döner', () => {
     const id = getSessionId();
-    expect(typeof id).toBe("string");
+    expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
   });
 
-  it("aynı oturumda aynı ID döner", () => {
+  it('aynı oturumda aynı ID döner', () => {
     const id1 = getSessionId();
     const id2 = getSessionId();
     expect(id1).toBe(id2);
   });
 
-  it("sessionStorage temizlenince yeni ID üretir", () => {
+  it('sessionStorage temizlenince yeni ID üretir', () => {
     const id1 = getSessionId();
     sessionStorage.clear();
     const id2 = getSessionId();
@@ -299,8 +271,8 @@ describe("getSessionId", () => {
 
 // ─── runFullAudit Testleri ────────────────────────────────────────────────────
 
-describe("runFullAudit", () => {
-  it("boş DB → sıfır istatistik döner", () => {
+describe('runFullAudit', () => {
+  it('boş DB → sıfır istatistik döner', () => {
     const db = makeDB();
     const report = runFullAudit(db);
     expect(report.totalEntries).toBe(0);
@@ -311,13 +283,13 @@ describe("runFullAudit", () => {
     expect(report.anomalies).toHaveLength(0);
   });
 
-  it("_auditLog istatistiklerini doğru hesaplar", () => {
+  it('_auditLog istatistiklerini doğru hesaplar', () => {
     const db = makeDB({
       _auditLog: [
-        makeAuditEntry({ status: "applied" }),
-        makeAuditEntry({ status: "applied" }),
-        makeAuditEntry({ status: "blocked" }),
-        makeAuditEntry({ status: "warned" }),
+        makeAuditEntry({ status: 'applied' }),
+        makeAuditEntry({ status: 'applied' }),
+        makeAuditEntry({ status: 'blocked' }),
+        makeAuditEntry({ status: 'warned' }),
       ],
     });
     const report = runFullAudit(db);
@@ -327,27 +299,25 @@ describe("runFullAudit", () => {
     expect(report.warnedCount).toBe(1);
   });
 
-  it("TRANSACTION_LIMIT aşımı → anomaly ve riskFlag üretir", () => {
+  it('TRANSACTION_LIMIT aşımı → anomaly ve riskFlag üretir', () => {
     const db = makeDB({
-      kasa: [makeKasaEntry({ id: "k_big", amount: 150_000, kasa: "nakit" })],
+      kasa: [makeKasaEntry({ id: 'k_big', amount: 150_000, kasa: 'nakit' })],
     });
     const report = runFullAudit(db);
     expect(report.anomalies.length).toBeGreaterThan(0);
-    expect(report.riskFlags.some((f) => f.includes("TRANSACTION_LIMIT"))).toBe(
-      true,
-    );
+    expect(report.riskFlags.some((f) => f.includes('TRANSACTION_LIMIT'))).toBe(true);
   });
 
-  it("AuditReport gerekli alanları içerir", () => {
+  it('AuditReport gerekli alanları içerir', () => {
     const db = makeDB();
     const report = runFullAudit(db);
-    expect(report).toHaveProperty("anomalies");
-    expect(report).toHaveProperty("balanceDrifts");
-    expect(report).toHaveProperty("riskFlags");
-    expect(report).toHaveProperty("totalEntries");
-    expect(report).toHaveProperty("appliedCount");
-    expect(report).toHaveProperty("blockedCount");
-    expect(report).toHaveProperty("warnedCount");
+    expect(report).toHaveProperty('anomalies');
+    expect(report).toHaveProperty('balanceDrifts');
+    expect(report).toHaveProperty('riskFlags');
+    expect(report).toHaveProperty('totalEntries');
+    expect(report).toHaveProperty('appliedCount');
+    expect(report).toHaveProperty('blockedCount');
+    expect(report).toHaveProperty('warnedCount');
   });
 });
 
@@ -358,13 +328,9 @@ const arbAuditEntry = () =>
   fc.record({
     id: fc.uuid(),
     action: fc.string({ minLength: 1, maxLength: 20 }),
-    entity: fc.constant("DB"),
+    entity: fc.constant('DB'),
     sessionId: fc.uuid(),
-    status: fc.oneof(
-      fc.constant("applied" as const),
-      fc.constant("blocked" as const),
-      fc.constant("warned" as const),
-    ),
+    status: fc.oneof(fc.constant('applied' as const), fc.constant('blocked' as const), fc.constant('warned' as const)),
     time: fc.constant(new Date().toISOString()),
   });
 
@@ -378,20 +344,16 @@ const arbDB = () =>
 
 // Property 7: AuditEntry.status işlem sonucunu yansıtır
 // Feature: rule-engine-audit, Property 7: AuditEntry status reflects transaction outcome
-describe("Property 7: AuditEntry status reflects transaction outcome", () => {
-  it("createAuditEntry status parametresini doğru yansıtır", () => {
+describe('Property 7: AuditEntry status reflects transaction outcome', () => {
+  it('createAuditEntry status parametresini doğru yansıtır', () => {
     fc.assert(
       fc.property(
-        fc.oneof(
-          fc.constant("applied" as const),
-          fc.constant("blocked" as const),
-          fc.constant("warned" as const),
-        ),
+        fc.oneof(fc.constant('applied' as const), fc.constant('blocked' as const), fc.constant('warned' as const)),
         (status) => {
           const db = makeDB();
           const entry = createAuditEntry({
-            action: "save",
-            entity: "DB",
+            action: 'save',
+            entity: 'DB',
             prevDB: db,
             nextDB: db,
             status,
@@ -406,15 +368,12 @@ describe("Property 7: AuditEntry status reflects transaction outcome", () => {
 
 // Property 8: computeDiff yalnızca değişen alanları içerir
 // Feature: rule-engine-audit, Property 8: computeDiff only includes changed top-level fields
-describe("Property 8: computeDiff only includes changed top-level fields", () => {
-  it("aynı DB için diff boş döner", () => {
+describe('Property 8: computeDiff only includes changed top-level fields', () => {
+  it('aynı DB için diff boş döner', () => {
     fc.assert(
       fc.property(arbDB(), (db) => {
         const { prevValue, nextValue } = computeDiff(db, db);
-        return (
-          Object.keys(prevValue).length === 0 &&
-          Object.keys(nextValue).length === 0
-        );
+        return Object.keys(prevValue).length === 0 && Object.keys(nextValue).length === 0;
       }),
       { numRuns: 100 },
     );
@@ -423,16 +382,13 @@ describe("Property 8: computeDiff only includes changed top-level fields", () =>
 
 // Property 9: _auditLog 500 kayıt sınırını aşmaz
 // Feature: rule-engine-audit, Property 9: _auditLog never exceeds 500 entries
-describe("Property 9: _auditLog never exceeds 500 entries", () => {
-  it("trimAuditLog çıktısı her zaman <= 500", () => {
+describe('Property 9: _auditLog never exceeds 500 entries', () => {
+  it('trimAuditLog çıktısı her zaman <= 500', () => {
     fc.assert(
-      fc.property(
-        fc.array(arbAuditEntry(), { minLength: 0, maxLength: 1000 }),
-        (entries) => {
-          const trimmed = trimAuditLog(entries as AuditEntry[]);
-          return trimmed.length <= 500;
-        },
-      ),
+      fc.property(fc.array(arbAuditEntry(), { minLength: 0, maxLength: 1000 }), (entries) => {
+        const trimmed = trimAuditLog(entries as AuditEntry[]);
+        return trimmed.length <= 500;
+      }),
       { numRuns: 100 },
     );
   });

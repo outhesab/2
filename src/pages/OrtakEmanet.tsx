@@ -2,7 +2,7 @@ import { useToast } from "@/components/Toast";
 import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { DB, OrtakEmanet as OrtakEmanetType } from "@/types";
 import { useMemo, useState } from "react";
-import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers";
+import { cardStyle, mutedText, sectionTitleStyle, rowStyle, Metric } from "@/pages/pageHelpers.tsx";
 
 interface Props {
   db: DB;

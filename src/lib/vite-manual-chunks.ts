@@ -13,6 +13,10 @@
  * 5. framer-motion      → 'animations'
  * 6. lucide-react       → 'icons'
  * 7. xlsx               → 'excel'
+ * 8. firebase           → 'firebase'
+ * 9. dexie              → 'dexie'
+ * 10. zustand / mitt     → 'state'
+ * 11. exceljs            → 'exceljs'
  */
 export function manualChunks(id: string): string | undefined {
   // Vendor chunk
@@ -31,6 +35,12 @@ export function manualChunks(id: string): string | undefined {
   if (id.includes('firebase')) return 'firebase';
   // xlsx Excel processing chunk
   if (id.includes('xlsx')) return 'excel';
+  // exceljs chunk (lazy loaded, ~1MB)
+  if (id.includes('exceljs')) return 'exceljs';
+  // Dexie IndexedDB chunk
+  if (id.includes('dexie')) return 'dexie';
+  // State management (zustand, mitt)
+  if (id.includes('zustand') || id.includes('mitt')) return 'state';
   // sonner toast chunk
   if (id.includes('sonner')) return 'ui';
   return undefined;

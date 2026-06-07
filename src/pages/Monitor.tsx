@@ -12,7 +12,7 @@ import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { AuditEntry, DB, MonitorRule } from "@/types";
 import { useMemo, useState } from "react";
 import { lbl, inp } from "@/lib/formStyles";
-import { ModalActions, CheckboxField, TabButton } from "./pageHelpers";
+import { ModalActions, CheckboxField, TabButton } from "./pageHelpers.tsx";
 
 interface Props {
   db: DB;
