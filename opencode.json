@@ -1,13 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
-
+  "model": "openrouter/free",
+  "small_model": "meta-llama/llama-3.3-70b-instruct:free",
+  "default_agent": "coder",
   "skills": {
     "paths": [".opencode/skills"]
   },
-
-  "model": "opencode/deepseek-v4-flash-free",
-  "small_model": "ollama/qwen2.5-coder:1.5b",
-
+  "provider": {
+    "openrouter": {
+      "options": {
+        "apiKey": "${OPENROUTER_API_KEY}"
+      }
+    }
+  },
+  "disabled_providers": ["openai", "gemini", "github-copilot", "groq", "anthropic"],
   "instructions": [
     "PAKET YÖNETİCİSİ: Sadece pnpm kullan. npm veya yarn kullanma.",
     "CHANGELOG ZORUNLULUĞU: Her kaynak kod değişikliğinden sonra src/lib/changelog.ts dosyasına mutlaka yeni bir sürüm girişi ekle.",
@@ -16,138 +22,77 @@
     "MOBİL: Capacitor 8 ile Android APK. pnpm run cap:android ile build al.",
     ".opencode/MEMORY.md"
   ],
-
   "agent": {
-    "hizli": {
-      "model": "opencode/deepseek-v4-flash-free",
-      "mode": "subagent",
-      "description": "Hızlı yanıt gerektiren basit görevler için çevik ajan. API gerekmez.",
-      "prompt": "You are a fast and concise assistant. Give very brief answers. No explanations unless asked. Be direct and to the point."
-    },
-    "plan": {
-      "model": "opencode/deepseek-v4-flash-free",
-      "mode": "subagent",
-      "description": "Mimari planlama, proje analizi ve tasarım kararları için uzman ajan. API gerekmez.",
+    "architect": {
+      "model": "qwen/qwen3-next-80b-a3b-instruct:free",
+      "mode": "primary",
+      "description": "Sistem mimarisi, uzun vadeli planlama, 80B MoE ile büyük codebase anlama. Derin analiz ve reasoning.",
       "prompt": "You are a senior software architect. Analyze requirements deeply, consider trade-offs, design scalable solutions, and provide structured implementation plans."
     },
-    "kod-gozden-gecir": {
-      "model": "opencode/deepseek-v4-flash-free",
-      "mode": "subagent",
-      "description": "Kod inceleme, kalite kontrol ve hata avcısı. API gerekmez.",
-      "prompt": "You are a strict code reviewer. Focus on: security vulnerabilities, performance issues, TypeScript type safety, code style consistency, and logic errors. Be thorough but constructive."
+    "coder": {
+      "model": "qwen/qwen3-coder:free",
+      "mode": "primary",
+      "description": "En güçlü free coding model. 1M context, native tool calling, SOTA code generation. Çok dosyalı işlemler için king.",
+      "prompt": "You are an expert coding assistant. Focus on clean code, best practices, and efficient implementation. Handle multi-file changes with care."
     },
-    "test-uzmani": {
-      "model": "opencode/deepseek-v4-flash-free",
+    "brainstorm": {
+      "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Test yazma uzmanı — Vitest + fast-check ile property-based testler. API gerekmez.",
-      "prompt": "You are a testing expert. Write Vitest tests with fast-check property-based testing. Follow the project's prevDB → islem → nextDB pattern. Cover edge cases."
+      "description": "Fikir alışverişi, araştırma, router ile en uygun free modeli otomatik seçer. Çeşitlilik sağlar.",
+      "prompt": "You are a creative brainstorming partner. Explore ideas, research best practices, and propose innovative solutions."
     },
-
-    "yerel-lmstudio": {
-      "model": "lmstudio/phi-3.5-mini-instruct",
+    "reviewer": {
+      "model": "meta-llama/llama-3.3-70b-instruct:free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Phi 3.5) — offline. LM Studio sunucu çalışıyor olmalı.",
-      "prompt": "You are a local coding assistant running on LM Studio. Be concise and practical."
+      "description": "Hızlı, güvenilir kod review. Güvenlik, performans, best practice odaklı.",
+      "prompt": "You are a strict code reviewer. Focus on: security, performance, code style, and logic errors."
     },
-    "yerel-lmstudio-gucludi": {
-      "model": "lmstudio/qwen/qwen3-4b-thinking-2507",
+    "orchestrator": {
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Qwen3 4B Thinking) — offline. Reasoning destekli.",
-      "prompt": "You are a powerful local coding assistant running on LM Studio. Use reasoning for complex tasks. Provide thorough analysis."
+      "description": "Multi-agent koordinasyonu, kompleks workflow orkestrasyonu.",
+      "prompt": "You are an orchestrator. Manage agent tasks, decompose complex workflows, and ensure efficient project progress."
     },
-    "yerel": {
-      "model": "ollama/qwen2.5-coder:7b",
+    "visionary": {
+      "model": "google/gemma-4-31b-it:free",
       "mode": "subagent",
-      "description": "Yerel Ollama Qwen2.5 Coder 7B — tamamen offline, API gerekmez. Ollama çalışıyor olmalı."
+      "description": "Görsel anlama, multimodal analiz. Screenshot'tan kod, diagram anlama, UI review.",
+      "prompt": "You are a multimodal assistant. Analyze images, UI screenshots, and diagrams to provide actionable insights or code."
     },
-    "yerel-hizli": {
-      "model": "ollama/qwen2.5-coder:1.5b",
+    "agentic-coder": {
+      "model": "poolside/laguna-m.1:free",
       "mode": "subagent",
-      "description": "Yerel Ollama Qwen2.5 Coder 1.5B — çok hızlı, offline. Ollama çalışıyor olmalı.",
-      "prompt": "You are a fast local coding assistant. Give concise answers. Focus on practical solutions."
+      "description": "Tool calling + reasoning birleşik. Agentic coding workflow'lar: otomatik refactor, PR automation.",
+      "prompt": "You are an agentic coder. Use tools to perform automated refactoring, test generation, and pipeline tasks."
+    },
+    "power-coder": {
+      "model": "opencode-go/minimax-m2.7",
+      "mode": "primary",
+      "description": "Günlük yoğun coding için opencode-go quota'sı. SWE-Bench 80.2%.",
+      "prompt": "You are a high-performance coding agent running on opencode-go. Focus on rapid implementation and testing."
+    },
+    "power-planner": {
+      "model": "opencode-go/qwen3.6-plus",
+      "mode": "subagent",
+      "description": "1M context, zorunlu CoT, guaranteed capacity.",
+      "prompt": "You are a power-user planning agent with 1M context. Provide deep analytical insights."
+    },
+    "power-reasoner": {
+      "model": "opencode-go/glm-5.1",
+      "mode": "subagent",
+      "description": "En güçlü reasoning (math/logic). Zor problemler için.",
+      "prompt": "You are an advanced reasoning agent. Solve complex logic, mathematics, and architectural problems."
+    },
+    "power-frontend": {
+      "model": "opencode-go/kimi-k2.6",
+      "mode": "subagent",
+      "description": "Frontend/UI, multimodal, multi-agent orchestration.",
+      "prompt": "You are a frontend/UI specialist agent. Focus on component generation, UI design, and design systems."
     }
   },
-
-  "provider": {
-    "lmstudio": {
-      "id": "lmstudio",
-      "npm": "@ai-sdk/openai-compatible",
-      "api": "http://127.0.0.1:1234/v1",
-      "options": {
-        "apiKey": "sk-lm-6qQg7mXn:LAT5ZLdSEe0irHlCboPe"
-      },
-      "models": {
-        "qwen/qwen3-4b-thinking-2507": {
-          "name": "Qwen3 4B Thinking",
-          "family": "qwen",
-          "tool_call": false,
-          "reasoning": true,
-          "temperature": true,
-          "vision": false,
-          "limit": { "context": 32768, "output": 8192 },
-          "cost": { "input": 0, "output": 0 }
-        },
-        "qwen/qwen3-vl-4b": {
-          "name": "Qwen3 VL 4B (Vision)",
-          "family": "qwen",
-          "tool_call": false,
-          "reasoning": false,
-          "temperature": true,
-          "vision": true,
-          "limit": { "context": 32768, "output": 8192 },
-          "cost": { "input": 0, "output": 0 }
-        },
-        "phi-3.5-mini-instruct": {
-          "name": "Phi 3.5 Mini Instruct",
-          "family": "phi",
-          "tool_call": false,
-          "reasoning": false,
-          "temperature": true,
-          "vision": false,
-          "limit": { "context": 4096, "output": 2048 },
-          "cost": { "input": 0, "output": 0 }
-        },
-        "liquid/lfm2-1.2b": {
-          "name": "LFM2 1.2B",
-          "family": "lfm",
-          "tool_call": false,
-          "reasoning": false,
-          "temperature": true,
-          "vision": false,
-          "limit": { "context": 2048, "output": 1024 },
-          "cost": { "input": 0, "output": 0 }
-        }
-      }
-    },
-    "ollama": {
-      "id": "ollama",
-      "npm": "@ai-sdk/openai-compatible",
-      "api": "http://localhost:11434/v1",
-      "options": {
-        "apiKey": "ollama"
-      },
-      "models": {
-        "qwen2.5-coder:7b": {
-          "id": "qwen2.5-coder:7b",
-          "name": "Qwen2.5 Coder 7B",
-          "family": "qwen",
-          "tool_call": true,
-          "reasoning": false,
-          "temperature": true,
-          "limit": { "context": 32768, "output": 8192 },
-          "cost": { "input": 0, "output": 0 }
-        },
-        "qwen2.5-coder:1.5b": {
-          "id": "qwen2.5-coder:1.5b",
-          "name": "Qwen2.5 Coder 1.5B",
-          "family": "qwen",
-          "tool_call": true,
-          "reasoning": false,
-          "temperature": true,
-          "limit": { "context": 32768, "output": 8192 },
-          "cost": { "input": 0, "output": 0 }
-        }
-      }
-    }
+  "compaction": {
+    "auto": true,
+    "tail_turns": 20,
+    "reserved": 15000
   }
 }

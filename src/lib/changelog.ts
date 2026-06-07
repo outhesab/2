@@ -20,6 +20,69 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.16.0',
+    date: '7 Haziran 2026',
+    title: 'OpenRouter Multi-Agent Yapılandırması',
+    summary:
+      "OpenRouter free tier ile 11 agent tanımlandı (7 free, 4 power). LMStudio ve Ollama provider'ları kaldırıldı. Compaction ayarları optimize edildi.",
+    changes: [
+      { type: 'yeni', text: 'OpenRouter provider eklendi (free tier modeller)' },
+      {
+        type: 'yeni',
+        text: '11 agent tanımlandı: architect, coder, brainstorm, reviewer, orchestrator, visionary, agentic-coder (free) + power-coder, power-planner, power-reasoner, power-frontend (opencode-go)',
+      },
+      { type: 'kaldirildi', text: "LMStudio ve Ollama provider'ları kaldırıldı" },
+      { type: 'iyilestirme', text: 'Compaction ayarları: tail_turns 20, reserved 15000' },
+    ],
+  },
+  {
+    version: '3.15.4',
+    date: '8 Haziran 2026',
+    title: 'CI/CD Workflow Güvenlik ve Güvenilirlik Düzeltmeleri',
+    summary:
+      "GitHub Actions workflow'larında 6 kritik sorun düzeltildi: block-new-branch tüm branch'leri siliyordu, quality-gate PR'lerde çalışmıyordu, deploy/build APK kalite kontrolünü beklemeden çalışıyordu, build-apk Gradle izin eksikliği vardı, pnpm PATH'de bulunamıyordu, Node.js 20 deprecation uyarısı vardı.",
+    changes: [
+      {
+        type: 'duzeltme',
+        text: "block-new-branch.yml: if koşulu düzeltildi — artık sadece dev/main dışındaki branch'leri engelliyor, main branch'ini silmiyor",
+      },
+      {
+        type: 'duzeltme',
+        text: 'quality-gate.yml: push + pull_request trigger eklendi — PR açıldığında da lint/test/build çalışıyor',
+      },
+      {
+        type: 'duzeltme',
+        text: 'deploy.yml + build-apk.yml: "needs: quality" bağımlılığı eklendi — deploy ve APK build önce kalite kontrolünden geçiyor',
+      },
+      { type: 'duzeltme', text: 'build-apk.yml: Gradle executable izni (chmod +x) ve android/ dizin kontrolü eklendi' },
+      {
+        type: 'duzeltme',
+        text: "build-apk.yml: setup-android action kaldırıldı — Capacitor kendi Gradle wrapper'ını kullanıyor, ek Android SDK gerekmez",
+      },
+      {
+        type: 'duzeltme',
+        text: "Tüm workflow'lar: pnpm/action-setup -> setup-node sıralaması düzeltildi, run_install: false eklendi — pnpm PATH'te bulunamama hatası giderildi",
+      },
+      {
+        type: 'duzeltme',
+        text: "Tüm workflow'lar: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 env kaldırıldı — Node.js 20 deprecation uyarısı giderildi",
+      },
+    ],
+  },
+  {
+    version: '3.15.3',
+    date: '7 Haziran 2026',
+    title: "Güvenlik — Firebase API Key URL Query'den Çıkarıldı",
+    summary:
+      "userManager.ts'teki Firebase REST API çağrıları Firebase SDK'ya taşındı. API key artık URL'de query parameter olarak gönderilmiyor, SDK üzerinden güvenli şekilde iletilir.",
+    changes: [
+      {
+        type: 'iyilestirme',
+        text: "userManager.ts: loadUsers/saveUsers REST API → Firebase SDK (readDoc/writeDoc) — API key URL query parameter'dan kaldırıldı",
+      },
+    ],
+  },
+  {
     version: '3.15.2',
     date: '7 Haziran 2026',
     title: 'StatCard SalesHelpers → pageHelpers taşıması',
