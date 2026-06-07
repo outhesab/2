@@ -23,6 +23,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [3.7.2] - 7 Haziran 2026
+
+### Hata Düzeltmeleri
+- Hızlı login (Demo Hesap) stale closure bug'ı giderildi: `handleLogin` artık parametre alıyor, demo butonu direkt `handleLogin('demo29605', 'demo1234')` çağırıyor
+
+---
+
 ## [3.7.0] - 28 Mayıs 2026
 
 ### Eklenen

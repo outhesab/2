@@ -138,9 +138,11 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
   const doShake = () => { setShake(true); setTimeout(() => setShake(false), 600); };
 
-  const handleLogin = async () => {
-    if (!username.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
-    if (!pass.trim()) { setError('Şifre gerekli'); doShake(); return; }
+  const handleLogin = async (userOverride?: string, passOverride?: string) => {
+    const u = userOverride ?? username;
+    const p = passOverride ?? pass;
+    if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
+    if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
     setLoading(true); setError('');
     const users = await loadUsers();
     if (users.length === 0) {
@@ -149,7 +151,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
       setLoading(false);
       return;
     }
-    const user = await loginUser(username.trim(), pass);
+    const user = await loginUser(u.trim(), p);
     if (user) {
       setSuccess(true);
       setTimeout(() => onLogin(user, remember), 900);
@@ -329,11 +331,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               {!registerMode && (
                 <button
                   className="login-demo-btn"
-                  onClick={() => {
-                    setUsername('demo29605');
-                    setPass('demo1234');
-                    setTimeout(() => handleLogin(), 100);
-                  }}
+                  onClick={() => handleLogin('demo29605', 'demo1234')}
                   disabled={loading}
                 >
                   <Sparkles size={16} /> Demo Hesap ile Hızlı Giriş
