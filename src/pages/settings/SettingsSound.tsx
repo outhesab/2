@@ -1,33 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { SoundSettings, SoundTheme, SoundType } from '@/hooks/useSoundFeedback';
 import { Card } from '@/pages/SettingsCard';
 import { Button } from '@/components/ui/button';
-import { useDB } from '@/hooks/db/core';
+import { useDB } from '@/hooks/useDB';
 
 export function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType) => void }) {
   const { db, save } = useDB();
-  const [settings, setSettings] = useState<SoundSettings>(() => {
-    return db.soundSettings || { enabled: true, volume: 0.5, theme: 'standart' };
-  });
+
+  const settings = useMemo<SoundSettings>(() => {
+    const ss = (db as unknown as Record<string, unknown>).soundSettings as Partial<SoundSettings> | undefined;
+    return { enabled: true, volume: 0.5, theme: 'standart', ...(ss || {}) };
+  }, [db]);
+
   const [speechEnabled, setSpeechEnabled] = useState<boolean>(() => {
-    return db.soundSettings?.speechEnabled !== false;
+    const ss = (db as unknown as Record<string, unknown>).soundSettings as Record<string, unknown> | undefined;
+    return ss?.speechEnabled !== false;
   });
 
+  useEffect(() => {
+    const ss = (db as unknown as Record<string, unknown>).soundSettings as Record<string, unknown> | undefined;
+    setSpeechEnabled(ss?.speechEnabled !== false);
+  }, [db]);
+
   const updateSettings = (patch: Partial<SoundSettings>) => {
-    const next = { ...settings, ...patch };
-    setSettings(next);
-    save((prev) => ({ ...prev, soundSettings: next }));
+    save((prev) => ({
+      ...prev,
+      soundSettings: {
+        ...(((prev as unknown as Record<string, unknown>).soundSettings as Partial<SoundSettings>) || {}),
+        ...patch,
+      } as SoundSettings,
+    }));
   };
 
   const toggleSpeech = () => {
     const next = !speechEnabled;
-    setSpeechEnabled(next);
     save((prev) => ({
       ...prev,
       soundSettings: {
-        ...(prev.soundSettings || { enabled: true, volume: 0.5, theme: 'standart' }),
+        ...(((prev as unknown as Record<string, unknown>).soundSettings as Record<string, unknown>) || {}),
         speechEnabled: next,
-      },
+      } as unknown as SoundSettings,
     }));
     if (next && 'speechSynthesis' in window) {
       const u = new SpeechSynthesisUtterance('Sesli bildirim aktif edildi');
@@ -60,7 +72,7 @@ export function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType)
               <div className="text-foreground text-sm">Sesli Geri Bildirim</div>
               <div className="text-muted-foreground text-xs">İşlem seslerini açın veya kapatın</div>
             </div>
-            <Button
+            <button
               onClick={() => updateSettings({ enabled: !settings.enabled })}
               className="w-[52px] h-[28px] rounded-[14px] border-none cursor-pointer relative transition-all"
               style={{ background: settings.enabled ? 'var(--color-success)' : 'var(--text-dim)' }}
@@ -69,7 +81,7 @@ export function SoundSettingsPanel({ playSound }: { playSound: (type: SoundType)
                 className="w-5 h-5 rounded-full bg-[var(--bg-elevated)] absolute top-1 transition-all shadow-md"
                 style={{ left: settings.enabled ? 28 : 4 }}
               />
-            </Button>
+            </button>
           </div>
 
           <div>

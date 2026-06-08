@@ -119,6 +119,20 @@ function AppContent({
   const prevOnline = useRef(isOnline);
   const { showToast } = useToast();
 
+  // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue =
+        'PARSPEL: Devam eden işlemleriniz veya takip edilen loglarınız olabilir. Ayrılmak istediğinize emin misiniz?';
+      return e.returnValue;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   // UIPrefs değişikliklerini dinle (Settings'ten güncelleme gelince yansısın)
   useEffect(() => {
     const handler = () => setUiPrefs(loadUIPrefs());

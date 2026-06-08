@@ -135,7 +135,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
   ];
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto overflow-hidden">
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full">
         <TabsList className="flex-nowrap overflow-x-auto justify-start h-auto gap-1 bg-transparent p-0 mb-4 no-scrollbar">
           <TabsTrigger value="arayuz" className="whitespace-nowrap">

@@ -20,6 +20,25 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.4',
+    date: '8 Haziran 2026',
+    title: 'UI/UX Modernizasyonu — Gauge, Glassmorphism ve Kritik Düzeltmeler',
+    summary:
+      'AnomaliOneri SVG gauge modernizasyonu, Dashboard glassmorphism efektleri, App.tsx beforeunload koruması, encoding/Settings düzeltmeleri, SettingsSound spec compliance.',
+    changes: [
+      { type: 'iyilestirme', text: 'AnomaliOneri: PieChart → SVG gauge, gradient glow, CSS variable geçişi' },
+      {
+        type: 'iyilestirme',
+        text: 'Dashboard (5 sayfa): glassmorphism kart efektleri (backdrop-filter, blur, transition)',
+      },
+      { type: 'yeni', text: 'App.tsx: Tarayıcı sekmesi beforeunload koruması eklendi' },
+      { type: 'duzeltme', text: 'Settings.tsx: overflow düzeltildi (overflow-hidden + flex-nowrap)' },
+      { type: 'duzeltme', text: 'SettingsSound.tsx: relative import → @/ alias, localStorage → useDB()' },
+      { type: 'duzeltme', text: 'AnomaliOneri.tsx: JSX hatası düzeltildi (<div> tag kapatıldı)' },
+      { type: 'duzeltme', text: '15 sayfa taraması temiz (0 encoding hatası, 0 JS hatası)' },
+    ],
+  },
+  {
     version: '3.18.3',
     date: '7 Haziran 2026',
     title: 'Spec Compliance Düzeltmeleri',

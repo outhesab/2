@@ -11,6 +11,12 @@
       "options": {
         "apiKey": "${OPENROUTER_API_KEY}"
       }
+    },
+    "lmstudio": {
+      "options": {
+        "baseURL": "http://127.0.0.1:1234/v1",
+        "apiKey": "lm-studio"
+      }
     }
   },
   "disabled_providers": ["openai", "gemini", "github-copilot", "groq", "anthropic"],
@@ -88,6 +94,12 @@
       "mode": "subagent",
       "description": "Frontend/UI, multimodal, multi-agent orchestration.",
       "prompt": "You are a frontend/UI specialist agent. Focus on component generation, UI design, and design systems."
+    },
+    "hermes": {
+      "model": "lmstudio/qwen3-4b-thinking-2507",
+      "mode": "primary",
+      "description": "Hermes UI + LM Studio backend (Qwen3-4B-Thinking). Reasoning, coding, analysis.",
+      "prompt": "You are a helpful coding assistant running on local LM Studio via Hermes. Focus on clean code, best practices, and efficient implementation."
     }
   },
   "compaction": {

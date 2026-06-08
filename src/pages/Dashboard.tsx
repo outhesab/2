@@ -78,8 +78,11 @@ function StatCard({
       className={`dash-statcard${onClick ? ' clickable' : ''}`}
       style={{
         background: `linear-gradient(135deg, ${gradient})`,
-        border: `1px solid ${color}22`,
-        boxShadow: `0 2px 8px ${color}10`,
+        border: '1px solid var(--glass-border, rgba(255,255,255,0.06))',
+        boxShadow: `0 2px 8px ${color}10, var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))`,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <div className="dash-statcard-bg-icon">{icon}</div>
@@ -1261,9 +1264,21 @@ function WidgetCard({
 }) {
   return (
     <motion.div
-      whileHover={{ borderColor: 'var(--border-strong)', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+      whileHover={{
+        scale: 1.01,
+        borderColor: 'var(--border-strong)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+      }}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       className="dash-widget-card"
+      style={{
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        background: 'var(--glass-bg, rgba(255,255,255,0.9))',
+        border: '1px solid var(--glass-border, rgba(255,255,255,0.06))',
+        boxShadow: 'var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
     >
       <div className={`dash-widget-card-header${subtitle ? '' : ' no-sub'}`}>
         <div>
