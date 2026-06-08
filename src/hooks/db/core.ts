@@ -262,6 +262,9 @@ let _pendingDb: DB | null = null;
 function saveToStorage(db: DB): boolean {
   const t = logger.time('db', 'localStorage yaz');
   if (_isSaving) {
+    if (_pendingDb) {
+      logger.warn('db', 'Önceki bekleyen DB kaydı üzerine yazıldı — last-write-wins kayıp riski');
+    }
     _pendingDb = db;
     return false;
   }
@@ -362,7 +365,9 @@ export function useDB() {
         let next = updater(prev);
         (next as DB & { _lastSyncAt?: string })._lastSyncAt = new Date().toISOString();
         if (next.stockMovements && next.stockMovements.length > 1000) {
+          const before = next.stockMovements.length;
           next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
+          logger.warn('db', 'Stok hareketleri 1000 limiti aşıldı, eski kayıtlar kesildi', { before, after: 1000 });
         }
 
         const { violations, hasBlock, hasWarn } = validateAndClassify(

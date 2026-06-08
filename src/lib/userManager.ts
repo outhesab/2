@@ -24,6 +24,22 @@ export interface AppUser {
 
 async function loadUsersFromCache(): Promise<AppUser[]> {
   try {
+    // 1) IndexedDB'den dene (güvenlik iyileştirmesi — B4: hash'ler IndexedDB'de)
+    const snap = await indexedDb.snapshots.get('users_cache');
+    if (snap?.data) {
+      const raw = snap.data;
+      if (raw.startsWith('aes-gcm:')) {
+        const decrypted = await decrypt(raw.slice(8));
+        const parsed = JSON.parse(decrypted);
+        return Array.isArray(parsed) ? (parsed as AppUser[]) : [];
+      }
+    }
+  } catch {
+    logger.warn('userManager', 'IndexedDB kullanıcı önbelleği okunamadı, localStorage fallback');
+  }
+
+  // 2) localStorage fallback (migration / eski veri)
+  try {
     const raw = localStorage.getItem(USERS_CACHE_KEY);
     if (!raw) return [];
     // Legacy plaintext JSON — güncelleme sırasında dönüştürülür
@@ -37,19 +53,30 @@ async function loadUsersFromCache(): Promise<AppUser[]> {
       const parsed = JSON.parse(decrypted);
       return Array.isArray(parsed) ? (parsed as AppUser[]) : [];
     }
-    return [];
   } catch {
     logger.warn('userManager', 'Kullanıcı önbelleği okunamadı');
-    return [];
   }
+  return [];
 }
 
 async function saveUsersToCache(users: AppUser[]): Promise<void> {
   try {
     const encrypted = await encrypt(JSON.stringify(users));
-    localStorage.setItem(USERS_CACHE_KEY, 'aes-gcm:' + encrypted);
+    await indexedDb.snapshots.put({
+      id: 'users_cache',
+      data: 'aes-gcm:' + encrypted,
+      updatedAt: new Date().toISOString(),
+    });
+    // Migration sonrası eski localStorage cache'i temizle
+    localStorage.removeItem(USERS_CACHE_KEY);
   } catch {
-    logger.warn('userManager', 'Kullanıcı önbelleği yazılamadı');
+    logger.warn('userManager', 'IndexedDB kullanıcı önbelleği yazılamadı, localStorage fallback kullanılıyor');
+    try {
+      const encrypted = await encrypt(JSON.stringify(users));
+      localStorage.setItem(USERS_CACHE_KEY, 'aes-gcm:' + encrypted);
+    } catch {
+      logger.warn('userManager', 'Kullanıcı önbelleği yazılamadı');
+    }
   }
 }
 

@@ -20,6 +20,52 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.5',
+    date: '8 Haziran 2026',
+    title: 'Güvenlik ve Veri Bütünlüğü Kritik Düzeltmeleri',
+    summary:
+      'API key yönetimi, kullanıcı cache IndexedDB migration, stok hareketi limit uyarıları, localStorage truncation sentinel ve last-write-wins kayıp uyarıları eklendi.',
+    changes: [
+      {
+        type: 'duzeltme',
+        text: 'aiKeys.ts: API key’ler zaten AES-GCM ile şifreleniyor, memory-only cache güvenlik notu eklendi',
+      },
+      {
+        type: 'duzeltme',
+        text: 'aiApi.ts: Gemini API key zaten X-Goog-Api-Key header’ında, URL query parameter kullanımı yok',
+      },
+      {
+        type: 'duzeltme',
+        text: 'userManager.ts (B4): Kullanıcı cache artık IndexedDB’ye taşındı (PBKDF2+salt hash’ler), localStorage fallback korundu',
+      },
+      {
+        type: 'duzeltme',
+        text: 'userManager.ts (B5): Eski SHA-256 legacy hash’ler login sırasında otomatik PBKDF2+salt’a upgrade ediliyor (zaten mevcut)',
+      },
+      { type: 'duzeltme', text: 'core.ts (G1): 1000 stok hareketi limit aşımında logger.warn uyarısı eklendi' },
+      {
+        type: 'duzeltme',
+        text: 'core.ts (G3): saveToStorage last-write-wins durumunda logger.warn kayıp uyarısı eklendi',
+      },
+      {
+        type: 'duzeltme',
+        text: 'safeIO.ts (G2): __truncated__ sentinel durumunda console.error (kritik data loss) eklendi; logger.ts döngüsel bağımlılık nedeniyle console kullanıldı',
+      },
+      {
+        type: 'duzeltme',
+        text: 'kapsamli-senaryo.test.ts (A7): P1 test tautolojisi düzeltildi (computed !== beklenen aynı hesapla) — artık farklı hesaplama yollarını karşılaştırıyor',
+      },
+      {
+        type: 'duzeltme',
+        text: 'anomalyEngine.ts (E3): IssueCategory → AnomalyCategory cast kaldırıldı, explicit CATEGORY_MAP eklendi',
+      },
+      {
+        type: 'duzeltme',
+        text: "backup.ts (E4): undefined as unknown as string cast'leri kaldırıldı, orphan kayıtlar deleted: true ile işaretleniyor",
+      },
+    ],
+  },
+  {
     version: '3.18.4',
     date: '8 Haziran 2026',
     title: 'UI/UX Modernizasyonu — Gauge, Glassmorphism ve Kritik Düzeltmeler',

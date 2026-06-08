@@ -101,15 +101,17 @@ export function safeWriteJSON(
       } catch {
         console.warn('[safeIO] Temizleme sonrası yazma hatası, sentinel deneniyor:', key);
         try {
+          const originalLength = Array.isArray(value) ? (value as unknown[]).length : undefined;
+          console.error('[safeIO] DATA LOSS: localStorage kota aşıldı, veri kesildi', { key, originalLength });
           const sentinel = {
             __truncated__: true,
             ts: new Date().toISOString(),
-            originalLength: Array.isArray(value) ? (value as unknown[]).length : undefined,
+            originalLength,
           };
           localStorage.setItem(key, JSON.stringify(sentinel));
           return true;
         } catch {
-          console.warn('[safeIO] Sentinel yazma hatası:', key);
+          console.error('[safeIO] Sentinel yazma hatası:', key);
           return false;
         }
       }

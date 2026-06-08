@@ -5,7 +5,7 @@
  * örüntü tabanlı ve istatistiksel anomaliler tespit eder.
  */
 import type { DB } from '@/types';
-import { runIntegrityCheck, computeHealthScore } from './dataIntegrityChecker';
+import { runIntegrityCheck, computeHealthScore, type IssueCategory } from './dataIntegrityChecker';
 import { formatMoney, genId } from './utils-tr';
 import { logger } from './logger';
 
@@ -492,12 +492,24 @@ function orphanRecordDetector(db: DB): AnomalyResult[] {
 
 // ── Integrity → Anomaly dönüştürücü ─────────────────────────────────────────
 
+const CATEGORY_MAP: Record<IssueCategory, AnomalyCategory> = {
+  stok: 'stok',
+  kasa: 'kasa',
+  cari: 'cari',
+  siparis: 'siparis',
+  veri: 'veri',
+  satis: 'tutar',
+  fatura: 'tutar',
+  referans: 'veri',
+  anomali: 'supheli',
+};
+
 function convertIntegrityToAnomalies(db: DB): AnomalyResult[] {
   const issues = runIntegrityCheck(db);
   return issues.map((issue) =>
     makeAnomaly(
       issue.severity,
-      (issue.category as AnomalyCategory) || 'veri',
+      CATEGORY_MAP[issue.category] || 'veri',
       issue.title,
       issue.detail,
       issue.suggestion || 'Veri bütünlüğünü kontrol edin.',
