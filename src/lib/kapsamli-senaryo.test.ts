@@ -12,6 +12,8 @@ import { describe, expect, it } from 'vitest';
 import { validateTransaction } from './ruleEngine';
 import { similarity } from './similarity';
 
+const TEST_DATE = '2020-01-01';
+
 // ─── Yardımcı: ID ve Zaman ────────────────────────────────────────────────────
 
 function genId(): string {
@@ -1430,14 +1432,14 @@ describe('🏪 Kapsamlı Senaryo Testleri', () => {
       // Kısa bir bekleme simüle etmek için updatedAt'i geçmişe al
       const db1Modified: DB = {
         ...db1,
-        cari: db1.cari.map((c) => (c.id === cariId ? { ...c, updatedAt: '2020-01-01T00:00:00.000Z' } : c)),
+        cari: db1.cari.map((c) => (c.id === cariId ? { ...c, updatedAt: TEST_DATE } : c)),
       };
 
       const { nextDB: db2 } = cariSil(db1Modified, cariId);
       const deletedCari = db2.cari.find((c) => c.id === cariId)!;
 
       expect(deletedCari.deleted).toBe(true);
-      expect(deletedCari.updatedAt).not.toBe('2020-01-01T00:00:00.000Z');
+      expect(deletedCari.updatedAt).not.toBe(TEST_DATE);
     });
 
     // ── 7c: Düzenleme bakiye koruması ─────────────────────────────────────
@@ -1459,7 +1461,7 @@ describe('🏪 Kapsamlı Senaryo Testleri', () => {
       // updatedAt'i geçmişe al (düzenleme sonrası değiştiğini doğrulamak için)
       const db2Modified: DB = {
         ...db2,
-        cari: db2.cari.map((c) => (c.id === cariId ? { ...c, updatedAt: '2020-01-01T00:00:00.000Z' } : c)),
+        cari: db2.cari.map((c) => (c.id === cariId ? { ...c, updatedAt: TEST_DATE } : c)),
       };
 
       // Sadece telefon numarasını düzenle
@@ -1473,7 +1475,7 @@ describe('🏪 Kapsamlı Senaryo Testleri', () => {
       expect(cariAfterEdit.balance).toBe(700);
 
       // updatedAt güncellenmeli
-      expect(cariAfterEdit.updatedAt).not.toBe('2020-01-01T00:00:00.000Z');
+      expect(cariAfterEdit.updatedAt).not.toBe(TEST_DATE);
 
       // Telefon güncellenmeli
       expect(cariAfterEdit.phone).toBe('555');

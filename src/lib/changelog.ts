@@ -63,6 +63,12 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'duzeltme',
         text: "backup.ts (E4): undefined as unknown as string cast'leri kaldırıldı, orphan kayıtlar deleted: true ile işaretleniyor",
       },
+      { type: 'duzeltme', text: 'saleCompletion.ts: toPayload helper eklendi, 4 cast temizlendi' },
+      { type: 'duzeltme', text: 'SatisAgent.ts: payload cast sonrası validation eklendi' },
+      { type: 'duzeltme', text: 'deepseek.ts + aiApi.ts: res.body! → null check, any → unknown' },
+      { type: 'duzeltme', text: 'streamUtils.ts: response.body! null check eklendi' },
+      { type: 'duzeltme', text: 'pageHelpers.ts, aiActions.ts, e2e/helpers/app.ts: any → proper type' },
+      { type: 'duzeltme', text: 'Tüm catch {} bloklarına logger.warn veya yorum eklendi' },
     ],
   },
   {

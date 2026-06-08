@@ -44,8 +44,10 @@ export async function askClaude(
   await readSSEStream(
     res,
     onChunk,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (d: any) => (d.type === 'content_block_delta' ? d.delta?.text : undefined),
+    (d: unknown) =>
+      (d as { type?: string; delta?: { text?: string } }).type === 'content_block_delta'
+        ? (d as { delta?: { text?: string } }).delta?.text
+        : undefined,
     () => logger.warn('aiApi', 'Claude stream parse hatası'),
   );
 }
@@ -92,8 +94,7 @@ export async function askGemini(
   await readSSEStream(
     res,
     onChunk,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (d: any) => d.candidates?.[0]?.content?.parts?.[0]?.text,
+    (d: unknown) => (d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates?.[0]?.content?.parts?.[0]?.text,
     () => logger.warn('aiApi', 'Gemini stream parse hatası'),
   );
 }

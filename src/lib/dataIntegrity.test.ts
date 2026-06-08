@@ -7,13 +7,7 @@ function applyQuickSale(cari: { balance: number }, saleAmount: number) {
   return { ...cari, balance: cari.balance + saleAmount };
 }
 
-function createStockMovement(
-  productId: string,
-  productName: string,
-  before: number,
-  soldQty: number,
-  note: string
-) {
+function createStockMovement(productId: string, productName: string, before: number, soldQty: number, note: string) {
   const amount = -soldQty;
   const after = before + amount;
   return {
@@ -29,7 +23,7 @@ function createStockMovement(
 
 function applyCompleteOrder(
   products: Array<{ id: string; stock: number }>,
-  order: { stockCompleted?: boolean; items: Array<{ productId: string; qty: number }> }
+  order: { stockCompleted?: boolean; items: Array<{ productId: string; qty: number }> },
 ) {
   if (order.stockCompleted) return { products, alreadyDone: true };
   const updated = products.map((p) => {
@@ -39,23 +33,14 @@ function applyCompleteOrder(
   return { products: updated, alreadyDone: false };
 }
 
-function createInstallmentPlan(
-  invoiceId: string,
-  total: number,
-  count: number,
-  firstDueDate: Date
-) {
+function createInstallmentPlan(invoiceId: string, total: number, count: number, firstDueDate: Date) {
   const base = Math.floor((total / count) * 100) / 100;
   const last = Math.round((total - base * (count - 1)) * 100) / 100;
   const nowIso = new Date().toISOString();
   return Array.from({ length: count }, (_, i) => ({
     id: `inst-${i}`,
     invoiceId,
-    dueDate: new Date(
-      firstDueDate.getFullYear(),
-      firstDueDate.getMonth() + i,
-      firstDueDate.getDate()
-    ).toISOString(),
+    dueDate: new Date(firstDueDate.getFullYear(), firstDueDate.getMonth() + i, firstDueDate.getDate()).toISOString(),
     amount: i === count - 1 ? last : base,
     paid: false,
     paidAt: undefined,
@@ -68,7 +53,7 @@ function applyInvoiceStatusChange(
   cariBalance: number,
   invoiceTotal: number,
   invoice: { status: 'taslak' | 'onaylandi'; cariUpdated: boolean },
-  newStatus: 'taslak' | 'onaylandi'
+  newStatus: 'taslak' | 'onaylandi',
 ): { cariBalance: number; cariUpdated: boolean } {
   if (newStatus === 'onaylandi' && !invoice.cariUpdated) {
     return { cariBalance: cariBalance + invoiceTotal, cariUpdated: true };
@@ -95,9 +80,9 @@ describe('Özellik 1: Cari Bakiye Güncelleme Tutarlılığı', () => {
           const cari = { balance };
           const result = applyQuickSale(cari, amount);
           expect(result.balance).toBe(balance + amount);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -110,9 +95,9 @@ describe('Özellik 2: StockMovement Kaydı Bütünlüğü', () => {
   it('after === before + amount, amount < 0, note === Hızlı Satış, zorunlu alanlar mevcut', () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: 1, max: 10_000 }).chain((before) =>
-          fc.integer({ min: 1, max: before }).map((soldQty) => ({ before, soldQty }))
-        ),
+        fc
+          .integer({ min: 1, max: 10_000 })
+          .chain((before) => fc.integer({ min: 1, max: before }).map((soldQty) => ({ before, soldQty }))),
         fc.string({ minLength: 1, maxLength: 20 }),
         fc.string({ minLength: 1, maxLength: 30 }),
         ({ before, soldQty }, productId, productName) => {
@@ -134,9 +119,9 @@ describe('Özellik 2: StockMovement Kaydı Bütünlüğü', () => {
           expect(movement.date).toBeTruthy();
           expect(typeof movement.before).toBe('number');
           expect(typeof movement.after).toBe('number');
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -149,23 +134,25 @@ describe('Özellik 7: Sipariş Tamamlama İdempotency', () => {
   it('İki kez çağrıldığında stok yalnızca bir kez artmalı', () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.record({
-            id: fc.uuid(),
-            stock: fc.integer({ min: 0, max: 1000 }),
-          }),
-          { minLength: 1, maxLength: 5 }
-        ).chain((products) =>
-          fc
-            .array(
-              fc.record({
-                productId: fc.constantFrom(...products.map((p) => p.id)),
-                qty: fc.integer({ min: 1, max: 50 }),
-              }),
-              { minLength: 1, maxLength: products.length }
-            )
-            .map((items) => ({ products, items }))
-        ),
+        fc
+          .array(
+            fc.record({
+              id: fc.uuid(),
+              stock: fc.integer({ min: 0, max: 1000 }),
+            }),
+            { minLength: 1, maxLength: 5 },
+          )
+          .chain((products) =>
+            fc
+              .array(
+                fc.record({
+                  productId: fc.constantFrom(...products.map((p) => p.id)),
+                  qty: fc.integer({ min: 1, max: 50 }),
+                }),
+                { minLength: 1, maxLength: products.length },
+              )
+              .map((items) => ({ products, items })),
+          ),
         ({ products, items }) => {
           // İlk çağrı: stockCompleted: false → stok artar
           const firstResult = applyCompleteOrder(products, { stockCompleted: false, items });
@@ -182,9 +169,9 @@ describe('Özellik 7: Sipariş Tamamlama İdempotency', () => {
           firstResult.products.forEach((p, idx) => {
             expect(secondResult.products[idx].stock).toBe(p.stock);
           });
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -196,16 +183,12 @@ describe('Özellik 7: Sipariş Tamamlama İdempotency', () => {
 describe('Özellik 8: Taksit Toplamı Tutarlılığı', () => {
   it('Tüm taksit tutarlarının toplamı fatura toplamına 0.01 toleransla eşit', () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 100, max: 1_000_000 }),
-        fc.integer({ min: 1, max: 24 }),
-        (total, count) => {
-          const plan = createInstallmentPlan('inv-1', total, count, new Date(2024, 0, 1));
-          const sum = Math.round(plan.reduce((acc, inst) => acc + inst.amount, 0) * 100) / 100;
-          expect(Math.abs(sum - total)).toBeLessThanOrEqual(0.01);
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.integer({ min: 100, max: 1_000_000 }), fc.integer({ min: 1, max: 24 }), (total, count) => {
+        const plan = createInstallmentPlan('inv-1', total, count, new Date(2024, 0, 1));
+        const sum = Math.round(plan.reduce((acc, inst) => acc + inst.amount, 0) * 100) / 100;
+        expect(Math.abs(sum - total)).toBeLessThanOrEqual(0.01);
+      }),
+      { numRuns: 100 },
     );
   });
 });
@@ -226,20 +209,29 @@ describe('Özellik 5: Fatura Durum Döngüsü İdempotency', () => {
           // taslak → onaylandi
           const s1 = applyInvoiceStatusChange(cariBalance, invoiceTotal, initial, 'onaylandi');
           // onaylandi → taslak
-          const s2 = applyInvoiceStatusChange(s1.cariBalance, invoiceTotal, { status: 'onaylandi', cariUpdated: s1.cariUpdated }, 'taslak');
+          const s2 = applyInvoiceStatusChange(
+            s1.cariBalance,
+            invoiceTotal,
+            { status: 'onaylandi', cariUpdated: s1.cariUpdated },
+            'taslak',
+          );
           // taslak → onaylandi (tekrar)
-          const s3 = applyInvoiceStatusChange(s2.cariBalance, invoiceTotal, { status: 'taslak', cariUpdated: s2.cariUpdated }, 'onaylandi');
+          const s3 = applyInvoiceStatusChange(
+            s2.cariBalance,
+            invoiceTotal,
+            { status: 'taslak', cariUpdated: s2.cariUpdated },
+            'onaylandi',
+          );
 
           // Net değişim = +invoiceTotal (yalnızca bir kez artmış olmalı)
           expect(s3.cariBalance).toBe(cariBalance + invoiceTotal);
           expect(s3.cariUpdated).toBe(true);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
-
 
 // ─── Görev 16.1 — Boyut Eşiği Birim Testleri ─────────────────────────────────
 // Validates: Requirements 13.2, 13.3, 16.3
@@ -295,7 +287,7 @@ function makeDBWithSizeMB(targetMB: number): DB {
   const needed = targetBytes - baseSize;
   if (needed > 0) {
     // Her note ~1000 karakter; gerekli sayıda ekle
-    const chunkSize = 900;
+    const chunkSize = process.env.CI ? 900 : 1000;
     const count = Math.ceil(needed / chunkSize);
     db.notes = Array.from({ length: count }, (_, i) => ({
       id: `n${i}`,
@@ -318,7 +310,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       expect(actualSize).toBeLessThan(2);
 
       const issues = runIntegrityCheck(db);
-      const sizeIssues = issues.filter(i => i.category === 'veri');
+      const sizeIssues = issues.filter((i) => i.category === 'veri');
       expect(sizeIssues).toHaveLength(0);
     });
 
@@ -329,9 +321,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
 
       const issues = runIntegrityCheck(db);
       // Bölüm 9: >4 MB → warning
-      const sizeWarnings = issues.filter(
-        i => i.severity === 'warning' && i.category === 'veri'
-      );
+      const sizeWarnings = issues.filter((i) => i.severity === 'warning' && i.category === 'veri');
       expect(sizeWarnings.length).toBeGreaterThan(0);
     });
   });
@@ -347,8 +337,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       const issues = runIntegrityCheck(db);
       // Bölüm 9 critical: detail'de "X.XX MB" formatı ve "localStorage limiti" içerir
       const section9Critical = issues.filter(
-        i => i.severity === 'critical' && i.category === 'veri' &&
-             /\d+\.\d{2} MB/.test(i.detail)
+        (i) => i.severity === 'critical' && i.category === 'veri' && /\d+\.\d{2} MB/.test(i.detail),
       );
       expect(section9Critical).toHaveLength(0);
     });
@@ -359,9 +348,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       expect(actualSize).toBeGreaterThan(7);
 
       const issues = runIntegrityCheck(db);
-      const criticalSizeIssues = issues.filter(
-        i => i.severity === 'critical' && i.category === 'veri'
-      );
+      const criticalSizeIssues = issues.filter((i) => i.severity === 'critical' && i.category === 'veri');
       expect(criticalSizeIssues.length).toBeGreaterThan(0);
     });
   });
@@ -388,7 +375,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       });
       const issues = runIntegrityCheck(db);
       const stockCountIssues = issues.filter(
-        i => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi')
+        (i) => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi'),
       );
       expect(stockCountIssues).toHaveLength(0);
     });
@@ -399,7 +386,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       });
       const issues = runIntegrityCheck(db);
       const stockCountIssues = issues.filter(
-        i => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi')
+        (i) => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi'),
       );
       expect(stockCountIssues).toHaveLength(1);
     });
@@ -410,7 +397,7 @@ describe('Görev 16.1 — Boyut Eşiği Birim Testleri', () => {
       });
       const issues = runIntegrityCheck(db);
       const stockCountIssues = issues.filter(
-        i => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi')
+        (i) => i.severity === 'info' && i.category === 'stok' && i.title.toLowerCase().includes('stok hareketi'),
       );
       expect(stockCountIssues).toHaveLength(1);
     });

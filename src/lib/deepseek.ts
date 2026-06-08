@@ -40,8 +40,7 @@ export async function askDeepSeek(
   return readSSEStream(
     res,
     onChunk,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (d: any) => d.choices?.[0]?.delta?.content,
+    (d: unknown) => (d as { choices?: Array<{ delta?: { content?: string } }> }).choices?.[0]?.delta?.content,
     () => logger.warn('deepseek', 'DeepSeek stream parse hatası'),
   );
 }

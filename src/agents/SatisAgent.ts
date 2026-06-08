@@ -268,6 +268,9 @@ export class SatisAgent extends BaseAgent {
 
     if (talep.action === 'sale' && talep.payload) {
       const p = talep.payload as Record<string, unknown>;
+      if (!p || typeof p !== 'object' || !Array.isArray(p.items)) {
+        return { ok: false, error: 'Geçersiz satış payload' };
+      }
       const params: YeniSatisParams = {
         items: (p.items as YeniSatisParams['items']) || [],
         cariId: (p.cariId as string) || '',

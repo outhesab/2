@@ -1,4 +1,4 @@
-import { logger } from "@/lib/logger";
+import { logger } from '@/lib/logger';
 
 export async function readSSEStream(
   response: Response,
@@ -6,22 +6,28 @@ export async function readSSEStream(
   extractText: (data: unknown) => string | undefined,
   onError?: () => void,
 ): Promise<string> {
-  const reader = response.body!.getReader();
+  if (!response.body) {
+    throw new Error('Response body mevcut değil');
+  }
+  const reader = response.body.getReader();
   const dec = new TextDecoder();
-  let buf = "";
-  let full = "";
+  let buf = '';
+  let full = '';
   let streamDone = false;
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n");
-    buf = lines.pop() || "";
+    const lines = buf.split('\n');
+    buf = lines.pop() || '';
     for (const line of lines) {
-      if (!line.startsWith("data: ")) continue;
+      if (!line.startsWith('data: ')) continue;
       const data = line.slice(6).trim();
-      if (data === "[DONE]") { streamDone = true; break; }
+      if (data === '[DONE]') {
+        streamDone = true;
+        break;
+      }
       try {
         const d = JSON.parse(data);
         const text = extractText(d);
@@ -30,7 +36,7 @@ export async function readSSEStream(
           full += text;
         }
       } catch {
-        logger.warn("streamUtils", "SSE akışı JSON parse hatası");
+        logger.warn('streamUtils', 'SSE akışı JSON parse hatası');
         onError?.();
       }
     }
