@@ -195,3 +195,49 @@ showToast('Hata mesajı', 'error');
 | `WEEKLY_PLAN.md`           | 57 pending tasks across 6 weeks   |
 | `docs/skin-plan.md`        | Corporate theme transformation    |
 | `.opencode/skills/`        | Agent skills for common tasks     |
+## Local AI Ortami (Air-Gapped / Offline)
+
+### LM Studio (Yerel LLM Sunucusu)
+- **API:** http://127.0.0.1:1234/v1 (OpenAI-uyumlu)
+- **Model JIT:** 300 saniye boslukta bellekten bosaltilir
+- **GPU Offload:** Qwen3 4B Thinking -> 0.6, VL/Phi -> 0.5
+- **Context Limit:** Tum modellerde 2048
+
+### Yerel Modeller (5 adet)
+| Model | Boyut | Kullanim |
+|-------|-------|----------|
+| Qwen3 4B Thinking | ~2.5GB | Karmasik reasoning, offline |
+| Qwen3 VL 4B | ~2.5GB | Gorsel isleme |
+| Phi-3.5 Mini | ~2GB | Hizli basit isler |
+| Liquid 1.2B | ~0.8GB | Cok dusuk kaynak, yedek |
+| text-embedding | - | Embedding |
+
+### MCP Servisleri (3 adet, ~25 tool)
+| MCP | Protokol | Kullanim |
+|-----|----------|----------|
+| filesystem | stdio (local) | Dosya okuma/yazma/arama/dizin |
+| github | stdio (local) | Issue/PR/repo/commit yonetimi |
+| web-search (Exa) | SSE (remote) | Web arama (internet gerekli) |
+
+### Local Agentlar (opencode icinde)
+- /yerel-zeki -> Qwen3 4B Thinking (karmasik reasoning)
+- /yerel-goruntu -> Qwen3 VL 4B (gorsel isleme)
+- /yerel-hizli -> Phi-3.5 Mini (hizli)
+- /yerel-hafif -> Liquid 1.2B (yedek)
+- /yerel-docs -> Qwen3 4B Thinking (dokumantasyon)
+
+### Local Komutlar (l- on ekli, offline calisir)
+- /ltest -> offline test suite
+- /lfix -> offline hata duzeltme
+- /lreview -> offline kod inceleme
+- /ldurum -> offline proje durumu
+- /ltasi -> offline refactor/tasi
+
+### Offline (Air-Gapped) Mod Aktiflestirme
+Config dosyalarinda "offline": true ayarlidir.
+PowerShell profili su env vars icerir:
+- OPENCODE_OFFLINE=true
+- OPENCODE_DISABLE_AUTOUPDATE=true
+- OPENCODE_DISABLE_MODELS_FETCH=true
+- OPENCODE_DISABLE_DEFAULT_PLUGINS=true
+- OPENCODE_DISABLE_LSP_DOWNLOAD=true

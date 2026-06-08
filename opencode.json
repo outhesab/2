@@ -1,10 +1,13 @@
-{
+﻿{
   "$schema": "https://opencode.ai/config.json",
+  "offline": true,
   "model": "openrouter/free",
   "small_model": "meta-llama/llama-3.3-70b-instruct:free",
   "default_agent": "coder",
   "skills": {
-    "paths": [".opencode/skills"]
+    "paths": [
+      ".opencode/skills"
+    ]
   },
   "provider": {
     "openrouter": {
@@ -16,41 +19,113 @@
       "options": {
         "baseURL": "http://127.0.0.1:1234/v1",
         "apiKey": "lm-studio"
+      },
+      "models": {
+        "qwen/qwen3-4b-thinking-2507": {
+          "name": "Qwen3 4B Thinking",
+          "family": "qwen",
+          "tool_call": false,
+          "reasoning": true,
+          "temperature": true,
+          "vision": false,
+          "limit": {
+            "context": 2048,
+            "output": 1024
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "qwen/qwen3-vl-4b": {
+          "name": "Qwen3 VL 4B (Vision)",
+          "family": "qwen",
+          "tool_call": false,
+          "reasoning": false,
+          "temperature": true,
+          "vision": true,
+          "limit": {
+            "context": 2048,
+            "output": 1024
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "phi-3.5-mini-instruct": {
+          "name": "Phi 3.5 Mini Instruct",
+          "family": "phi",
+          "tool_call": false,
+          "reasoning": false,
+          "temperature": true,
+          "vision": false,
+          "limit": {
+            "context": 2048,
+            "output": 1024
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "liquid/lfm2-1.2b": {
+          "name": "LFM2 1.2B",
+          "family": "lfm",
+          "tool_call": false,
+          "reasoning": false,
+          "temperature": true,
+          "vision": false,
+          "limit": {
+            "context": 2048,
+            "output": 1024
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          }
+        }
       }
     }
   },
-  "disabled_providers": ["openai", "gemini", "github-copilot", "groq", "anthropic"],
+  "disabled_providers": [
+    "openai",
+    "gemini",
+    "github-copilot",
+    "groq",
+    "anthropic"
+  ],
   "instructions": [
-    "PAKET YÖNETİCİSİ: Sadece pnpm kullan. npm veya yarn kullanma.",
-    "CHANGELOG ZORUNLULUĞU: Her kaynak kod değişikliğinden sonra src/lib/changelog.ts dosyasına mutlaka yeni bir sürüm girişi ekle.",
+    "PAKET YÃ–NETÄ°CÄ°SÄ°: Sadece pnpm kullan. npm veya yarn kullanma.",
+    "CHANGELOG ZORUNLULUÄžU: Her kaynak kod deÄŸiÅŸikliÄŸinden sonra src/lib/changelog.ts dosyasÄ±na mutlaka yeni bir sÃ¼rÃ¼m giriÅŸi ekle.",
     "OFFLINE-FIRST: localStorage birincil depolama, Firebase Firestore opsiyonel sync.",
-    "TEST: Vitest + fast-check (property-based). pnpm run test:run ile çalıştır.",
-    "MOBİL: Capacitor 8 ile Android APK. pnpm run cap:android ile build al.",
+    "TEST: Vitest + fast-check (property-based). pnpm run test:run ile Ã§alÄ±ÅŸtÄ±r.",
+    "MOBÄ°L: Capacitor 8 ile Android APK. pnpm run cap:android ile build al.",
     ".opencode/MEMORY.md"
   ],
   "agent": {
     "architect": {
       "model": "qwen/qwen3-next-80b-a3b-instruct:free",
       "mode": "primary",
-      "description": "Sistem mimarisi, uzun vadeli planlama, 80B MoE ile büyük codebase anlama. Derin analiz ve reasoning.",
+      "description": "Sistem mimarisi, uzun vadeli planlama, 80B MoE ile bÃ¼yÃ¼k codebase anlama. Derin analiz ve reasoning.",
       "prompt": "You are a senior software architect. Analyze requirements deeply, consider trade-offs, design scalable solutions, and provide structured implementation plans."
     },
     "coder": {
       "model": "qwen/qwen3-coder:free",
       "mode": "primary",
-      "description": "En güçlü free coding model. 1M context, native tool calling, SOTA code generation. Çok dosyalı işlemler için king.",
+      "description": "En gÃ¼Ã§lÃ¼ free coding model. 1M context, native tool calling, SOTA code generation. Ã‡ok dosyalÄ± iÅŸlemler iÃ§in king.",
       "prompt": "You are an expert coding assistant. Focus on clean code, best practices, and efficient implementation. Handle multi-file changes with care."
     },
     "brainstorm": {
       "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Fikir alışverişi, araştırma, router ile en uygun free modeli otomatik seçer. Çeşitlilik sağlar.",
+      "description": "Fikir alÄ±ÅŸveriÅŸi, araÅŸtÄ±rma, router ile en uygun free modeli otomatik seÃ§er. Ã‡eÅŸitlilik saÄŸlar.",
       "prompt": "You are a creative brainstorming partner. Explore ideas, research best practices, and propose innovative solutions."
     },
     "reviewer": {
       "model": "meta-llama/llama-3.3-70b-instruct:free",
       "mode": "subagent",
-      "description": "Hızlı, güvenilir kod review. Güvenlik, performans, best practice odaklı.",
+      "description": "HÄ±zlÄ±, gÃ¼venilir kod review. GÃ¼venlik, performans, best practice odaklÄ±.",
       "prompt": "You are a strict code reviewer. Focus on: security, performance, code style, and logic errors."
     },
     "orchestrator": {
@@ -62,19 +137,19 @@
     "visionary": {
       "model": "google/gemma-4-31b-it:free",
       "mode": "subagent",
-      "description": "Görsel anlama, multimodal analiz. Screenshot'tan kod, diagram anlama, UI review.",
+      "description": "GÃ¶rsel anlama, multimodal analiz. Screenshot'tan kod, diagram anlama, UI review.",
       "prompt": "You are a multimodal assistant. Analyze images, UI screenshots, and diagrams to provide actionable insights or code."
     },
     "agentic-coder": {
       "model": "poolside/laguna-m.1:free",
       "mode": "subagent",
-      "description": "Tool calling + reasoning birleşik. Agentic coding workflow'lar: otomatik refactor, PR automation.",
+      "description": "Tool calling + reasoning birleÅŸik. Agentic coding workflow'lar: otomatik refactor, PR automation.",
       "prompt": "You are an agentic coder. Use tools to perform automated refactoring, test generation, and pipeline tasks."
     },
     "power-coder": {
       "model": "opencode-go/minimax-m2.7",
       "mode": "primary",
-      "description": "Günlük yoğun coding için opencode-go quota'sı. SWE-Bench 80.2%.",
+      "description": "GÃ¼nlÃ¼k yoÄŸun coding iÃ§in opencode-go quota'sÄ±. SWE-Bench 80.2%.",
       "prompt": "You are a high-performance coding agent running on opencode-go. Focus on rapid implementation and testing."
     },
     "power-planner": {
@@ -86,7 +161,7 @@
     "power-reasoner": {
       "model": "opencode-go/glm-5.1",
       "mode": "subagent",
-      "description": "En güçlü reasoning (math/logic). Zor problemler için.",
+      "description": "En gÃ¼Ã§lÃ¼ reasoning (math/logic). Zor problemler iÃ§in.",
       "prompt": "You are an advanced reasoning agent. Solve complex logic, mathematics, and architectural problems."
     },
     "power-frontend": {
@@ -100,11 +175,61 @@
       "mode": "primary",
       "description": "Hermes UI + LM Studio backend (Qwen3-4B-Thinking). Reasoning, coding, analysis.",
       "prompt": "You are a helpful coding assistant running on local LM Studio via Hermes. Focus on clean code, best practices, and efficient implementation."
+    },
+    "yerel-hizli": {
+      "model": "lmstudio/phi-3.5-mini-instruct",
+      "mode": "subagent",
+      "description": "Yerel LM Studio (Phi 3.5) â€” hÄ±zlÄ±, basit iÅŸler, Ã§evrimdÄ±ÅŸÄ±"
+    },
+    "yerel-zeki": {
+      "model": "lmstudio/qwen/qwen3-4b-thinking-2507",
+      "mode": "subagent",
+      "description": "Yerel LM Studio (Qwen3 4B Thinking) â€” karmaÅŸÄ±k reasoning, Ã§evrimdÄ±ÅŸÄ±"
+    },
+    "yerel-hafif": {
+      "model": "lmstudio/liquid/lfm2-1.2b",
+      "mode": "subagent",
+      "description": "Yerel LM Studio (Liquid 1.2B) â€” Ã§ok dÃ¼ÅŸÃ¼k kaynak, yedek model"
+    },
+    "yerel-goruntu": {
+      "model": "lmstudio/qwen/qwen3-vl-4b",
+      "mode": "subagent",
+      "description": "Yerel LM Studio (Qwen3 VL 4B) â€” gÃ¶rsel iÅŸleme"
+    }
+  },
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
+      "enabled": true
+    },
+    "web-search": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp",
+      "enabled": true
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "environment": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": true
     }
   },
   "compaction": {
     "auto": true,
     "tail_turns": 20,
     "reserved": 15000
-  }
+  },
+  "autoupdate": false
 }
