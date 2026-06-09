@@ -308,7 +308,11 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
       (k) => k.kasa === kasaId && k.type === 'gider' && new Date(k.createdAt).getTime() >= thirtyDaysAgo,
     );
     const totalGider = giderler.reduce((s, k) => s + k.amount, 0);
-    kasaAvgGider[kasaId] = totalGider / 30;
+    const earliestDate = giderler.length > 0
+      ? Math.min(...giderler.map(k => new Date(k.createdAt).getTime()))
+      : Date.now();
+    const daysWithData = Math.max(1, Math.ceil((Date.now() - earliestDate) / 86400000));
+    kasaAvgGider[kasaId] = totalGider / daysWithData;
   });
 
   // Aynı gün 5+ gider kaydı

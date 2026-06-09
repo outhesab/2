@@ -257,24 +257,28 @@ function loadFromStorage(): DB {
 }
 
 let _isSaving = false;
-let _pendingDb: DB | null = null;
+const _saveQueue: DB[] = [];
 
 function saveToStorage(db: DB): boolean {
   const t = logger.time('db', 'localStorage yaz');
   if (_isSaving) {
-    if (_pendingDb) {
-      logger.warn('db', 'Önceki bekleyen DB kaydı üzerine yazıldı — last-write-wins kayıp riski');
+    _saveQueue.push(db);
+    if (_saveQueue.length > 10) {
+      const dropped = _saveQueue.splice(0, _saveQueue.length - 10);
+      logger.warn('db', 'Save queue taştı, eski kayıtlar atıldı', { dropped: dropped.length });
     }
-    _pendingDb = db;
     return false;
   }
   _isSaving = true;
   try {
-    // Mutasyon yok — JSON.stringify öncesi version artır
-    const versioned = { ...db, _version: (db._version || 0) + 1 };
+    // Son bekleyeni al, aradakileri atla (sadece son durum önemli)
+    let toSave = db;
+    while (_saveQueue.length > 0) {
+      toSave = _saveQueue.shift()!;
+    }
+    const versioned = { ...toSave, _version: (toSave._version || 0) + 1 };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(versioned));
-    // State senkronizasyonu için orijinal objeye version geri yaz
-    db._version = versioned._version;
+    toSave._version = versioned._version;
     t.end({ version: versioned._version });
     return true;
   } catch (e) {
@@ -282,10 +286,9 @@ function saveToStorage(db: DB): boolean {
     return false;
   } finally {
     _isSaving = false;
-    if (_pendingDb) {
-      const pending = _pendingDb;
-      _pendingDb = null;
-      saveToStorage(pending);
+    if (_saveQueue.length > 0) {
+      const next = _saveQueue.shift()!;
+      saveToStorage(next);
     }
   }
 }
@@ -368,6 +371,13 @@ export function useDB() {
           const before = next.stockMovements.length;
           next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
           logger.warn('db', 'Stok hareketleri 1000 limiti aşıldı, eski kayıtlar kesildi', { before, after: 1000 });
+          setDbError({
+            message: `Stok hareketleri 1000 limiti aşıldı, ${before - 1000} eski kayıt temizlendi.`,
+            code: 'STOCK_LIMIT_EXCEEDED',
+            timestamp: new Date().toISOString(),
+            recoverable: false,
+            context: { before, after: 1000 },
+          });
         }
 
         const { violations, hasBlock, hasWarn } = validateAndClassify(

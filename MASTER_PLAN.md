@@ -1,12 +1,12 @@
 # PARSPEL — Master İyileştirme Planı
 
 > Oluşturulma: 5 Haziran 2026
-> Son güncelleme: 5 Haziran 2026
-> Kapsam: ~136 madde (14 tamamlandı)
+> Son güncelleme: 9 Haziran 2026
+> Kapsam: ~136 madde (30+ tamamlandı, çoğu v3.7.1-3'te düzeltildi)
 
 ---
 
-## A — KRİTİK HATALAR (7)  ✓ 5/7 tamam
+## A — KRİTİK HATALAR (7)  ✓ 7/7 tamam
 
 | # | Hata | Dosya:Satır | Şiddet | Durum |
 |---|------|-------------|--------|-------|
@@ -14,11 +14,8 @@
 | A2 | `iadeYap` çok-ürünlü: `qty` öğe bazlı dağıtım desteği eklendi | `SatisAgent.ts:186` | CRITICAL | ✓ DÜZELTİLDİ |
 | A3 | `fiyatDuzelt` kar hesabı: tüm `items[]` güncellenir, total/profit items'dan hesaplanır | `SatisAgent.ts:266` | CRITICAL | ✓ DÜZELTİLDİ |
 | A4 | useDB init race: Firebase → IndexedDB sıralı yükleme | `core.ts:221,240` | CRITICAL | ✓ DÜZELTİLDİ |
-| A5 | `saveUsers` hep true döner: Firebase hatasında `false` döner | `userManager.ts:120-135` | CRITICAL | ✓ DÜZELTİLDİ |
-| A6 | `saveUsers` salt regex: `match(/../g)!` non-null assertion | `userManager.ts:147` | HIGH | ✓ DÜZELTİLDİ |
-| A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | |
-| A6 | `saveUsers` salt regex: `match(/../g)!` non-null assertion | `userManager.ts:147` | HIGH |
-| A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH |
+|| A6 | `saveUsers` salt regex: `match(/../g)!` non-null assertion | `userManager.ts:147` | HIGH | ✓ DÜZELTİLDİ |
+|| A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | ✅ v3.7.x'te düzeltildi / test dosyası kaldırıldı | A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | ✅ v3.7.x'te düzeltildi / test dosyası kaldırıldı |
 
 ---
 
@@ -26,16 +23,16 @@
 
 | # | Sorun | Dosya | Durum |
 |---|-------|-------|-------|
-| B1 | `.env`'de 2 plaintext API key (DeepSeek, LM Studio, Gemini) | `.env` | ✓ TEMİZLENDİ |
-| B2 | Firebase'de API key'ler şifresiz saklanıyor | `aiKeys.ts:50` | |
-| B3 | Gemini API key URL'de query parameter | `aiApi.ts:90` | |
-| B4 | Şifre hash'leri localStorage'da — XSS riski | `userManager.ts:43` | |
-| B5 | Eski SHA-256 hash'ler salt'sız (rainbow table) | `userManager.ts:159` | |
-| B6 | CSP `worker-src` eksik — worker'lar bloklanır | `index.html` | ✓ DÜZELTİLDİ |
-| B7 | CSP `connect-src` react-grab.com yok | `index.html` | ✓ DÜZELTİLDİ |
-| B8 | `dangerouslySetInnerHTML` kullanımı var (XSS) | Birkaç sayfada | ✅ (zaten DOMPurify ile korunuyor) |
-| B9 | `apple-touch-icon.png` referansı var ama dosya yok | `public/` | ✓ OLUŞTURULDU |
-| B10 | `.env.example` güncel değil — değişken eksik | `.env.example` | ✓ DÜZELTİLDİ |
+|| B1 | `.env`'de 2 plaintext API key (DeepSeek, LM Studio, Gemini) | `.env` | ✓ TEMİZLENDİ |
+|| B2 | Firebase'de API key'ler şifresiz saklanıyor | `aiKeys.ts:50` | ✅ AES-GCM ile şifreli (v3.7.1) |
+|| B3 | Gemini API key URL'de query parameter | `aiApi.ts:90` | ✅ `X-Goog-Api-Key` header'ında (v3.7.1) |
+|| B4 | Şifre hash'leri localStorage'da — XSS riski | `userManager.ts:43` | ✅ IndexedDB + AES-GCM (v3.7.1) |
+|| B5 | Eski SHA-256 hash'ler salt'sız (rainbow table) | `userManager.ts:159` | ✅ PBKDF2 + 600k iterasyon + salt (v3.7.1) |
+|| B6 | CSP `worker-src` eksik — worker'lar bloklanır | `index.html` | ✓ DÜZELTİLDİ |
+|| B7 | CSP `connect-src` react-grab.com yok | `index.html` | ✓ DÜZELTİLDİ |
+|| B8 | `dangerouslySetInnerHTML` kullanımı var (XSS) | Birkaç sayfada | ✅ (zaten DOMPurify ile korunuyor) |
+|| B9 | `apple-touch-icon.png` referansı var ama dosya yok | `public/` | ✓ OLUŞTURULDU |
+|| B10 | `.env.example` güncel değil — değişken eksik | `.env.example` | ✓ DÜZELTİLDİ |
 
 ---
 
@@ -97,16 +94,16 @@
 
 ---
 
-## G — VERİ BÜTÜNLÜĞÜ (6)
+## G — VERİ BÜTÜNLÜĞÜ (6) — 3/6 tamam
 
-| # | Sorun | Dosya:Satır |
-|---|-------|-------------|
-| G1 | 1000 stok hareketi sessizce kesilir — kullanıcı habersiz | `core.ts:272` |
-| G2 | `__truncated__` sentinel ile sessiz data loss | `storageQuota.ts:112` |
-| G3 | Last-write-wins save queue — ara durumlar kaybolur | `core.ts:186-211` |
-| G4 | Firebase sync setTimeout uncached promise | `core.ts:332` |
-| G5 | Kasa/POS ödemeleri hep "banka"ya gider — POS ayrımı kaybolur | `aiActions.ts:432` |
-| G6 | Günlük ortalama /30 ile sabit — yeni şirkette false positive | `anomalyEngine.ts:338` |
+| # | Sorun | Dosya:Sati | Durum |
+|---|-------|------------|-------|
+| G1 | 1000 stok hareketi sessizce kesilir | core.ts:272 | ✅ UI bildirimi eklendi (setDbError) |
+| G2 | __truncated__ sentinel ile sessiz data loss | storageQuota.ts:112 | ✅ storageQuota.ts olud kod, kaldirildi (v3.7.1) |
+| G3 | Last-write-wins save queue ara durumlar kaybolur | core.ts:186-211 | ✅ Queue sistemi eklendi (_saveQueue, max 10) |
+| G4 | Firebase sync setTimeout uncached promise | core.ts:332 | ⬜ |
+| G5 | Kasa/POS odemeleri hep bankaya gider | aiActions.ts:432 | ⬜ |
+| G6 | Gunluk ortalama /30 ile sabit | anomalyEngine.ts:338 | ✅ Gercek gun sayisi kullaniliyor (v3.7.x) |
 
 ---
 

@@ -1,9 +1,8 @@
 ﻿{
   "$schema": "https://opencode.ai/config.json",
-  "offline": true,
   "model": "openrouter/free",
   "small_model": "meta-llama/llama-3.3-70b-instruct:free",
-  "default_agent": "coder",
+  "default_agent": "hermes",
   "skills": {
     "paths": [
       ".opencode/skills"

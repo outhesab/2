@@ -23,11 +23,11 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 
 | # | Görev | Dosya | Durum |
 |---|-------|-------|-------|
-| 2.1 | Boş `catch {}` bloklarına `console.error` eklenecek (109 adet) | Tüm proje | ⬜ |
-| 2.2 | `catch (e) {}` bloklarına logger entegre edilecek (40 adet) | Tüm proje | ⬜ |
-| 2.3 | `logger.ts`'e crash reporting fonksiyonu eklenecek | `src/lib/logger.ts` | ✅ |
-| 2.4 | DB katmanına error boundary eklenecek | `src/hooks/db/core.ts`, `src/hooks/db/backup.ts` | ✅ |
-| 2.5 | `/* ignore */` yorumlu catch blokları gözden geçirilecek (5 dosya) | `dataIntegrityChecker.ts`, `offline-ai.ts`, `appConfig.ts`, `db/sync.ts`, `AnomaliOneri.tsx` | ✅ |
+|| 2.1 | Boş `catch {}` bloklarına `console.error` eklenecek (109 adet) | Tüm proje | ✅ (v3.7.1) |
+|| 2.2 | `catch (e) {}` bloklarına logger entegre edilecek (40 adet) | Tüm proje | ✅ (v3.7.1) |
+|| 2.3 | `logger.ts`'e crash reporting fonksiyonu eklenecek | `src/lib/logger.ts` | ✅ |
+|| 2.4 | DB katmanına error boundary eklenecek | `src/hooks/db/core.ts`, `src/hooks/db/backup.ts` | ✅ |
+|| 2.5 | `/* ignore */` yorumlu catch blokları gözden geçirilecek (5 dosya) | `dataIntegrityChecker.ts`, `offline-ai.ts`, `appConfig.ts`, `db/sync.ts`, `AnomaliOneri.tsx` | ✅ |
 
 ---
 
@@ -111,15 +111,15 @@ Proje analizi sonucu tespit edilen eksikliklerin giderilmesi için 6 haftalık p
 
 ## Durum Takip Özeti
 
-| Hafta | Toplam Görev | Tamamlanan | Kaldı |
-|-------|-------------|------------|-------|
-| 1. Hafta — Güvenlik | 7 | 6 | 1 |
-| 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
-| 3. Hafta — Tip Güvenliği | 5 | 0 | 5 |
-| 4. Hafta — Test (1) | 13 | 0 | 13 |
-| 5. Hafta — Test (2) | 12 | 0 | 12 |
-| 6. Hafta — Refactor | 15 | 0 | 15 |
-| **TOPLAM** | **57** | **0** | **57** |
+|| Hafta | Toplam Görev | Tamamlanan | Kaldı |
+||-------|-------------|------------|-------|
+|| 1. Hafta — Güvenlik | 7 | 7 | 0 |
+|| 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
+|| 3. Hafta — Tip Güvenliği | 5 | 5 | 0 |
+|| 4. Hafta — Test (1) | 13 | 0 | 13 |
+|| 5. Hafta — Test (2) | 12 | 0 | 12 |
+|| 6. Hafta — Refactor | 15 | 0 | 15 |
+|| **TOPLAM** | **57** | **17** | **40** |
 
 ---
 
