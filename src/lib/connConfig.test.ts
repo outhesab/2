@@ -1,0 +1,63 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { loadConnConfig, saveConnConfig, DEFAULT_CONN, type ConnConfig } from './connConfig';
+
+vi.mock('@/lib/logger', () => ({
+  logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
+
+vi.mock('@/lib/firebase', () => ({
+  readDoc: vi.fn(),
+  writeDoc: vi.fn(),
+  isFirebaseReady: vi.fn(() => true),
+}));
+
+const STORAGE_KEY = 'sobaConnConfig';
+
+describe('connConfig', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  describe('DEFAULT_CONN', () => {
+    it('should have firebase disabled by default', () => {
+      expect(DEFAULT_CONN.firebase.enabled).toBe(false);
+    });
+
+    it('should have activeProvider none', () => {
+      expect(DEFAULT_CONN.activeProvider).toBe('none');
+    });
+
+    it('should have supabase disabled', () => {
+      expect(DEFAULT_CONN.supabase.enabled).toBe(false);
+    });
+  });
+
+  describe('saveConnConfig', () => {
+    it('should save config to localStorage', () => {
+      const config: ConnConfig = {
+        firebase: { enabled: true, projectId: 'test-proj', apiKey: 'test-key', docPath: 'sync/main' },
+        supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' },
+        activeProvider: 'firebase',
+      };
+      saveConnConfig(config);
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+      expect(saved.firebase.projectId).toBe('test-proj');
+      expect(saved.activeProvider).toBe('firebase');
+    });
+  });
+
+  describe('loadConnConfig', () => {
+    it('should return DEFAULT_CONN when nothing saved', () => {
+      const config = loadConnConfig();
+      expect(config.activeProvider).toBe(DEFAULT_CONN.activeProvider);
+    });
+
+    it('should return saved config when available', () => {
+      const saved = { firebase: { enabled: true, projectId: 'saved-proj', apiKey: 'saved-key', docPath: 'sync/main' }, supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' }, activeProvider: 'firebase' as const };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+      const config = loadConnConfig();
+      expect(config.firebase.projectId).toBe('saved-proj');
+    });
+  });
+});
