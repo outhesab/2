@@ -79,6 +79,14 @@ export const CHANGELOG: VersionEntry[] = [
         text: 'Tum hooklarda Windows (Git Bash) uyumlulugu: jq -> node, %N+bc -> date+%s+$(()), grep -oP -> sed',
       },
       { type: 'duzeltme', text: 'package.json prepare script: "husky install" -> "husky" (Husky v9+ uyumu)' },
+      {
+        type: 'kaldirildi',
+        text: 'Husky v9 ve lint-staged kaldırıldı — simple-git-hooks tek başına yeterli, çakışma riski giderildi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'package.json cleanup: kullanılmayan husky, lint-staged, lint-staged.config.js kaldırıldı; prepare script "simple-git-hooks" olarak güncellendi',
+      },
     ],
   },
   {
