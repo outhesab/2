@@ -22,10 +22,18 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: '3.18.8',
     date: '10 Haziran 2026',
-    title: 'Git Hooks Sistemi & Husky v9 Entegrasyonu',
+    title: 'Settings & AIAsistan Split, Git Hooks Sistemi',
     summary:
-      'Husky v9 tabanli git hook sistemi kuruldu. 5 hook (pre-commit, pre-push, commit-msg, post-merge, post-checkout) + 5 helper script + lint-staged + dokumantasyon. Windows (Git Bash) uyumlu, cross-platform.',
+      'Settings.tsx 3069→1056 satıra indirildi (6 modüle ayrıldı). AIAsistan.tsx 1645→1374 satıra indirildi (yardımcı fonksiyonlar + ApiSettings ayrıldı). Husky v9 tabanlı git hook sistemi kuruldu.',
     changes: [
+      {
+        type: 'iyilestirme',
+        text: 'Settings.tsx parçalandı: 3069→1056 satır — SettingsActivity, SettingsBackup, SettingsPelet, SettingsRepair, SettingsData, SettingsShortcuts ayrı dosyalara çıkarıldı',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'AIAsistan.tsx parçalandı: 1645→1374 satır — AIAHelpers.tsx (MarkdownText, getActionAffectedIds, isDangerousAction, sourceLabel) ve AIASettings.tsx (ApiSettings) ayrı dosyalara çıkarıldı',
+      },
       {
         type: 'yeni',
         text: 'Husky v9+ git hook sistemi: pre-commit (6 adim), pre-push (5 adim), commit-msg (conventional commits), post-merge, post-checkout',
@@ -38,6 +46,14 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'yeni', text: 'docs/development/GIT_HOOKS.md: hook sistemi dokumantasyonu' },
       { type: 'yeni', text: 'docs/development/WORKFLOW.md: gelistirme is akisi ve branch stratejisi' },
       { type: 'yeni', text: 'scripts/setup-hooks.sh: manuel hook kurulum scripti' },
+      {
+        type: 'iyilestirme',
+        text: 'Settings son parçalama: KategoriYonetim, AboutPanel, AgentSettingsPanel ayri dosyalara çikarildi (SettingsKategoriYonetim, SettingsAboutPanel, SettingsAgentPanel)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Skin Transformation tamamlandi: corporate enterprise teması varsayilan, design-tokens.css light-first, ThemeProvider corporate default',
+      },
       {
         type: 'iyilestirme',
         text: 'pre-commit hook: lockfile senkronizasyonu, typecheck, ESLint+Prettier, JSON validasyonu (node ile, cross-platform), changelog kontrolu, korumali dosya uyarisi',

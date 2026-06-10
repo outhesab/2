@@ -1,8 +1,8 @@
 # PARSPEL — Master İyileştirme Planı
 
 > Oluşturulma: 5 Haziran 2026
-> Son güncelleme: 9 Haziran 2026
-> Kapsam: ~136 madde (30+ tamamlandı, çoğu v3.7.1-3'te düzeltildi)
+> Son güncelleme: 10 Haziran 2026
+> Kapsam: ~136 madde (40+ tamamlandı, çoğu v3.7.1-3'te düzeltildi)
 
 ---
 
@@ -15,7 +15,7 @@
 | A3 | `fiyatDuzelt` kar hesabı: tüm `items[]` güncellenir, total/profit items'dan hesaplanır | `SatisAgent.ts:266` | CRITICAL | ✓ DÜZELTİLDİ |
 | A4 | useDB init race: Firebase → IndexedDB sıralı yükleme | `core.ts:221,240` | CRITICAL | ✓ DÜZELTİLDİ |
 || A6 | `saveUsers` salt regex: `match(/../g)!` non-null assertion | `userManager.ts:147` | HIGH | ✓ DÜZELTİLDİ |
-|| A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | ✅ v3.7.x'te düzeltildi / test dosyası kaldırıldı | A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | ✅ v3.7.x'te düzeltildi / test dosyası kaldırıldı |
+|| A7 | P1 property test tautoloji: `beklenen === computed` aynı hesapla | `kapsamli-senaryo.test.ts:2729` | HIGH | ✅ v3.7.x'te düzeltildi / test dosyası kaldırıldı |
 
 ---
 
@@ -94,7 +94,7 @@
 
 ---
 
-## G — VERİ BÜTÜNLÜĞÜ (6) — 3/6 tamam
+## G — VERİ BÜTÜNLÜĞÜ (6) — 4/6 tamam
 
 | # | Sorun | Dosya:Sati | Durum |
 |---|-------|------------|-------|
@@ -163,7 +163,7 @@
 
 ## L — WEEKLY_PLAN'DAKİ YAPILMAMIŞ 57 İŞ
 
-> WEEKLY_PLAN.md'de 57 task'ın tamamı `[ ]` (başlanmamış)
+> WEEKLY_PLAN.md'de 57 task'tan 38'i tamamlandı, 19'u kaldı
 
 | Hafta | Konu | Task Sayısı |
 |-------|------|:-----------:|
@@ -171,7 +171,7 @@
 | Week 2 | Hata yönetimi — boş catch, logger, crash reporting | 5 |
 | Week 3 | Tip güvenliği — any temizliği, noUnusedLocals | 5 |
 | Week 4 | Test kapsamı — testing-library, lib testleri | 13 |
-| Week 5 | Test kapsamı — agent testleri, DB testleri | 12 |
+| Week 5 | Test kapsamı — agent testleri, DB testleri | 8/12 |
 | Week 6 | Refactor — Settings/AIAsistan/Fatura bölme, dead code | 15 |
 
 ---
@@ -184,6 +184,8 @@
 | duplicate clone groups | 140 | 126 | ▼ 14 |
 | health issues | 474 | 440 | ▼ 34 |
 | maintainability | 83.3 | 89.2 | ▲ 5.9 |
+
+> Ölçüm tarihi: 5 Haziran 2026
 
 ## YAPILAN ANA DEĞİŞİKLİKLER
 

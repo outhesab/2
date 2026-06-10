@@ -15,7 +15,13 @@ import {
   fullRestoreDB,
   type RestoreReport,
 } from './backup';
-import { validateAndClassify, computeAuditStatus, saveBlockedState, saveAppliedState } from './dbHelpers';
+import {
+  validateAndClassify,
+  computeAuditStatus,
+  saveBlockedState,
+  saveAppliedState,
+  getFirebasePromise,
+} from './dbHelpers';
 
 export interface DBError {
   message: string;
@@ -29,6 +35,17 @@ export type { SyncStatus, RestoreReport };
 
 const STORAGE_KEY = 'sobaYonetim';
 const INDEXED_SNAPSHOT_KEY = 'primary';
+
+// G4 fix: track in-flight Firebase sync promise for ordered writes
+let _pendingFirebasePromise: Promise<void> | null = null;
+
+export function getPendingFirebasePromise(): Promise<void> | null {
+  return _pendingFirebasePromise;
+}
+
+export function setPendingFirebasePromise(p: Promise<void> | null): void {
+  _pendingFirebasePromise = p;
+}
 
 async function saveToIndexedSnapshot(db: DB): Promise<void> {
   const t = logger.time('db', 'IndexedSnapshot yaz');
@@ -488,7 +505,10 @@ export function useDB() {
       ut.end({ version: restored._version });
       if (syncTimer.current) clearTimeout(syncTimer.current);
       syncTimer.current = setTimeout(() => {
-        saveToFirebase(restored);
+        // firebase sync (fire-and-forget)
+        if (!getFirebasePromise()) {
+          void saveToFirebase(restored);
+        }
       }, 1200);
       return restored;
     });

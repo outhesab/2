@@ -1,8 +1,29 @@
-import type { DB, RuleViolation, AuditEntry } from "@/types";
-import { trimAuditLog } from "@/lib/auditEngine";
-import { logger } from "@/lib/logger";
-import { validateTransaction } from "@/lib/ruleEngine";
-import { saveToFirebase } from "./sync";
+import type { DB, RuleViolation, AuditEntry } from '@/types';
+import { trimAuditLog } from '@/lib/auditEngine';
+import { logger } from '@/lib/logger';
+import { validateTransaction } from '@/lib/ruleEngine';
+import { saveToFirebase } from './sync';
+
+// G4 fix: shared pending promise reference
+let _firebasePromise: Promise<void> | null = null;
+export function getFirebasePromise() {
+  return _firebasePromise;
+}
+
+async function scheduleFirebaseSave(db: DB): Promise<void> {
+  // Chain saves: wait for previous, then schedule new one
+  if (_firebasePromise) {
+    try {
+      await _firebasePromise;
+    } catch {
+      /* previous failed, continue */
+    }
+  }
+  _firebasePromise = saveToFirebase(db);
+  _firebasePromise.finally(() => {
+    _firebasePromise = null;
+  });
+}
 
 export function validateAndClassify(
   prev: DB,
@@ -13,18 +34,15 @@ export function validateAndClassify(
   try {
     violations = validateTransaction(prev, next);
   } catch (e) {
-    logger.warn("db", warnMsg, { error: String(e) });
+    logger.warn('db', warnMsg, { error: String(e) });
   }
-  const hasBlock = violations.some((v) => v.severity === "block");
-  const hasWarn = violations.some((v) => v.severity === "warn");
+  const hasBlock = violations.some((v) => v.severity === 'block');
+  const hasWarn = violations.some((v) => v.severity === 'warn');
   return { violations, hasBlock, hasWarn };
 }
 
-export function computeAuditStatus(
-  hasBlock: boolean,
-  hasWarn: boolean,
-): "applied" | "blocked" | "warned" {
-  return hasBlock ? "blocked" : hasWarn ? "warned" : "applied";
+export function computeAuditStatus(hasBlock: boolean, hasWarn: boolean): 'applied' | 'blocked' | 'warned' {
+  return hasBlock ? 'blocked' : hasWarn ? 'warned' : 'applied';
 }
 
 export function saveBlockedState(
@@ -43,10 +61,8 @@ export function saveBlockedState(
   saveToStorage(auditOnly);
   void saveToIndexedSnapshot(auditOnly);
   end({ version: prev._version, blocked: true });
-  logger.warn("db", `${source}: İşlem engellendi`, {
-    violations: violations
-      .filter((v) => v.severity === "block")
-      .map((v) => v.ruleId),
+  logger.warn('db', `${source}: İşlem engellendi`, {
+    violations: violations.filter((v) => v.severity === 'block').map((v) => v.ruleId),
   });
   return auditOnly;
 }
@@ -69,7 +85,7 @@ export function saveAppliedState(
   end({ version: withAudit._version, ...extraEndMeta });
   if (syncTimer.current) clearTimeout(syncTimer.current);
   syncTimer.current = setTimeout(() => {
-    saveToFirebase(withAudit);
+    scheduleFirebaseSave(withAudit);
   }, 1200);
   return withAudit;
 }

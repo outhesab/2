@@ -1,6 +1,6 @@
-import { exportArrayToExcel as exportToExcel } from "@/lib/excelExport";
-import { downloadObjectSheetsAsXlsx } from "@/lib/safeXlsx";
-import { formatDate, formatMoney } from "@/lib/utils-tr";
+import { exportArrayToExcel as exportToExcel } from '@/lib/excelExport';
+import { downloadObjectSheetsAsXlsx } from '@/lib/safeXlsx';
+import { formatDate, formatMoney } from '@/lib/utils-tr';
 import {
   computeAlacak,
   computeBorc,
@@ -8,9 +8,10 @@ import {
   computeStokDeger,
   getLowStockProducts,
   getOutOfStockProducts,
-} from "@/lib/dbUtils";
-import type { DB } from "@/types";
-import { useMemo, useState } from "react";
+} from '@/lib/dbUtils';
+import type { DB } from '@/types';
+import { useMemo, useState } from 'react';
+import styles from '@/styles/common.module.css';
 import {
   Area,
   AreaChart,
@@ -24,57 +25,42 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from 'recharts';
 
 interface Props {
   db: DB;
 }
 
-const COLORS = [
-  "#ff5722",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#84cc16",
-];
+const COLORS = ['#ff5722', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 const TT_STYLE = {
-  background: "#0f172a",
-  border: "1px solid #334155",
+  background: '#0f172a',
+  border: '1px solid #334155',
   borderRadius: 8,
-  color: "var(--text-primary)",
-  fontSize: "0.82rem",
+  color: 'var(--text-primary)',
+  fontSize: '0.82rem',
 };
 const CARD = {
-  background: "linear-gradient(135deg,#1a2740,#0f1e35)",
+  background: 'linear-gradient(135deg,#1a2740,#0f1e35)',
   borderRadius: 14,
-  padding: "16px 18px",
-  border: "1px solid rgba(255,255,255,0.07)",
+  padding: '16px 18px',
+  border: '1px solid rgba(255,255,255,0.07)',
 };
 
-type Tab = "ozet" | "satis" | "urun" | "cari" | "kasa" | "olusturucu";
-type Period = "bu_ay" | "gecen_ay" | "bu_yil" | "ozel";
+type Tab = 'ozet' | 'satis' | 'urun' | 'cari' | 'kasa' | 'olusturucu';
+type Period = 'bu_ay' | 'gecen_ay' | 'bu_yil' | 'ozel';
 
-function periodDates(
-  p: Period,
-  from: string,
-  to: string,
-): { start: Date; end: Date } {
+function periodDates(p: Period, from: string, to: string): { start: Date; end: Date } {
   const now = new Date();
-  if (p === "bu_ay")
-    return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
-  if (p === "gecen_ay")
+  if (p === 'bu_ay') return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
+  if (p === 'gecen_ay')
     return {
       start: new Date(now.getFullYear(), now.getMonth() - 1, 1),
       end: new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59),
     };
-  if (p === "bu_yil")
-    return { start: new Date(now.getFullYear(), 0, 1), end: now };
+  if (p === 'bu_yil') return { start: new Date(now.getFullYear(), 0, 1), end: now };
   return {
     start: from ? new Date(from) : new Date(2000, 0, 1),
-    end: to ? new Date(to + "T23:59:59") : now,
+    end: to ? new Date(to + 'T23:59:59') : now,
   };
 }
 
@@ -82,17 +68,17 @@ function EmptyChart() {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         height: 160,
-        color: "#334155",
-        flexDirection: "column",
+        color: '#334155',
+        flexDirection: 'column',
         gap: 8,
       }}
     >
-      <span style={{ fontSize: "2rem", opacity: 0.3 }}>📊</span>
-      <span style={{ fontSize: "0.82rem" }}>Veri yok</span>
+      <span style={{ fontSize: '2rem', opacity: 0.3 }}>📊</span>
+      <span style={{ fontSize: '0.82rem' }}>Veri yok</span>
     </div>
   );
 }
@@ -114,19 +100,19 @@ function KpiCard({
     <div style={{ ...CARD, borderColor: `${color}25` }}>
       <div
         style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
           marginBottom: 8,
         }}
       >
-        <span style={{ fontSize: "1.4rem" }}>{icon}</span>
+        <span style={{ fontSize: '1.4rem' }}>{icon}</span>
         <span
           style={{
-            fontSize: "0.68rem",
+            fontSize: '0.68rem',
             color: color,
             background: `${color}18`,
-            padding: "2px 8px",
+            padding: '2px 8px',
             borderRadius: 20,
             fontWeight: 700,
           }}
@@ -136,20 +122,16 @@ function KpiCard({
       </div>
       <div
         style={{
-          fontSize: "1.4rem",
+          fontSize: '1.4rem',
           fontWeight: 900,
           color,
-          letterSpacing: "-0.02em",
+          letterSpacing: '-0.02em',
           lineHeight: 1.1,
         }}
       >
         {value}
       </div>
-      {sub && (
-        <div style={{ color: "#475569", fontSize: "0.75rem", marginTop: 4 }}>
-          {sub}
-        </div>
-      )}
+      {sub && <div style={{ color: '#475569', fontSize: '0.75rem', marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }
@@ -166,25 +148,25 @@ function SectionBox({
   return (
     <div
       style={{
-        background: "#111e33",
+        background: '#111e33',
         borderRadius: 14,
         padding: 20,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: '1px solid rgba(255,255,255,0.06)',
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           marginBottom: 16,
         }}
       >
         <h3
           style={{
             fontWeight: 700,
-            color: "var(--text-primary)",
-            fontSize: "0.95rem",
+            color: 'var(--text-primary)',
+            fontSize: '0.95rem',
             margin: 0,
           }}
         >
@@ -203,22 +185,17 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
     () =>
       db.sales.filter(
         (s) =>
-          s.status === "tamamlandi" &&
-          !s.deleted &&
-          new Date(s.createdAt) >= start &&
-          new Date(s.createdAt) <= end,
+          s.status === 'tamamlandi' && !s.deleted && new Date(s.createdAt) >= start && new Date(s.createdAt) <= end,
       ),
     [db.sales, start, end],
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const prevStart = new Date(
-    start.getTime() - (end.getTime() - start.getTime()),
-  );
+  const prevStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
   const prevSales = useMemo(
     () =>
       db.sales.filter(
         (s) =>
-          s.status === "tamamlandi" &&
+          s.status === 'tamamlandi' &&
           !s.deleted &&
           new Date(s.createdAt) >= prevStart &&
           new Date(s.createdAt) < start,
@@ -229,11 +206,8 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const ciro = sales.reduce((s, x) => s + x.total, 0);
   const kar = sales.reduce((s, x) => s + x.profit, 0);
   const prevCiro = prevSales.reduce((s, x) => s + x.total, 0);
-  prevSales.reduce((s, x) => s + x.profit, 0);
   const delta = (curr: number, prev: number) =>
-    prev === 0
-      ? null
-      : `${curr >= prev ? "▲" : "▼"} %${Math.abs(((curr - prev) / prev) * 100).toFixed(1)}`;
+    prev === 0 ? null : `${curr >= prev ? '▲' : '▼'} %${Math.abs(((curr - prev) / prev) * 100).toFixed(1)}`;
 
   const alacak = computeAlacak(db);
   void computeBorc(db);
@@ -246,19 +220,19 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
     for (let i = 13; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const key = d.toLocaleDateString("tr-TR", {
-        day: "2-digit",
-        month: "short",
+      const key = d.toLocaleDateString('tr-TR', {
+        day: '2-digit',
+        month: 'short',
       });
       map[key] = { ciro: 0, kar: 0 };
     }
     db.sales
-      .filter((s) => s.status === "tamamlandi" && !s.deleted)
+      .filter((s) => s.status === 'tamamlandi' && !s.deleted)
       .forEach((s) => {
         const d = new Date(s.createdAt);
-        const key = d.toLocaleDateString("tr-TR", {
-          day: "2-digit",
-          month: "short",
+        const key = d.toLocaleDateString('tr-TR', {
+          day: '2-digit',
+          month: 'short',
         });
         if (map[key]) {
           map[key].ciro += s.total;
@@ -269,11 +243,11 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
   }, [db.sales]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className={styles.flexCol20}>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
           gap: 12,
         }}
       >
@@ -298,24 +272,9 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
           sub={delta(sales.length, prevSales.length) || undefined}
           color="#f59e0b"
         />
-        <KpiCard
-          icon="👤"
-          label="Alacak"
-          value={formatMoney(alacak)}
-          color="#ef4444"
-        />
-        <KpiCard
-          icon="🏦"
-          label="Kasa"
-          value={formatMoney(kasaToplam)}
-          color="#8b5cf6"
-        />
-        <KpiCard
-          icon="📦"
-          label="Stok Değeri"
-          value={formatMoney(stokDeger)}
-          color="#06b6d4"
-        />
+        <KpiCard icon="👤" label="Alacak" value={formatMoney(alacak)} color="#ef4444" />
+        <KpiCard icon="🏦" label="Kasa" value={formatMoney(kasaToplam)} color="#8b5cf6" />
+        <KpiCard icon="📦" label="Stok Değeri" value={formatMoney(stokDeger)} color="#06b6d4" />
       </div>
 
       <SectionBox title="📅 Son 14 Gün — Günlük Ciro & Kâr">
@@ -334,17 +293,12 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
               <YAxis
-                tick={{ fontSize: 10, fill: "#64748b" }}
-                tickFormatter={(v) =>
-                  v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
-                }
+                tick={{ fontSize: 10, fill: '#64748b' }}
+                tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))}
               />
-              <Tooltip
-                formatter={(v: number) => [formatMoney(v), ""]}
-                contentStyle={TT_STYLE}
-              />
+              <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
               <Legend />
               <Area
                 type="monotone"
@@ -369,7 +323,7 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
         )}
       </SectionBox>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <SectionBox title="⚠️ Stok Uyarıları">
           {(() => {
             const out = getOutOfStockProducts(db);
@@ -378,9 +332,9 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
               return (
                 <div
                   style={{
-                    color: "#10b981",
-                    fontSize: "0.85rem",
-                    padding: "12px 0",
+                    color: '#10b981',
+                    fontSize: '0.85rem',
+                    padding: '12px 0',
                   }}
                 >
                   ✅ Tüm stoklar yeterli
@@ -389,33 +343,31 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
             return (
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: 6,
                   maxHeight: 200,
-                  overflowY: "auto",
+                  overflowY: 'auto',
                 }}
               >
                 {out.map((p) => (
                   <div
                     key={p.id}
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "6px 10px",
-                      background: "rgba(239,68,68,0.08)",
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '6px 10px',
+                      background: 'rgba(239,68,68,0.08)',
                       borderRadius: 8,
-                      border: "1px solid rgba(239,68,68,0.2)",
+                      border: '1px solid rgba(239,68,68,0.2)',
                     }}
                   >
-                    <span style={{ color: "#fca5a5", fontSize: "0.83rem" }}>
-                      {p.name}
-                    </span>
+                    <span style={{ color: '#fca5a5', fontSize: '0.83rem' }}>{p.name}</span>
                     <span
                       style={{
-                        color: "#ef4444",
+                        color: '#ef4444',
                         fontWeight: 700,
-                        fontSize: "0.78rem",
+                        fontSize: '0.78rem',
                       }}
                     >
                       BĐTĐ
@@ -426,22 +378,20 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
                   <div
                     key={p.id}
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "6px 10px",
-                      background: "rgba(245,158,11,0.08)",
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: '6px 10px',
+                      background: 'rgba(245,158,11,0.08)',
                       borderRadius: 8,
-                      border: "1px solid rgba(245,158,11,0.2)",
+                      border: '1px solid rgba(245,158,11,0.2)',
                     }}
                   >
-                    <span style={{ color: "#fcd34d", fontSize: "0.83rem" }}>
-                      {p.name}
-                    </span>
+                    <span style={{ color: '#fcd34d', fontSize: '0.83rem' }}>{p.name}</span>
                     <span
                       style={{
-                        color: "#f59e0b",
+                        color: '#f59e0b',
                         fontWeight: 700,
-                        fontSize: "0.78rem",
+                        fontSize: '0.78rem',
                       }}
                     >
                       {p.stock} adet
@@ -456,28 +406,25 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
         <SectionBox title="🏆 Top 5 Müşteri (Alacak)">
           {(() => {
             const top = [...db.cari]
-              .filter((c) => c.type === "musteri" && c.balance > 0)
+              .filter((c) => c.type === 'musteri' && c.balance > 0)
               .sort((a, b) => b.balance - a.balance)
               .slice(0, 5);
             if (!top.length) return <EmptyChart />;
             return (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {top.map((c, i) => (
-                  <div
-                    key={c.id}
-                    style={{ display: "flex", alignItems: "center", gap: 8 }}
-                  >
+                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span
                       style={{
                         width: 22,
                         height: 22,
-                        borderRadius: "50%",
+                        borderRadius: '50%',
                         background: COLORS[i],
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        fontSize: "0.68rem",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontSize: '0.68rem',
                         fontWeight: 700,
                         flexShrink: 0,
                       }}
@@ -487,20 +434,20 @@ function TabOzet({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     <span
                       style={{
                         flex: 1,
-                        color: "#cbd5e1",
-                        fontSize: "0.83rem",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        color: '#cbd5e1',
+                        fontSize: '0.83rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {c.name}
                     </span>
                     <span
                       style={{
-                        color: "#ef4444",
+                        color: '#ef4444',
                         fontWeight: 700,
-                        fontSize: "0.83rem",
+                        fontSize: '0.83rem',
                       }}
                     >
                       {formatMoney(c.balance)}
@@ -522,10 +469,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
     () =>
       db.sales.filter(
         (s) =>
-          s.status === "tamamlandi" &&
-          !s.deleted &&
-          new Date(s.createdAt) >= start &&
-          new Date(s.createdAt) <= end,
+          s.status === 'tamamlandi' && !s.deleted && new Date(s.createdAt) >= start && new Date(s.createdAt) <= end,
       ),
     [db.sales, start, end],
   );
@@ -533,9 +477,9 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const monthlyData = useMemo(() => {
     const map: Record<string, { ciro: number; kar: number; adet: number }> = {};
     sales.forEach((s) => {
-      const key = new Date(s.createdAt).toLocaleDateString("tr-TR", {
-        month: "short",
-        year: "2-digit",
+      const key = new Date(s.createdAt).toLocaleDateString('tr-TR', {
+        month: 'short',
+        year: '2-digit',
       });
       if (!map[key]) map[key] = { ciro: 0, kar: 0, adet: 0 };
       map[key].ciro += s.total;
@@ -551,10 +495,10 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
       map[s.payment] = (map[s.payment] || 0) + s.total;
     });
     const labels: Record<string, string> = {
-      nakit: "💵 Nakit",
-      kart: "💳 Kart",
-      havale: "🏦 Havale",
-      cari: "👤 Cari",
+      nakit: '💵 Nakit',
+      kart: '💳 Kart',
+      havale: '🏦 Havale',
+      cari: '👤 Cari',
     };
     return Object.entries(map).map(([k, v]) => ({
       name: labels[k] || k,
@@ -565,7 +509,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const categoryData = useMemo(() => {
     const map: Record<string, { ciro: number; kar: number; adet: number }> = {};
     sales.forEach((s) => {
-      const cat = s.productCategory || "Diğer";
+      const cat = s.productCategory || 'Diğer';
       if (!map[cat]) map[cat] = { ciro: 0, kar: 0, adet: 0 };
       map[cat].ciro += s.total;
       map[cat].kar += s.profit;
@@ -577,11 +521,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
   }, [sales]);
 
   const iadeler = db.sales.filter(
-    (s) =>
-      s.status === "iade" &&
-      !s.deleted &&
-      new Date(s.createdAt) >= start &&
-      new Date(s.createdAt) <= end,
+    (s) => s.status === 'iade' && !s.deleted && new Date(s.createdAt) >= start && new Date(s.createdAt) <= end,
   );
   const ciro = sales.reduce((s, x) => s + x.total, 0);
   const kar = sales.reduce((s, x) => s + x.profit, 0);
@@ -591,33 +531,28 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
       sales.map((s) => ({
         Tarih: formatDate(s.createdAt),
         Ürün: s.productName,
-        Kategori: s.productCategory || "",
+        Kategori: s.productCategory || '',
         Adet: s.quantity,
-        "Birim Fiyat": s.unitPrice,
+        'Birim Fiyat': s.unitPrice,
         Toplam: s.total,
         Kâr: s.profit,
         Ödeme: s.payment,
-        Müşteri: s.cariName || "",
+        Müşteri: s.cariName || '',
       })),
-      "satis-raporu",
+      'satis-raporu',
     );
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className={styles.flexCol20}>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
           gap: 12,
         }}
       >
-        <KpiCard
-          icon="💰"
-          label="Dönem Ciro"
-          value={formatMoney(ciro)}
-          color="#10b981"
-        />
+        <KpiCard icon="💰" label="Dönem Ciro" value={formatMoney(ciro)} color="#10b981" />
         <KpiCard
           icon="📈"
           label="Dönem Kâr"
@@ -625,18 +560,8 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
           sub={`Marj: %${ciro ? ((kar / ciro) * 100).toFixed(1) : 0}`}
           color="#3b82f6"
         />
-        <KpiCard
-          icon="🛒"
-          label="Satış Adedi"
-          value={String(sales.length)}
-          color="#f59e0b"
-        />
-        <KpiCard
-          icon="🔄"
-          label="İade"
-          value={String(iadeler.length)}
-          color="#ef4444"
-        />
+        <KpiCard icon="🛒" label="Satış Adedi" value={String(sales.length)} color="#f59e0b" />
+        <KpiCard icon="🔄" label="İade" value={String(iadeler.length)} color="#ef4444" />
         <KpiCard
           icon="🎯"
           label="Ort. Sepet"
@@ -651,20 +576,20 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <SectionBox
           title="📅 Aylık Ciro & Kâr"
           action={
             <button
               onClick={handleExport}
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                background: 'rgba(16,185,129,0.12)',
+                border: '1px solid rgba(16,185,129,0.25)',
                 borderRadius: 8,
-                color: "#10b981",
-                padding: "5px 12px",
-                cursor: "pointer",
-                fontSize: "0.78rem",
+                color: '#10b981',
+                padding: '5px 12px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
                 fontWeight: 600,
               }}
             >
@@ -677,33 +602,15 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyData}>
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: "#64748b" }}
-                />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
                 <YAxis
-                  tick={{ fontSize: 10, fill: "#64748b" }}
-                  tickFormatter={(v) =>
-                    v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
-                  }
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))}
                 />
-                <Tooltip
-                  formatter={(v: number) => [formatMoney(v), ""]}
-                  contentStyle={TT_STYLE}
-                />
+                <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
                 <Legend />
-                <Bar
-                  dataKey="ciro"
-                  fill="#ff5722"
-                  name="Ciro"
-                  radius={[3, 3, 0, 0]}
-                />
-                <Bar
-                  dataKey="kar"
-                  fill="#10b981"
-                  name="Kâr"
-                  radius={[3, 3, 0, 0]}
-                />
+                <Bar dataKey="ciro" fill="#ff5722" name="Ciro" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="kar" fill="#10b981" name="Kâr" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -729,10 +636,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(v: number) => [formatMoney(v), ""]}
-                  contentStyle={TT_STYLE}
-                />
+                <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -744,25 +648,25 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
         {categoryData.length === 0 ? (
           <EmptyChart />
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div className={styles.overflowAuto}>
             <table
               style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.85rem",
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.85rem',
               }}
             >
               <thead>
-                <tr style={{ borderBottom: "1px solid #1e3a5f" }}>
-                  {["Kategori", "Ciro", "Kâr", "Marj %", "Adet"].map((h) => (
+                <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
+                  {['Kategori', 'Ciro', 'Kâr', 'Marj %', 'Adet'].map((h) => (
                     <th
                       key={h}
                       style={{
-                        padding: "8px 12px",
-                        color: "#475569",
+                        padding: '8px 12px',
+                        color: '#475569',
                         fontWeight: 600,
-                        textAlign: h === "Kategori" ? "left" : "right",
-                        whiteSpace: "nowrap",
+                        textAlign: h === 'Kategori' ? 'left' : 'right',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {h}
@@ -772,23 +676,20 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
               </thead>
               <tbody>
                 {categoryData.map((c, i) => (
-                  <tr
-                    key={i}
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                  >
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <td
                       style={{
-                        padding: "9px 12px",
-                        color: "var(--text-primary)",
+                        padding: '9px 12px',
+                        color: 'var(--text-primary)',
                         fontWeight: 600,
                       }}
                     >
                       <span
                         style={{
-                          display: "inline-block",
+                          display: 'inline-block',
                           width: 8,
                           height: 8,
-                          borderRadius: "50%",
+                          borderRadius: '50%',
                           background: COLORS[i % COLORS.length],
                           marginRight: 8,
                         }}
@@ -797,41 +698,37 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     </td>
                     <td
                       style={{
-                        padding: "9px 12px",
-                        color: "#10b981",
+                        padding: '9px 12px',
+                        color: '#10b981',
                         fontWeight: 700,
-                        textAlign: "right",
+                        textAlign: 'right',
                       }}
                     >
                       {formatMoney(c.ciro)}
                     </td>
                     <td
                       style={{
-                        padding: "9px 12px",
-                        color: "#3b82f6",
-                        textAlign: "right",
+                        padding: '9px 12px',
+                        color: '#3b82f6',
+                        textAlign: 'right',
                       }}
                     >
                       {formatMoney(c.kar)}
                     </td>
                     <td
                       style={{
-                        padding: "9px 12px",
-                        color: c.ciro
-                          ? c.kar / c.ciro > 0.2
-                            ? "#10b981"
-                            : "#f59e0b"
-                          : "#64748b",
-                        textAlign: "right",
+                        padding: '9px 12px',
+                        color: c.ciro ? (c.kar / c.ciro > 0.2 ? '#10b981' : '#f59e0b') : '#64748b',
+                        textAlign: 'right',
                       }}
                     >
                       %{c.ciro ? ((c.kar / c.ciro) * 100).toFixed(1) : 0}
                     </td>
                     <td
                       style={{
-                        padding: "9px 12px",
-                        color: "var(--text-dim)",
-                        textAlign: "right",
+                        padding: '9px 12px',
+                        color: 'var(--text-dim)',
+                        textAlign: 'right',
                       }}
                     >
                       {c.adet}
@@ -849,9 +746,7 @@ function TabSatis({ db, start, end }: { db: DB; start: Date; end: Date }) {
 
 // ── Sekme: Ürün & Stok ───────────────────────────────────────────────────────
 function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
-  const [sortBy, setSortBy] = useState<"ciro" | "kar" | "adet" | "marj">(
-    "ciro",
-  );
+  const [sortBy, setSortBy] = useState<'ciro' | 'kar' | 'adet' | 'marj'>('ciro');
 
   const productStats = useMemo(() => {
     const map: Record<
@@ -870,10 +765,7 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
     db.sales
       .filter(
         (s) =>
-          s.status === "tamamlandi" &&
-          !s.deleted &&
-          new Date(s.createdAt) >= start &&
-          new Date(s.createdAt) <= end,
+          s.status === 'tamamlandi' && !s.deleted && new Date(s.createdAt) >= start && new Date(s.createdAt) <= end,
       )
       .forEach((s) => {
         const id = s.productId || s.productName;
@@ -881,7 +773,7 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
         if (!map[id])
           map[id] = {
             name: s.productName,
-            category: s.productCategory || "",
+            category: s.productCategory || '',
             ciro: 0,
             kar: 0,
             adet: 0,
@@ -894,9 +786,9 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
         map[id].adet += s.quantity;
       });
     return Object.values(map).sort((a, b) => {
-      if (sortBy === "ciro") return b.ciro - a.ciro;
-      if (sortBy === "kar") return b.kar - a.kar;
-      if (sortBy === "adet") return b.adet - a.adet;
+      if (sortBy === 'ciro') return b.ciro - a.ciro;
+      if (sortBy === 'kar') return b.kar - a.kar;
+      if (sortBy === 'adet') return b.adet - a.adet;
       return (b.ciro ? b.kar / b.ciro : 0) - (a.ciro ? a.kar / a.ciro : 0);
     });
   }, [db.sales, db.products, start, end, sortBy]);
@@ -919,96 +811,62 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
         Kategori: p.category,
         Ciro: p.ciro,
         Kâr: p.kar,
-        "Marj %": p.ciro ? +((p.kar / p.ciro) * 100).toFixed(1) : 0,
-        "Satış Adedi": p.adet,
-        "Mevcut Stok": p.stock,
+        'Marj %': p.ciro ? +((p.kar / p.ciro) * 100).toFixed(1) : 0,
+        'Satış Adedi': p.adet,
+        'Mevcut Stok': p.stock,
       })),
-      "urun-raporu",
+      'urun-raporu',
     );
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className={styles.flexCol20}>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))',
           gap: 12,
         }}
       >
-        <KpiCard
-          icon="📦"
-          label="Toplam Ürün"
-          value={String(stokDurum.toplam)}
-          color="#06b6d4"
-        />
-        <KpiCard
-          icon="✅"
-          label="Normal Stok"
-          value={String(stokDurum.normal)}
-          color="#10b981"
-        />
-        <KpiCard
-          icon="⚠️"
-          label="Az Stok"
-          value={String(stokDurum.az)}
-          color="#f59e0b"
-        />
-        <KpiCard
-          icon="❌"
-          label="Biten"
-          value={String(stokDurum.biten)}
-          color="#ef4444"
-        />
-        <KpiCard
-          icon="💎"
-          label="Stok Değeri"
-          value={formatMoney(stokDurum.deger)}
-          color="#8b5cf6"
-        />
+        <KpiCard icon="📦" label="Toplam Ürün" value={String(stokDurum.toplam)} color="#06b6d4" />
+        <KpiCard icon="✅" label="Normal Stok" value={String(stokDurum.normal)} color="#10b981" />
+        <KpiCard icon="⚠️" label="Az Stok" value={String(stokDurum.az)} color="#f59e0b" />
+        <KpiCard icon="❌" label="Biten" value={String(stokDurum.biten)} color="#ef4444" />
+        <KpiCard icon="💎" label="Stok Değeri" value={formatMoney(stokDurum.deger)} color="#8b5cf6" />
       </div>
 
       <SectionBox
         title="🏆 Ürün Performansı"
         action={
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {(["ciro", "kar", "adet", "marj"] as const).map((s) => (
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {(['ciro', 'kar', 'adet', 'marj'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setSortBy(s)}
                 style={{
-                  background:
-                    sortBy === s
-                      ? "rgba(255,87,34,0.2)"
-                      : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${sortBy === s ? "rgba(255,87,34,0.4)" : "rgba(255,255,255,0.07)"}`,
+                  background: sortBy === s ? 'rgba(255,87,34,0.2)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${sortBy === s ? 'rgba(255,87,34,0.4)' : 'rgba(255,255,255,0.07)'}`,
                   borderRadius: 6,
-                  color: sortBy === s ? "#ff7043" : "#64748b",
-                  padding: "4px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.75rem",
+                  color: sortBy === s ? '#ff7043' : '#64748b',
+                  padding: '4px 10px',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
                   fontWeight: 600,
                 }}
               >
-                {s === "ciro"
-                  ? "Ciro"
-                  : s === "kar"
-                    ? "Kâr"
-                    : s === "adet"
-                      ? "Adet"
-                      : "Marj"}
+                {s === 'ciro' ? 'Ciro' : s === 'kar' ? 'Kâr' : s === 'adet' ? 'Adet' : 'Marj'}
               </button>
             ))}
             <button
               onClick={handleExport}
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                background: 'rgba(16,185,129,0.12)',
+                border: '1px solid rgba(16,185,129,0.25)',
                 borderRadius: 6,
-                color: "#10b981",
-                padding: "4px 10px",
-                cursor: "pointer",
-                fontSize: "0.75rem",
+                color: '#10b981',
+                padding: '4px 10px',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
                 fontWeight: 600,
               }}
             >
@@ -1020,47 +878,44 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
         <div
           style={{
             marginBottom: 10,
-            padding: "7px 10px",
-            background: "rgba(245,158,11,0.07)",
-            border: "1px solid rgba(245,158,11,0.2)",
+            padding: '7px 10px',
+            background: 'rgba(245,158,11,0.07)',
+            border: '1px solid rgba(245,158,11,0.2)',
             borderRadius: 8,
-            fontSize: "0.75rem",
-            color: "#f59e0b",
+            fontSize: '0.75rem',
+            color: '#f59e0b',
           }}
         >
-          ℹ️ Kâr ve marj değerleri satış anındaki maliyete göre hesaplanır. Ürün
-          maliyeti sonradan değiştirilirse geçmiş satışlar etkilenmez.
+          ℹ️ Kâr ve marj değerleri satış anındaki maliyete göre hesaplanır. Ürün maliyeti sonradan değiştirilirse geçmiş
+          satışlar etkilenmez.
         </div>
         {productStats.length === 0 ? (
           <EmptyChart />
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div className={styles.overflowAuto}>
             <table
               style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.83rem",
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.83rem',
               }}
             >
               <thead>
-                <tr style={{ borderBottom: "1px solid #1e3a5f" }}>
-                  {["#", "Ürün", "Ciro", "Kâr", "Marj", "Adet", "Stok"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "7px 10px",
-                          color: "#475569",
-                          fontWeight: 600,
-                          textAlign:
-                            h === "Ürün" || h === "#" ? "left" : "right",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
+                <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
+                  {['#', 'Ürün', 'Ciro', 'Kâr', 'Marj', 'Adet', 'Stok'].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: '7px 10px',
+                        color: '#475569',
+                        fontWeight: 600,
+                        textAlign: h === 'Ürün' || h === '#' ? 'left' : 'right',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -1070,54 +925,47 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
                     <tr
                       key={i}
                       style={{
-                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                        borderBottom: '1px solid rgba(255,255,255,0.03)',
                       }}
                     >
-                      <td style={{ padding: "8px 10px", color: "#475569" }}>
-                        {i + 1}
-                      </td>
+                      <td style={{ padding: '8px 10px', color: '#475569' }}>{i + 1}</td>
                       <td
                         style={{
-                          padding: "8px 10px",
-                          color: "var(--text-primary)",
+                          padding: '8px 10px',
+                          color: 'var(--text-primary)',
                           fontWeight: 500,
                           maxWidth: 200,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         {p.name}
                       </td>
                       <td
                         style={{
-                          padding: "8px 10px",
-                          color: "#10b981",
+                          padding: '8px 10px',
+                          color: '#10b981',
                           fontWeight: 700,
-                          textAlign: "right",
+                          textAlign: 'right',
                         }}
                       >
                         {formatMoney(p.ciro)}
                       </td>
                       <td
                         style={{
-                          padding: "8px 10px",
-                          color: "#3b82f6",
-                          textAlign: "right",
+                          padding: '8px 10px',
+                          color: '#3b82f6',
+                          textAlign: 'right',
                         }}
                       >
                         {formatMoney(p.kar)}
                       </td>
                       <td
                         style={{
-                          padding: "8px 10px",
-                          color:
-                            marj >= 20
-                              ? "#10b981"
-                              : marj >= 10
-                                ? "#f59e0b"
-                                : "#ef4444",
-                          textAlign: "right",
+                          padding: '8px 10px',
+                          color: marj >= 20 ? '#10b981' : marj >= 10 ? '#f59e0b' : '#ef4444',
+                          textAlign: 'right',
                           fontWeight: 600,
                         }}
                       >
@@ -1125,22 +973,17 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
                       </td>
                       <td
                         style={{
-                          padding: "8px 10px",
-                          color: "var(--text-dim)",
-                          textAlign: "right",
+                          padding: '8px 10px',
+                          color: 'var(--text-dim)',
+                          textAlign: 'right',
                         }}
                       >
                         {p.adet}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right" }}>
+                      <td style={{ padding: '8px 10px', textAlign: 'right' }}>
                         <span
                           style={{
-                            color:
-                              p.stock === 0
-                                ? "#ef4444"
-                                : p.stock <= 5
-                                  ? "#f59e0b"
-                                  : "#10b981",
+                            color: p.stock === 0 ? '#ef4444' : p.stock <= 5 ? '#f59e0b' : '#10b981',
                             fontWeight: 600,
                           }}
                         >
@@ -1161,69 +1004,46 @@ function TabUrun({ db, start, end }: { db: DB; start: Date; end: Date }) {
 
 // ── Sekme: Cari & Alacak ─────────────────────────────────────────────────────
 function TabCari({ db }: { db: DB }) {
-  const [filter, setFilter] = useState<"all" | "musteri" | "tedarikci">(
-    "musteri",
-  );
-  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<'all' | 'musteri' | 'tedarikci'>('musteri');
+  const [search, setSearch] = useState('');
   const [_aging, _setAging] = useState(false);
 
   const now = new Date();
   const cariList = useMemo(() => {
-    let list = db.cari.filter(
-      (c) => !c.deleted && (filter === "all" ? true : c.type === filter),
-    );
-    if (search)
-      list = list.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase()),
-      );
+    let list = db.cari.filter((c) => !c.deleted && (filter === 'all' ? true : c.type === filter));
+    if (search) list = list.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
     return [...list].sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
   }, [db.cari, filter, search]);
 
   // Vade yaşlandırma — son işlem tarihine göre
   const agingData = useMemo(() => {
-    const buckets = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0 };
+    const buckets = { '0-30': 0, '31-60': 0, '61-90': 0, '90+': 0 };
     db.cari
-      .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
+      .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
       .forEach((c) => {
         const lastSale = db.sales
-          .filter(
-            (s) =>
-              (s.cariId === c.id) &&
-              s.status === "tamamlandi",
-          )
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          )[0];
-        const days = lastSale
-          ? Math.floor(
-              (now.getTime() - new Date(lastSale.createdAt).getTime()) /
-                86400000,
-            )
-          : 999;
-        if (days <= 30) buckets["0-30"] += c.balance;
-        else if (days <= 60) buckets["31-60"] += c.balance;
-        else if (days <= 90) buckets["61-90"] += c.balance;
-        else buckets["90+"] += c.balance;
+          .filter((s) => s.cariId === c.id && s.status === 'tamamlandi')
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+        const days = lastSale ? Math.floor((now.getTime() - new Date(lastSale.createdAt).getTime()) / 86400000) : 999;
+        if (days <= 30) buckets['0-30'] += c.balance;
+        else if (days <= 60) buckets['31-60'] += c.balance;
+        else if (days <= 90) buckets['61-90'] += c.balance;
+        else buckets['90+'] += c.balance;
       });
     return Object.entries(buckets).map(([name, value]) => ({ name, value }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db.cari, db.sales]);
 
   const totals = useMemo(
     () => ({
       musteri: db.cari
-        .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)
+        .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
         .reduce((s, c) => s + c.balance, 0),
       tedarikci: db.cari
-        .filter((c) => !c.deleted && c.type === "tedarikci" && c.balance > 0)
+        .filter((c) => !c.deleted && c.type === 'tedarikci' && c.balance > 0)
         .reduce((s, c) => s + c.balance, 0),
-      musteri_sayisi: db.cari.filter(
-        (c) => !c.deleted && c.type === "musteri" && c.balance > 0,
-      ).length,
-      tedarikci_sayisi: db.cari.filter(
-        (c) => !c.deleted && c.type === "tedarikci" && c.balance > 0,
-      ).length,
+      musteri_sayisi: db.cari.filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0).length,
+      tedarikci_sayisi: db.cari.filter((c) => !c.deleted && c.type === 'tedarikci' && c.balance > 0).length,
     }),
     [db.cari],
   );
@@ -1232,21 +1052,21 @@ function TabCari({ db }: { db: DB }) {
     exportToExcel(
       cariList.map((c) => ({
         Ad: c.name,
-        Tip: c.type === "musteri" ? "Müşteri" : "Tedarikçi",
+        Tip: c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
         Bakiye: c.balance,
-        Telefon: c.phone || "",
-        "Vergi No": c.taxNo || "",
+        Telefon: c.phone || '',
+        'Vergi No': c.taxNo || '',
       })),
-      "cari-raporu",
+      'cari-raporu',
     );
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className={styles.flexCol20}>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
           gap: 12,
         }}
       >
@@ -1268,11 +1088,11 @@ function TabCari({ db }: { db: DB }) {
           icon="⚖️"
           label="Net Pozisyon"
           value={formatMoney(totals.musteri - totals.tedarikci)}
-          color={totals.musteri >= totals.tedarikci ? "#10b981" : "#ef4444"}
+          color={totals.musteri >= totals.tedarikci ? '#10b981' : '#ef4444'}
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <SectionBox title="📊 Alacak Yaşlandırma (Müşteri)">
           {agingData.every((d) => d.value === 0) ? (
             <EmptyChart />
@@ -1281,27 +1101,14 @@ function TabCari({ db }: { db: DB }) {
               <BarChart data={agingData} layout="vertical">
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 10, fill: "#64748b" }}
-                  tickFormatter={(v) =>
-                    v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
-                  }
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))}
                 />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: 11, fill: "#94a3b8" }}
-                  width={55}
-                />
-                <Tooltip
-                  formatter={(v: number) => [formatMoney(v), "Tutar"]}
-                  contentStyle={TT_STYLE}
-                />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} width={55} />
+                <Tooltip formatter={(v: number) => [formatMoney(v), 'Tutar']} contentStyle={TT_STYLE} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {agingData.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={["#10b981", "#f59e0b", "#ef4444", "#7f1d1d"][i]}
-                    />
+                    <Cell key={i} fill={['#10b981', '#f59e0b', '#ef4444', '#7f1d1d'][i]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -1312,8 +1119,8 @@ function TabCari({ db }: { db: DB }) {
         <SectionBox title="🥧 Cari Dağılım">
           {(() => {
             const data = [
-              { name: "Alacak", value: totals.musteri },
-              { name: "Borç", value: totals.tedarikci },
+              { name: 'Alacak', value: totals.musteri },
+              { name: 'Borç', value: totals.tedarikci },
             ].filter((d) => d.value > 0);
             if (!data.length) return <EmptyChart />;
             return (
@@ -1332,10 +1139,7 @@ function TabCari({ db }: { db: DB }) {
                     <Cell fill="#ef4444" />
                     <Cell fill="#f59e0b" />
                   </Pie>
-                  <Tooltip
-                    formatter={(v: number) => [formatMoney(v), ""]}
-                    contentStyle={TT_STYLE}
-                  />
+                  <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -1347,56 +1151,49 @@ function TabCari({ db }: { db: DB }) {
       <SectionBox
         title="👥 Cari Listesi"
         action={
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Ara..."
               style={{
-                padding: "5px 10px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                padding: '5px 10px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 7,
-                color: "var(--text-primary)",
-                fontSize: "0.8rem",
+                color: 'var(--text-primary)',
+                fontSize: '0.8rem',
                 width: 120,
               }}
             />
-            {(["all", "musteri", "tedarikci"] as const).map((f) => (
+            {(['all', 'musteri', 'tedarikci'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 style={{
-                  background:
-                    filter === f
-                      ? "rgba(255,87,34,0.15)"
-                      : "rgba(255,255,255,0.05)",
-                  border: `1px solid ${filter === f ? "rgba(255,87,34,0.3)" : "rgba(255,255,255,0.07)"}`,
+                  background: filter === f ? 'rgba(255,87,34,0.15)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${filter === f ? 'rgba(255,87,34,0.3)' : 'rgba(255,255,255,0.07)'}`,
                   borderRadius: 7,
-                  color: filter === f ? "#ff7043" : "#64748b",
-                  padding: "5px 10px",
-                  cursor: "pointer",
-                  fontSize: "0.78rem",
+                  color: filter === f ? '#ff7043' : '#64748b',
+                  padding: '5px 10px',
+                  cursor: 'pointer',
+                  fontSize: '0.78rem',
                   fontWeight: 600,
                 }}
               >
-                {f === "all"
-                  ? "Tümü"
-                  : f === "musteri"
-                    ? "Müşteri"
-                    : "Tedarikçi"}
+                {f === 'all' ? 'Tümü' : f === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
               </button>
             ))}
             <button
               onClick={handleExport}
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                background: 'rgba(16,185,129,0.12)',
+                border: '1px solid rgba(16,185,129,0.25)',
                 borderRadius: 7,
-                color: "#10b981",
-                padding: "5px 10px",
-                cursor: "pointer",
-                fontSize: "0.78rem",
+                color: '#10b981',
+                padding: '5px 10px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
                 fontWeight: 600,
               }}
             >
@@ -1405,24 +1202,24 @@ function TabCari({ db }: { db: DB }) {
           </div>
         }
       >
-        <div style={{ overflowX: "auto" }}>
+        <div className={styles.overflowAuto}>
           <table
             style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "0.83rem",
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '0.83rem',
             }}
           >
             <thead>
-              <tr style={{ borderBottom: "1px solid #1e3a5f" }}>
-                {["Ad", "Tip", "Bakiye", "Telefon"].map((h) => (
+              <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
+                {['Ad', 'Tip', 'Bakiye', 'Telefon'].map((h) => (
                   <th
                     key={h}
                     style={{
-                      padding: "7px 10px",
-                      color: "#475569",
+                      padding: '7px 10px',
+                      color: '#475569',
                       fontWeight: 600,
-                      textAlign: h === "Bakiye" ? "right" : "left",
+                      textAlign: h === 'Bakiye' ? 'right' : 'left',
                     }}
                   >
                     {h}
@@ -1432,55 +1229,41 @@ function TabCari({ db }: { db: DB }) {
             </thead>
             <tbody>
               {cariList.slice(0, 50).map((c, i) => (
-                <tr
-                  key={i}
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}
-                >
+                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                   <td
                     style={{
-                      padding: "8px 10px",
-                      color: "var(--text-primary)",
+                      padding: '8px 10px',
+                      color: 'var(--text-primary)',
                       fontWeight: 500,
                     }}
                   >
                     {c.name}
                   </td>
-                  <td style={{ padding: "8px 10px" }}>
+                  <td style={{ padding: '8px 10px' }}>
                     <span
                       style={{
-                        background:
-                          c.type === "musteri"
-                            ? "rgba(59,130,246,0.12)"
-                            : "rgba(245,158,11,0.12)",
-                        color: c.type === "musteri" ? "#60a5fa" : "#fbbf24",
-                        padding: "2px 8px",
+                        background: c.type === 'musteri' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: c.type === 'musteri' ? '#60a5fa' : '#fbbf24',
+                        padding: '2px 8px',
                         borderRadius: 12,
-                        fontSize: "0.75rem",
+                        fontSize: '0.75rem',
                         fontWeight: 600,
                       }}
                     >
-                      {c.type === "musteri" ? "Müşteri" : "Tedarikçi"}
+                      {c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
                     </span>
                   </td>
                   <td
                     style={{
-                      padding: "8px 10px",
-                      textAlign: "right",
+                      padding: '8px 10px',
+                      textAlign: 'right',
                       fontWeight: 700,
-                      color:
-                        c.balance > 0
-                          ? "#ef4444"
-                          : c.balance < 0
-                            ? "#10b981"
-                            : "#64748b",
+                      color: c.balance > 0 ? '#ef4444' : c.balance < 0 ? '#10b981' : '#64748b',
                     }}
                   >
-                    {formatMoney(Math.abs(c.balance))}{" "}
-                    {c.balance > 0 ? "▲" : c.balance < 0 ? "▼" : ""}
+                    {formatMoney(Math.abs(c.balance))} {c.balance > 0 ? '▲' : c.balance < 0 ? '▼' : ''}
                   </td>
-                  <td style={{ padding: "8px 10px", color: "var(--text-muted)" }}>
-                    {c.phone || "—"}
-                  </td>
+                  <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{c.phone || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -1494,27 +1277,17 @@ function TabCari({ db }: { db: DB }) {
 // ── Sekme: Kasa Analizi ───────────────────────────────────────────────────────
 function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const entries = useMemo(
-    () =>
-      db.kasa.filter(
-        (e) =>
-          !e.deleted &&
-          new Date(e.createdAt) >= start &&
-          new Date(e.createdAt) <= end,
-      ),
+    () => db.kasa.filter((e) => !e.deleted && new Date(e.createdAt) >= start && new Date(e.createdAt) <= end),
     [db.kasa, start, end],
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const kasalar = db.kasalar || [
-    { id: "nakit", name: "Nakit", icon: "💵" },
-    { id: "banka", name: "Banka", icon: "🏦" },
+    { id: 'nakit', name: 'Nakit', icon: '💵' },
+    { id: 'banka', name: 'Banka', icon: '🏦' },
   ];
 
-  const gelir = entries
-    .filter((e) => e.type === "gelir")
-    .reduce((s, e) => s + e.amount, 0);
-  const gider = entries
-    .filter((e) => e.type === "gider")
-    .reduce((s, e) => s + e.amount, 0);
+  const gelir = entries.filter((e) => e.type === 'gelir').reduce((s, e) => s + e.amount, 0);
+  const gider = entries.filter((e) => e.type === 'gider').reduce((s, e) => s + e.amount, 0);
   const net = gelir - gider;
 
   const kasaBakiye = useMemo(() => {
@@ -1523,8 +1296,7 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
     db.kasa
       .filter((e) => !e.deleted)
       .forEach((e) => {
-        map[e.kasa] =
-          (map[e.kasa] || 0) + (e.type === "gelir" ? e.amount : -e.amount);
+        map[e.kasa] = (map[e.kasa] || 0) + (e.type === 'gelir' ? e.amount : -e.amount);
       });
     return map;
   }, [db.kasa, kasalar]);
@@ -1532,12 +1304,12 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const monthlyKasa = useMemo(() => {
     const map: Record<string, { gelir: number; gider: number }> = {};
     entries.forEach((e) => {
-      const key = new Date(e.createdAt).toLocaleDateString("tr-TR", {
-        month: "short",
-        year: "2-digit",
+      const key = new Date(e.createdAt).toLocaleDateString('tr-TR', {
+        month: 'short',
+        year: '2-digit',
       });
       if (!map[key]) map[key] = { gelir: 0, gider: 0 };
-      if (e.type === "gelir") map[key].gelir += e.amount;
+      if (e.type === 'gelir') map[key].gelir += e.amount;
       else map[key].gider += e.amount;
     });
     return Object.entries(map).map(([name, v]) => ({ name, ...v }));
@@ -1546,9 +1318,9 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
   const categoryData = useMemo(() => {
     const map: Record<string, number> = {};
     entries
-      .filter((e) => e.type === "gider")
+      .filter((e) => e.type === 'gider')
       .forEach((e) => {
-        const cat = e.category || "Diğer";
+        const cat = e.category || 'Diğer';
         map[cat] = (map[cat] || 0) + e.amount;
       });
     return Object.entries(map)
@@ -1560,68 +1332,53 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
     exportToExcel(
       entries.map((e) => ({
         Tarih: formatDate(e.createdAt),
-        Tip: e.type === "gelir" ? "Gelir" : "Gider",
+        Tip: e.type === 'gelir' ? 'Gelir' : 'Gider',
         Tutar: e.amount,
         Kasa: e.kasa,
-        Kategori: e.category || "",
-        Açıklama: e.description || "",
+        Kategori: e.category || '',
+        Açıklama: e.description || '',
       })),
-      "kasa-raporu",
+      'kasa-raporu',
     );
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div className={styles.flexCol20}>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))",
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))',
           gap: 12,
         }}
       >
-        <KpiCard
-          icon="📥"
-          label="Dönem Gelir"
-          value={formatMoney(gelir)}
-          color="#10b981"
-        />
-        <KpiCard
-          icon="📤"
-          label="Dönem Gider"
-          value={formatMoney(gider)}
-          color="#ef4444"
-        />
-        <KpiCard
-          icon="⚖️"
-          label="Net Akış"
-          value={formatMoney(net)}
-          color={net >= 0 ? "#10b981" : "#ef4444"}
-        />
+        <KpiCard icon="📥" label="Dönem Gelir" value={formatMoney(gelir)} color="#10b981" />
+        <KpiCard icon="📤" label="Dönem Gider" value={formatMoney(gider)} color="#ef4444" />
+        <KpiCard icon="⚖️" label="Net Akış" value={formatMoney(net)} color={net >= 0 ? '#10b981' : '#ef4444'} />
         {kasalar.map((k) => (
           <KpiCard
             key={k.id}
             icon={k.icon}
             label={k.name}
             value={formatMoney(kasaBakiye[k.id] || 0)}
-            color={kasaBakiye[k.id] >= 0 ? "#8b5cf6" : "#ef4444"}
+            color={kasaBakiye[k.id] >= 0 ? '#8b5cf6' : '#ef4444'}
           />
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <SectionBox
           title="📅 Aylık Nakit Akışı"
           action={
             <button
               onClick={handleExport}
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                background: 'rgba(16,185,129,0.12)',
+                border: '1px solid rgba(16,185,129,0.25)',
                 borderRadius: 8,
-                color: "#10b981",
-                padding: "5px 12px",
-                cursor: "pointer",
-                fontSize: "0.78rem",
+                color: '#10b981',
+                padding: '5px 12px',
+                cursor: 'pointer',
+                fontSize: '0.78rem',
                 fontWeight: 600,
               }}
             >
@@ -1634,33 +1391,15 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyKasa}>
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: "#64748b" }}
-                />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
                 <YAxis
-                  tick={{ fontSize: 10, fill: "#64748b" }}
-                  tickFormatter={(v) =>
-                    v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
-                  }
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))}
                 />
-                <Tooltip
-                  formatter={(v: number) => [formatMoney(v), ""]}
-                  contentStyle={TT_STYLE}
-                />
+                <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
                 <Legend />
-                <Bar
-                  dataKey="gelir"
-                  fill="#10b981"
-                  name="Gelir"
-                  radius={[3, 3, 0, 0]}
-                />
-                <Bar
-                  dataKey="gider"
-                  fill="#ef4444"
-                  name="Gider"
-                  radius={[3, 3, 0, 0]}
-                />
+                <Bar dataKey="gelir" fill="#10b981" name="Gelir" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="gider" fill="#ef4444" name="Gider" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -1680,19 +1419,14 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
                   cy="50%"
                   outerRadius={80}
                   paddingAngle={2}
-                  label={({ percent }) =>
-                    percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
-                  }
+                  label={({ percent }) => (percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : '')}
                   labelLine={false}
                 >
                   {categoryData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(v: number) => [formatMoney(v), ""]}
-                  contentStyle={TT_STYLE}
-                />
+                <Tooltip formatter={(v: number) => [formatMoney(v), '']} contentStyle={TT_STYLE} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -1705,53 +1439,66 @@ function TabKasa({ db, start, end }: { db: DB; start: Date; end: Date }) {
 
 // ── Ana Bileşen ───────────────────────────────────────────────────────────────
 function RaporOlusturucu({ db, start, end }: { db: DB; start: Date; end: Date }) {
-  const [modules, setModules] = useState<Record<string, boolean>>({ stok: true, cari: false, kasa: false, satis: false });
+  const [modules, setModules] = useState<Record<string, boolean>>({
+    stok: true,
+    cari: false,
+    kasa: false,
+    satis: false,
+  });
   const [exportFormat, setExportFormat] = useState<'tablo' | 'grafik'>('tablo');
   const [generated, setGenerated] = useState<{ label: string; data: Record<string, string | number>[] }[] | null>(null);
 
   const generate = () => {
     const result: { label: string; data: Record<string, string | number>[] }[] = [];
     if (modules.stok) {
-      const products = db.products.filter(p => !p.deleted).map(p => ({
-        'Ürün Adı': p.name,
-        'Stok': p.stock,
-        'Maliyet': p.cost,
-        'Birim Fiyat': p.price,
-        'KDV': p.vat || 0,
-        'Kâr %': p.cost > 0 ? Math.round(((p.price - p.cost) / p.cost) * 100) : 0,
-        'Kategori': p.category || '-',
-      }));
+      const products = db.products
+        .filter((p) => !p.deleted)
+        .map((p) => ({
+          'Ürün Adı': p.name,
+          Stok: p.stock,
+          Maliyet: p.cost,
+          'Birim Fiyat': p.price,
+          KDV: p.vat || 0,
+          'Kâr %': p.cost > 0 ? Math.round(((p.price - p.cost) / p.cost) * 100) : 0,
+          Kategori: p.category || '-',
+        }));
       result.push({ label: '📦 Stok Raporu', data: products });
     }
     if (modules.cari) {
-      const cari = db.cari.filter(c => !c.deleted).map(c => ({
-        'Ad': c.name,
-        'Tür': c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
-        'Bakiye': c.balance,
-        'Telefon': c.phone || '-',
-        'E-posta': c.email || '-',
-      }));
+      const cari = db.cari
+        .filter((c) => !c.deleted)
+        .map((c) => ({
+          Ad: c.name,
+          Tür: c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
+          Bakiye: c.balance,
+          Telefon: c.phone || '-',
+          'E-posta': c.email || '-',
+        }));
       result.push({ label: '👤 Cari Raporu', data: cari });
     }
     if (modules.kasa) {
-      const kasa = db.kasa.filter(k => !k.deleted && k.createdAt >= start.toISOString() && k.createdAt <= end.toISOString()).map(k => ({
-        'Tarih': formatDate(k.createdAt),
-        'Tür': k.type === 'gelir' ? 'Gelir' : 'Gider',
-        'Tutar': k.amount,
-        'Kategori': k.category || '-',
-        'Açıklama': k.description || '-',
-      }));
+      const kasa = db.kasa
+        .filter((k) => !k.deleted && k.createdAt >= start.toISOString() && k.createdAt <= end.toISOString())
+        .map((k) => ({
+          Tarih: formatDate(k.createdAt),
+          Tür: k.type === 'gelir' ? 'Gelir' : 'Gider',
+          Tutar: k.amount,
+          Kategori: k.category || '-',
+          Açıklama: k.description || '-',
+        }));
       result.push({ label: '💰 Kasa Raporu', data: kasa });
     }
     if (modules.satis) {
-      const satis = db.sales.filter(s => !s.deleted && s.createdAt >= start.toISOString() && s.createdAt <= end.toISOString()).map(s => ({
-        'Tarih': formatDate(s.createdAt),
-        'Fatura No': s.invoiceNo || '-',
-        'Müşteri': s.cariName || '-',
-        'Toplam': s.total,
-        'Ödeme': s.paymentType || '-',
-        'Durum': s.status || '-',
-      }));
+      const satis = db.sales
+        .filter((s) => !s.deleted && s.createdAt >= start.toISOString() && s.createdAt <= end.toISOString())
+        .map((s) => ({
+          Tarih: formatDate(s.createdAt),
+          'Fatura No': s.invoiceNo || '-',
+          Müşteri: s.cariName || '-',
+          Toplam: s.total,
+          Ödeme: s.paymentType || '-',
+          Durum: s.status || '-',
+        }));
       result.push({ label: '🛒 Satış Raporu', data: satis });
     }
     setGenerated(result);
@@ -1760,7 +1507,7 @@ function RaporOlusturucu({ db, start, end }: { db: DB; start: Date; end: Date })
   const exportExcel = () => {
     if (!generated || generated.length === 0) return;
     downloadObjectSheetsAsXlsx(
-      generated.map(g => ({
+      generated.map((g) => ({
         name: g.label.replace(/[^a-z0-9çşğıüö ]/gi, '').slice(0, 31),
         rows: g.data.length > 0 ? g.data : [{}],
         widths: Object.keys(g.data[0] || {}).map(() => 18),
@@ -1772,116 +1519,210 @@ function RaporOlusturucu({ db, start, end }: { db: DB; start: Date; end: Date })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ background: '#111e33', borderRadius: 14, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
-        <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.95rem', margin: '0 0 14px' }}>🔧 Rapor Modülleri</h3>
+        <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.95rem', margin: '0 0 14px' }}>
+          🔧 Rapor Modülleri
+        </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-          {[{ id: 'stok', label: '📦 Stok' }, { id: 'cari', label: '👤 Cari' }, { id: 'kasa', label: '💰 Kasa' }, { id: 'satis', label: '🛒 Satış' }].map(m => (
-            <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: modules[m.id] ? 'rgba(255,87,34,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${modules[m.id] ? 'rgba(255,87,34,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8, cursor: 'pointer', color: modules[m.id] ? '#ff7043' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>
-              <input type="checkbox" checked={modules[m.id]} onChange={e => setModules(prev => ({ ...prev, [m.id]: e.target.checked }))} style={{ width: 16, height: 16, accentColor: '#ff5722' }} />
+          {[
+            { id: 'stok', label: '📦 Stok' },
+            { id: 'cari', label: '👤 Cari' },
+            { id: 'kasa', label: '💰 Kasa' },
+            { id: 'satis', label: '🛒 Satış' },
+          ].map((m) => (
+            <label
+              key={m.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 14px',
+                background: modules[m.id] ? 'rgba(255,87,34,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${modules[m.id] ? 'rgba(255,87,34,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                color: modules[m.id] ? '#ff7043' : '#64748b',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={modules[m.id]}
+                onChange={(e) => setModules((prev) => ({ ...prev, [m.id]: e.target.checked }))}
+                style={{ width: 16, height: 16, accentColor: '#ff5722' }}
+              />
               {m.label}
             </label>
           ))}
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <select value={exportFormat} onChange={e => setExportFormat(e.target.value as 'tablo' | 'grafik')} style={{ padding: '9px 14px', background: '#0d1b2e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f1f5f9', fontSize: '0.85rem' }}>
+          <select
+            value={exportFormat}
+            onChange={(e) => setExportFormat(e.target.value as 'tablo' | 'grafik')}
+            style={{
+              padding: '9px 14px',
+              background: '#0d1b2e',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8,
+              color: '#f1f5f9',
+              fontSize: '0.85rem',
+            }}
+          >
             <option value="tablo">📋 Tablo Görünümü</option>
             <option value="grafik">📊 Grafik Görünümü</option>
           </select>
-          <button onClick={generate} style={{ padding: '9px 20px', background: '#ff5722', border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>🚀 Rapor Oluştur</button>
+          <button
+            onClick={generate}
+            style={{
+              padding: '9px 20px',
+              background: '#ff5722',
+              border: 'none',
+              borderRadius: 8,
+              color: '#fff',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            🚀 Rapor Oluştur
+          </button>
           {generated && generated.length > 0 && (
-            <button onClick={exportExcel} style={{ padding: '9px 16px', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 8, color: '#10b981', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📥 Excel İndir</button>
+            <button
+              onClick={exportExcel}
+              style={{
+                padding: '9px 16px',
+                background: 'rgba(16,185,129,0.15)',
+                border: '1px solid rgba(16,185,129,0.3)',
+                borderRadius: 8,
+                color: '#10b981',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              📥 Excel İndir
+            </button>
           )}
         </div>
       </div>
 
-      {generated && generated.map((section, si) => (
-        <div key={si} style={{ background: '#111e33', borderRadius: 14, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.9rem', margin: '0 0 12px' }}>{section.label} ({section.data.length} kayıt)</h3>
-          {exportFormat === 'tablo' ? (
-            <div className="responsive-table-wrap" style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
-                    {Object.keys(section.data[0] || {}).map(h => <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: '#64748b', fontWeight: 600 }}>{h}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {section.data.slice(0, 200).map((row, ri) => (
-                    <tr key={ri} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      {Object.values(row).map((v, ci) => (
-                        <td key={ci} style={{ padding: '8px 14px', color: typeof v === 'number' ? '#10b981' : '#94a3b8', fontWeight: typeof v === 'number' ? 600 : 400 }}>{typeof v === 'number' ? v.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : v}</td>
+      {generated &&
+        generated.map((section, si) => (
+          <div
+            key={si}
+            style={{ background: '#111e33', borderRadius: 14, padding: 20, border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <h3 style={{ fontWeight: 700, color: '#f1f5f9', fontSize: '0.9rem', margin: '0 0 12px' }}>
+              {section.label} ({section.data.length} kayıt)
+            </h3>
+            {exportFormat === 'tablo' ? (
+              <div className="responsive-table-wrap overflow-auto">
+                <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                      {Object.keys(section.data[0] || {}).map((h) => (
+                        <th
+                          key={h}
+                          style={{ padding: '10px 14px', textAlign: 'left', color: '#64748b', fontWeight: 600 }}
+                        >
+                          {h}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                  {section.data.length > 200 && <tr><td colSpan={Object.keys(section.data[0] || {}).length} style={{ textAlign: 'center', padding: 16, color: '#475569' }}>...ve {section.data.length - 200} kayıt daha (Excel ile tamamını indirin)</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div style={{ height: 250, color: '#475569', textAlign: 'center', paddingTop: 80 }}>
-              📊 Grafik görünümü — Excel ile dışa aktarın
-            </div>
-          )}
-        </div>
-      ))}
+                  </thead>
+                  <tbody>
+                    {section.data.slice(0, 200).map((row, ri) => (
+                      <tr key={ri} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                        {Object.values(row).map((v, ci) => (
+                          <td
+                            key={ci}
+                            style={{
+                              padding: '8px 14px',
+                              color: typeof v === 'number' ? '#10b981' : '#94a3b8',
+                              fontWeight: typeof v === 'number' ? 600 : 400,
+                            }}
+                          >
+                            {typeof v === 'number' ? v.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : v}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                    {section.data.length > 200 && (
+                      <tr>
+                        <td
+                          colSpan={Object.keys(section.data[0] || {}).length}
+                          style={{ textAlign: 'center', padding: 16, color: '#475569' }}
+                        >
+                          ...ve {section.data.length - 200} kayıt daha (Excel ile tamamını indirin)
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ height: 250, color: '#475569', textAlign: 'center', paddingTop: 80 }}>
+                📊 Grafik görünümü — Excel ile dışa aktarın
+              </div>
+            )}
+          </div>
+        ))}
     </div>
   );
 }
 
 export default function Reports({ db }: Props) {
-  const [tab, setTab] = useState<Tab>("ozet");
-  const [period, setPeriod] = useState<Period>("bu_ay");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [tab, setTab] = useState<Tab>('ozet');
+  const [period, setPeriod] = useState<Period>('bu_ay');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const { start, end } = periodDates(period, dateFrom, dateTo);
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: "ozet", label: "Genel Özet", icon: "🏠" },
-    { id: "satis", label: "Satış", icon: "🛒" },
-    { id: "urun", label: "Ürün & Stok", icon: "📦" },
-    { id: "cari", label: "Cari", icon: "👤" },
-    { id: "kasa", label: "Kasa", icon: "💰" },
-    { id: "olusturucu", label: "Oluşturucu", icon: "🔧" },
+    { id: 'ozet', label: 'Genel Özet', icon: '🏠' },
+    { id: 'satis', label: 'Satış', icon: '🛒' },
+    { id: 'urun', label: 'Ürün & Stok', icon: '📦' },
+    { id: 'cari', label: 'Cari', icon: '👤' },
+    { id: 'kasa', label: 'Kasa', icon: '💰' },
+    { id: 'olusturucu', label: 'Oluşturucu', icon: '🔧' },
   ];
 
   const periods: { id: Period; label: string }[] = [
-    { id: "bu_ay", label: "Bu Ay" },
-    { id: "gecen_ay", label: "Geçen Ay" },
-    { id: "bu_yil", label: "Bu Yıl" },
-    { id: "ozel", label: "Özel" },
+    { id: 'bu_ay', label: 'Bu Ay' },
+    { id: 'gecen_ay', label: 'Geçen Ay' },
+    { id: 'bu_yil', label: 'Bu Yıl' },
+    { id: 'ozel', label: 'Özel' },
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Toolbar */}
       <div
         style={{
-          display: "flex",
-          flexWrap: "wrap",
+          display: 'flex',
+          flexWrap: 'wrap',
           gap: 10,
-          alignItems: "center",
-          background: "#0d1b2e",
+          alignItems: 'center',
+          background: '#0d1b2e',
           borderRadius: 12,
-          padding: "10px 14px",
-          border: "1px solid rgba(255,255,255,0.06)",
+          padding: '10px 14px',
+          border: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {periods.map((p) => (
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
               style={{
-                background:
-                  period === p.id
-                    ? "rgba(255,87,34,0.18)"
-                    : "rgba(255,255,255,0.04)",
-                border: `1px solid ${period === p.id ? "rgba(255,87,34,0.35)" : "rgba(255,255,255,0.07)"}`,
+                background: period === p.id ? 'rgba(255,87,34,0.18)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${period === p.id ? 'rgba(255,87,34,0.35)' : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: 8,
-                color: period === p.id ? "#ff7043" : "#64748b",
-                padding: "6px 14px",
-                cursor: "pointer",
-                fontSize: "0.82rem",
+                color: period === p.id ? '#ff7043' : '#64748b',
+                padding: '6px 14px',
+                cursor: 'pointer',
+                fontSize: '0.82rem',
                 fontWeight: 600,
               }}
             >
@@ -1889,55 +1730,52 @@ export default function Reports({ db }: Props) {
             </button>
           ))}
         </div>
-        {period === "ozel" && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        {period === 'ozel' && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               style={{
-                padding: "6px 10px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                padding: '6px 10px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                color: "var(--text-primary)",
-                fontSize: "0.82rem",
+                color: 'var(--text-primary)',
+                fontSize: '0.82rem',
               }}
             />
-            <span style={{ color: "#334155" }}>—</span>
+            <span style={{ color: '#334155' }}>—</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               style={{
-                padding: "6px 10px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                padding: '6px 10px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 8,
-                color: "var(--text-primary)",
-                fontSize: "0.82rem",
+                color: 'var(--text-primary)',
+                fontSize: '0.82rem',
               }}
             />
           </div>
         )}
-        <div
-          style={{ color: "#1e3a5f", fontSize: "0.75rem", marginLeft: "auto" }}
-        >
-          {start.toLocaleDateString("tr-TR")} –{" "}
-          {end.toLocaleDateString("tr-TR")}
+        <div style={{ color: '#1e3a5f', fontSize: '0.75rem', marginLeft: 'auto' }}>
+          {start.toLocaleDateString('tr-TR')} – {end.toLocaleDateString('tr-TR')}
         </div>
       </div>
 
       {/* Tab bar */}
       <div
         style={{
-          display: "flex",
+          display: 'flex',
           gap: 4,
-          background: "#0d1b2e",
+          background: '#0d1b2e',
           borderRadius: 12,
           padding: 6,
-          border: "1px solid rgba(255,255,255,0.06)",
-          overflowX: "auto",
+          border: '1px solid rgba(255,255,255,0.06)',
+          overflowX: 'auto',
         }}
       >
         {tabs.map((t) => (
@@ -1947,21 +1785,18 @@ export default function Reports({ db }: Props) {
             style={{
               flex: 1,
               minWidth: 80,
-              padding: "8px 12px",
-              border: "none",
+              padding: '8px 12px',
+              border: 'none',
               borderRadius: 9,
-              cursor: "pointer",
+              cursor: 'pointer',
               fontWeight: 600,
-              fontSize: "0.82rem",
+              fontSize: '0.82rem',
               background:
-                tab === t.id
-                  ? "linear-gradient(135deg,rgba(255,87,34,0.2),rgba(255,87,34,0.08))"
-                  : "transparent",
-              color: tab === t.id ? "#ff7043" : "#475569",
-              transition: "all 0.15s",
-              whiteSpace: "nowrap",
-              boxShadow:
-                tab === t.id ? "inset 0 0 0 1px rgba(255,87,34,0.25)" : "none",
+                tab === t.id ? 'linear-gradient(135deg,rgba(255,87,34,0.2),rgba(255,87,34,0.08))' : 'transparent',
+              color: tab === t.id ? '#ff7043' : '#475569',
+              transition: 'all 0.15s',
+              whiteSpace: 'nowrap',
+              boxShadow: tab === t.id ? 'inset 0 0 0 1px rgba(255,87,34,0.25)' : 'none',
             }}
           >
             {t.icon} {t.label}
@@ -1970,12 +1805,12 @@ export default function Reports({ db }: Props) {
       </div>
 
       {/* Tab içeriği */}
-      {tab === "ozet" && <TabOzet db={db} start={start} end={end} />}
-      {tab === "satis" && <TabSatis db={db} start={start} end={end} />}
-      {tab === "urun" && <TabUrun db={db} start={start} end={end} />}
-      {tab === "cari" && <TabCari db={db} />}
-      {tab === "kasa" && <TabKasa db={db} start={start} end={end} />}
-      {tab === "olusturucu" && <RaporOlusturucu db={db} start={start} end={end} />}
+      {tab === 'ozet' && <TabOzet db={db} start={start} end={end} />}
+      {tab === 'satis' && <TabSatis db={db} start={start} end={end} />}
+      {tab === 'urun' && <TabUrun db={db} start={start} end={end} />}
+      {tab === 'cari' && <TabCari db={db} />}
+      {tab === 'kasa' && <TabKasa db={db} start={start} end={end} />}
+      {tab === 'olusturucu' && <RaporOlusturucu db={db} start={start} end={end} />}
     </div>
   );
 }

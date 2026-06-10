@@ -1,0 +1,10 @@
+/* Bank-specific */
+.container { display: flex; flex-direction: column; gap: 16px; }
+.accountCard { background: linear-gradient(135deg, #1a2740, #0f1e35); border-radius: 14px; padding: 16px 18px; border: 1px solid rgba(255,255,255,0.07); }
+.balanceBig { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; }
+.balanceLabel { color: #64748b; font-size: 0.78rem; font-weight: 600; margin-top: 2px; }
+.transferRow { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(0,0,0,0.2); }
+.filterBar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.gridAuto { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tableWrap { overflow-x: auto; }

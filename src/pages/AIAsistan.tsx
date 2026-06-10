@@ -4,8 +4,7 @@ import type { DBAction, SaveFn } from '@/lib/aiActions';
 import { applyActionWithFallback, parseActions, stripActions } from '@/lib/aiActions';
 import type { Message as ApiMessage } from '@/lib/aiApi';
 import { askClaude, askGemini } from '@/lib/aiApi';
-import DOMPurify from 'dompurify';
-import { getKeys, invalidateKeyCache, loadKeysFromFirebase, saveKeysToFirebase } from '@/lib/aiKeys';
+import { getKeys, invalidateKeyCache } from '@/lib/aiKeys';
 import { buildContext, offlineReply, QUICK_PROMPTS } from '@/lib/aiOffline';
 import { askDeepSeek } from '@/lib/deepseek';
 import { getUserSession } from '@/lib/userManager';
@@ -21,6 +20,8 @@ import {
   MiniStatCard,
   EmbeddedStatCard,
 } from './pageHelpers.tsx';
+import { MarkdownText, getActionAffectedIds, isDangerousAction, sourceLabel } from './ai/AIAHelpers';
+import ApiSettings from './ai/AIASettings';
 
 interface Props {
   db: DB;
@@ -30,260 +31,6 @@ interface Props {
 
 // Message type imported from @/lib/aiApi as ApiMessage
 type Message = ApiMessage;
-
-function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-const ALLOWED_TAGS = new Set(['strong', 'h3', 'h4', 'li', 'ul', 'br', 'span']);
-function sanitize(html: string): string {
-  return html.replace(/<(\/?)(\w+)[^>]*>/g, (match, slash, tag) => {
-    if (ALLOWED_TAGS.has(tag.toLowerCase())) return match;
-    const escaped = match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return escaped;
-  });
-}
-
-function MarkdownText({ text }: { text: string }) {
-  const html = sanitize(
-    escapeHtml(text)
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(
-        /^### (.+)$/gm,
-        '<h4 style="color:var(--accent);font-size:0.9rem;margin:10px 0 4px;font-weight:700">$1</h4>',
-      )
-      .replace(
-        /^## (.+)$/gm,
-        '<h3 style="color:var(--text-primary);font-size:1rem;margin:12px 0 6px;font-weight:800">$1</h3>',
-      )
-      .replace(/^- (.+)$/gm, '<li style="margin:3px 0;padding-left:4px">$1</li>')
-      .replace(/(<li[^>]*>.*<\/li>\n?)+/gs, '<ul style="list-style:none;padding:0;margin:6px 0">$&</ul>')
-      .replace(/\n\n/g, '<br/>')
-      .replace(/\n/g, '<br/>'),
-  );
-  return <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
-}
-
-function getActionAffectedIds(action: DBAction): string[] {
-  const ids = new Set<string>();
-  const payload = action.payload || {};
-  ['id', 'productId', 'cariId', 'saleId', 'invoiceId', 'kasaEntryId'].forEach((key) => {
-    const value = payload[key];
-    if (typeof value === 'string' && value.trim()) ids.add(value.trim());
-  });
-  return [...ids];
-}
-
-function isDangerousAction(action: DBAction): boolean {
-  return ['sale', 'kasa_gider', 'stok_guncelle', 'cari_tahsilat'].includes(action.type);
-}
-
-function ApiSettings({ onClose }: { onClose: () => void }) {
-  const [ck, setCk] = useState('');
-  const [gk, setGk] = useState('');
-  const [dk, setDk] = useState('');
-  const [hk, setHk] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
-
-  useEffect(() => {
-    loadKeysFromFirebase().then((keys) => {
-      setCk(keys.claude);
-      setGk(keys.gemini);
-      setDk(keys.deepseek);
-      setHk(keys.huggingface);
-      setLoading(false);
-    });
-  }, []);
-
-  const save = async () => {
-    setSaving(true);
-    const ok = await saveKeysToFirebase({
-      claude: ck.trim(),
-      gemini: gk.trim(),
-      deepseek: dk.trim(),
-      huggingface: hk.trim(),
-      opencodeNvidia: '',
-      opencodeHf: '',
-    });
-    if (ok) {
-      invalidateKeyCache();
-      setMsg("✅ Firebase'e kaydedildi");
-      setTimeout(() => {
-        setMsg('');
-        onClose();
-      }, 1200);
-    } else {
-      setMsg('❌ Kayıt başarısız — Firebase bağlantısını kontrol edin');
-    }
-    setSaving(false);
-  };
-
-  const inp: React.CSSProperties = {
-    width: '100%',
-    padding: '9px 12px',
-    background: '#0f172a',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    color: '#f1f5f9',
-    fontSize: '0.85rem',
-    boxSizing: 'border-box',
-    fontFamily: 'monospace',
-  };
-  return (
-    <div style={{ padding: '16px 0' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 14,
-          padding: '8px 12px',
-          background: 'rgba(16,185,129,0.08)',
-          border: '1px solid rgba(16,185,129,0.2)',
-          borderRadius: 8,
-        }}
-      >
-        <span>☁️</span>
-        <p style={{ color: '#10b981', fontSize: '0.82rem', margin: 0 }}>
-          API anahtarları Firebase'de şifreli saklanır — tüm cihazlarda geçerlidir.
-        </p>
-      </div>
-      {loading ? (
-        <div
-          style={{
-            color: '#64748b',
-            fontSize: '0.85rem',
-            textAlign: 'center',
-            padding: '20px 0',
-          }}
-        >
-          Firebase'den yükleniyor...
-        </div>
-      ) : (
-        <>
-          <label
-            style={{
-              display: 'block',
-              color: '#94a3b8',
-              fontSize: '0.82rem',
-              marginBottom: 4,
-            }}
-          >
-            🤖 Claude API Key (Anthropic — birincil)
-          </label>
-          <input
-            value={ck}
-            onChange={(e) => setCk(e.target.value)}
-            placeholder="sk-ant-..."
-            style={{ ...inp, marginBottom: 14 }}
-            type="password"
-          />
-          <label
-            style={{
-              display: 'block',
-              color: '#94a3b8',
-              fontSize: '0.82rem',
-              marginBottom: 4,
-            }}
-          >
-            ✨ Gemini API Key (Google — yedek)
-          </label>
-          <input
-            value={gk}
-            onChange={(e) => setGk(e.target.value)}
-            placeholder="AIza..."
-            style={{ ...inp, marginBottom: 18 }}
-            type="password"
-          />
-          <label
-            style={{
-              display: 'block',
-              color: '#94a3b8',
-              fontSize: '0.82rem',
-              marginBottom: 4,
-            }}
-          >
-            🧠 DeepSeek API Key (yedek AI)
-          </label>
-          <input
-            value={dk}
-            onChange={(e) => setDk(e.target.value)}
-            placeholder="sk-..."
-            style={{ ...inp, marginBottom: 14 }}
-            type="password"
-          />
-          <label
-            style={{
-              display: 'block',
-              color: '#94a3b8',
-              fontSize: '0.82rem',
-              marginBottom: 4,
-            }}
-          >
-            🤗 Hugging Face Token (HF_TOKEN)
-          </label>
-          <input
-            value={hk}
-            onChange={(e) => setHk(e.target.value)}
-            placeholder="hf_..."
-            style={{ ...inp, marginBottom: 18 }}
-            type="password"
-          />
-          {msg && (
-            <div
-              style={{
-                marginBottom: 12,
-                fontSize: '0.82rem',
-                color: msg.startsWith('✅') ? '#10b981' : '#ef4444',
-                fontWeight: 600,
-              }}
-            >
-              {msg}
-            </div>
-          )}
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              onClick={save}
-              disabled={saving}
-              style={{
-                flex: 1,
-                background: '#10b981',
-                border: 'none',
-                borderRadius: 8,
-                color: '#fff',
-                padding: '10px 0',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              {saving ? 'Kaydediliyor...' : "☁️ Firebase'e Kaydet"}
-            </button>
-            <button
-              onClick={onClose}
-              style={{
-                background: '#273548',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                color: '#94a3b8',
-                padding: '10px 16px',
-                cursor: 'pointer',
-              }}
-            >
-              İptal
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function AIAsistan({ db, save, embedded = false }: Props) {
   const session = getUserSession();
@@ -751,29 +498,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       e.preventDefault();
       send();
     }
-  };
-
-  const sourceLabel: Record<string, { label: string; color: string; bg: string }> = {
-    deepseek: {
-      label: '🧠 DeepSeek',
-      color: 'var(--color-success)',
-      bg: 'var(--color-success-soft)',
-    },
-    claude: {
-      label: '🤖 Claude',
-      color: 'var(--color-accent)',
-      bg: 'var(--color-accent-soft)',
-    },
-    gemini: {
-      label: '✨ Gemini',
-      color: 'var(--color-primary-light)',
-      bg: 'var(--color-primary-ultra)',
-    },
-    offline: {
-      label: '🔌 Çevrimdışı',
-      color: 'var(--text-muted)',
-      bg: 'var(--bg-card)',
-    },
   };
 
   // Anlık işletme özeti

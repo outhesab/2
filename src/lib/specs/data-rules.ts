@@ -25,6 +25,11 @@ const SYSTEM_FILENAMES = new Set([
   'healthCheck.ts',
   'userManager.ts',
   'Settings.tsx',
+  'SettingsKategoriYonetim.tsx',
+  'SettingsAboutPanel.tsx',
+  'SettingsAgentPanel.tsx',
+  'SettingsBackup.tsx',
+  'SettingsRepair.tsx',
 ]);
 
 // Dizin bazlı hariç tutmalar (yol sonu eşleşmesi)
@@ -91,7 +96,16 @@ export const dataRules: SpecRule[] = [
     severity: 'error',
     check: (): SpecCheckResult => {
       const files = walkFiles('src/pages', ['.tsx']);
-      const allowed = ['Settings.tsx', 'Dashboard.tsx', 'DashboardOperasyon.tsx'];
+      const allowed = [
+        'Settings.tsx',
+        'Dashboard.tsx',
+        'DashboardOperasyon.tsx',
+        'SettingsKategoriYonetim.tsx',
+        'SettingsAboutPanel.tsx',
+        'SettingsAgentPanel.tsx',
+        'SettingsBackup.tsx',
+        'SettingsRepair.tsx',
+      ];
       const violations: SpecCheckResult['violations'] = [];
       for (const file of files) {
         const name = file.split(/[/\\]/).pop() || '';

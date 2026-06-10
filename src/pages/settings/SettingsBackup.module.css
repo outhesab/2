@@ -1,0 +1,9 @@
+/* SettingsBackup-specific */
+.container { display: flex; flex-direction: column; gap: 16px; }
+.card { background: #111e33; border-radius: 14px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); }
+.cardTitle { font-weight: 700; color: #f1f5f9; font-size: 0.95rem; margin: 0 0 14px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.flexCol { display: flex; flex-direction: column; gap: 12px; }
+.flexRow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.fileBtn { padding: 10px 14px; background: rgba(255,87,34,0.1); border: 1px solid rgba(255,87,34,0.25); border-radius: 10px; color: #ff7043; cursor: pointer; font-weight: 700; font-size: 0.85rem; text-align: center; }
+.dangerBtn { padding: 10px 14px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; color: #ef4444; cursor: pointer; font-weight: 700; font-size: 0.85rem; text-align: center; }
