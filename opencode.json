@@ -223,6 +223,37 @@
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       },
       "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp",
+        "--headless",
+        "--browser", "chromium",
+        "--viewport-size", "1280x720",
+        "--isolated"
+      ],
+      "enabled": true
+    },
+    "lighthouse": {
+      "type": "local",
+      "command": [
+        "node",
+        "scripts/lighthouse-mcp.mjs"
+      ],
+      "enabled": true
+    },
+    "storybook": {
+      "type": "local",
+      "command": [
+        "npx",
+        "storybook",
+        "dev",
+        "-p", "6006",
+        "--no-open"
+      ],
+      "enabled": true
     }
   },
   "compaction": {
