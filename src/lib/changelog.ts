@@ -55,6 +55,14 @@ export const CHANGELOG: VersionEntry[] = [
         text: 'Skin Transformation tamamlandi: corporate enterprise teması varsayilan, design-tokens.css light-first, ThemeProvider corporate default',
       },
       {
+        type: 'yeni',
+        text: 'Playwright MCP (@playwright/mcp) kuruldu, playwright.config.ts oluşturuldu, e2e/helpers/app.ts expect import fix',
+      },
+      {
+        type: 'yeni',
+        text: 'Lighthouse + axe-core Playwright entegrasyonu: accessibility.spec.ts, lighthouse helper, npm scriptleri eklendi',
+      },
+      {
         type: 'iyilestirme',
         text: 'pre-commit hook: lockfile senkronizasyonu, typecheck, ESLint+Prettier, JSON validasyonu (node ile, cross-platform), changelog kontrolu, korumali dosya uyarisi',
       },

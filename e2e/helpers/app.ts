@@ -1,3 +1,5 @@
+import { expect, type Page } from '@playwright/test';
+
 const baseSeedDb = {
   _version: 0,
   products: [

@@ -24,6 +24,8 @@
     "test:run": "vitest run",
     "test:specs": "vitest run src/__tests__/spec-compliance.test.ts",
     "test:e2e": "playwright test",
+    "test:e2e:axe": "playwright test --project=chromium e2e/accessibility.spec.ts",
+    "test:lighthouse": "node -e \"import('./e2e/helpers/lighthouse.ts').then(m => m.runLighthouse('http://localhost:3000').then(r => console.log(JSON.stringify(r.scores, null, 2))))\"",
     "cap:android": "vite build && pnpm exec cap sync android && pnpm exec cap open android",
     "cap:apk:dev": "vite build --mode development && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --build-cache --parallel",
     "cap:apk:release": "vite build && pnpm exec cap sync android && cd android && ./gradlew assembleRelease --build-cache --parallel",
@@ -110,8 +112,10 @@
     }
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@capacitor/cli": "^8.3.4",
     "@eslint/js": "^9.25.1",
+    "@playwright/mcp": "^0.0.76",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/vite": "^4.1.4",
     "@testing-library/jest-dom": "^6.6.3",
@@ -129,6 +133,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "lighthouse": "^13.4.0",
     "lightningcss-win32-x64-msvc": "^1.32.0",
     "lint-staged": "^17.0.7",
     "playwright": "^1.52.0",
