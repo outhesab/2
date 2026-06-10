@@ -146,3 +146,12 @@
     "vitest": "^3.1.2"
   }
 }
+  "husky": {
+    "hooks": {
+      "pre-commit": ".husky/pre-commit",
+      "pre-push": ".husky/pre-push",
+      "commit-msg": ".husky/commit-msg",
+      "post-merge": ".husky/post-merge",
+      "post-checkout": ".husky/post-checkout"
+    }
+  }

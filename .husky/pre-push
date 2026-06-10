@@ -1,0 +1,92 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/helpers/colors.sh"
+source "$SCRIPT_DIR/helpers/git-context.sh"
+
+print_header "🚀 PRE-PUSH VALIDATION"
+
+TOTAL_TIME=$(date +%s.%N)
+FAILED=0
+
+# Protected branch kontrolü
+BRANCH=$(get_current_branch)
+if is_protected_branch "$BRANCH"; then
+  print_error "Direct push to $BRANCH is not allowed!"
+  print_info "Please create a PR instead"
+  exit 1
+fi
+
+# 1. TEST SUITE
+print_step "1/5 Running test suite"
+
+if ! pnpm run test:run > /dev/null 2>&1; then
+  print_error "Tests failed!"
+  pnpm run test:run
+  FAILED=$((FAILED + 1))
+else
+  print_success "All tests passed"
+fi
+
+# 2. BUILD CHECK
+print_step "2/5 Building project"
+
+if ! pnpm run build > /dev/null 2>&1; then
+  print_error "Build failed!"
+  pnpm run build
+  FAILED=$((FAILED + 1))
+else
+  print_success "Build successful"
+fi
+
+# 3. SPEC COMPLIANCE
+print_step "3/5 Spec compliance check"
+
+if ! pnpm run test:specs > /dev/null 2>&1; then
+  print_warning "Some spec rules violated (non-blocking)"
+  pnpm run test:specs
+else
+  print_success "All spec rules passed"
+fi
+
+# 4. BUNDLE SIZE CHECK
+print_step "4/5 Bundle size analysis"
+
+BUNDLE_SIZE=$(du -sh dist 2>/dev/null | cut -f1)
+print_info "Current bundle: $BUNDLE_SIZE"
+
+if [ -f ".hook_cache/bundle_size" ]; then
+  PREV_SIZE=$(cat .hook_cache/bundle_size)
+  print_info "Previous bundle: $PREV_SIZE"
+fi
+
+mkdir -p .hook_cache
+du -sh dist | cut -f1 > .hook_cache/bundle_size
+
+print_success "Bundle size recorded"
+
+# 5. COMMIT COUNT
+print_step "5/5 Verifying commits"
+
+COMMIT_COUNT=$(git rev-list --count $(git merge-base origin/dev HEAD)..HEAD 2>/dev/null || echo "1")
+print_info "Pushing $COMMIT_COUNT commit(s)"
+
+if [ "$COMMIT_COUNT" -gt 10 ]; then
+  print_warning "Large number of commits - consider squashing"
+fi
+
+print_success "Commit count verified"
+
+# SONUÇ
+TOTAL_END=$(date +%s.%N)
+DURATION=$(echo "$TOTAL_END - $TOTAL_TIME" | bc)
+
+echo ""
+if [ $FAILED -eq 0 ]; then
+  print_success "All pre-push checks passed! (${DURATION}s)"
+  print_info "Pushing to $BRANCH..."
+  exit 0
+else
+  print_error "Pre-push failed - fix issues before pushing"
+  exit 1
+fi
