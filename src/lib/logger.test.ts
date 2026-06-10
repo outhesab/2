@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { logger, type LogLevel } from './logger';
-import { safeReadJSON, safeWriteJSON, safeRemove } from './safeIO';
+import { logger } from './logger';
+import { safeReadJSON, safeRemove } from './safeIO';
 
 vi.mock('./safeIO', () => ({
   safeReadJSON: vi.fn(),

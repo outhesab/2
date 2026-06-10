@@ -20,13 +20,54 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.18.8',
+    date: '10 Haziran 2026',
+    title: 'Git Hooks Sistemi & Husky v9 Entegrasyonu',
+    summary:
+      'Husky v9 tabanli git hook sistemi kuruldu. 5 hook (pre-commit, pre-push, commit-msg, post-merge, post-checkout) + 5 helper script + lint-staged + dokumantasyon. Windows (Git Bash) uyumlu, cross-platform.',
+    changes: [
+      {
+        type: 'yeni',
+        text: 'Husky v9+ git hook sistemi: pre-commit (6 adim), pre-push (5 adim), commit-msg (conventional commits), post-merge, post-checkout',
+      },
+      {
+        type: 'yeni',
+        text: '5 helper script: colors.sh, staged-files.sh, git-context.sh, timer.sh, performance-log.sh',
+      },
+      { type: 'yeni', text: 'lint-staged.config.js: ESLint + Prettier + JSON validasyonu + test runner' },
+      { type: 'yeni', text: 'docs/development/GIT_HOOKS.md: hook sistemi dokumantasyonu' },
+      { type: 'yeni', text: 'docs/development/WORKFLOW.md: gelistirme is akisi ve branch stratejisi' },
+      { type: 'yeni', text: 'scripts/setup-hooks.sh: manuel hook kurulum scripti' },
+      {
+        type: 'iyilestirme',
+        text: 'pre-commit hook: lockfile senkronizasyonu, typecheck, ESLint+Prettier, JSON validasyonu (node ile, cross-platform), changelog kontrolu, korumali dosya uyarisi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'pre-push hook: korumali branch kontrolu, test suite, build, spec compliance, bundle size karsilastirmasi, commit sayisi uyarisi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'commit-msg hook: conventional commits format, subject uzunlugu, scope dogrulama, body yapisi, issue reference',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Tum hooklarda Windows (Git Bash) uyumlulugu: jq -> node, %N+bc -> date+%s+$(()), grep -oP -> sed',
+      },
+      { type: 'duzeltme', text: 'package.json prepare script: "husky install" -> "husky" (Husky v9+ uyumu)' },
+    ],
+  },
+  {
     version: '3.18.6',
     date: '9 Haziran 2026',
     title: 'Air-Gapped / Offline AI Ortami Kurulumu',
     summary: 'Local AI (LM Studio) + MCP server + offline mod konfigurasyonu.',
     changes: [
       { type: 'iyilestirme', text: 'opencode global+proje config: offline:true, autoupdate:false eklendi' },
-      { type: 'iyilestirme', text: 'Air-gapped env degiskenleri PowerShell profiline eklendi (OPENCODE_OFFLINE, DISABLE_*)' },
+      {
+        type: 'iyilestirme',
+        text: 'Air-gapped env degiskenleri PowerShell profiline eklendi (OPENCODE_OFFLINE, DISABLE_*)',
+      },
       { type: 'yeni', text: 'AGENTS.md: Local AI ortami dokumantasyonu eklendi' },
     ],
   },
@@ -196,7 +237,10 @@ export const CHANGELOG: VersionEntry[] = [
       },
       { type: 'duzeltme', text: 'connConfig.ts: Config kayÄ±t Ã¶ncesi tip ve injection doÄŸrulamasÄ± eklendi' },
       { type: 'duzeltme', text: 'userManager.ts: Math.random() yerine crypto.randomUUID() kullanÄ±lÄ±yor' },
-      { type: 'duzeltme', text: 'userManager.ts: Brute-force korumasÄ± â€” 5 baÅŸarÄ±sÄ±z denemeden sonra 1 dakika kilit' },
+      {
+        type: 'duzeltme',
+        text: 'userManager.ts: Brute-force korumasÄ± â€” 5 baÅŸarÄ±sÄ±z denemeden sonra 1 dakika kilit',
+      },
       {
         type: 'duzeltme',
         text: 'userManager.ts: Misafir oturumu integrity hash artÄ±k crypto.randomUUID ile Ã¼retiliyor',
@@ -217,14 +261,20 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'iyilestirme',
         text: 'index.css: background-attachment: fixed kaldÄ±rÄ±ldÄ± â€” mobilde GPU performansÄ± arttÄ±',
       },
-      { type: 'iyilestirme', text: "vite-manual-chunks.ts: dexie, exceljs, zustand, mitt iÃ§in ayrÄ± chunk'lar eklendi" },
+      {
+        type: 'iyilestirme',
+        text: "vite-manual-chunks.ts: dexie, exceljs, zustand, mitt iÃ§in ayrÄ± chunk'lar eklendi",
+      },
       // BakÄ±m
       {
         type: 'iyilestirme',
         text: 'anomalyEngine + dataIntegrityChecker: SaÄŸlÄ±k skoru formÃ¼lÃ¼ tekilleÅŸtirildi (computeHealthScore)',
       },
       { type: 'iyilestirme', text: 'anomalyEngine + dataIntegrityChecker: console.warn yerine logger kullanÄ±lÄ±yor' },
-      { type: 'duzeltme', text: 'dataIntegrityChecker: Ã‡eliÅŸkili boyut eÅŸikleri olan mÃ¼kerrer bÃ¶lÃ¼m 9 kaldÄ±rÄ±ldÄ±' },
+      {
+        type: 'duzeltme',
+        text: 'dataIntegrityChecker: Ã‡eliÅŸkili boyut eÅŸikleri olan mÃ¼kerrer bÃ¶lÃ¼m 9 kaldÄ±rÄ±ldÄ±',
+      },
       {
         type: 'iyilestirme',
         text: 'data-rules.ts: walkFiles artÄ±k birden fazla uzantÄ± alÄ±yor ve tam dosya adÄ± eÅŸleÅŸmesi yapÄ±yor',
@@ -315,7 +365,10 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'duzeltme',
         text: 'deploy.yml + build-apk.yml: "needs: quality" baÄŸÄ±mlÄ±lÄ±ÄŸÄ± eklendi â€” deploy ve APK build Ã¶nce kalite kontrolÃ¼nden geÃ§iyor',
       },
-      { type: 'duzeltme', text: 'build-apk.yml: Gradle executable izni (chmod +x) ve android/ dizin kontrolÃ¼ eklendi' },
+      {
+        type: 'duzeltme',
+        text: 'build-apk.yml: Gradle executable izni (chmod +x) ve android/ dizin kontrolÃ¼ eklendi',
+      },
       {
         type: 'duzeltme',
         text: "build-apk.yml: setup-android action kaldÄ±rÄ±ldÄ± â€” Capacitor kendi Gradle wrapper'Ä±nÄ± kullanÄ±yor, ek Android SDK gerekmez",
@@ -347,9 +400,13 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.15.2',
     date: '7 Haziran 2026',
     title: 'StatCard SalesHelpers â†’ pageHelpers taÅŸÄ±masÄ±',
-    summary: "StatCard bileÅŸeni SalesHelpers.tsx'ten pageHelpers.tsx'e taÅŸÄ±ndÄ±, clone refactor batch 2 kapsamÄ±nda.",
+    summary:
+      "StatCard bileÅŸeni SalesHelpers.tsx'ten pageHelpers.tsx'e taÅŸÄ±ndÄ±, clone refactor batch 2 kapsamÄ±nda.",
     changes: [
-      { type: 'iyilestirme', text: 'StatCard: SalesHelpers â†’ pageHelpers taÅŸÄ±ndÄ±, re-export ile geriye uyum saÄŸlandÄ±' },
+      {
+        type: 'iyilestirme',
+        text: 'StatCard: SalesHelpers â†’ pageHelpers taÅŸÄ±ndÄ±, re-export ile geriye uyum saÄŸlandÄ±',
+      },
     ],
   },
   {
@@ -441,7 +498,10 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'iyilestirme',
         text: 'WIDGET_OPTIONS ve WidgetId tipi src/config/widgets.ts ortak dosyasÄ±na taÅŸÄ±ndÄ± â€” Dashboard ve Settings aynÄ± kaynaktan import eder',
       },
-      { type: 'duzeltme', text: 'Settings sayfasÄ± aÃ§Ä±lÄ±rken oluÅŸan "WIDGET_OPTIONS is not defined" hatasÄ± giderildi' },
+      {
+        type: 'duzeltme',
+        text: 'Settings sayfasÄ± aÃ§Ä±lÄ±rken oluÅŸan "WIDGET_OPTIONS is not defined" hatasÄ± giderildi',
+      },
       {
         type: 'duzeltme',
         text: 'AI Asistan sayfasÄ±ndaki inline stillerdeki hardcoded renkler CSS variable ile deÄŸiÅŸtirildi â€” butonlar karanlÄ±k temada gÃ¶rÃ¼nmez olmuyor',
@@ -473,9 +533,18 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'iyilestirme',
         text: 'orchestrator.ts: @deprecated eklendi â€” gelecek sÃ¼rÃ¼mde processIntent lehine kaldÄ±rÄ±lacak',
       },
-      { type: 'iyilestirme', text: 'StokAgent: sadece stok_guncelle/urun_ekle iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)' },
-      { type: 'iyilestirme', text: 'KasaAgent: sadece kasa_gelir/kasa_gider iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)' },
-      { type: 'iyilestirme', text: 'CariAgent: sadece cari_tahsilat/cari_ekle iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)' },
+      {
+        type: 'iyilestirme',
+        text: 'StokAgent: sadece stok_guncelle/urun_ekle iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'KasaAgent: sadece kasa_gelir/kasa_gider iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'CariAgent: sadece cari_tahsilat/cari_ekle iÅŸlemleri (sale mantÄ±ÄŸÄ± kaldÄ±rÄ±ldÄ±)',
+      },
       { type: 'iyilestirme', text: 'StokAgent/KasaAgent: crypto.randomUUID() â†’ genId() ile deÄŸiÅŸtirildi' },
     ],
   },
@@ -490,7 +559,10 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'yeni',
         text: 'src/domain/types.ts: DomainEvent, SaleIntent, StockMovementV2, CashTransaction, CariUpdate, SaleResult, Intent tipleri',
       },
-      { type: 'yeni', text: 'src/domain/eventBus.ts: DomainEventBus â€” typed pub/sub event bus (on/onAny/emit/clear)' },
+      {
+        type: 'yeni',
+        text: 'src/domain/eventBus.ts: DomainEventBus â€” typed pub/sub event bus (on/onAny/emit/clear)',
+      },
       {
         type: 'yeni',
         text: 'src/domain/services/saleCompletion.ts: pure completeSale() â€” stok doÄŸrulama, satÄ±ÅŸ hesaplama, stok/kasa/cari yan etkilerini Ã¶nceden hesaplar (mutasyon yok)',
@@ -624,7 +696,10 @@ export const CHANGELOG: VersionEntry[] = [
     summary:
       '30+ sayfada hardcoded renkler CSS variable referanslarÄ±na dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼. AI Asistan, Dashboard, Kasa, Stock, Products, Sales, Reports, Fatura ve 20+ sayfada kontrast sorunlarÄ± giderildi. Light/dark tema geÃ§iÅŸlerinde okunamayan yazÄ± sorunu Ã§Ã¶zÃ¼ldÃ¼.',
     changes: [
-      { type: 'iyilestirme', text: 'AIAsistan: mesaj metin/sourceLabel/onay kartÄ± renkleri hardcoded â†’ CSS variable' },
+      {
+        type: 'iyilestirme',
+        text: 'AIAsistan: mesaj metin/sourceLabel/onay kartÄ± renkleri hardcoded â†’ CSS variable',
+      },
       {
         type: 'iyilestirme',
         text: 'DashboardOperasyon/Ticaret: sabit dark/light renk sabitleri â†’ var(--text-primary)/var(--bg-card)',
@@ -642,7 +717,10 @@ export const CHANGELOG: VersionEntry[] = [
         text: '#94a3b8 â†’ var(--text-dim), #64748b â†’ var(--text-muted), #475569 â†’ var(--text-secondary) toplu dÃ¶nÃ¼ÅŸÃ¼m',
       },
       { type: 'iyilestirme', text: 'Settings: #fff arkaplanlar â†’ var(--bg-elevated) (dark mod uyumu)' },
-      { type: 'iyilestirme', text: "Dashboard grafik: chart label/axis/dot renkleri CSS variable'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼" },
+      {
+        type: 'iyilestirme',
+        text: "Dashboard grafik: chart label/axis/dot renkleri CSS variable'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼",
+      },
       {
         type: 'iyilestirme',
         text: "AIAsistan: Markdown baÅŸlÄ±k/sourceLabel renkleri CSS variable'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼ (#ff7043â†’var(--accent))",
@@ -710,13 +788,22 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'yeni',
         text: 'docs/BILESEN_MIMARISI.md â€” bileÅŸen tÃ¼rleri, stil/import kurallarÄ±, state kaldÄ±rma patterni',
       },
-      { type: 'yeni', text: 'docs/NAVIGASYON.md â€” route yapÄ±sÄ±, tab sistemi, lazy loading, route ekleme prosedÃ¼rÃ¼' },
-      { type: 'iyilestirme', text: 'docs/README.md â€” yeni spec listesi ve geliÅŸtirici baÅŸlangÄ±Ã§ sÄ±rasÄ± eklendi' },
+      {
+        type: 'yeni',
+        text: 'docs/NAVIGASYON.md â€” route yapÄ±sÄ±, tab sistemi, lazy loading, route ekleme prosedÃ¼rÃ¼',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'docs/README.md â€” yeni spec listesi ve geliÅŸtirici baÅŸlangÄ±Ã§ sÄ±rasÄ± eklendi',
+      },
       {
         type: 'yeni',
         text: 'src/lib/specs/ â€” dinamik spec rule engine (types, component, error, nav, data, test rules)',
       },
-      { type: 'yeni', text: 'src/__tests__/spec-compliance.test.ts â€” 13 spec kuralÄ± iÃ§in otomatik compliance testi' },
+      {
+        type: 'yeni',
+        text: 'src/__tests__/spec-compliance.test.ts â€” 13 spec kuralÄ± iÃ§in otomatik compliance testi',
+      },
       { type: 'yeni', text: 'src/pages/SpecDashboard.tsx â€” canlÄ± spec durumu sayfasÄ± (Sistem > Spec)' },
       {
         type: 'iyilestirme',
@@ -781,7 +868,10 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'TÃ¼m .ts/.tsx dosyalarÄ± CRLF â†’ LF normalize edildi (172 dosya)' },
       { type: 'duzeltme', text: 'TypeScript derleme hatalarÄ± giderildi (Stock/Kasa/DashboardFinans/types/index)' },
       { type: 'iyilestirme', text: '.gitattributes eklendi â€” LF + UTF-8 working-tree-encoding zorlamasÄ±' },
-      { type: 'iyilestirme', text: 'PowerShell UTF-8 code page (65001) yapÄ±landÄ±rmasÄ± â€” TÃ¼rkÃ§e karakter gÃ¶rÃ¼ntÃ¼leme' },
+      {
+        type: 'iyilestirme',
+        text: 'PowerShell UTF-8 code page (65001) yapÄ±landÄ±rmasÄ± â€” TÃ¼rkÃ§e karakter gÃ¶rÃ¼ntÃ¼leme',
+      },
     ],
   },
   {
@@ -858,7 +948,10 @@ export const CHANGELOG: VersionEntry[] = [
         text: 'Dashboard (5 sayfa): 200+ hardcoded hex/rgba renk CSS variable referanslarÄ±na dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼',
       },
       { type: 'iyilestirme', text: "Settings.tsx: 150+ inline style rengi CSS variable'a dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼" },
-      { type: 'iyilestirme', text: 'SystemMap: tÃ¼m dÃ¼ÄŸÃ¼m/kenar renkleri CSS variable tokenlarÄ±na dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼' },
+      {
+        type: 'iyilestirme',
+        text: 'SystemMap: tÃ¼m dÃ¼ÄŸÃ¼m/kenar renkleri CSS variable tokenlarÄ±na dÃ¶nÃ¼ÅŸtÃ¼rÃ¼ldÃ¼',
+      },
       { type: 'iyilestirme', text: 'Products.tsx: derleme hatasÄ± giderildi (Ã§ift state tanÄ±mÄ±, eksik filter)' },
       { type: 'duzeltme', text: 'index.css: premium tema deÄŸiÅŸkenleri, spacing ve tipografi skalasÄ± eklendi' },
     ],
@@ -914,7 +1007,10 @@ export const CHANGELOG: VersionEntry[] = [
         text: 'Monitor kural editÃ¶rÃ¼: stok_min/alacak/borÃ§ eÅŸik deÄŸerleri, popup ve aktif toggle eklendi',
       },
       { type: 'yeni', text: 'Butce bÃ¼tÃ§e kopyalama: mevcut kategorileri yeni yÄ±la kopyalama' },
-      { type: 'yeni', text: 'Notlar not baÄŸlama: cari/Ã¼rÃ¼n/satÄ±ÅŸ baÄŸlantÄ±sÄ± seÃ§ici, baÄŸlÄ± entity gÃ¶rÃ¼ntÃ¼leme' },
+      {
+        type: 'yeni',
+        text: 'Notlar not baÄŸlama: cari/Ã¼rÃ¼n/satÄ±ÅŸ baÄŸlantÄ±sÄ± seÃ§ici, baÄŸlÄ± entity gÃ¶rÃ¼ntÃ¼leme',
+      },
     ],
   },
   {
@@ -934,7 +1030,10 @@ export const CHANGELOG: VersionEntry[] = [
       },
       { type: 'yeni', text: 'Stok ABC analizi: A=%80, B=%15, C=%5 segmentasyonu, kÃ¼mÃ¼latif ciro grafiÄŸi' },
       { type: 'yeni', text: 'Stok Ã¶lÃ¼ stok tespiti: 90+ gÃ¼n hareketsiz Ã¼rÃ¼nler, baÄŸlÄ± sermaye hesaplamasÄ±' },
-      { type: 'yeni', text: 'Anomali saÄŸlÄ±k skoru gauge: PieChart ile yarÄ±m Ã§ember gÃ¶sterge, 30 gÃ¼nlÃ¼k trend grafiÄŸi' },
+      {
+        type: 'yeni',
+        text: 'Anomali saÄŸlÄ±k skoru gauge: PieChart ile yarÄ±m Ã§ember gÃ¶sterge, 30 gÃ¼nlÃ¼k trend grafiÄŸi',
+      },
       {
         type: 'yeni',
         text: 'DashboardFinans alacak yaÅŸlandÄ±rma: 0-30/31-60/61-90/90+ gÃ¼n renk kodlu kartlar ve mÃ¼ÅŸteri detay tablosu',
@@ -954,7 +1053,8 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.3.0',
     date: '26 MayÄ±s 2026',
     title: 'Faz 1 Yeni Detay SayfalarÄ±',
-    summary: 'ÃœrÃ¼n, satÄ±ÅŸ, cari, ortak emanet ve AI aksiyon gÃ¼nlÃ¼ÄŸÃ¼ iÃ§in Faz 1 kapsamÄ±ndaki yeni UI sayfalarÄ± eklendi.',
+    summary:
+      'ÃœrÃ¼n, satÄ±ÅŸ, cari, ortak emanet ve AI aksiyon gÃ¼nlÃ¼ÄŸÃ¼ iÃ§in Faz 1 kapsamÄ±ndaki yeni UI sayfalarÄ± eklendi.',
     changes: [
       {
         type: 'yeni',
@@ -998,7 +1098,10 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'iyilestirme',
         text: 'PWA runtime caching: Google Fonts (CacheFirst, 1 yÄ±l) ve Firebase API (NetworkOnly) eklendi',
       },
-      { type: 'iyilestirme', text: 'README.md: "Build & Performans" bÃ¶lÃ¼mÃ¼ eklendi â€” chunk tablosu ve PWA durumu' },
+      {
+        type: 'iyilestirme',
+        text: 'README.md: "Build & Performans" bÃ¶lÃ¼mÃ¼ eklendi â€” chunk tablosu ve PWA durumu',
+      },
     ],
   },
   {
@@ -1028,7 +1131,10 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'yeni', text: 'Dexie tabanlÄ± IndexedDB snapshot yazma/geri yÃ¼kleme akÄ±ÅŸÄ± eklendi' },
       { type: 'iyilestirme', text: 'AI asistan aksiyonlarÄ±nda fail-soft fallback zinciri uygulandÄ±' },
       { type: 'iyilestirme', text: 'GiriÅŸ ekranÄ± sÃ¼rÃ¼m etiketi v3.0.0 olarak gÃ¶rÃ¼nÃ¼r hale getirildi' },
-      { type: 'duzeltme', text: 'Anomali motorunda strict TypeScript uyumu iÃ§in tip gÃ¼venliÄŸi dÃ¼zeltmeleri yapÄ±ldÄ±' },
+      {
+        type: 'duzeltme',
+        text: 'Anomali motorunda strict TypeScript uyumu iÃ§in tip gÃ¼venliÄŸi dÃ¼zeltmeleri yapÄ±ldÄ±',
+      },
     ],
   },
   {

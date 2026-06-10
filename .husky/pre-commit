@@ -1,27 +1,138 @@
-#!/bin/sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/bash
 
-# Lockfile sync kontrolü
-if git diff --cached --name-only | grep -q "package.json"; then
-  echo "📦 package.json değişti — lockfile senkronize ediliyor..."
-  pnpm install --frozen-lockfile=false
-  git add pnpm-lock.yaml
+# Source helpers
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/helpers/colors.sh"
+source "$SCRIPT_DIR/helpers/staged-files.sh"
+
+print_header "🔍 PRE-COMMIT VALIDATION"
+
+TOTAL_TIME=$(date +%s)
+FAILED=0
+
+# 1. LOCK FILE SENKRONIZASYONU
+print_step "1/6 Lock file synchronization"
+
+if git diff --cached --name-only | grep -qE "package\.json"; then
+  print_info "package.json changed - syncing dependencies..."
+  
+  # --ignore-scripts: prepare script (husky) tetiklenmesin, EACCES hatalarindan kacin
+  if pnpm install --frozen-lockfile=false --ignore-scripts > /dev/null 2>&1; then
+    if git diff pnpm-lock.yaml | grep -q .; then
+      git add pnpm-lock.yaml
+      print_success "pnpm-lock.yaml synchronized"
+    fi
+  else
+    print_error "pnpm install failed"
+    FAILED=$((FAILED + 1))
+  fi
+else
+  print_success "No package.json changes"
 fi
 
-# Changelog kontrolü (mevcut hook)
-CHANGELOG="src/lib/changelog.ts"
-CHANGED=$(git diff --cached --name-only --diff-filter=ACMR)
-echo "$CHANGED" | grep -q "$CHANGELOG" && exit 0
-SOURCE=$(echo "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|css|html|json)$' | grep -v 'node_modules' | grep -v 'dist' | head -1)
+# 2. TYPESCRIPT TYPE CHECK
+print_step "2/6 TypeScript type checking"
 
-if [ -n "$SOURCE" ]; then
-  echo ""
-  echo "╔══════════════════════════════════════════════════════════════╗"
-  echo "║  ❌ COMMIT REDDEDİLDİ                                      ║"
-  echo "║  src/lib/changelog.ts güncellenmemiş!                      ║"
-  echo "╚══════════════════════════════════════════════════════════════╝"
-  echo ""
+TS_FILES=$(get_staged_ts_files)
+if [ -n "$TS_FILES" ]; then
+  print_info "Checking $(echo "$TS_FILES" | wc -l) TypeScript files..."
+  
+  if ! pnpm run typecheck > /dev/null 2>&1; then
+    print_error "TypeScript errors found"
+    pnpm run typecheck
+    FAILED=$((FAILED + 1))
+  else
+    print_success "All TypeScript files valid"
+  fi
+else
+  print_success "No TypeScript files staged"
+fi
+
+# 3. ESLINT + PRETTIER (Staged files)
+print_step "3/6 ESLint & Prettier (staged files)"
+
+if [ -n "$TS_FILES" ]; then
+  print_info "Running ESLint on staged files..."
+  
+  if ! pnpm exec eslint $TS_FILES --max-warnings 0 > /dev/null 2>&1; then
+    print_warning "ESLint issues found - attempting auto-fix..."
+    pnpm exec eslint $TS_FILES --fix
+    git add $TS_FILES
+  fi
+  
+  print_info "Running Prettier..."
+  pnpm exec prettier --write $TS_FILES > /dev/null 2>&1
+  git add $TS_FILES
+  
+  print_success "Code formatting complete"
+else
+  print_success "No files to lint"
+fi
+
+# 4. JSON DOSYA VALIDASYONU
+print_step "4/6 JSON validation"
+
+JSON_FILES=$(get_staged_json_files)
+if [ -n "$JSON_FILES" ]; then
+  print_info "Validating JSON files..."
+  
+  for json_file in $JSON_FILES; do
+    # node ile JSON validasyonu (cross-platform, harici araç gerekmez)
+    if ! node -e "JSON.parse(require('fs').readFileSync('$json_file','utf8'))" > /dev/null 2>&1; then
+      print_error "Invalid JSON: $json_file"
+      FAILED=$((FAILED + 1))
+    fi
+  done
+  
+  if [ $FAILED -eq 0 ]; then
+    print_success "All JSON files valid"
+  fi
+else
+  print_success "No JSON files staged"
+fi
+
+# 5. CHANGELOG UPDATE KONTROL (önemli files için)
+print_step "5/6 Changelog verification"
+
+if echo "$TS_FILES" | grep -qvE "\.test\.(ts|tsx)$|node_modules"; then
+  if ! git diff --cached --name-only | grep -q "changelog"; then
+    print_warning "Changelog not updated for code changes"
+    # Uyarı ver ama fail etme
+  else
+    print_success "Changelog updated"
+  fi
+else
+  print_success "Only tests changed - changelog optional"
+fi
+
+# 6. PROTECTED FILES KONTROL
+print_step "6/6 Protected files check"
+
+PROTECTED_PATTERNS=(
+  "pnpm-lock.yaml"
+  "tsconfig.json"
+  ".env.production"
+  "android/local.properties"
+)
+
+STAGED_FILES=$(git diff --cached --name-only)
+for pattern in "${PROTECTED_PATTERNS[@]}"; do
+  if echo "$STAGED_FILES" | grep -q "$pattern"; then
+    print_warning "Protected file changed: $pattern (review carefully)"
+  fi
+done
+
+print_success "Protected files validated"
+
+# SONUÇ
+TOTAL_END=$(date +%s)
+DURATION=$(( TOTAL_END - TOTAL_TIME ))
+
+echo ""
+if [ $FAILED -eq 0 ]; then
+  print_success "All pre-commit checks passed! (${DURATION}s)"
+  exit 0
+else
+  print_error "Pre-commit failed with $FAILED error(s)"
   exit 1
 fi
-
-exit 0

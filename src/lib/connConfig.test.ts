@@ -13,9 +13,38 @@ vi.mock('@/lib/firebase', () => ({
 
 const STORAGE_KEY = 'sobaConnConfig';
 
+function temizleLocalStorage() {
+  // jsdom --localstorage-file hatası nedeniyle localStorage bozulabiliyor
+  try {
+    localStorage.clear();
+  } catch {
+    // localStorage bozulmuş, yeniden oluştur
+    const storage: Storage = (() => {
+      const store: Record<string, string> = {};
+      return {
+        getItem: (k: string) => store[k] ?? null,
+        setItem: (k: string, v: string) => {
+          store[k] = String(v);
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        },
+        clear: () => {
+          Object.keys(store).forEach((k) => delete store[k]);
+        },
+        key: (i: number) => Object.keys(store)[i] ?? null,
+        get length() {
+          return Object.keys(store).length;
+        },
+      };
+    })();
+    vi.stubGlobal('localStorage', storage);
+  }
+}
+
 describe('connConfig', () => {
   beforeEach(() => {
-    localStorage.clear();
+    temizleLocalStorage();
     vi.clearAllMocks();
   });
 
@@ -54,7 +83,11 @@ describe('connConfig', () => {
     });
 
     it('should return saved config when available', () => {
-      const saved = { firebase: { enabled: true, projectId: 'saved-proj', apiKey: 'saved-key', docPath: 'sync/main' }, supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' }, activeProvider: 'firebase' as const };
+      const saved = {
+        firebase: { enabled: true, projectId: 'saved-proj', apiKey: 'saved-key', docPath: 'sync/main' },
+        supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' },
+        activeProvider: 'firebase' as const,
+      };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
       const config = loadConnConfig();
       expect(config.firebase.projectId).toBe('saved-proj');

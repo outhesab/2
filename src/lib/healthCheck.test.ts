@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { quickHealthCheck, type HealthMetric, type HealthStatus } from './healthCheck';
+import { quickHealthCheck } from './healthCheck';
 
 vi.mock('./logger', () => ({
   logger: { warn: vi.fn(), info: vi.fn(), time: vi.fn(() => ({ end: vi.fn(() => 0) })) },
@@ -37,9 +37,38 @@ function makeDB(overrides?: Record<string, unknown>) {
   };
 }
 
+function temizleLocalStorage() {
+  // jsdom --localstorage-file hatası nedeniyle localStorage bozulabiliyor
+  try {
+    localStorage.clear();
+  } catch {
+    // localStorage bozulmuş, yeniden oluştur
+    const storage: Storage = (() => {
+      const store: Record<string, string> = {};
+      return {
+        getItem: (k: string) => store[k] ?? null,
+        setItem: (k: string, v: string) => {
+          store[k] = String(v);
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        },
+        clear: () => {
+          Object.keys(store).forEach((k) => delete store[k]);
+        },
+        key: (i: number) => Object.keys(store)[i] ?? null,
+        get length() {
+          return Object.keys(store).length;
+        },
+      };
+    })();
+    vi.stubGlobal('localStorage', storage);
+  }
+}
+
 describe('quickHealthCheck', () => {
   beforeEach(() => {
-    localStorage.clear();
+    temizleLocalStorage();
     vi.clearAllMocks();
   });
 
@@ -71,21 +100,23 @@ describe('quickHealthCheck', () => {
 
 describe('checkLocalStorage', () => {
   beforeEach(() => {
-    localStorage.clear();
+    temizleLocalStorage();
   });
 
   it('should return healthy for empty storage', () => {
     const report = quickHealthCheck(makeDB());
-    const lsMetric = report.metrics.find(m => m.id === 'localStorage')!;
+    const lsMetric = report.metrics.find((m) => m.id === 'localStorage')!;
     expect(lsMetric).toBeDefined();
     expect(lsMetric.status).toBe('healthy');
   });
 
   it('should detect localStorage write failures as critical', () => {
     const setItem = Storage.prototype.setItem;
-    Storage.prototype.setItem = vi.fn(() => { throw new Error('QuotaExceededError'); });
+    Storage.prototype.setItem = vi.fn(() => {
+      throw new Error('QuotaExceededError');
+    });
     const report = quickHealthCheck(makeDB());
-    const lsMetric = report.metrics.find(m => m.id === 'localStorage');
+    const lsMetric = report.metrics.find((m) => m.id === 'localStorage');
     Storage.prototype.setItem = setItem;
     if (lsMetric && lsMetric.status !== 'healthy') {
       expect(['critical', 'degraded']).toContain(lsMetric.status);
@@ -97,14 +128,14 @@ describe('checkNetwork', () => {
   it('should report online status', () => {
     Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
     const report = quickHealthCheck(makeDB());
-    const netMetric = report.metrics.find(m => m.id === 'network' || m.id === 'network')!;
+    const netMetric = report.metrics.find((m) => m.id === 'network' || m.id === 'network')!;
     expect(netMetric).toBeDefined();
   });
 
   it('should report critical when offline', () => {
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
     const report = quickHealthCheck(makeDB());
-    const netMetric = report.metrics.find(m => m.id === 'network')!;
+    const netMetric = report.metrics.find((m) => m.id === 'network')!;
     if (netMetric) {
       expect(netMetric.status).toBe('critical');
     }
