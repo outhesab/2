@@ -28,8 +28,12 @@
     "cap:apk:dev": "vite build --mode development && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --build-cache --parallel",
     "cap:apk:release": "vite build && pnpm exec cap sync android && cd android && ./gradlew assembleRelease --build-cache --parallel",
     "cap:apk:fast": "vite build --mode development --emptyOutDir && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --build-cache --parallel --offline",
+    "build:apk": "pnpm install --frozen-lockfile && pnpm run build && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --no-daemon --stacktrace",
+    "build:check": "pnpm install --no-frozen-lockfile && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
+    "prepare": "husky install",
+    "preinstall": "npx only-allow pnpm",
     "postinstall": "echo ok",
-    "analyze": "pnpm build --mode analyze && start dist\\stats.html",
+    "analyze": "pnpm build --mode analyze && start dist\\\\stats.html",
     "coverage:ui": "vitest run --coverage --reporter=html && start coverage/index.html",
     "coverage": "vitest run --coverage"
   },
@@ -97,13 +101,13 @@
     "xlsx": "^0.18.5",
     "zustand": "^5.0.13"
   },
-  "simple-git-hooks": {
-    "pre-commit": ".simple-git-hooks/pre-commit"
-  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "fallow"
-    ]
+    ],
+    "updateConfig": {
+      "autoinstall": true
+    }
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4",
@@ -123,8 +127,10 @@
     "fallow": "^0.1.5",
     "fast-check": "^4.1.1",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lightningcss-win32-x64-msvc": "^1.32.0",
+    "lint-staged": "^17.0.7",
     "playwright": "^1.52.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.0",

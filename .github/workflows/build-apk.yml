@@ -5,6 +5,7 @@ on:
       - dev
       - main
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   quality:
@@ -76,7 +77,15 @@ jobs:
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: parspel-apk
           path: ${{ github.workspace }}/android/app/build/outputs/apk/debug/*.apk
+
+      - name: Build Failed
+        if: failure()
+        run: |
+          echo "❌ APK derlemesi başarısız. Hata günlüğü:"
+          ls -la ${{ github.workspace }}/android/app/build/outputs/ 2>/dev/null || echo "Build output bulunamadı"
+          exit 1
