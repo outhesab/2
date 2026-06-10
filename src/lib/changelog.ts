@@ -87,6 +87,14 @@ export const CHANGELOG: VersionEntry[] = [
         type: 'iyilestirme',
         text: 'package.json cleanup: kullanılmayan husky, lint-staged, lint-staged.config.js kaldırıldı; prepare script "simple-git-hooks" olarak güncellendi',
       },
+      {
+        type: 'yeni',
+        text: 'parspel-audit skill v1.0.0: PARSPEL mimarisini koruyan otonom frontend denetim ajanı — Playwright + Lighthouse + Storybook MCP entegrasyonlu, 3 iterasyon sınırlı, kırmızı çizgi kurallı',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'parspel-audit skill v1.1.0: Git güvenliği (commit/push yasak), P0-P3 risk öncelik sistemi, changelog zorunluluğu eklendi — production-grade seviyesine yükseltildi',
+      },
     ],
   },
   {
