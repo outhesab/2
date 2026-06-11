@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.20.1',
+    date: '11 Haziran 2026',
+    title: 'GitHub Pages deploy.yml Kaldırıldı',
+    summary:
+      'Kullanılmayan GitHub Pages deployment workflow\'u silindi. deploy.yml sadece main branch\'ini dinliyordu ancak proje sadece dev kullanıyor — hiç tetiklenmemişti. Deployment işlemleri zaten Vercel tarafından yapılıyor. GitHub Pages ortamı repo Settings > Environments > github-pages üzerinden manuel kaldırılmalı.',
+    changes: [
+      {
+        type: 'kaldirildi',
+        text: '.github/workflows/deploy.yml: GitHub Pages deploy workflow\'u silindi — main branch\'ini dinliyordu, hiç tetiklenmedi, Vercel tüm deployment\'ları yapıyor',
+      },
+    ],
+  },
+  {
     version: '3.20.0',
     date: '11 Haziran 2026',
     title: 'AGENTS.md Yeniden Yazımı — 26 Bölümlü Sıfır-Tolerans Kuralları',
