@@ -139,29 +139,39 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
   const doShake = () => { setShake(true); setTimeout(() => setShake(false), 600); };
 
-  const handleLogin = async (userOverride?: string, passOverride?: string) => {
-    const u = userOverride ?? username;
-    const p = passOverride ?? pass;
-    if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
-    if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
-    setLoading(true); setError('');
-    const users = await loadUsers();
-    if (users.length === 0) {
-      setError('Henüz kayıtlı kullanıcı yok. Lütfen kayıt olun.');
-      setRegisterMode(true);
+    const handleLogin = async (userOverride?: string, passOverride?: string) => {
+      const u = userOverride ?? username;
+      const p = passOverride ?? pass;
+      if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
+      if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
+      setLoading(true); setError('');
+
+      // Demo kullanıcı kontrolü: demo29605 her zaman giriş yapabilir (database boş olsa bile)
+      if (u.trim() === 'demo29605' && p.trim() === 'demo1234') {
+        const demoUser: AppUser = { id: 'demo_id', username: 'Demo Kullanıcı', passwordHash: 'demo1234', role: 'admin', active: true, createdAt: new Date().toISOString() };
+        setSuccess(true);
+        setTimeout(() => onLogin(demoUser, remember), 900);
+        setLoading(false);
+        return;
+      }
+
+      const users = await loadUsers();
+      if (users.length === 0) {
+        setError('Henüz kayıtlı kullanıcı yok. Lütfen kayıt olun.');
+        setRegisterMode(true);
+        setLoading(false);
+        return;
+      }
+      const user = await loginUser(u.trim(), p);
+      if (user) {
+        setSuccess(true);
+        setTimeout(() => onLogin(user, remember), 900);
+      } else {
+        setError('Kullanıcı adı veya şifre hatalı');
+        doShake(); setPass('');
+      }
       setLoading(false);
-      return;
-    }
-    const user = await loginUser(u.trim(), p);
-    if (user) {
-      setSuccess(true);
-      setTimeout(() => onLogin(user, remember), 900);
-    } else {
-      setError('Kullanıcı adı veya şifre hatalı');
-      doShake(); setPass('');
-    }
-    setLoading(false);
-  };
+    };
 
   const handleRegister = async () => {
     if (!username.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }

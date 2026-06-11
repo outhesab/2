@@ -41,7 +41,7 @@ function cspPlugin(mode: string): Plugin {
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development' || mode === 'dev';
   return {
-    base: './',
+    base: '/',
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },

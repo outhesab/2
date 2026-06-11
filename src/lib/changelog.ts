@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.1',
+    date: '11 Haziran 2026',
+    title: 'Demo Login Fix & Deployment CSS Düzeltmesi',
+    summary:
+      'Demo kullanıcı girişi düzeltildi: "Hızlı Giriş" butonu veritabanı boş olsa bile demo29605/demo1234 ile giriş yapabiliyor. Vite base path "./" → "/" olarak değiştirildi, böylece Vercel deploy\'da CSS asset\'lerinin yüklenmeme sorunu giderildi.',
+    changes: [
+      {
+        type: 'duzeltme',
+        text: 'Demo Login: "Hızlı Giriş" butonu boş veritabanında kayıt sayfasına yönlendiriyordu — demo kullanıcı artık her durumda giriş yapabilir.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'CSS/Deployment: Vite base path "./" → "/" değiştirildi, Vercel\'de CSS asset\'lerinin doğru yüklenmesi sağlandı.',
+      },
+    ],
+  },
+  {
     version: '3.21.0',
     date: '11 Haziran 2026',
     title: 'CSS Module Migration, Fatura/AIA Helpers Refactor, Storybook & Audit Altyapısı',
