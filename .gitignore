@@ -63,3 +63,10 @@ scripts/archive/
 # Geliştirme çıktıları
 console-logs.txt
 *.png
+
+# Audit & Test Çıktıları
+screenshots/
+scripts/screenshots/
+.fallow/
+audit-snapshot-*.md
+

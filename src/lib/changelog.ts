@@ -20,6 +20,27 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.2',
+    date: '11 Haziran 2026',
+    title: 'Proje Temizliği & Dosya Organizasyonu',
+    summary:
+      'Gereksiz generated dosyalar silindi ve .gitignore güncellendi. Proje dökümanı .txt formatından .md formatına taşındı. Çalışma dizini gereksiz audit/screenshot kalıntılarından arındırıldı.',
+    changes: [
+      {
+        type: 'iyilestirme',
+        text: 'Temizlik: screenshots/report.json, audit-snapshot-1.md ve .fallow/ önbelleği silindi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Dökümantasyon: PARSPEL_MASTER_PROJE_DOKUMANI.txt → .md formatına dönüştürüldü',
+      },
+      {
+        type: 'iyilestirme',
+        text: '.gitignore: generated dosyalar, screenshots/ ve .fallow/ klasörleri dışlandığı belirtildi',
+      },
+    ],
+  },
+  {
     version: '3.21.1',
     date: '11 Haziran 2026',
     title: 'Demo Login Fix & Deployment CSS Düzeltmesi',
