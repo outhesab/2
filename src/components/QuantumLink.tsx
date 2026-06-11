@@ -253,7 +253,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
         }
       } catch (err) {
         const errMsg = `❌ Hata: ${err instanceof Error ? err.message : 'İşlem başarısız'}`;
-        logger.error('quantumlink', 'Komut işlenirken hata', { error: err, text });
+        logger.error('ai', 'Komut işlenirken hata', { error: err, text });
         setMessages((prev) => [...prev, { role: 'assistant', text: errMsg }]);
       } finally {
         setIsProcessing(false);

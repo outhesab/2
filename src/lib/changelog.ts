@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.4',
+    date: '11 Haziran 2026',
+    title: 'Quantum Link Sessiz Hata Düzeltmesi',
+    summary: 'Quantum Link\'te dispatchAgentFlow üzerinden yapılan işlemlerde dönüş değerleri kontrol edilmiyor, hatalar sessizce yutuluyor ve cari tahsilat payload\'u yanlış gönderiliyordu. Agent çağrıları doğrudan getAgent() ile yapılacak şekilde yeniden yazıldı, dönüş değerleri kontrol ediliyor ve hatalar kullanıcıya gösteriliyor.',
+    changes: [
+      { type: 'duzeltme', text: 'Quantum Link: dispatchAgentFlow (deprecated) yerine doğrudan getAgent().islemYap() kullanıldı — agent yanıtları kontrol ediliyor.' },
+      { type: 'duzeltme', text: 'Quantum Link: cari tahsilat işleminde cariName yerine cariId gönderiliyordu — db\'den isimle eşleşen cari bulunarak düzeltildi.' },
+      { type: 'duzeltme', text: 'Quantum Link: satış komutu items dizisi olmadan gönderiliyor, sessizce başarısız oluyordu — kasa_gelir olarak kaydedilecek şekilde değiştirildi.' },
+      { type: 'iyilestirme', text: 'Quantum Link: tüm işlem sonuçları kullanıcıya net başarı/başarısızlık mesajı olarak dönülüyor.' },
+    ],
+  },
+  {
     version: '3.21.3',
     date: '11 Haziran 2026',
     title: 'Baseline Onarımı ve Veri Katmanı İyileştirmeleri',
