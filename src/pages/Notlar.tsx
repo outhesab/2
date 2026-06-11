@@ -1,6 +1,9 @@
 import { useState, useMemo, useRef } from 'react';
 import { genId, formatDate } from '@/lib/utils-tr';
+import { logger } from '@/lib/logger';
 import type { DB, Note } from '@/types';
+import EmptyState from '@/components/EmptyState';
+import { StickyNote } from 'lucide-react';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -87,7 +90,7 @@ export default function Notlar({ db, save }: Props) {
   };
 
   const copyNote = (n: Note) => {
-    navigator.clipboard.writeText(`${n.title ? n.title + '\n\n' : ''}${n.content}`).catch(() => console.warn('[notlar] Panoya yazılamadı'));
+    navigator.clipboard.writeText(`${n.title ? n.title + '\n\n' : ''}${n.content}`).catch(() => logger.warn('ui', 'Panoya yazılamadı'));
   };
 
   const pinnedCount = notes.filter(n => n.pinned).length;
@@ -182,10 +185,13 @@ export default function Notlar({ db, save }: Props) {
 
       {/* Notes */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#334155' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 12 }}>📝</div>
-          <p style={{ fontSize: '0.9rem' }}>{search ? 'Not bulunamadı' : 'Henüz not yok — yukarıdan ekleyin'}</p>
-        </div>
+        <EmptyState
+          icon={StickyNote}
+          title={search ? 'Not bulunamadı' : 'Henüz not yok'}
+          description={search ? 'Aramanızla eşleşen not bulunamadı.' : 'Yukarıdaki formu kullanarak ilk notunuzu ekleyin.'}
+          actionLabel={search ? 'Aramayı temizle' : undefined}
+          onAction={search ? () => setSearch('') : undefined}
+        />
       ) : (
         <div style={view === 'grid'
           ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }

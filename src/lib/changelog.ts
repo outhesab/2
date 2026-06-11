@@ -20,6 +20,55 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.0',
+    date: '11 Haziran 2026',
+    title: 'CSS Module Migration, Fatura/AIA Helpers Refactor, Storybook & Audit Altyapısı',
+    summary:
+      'Kapsamlı refactor ve altyapı oturumu: Inline CSS'ler CSS Module'lere taşındı (Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers — 8 sayfa). FaturaHelpers ve AIAHelpers'deki utility fonksiyonlar ayrı utils dosyalarına çıkarıldı. Storybook kurulumu yapıldı (.storybook/main.ts, preview.ts ve örnek stories). parspel-audit skill v2.0.0'a güncellendi (deterministik execution, strict tool pipeline, loop-safe). Vite config Storybook/Playwright için genişletildi. Seed data (src/lib/seedData.ts) eklendi. Audit helper script'leri yazıldı (hash-audit, lighthouse-mcp, storybook-mcp). Git branch'leri temizlendi: dev fast-forward ile güncellendi, feat/my-feature ve feat/session-3 silindi.',
+    changes: [
+      {
+        type: 'iyilestirme',
+        text: 'CSS Module migration: Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers sayfaları inline CSS → CSS Module',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'FaturaHelpers.tsx: utility fonksiyonlar (createInstallmentPlan, emptyItem, nextInvoiceNo, statusColors, vb.) FaturaHelpers.utils.ts dosyasına çıkarıldı',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'AIAHelpers.tsx: utility fonksiyonlar AIAHelpers.utils.ts dosyasına çıkarıldı',
+      },
+      {
+        type: 'yeni',
+        text: 'Storybook kurulumu: .storybook/main.ts, .storybook/preview.ts, src/stories/Button.stories.tsx',
+      },
+      {
+        type: 'yeni',
+        text: 'parspel-audit skill v2.0.0: deterministik execution, strict tool pipeline, mandatory stop condition, loop-safe',
+      },
+      {
+        type: 'yeni',
+        text: 'Seed data: src/lib/seedData.ts — test ve demo verisi',
+      },
+      {
+        type: 'yeni',
+        text: 'Audit helper script\'leri: scripts/hash-audit.mjs, scripts/lighthouse-mcp.mjs, scripts/storybook-mcp.mjs',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Vite config: Storybook ve Playwright entegrasyonu için genişletildi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'opencode.json: audit-state tracking, memory paths, yeni skill referansları güncellendi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Git branch cleanup: dev fast-forward (0eb729f → 242b1c6), feat/my-feature ve feat/session-3 silindi',
+      },
+    ],
+  },
+  {
     version: '3.20.1',
     date: '11 Haziran 2026',
     title: 'GitHub Pages deploy.yml Kaldırıldı',

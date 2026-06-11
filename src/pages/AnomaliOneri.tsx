@@ -632,7 +632,7 @@ export default function AnomaliOneri({ db, save }: Props) {
             <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(aiMessage).catch(() => console.warn('[anomali] Panoya yazılamadı'));
+                  navigator.clipboard.writeText(aiMessage).catch(() => logger.warn('anomali', 'Panoya yazılamadı'));
                 }}
                 style={{
                   background: 'rgba(99,102,241,0.15)',

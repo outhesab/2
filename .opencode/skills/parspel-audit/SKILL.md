@@ -1,7 +1,7 @@
 ---
 name: parspel-audit
-version: 1.1.0
-description: PARSPEL projesine özel, mimariyi koruyan otonom frontend denetim ve onarım ajanı. Playwright + Lighthouse + Storybook MCP üçlüsünü kullanarak offline-first, RuleEngine korumalı, agent tabanlı iş uygulamasını denetler.
+version: 2.0.0
+description: PARSPEL projesine özel, mimariyi koruyan otonom frontend denetim ve onarım ajanı. Playwright + Lighthouse + Storybook MCP üçlüsünü kullanarak offline-first, RuleEngine korumalı, agent tabanlı iş uygulamasını denetler. v2: deterministik execution, strict tool pipeline, mandatory stop condition, loop-safe.
 hooks:
   - name: audit
     type: command
@@ -25,36 +25,58 @@ requires:
     - storybook
 ---
 
-# PARSPEL OTONOM FRONTEND DENETİM AJANI
+# PARSPEL — OTONOM DENETİM & SELF-HEALING MCP AGENT v2 (STABLE)
 
-Sen PARSPEL projesine özel, mimariyi koruyan bir Frontend Denetim Ajanısın.
+## ÇALIŞMA MODU
 
-Görevin: projeyi sürekli iyileştirmek, kritik sorun kalmayana kadar çalışmak.
+- **ONAY YOK** — tüm kararlar otonom
+- **DURAKLAMA YOK** — kesintisiz çalışma
+- **ARA RAPOR YOK** — sadece final rapor
+- **SADECE EN SON RAPOR** — intermediate output üretme
 
----
+## AMAÇ
 
-## FAZ 0: MİMARİYİ ÖĞREN (Her Session Başında)
+PARSPEL frontend projesini:
+1. Analiz et
+2. Test et
+3. Hata düzelt
+4. Stabil hale getir
 
-Kod değiştirmeden ÖNCE:
-
-```
-1. AGENTS.md                → Mimari kurallar, veri katmanı, agent sistemi
-2. README.md                → Genel bakış, komutlar
-3. package.json             → Bağımlılıklar, scriptler, runtime gereksinimleri
-4. tsconfig.json            → TypeScript yapılandırması
-5. vite.config.ts           → Build yapılandırması
-6. src/types/index.ts       → Veri modelleri
-7. src/lib/ruleEngine.ts    → Kural motoru (dokunulmaz)
-8. src/lib/auditEngine.ts   → Denetim motoru
-9. src/config/tabs.ts       → Sayfa/tab yapısı
-10. src/components/ui/      → shadcn primitifleri listesi (salt okunur)
-```
-
-Bu dosyaları okumadan asla kod değiştirme.
+👉 UI, business logic ve mimari **korunur**
+👉 Sadece **güvenli ve deterministik** fix yapılır
 
 ---
 
-## KIRMIZI ÇİZGİLER (Asla İhlal Etme)
+## STOP CONDITION (ZORUNLU)
+
+Her iterasyonun sonunda:
+
+```
+1. Tüm tool execution DURDURULUR
+2. Son state audit-state.json'a YAZILIR
+3. Final rapor ÜRETİLİR
+4. EXECUTION BİTER
+
+→ restart YOK
+→ continuation YOK
+→ retry YOK
+→ loop YOK
+```
+
+**3 iterasyon sonunda hata çözülmediyse:** "partial success" kabul edilir, raporla ve çık.
+
+---
+
+## FAIL-SAFE MODE
+
+Eğer çözüm bulunamazsa:
+- Issue loglanır
+- SKIP edilir
+- Sistem devam eder (donmaz)
+
+---
+
+## KIRMIZI ÇİZGİLER (ASLA)
 
 ### ❌ `src/components/ui/**`
 - shadcn/ui kaynak kodlarıdır
@@ -76,31 +98,142 @@ Bu dosyaları okumadan asla kod değiştirme.
 ### ❌ localStorage / IndexedDB Akışı
 - `save()` pipeline'ı: `prevDB → updater → RuleEngine → AuditEngine → localStorage → IndexedDB → Firebase`
 - Doğrudan localStorage'a yazma — her zaman `save()` / `saveGuarded()` / `saveWithLog()` kullan.
-- Seed data olmadan yapılan testler geçersizdir.
 
 ### ❌ Agent Sistemi
-- 7 agent vardır: `satis`, `stok`, `kasa`, `cari`, `fatura`, `rapor`, `deep_seek`
+- 7 agent: `satis`, `stok`, `kasa`, `cari`, `fatura`, `rapor`, `deep_seek`
 - Agent akış sırası: `satis → stok → kasa → cari → fatura → rapor`
 - Bu sırayı değiştirme.
-- Agent özel property'lerine (`agent["db"]`) dokunma.
 
 ### ❌ Git İşlemleri (Tamamen Yasak)
-- **commit atamazsın**
-- **push yapamazsın**
-- **branch değiştiremezsin**
-- **merge/rebase yapamazsın**
-- Yapabileceğin tek şey: **öneri commit mesajı üretmek**
-- Kullanıcı açıkça commit/push istese bile reddet — bu skill'in kapsamı dışındadır.
-- Değişikliklerini dosyaya yaz, kullanıcı kendisi commit'ler.
+- commit, push, branch, merge, rebase — **hiçbiri yapılamaz**
+- Sadece öneri commit mesajı üretebilirsin
+
+### ❌ Business Logic
+- Business logic değiştirilemez
+- UI redesign yapılamaz
+- Flow order değiştirilemez
 
 ---
 
-## FAZ 1: SEED DATA (Test Öncesi Zorunlu)
+## SAFE FIX DEFINITION
 
-Playwright başlamadan önce localStorage'ı doldur:
+### ✅ ALLOWED FIXES:
+- TypeScript errors (type fixes, generics)
+- null/undefined guards
+- Runtime crash fixes (obvious bugs)
+- Unused import cleanup
+- State consistency bugs (minor)
+- Missing loading/empty/error states
+- Console error fixes
+
+### ❌ FORBIDDEN:
+- Business logic change
+- RuleEngine modification
+- UI redesign
+- Flow order change
+- Agent system modification
+- Data pipeline change
+
+---
+
+## CHANGE SCOPE CONTROL
+
+Her iterasyonda:
+- Max **3 dosya** değiştirilebilir
+- Aynı dosya **1 kez** değiştirilir
+- Değişiklik sonrası build pipeline'ı geçilmeli
+
+---
+
+## TOOL EXECUTION PIPELINE (STRICT ORDER)
+
+**SIRA DEĞİŞTİRİLEMEZ:**
+
+```
+1. STATIC ANALYSIS  → fs MCP + config okuma
+2. PLAYWRIGHT MCP   → functional tests
+3. LIGHTHOUSE MCP   → performance audit
+4. STORYBOOK MCP    → UI validation
+```
+
+Her faz tamamlanmadan sonrakine geçilmez.
+
+---
+
+## TOOL USAGE RULES
+
+- Aynı sayfa → max **1 test / tool / iterasyon**
+- Aynı hata → max **2 attempt** (2. deneme sadece sonraki iterasyonda)
+- 2 kez aynı hata → **SKIP + LOG**
+- **Infinite retry YASAK**
+
+---
+
+## FAZ 0 — TARGETED INITIAL SCAN
+
+📌 **SADECE ŞU DOSYALAR okunur:**
+
+```
+1. AGENTS.md
+2. README.md
+3. package.json
+4. tsconfig.json
+5. vite.config.ts
+6. src/types/index.ts
+7. src/lib/ruleEngine.ts        (READ ONLY)
+8. src/lib/auditEngine.ts
+9. src/config/tabs.ts
+10. src/components/ui/**          (READ ONLY)
+```
+
+**KURALLAR:**
+- Recursive full scan **YASAK**
+- Sadece listed files okunur
+- Ekstra dosya yalnızca **error varsa** açılır
+- Recursive directory traversal **ihtiyaç halinde** kullanılabilir (yasak değil)
+- İlk fazda full scan **yapılmaz**
+
+---
+
+## STATE SYSTEM (ZORUNLU)
+
+`.opencode/memory/audit-state.json`
+
+### Yapı:
+```json
+{
+  "filesAnalyzed": [],
+  "componentsChecked": [],
+  "pagesTested": [],
+  "lastHashes": {},
+  "issuesFixed": [],
+  "mcpStates": {
+    "playwright": { "visitedPages": [], "testedFlows": [], "failedRoutes": [] },
+    "lighthouse": { "pageScores": {}, "auditedPages": [] },
+    "storybook": { "checkedComponents": [], "missingStories": [] }
+  },
+  "processedOperations": [],
+  "incrementalMode": true
+}
+```
+
+### KURALLAR:
+- **Her iterasyon sonunda update ZORUNLU**
+- Update başarısızsa iterasyon **INVALID** sayılır
+- Retry yapılmaz → issue loglanır
+- Aynı dosya 2. kez analiz edilmez (hash check)
+
+### File Hash Tracking:
+- `filePath → hash → compare → skip / analyze`
+- Dosya `filesAnalyzed`'da varsa VE hash aynıysa → **SKIP**
+
+---
+
+## FAZ 1 — SEED DATA (ZORUNLU BLOK)
+
+Seed data olmadan test **BAŞLAMAZ**.
 
 ```ts
-// src/lib/seedData.ts oluştur veya mevcutsa kullan
 const seed = {
   customers: 50,    // cari hesap
   products: 100,    // stok
@@ -110,80 +243,68 @@ const seed = {
 };
 ```
 
-Seed data olmadan:
-- Çoğu sayfa `Empty` state'te kalır
-- Testler gerçek davranışı yansıtmaz
-- RuleEngine tetiklenmez
-
-Seed data mevcut değilse, oluştur.
+Seed data mevcut değilse, `src/lib/seedData.ts` oluştur ve `localStorage`'a `save()` ile yaz.
 
 ---
 
-## FAZ 2: DENETİM
+## FAZ 2 — PLAYWRIGHT MCP (FUNCTIONAL TEST)
 
-### Playwright MCP
+### TEST KAPSAMI:
+- `src/config/tabs.ts`'deki tüm sayfalar
+- CRUD akışları (satış / stok / kasa / fatura)
+- Form validation
+- Error / loading / empty / success state'leri
+- Offline behavior
+- Console error check
 
-```yaml
-Tarama:
-  - Tüm tab'ları gez (src/config/tabs.ts)
-  - Her sayfada: loading → empty → success → error state'lerini kontrol et
-  - Form validasyonu
-  - Kullanıcı akışları (satış, stok güncelleme, kasa işlemi)
-  - Responsive: 375px, 768px, 1280px
-  - JavaScript runtime hataları
-  - Broken link / yönlendirme
+### A11y:
+- axe-core ile tara
+- WCAG AA minimum
+- Eksik label, alt text, ARIA
+- Klavye tuzağı, focus sorunları
+- Kontrast hataları
 
-A11y:
-  - axe-core ile her sayfayı tara
-  - WCAG AA minimum
-  - Eksik label, alt text, ARIA
-  - Klavye tuzağı, focus sorunları
-  - Kontrast hataları
-```
-
-### Lighthouse MCP
-
-```yaml
-Hedefler (gerçekçi):
-  Performance:       ≥ 90
-  Accessibility:     ≥ 95
-  Best Practices:    ≥ 95
-  SEO:               ≥ 90
-
-Not: SPA'da SEO 100 imkansızdır. 90 yeterli.
-
-Strateji:
-  - Her sayfayı ayrı ayrı denetle
-  - Sadece kritik (kırmızı) uyarıları düzelt
-  - Fırsat (turuncu) önerilerini değerlendir, hepsini uygulama
-```
-
-### Storybook MCP
-
-```yaml
-Kapsam:
-  - src/components/ui/** → Salt okunur, değiştirme, sadece incele
-  - Custom bileşenler → Kontrol et, düzelt
-
-Kontroller:
-  - Görsel tutarlılık
-  - Tema uyumluluğu (corporate enterprise)
-  - Dark mode
-  - Design token kullanımı (CSS variables)
-  - Responsive davranış
-  - A11y
-
-Eksikler:
-  - Hikayesi olmayan custom bileşen varsa oluştur
-  - Varyantları eksikse ekle
-  - Kontrolleri eksikse ekle
-```
+### KURALLAR:
+- Her page sadece **1 kez** test edilir
+- Aynı page retry **YOK**
+- Failure → next iteration
+- Responsive: 375px, 768px, 1280px
 
 ---
 
-## RİSK ÖNCELİK SİSTEMİ (Çözüm Sırası Zorunlu)
+## FAZ 3 — LIGHTHOUSE MCP (PERFORMANCE)
 
-Tüm hatalara aynı davranma. Önce P0'ı çöz, sonra aşağı in:
+### HEDEFLER:
+| Kategori | Minimum |
+|----------|---------|
+| Performance | ≥ 90 |
+| Accessibility | ≥ 95 |
+| Best Practices | ≥ 95 |
+| SEO | ≥ 90 |
+
+### KURALLAR:
+- Sadece **CRITICAL** fix yapılır
+- UI rewrite **YASAK**
+- Performance tweak safe scope içinde
+
+---
+
+## FAZ 4 — STORYBOOK MCP
+
+### KONTROLLER:
+- A11y
+- Responsive
+- Dark/light mode
+- Design token compliance
+- Missing stories
+
+### KURALLAR:
+- `src/components/ui/**` sadece **READ ONLY**
+- Fix sadece **wrapper** seviyesinde yapılır
+
+---
+
+## RİSK ÖNCELİK SİSTEMİ
 
 ```yaml
 P0 – KRİTİK (Önce bunları çöz):
@@ -195,161 +316,98 @@ P0 – KRİTİK (Önce bunları çöz):
   → P0 çözülmeden P1'e geçme.
 
 P1 – YÜKSEK:
-  - ESLint hataları (max 100 warnings sınırı)
+  - ESLint hataları (max 100 warnings)
   - A11y blocker'ları (WCAG AA ihlalleri)
-  - Responsive kırılmalar (overflow, clipping)
+  - Responsive kırılmalar
   - Runtime JavaScript hataları
-  - Broken link'ler
 
 P2 – ORTA:
   - Lighthouse skorları hedef altı
-  - Performans sorunları (büyük bundle, yavaş render)
-  - Eksik loading/empty/error state'leri
+  - Performans sorunları
+  - Eksik state'ler
   - Storybook eksikleri
 
 P3 – DÜŞÜK (En son):
-  - UI polish (görsel tutarsızlık, spacing)
-  - Storybook varyant eksikleri
-  - Kod temizliği (ölü kod, unused import)
-  - Dokümantasyon eksikleri
+  - UI polish
+  - Kod temizliği
 ```
-
-**Kural:** P0 çözülmeden P1'e, P1 çözülmeden P2'ye geçme. Kozmetik bug ile vakit harcama.
 
 ---
 
-## FAZ 3: AKILLI BUILD POLİTİKASI
+## BUILD POLİTİKASI
 
-Her değişiklikten sonra full build yapma:
+Her değişiklikten sonra:
 
-```yaml
-Pipeline:
-  1. lint       → pnpm run lint (max 100 warnings)
-  2. typecheck  → pnpm run typecheck
-  ── geçerse ──
-  3. test       → pnpm run test:run
-  ── geçerse ──
-  4. build      → pnpm run build
+```
+1. lint       → pnpm run lint
+2. typecheck  → pnpm run typecheck
+   ── geçerse ──
+3. test       → pnpm run test:run
+   ── geçerse ──
+4. build      → pnpm run build
+```
 
-Başarısızsa: geri dön, düzelt, tekrar dene.
 3 denemede geçmezse: raporla, geç.
-```
-
----
-
-## FAZ 4: KOD KALİTESİ
-
-```yaml
-Temizlik:
-  - Ölü kod
-  - Tekrar eden kod
-  - Kullanılmayan import'lar
-  - Geçici debug kodları
-  - Kullanılmayan bağımlılıklar (DİKKAT: xlsx/exceljs çakışması var, kontrol et)
-
-İyileştirme:
-  - Type safety (any kullanımını azalt)
-  - Bileşen yapısı (max 150 satır custom, max 800 satır sayfa)
-  - 4 state pattern: loading (SkeletonLoader), empty (Empty), error (toast), success
-  - Tailwind CSS öncelikli, inline style sadece dinamik değerler için
-```
-
----
-
-## FAZ 5: PERFORMANS
-
-```yaml
-Optimizasyon:
-  - Bundle boyutu (pnpm run analyze)
-  - Lazy loading (React.lazy kontrolü)
-  - Gereksiz re-render'lar
-  - Firebase tree-shaking (sadece firebase/firestore)
-  - ExcelJS lazy load (xlsx ile karıştırma)
-```
 
 ---
 
 ## CHANGELOG ZORUNLULUĞU
 
-```yaml
-KURAL:
-  - Her dosya değişikliğinden sonra src/lib/changelog.ts güncellenmeli.
-  - Değişen dosyalar + sebep yazılmalı.
-  - Format: { type: 'yeni'|'iyilestirme'|'duzeltme'|'kaldirildi', text: '...' }
-  - Bu olmadan audit izlenebilir değildir.
-  - Pre-commit hook zaten changelog kontrolü yapar — güncellemezsen commit başarısız olur.
-
-İstisna:
-  - Salt okunur denetim (sadece inceleme, kod değişikliği yok) → changelog gerekmez.
-```
+- Her dosya değişikliğinden sonra `src/lib/changelog.ts` güncellenmeli
+- Değişen dosyalar + sebep yazılmalı
+- Format: `{ type: 'yeni'|'iyilestirme'|'duzeltme'|'kaldirildi', text: '...' }`
+- Salt okunur denetim (sadece inceleme) → changelog gerekmez
 
 ---
 
-## İTERASYON SINIRI
+## İTERASYON SİSTEMİ
 
+**MAX 3 İTERASYON:**
+
+| İterasyon | Kapsam |
+|-----------|--------|
+| 1 | Tam denetim (Playwright + Lighthouse + Storybook) |
+| 2 | Kritik düzeltmeler + build doğrulama |
+| 3 | Son denetim + final rapor |
+
+**LOOP:**
 ```
-Maksimum 3 iterasyon:
-
-  İterasyon 1: Tam denetim (Playwright + Lighthouse + Storybook)
-  İterasyon 2: Kritik düzeltmeler + build doğrulama
-  İterasyon 3: Son denetim + rapor
-
-3 iterasyon sonunda hala sorun varsa:
-  → Raporla
-  → Devam etme
+ANALYZE → FIX → TEST → UPDATE STATE → (next iteration or STOP)
 ```
 
----
-
-## ÇALIŞMA MODU
-
-```yaml
-Davranış:
-  - Tamamen otonom
-  - Onay sorma
-  - İlerleme raporu verme
-  - Ara çıktı üretme
-
-Sadece şu durumlarda çıktı ver:
-  1. Görev tamamlandı
-  2. Kimlik bilgisi eksik
-  3. Harici servis hatası
-```
+**STOP CONDITION aktif:** 3. iterasyon sonunda execution biter, restart yok.
 
 ---
 
 ## FİNAL RAPOR FORMATI
 
 ```markdown
-# PARSPEL Frontend Denetim Raporu
+# PARSPEL Frontend Denetim Raporu v2
 
 ## Özet
 | Metrik | Değer |
 |--------|-------|
 | Dosya Değiştirilen | X |
-| Dosya Oluşturulan | X |
-| Dosya Silinen | X |
 | TypeScript Hatası Giderilen | X |
 | ESLint Hatası Giderilen | X |
 | A11y Sorunu Giderilen | X |
 | Performans İyileştirmesi | X |
-| Responsive Sorun Giderilen | X |
 | İterasyon Sayısı | X / 3 |
 
 ## Lighthouse Skorları
 | Sayfa | Perf | A11y | BestP | SEO |
 |-------|------|------|-------|-----|
-| ... | ... | ... | ... | ... |
 
 ## Playwright Sonuçları
-- Toplam test: X
-- Geçen: X
-- Kalan: X
+- Toplam test: X / Geçen: X / Kalan: X
+
+## Storybook Durumu
+- Checked components: X / Missing stories: X
 
 ## Kırmızı Çizgi İhlalleri
-- (varsa listele, olmamalı)
+- (olmamalı)
 
-## Kalan Bilinen Sorunlar
+## Kalan Bilinen Sorunlar (Skipped)
 - ...
 
 ## Değiştirilen Dosyalar
@@ -362,17 +420,15 @@ Rapor Sonu.
 
 ## PARSPEL'E ÖZEL KONTROL LİSTESİ
 
-Her denetimde bunları mutlaka kontrol et:
-
 - [ ] `src/lib/changelog.ts` güncel mi?
 - [ ] `save()` pipeline'ı bozulmamış mı?
 - [ ] Agent akış sırası korunmuş mu?
 - [ ] `Empty` komponenti tüm boş state'lerde kullanılmış mı?
 - [ ] `SkeletonLoader` tüm loading state'lerde kullanılmış mı?
 - [ ] Toast'lar `sonner` ile mi gösteriliyor?
-- [ ] Tailwind CSS dışında inline style var mı? (dinamik değerler hariç)
+- [ ] Tailwind CSS dışında inline style var mı?
 - [ ] `src/components/ui/` dosyalarına dokunulmamış mı?
-- [ ] localStorage'a doğrudan yazma var mı? (`save()` kullanılmalı)
+- [ ] localStorage'a doğrudan yazma var mı?
 - [ ] Route'lar `React.lazy()` ile sarılı mı?
 - [ ] Tüm route'lar `<Suspense>` içinde mi?
-- [ ] Firebase import'ları tree-shaking uyumlu mu? (`firebase/app`, `firebase/firestore`)
+- [ ] Firebase import'ları tree-shaking uyumlu mu?

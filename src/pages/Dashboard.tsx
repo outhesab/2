@@ -1122,7 +1122,7 @@ function KasaSayimWidget({ db }: { db: DB }) {
             `${f.kasa}: Sayılan ${formatMoney(f.sayilan)} | Sistem ${formatMoney(f.sistem)} | Fark ${f.fark >= 0 ? '+' : ''}${formatMoney(f.fark)}`,
         )
         .join('\n');
-    console.info('[Kasa Sayım]', log);
+    logger.info('dashboard', 'Kasa Sayım', { log });
     setKaydedildi(true);
     setTimeout(() => setKaydedildi(false), 3000);
   };

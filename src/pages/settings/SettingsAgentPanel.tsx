@@ -44,17 +44,15 @@ function getDefaultAgentSettings(): Record<string, unknown> {
   };
 }
 
-export function AgentSettingsPanel({ db: _db, save: _save }: Props) {
+export function AgentSettingsPanel({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
   const [agentSettings, setAgentSettings] = useState(() => {
     try {
-      const raw = localStorage.getItem('sobaYonetim');
-      if (!raw) return getDefaultAgentSettings();
-      const parsed = JSON.parse(raw);
-      return parsed.agentSettings || getDefaultAgentSettings();
+      const stored = (db.settings?.agentSettings as Record<string, unknown>) || null;
+      return stored || getDefaultAgentSettings();
     } catch {
-      logger.warn('settings', "Ajan ayarları localStorage'dan okunamadı, varsayılan kullanıldı");
+      logger.warn('settings', "Ajan ayarları DB'den okunamadı, varsayılan kullanıldı");
       return getDefaultAgentSettings();
     }
   });
@@ -113,10 +111,7 @@ export function AgentSettingsPanel({ db: _db, save: _save }: Props) {
 
   const saveAgentSettings = () => {
     try {
-      const raw = localStorage.getItem('sobaYonetim');
-      const parsed = raw ? JSON.parse(raw) : {};
-      parsed.agentSettings = agentSettings;
-      localStorage.setItem('sobaYonetim', JSON.stringify(parsed));
+      save((prev) => ({ ...prev, settings: { ...prev.settings, agentSettings } }));
       showToast('Ajan ayarları kaydedildi!', 'success');
     } catch {
       logger.warn('settings', 'Ajan ayarları kaydedilemedi');

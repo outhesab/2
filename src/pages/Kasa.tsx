@@ -1,4 +1,5 @@
 import EmptyState from "@/components/EmptyState";
+import { SkeletonTable } from '@/components/SkeletonLoaders';
 import {
   ChevronDown,
   Coins,
@@ -42,6 +43,7 @@ export default function Kasa({ db, save }: Props) {
   const [dateTo, setDateTo] = useState('');
   const [sayimModal, setSayimModal] = useState(false);
   const [sayimForm, setSayimForm] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const [sayimDate, setSayimDate] = useState(new Date().toISOString().slice(0, 10));
 
   const kasalar = useMemo(() => db.kasalar || [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }], [db.kasalar]);
@@ -122,6 +124,7 @@ export default function Kasa({ db, save }: Props) {
       amount, kasa: form.kasa, description: form.description, cariId: form.cariId || undefined,
       createdAt: nowIso, updatedAt: nowIso,
     };
+    setLoading(true);
     save(prev => {
       let cari = prev.cari;
       if (form.cariId) {
@@ -140,6 +143,7 @@ export default function Kasa({ db, save }: Props) {
       }
       return { ...prev, kasa: [...prev.kasa, entry], cari, ortakEmanetler };
     });
+    setLoading(false);
     playSound(type === 'gelir' ? 'success' : 'notification');
     showToast(`${type === 'gelir' ? 'Gelir' : 'Gider'} kaydedildi!`, 'success');
     setForm({ amount: '', description: '', kasa: 'nakit', cariId: '', partnerId: '', category: '' });
@@ -150,6 +154,7 @@ export default function Kasa({ db, save }: Props) {
   const deleteEntry = (id: string) => {
     showConfirm('Kaydı Sil', 'Bu kasa kaydını silmek istediğinizden emin misiniz?', () => {
       const nowIso = new Date().toISOString();
+      setLoading(true);
       save(prev => {
         const entry = prev.kasa.find(e => e.id === id);
         if (!entry) return prev;
@@ -169,6 +174,7 @@ export default function Kasa({ db, save }: Props) {
 
         return { ...prev, kasa, cari };
       });
+      setLoading(false);
       showToast('Kayıt silindi!', 'success');
     });
   };
@@ -227,6 +233,8 @@ export default function Kasa({ db, save }: Props) {
       </div>
     </Modal>
   );
+
+  if (loading) return <SkeletonTable rows={6} cols={7} />;
 
   return (
     <div>

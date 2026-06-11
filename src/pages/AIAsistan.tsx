@@ -20,7 +20,8 @@ import {
   MiniStatCard,
   EmbeddedStatCard,
 } from './pageHelpers.tsx';
-import { MarkdownText, getActionAffectedIds, isDangerousAction, sourceLabel } from './ai/AIAHelpers';
+import { MarkdownText } from './ai/AIAHelpers';
+import { getActionAffectedIds, isDangerousAction, sourceLabel } from './ai/AIAHelpers.utils';
 import ApiSettings from './ai/AIASettings';
 
 interface Props {
@@ -413,7 +414,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             setLoading(false);
             return true;
           }
-          console.warn(`${source} başarısız:`, e);
+          logger.warn('ai', `${source} başarısız`, e);
           return false;
         }
       };

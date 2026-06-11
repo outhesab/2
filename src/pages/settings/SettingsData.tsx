@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/pages/SettingsCard';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { makeDefaultDB } from '@/lib/dbDefaults';
 import type { DB } from '@/types';
 
 interface DangerActionProps {
@@ -58,7 +59,7 @@ export function DataPanel({ db, save, showToast, showConfirm }: DataStatsProps) 
       'Tüm Verileri Sil',
       'TÜM verileriniz kalıcı olarak silinecek! Bu işlem geri alınamaz. Emin misiniz?',
       () => {
-        localStorage.removeItem('sobaYonetim');
+        save(() => makeDefaultDB());
         window.location.reload();
       },
       true,

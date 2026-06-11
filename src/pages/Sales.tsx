@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/EmptyState';
 import { ShoppingCart } from 'lucide-react';
+import { SkeletonTable } from '@/components/SkeletonLoaders';
 import { useLocation } from 'wouter';
 import SaleFormModal from './SaleFormModal';
 import { StatCard } from './SalesHelpers';
@@ -31,6 +32,7 @@ export default function Sales({ db, save: _save }: Props) {
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Yeni satış formu
   const [items, setItems] = useState<SaleItem[]>([]);
@@ -104,59 +106,74 @@ export default function Sales({ db, save: _save }: Props) {
       return;
     }
 
-    const params: YeniSatisParams = {
-      items: items.map((i) => ({
-        productId: i.productId,
-        productName: i.productName,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-        cost: i.cost,
-        total: i.total,
-      })),
-      cariId,
-      payment: payment as 'nakit' | 'kart' | 'havale' | 'cari',
-      discount: discountNum,
-      discountAmount,
-      tahsilat: tahsilat === '' ? undefined : tahsilatNum,
-      saleDate,
-    };
+    setLoading(true);
+    try {
+      const params: YeniSatisParams = {
+        items: items.map((i) => ({
+          productId: i.productId,
+          productName: i.productName,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          cost: i.cost,
+          total: i.total,
+        })),
+        cariId,
+        payment: payment as 'nakit' | 'kart' | 'havale' | 'cari',
+        discount: discountNum,
+        discountAmount,
+        tahsilat: tahsilat === '' ? undefined : tahsilatNum,
+        saleDate,
+      };
 
-    const sonuc = await getAgent('satis').yeniSatis(params);
-    if (!sonuc.ok) {
-      showToast(sonuc.error || 'Satış kaydedilemedi', 'error');
-      return;
+      const sonuc = await getAgent('satis').yeniSatis(params);
+      if (!sonuc.ok) {
+        showToast(sonuc.error || 'Satış kaydedilemedi', 'error');
+        return;
+      }
+
+      playSound('sale');
+      toast.success(`Satış kaydedildi! ${formatMoney(sonuc.data!.total)}`);
+      setReceiptId(sonuc.data!.saleId);
+      setItems([]);
+      setCariId('');
+      setPayment('nakit');
+      setDiscount('');
+      setTahsilat('');
+      setSaleDate(new Date().toISOString().slice(0, 16));
+      setModalOpen(false);
+    } finally {
+      setLoading(false);
     }
-
-    playSound('sale');
-    toast.success(`Satış kaydedildi! ${formatMoney(sonuc.data!.total)}`);
-    setReceiptId(sonuc.data!.saleId);
-    setItems([]);
-    setCariId('');
-    setPayment('nakit');
-    setDiscount('');
-    setTahsilat('');
-    setSaleDate(new Date().toISOString().slice(0, 16));
-    setModalOpen(false);
   };
 
   const handleReturn = (id: string) => {
     showConfirm('İade / İptal', 'Bu satışı iade etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
-      const sonuc = await getAgent('satis').iadeYap(id);
-      if (sonuc.ok) {
-        showToast('İade işlemi tamamlandı!', 'success');
-      } else {
-        showToast(sonuc.error || 'İade başarısız', 'error');
+      setLoading(true);
+      try {
+        const sonuc = await getAgent('satis').iadeYap(id);
+        if (sonuc.ok) {
+          showToast('İade işlemi tamamlandı!', 'success');
+        } else {
+          showToast(sonuc.error || 'İade başarısız', 'error');
+        }
+      } finally {
+        setLoading(false);
       }
     });
   };
 
   const handleCancel = (id: string) => {
     showConfirm('Satış İptal', 'Bu satışı iptal etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
-      const sonuc = await getAgent('satis').iptalEt(id);
-      if (sonuc.ok) {
-        showToast('Satış iptal edildi!', 'success');
-      } else {
-        showToast(sonuc.error || 'İptal başarısız', 'error');
+      setLoading(true);
+      try {
+        const sonuc = await getAgent('satis').iptalEt(id);
+        if (sonuc.ok) {
+          showToast('Satış iptal edildi!', 'success');
+        } else {
+          showToast(sonuc.error || 'İptal başarısız', 'error');
+        }
+      } finally {
+        setLoading(false);
       }
     });
   };
@@ -177,6 +194,8 @@ export default function Sales({ db, save: _save }: Props) {
       profit: t.reduce((s, x) => s + x.profit, 0),
     };
   }, [db.sales]);
+
+  if (loading) return <SkeletonTable rows={6} cols={9} />;
 
   return (
     <div>

@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { lbl, inp } from '@/lib/formStyles';
 import { useDebounce } from './useDebounce';
 import { ModalActions, FormField, FormTextArea, ActionButtons } from './pageHelpers';
+import EmptyState from '@/components/EmptyState';
+import { Truck } from 'lucide-react';
 
 interface Props {
   db: DB;
@@ -552,15 +554,14 @@ export default function Suppliers({ db, save }: Props) {
             }}
           >
             {filteredSuppliers.length === 0 ? (
-              <div
-                style={{
-                  gridColumn: '1/-1',
-                  textAlign: 'center',
-                  padding: 48,
-                  color: 'var(--text-muted)',
-                }}
-              >
-                Tedarikçi bulunamadı
+              <div style={{ gridColumn: '1/-1' }}>
+                <EmptyState
+                  icon={Truck}
+                  title="Tedarikçi bulunamadı"
+                  description="Arama veya filtre kriterlerine uygun tedarikçi bulunamadı."
+                  actionLabel="Filtreleri temizle"
+                  onAction={() => setSearch('')}
+                />
               </div>
             ) : (
               filteredSuppliers.map((s) => (
@@ -808,15 +809,12 @@ export default function Suppliers({ db, save }: Props) {
               <tbody>
                 {sortedOrders.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={6}
-                      style={{
-                        textAlign: 'center',
-                        padding: 40,
-                        color: 'var(--text-muted)',
-                      }}
-                    >
-                      Sipariş bulunamadı
+                    <td colSpan={6} style={{ padding: 24 }}>
+                      <EmptyState
+                        icon={Truck}
+                        title="Sipariş bulunamadı"
+                        description="Henüz kaydedilmiş sipariş bulunmamaktadır."
+                      />
                     </td>
                   </tr>
                 ) : (

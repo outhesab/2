@@ -1,4 +1,5 @@
 import EmptyState from '@/components/EmptyState';
+import { SkeletonStatRow, SkeletonTable } from '@/components/SkeletonLoaders';
 import { PackageSearch } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
@@ -45,6 +46,7 @@ export default function Products({ db, save }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<Partial<Product>>(empty);
   const [editId, setEditId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [bulkModal, setBulkModal] = useState(false);
   const [bulkPct, setBulkPct] = useState('');
@@ -85,6 +87,7 @@ export default function Products({ db, save }: Props) {
       return;
     }
     const nowIso = new Date().toISOString();
+    setLoading(true);
     save((prev) => {
       const products = [...prev.products];
       if (editId) {
@@ -109,16 +112,19 @@ export default function Products({ db, save }: Props) {
       }
       return { ...prev, products };
     });
+    setLoading(false);
     setModalOpen(false);
   };
 
   const handleDelete = (id: string) => {
     showConfirm('Ürünü Sil', 'Bu ürünü silmek istediğinizden emin misiniz?', () => {
       const nowIso = new Date().toISOString();
+      setLoading(true);
       save((prev) => ({
         ...prev,
         products: prev.products.map((p) => (p.id === id ? { ...p, deleted: true, updatedAt: nowIso } : p)),
       }));
+      setLoading(false);
       showToast('Ürün silindi!', 'success');
     });
   };
@@ -130,6 +136,14 @@ export default function Products({ db, save }: Props) {
   const outOfStock = activeProducts.filter((p) => p.stock === 0).length;
   const lowStock = activeProducts.filter((p) => p.stock > 0 && p.stock <= p.minStock).length;
   const siparisOnerisi = activeProducts.filter((p) => p.stock <= p.minStock);
+
+  if (loading)
+    return (
+      <div>
+        <SkeletonStatRow count={4} />
+        <SkeletonTable rows={6} cols={4} />
+      </div>
+    );
 
   return (
     <div>
@@ -691,6 +705,7 @@ export default function Products({ db, save }: Props) {
               }
               const multiplier = bulkDirection === 'up' ? (100 + pct) / 100 : (100 - pct) / 100;
               const nowIso = new Date().toISOString();
+              setLoading(true);
               save((prev) => ({
                 ...prev,
                 products: prev.products.map((p) => {
@@ -700,6 +715,7 @@ export default function Products({ db, save }: Props) {
                   return { ...p, price: Math.round(p.price * multiplier * 100) / 100, updatedAt: nowIso };
                 }),
               }));
+              setLoading(false);
               showToast(
                 `${bulkCat === 'all' ? 'Tüm ürünler' : 'Seçili kategori'} ${bulkDirection === 'up' ? `%${pct} zamlandı` : `%${pct} indirim yapıldı`}!`,
                 'success',

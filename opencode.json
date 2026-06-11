@@ -23,7 +23,7 @@
         "qwen/qwen3-4b-thinking-2507": {
           "name": "Qwen3 4B Thinking",
           "family": "qwen",
-          "tool_call": false,
+          "tool_call": true,
           "reasoning": true,
           "temperature": true,
           "vision": false,
@@ -39,7 +39,7 @@
         "qwen/qwen3-vl-4b": {
           "name": "Qwen3 VL 4B (Vision)",
           "family": "qwen",
-          "tool_call": false,
+          "tool_call": true,
           "reasoning": false,
           "temperature": true,
           "vision": true,
@@ -55,7 +55,7 @@
         "phi-3.5-mini-instruct": {
           "name": "Phi 3.5 Mini Instruct",
           "family": "phi",
-          "tool_call": false,
+          "tool_call": true,
           "reasoning": false,
           "temperature": true,
           "vision": false,
@@ -71,7 +71,7 @@
         "liquid/lfm2-1.2b": {
           "name": "LFM2 1.2B",
           "family": "lfm",
-          "tool_call": false,
+          "tool_call": true,
           "reasoning": false,
           "temperature": true,
           "vision": false,
@@ -92,7 +92,8 @@
     "gemini",
     "github-copilot",
     "groq",
-    "anthropic"
+    "anthropic",
+    "lmstudio"
   ],
   "instructions": [
     "PAKET YÃ–NETÄ°CÄ°SÄ°: Sadece pnpm kullan. npm veya yarn kullanma.",
@@ -170,41 +171,36 @@
       "prompt": "You are a frontend/UI specialist agent. Focus on component generation, UI design, and design systems."
     },
     "hermes": {
-      "model": "lmstudio/qwen3-4b-thinking-2507",
+      "model": "openrouter/free",
       "mode": "primary",
-      "description": "Hermes UI + LM Studio backend (Qwen3-4B-Thinking). Reasoning, coding, analysis.",
-      "prompt": "You are a helpful coding assistant running on local LM Studio via Hermes. Focus on clean code, best practices, and efficient implementation."
+      "description": "Hermes UI + OpenRouter backend. Reasoning, coding, analysis.",
+      "prompt": "You are a helpful coding assistant running on OpenRouter via Hermes. Focus on clean code, best practices, and efficient implementation."
     },
     "yerel-hizli": {
-      "model": "lmstudio/phi-3.5-mini-instruct",
+      "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Phi 3.5) â€” hÄ±zlÄ±, basit iÅŸler, Ã§evrimdÄ±ÅŸÄ±"
+      "description": "HÄ±zlÄ±, basit iÅŸler iÃ§in OpenRouter free model"
     },
     "yerel-zeki": {
-      "model": "lmstudio/qwen/qwen3-4b-thinking-2507",
+      "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Qwen3 4B Thinking) â€” karmaÅŸÄ±k reasoning, Ã§evrimdÄ±ÅŸÄ±"
+      "description": "KarmaÅŸÄ±k reasoning iÃ§in OpenRouter free model"
     },
     "yerel-hafif": {
-      "model": "lmstudio/liquid/lfm2-1.2b",
+      "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Liquid 1.2B) â€” Ã§ok dÃ¼ÅŸÃ¼k kaynak, yedek model"
+      "description": "DÃ¼ÅŸÃ¼k kaynak, yedek model"
     },
     "yerel-goruntu": {
-      "model": "lmstudio/qwen/qwen3-vl-4b",
+      "model": "openrouter/free",
       "mode": "subagent",
-      "description": "Yerel LM Studio (Qwen3 VL 4B) â€” gÃ¶rsel iÅŸleme"
+      "description": "GÃ¶rsel iÅŸleme iÃ§in OpenRouter free model"
     }
   },
   "mcp": {
     "filesystem": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "."
-      ],
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
       "enabled": true
     },
     "web-search": {
@@ -214,11 +210,7 @@
     },
     "github": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
       "environment": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       },
@@ -226,33 +218,17 @@
     },
     "playwright": {
       "type": "local",
-      "command": [
-        "npx",
-        "@playwright/mcp",
-        "--headless",
-        "--browser", "chromium",
-        "--viewport-size", "1280x720",
-        "--isolated"
-      ],
+      "command": ["npx", "@playwright/mcp", "--headless", "--browser", "chromium", "--viewport-size", "1280x720", "--isolated"],
       "enabled": true
     },
     "lighthouse": {
       "type": "local",
-      "command": [
-        "node",
-        "scripts/lighthouse-mcp.mjs"
-      ],
+      "command": ["node", "scripts/lighthouse-mcp.mjs"],
       "enabled": true
     },
     "storybook": {
       "type": "local",
-      "command": [
-        "npx",
-        "storybook",
-        "dev",
-        "-p", "6006",
-        "--no-open"
-      ],
+      "command": ["node", "scripts/storybook-mcp.mjs"],
       "enabled": true
     }
   },

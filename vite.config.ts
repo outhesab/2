@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import pkg from './package.json';
 import Inspect from 'vite-plugin-inspect';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -14,6 +14,29 @@ import { manualChunks } from './src/lib/vite-manual-chunks';
 export { manualChunks };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Production'da unsafe-eval ve ws:// bağlantısını kaldıran CSP dönüştürücü */
+function cspPlugin(mode: string): Plugin {
+  const isDev = mode === 'development' || mode === 'dev';
+
+  if (isDev) {
+    // Geliştirme ortamında mevcut CSP'yi koru
+    return { name: 'csp-dev' };
+  }
+
+  const prodCsp =
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://api.deepseek.com https://api.anthropic.com https://generativelanguage.googleapis.com https://*.react-grab.com;";
+
+  return {
+    name: 'csp-prod',
+    transformIndexHtml(html) {
+      return html.replace(
+        /<meta\s+http-equiv="Content-Security-Policy"[^>]*\/?>/i,
+        `<meta http-equiv="Content-Security-Policy" content="${prodCsp}" />`,
+      );
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development' || mode === 'dev';
@@ -25,6 +48,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
+      cspPlugin(mode),
       mode === 'analyze'
         ? visualizer({
             emitFile: true,

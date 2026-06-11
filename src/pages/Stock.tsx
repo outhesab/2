@@ -5,6 +5,9 @@ import { useSoundFeedback } from '@/hooks/useSoundFeedback';
 import { exportToExcel } from '@/lib/excelExport';
 import { genId, formatDate, formatMoney } from '@/lib/utils-tr';
 import type { DB } from '@/types';
+import EmptyState from '@/components/EmptyState';
+import { SkeletonTable } from '@/components/SkeletonLoaders';
+import { PackageSearch } from 'lucide-react';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -18,6 +21,7 @@ export default function Stock({ db, save }: Props) {
   const [histSearch, setHistSearch] = useState('');
   const [histTypeFilter, setHistTypeFilter] = useState('');
   const [histPage, setHistPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const HIST_PAGE_SIZE = 50;
   const movTableRef = useRef<HTMLDivElement>(null);
 
@@ -44,6 +48,7 @@ export default function Stock({ db, save }: Props) {
     const before = product.stock;
     const after = form.type === 'giris' ? before + amount : form.type === 'cikis' ? Math.max(0, before - amount) : amount;
 
+    setLoading(true);
     save(prev => ({
       ...prev,
       products: prev.products.map(p => p.id === form.productId ? { ...p, stock: after, updatedAt: nowIso } : p),
@@ -53,6 +58,7 @@ export default function Stock({ db, save }: Props) {
         before, after, note: form.note, date: nowIso,
       }],
     }));
+    setLoading(false);
 
     playSound('success');
     showToast(`Stok güncellendi: ${product.name} → ${after}`, 'success');
@@ -114,6 +120,8 @@ export default function Stock({ db, save }: Props) {
   const outOfStock = activeProducts.filter(p => p.stock === 0).length;
   const lowStock = activeProducts.filter(p => p.stock > 0 && p.stock <= p.minStock).length;
 
+  if (loading) return <SkeletonTable rows={6} cols={6} />;
+
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 14, marginBottom: 20 }}>
@@ -147,7 +155,15 @@ export default function Stock({ db, save }: Props) {
               </thead>
               <tbody>
                 {sortedProducts.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Ürün bulunamadı</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 24 }}>
+                    <EmptyState
+                      icon={PackageSearch}
+                      title="Ürün bulunamadı"
+                      description="Arama kriterlerine uygun ürün bulunamadı. Filtreleri temizleyip tekrar deneyin."
+                      actionLabel="Aramayı temizle"
+                      onAction={() => setSearch('')}
+                    />
+                  </td></tr>
                 ) : sortedProducts.map(p => {
                   const stockStatus = p.stock === 0 ? { color: '#ef4444', label: '🔴 Bitti', bg: 'rgba(239,68,68,0.1)' } : p.stock <= p.minStock ? { color: '#f59e0b', label: '⚠️ Az', bg: 'rgba(245,158,11,0.1)' } : { color: '#10b981', label: '✓ Normal', bg: 'rgba(16,185,129,0.1)' };
                   const catIcon = (db.productCategories || []).find(c => c.id === p.category)?.icon || '📦';
@@ -200,7 +216,13 @@ export default function Stock({ db, save }: Props) {
               </thead>
               <tbody>
                 {abcData.length === 0 ? (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Satış verisi yok</td></tr>
+                  <tr><td colSpan={7} style={{ padding: 24 }}>
+                    <EmptyState
+                      icon={PackageSearch}
+                      title="ABC verisi yok"
+                      description="ABC analizi için tamamlanmış satış kaydı bulunamadı."
+                    />
+                  </td></tr>
                 ) : abcData.map((v, _i) => {
                   const clsColor = v.class === 'A' ? '#10b981' : v.class === 'B' ? '#3b82f6' : '#64748b';
                   return (
@@ -252,7 +274,13 @@ export default function Stock({ db, save }: Props) {
               </thead>
               <tbody>
                 {deadStock.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Ölü stok bulunamadı</td></tr>
+                  <tr><td colSpan={6} style={{ padding: 24 }}>
+                    <EmptyState
+                      icon={PackageSearch}
+                      title="Ölü stok bulunamadı"
+                      description="90 günden uzun süredir hareket görmeyen ürün bulunamadı."
+                    />
+                  </td></tr>
                 ) : deadStock.map(p => (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{p.name}</td>
@@ -293,7 +321,15 @@ export default function Stock({ db, save }: Props) {
               </thead>
               <tbody>
                 {pagedMovements.length === 0 ? (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Hareket bulunamadı</td></tr>
+                  <tr><td colSpan={7} style={{ padding: 24 }}>
+                    <EmptyState
+                      icon={PackageSearch}
+                      title="Hareket bulunamadı"
+                      description="Seçili filtrelere uygun stok hareketi bulunamadı."
+                      actionLabel="Filtreleri temizle"
+                      onAction={() => { setHistSearch(''); setHistTypeFilter(''); }}
+                    />
+                  </td></tr>
                 ) : pagedMovements.map(m => {
                   const typeMap: Record<string, { label: string; color: string }> = { giris: { label: '📥 Giriş', color: '#10b981' }, cikis: { label: '📤 Çıkış', color: '#ef4444' }, satis: { label: '🛒 Satış', color: '#3b82f6' }, iade: { label: '↩️ İade', color: '#8b5cf6' }, duzeltme: { label: '⚙️ Düzeltme', color: '#f59e0b' }, siparis: { label: '📦 Sipariş', color: '#8b5cf6' } };
                   const t = typeMap[m.type] || { label: m.type, color: 'var(--text-dim)' };

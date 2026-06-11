@@ -7,6 +7,8 @@ import { assertSafeSpreadsheetFile, readSafeWorkbook } from '@/lib/safeXlsx';
 import { genId, formatMoney, parseBankDate } from '@/lib/utils-tr';
 import { logger } from '@/lib/logger';
 import type { DB, BudgetCategory } from '@/types';
+import EmptyState from '@/components/EmptyState';
+import { PiggyBank } from 'lucide-react';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -294,11 +296,13 @@ export default function Butce({ db, save }: Props) {
       )}
 
       {budgets.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 60, background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 14 }}>📊</div>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: 8 }}>Bütçe kategorisi yok</h3>
-          <p style={{ color: '#475569', marginBottom: 20, fontSize: '0.9rem' }}>Gider kategorileri ekleyerek aylık bütçenizi takip edin</p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ textAlign: 'center', padding: 24, background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
+          <EmptyState
+            icon={PiggyBank}
+            title="Bütçe kategorisi yok"
+            description="Gider kategorileri ekleyerek aylık bütçenizi takip edin."
+          />
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 12 }}>
             <button onClick={initPresets} style={btnPrimary}>✨ Hazır Kategoriler Yükle</button>
             <button onClick={openAdd} style={btnSecondary}>Manuel Ekle</button>
           </div>

@@ -13,6 +13,8 @@ import type { AuditEntry, DB, MonitorRule } from "@/types";
 import { useMemo, useState } from "react";
 import { lbl, inp } from "@/lib/formStyles";
 import { ModalActions, CheckboxField, TabButton } from "./pageHelpers.tsx";
+import EmptyState from "@/components/EmptyState";
+import { Activity, AlertTriangle, FileCheck, ShieldCheck, ShieldAlert, Bug } from "lucide-react";
 
 interface Props {
   db: DB;
@@ -417,17 +419,11 @@ export default function Monitor({ db, save }: Props) {
           </div>
 
           {filteredIssues.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "#10b981" }}>
-              <div style={{ fontSize: "3rem", marginBottom: 12 }}>✅</div>
-              <p style={{ fontWeight: 700, fontSize: "1.1rem" }}>
-                Tüm veriler tutarlı!
-              </p>
-              <p
-                style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 8 }}
-              >
-                Hiçbir veri bütünlüğü sorunu bulunamadı.
-              </p>
-            </div>
+            <EmptyState
+              icon={FileCheck}
+              title="Tüm veriler tutarlı!"
+              description="Hiçbir veri bütünlüğü sorunu bulunamadı."
+            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {filteredIssues.map((issue) => (
@@ -513,10 +509,11 @@ export default function Monitor({ db, save }: Props) {
       {tab === "alerts" && (
         <>
           {alerts.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "#10b981" }}>
-              <div style={{ fontSize: "3rem", marginBottom: 12 }}>🔕</div>
-              <p style={{ fontWeight: 700 }}>Aktif alarm yok</p>
-            </div>
+            <EmptyState
+              icon={AlertTriangle}
+              title="Aktif alarm yok"
+              description="Tüm sistem göstergeleri normal sınırlar içinde."
+            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {alerts.map((a, i) => (
@@ -577,11 +574,11 @@ export default function Monitor({ db, save }: Props) {
           </div>
           <div style={{ display: "grid", gap: 12 }}>
             {db.monitorRules.length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}
-              >
-                Kural bulunamadı
-              </div>
+              <EmptyState
+                icon={ShieldAlert}
+                title="Kural bulunamadı"
+                description="Henüz izleme kuralı tanımlanmadı. Buton ile yeni kural ekleyin."
+              />
             ) : (
               db.monitorRules.map((r) => (
                 <div
@@ -710,15 +707,11 @@ export default function Monitor({ db, save }: Props) {
             </div>
           )}
           {errorLogs.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "#10b981" }}>
-              <div style={{ fontSize: "3rem", marginBottom: 12 }}>🐛</div>
-              <p style={{ fontWeight: 700 }}>Hata kaydı yok!</p>
-              <p
-                style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 8 }}
-              >
-                Uygulama hatasız çalışıyor.
-              </p>
-            </div>
+            <EmptyState
+              icon={Bug}
+              title="Hata kaydı yok!"
+              description="Uygulama hatasız çalışıyor."
+            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {errorLogs.map((log) => (
@@ -804,15 +797,11 @@ export default function Monitor({ db, save }: Props) {
           </div>
 
           {filteredAuditLog.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
-              <div style={{ fontSize: "3rem", marginBottom: 12 }}>🔒</div>
-              <p style={{ fontWeight: 700 }}>Denetim kaydı yok</p>
-              <p
-                style={{ color: "#475569", fontSize: "0.85rem", marginTop: 8 }}
-              >
-                İşlemler otomatik olarak denetim loguna kaydedilecek.
-              </p>
-            </div>
+            <EmptyState
+              icon={ShieldCheck}
+              title="Denetim kaydı yok"
+              description="İşlemler otomatik olarak denetim loguna kaydedilecek."
+            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {filteredAuditLog.slice(0, 200).map((entry) => {
@@ -999,15 +988,11 @@ export default function Monitor({ db, save }: Props) {
       {tab === "activity" && (
         <>
           {activityLog.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 48, color: "var(--text-muted)" }}>
-              <div style={{ fontSize: "3rem", marginBottom: 12 }}>📋</div>
-              <p style={{ fontWeight: 700 }}>Aktivite kaydı yok</p>
-              <p
-                style={{ color: "#475569", fontSize: "0.85rem", marginTop: 8 }}
-              >
-                İşlemler otomatik olarak kaydedilecek.
-              </p>
-            </div>
+            <EmptyState
+              icon={Activity}
+              title="Aktivite kaydı yok"
+              description="İşlemler otomatik olarak kaydedilecek."
+            />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {activityLog.slice(0, 100).map((log) => (

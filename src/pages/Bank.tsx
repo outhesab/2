@@ -6,6 +6,8 @@ import { formatDate, formatMoney, genId } from "@/lib/utils-tr";
 import type { BankTransaction, DB } from "@/types";
 import { useMemo, useState } from "react";
 import { TableFilterBar, TableWrapper } from "@/pages/pageHelpers.tsx";
+import EmptyState from "@/components/EmptyState";
+import { Landmark } from "lucide-react";
 
 interface Props {
   db: DB;
@@ -702,10 +704,18 @@ export default function Bank({ db, save }: Props) {
       <TableWrapper
         columns={["Tarih", "Açıklama", "Tutar", "Cari Eşleşme", "Durum", ""]}
         noData={sorted.length === 0 ? (
-          <>
-            <div style={{ fontSize: "2.5rem", marginBottom: 10 }}>🏦</div>
-            <div>İşlem bulunamadı</div>
-          </>
+          <EmptyState
+            icon={Landmark}
+            title="İşlem bulunamadı"
+            description="Seçili filtrelerle eşleşen banka işlemi bulunamadı."
+            actionLabel="Filtreleri temizle"
+            onAction={() => {
+              setSearch('');
+              setDateFrom('');
+              setDateTo('');
+              setTypeFilter('all');
+            }}
+          />
         ) : undefined}
         colSpan={6}
       >

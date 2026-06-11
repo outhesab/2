@@ -1,7 +1,8 @@
 import { Modal } from '@/components/Modal';
 import { formatDate, formatMoney } from '@/lib/utils-tr';
 import type { DB, InvoiceItem } from '@/types';
-import { TotalRow, lbl, inp, paymentLabels, type FormState } from './FaturaHelpers';
+import { TotalRow, type FormState } from './FaturaHelpers';
+import { lbl, inp, paymentLabels } from './FaturaHelpers.utils';
 
 interface FaturaFormProps {
   db: DB;

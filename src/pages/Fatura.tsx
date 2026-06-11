@@ -1,4 +1,5 @@
 ﻿import EmptyState from '@/components/EmptyState';
+import { SkeletonTable } from '@/components/SkeletonLoaders';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { useToast } from '@/components/Toast';
 import { FileText } from 'lucide-react';
@@ -7,7 +8,7 @@ import type { Invoice, InvoiceItem } from '@/types';
 import { useMemo, useState } from 'react';
 import FaturaForm from './FaturaForm';
 import FaturaPreview from './FaturaPreview';
-import { nextInvoiceNo, statusColors, statusLabels, paymentLabels, miniBtn, emptyItem } from './FaturaHelpers';
+import { nextInvoiceNo, statusColors, statusLabels, paymentLabels, miniBtn, emptyItem } from './FaturaHelpers.utils';
 import type { Props } from './FaturaHelpers';
 
 export default function Fatura({ db, save }: Props) {
@@ -18,6 +19,7 @@ export default function Fatura({ db, save }: Props) {
   const [editId, setEditId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'satis' | 'alis'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
   const [form, setForm] = useState({
@@ -124,6 +126,7 @@ export default function Fatura({ db, save }: Props) {
     const { subtotal, vatTotal, total } = calcTotals(validItems, form.discount);
     const nowIso = new Date().toISOString();
 
+    setLoading(true);
     save((prev) => {
       const invoices = [...(prev.invoices || [])];
       if (editId) {
@@ -160,10 +163,12 @@ export default function Fatura({ db, save }: Props) {
       }
       return { ...prev, invoices };
     });
+    setLoading(false);
     setModal(false);
   };
 
   const updateStatus = (id: string, status: Invoice['status']) => {
+    setLoading(true);
     save((prev) => {
       const nowIso = new Date().toISOString();
       const inv = (prev.invoices || []).find((i) => i.id === id);
@@ -262,12 +267,14 @@ export default function Fatura({ db, save }: Props) {
       );
       return { ...prev, invoices, kasa, cari };
     });
+    setLoading(false);
     if (status !== 'odendi' && status !== 'onaylandi') showToast('Durum güncellendi!');
   };
 
   const deleteInvoice = (id: string) => {
     showConfirm('Fatura Sil', 'Bu fatura silinecek. Kasa ve cari etkileri de geri alınacak.', () => {
       const nowIso = new Date().toISOString();
+      setLoading(true);
       save((prev) => {
         const inv = (prev.invoices || []).find((i) => i.id === id);
         if (!inv) return prev;
@@ -301,6 +308,7 @@ export default function Fatura({ db, save }: Props) {
         );
         return { ...prev, invoices, kasa, cari };
       });
+      setLoading(false);
       showToast('Fatura silindi!');
     });
   };
@@ -322,6 +330,8 @@ export default function Fatura({ db, save }: Props) {
         cariAddress: c.address || '',
       }));
   };
+
+  if (loading) return <SkeletonTable rows={6} cols={8} />;
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>

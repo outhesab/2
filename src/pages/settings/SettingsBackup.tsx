@@ -583,7 +583,7 @@ export function SelectiveRestore({
 
 export function SmartImportManager({
   db,
-  save: _save,
+  save,
   showToast,
   showConfirm,
 }: {
@@ -833,9 +833,7 @@ export function SmartImportManager({
       'Seçilen çakışma çözümleri uygulanacak ve veriler içe aktarılacak. Mevcut veriler etkilenebilir. Onaylıyor musunuz?',
       () => {
         try {
-          const raw = localStorage.getItem('sobaYonetim');
-          const current = raw ? JSON.parse(raw) : {};
-          const def = {
+          const def: Record<string, unknown> = {
             _version: 1,
             products: [],
             sales: [],
@@ -860,18 +858,22 @@ export function SmartImportManager({
             budgets: [],
             returns: [],
             _activityLog: [],
-            company: current.company || {},
-            settings: {},
+            _auditLog: [],
+            company: db.company || {},
+            settings: db.settings || {},
             pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
             ortakEmanetler: [],
             installments: [],
+            partners: [],
+            productCategories: [],
+            notes: [],
           };
           const finalData: Record<string, unknown> = { ...def, ...mapped };
           const conflictEntities = ['products', 'cari', 'suppliers', 'sales'] as const;
           conflictEntities.forEach((entity) => {
             const resolution = resolutions[entity] || 'overwrite';
             const incoming = (mapped[entity] as { id?: string; name?: string }[]) || [];
-            const existing = (current[entity] as { id?: string; name?: string }[]) || [];
+            const existing = (db[entity as keyof DB] as { id?: string; name?: string }[]) || [];
             if (resolution === 'skip') {
               const existingIds = new Set(existing.map((x: { id?: string }) => x.id).filter(Boolean));
               const existingNames = new Set(
@@ -899,7 +901,7 @@ export function SmartImportManager({
           if (!finalData.kasalar || (finalData.kasalar as unknown[]).length === 0) finalData.kasalar = def.kasalar;
           if (!finalData.pelletSettings) finalData.pelletSettings = def.pelletSettings;
           if (!finalData.company || typeof finalData.company !== 'object') finalData.company = def.company;
-          localStorage.setItem('sobaYonetim', JSON.stringify(finalData));
+          save(() => finalData as unknown as DB);
           setStage('done');
           showToast('Veriler başarıyla aktarıldı! Sayfa yenilenecek...', 'success');
           setTimeout(() => window.location.reload(), 1200);
