@@ -24,7 +24,7 @@ export const CHANGELOG: VersionEntry[] = [
     date: '11 Haziran 2026',
     title: 'CSS Module Migration, Fatura/AIA Helpers Refactor, Storybook & Audit Altyapısı',
     summary:
-      'Kapsamlı refactor ve altyapı oturumu: Inline CSS'ler CSS Module'lere taşındı (Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers — 8 sayfa). FaturaHelpers ve AIAHelpers'deki utility fonksiyonlar ayrı utils dosyalarına çıkarıldı. Storybook kurulumu yapıldı (.storybook/main.ts, preview.ts ve örnek stories). parspel-audit skill v2.0.0'a güncellendi (deterministik execution, strict tool pipeline, loop-safe). Vite config Storybook/Playwright için genişletildi. Seed data (src/lib/seedData.ts) eklendi. Audit helper script'leri yazıldı (hash-audit, lighthouse-mcp, storybook-mcp). Git branch'leri temizlendi: dev fast-forward ile güncellendi, feat/my-feature ve feat/session-3 silindi.',
+      `Kapsamlı refactor ve altyapı oturumu: Inline CSS'ler CSS Module'lere taşındı (Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers — 8 sayfa). FaturaHelpers ve AIAHelpers'deki utility fonksiyonlar ayrı utils dosyalarına çıkarıldı. Storybook kurulumu yapıldı (.storybook/main.ts, preview.ts ve örnek stories). parspel-audit skill v2.0.0'a güncellendi (deterministik execution, strict tool pipeline, loop-safe). Vite config Storybook/Playwright için genişletildi. Seed data (src/lib/seedData.ts) eklendi. Audit helper script'leri yazıldı (hash-audit, lighthouse-mcp, storybook-mcp). Git branch'leri temizlendi: dev fast-forward ile güncellendi, feat/my-feature ve feat/session-3 silindi.`,
     changes: [
       {
         type: 'iyilestirme',
