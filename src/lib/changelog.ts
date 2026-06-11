@@ -20,6 +20,200 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.20.0',
+    date: '11 Haziran 2026',
+    title: 'AGENTS.md Yeniden Yazımı — 26 Bölümlü Sıfır-Tolerans Kuralları',
+    summary:
+      'AGENTS.md tamamen yeniden yazıldı: İngilizce→Türkçe, 243 satırdan 500+ satıra, 26 bölüm. Sıfır-Tolerans kuralları (§0), Değişiklik Protokolü (§1), Rollback Protokolü (§16), Error Handling Pattern (§12), Import Path Kuralları (§13), Güvenlik Kuralları (§14), Sub-AGENTS.md Okuma Zorunluluğu (§15), Performance Budget (§17), Tek Branch Deploy Yapısı (§18), Test Coverage Eşiği (§19), OpenCode Agent Seçimi (§20), Fallow Audit Kuralları (§21), MCP Kullanımı (§22), MEMORY.md Kullanımı (§23), Pre-commit Hook Detayı (§24), GitHub Actions CI/CD (§25) eklendi. Açık Görevler (§9) güncellendi — MASTER_PLAN ve WEEKLY_PLAN\'dan kalan işler listelendi.',
+    changes: [
+      {
+        type: 'yeni',
+        text: '§0 Sıfır-Tolerans Kuralları: Korunan sistemler listesi (ruleEngine.ts, AgentBus.ts, shadcn/ui, vb.) + yasak davranışlar (any tip, console.log, localStorage direkt, 5+ dosya, vb.)',
+      },
+      {
+        type: 'yeni',
+        text: '§1 Değişiklik Protokolü: 6 adımlı zorunlu akış (Baseline → Kapsam → Değişiklik → Changelog → Doğrulama → Commit)',
+      },
+      {
+        type: 'yeni',
+        text: '§11 Semantic Versiyonlama: PATCH/MINOR/MAJOR kuralları netleştirildi',
+      },
+      {
+        type: 'yeni',
+        text: '§12 Error Handling Pattern: Zorunlu logger kullanımı, yasak catch kalıpları (boş catch, console, sessiz fail)',
+      },
+      {
+        type: 'yeni',
+        text: '§13 Import Path Kuralları: @/ alias zorunlu, import sırası ESLint uyumlu',
+      },
+      {
+        type: 'yeni',
+        text: '§14 Güvenlik Kuralları: API key yönetimi (.env, VITE_ prefix), XSS koruması (DOMPurify), kullanıcı verisi (userManager)',
+      },
+      {
+        type: 'yeni',
+        text: '§15 Sub-AGENTS.md Okuma Zorunluluğu: Her klasörün kendi AGENTS.md\'ini okuma protokolü',
+      },
+      {
+        type: 'yeni',
+        text: '§16 Rollback Protokolü: CI fail → zorunlu revert, reset vs revert tablosu, force push yasağı',
+      },
+      {
+        type: 'yeni',
+        text: '§17 Performance Budget: Chunk limitleri (index 300KB, vendor 280KB, vb.), kütüphane ekleme kuralları, useEffect cleanup zorunluluğu',
+      },
+      {
+        type: 'yeni',
+        text: '§18 Branch & Deploy Yapısı: Tek branch dev → direkt canlı, push = production deploy, force push yasak',
+      },
+      {
+        type: 'yeni',
+        text: '§19 Test Coverage Eşiği: Katman bazlı minimum coverage (%80 lib, %75 agents, %70 hooks, %40 pages), edge case zorunluluğu',
+      },
+      {
+        type: 'yeni',
+        text: '§20 OpenCode Agent Seçimi: 9 agent tanımı, disabled_providers, context compaction kuralları',
+      },
+      {
+        type: 'yeni',
+        text: '§21 Fallow Audit Kuralları: ignorePatterns, usedClassMembers, ignoreExports listeleri, hedef metrikler',
+      },
+      {
+        type: 'yeni',
+        text: '§22 MCP Kullanımı: filesystem/github/web-search öncelik sırası ve kullanım senaryoları',
+      },
+      {
+        type: 'yeni',
+        text: '§23 MEMORY.md Kullanımı: Ne zaman yazılır, nasıl yazılır, ne zaman okunur',
+      },
+      {
+        type: 'yeni',
+        text: '§24 Pre-commit Hook Detayı: Tetikleyen uzantılar, changelog zorunluluğu, bypass yasağı',
+      },
+      {
+        type: 'yeni',
+        text: '§25 GitHub Actions CI/CD: quality-gate adımları, frozen-lockfile, yerel vs CI farkı',
+      },
+      {
+        type: 'yeni',
+        text: '§26 Sub-AGENTS.md Durumu: Hangi klasörlerde henüz AGENTS.md yok, oluşturma kuralları',
+      },
+      {
+        type: 'iyilestirme',
+        text: '§9 Açık Görevler: MASTER_PLAN (G4, G5, C1-C3) ve Hafta 6 Refactor (6.1-6.8) + eksik testler (5.9-5.12) eklendi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Tüm dosya İngilizce\'den Türkçe\'ye çevrildi, bölüm numaralandırması eklendi, daha yapısal ve deterministik hale getirildi',
+      },
+    ],
+  },
+  {
+    version: '3.19.0',
+    date: '10 Haziran 2026',
+    title: 'MCP Fix, Storybook Kurulumu, Audit v2, Memory/Cache Optimizasyonu',
+    summary:
+      'Tüm MCP type\'ları düzeltildi (local→stdio, remote→sse). 4 LM Studio modeline tool_call: true eklendi. Storybook altyapısı kuruldu (.storybook/, MCP wrapper, ilk story). parspel-audit skill v2.0.0: deterministik execution, strict tool pipeline, stop condition, loop-safe. Memory/Cache optimizasyon katmanı (audit-state.json, hash tracking, incremental audit).',
+    changes: [
+      {
+        type: 'duzeltme',
+        text: 'opencode.json MCP type fix: tüm local→stdio, remote→sse düzeltildi — MCP\'ler artık doğru protokolle bağlanıyor',
+      },
+      {
+        type: 'duzeltme',
+        text: 'opencode.json: 4 LM Studio modeline tool_call: true eklendi (Qwen3 4B Thinking, Qwen3 VL 4B, Phi 3.5 Mini, Liquid 1.2B) — yerel modellerle MCP kullanılabilir',
+      },
+      {
+        type: 'yeni',
+        text: 'GITHUB_TOKEN env var tanımlandı — GitHub MCP\'si aktif',
+      },
+      {
+        type: 'yeni',
+        text: '.storybook/ dizini oluşturuldu: main.ts (React-Vite framework), preview.ts (controls expanded)',
+      },
+      {
+        type: 'yeni',
+        text: 'src/stories/Button.stories.tsx: ilk Storybook hikayesi (UI/Button)',
+      },
+      {
+        type: 'yeni',
+        text: 'scripts/storybook-mcp.mjs: Storybook MCP wrapper (JSON-RPC 2.0) — storybook_list_components, storybook_check, storybook_get_state, storybook_start_dev tool\'ları',
+      },
+      {
+        type: 'yeni',
+        text: 'scripts/lighthouse-mcp.mjs: Lighthouse MCP server (JSON-RPC 2.0) — lighthouse_audit, lighthouse_get_state tool\'ları',
+      },
+      {
+        type: 'yeni',
+        text: 'scripts/hash-audit.mjs: SHA-256 dosya hash hesaplama aracı — incremental audit için',
+      },
+      {
+        type: 'yeni',
+        text: '.opencode/memory/audit-state.json: MCP state tracking merkezi — filesAnalyzed, componentsChecked, pagesTested, lastHashes, mcpStates',
+      },
+      {
+        type: 'iyilestirme',
+        text: '.opencode/MEMORY.md: 10.06.2026 session, MCP fix notları, 7 optimizasyon kuralı (hash tracking, incremental audit, re-run kontrolü) eklendi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'parspel-audit skill v2.0.0: STOP CONDITION (zorunlu final state), TOOL EXECUTION PIPELINE (strict order: Static→Playwright→Lighthouse→Storybook), SAFE FIX tanımı (allowed/forbidden), STATE PERSISTENCE (her iterasyon sonu zorunlu update), TOOL USAGE RULES (max 1 test/tool/iterasyon, 2 failure→SKIP), FAIL-SAFE MODE, CHANGE SCOPE (max 3 file/iterasyon)',
+      },
+      {
+        type: 'duzeltme',
+        text: 'CSP meta tag güncellendi: connect-src\'ye ws://127.0.0.1:* ve https://*.react-grab.com eklendi — HMR WebSocket ve react-scan bağlantıları düzeltildi',
+      },
+      {
+        type: 'duzeltme',
+        text: 'package.json version 3.18.8 → 3.19.0 güncellendi — changelog ile tutarlılık sağlandı',
+      },
+      {
+        type: 'duzeltme',
+        text: 'src/stories/Button.stories.tsx: relative import → @/ path alias düzeltildi — spec compliance',
+      },
+      {
+        type: 'duzeltme',
+        text: 'P0: console.warn/info çağrıları logger ile değiştirildi (AIAsistan, AnomaliOneri, Dashboard, Notlar) — 4 dosya',
+      },
+      {
+        type: 'duzeltme',
+        text: 'P0: localStorage doğrudan erişimler save() pipeline\'ına taşındı (SettingsAgentPanel, SettingsBackup, SettingsData) — RuleEngine/AuditEngine bypass engellendi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'P1: Sales, Products, Kasa, Fatura, Stock sayfalarına SkeletonTable/SkeletonStatRow loading state eklendi — 4 UI state standardı',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'P1: Stock sayfasına EmptyState eklendi (4 tab: ürünler, ABC, ölü stok, hareketler) + SkeletonTable loading',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'P2: Suppliers, Bank, Butce, Notlar, Monitor sayfalarına EmptyState eklendi — inline empty textler EmptyState komponentiyle değiştirildi',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'P2: CSP production mod conditional yapıldı — vite.config.ts\'e cspPlugin eklendi, production build\'de unsafe-eval ve ws:// kaldırılıyor',
+      },
+      {
+        type: 'yeni',
+        text: 'src/lib/seedData.ts: test ve geliştirme için demo veri üreteci — makeSeedDB() ile 9 ürün, 3 cari, 5 satış, 5 kasa kaydı',
+      },
+      {
+        type: 'duzeltme',
+        text: 'github-workflow-cleanup.test.ts: block-new-branch.yml testleri kaldırıldı (workflow silindi) — 8 test hatası giderildi',
+      },
+      {
+        type: 'duzeltme',
+        text: 'KRİTİK: index.css\'teki 4926 satır özel CSS (login, dashboard, settings sınıfları) geri yüklendi — 9fb26ac commit\'inde yanlışlıkla silinmişti. CSS kural sayısı 82→855, sayfa artık düz yazı olarak kalmıyor',
+      },
+      {
+        type: 'duzeltme',
+        text: 'main.tsx CSS import sıralaması düzeltildi: index.css (Tailwind) → design-tokens.css (override) — Tailwind varsayılan teması artık design token\'ları ezmiyor',
+      },
+    ],
+  },
+  {
     version: '3.18.8',
     date: '10 Haziran 2026',
     title: 'Settings & AIAsistan Split, Git Hooks Sistemi',
