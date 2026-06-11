@@ -36,18 +36,18 @@
 
 ---
 
-## C — MİMARİ (8)
+## C — MİMARİ (8) — 2/8 tamam
 
-| # | Sorun | Dosya |
-|---|-------|-------|
-| C1 | `processIntent()` geçişi yarım: orchestrator deprecated ama hâlâ çalışıyor | `agents/` vs `domain/` |
-| C2 | Çift event sistemi: AgentBus + domainEventBus, ikisi de mitt | `agents/AgentBus.ts`, `domain/eventBus.ts` |
-| C3 | useDB monolit: 640 satırda 7 sorumluluk | `hooks/db/core.ts` |
-| C4 | Agent sistemi over-engineering: 7 agent + permission + bus + orchestrator | `agents/` |
-| C5 | localStorage 5MB limiti aşılabilir, Firebase 1MB/doc limiti aşılabilir | `sync.ts:82` |
-| C6 | Settings.tsx hâlâ 4394 satır — bölme bitmemiş | `pages/Settings.tsx` |
-| C7 | excel-merge.ts 769 satır — 4 parser + merge + diff + search + clean tek dosyada | `lib/excel-merge.ts` |
-| C8 | PWA manifest.json yok, service worker yok | `public/` |
+| # | Sorun | Dosya | Durum |
+|---|-------|-------|-------|
+| C1 | `processIntent()` geçişi yarım: orchestrator deprecated ama hâlâ çalışıyor | `agents/` vs `domain/` | ⬜ |
+| C2 | Çift event sistemi: AgentBus + domainEventBus, ikisi de mitt | `agents/AgentBus.ts`, `domain/eventBus.ts` | ⬜ |
+| C3 | useDB monolit: 640 satırda 7 sorumluluk | `hooks/db/core.ts` | ✅ ZATEN BÖLÜNMÜŞ (index.ts 192 satır, 7 dosya) |
+| C4 | Agent sistemi over-engineering: 7 agent + permission + bus + orchestrator | `agents/` | ⬜ |
+| C5 | localStorage 5MB limiti aşılabilir, Firebase 1MB/doc limiti aşılabilir | `sync.ts:82` | ⬜ |
+| C6 | Settings.tsx hâlâ 4394 satır — bölme bitmemiş | `pages/Settings.tsx` | ✅ ZATEN BÖLÜNMÜŞ (292 satır, 19 alt modül) |
+| C7 | excel-merge.ts 769 satır — 4 parser + merge + diff + search + clean tek dosyada | `lib/excel-merge.ts` | ⬜ (654 satır mevcut) |
+| C8 | PWA manifest.json yok, service worker yok | `public/` | ⬜ |
 
 ---
 
@@ -176,6 +176,29 @@
 
 ---
 
+## P — SAYFA BOYUT İHLALLERİ (11) — YENİ KEŞFEDİLDİ
+
+> **Kural:** Page component max 800 satır (AGENTS.md)  
+> **Gerçek Durum:** 11 sayfa kuralı ihlal ediyor  
+
+| # | Dosya | Satır | Aşım | Öncelik |
+|---|-------|-------|------|---------|
+| P1 | `pages/Reports.tsx` | 1755 | +955 | 🔴 KRİTİK |
+| P2 | `pages/Dashboard.tsx` | 1425 | +625 | 🔴 KRİTİK |
+| P3 | `pages/AIAsistan.tsx` | 1354 | +554 | 🔴 KRİTİK |
+| P4 | `pages/Suppliers.tsx` | 1265 | +465 | 🔴 YÜKSEK |
+| P5 | `pages/settings/SettingsBackup.tsx` | 1156 | +356 | 🔴 YÜKSEK |
+| P6 | `pages/Monitor.tsx` | 1147 | +347 | 🟡 ORTA |
+| P7 | `pages/BugHunter.tsx` | 1070 | +270 | 🟡 ORTA |
+| P8 | `pages/Bank.tsx` | 1010 | +210 | 🟡 ORTA |
+| P9 | `pages/Cari.tsx` | 977 | +177 | 🟡 ORTA |
+| P10 | `pages/Products.tsx` | 811 | +11 | 🟢 DÜŞÜK |
+| P11 | `pages/AnomaliOneri.tsx` | 793 | Sınırda | 🟢 İZLE |
+
+**Tavsiye:** P1-P5 acil refactor gerektirir (toplam ~20 saat)
+
+---
+
 ## FALLOW ÖLÇÜMLERİ (5 Haziran 2026)
 
 | Metrik | Başlangıç | Şimdi | Değişim |
@@ -196,17 +219,21 @@
    - `fast-check`, `lightningcss-win32` → devDependencies
    - Tüm yanlış pozitifler yapılandırmaya eklendi
    - `usedClassMembers` ile polimorfik metotlar susturuldu
-3. **Kritik hatalar (A1-A5)** — SSE deadlock, multi-item iade/fiyat, init race, saveUsers hep-true
+3. **Kritik hatalar (A1-A7)** — SSE deadlock, multi-item iade/fiyat, init race, saveUsers
 4. **CSP meta tag** — `index.html`'e eklendi
+5. **useDB refactor** — 640 satır → 7 dosyaya bölündü (index.ts 192, backup.ts 451, sync.ts 123, vs.)
+6. **Settings refactor** — 4394 satır → 292 satıra düştü, 19 alt modül oluşturuldu
 
 ---
 
-## UYGULAMA SIRASI ÖNERİSİ
+## UYGULAMA SIRASI ÖNERİSİ (GÜNCELLENMİŞ)
 
 ```
-Hafta 1-2: A (kritik hatalar) + B (güvenlik) + L/W1
-Hafta 3-4: C (mimari) + E (tip güvenliği) + L/W2-3
-Hafta 5-6: G (veri bütünlüğü) + L/W6 (refactor)
-Hafta 7:   F (performans) + D (kod tekrarı)
-Hafta 8:   H (test) + I (spes) + L/W4-5
+Hafta 1-2: G4, G5 (kritik buglar) + P1, P2 (Reports, Dashboard refactor)
+Hafta 3-4: P3, P4, P5 (AIAsistan, Suppliers, SettingsBackup refactor)
+Hafta 5-6: P6-P9 (Monitor, BugHunter, Bank, Cari refactor)
+Hafta 7:   C7 (excel-merge bölme) + F (performans)
+Hafta 8:   H (test) + I (spes) + J (accessibility)
 ```
+
+**Toplam tahmini iş:** ~40 saat (önceki tahmin: 100 saat ❌)
