@@ -7,7 +7,7 @@ import { BrainCircuit, X, Mic, MicOff, Palette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { DB } from '@/types';
 import { formatMoney } from '@/lib/utils-tr';
-import { dispatchAgentFlow } from '@/agents/orchestrator';
+import { getAgent } from '@/agents';
 import { logger } from '@/lib/logger';
 import { speak, hasSpeechRecognition, createSpeechRecognition } from '@/lib/audio';
 
@@ -191,51 +191,60 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
       const isimMatch = q.match(/tahsilat\s+(.+?)(\s+\d|$)/i);
       const isim = isimMatch ? isimMatch[1].trim() : '';
 
-      let isAgentCommand = false;
+      let islemCevap = '';
+      let islemBasari = false;
 
       try {
-        // Satış komutları
+        // Satış komutları → items'sız satış olmaz, kasa_gelir olarak kaydet
         if ((q.includes('satış') || q.includes('sattım') || q.includes('satis')) && tutar > 0) {
           const payment = q.includes('kart') ? 'kart' : q.includes('cari') ? 'cari' : 'nakit';
-          await dispatchAgentFlow({
-            type: 'sale',
-            label: `Sesli satış: ${tutar}₺ ${payment}`,
-            payload: { total: tutar, payment, profit: 0 },
+          const sonuc = await getAgent('kasa').islemYap({
+            action: 'kasa_gelir',
+            payload: { amount: tutar, kasa: payment, category: 'satis', description: `Sesli satış: ${tutar}₺ (${payment})` },
           });
-          isAgentCommand = true;
+          islemBasari = sonuc.ok;
+          islemCevap = sonuc.ok ? `✅ Satış kaydedildi: ${tutar}₺ (${payment})` : `❌ ${sonuc.error || 'Satış kaydedilemedi'}`;
         }
         // Gelir komutu
         else if ((q.includes('gelir') || (q.includes('tahsilat') && !isim)) && tutar > 0 && !q.includes('gider')) {
-          await dispatchAgentFlow({
-            type: 'kasa_gelir',
-            label: `Sesli gelir: ${tutar}₺`,
-            payload: { amount: tutar, description: text },
+          const sonuc = await getAgent('kasa').islemYap({
+            action: 'kasa_gelir',
+            payload: { amount: tutar, kasa: 'nakit', category: 'diger', description: text },
           });
-          isAgentCommand = true;
+          islemBasari = sonuc.ok;
+          islemCevap = sonuc.ok ? `✅ Gelir kaydedildi: ${tutar}₺` : `❌ ${sonuc.error || 'Gelir kaydedilemedi'}`;
         }
         // Gider komutu
         else if (q.includes('gider') && tutar > 0) {
-          await dispatchAgentFlow({
-            type: 'kasa_gider',
-            label: `Sesli gider: ${tutar}₺`,
-            payload: { amount: tutar, description: text },
+          const sonuc = await getAgent('kasa').islemYap({
+            action: 'kasa_gider',
+            payload: { amount: tutar, kasa: 'nakit', category: 'diger', description: text },
           });
-          isAgentCommand = true;
+          islemBasari = sonuc.ok;
+          islemCevap = sonuc.ok ? `✅ Gider kaydedildi: ${tutar}₺` : `❌ ${sonuc.error || 'Gider kaydedilemedi'}`;
         }
-        // Tahsilat komutu (isimli)
+        // Tahsilat komutu (isimli) — cariName → cariId lookup
         else if (q.includes('tahsilat') && isim && tutar > 0) {
-          await dispatchAgentFlow({
-            type: 'cari_tahsilat',
-            label: `Sesli tahsilat: ${isim} ${tutar}₺`,
-            payload: { amount: tutar, cariName: isim },
-          });
-          isAgentCommand = true;
+          const cari = db.cari.find(
+            (c) => !c.deleted && c.name.toLowerCase().includes(isim.toLowerCase()),
+          );
+          if (!cari) {
+            islemCevap = `❌ "${isim}" adında cari hesap bulunamadı`;
+          } else {
+            const sonuc = await getAgent('cari').islemYap({
+              action: 'cari_tahsilat',
+              payload: { cariId: cari.id, amount: tutar, description: text },
+            });
+            islemBasari = sonuc.ok;
+            islemCevap = sonuc.ok
+              ? `✅ ${cari.name} için ${tutar}₺ tahsilat kaydedildi`
+              : `❌ ${sonuc.error || 'Tahsilat başarısız'}`;
+          }
         }
 
-        if (isAgentCommand) {
-          const successMsg = `✅ İşlem tamamlandı: ${text}`;
-          setMessages((prev) => [...prev, { role: 'assistant', text: successMsg }]);
-          speak('İşlem tamamlandı');
+        if (islemCevap) {
+          setMessages((prev) => [...prev, { role: 'assistant', text: islemCevap }]);
+          speak(islemBasari ? 'İşlem tamamlandı' : 'Hata oluştu');
         } else {
           // Soru tipli → quickReply
           const response = quickReply(db, text);
@@ -244,6 +253,7 @@ export function QuantumLink({ db, defaultOpen = false }: QuantumLinkProps) {
         }
       } catch (err) {
         const errMsg = `❌ Hata: ${err instanceof Error ? err.message : 'İşlem başarısız'}`;
+        logger.error('quantumlink', 'Komut işlenirken hata', { error: err, text });
         setMessages((prev) => [...prev, { role: 'assistant', text: errMsg }]);
       } finally {
         setIsProcessing(false);

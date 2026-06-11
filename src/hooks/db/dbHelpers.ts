@@ -3,6 +3,7 @@ import { trimAuditLog } from '@/lib/auditEngine';
 import { logger } from '@/lib/logger';
 import { validateTransaction } from '@/lib/ruleEngine';
 import { saveToFirebase } from './sync';
+import { getUserSession } from '@/lib/userManager';
 
 // G4 fix: shared pending promise reference
 let _firebasePromise: Promise<void> | null = null;
@@ -11,6 +12,11 @@ export function getFirebasePromise() {
 }
 
 async function scheduleFirebaseSave(db: DB): Promise<void> {
+  const session = getUserSession();
+  if (!session) {
+    logger.warn('db', 'Kayıtlı oturum bulunamadı, Firebase sync atlandı');
+    return;
+  }
   // Chain saves: wait for previous, then schedule new one
   if (_firebasePromise) {
     try {
@@ -19,7 +25,7 @@ async function scheduleFirebaseSave(db: DB): Promise<void> {
       /* previous failed, continue */
     }
   }
-  _firebasePromise = saveToFirebase(db);
+  _firebasePromise = saveToFirebase(db, session.userId);
   _firebasePromise.finally(() => {
     _firebasePromise = null;
   });

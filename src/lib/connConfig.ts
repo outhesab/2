@@ -10,7 +10,6 @@ export interface FirebaseConfig {
   enabled: boolean;
   projectId: string;
   apiKey: string;
-  docPath: string;
 }
 
 export interface SupabaseConfig {
@@ -34,7 +33,6 @@ function isPlaceholder(val: string): boolean {
 const CONN_KEY = 'sobaConnConfig';
 const ENV_FB_PROJECT_ID = (import.meta.env.VITE_FIREBASE_PROJECT_ID ?? '').trim();
 const ENV_FB_API_KEY = (import.meta.env.VITE_FIREBASE_API_KEY ?? '').trim();
-const ENV_FB_DOC_PATH = (import.meta.env.VITE_FIREBASE_DOC_PATH ?? 'sync/main').trim();
 const HAS_FIREBASE_ENV = !isPlaceholder(ENV_FB_PROJECT_ID) && !isPlaceholder(ENV_FB_API_KEY);
 
 export const DEFAULT_CONN: ConnConfig = {
@@ -42,7 +40,6 @@ export const DEFAULT_CONN: ConnConfig = {
     enabled: HAS_FIREBASE_ENV,
     projectId: ENV_FB_PROJECT_ID,
     apiKey: ENV_FB_API_KEY,
-    docPath: ENV_FB_DOC_PATH || 'sync/main',
   },
   supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' },
   activeProvider: HAS_FIREBASE_ENV ? 'firebase' : 'none',
@@ -89,23 +86,20 @@ export function loadConnConfig(): ConnConfig {
 
 export function saveConnConfig(cfg: ConnConfig): void {
   const safeCfg = normalizeConnConfig(cfg);
-  // Tip doğrulama — beklenmedik veri tiplerini engelle
   if (typeof safeCfg.firebase?.projectId !== 'string' || typeof safeCfg.firebase?.apiKey !== 'string') {
     logger.warn('connConfig', 'Geçersiz config formatı — projectId/apiKey string olmalı');
     return;
   }
   if (typeof safeCfg.supabase?.url !== 'string' || typeof safeCfg.supabase?.anonKey !== 'string') {
-    logger.warn('connConfig', 'Geçersiz config formatı — supabase url/anonKey string olmalı');
+    logger.warn('connConfig', 'Geçersiz config formatı — url/anonKey string olmalı');
     return;
   }
-  // Injection kontrolü — URL ve key alanlarında XSS/script enjeksiyonu
   const dangerous = /[<>"]|javascript:|data:/i;
   if (dangerous.test(safeCfg.firebase.projectId) || dangerous.test(safeCfg.supabase.url)) {
     logger.warn('connConfig', 'Potansiyel injection tespit edildi — kayıt engellendi');
     return;
   }
   localStorage.setItem(CONN_KEY, JSON.stringify(safeCfg));
-  // Arka planda Firebase'e de yaz
   if (safeCfg.activeProvider === 'firebase' && safeCfg.firebase.enabled) {
     saveConnConfigToFirebase(safeCfg).catch(() => logger.error('sync', 'Firebase config yazılamadı'));
   }
@@ -133,7 +127,7 @@ export async function saveConnConfigToFirebase(cfg: ConnConfig): Promise<boolean
 
 /** Firebase Firestore koleksiyon referansı */
 export function getFirebaseDocUrl(cfg: FirebaseConfig): string {
-  return isFirebaseReady() ? `firebase://${cfg.projectId}/${cfg.docPath}` : '';
+  return isFirebaseReady() ? `firebase://${cfg.projectId}/users/default/db` : '';
 }
 
 /** Firebase bağlantısını test et */

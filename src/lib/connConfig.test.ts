@@ -65,7 +65,7 @@ describe('connConfig', () => {
   describe('saveConnConfig', () => {
     it('should save config to localStorage', () => {
       const config: ConnConfig = {
-        firebase: { enabled: true, projectId: 'test-proj', apiKey: 'test-key', docPath: 'sync/main' },
+        firebase: { enabled: true, projectId: 'test-proj', apiKey: 'test-key' },
         supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' },
         activeProvider: 'firebase',
       };
@@ -84,7 +84,7 @@ describe('connConfig', () => {
 
     it('should return saved config when available', () => {
       const saved = {
-        firebase: { enabled: true, projectId: 'saved-proj', apiKey: 'saved-key', docPath: 'sync/main' },
+        firebase: { enabled: true, projectId: 'saved-proj', apiKey: 'saved-key' },
         supabase: { enabled: false, url: '', anonKey: '', tableName: 'soba_sync' },
         activeProvider: 'firebase' as const,
       };

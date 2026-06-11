@@ -266,26 +266,45 @@ export class SatisAgent extends BaseAgent {
   async islemYap(talep: AgentRequest): Promise<AgentResponse> {
     this.yayinla('satis.islem', { action: talep.action, payload: talep.payload });
 
-    if (talep.action === 'sale' && talep.payload) {
-      const p = talep.payload as Record<string, unknown>;
-      if (!p || typeof p !== 'object' || !Array.isArray(p.items)) {
-        return { ok: false, error: 'Geçersiz satış payload' };
-      }
-      const params: YeniSatisParams = {
-        items: (p.items as YeniSatisParams['items']) || [],
-        cariId: (p.cariId as string) || '',
-        payment: (p.payment as YeniSatisParams['payment']) || 'nakit',
-        discount: (p.discount as number) || 0,
-        discountAmount: (p.discountAmount as number) || 0,
-        tahsilat: (p.tahsilat as number) || 0,
-        saleDate: (p.saleDate as string) || undefined,
-      };
-      return this.yeniSatis(params);
-    }
+    const p = talep.payload as Record<string, unknown>;
 
-    return {
-      ok: true,
-      data: { agent: this.id, action: talep.action, status: 'completed' },
-    };
+    switch (talep.action) {
+      case 'sale': {
+        if (!p || typeof p !== 'object' || !Array.isArray(p.items)) {
+          return { ok: false, error: 'Geçersiz satış payload' };
+        }
+        const params: YeniSatisParams = {
+          items: (p.items as YeniSatisParams['items']) || [],
+          cariId: (p.cariId as string) || '',
+          payment: (p.payment as YeniSatisParams['payment']) || 'nakit',
+          discount: (p.discount as number) || 0,
+          discountAmount: (p.discountAmount as number) || 0,
+          tahsilat: (p.tahsilat as number) || 0,
+          saleDate: (p.saleDate as string) || undefined,
+        };
+        return this.yeniSatis(params);
+      }
+
+      case 'iptal': {
+        if (!p?.saleId) return { ok: false, error: 'İptal için saleId gereklidir' };
+        return this.iptalEt(p.saleId as string);
+      }
+
+      case 'iade': {
+        if (!p?.saleId) return { ok: false, error: 'İade için saleId gereklidir' };
+        return this.iadeYap(p.saleId as string, p.qty as number | Record<string, number>);
+      }
+
+      case 'fiyat_duzelt': {
+        if (!p?.saleId) return { ok: false, error: 'Fiyat düzeltme için saleId gereklidir' };
+        return this.fiyatDuzelt(p.saleId as string, p.yeniFiyat as number | Record<string, number>);
+      }
+
+      default:
+        return {
+          ok: true,
+          data: { agent: this.id, action: talep.action, status: 'completed' },
+        };
+    }
   }
 }

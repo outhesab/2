@@ -4,7 +4,6 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ConfirmProvider } from '@/components/ConfirmDialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import LoginScreen, { useAuth } from '@/components/LoginScreen';
-import SetupWizard, { getSetupData, isSetupDone } from '@/components/SetupWizard';
 import { getAllAgents } from '@/agents';
 import type { AgentContext } from '@/agents/types';
 import { useToast } from '@/components/Toast';
@@ -178,51 +177,6 @@ function AppContent({
       void 0;
     }
   }, [showToast]);
-
-  // İlk kurulum verisini DB'ye yaz (bir kez)
-  useEffect(() => {
-    const setup = getSetupData();
-    if (!setup) return;
-    const applied = localStorage.getItem('sobaYonetim_setupApplied');
-    if (applied) return;
-    save((prev) => {
-      // Kasalar
-      const kasalar = setup.kasalar.length > 0 ? setup.kasalar : prev.kasalar;
-      // Ürünler
-      const mevcutIds = new Set(prev.products.map((p: { id: string }) => p.id));
-      const yeniUrunler = (setup.urunler || []).filter((u: { id: string }) => !mevcutIds.has(u.id));
-      const products = [...prev.products, ...yeniUrunler];
-      // Ortaklar
-      const mevcutOrtakIds = new Set((prev.partners || []).map((p: { id: string }) => p.id));
-      const yeniOrtaklar = (setup.ortaklar || []).filter((o: { id: string }) => !mevcutOrtakIds.has(o.id));
-      const partners = [...(prev.partners || []), ...yeniOrtaklar];
-      // Ortak carileri
-      const mevcutCariIds = new Set(prev.cari.map((c: { id: string }) => c.id));
-      const yeniCariOrtaklar = (setup.cariOrtaklar || []).filter((c: { id: string }) => !mevcutCariIds.has(c.id));
-      const cari = [...prev.cari, ...yeniCariOrtaklar];
-      // Settings
-      const settings = {
-        ...prev.settings,
-        companyName: setup.companyName,
-        city: setup.city,
-      };
-      // Kategoriler
-      const mevcutKatIds = new Set((prev.productCategories || []).map((k: { id: string }) => k.id));
-      const yeniKategoriler = (setup.kategoriler || []).filter((k: { id: string }) => !mevcutKatIds.has(k.id));
-      const productCategories = [...(prev.productCategories || []), ...yeniKategoriler];
-      return {
-        ...prev,
-        kasalar,
-        products,
-        partners,
-        cari,
-        settings,
-        productCategories,
-      };
-    });
-    localStorage.setItem('sobaYonetim_setupApplied', '1');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (prevOnline.current !== isOnline) {
@@ -534,27 +488,12 @@ function AppContent({
 
 export default function App() {
   const { authed, login, logout, currentUser, guestTimeLeft } = useAuth();
-  const [setupDone, setSetupDone] = useState(isSetupDone);
 
   if (!authed) {
     return (
       <LoginScreen
         onLogin={(user, remember) => {
           login(user, remember);
-          if (!isSetupDone()) {
-            localStorage.setItem('sobaYonetim_setupDone', '1');
-            setSetupDone(true);
-          }
-        }}
-      />
-    );
-  }
-
-  if (!setupDone) {
-    return (
-      <SetupWizard
-        onComplete={() => {
-          setSetupDone(true);
         }}
       />
     );
@@ -581,7 +520,7 @@ export default function App() {
               title: 'soba-toast-title',
               description: 'soba-toast-desc group-[.toast]:text-muted-foreground',
               actionButton:
-                'soba-toast-action group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:rounded-lg group-[.toast]:px-3 group-[.toast]:py-1.5 group-[.toast]:text-xs group-[.toast]:font-semibold',
+                'soba-toast-action group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:rounded-lg group-[.toast]:px-3 group [.toast]:py-1.5 group-[.toast]:text-xs group-[.toast]:font-semibold',
               cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
               icon: 'soba-toast-icon',
             },

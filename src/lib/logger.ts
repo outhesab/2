@@ -49,7 +49,9 @@ export type LogCategory =
   | 'streamUtils'
   | 'userManager'
   | 'utils-tr'
-  | 'version';
+  | 'version'
+  | 'voice'
+  | 'VoiceAgent';
 
 export interface CrashReport {
   id: string;

@@ -91,6 +91,7 @@ describe('emitSync / onSyncStatus / getSyncStatus', () => {
 });
 
 describe('saveToFirebase', () => {
+  const USER_ID = 'test-user-id';
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -99,27 +100,27 @@ describe('saveToFirebase', () => {
   it('returns early if Firebase not ready', async () => {
     mockIsFirebaseReady.mockReturnValue(false);
     const { saveToFirebase } = await import('./sync');
-    await saveToFirebase(makeMinimalDB());
+    await saveToFirebase(makeMinimalDB(), USER_ID);
     expect(mockWriteDoc).not.toHaveBeenCalled();
   });
 
   it('returns early if firebase not enabled in config', async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: false, docPath: 'test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: false } });
     const { saveToFirebase } = await import('./sync');
-    await saveToFirebase(makeMinimalDB());
+    await saveToFirebase(makeMinimalDB(), USER_ID);
     expect(mockWriteDoc).not.toHaveBeenCalled();
   });
 
   it('calls writeDoc with correct data on success', async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true, docPath: 'parspel/test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
     mockWriteDoc.mockResolvedValue(true);
     const { saveToFirebase } = await import('./sync');
     const db = makeMinimalDB(7);
-    await saveToFirebase(db);
+    await saveToFirebase(db, USER_ID);
     expect(mockWriteDoc).toHaveBeenCalledWith(
-      ['parspel/test'],
+      ['users', USER_ID, 'db'],
       expect.objectContaining({
         version: '7',
         data: expect.any(String),
@@ -131,17 +132,18 @@ describe('saveToFirebase', () => {
 
   it('retries on write failure', { timeout: 30000 }, async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true, docPath: 'parspel/test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
     mockWriteDoc.mockRejectedValueOnce(new Error('net'));
     mockWriteDoc.mockRejectedValueOnce(new Error('net'));
     mockWriteDoc.mockResolvedValueOnce(true);
     const { saveToFirebase } = await import('./sync');
-    await saveToFirebase(makeMinimalDB());
+    await saveToFirebase(makeMinimalDB(), USER_ID);
     expect(mockWriteDoc).toHaveBeenCalledTimes(3);
   });
 });
 
 describe('loadFromFirebase', () => {
+  const USER_ID = 'test-user-id';
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -150,35 +152,35 @@ describe('loadFromFirebase', () => {
   it('returns null if Firebase not ready', async () => {
     mockIsFirebaseReady.mockReturnValue(false);
     const { loadFromFirebase } = await import('./sync');
-    const result = await loadFromFirebase();
+    const result = await loadFromFirebase(USER_ID);
     expect(result).toBeNull();
   });
 
   it('returns null if firebase not enabled', async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: false, docPath: 'test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: false } });
     const { loadFromFirebase } = await import('./sync');
-    const result = await loadFromFirebase();
+    const result = await loadFromFirebase(USER_ID);
     expect(result).toBeNull();
   });
 
   it('returns parsed DB on success', async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true, docPath: 'parspel/test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
     const testDB = makeMinimalDB(5);
     mockReadDoc.mockResolvedValue({ data: JSON.stringify(testDB), version: '5', updatedAt: '2026-01-01' });
     const { loadFromFirebase } = await import('./sync');
-    const result = await loadFromFirebase();
+    const result = await loadFromFirebase(USER_ID);
     expect(result).not.toBeNull();
     expect(result!._version).toBe(5);
   });
 
   it('returns null when doc has no data', async () => {
     mockIsFirebaseReady.mockReturnValue(true);
-    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true, docPath: 'parspel/test' } });
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
     mockReadDoc.mockResolvedValue(null);
     const { loadFromFirebase } = await import('./sync');
-    const result = await loadFromFirebase();
+    const result = await loadFromFirebase(USER_ID);
     expect(result).toBeNull();
   });
 });

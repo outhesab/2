@@ -37,6 +37,8 @@ const empty: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = {
   description: '',
 };
 
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+
 export default function Products({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
@@ -751,6 +753,7 @@ export default function Products({ db, save }: Props) {
           </button>
         </div>
       </Modal>
+      <VoiceAssistantButton />
     </div>
   );
 }

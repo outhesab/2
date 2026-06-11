@@ -73,6 +73,8 @@ function debtColor(days: number | null): {
   };
 }
 
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+
 export default function Cari({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
@@ -998,6 +1000,7 @@ export default function Cari({ db, save }: Props) {
           />
         </Modal>
       )}
+      <VoiceAssistantButton />
     </div>
   );
 }

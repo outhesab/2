@@ -2,6 +2,7 @@ import { loadConnConfig } from "@/lib/connConfig";
 import { logger } from "@/lib/logger";
 import { writeDoc, readDoc, isFirebaseReady } from "@/lib/firebase";
 import type { DB } from "@/types";
+import { firebaseSyncQueue } from '@/lib/db/syncQueue';
 
 export type SyncStatus = "idle" | "saving" | "saved" | "error" | "loading";
 type SyncListener = (status: SyncStatus, detail?: string) => void;
@@ -67,37 +68,40 @@ async function retryableRead<T>(path: string[]): Promise<T | null> {
   return null;
 }
 
-export async function saveToFirebase(db: DB): Promise<void> {
-  if (!isFirebaseReady()) {
-    emitSync("idle");
-    return;
-  }
-  const cfg = loadConnConfig();
-  if (!cfg.firebase.enabled) {
-    emitSync("idle");
-    return;
-  }
-  const t = logger.time("firebase", `Firebase kayıt v${db._version}`);
-  emitSync("saving");
-  try {
-    const ok = await retryableWrite([cfg.firebase.docPath], {
-      data: JSON.stringify(db),
-      version: String(db._version || 0),
-      updatedAt: new Date().toISOString(),
-    });
-    const ms = t.end({ version: db._version, ok });
-    if (ok) {
-      emitSync("saved", `v${db._version} · ${ms}ms`);
-      logger.info("sync", "Firebase'e kaydedildi", { version: db._version, ms });
-    } else {
-      emitSync("error", "Firestore yazma başarısız");
-      logger.error("firebase", "Firestore yazma hatası");
+export async function saveToFirebase(db: DB, userId: string): Promise<void> {
+  // Kuyruğa ekle: Sıralı yazma garantisi
+  return firebaseSyncQueue.enqueue(async () => {
+    if (!isFirebaseReady()) {
+      emitSync("idle");
+      return;
     }
-  } catch (e) {
-    t.end({ error: String(e) });
-    emitSync("error", "Bağlantı hatası");
-    logger.error("firebase", "Firebase kayıt tamamen başarısız", { error: String(e) });
-  }
+    const cfg = loadConnConfig();
+    if (!cfg.firebase.enabled) {
+      emitSync("idle");
+      return;
+    }
+    const t = logger.time("firebase", `Firebase kayıt v${db._version} [${userId}]`);
+    emitSync("saving");
+    try {
+      const ok = await retryableWrite(['users', userId, 'db'], {
+        data: JSON.stringify(db),
+        version: String(db._version || 0),
+        updatedAt: new Date().toISOString(),
+      });
+      const ms = t.end({ version: db._version, ok });
+      if (ok) {
+        emitSync("saved", `v${db._version} · ${ms}ms`);
+        logger.info("sync", "Firebase'e kaydedildi", { userId, version: db._version, ms });
+      } else {
+        emitSync("error", "Firestore yazma başarısız");
+        logger.error("firebase", "Firestore yazma hatası");
+      }
+    } catch (e) {
+      t.end({ error: String(e) });
+      emitSync("error", "Bağlantı hatası");
+      logger.error("firebase", "Firebase kayıt tamamen başarısız", { userId, error: String(e) });
+    }
+  });
 }
 
 interface SyncDoc {
@@ -106,24 +110,24 @@ interface SyncDoc {
   updatedAt?: string;
 }
 
-export async function loadFromFirebase(): Promise<DB | null> {
+export async function loadFromFirebase(userId: string): Promise<DB | null> {
   if (!isFirebaseReady()) return null;
   const cfg = loadConnConfig();
   if (!cfg.firebase.enabled) return null;
-  const t = logger.time("firebase", "Firebase yükle");
+  const t = logger.time("firebase", `Firebase yükle [${userId}]`);
   try {
-    const doc = await retryableRead<SyncDoc>([cfg.firebase.docPath]);
+    const doc = await retryableRead<SyncDoc>(['users', userId, 'db']);
     if (!doc?.data) {
       t.end({ empty: true });
       return null;
     }
     const data = JSON.parse(doc.data) as DB;
     const ms = t.end({ version: data._version });
-    logger.info("firebase", "Firebase'den yüklendi", { version: data._version, ms });
+    logger.info("firebase", "Firebase'den yüklendi", { userId, version: data._version, ms });
     return data;
   } catch (e) {
     t.end({ error: String(e) });
-    logger.warn("firebase", "Firebase yükleme başarısız", { error: String(e) });
+    logger.warn("firebase", "Firebase yükleme başarısız", { userId, error: String(e) });
     return null;
   }
 }

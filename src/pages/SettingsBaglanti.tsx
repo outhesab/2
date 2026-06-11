@@ -194,18 +194,6 @@ export function BaglantiAyarlari({
               placeholder="AIza..."
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block mb-1.5 text-sm font-semibold text-muted-foreground">Doküman Yolu</label>
-            <input
-              value={cfg.firebase.docPath}
-              onChange={(e) => setFb({ docPath: e.target.value })}
-              className="w-full rounded-xl border border-strong px-4 py-2.5 text-sm bg-surface text-primary"
-              placeholder="sync/main"
-            />
-            <div className="text-muted-foreground text-xs mt-1">
-              Firestore'daki koleksiyon/doküman yolu. Örn: <code className="text-orange-400">sync/main</code>
-            </div>
-          </div>
         </div>
 
         <div className="flex items-center gap-2.5 mt-4">

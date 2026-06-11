@@ -30,6 +30,8 @@ import { TableFilterBar, TableWrapper } from '@/pages/pageHelpers.tsx';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+
 export default function Kasa({ db, save }: Props) {
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();
@@ -399,6 +401,7 @@ export default function Kasa({ db, save }: Props) {
           <button onClick={() => setSayimModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>Kapat</button>
         </div>
       </Modal>
+      <VoiceAssistantButton />
     </div>
   );
 }

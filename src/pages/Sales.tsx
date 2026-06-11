@@ -15,6 +15,7 @@ import { useLocation } from 'wouter';
 import SaleFormModal from './SaleFormModal';
 import { StatCard } from './SalesHelpers';
 import { sinp, paymentLabels } from './salesStyles';
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
 
 interface Props {
   db: DB;
@@ -524,6 +525,8 @@ export default function Sales({ db, save: _save }: Props) {
         kalan={kalan}
         paraUstu={-kalan}
       />
+
+      <VoiceAssistantButton />
     </div>
   );
 }

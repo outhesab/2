@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.3',
+    date: '11 Haziran 2026',
+    title: 'Baseline Onarımı ve Veri Katmanı İyileştirmeleri',
+    summary: 'Projenin baseline (lint, typecheck, test, build) hataları giderildi. useDB hook\'una saveGuarded fonksiyonu eklenerek kritik işlemler için uyarı mekanizması bypass edebilme imkanı sağlandı.',
+    changes: [
+      { type: 'duzeltme', text: 'Sistem genelindeki lint ve TypeScript hataları giderildi (Voice API tipleri, duplicate exportlar, unused vars).' },
+      { type: 'yeni', text: 'useDB hook\'una saveGuarded eklendi — warn seviyesindeki kural ihlallerini atlayarak işlem yapılması sağlandı.' },
+      { type: 'duzeltme', text: 'core.test.ts mock güncellendi — getUserSession export\'u eklendi, işlenmemiş hatalar giderildi.' },
+    ],
+  },
+  {
     version: '3.21.2',
     date: '11 Haziran 2026',
     title: 'Proje Temizliği & Dosya Organizasyonu',

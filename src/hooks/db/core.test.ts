@@ -18,7 +18,7 @@ vi.mock('@/lib/logger', () => ({
   logger: { time: vi.fn(() => ({ end: vi.fn() })), warn: vi.fn(), info: vi.fn(), error: vi.fn() },
 }));
 vi.mock('@/lib/utils-tr', () => ({ genId: vi.fn(() => 'id-1') }));
-vi.mock('@/lib/userManager', () => ({ isGuestSession: vi.fn(() => false) }));
+vi.mock('@/lib/userManager', () => ({ isGuestSession: vi.fn(() => false), getUserSession: vi.fn(() => ({ username: 'test', role: 'admin', isGuest: false })) }));
 vi.mock('@/lib/safeClone', () => ({ safeClone: vi.fn((x: unknown) => JSON.parse(JSON.stringify(x))) }));
 vi.mock('./sync', () => ({
   saveToFirebase: vi.fn(),
@@ -102,7 +102,7 @@ describe('useDB', () => {
   });
 
   it('returns expected API shape', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const api = useDB();
     const keys = Object.keys(api);
     expect(keys).toContain('db');
@@ -125,7 +125,7 @@ describe('useDB', () => {
   });
 
   it('returns a DB object with default shape', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { db } = useDB();
     expect(db).toHaveProperty('_version');
     expect(db).toHaveProperty('products');
@@ -139,39 +139,39 @@ describe('useDB', () => {
   });
 
   it('save calls processSave without error', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { save } = useDB();
     expect(() => save((prev: DB) => ({ ...prev, _version: (prev._version || 0) + 1 }))).not.toThrow();
   });
 
   it('exportJSON generates downloadable JSON', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { exportJSON } = useDB();
     expect(() => exportJSON()).not.toThrow();
   });
 
   it('getKasaBakiye returns number', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { getKasaBakiye } = useDB();
     const result = getKasaBakiye('nakit');
     expect(typeof result).toBe('number');
   });
 
   it('getTotalKasa returns number', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { getTotalKasa } = useDB();
     const result = getTotalKasa();
     expect(typeof result).toBe('number');
   });
 
   it('clearError resets dbError', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { clearError } = useDB();
     expect(() => clearError()).not.toThrow();
   });
 
   it('importJSON validates and rejects invalid input', async () => {
-    const { useDB } = await import('./core');
+    const { useDB } = await import('./index');
     const { importJSON } = useDB();
     const file = new File(['invalid json'], 'test.json', { type: 'application/json' });
     const result = await importJSON(file);

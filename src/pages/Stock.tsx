@@ -11,6 +11,8 @@ import { PackageSearch } from 'lucide-react';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+
 export default function Stock({ db, save }: Props) {
   const { showToast } = useToast();
   const { playSound } = useSoundFeedback();
@@ -391,6 +393,7 @@ export default function Stock({ db, save }: Props) {
           <button onClick={() => setAdjustModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
         </div>
       </Modal>
+      <VoiceAssistantButton />
     </div>
   );
 }

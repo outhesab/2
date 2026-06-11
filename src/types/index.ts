@@ -458,6 +458,43 @@ export interface AuditReport {
   warnedCount: number;
 }
 
+// ─── Voice API Types ─────────────────────────────────────────────────────────────
+export interface SpeechRecognition extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  start(): void;
+  stop(): void;
+  onstart: ((event: Event) => void) | null;
+  onend: ((event: Event) => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+}
+
+export interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+export interface SpeechRecognitionResultList extends Array<SpeechRecognitionResult> {
+  item(index: number): SpeechRecognitionResult;
+}
+
+export interface SpeechRecognitionResult {
+  [index: number]: SpeechRecognitionAlternative;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+}
+
+export interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+export interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 // ─── Veritabanı (Kök) ────────────────────────────────────────────────────────
 export interface DB {
   _version: number;

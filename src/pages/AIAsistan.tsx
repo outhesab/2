@@ -23,6 +23,8 @@ import {
 import { MarkdownText } from './ai/AIAHelpers';
 import { getActionAffectedIds, isDangerousAction, sourceLabel } from './ai/AIAHelpers.utils';
 import ApiSettings from './ai/AIASettings';
+import { useVoiceAgent } from '@/hooks/useVoiceAgent';
+import VoiceAgentUI from '@/components/ai/VoiceAgentUI';
 
 interface Props {
   db: DB;
@@ -30,7 +32,6 @@ interface Props {
   embedded?: boolean;
 }
 
-// Message type imported from @/lib/aiApi as ApiMessage
 type Message = ApiMessage;
 
 export default function AIAsistan({ db, save, embedded = false }: Props) {
@@ -48,7 +49,8 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   const [autoApplyActions, setAutoApplyActions] = useState(false);
   const [maxAutoActions, setMaxAutoActions] = useState(3);
   const [stopOnViolation, setStopOnViolation] = useState(true);
-  // Onay bekleyen DB işlemleri
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+
   const [pendingActions, setPendingActions] = useState<{
     msgIdx: number;
     actions: DBAction[];
@@ -185,7 +187,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     [save, autoApplyActions, maxAutoActions, stopOnViolation, modelSource],
   );
 
-  // Sesli özellikler
   const { speaking, speak, stop: stopSpeak } = useSpeechSynthesis();
   const {
     listening,
@@ -195,7 +196,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     stop: stopListen,
   } = useSpeechRecognition((text) => {
     setInput(text);
-    // Sesli girişten gelen metni otomatik gönder
     setTimeout(() => sendText(text), 100);
   });
 
@@ -230,10 +230,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       });
   }, []);
 
-  const [isOnline, setIsOnline] = useState(true); // başlangıçta online kabul et
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
-    // Capacitor Network plugin (Android WebView'da navigator.onLine güvenilmez)
     const initNetwork = async () => {
       try {
         const { Network } = await import('@capacitor/network');
@@ -242,7 +241,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         Network.addListener('networkStatusChange', (s) => setIsOnline(s.connected));
       } catch {
         logger.warn('ai', 'Capacitor Network algılanamadı, Web fallback kullanılıyor');
-        // Web fallback
         setIsOnline(navigator.onLine);
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
@@ -265,7 +263,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
       const userMsg = (text || input).trim();
       if (!userMsg || loading) return;
 
-      // Rate limit koruması: son istekten en az 3 saniye geçmeli
       const now = Date.now();
       const lastReq = parseInt(sessionStorage.getItem('ai_last_req') || '0');
       const elapsed = now - lastReq;
@@ -302,7 +299,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           return u;
         });
         if (autoSpeak) speak(reply);
-        // offline modda da action parse et
         const actions = parseActions(reply);
         if (actions.length > 0 && save) {
           if (!isAdminUser || !adminMode) {
@@ -325,7 +321,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         return;
       }
 
-      // Key'leri her seferinde cache'den al (kaydet sonrası invalidate edilir)
       const keys = await getKeys();
       keysRef.current = keys;
       const claudeKey = keys.claude;
@@ -343,7 +338,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         });
       };
 
-      // Yanıt tamamlandığında action bloklarını parse et
       const finalizeResponse = (msgIndex: number) => {
         setMessages((prev) => {
           const msg = prev[msgIndex];
@@ -369,11 +363,9 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
         });
       };
 
-      // Rate limit hata mesajı oluştur
       const rateLimitMsg = (api: string) =>
         `🚨 **${api} rate limit aşıldı** - çok fazla istek gönderildi.\n\nBirkaç dakika bekleyip tekrar deneyin. Bu sürede çevrimdışı mod aktif.`;
 
-      // Token tasarrufu: yalnizca son 10 mesaji API'ye gonder (bagiam sistem prompt'ta var)
       const apiMessages = newMessages.slice(-10);
 
       const tryApi = async (
@@ -483,12 +475,10 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     ],
   );
 
-  // Sesli girişten çağrılabilmesi için ayrı ref
   const sendText = useCallback(
     (text: string) => {
       if (!text.trim() || loading) return;
       setInput('');
-      // send fonksiyonunu text parametresiyle çağır
       send(text);
     },
     [send, loading],
@@ -501,7 +491,6 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     }
   };
 
-  // Anlık işletme özeti
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
@@ -514,6 +503,34 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
   const alacakToplam = db.cari
     .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
     .reduce((s, c) => s + c.balance, 0);
+
+  // Voice Agent Integration
+  const {
+    state: voiceState,
+    transcript: voiceTranscript,
+    response: voiceResponse,
+    toggleListening: toggleVoiceListening,
+  } = useVoiceAgent(async (text) => {
+    // Voice mode'da metni gönder ve AI'nın cevabını bekle
+    const keys = await getKeys();
+    const deepseekKey = keys.deepseek;
+    
+    if (modelSource === 'deepseek' && deepseekKey) {
+      const systemMsg = {
+        role: 'system' as const,
+        content: `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\n\n${context}`,
+      };
+      const userMsgs = [...messages, { role: 'user', content: text }]
+        .filter(m => m.content)
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+      
+      const result = await askDeepSeek([systemMsg, ...userMsgs], deepseekKey, () => {});
+      setMessages(prev => [...prev, { role: 'user', content: text }, { role: 'assistant', content: result, source: 'deepseek' }]);
+      return result;
+    }
+    
+    return offlineReply(db, text);
+  });
 
   return (
     <div
@@ -1264,7 +1281,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             boxShadow: loading || !input.trim() ? 'none' : '0 4px 16px rgba(99,102,241,0.4)',
             transition: 'all 0.2s',
           }}
-        >
+>
           {loading ? '⏳' : '↑'}
         </button>
       </div>
@@ -1326,7 +1343,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
           )}
 
         {micSupported && (
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginLeft: 'auto' }}>
+          <span style={{ color: 'var(--text-muted', fontSize: '0.7rem', marginLeft: 'auto' }}>
             🎤 Basılı tut → konuş → bırak
           </span>
         )}
@@ -1364,6 +1381,17 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
             </button>
           ))}
         </div>
+      )}
+
+      {/* Voice Agent UI Overlay */}
+      {isVoiceMode && (
+        <VoiceAgentUI 
+          state={voiceState}
+          transcript={voiceTranscript}
+          response={voiceResponse}
+          onToggleMic={toggleVoiceListening}
+          onClose={() => setIsVoiceMode(false)}
+        />
       )}
     </div>
   );

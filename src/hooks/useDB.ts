@@ -1,8 +1,8 @@
 // useDB.ts — re-exports from modularized db/ structure (direct imports, no barrel)
 // See src/hooks/db/ for the actual implementation
 
-export { useDB } from "./db/core";
-export type { SyncStatus, RestoreReport } from "./db/core";
+export { useDB } from "./db/index";
+export type { SyncStatus, RestoreReport } from "./db/index";
 export { onSyncStatus, getSyncStatus } from "./db/sync";
 export {
   saveBackupToFirebase,

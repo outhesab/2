@@ -285,6 +285,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                   ref={usernameRef}
                   className={`login-input${error ? ' error' : ''}`}
                   type="text"
+                  name="username"
                   value={username}
                   onChange={e => { setUsername(e.target.value); setError(''); }}
                   placeholder="Kullanıcı adı"
@@ -298,6 +299,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                 <input
                   className={`login-input${error ? ' error' : ''}`}
                   type={showPass ? 'text' : 'password'}
+                  name="password"
                   value={pass}
                   onChange={e => { setPass(e.target.value); setError(''); }}
                   onKeyDown={handleCapsLock}
