@@ -1,6 +1,6 @@
 import { Invoice } from '@/types';
 import { formatDate, formatMoney } from '@/lib/utils-tr';
-import { statusColors, statusLabels, paymentLabels, miniBtn } from '../FaturaHelpers.utils';
+import { statusColors, statusLabels, paymentLabels, miniBtn } from '@/pages/FaturaHelpers.utils';
 
 interface FaturaTableProps {
   invoices: Invoice[];
