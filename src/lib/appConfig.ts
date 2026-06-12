@@ -45,13 +45,6 @@ function defaultConfig(): AppConfig {
 
 // ── İkon Sistemi ───────────────────────────────────────────────────────────
 
-export type IconSource = 'emoji' | 'url' | 'lucide';
-
-export interface AppIcon {
-  type: IconSource;
-  value: string;  // emoji karakteri, URL veya lucide icon adı
-}
-
 /** Emoji kategorileri — IconPicker'da kullanılır */
 export const ICON_CATEGORIES: { label: string; icons: string[] }[] = [
   {
@@ -79,18 +72,6 @@ export const ICON_CATEGORIES: { label: string; icons: string[] }[] = [
     icons: ['⚡','🔌','💡','🖥️','💻','📡','🛰️','🔐','🔑','🗝️','🛡️','⚠️','✅','❌','🔄'],
   },
 ];
-
-/** Tüm emoji ikonları düz liste */
-export const ALL_EMOJIS = ICON_CATEGORIES.flatMap(c => c.icons);
-
-/** İkon render yardımcısı — emoji, URL veya lucide adını alır, string döndürür */
-export function resolveIcon(icon: string | AppIcon | undefined, fallback = '📦'): string {
-  if (!icon) return fallback;
-  if (typeof icon === 'string') return icon || fallback;
-  if (icon.type === 'emoji') return icon.value || fallback;
-  if (icon.type === 'url') return icon.value || fallback; // URL'ler <img> ile render edilmeli
-  return fallback;
-}
 
 /** Versiyon formatı doğrulama: "2.1.0", "2.1.0-beta", "3.0.0-rc1" */
 export function validateVersion(v: string): boolean {

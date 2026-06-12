@@ -13,12 +13,6 @@ export function formatMoney(n: number): string {
   return formatCurrency(n);
 }
 
-export function formatMoneyShort(n: number): string {
-  if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + 'M ₺';
-  if (Math.abs(n) >= 1_000) return (n / 1_000).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + 'K ₺';
-  return formatMoney(n);
-}
-
 export function formatDate(iso: string): string {
   if (!iso) return '-';
   try {
@@ -100,17 +94,4 @@ export function formatBankDate(date: Date): string {
   return `${d}.${m}.${y}`;
 }
 
-export function isUUID(v: string): boolean {
-  return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-}
 
-export function todayISO(): string {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  return now.toISOString().slice(0, 16);
-}
-
-export function dateOnly(iso: string): string {
-  if (!iso) return '';
-  return iso.slice(0, 10);
-}

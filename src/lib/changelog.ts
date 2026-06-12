@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.22.1',
+    date: '13 Haziran 2026',
+    title: 'Dead Code Temizliği (6.8)',
+    summary: 'Kullanılmayan exportlar, dosyalar ve importlar temizlendi. FormatMoneyShort, isUUID, todayISO, dateOnly gibi hiç kullanılmayan fonksiyonlar utils-tr.ts\'den kaldırıldı. version.ts ve appConfig.ts\'deki ölü exportlar temizlendi. excelmerge/not-found.tsx duplicate\'i silindi.',
+    changes: [
+      { type: 'kaldirildi', text: 'src/pages/excelmerge/not-found.tsx: duplicate 404 sayfası silindi (src/pages/not-found.tsx kullanılıyor).' },
+      { type: 'kaldirildi', text: 'src/lib/utils-tr.ts: formatMoneyShort, isUUID, todayISO, dateOnly — hiç import edilmeyen 4 fonksiyon kaldırıldı.' },
+      { type: 'kaldirildi', text: 'src/lib/version.ts: VERSION_DATE, getVersionDate, getDBVersion, getConfigVersion, validateVersionFormat, isVersionGte, getVersionInfo — kullanılmayan 8 export temizlendi.' },
+      { type: 'kaldirildi', text: 'src/lib/appConfig.ts: ALL_EMOJIS, resolveIcon, AppIcon, IconSource — kullanılmayan ikon sistemi exportları temizlendi.' },
+    ],
+  },
+  {
     version: '3.22.0',
     date: '12 Haziran 2026',
     title: 'CSS Module Migration — Dashboard, Fatura, Reports',
