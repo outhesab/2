@@ -1,0 +1,82 @@
+.statcard {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.bgIcon {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  font-size: 4rem;
+  opacity: 0.1;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.accentLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 1;
+}
+
+.icon {
+  position: relative;
+  z-index: 2;
+}
+
+.value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 8px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.trend.up {
+  color: var(--color-success);
+}
+
+.trend.down {
+  color: var(--color-danger);
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 2;
+}
+
+.sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  z-index: 2;
+}

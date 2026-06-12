@@ -38,6 +38,7 @@ import { KasaSayimWidget } from './Dashboard/KasaSayimWidget';
 import { YedekHatirlatmaWidget } from './Dashboard/YedekHatirlatmaWidget';
 import { Oneriler } from './Dashboard/Oneriler';
 import { LegendDot, QuickStat, FormulaItem } from './Dashboard/DashboardCommon';
+import styles from './Dashboard/Dashboard.module.css';
 
 export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
   const [prefs, setPrefs] = useState(loadDashboardPrefs);
@@ -611,13 +612,13 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
   const showSidePanel = contentWidth >= 1100;
 
   return (
-    <div className="dash-container">
+    <div className={styles['dash-container']}>
       <ScrollableCards cards={statCards} onTabChange={onTabChange} />
 
-      <div className="dash-header-row">
-        <div className="dash-badge-box">
-          <span className="dash-badge-label">VERSİYON</span>
-          <span className="dash-badge-value">
+      <div className={styles['dash-header-row']}>
+        <div className={styles['dash-badge-box']}>
+          <span className={styles['dash-badge-label']}>VERSİYON</span>
+          <span className={styles['dash-badge-value']}>
             {BRAND_NAME} v{getAppVersion()}
           </span>
           <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginLeft: 6 }}>
@@ -632,15 +633,15 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
             const pct = Math.min(100, (sizeMB / maxMB) * 100);
             const color = pct > 70 ? '#ef4444' : pct > 40 ? '#f59e0b' : '#10b981';
             return (
-              <div className="dash-storage-box" style={{ border: `1px solid ${color}30` }}>
-                <span className="dash-storage-label">DEPOLAMA</span>
-                <span className="dash-storage-value" style={{ color }}>
+              <div className={styles['dash-storage-box']} style={{ border: `1px solid ${color}30` }}>
+                <span className={styles['dash-storage-label']}>DEPOLAMA</span>
+                <span className={styles['dash-storage-value']} style={{ color }}>
                   {sizeMB.toFixed(2)} MB
                 </span>
-                <div className="dash-storage-bar">
-                  <div className="dash-storage-fill" style={{ width: `${pct}%`, background: color }} />
+                <div className={styles['dash-storage-bar']}>
+                  <div className={styles['dash-storage-fill']} style={{ width: `${pct}%`, background: color }} />
                 </div>
-                <span className="dash-storage-pct">%{pct.toFixed(0)}</span>
+                <span className={styles['dash-storage-pct']}>%{pct.toFixed(0)}</span>
               </div>
             );
           } catch {
@@ -652,7 +653,7 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
           onClick={openBackupPanel}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          className="dash-backup-btn"
+          className={styles['dash-backup-btn']}
         >
           💾 Yedek Yönetimi
         </motion.button>
@@ -718,35 +719,35 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
         </div>
       )}
 
-      <div className="dash-gunsonu-box">
-        <div className="dash-gunsonu-header">
-          <span className="dash-gunsonu-icon">⚖️</span>
-          <span className="dash-gunsonu-title">Gün Sonu Dengesi</span>
-          <span className="dash-gunsonu-hint">Kasa + Banka + Alacak − Borç = Net Sermaye</span>
+      <div className={styles['dash-gunsonu-box']}>
+        <div className={styles['dash-gunsonu-header']}>
+          <span className={styles['dash-gunsonu-icon']}>⚖️</span>
+          <span className={styles['dash-gunsonu-title']}>Gün Sonu Dengesi</span>
+          <span className={styles['dash-gunsonu-hint']}>Kasa + Banka + Alacak − Borç = Net Sermaye</span>
         </div>
-        <div className="dash-gunsonu-row">
+        <div className={styles['dash-gunsonu-row']}>
           <FormulaItem label="Nakit Kasa" value={stats.nakit} color="#06b6d4" />
-          <span className="dash-gunsonu-op">+</span>
+          <span className={styles['dash-gunsonu-op']}>+</span>
           <FormulaItem label="Banka" value={stats.banka} color="#6366f1" />
-          <span className="dash-gunsonu-op">+</span>
+          <span className={styles['dash-gunsonu-op']}>+</span>
           <FormulaItem label="Müşteri Alacağı" value={stats.totalReceivable} color="#10b981" />
-          <span className="dash-gunsonu-op" style={{ color: 'var(--color-danger)' }}>
+          <span className={styles['dash-gunsonu-op']} style={{ color: 'var(--color-danger)' }}>
             −
           </span>
           <FormulaItem label="Tedarikçi Borcu" value={stats.totalPayable} color="#ef4444" />
-          <span className="dash-gunsonu-op">=</span>
+          <span className={styles['dash-gunsonu-op']}>=</span>
           <motion.div
             whileHover={{ scale: 1.04, y: -2 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="dash-gunsonu-result"
+            className={styles['dash-gunsonu-result']}
             style={{
               background: stats.netSermaye >= 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
               border: `1px solid ${stats.netSermaye >= 0 ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}`,
             }}
           >
-            <div className="dash-gunsonu-result-label">Net Sermaye</div>
+            <div className={styles['dash-gunsonu-result-label']}>Net Sermaye</div>
             <div
-              className="dash-gunsonu-result-value"
+              className={styles['dash-gunsonu-result-value']}
               style={{ color: stats.netSermaye >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}
             >
               {formatMoney(stats.netSermaye)}
@@ -755,8 +756,8 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
         </div>
       </div>
 
-      <div className={`dash-grid ${showSidePanel ? 'side-panel' : 'no-side'}`}>
-        <div className="dash-left-col">
+      <div className={`${styles['dash-grid']} ${showSidePanel ? styles['side-panel'] : styles['no-side']}`}>
+        <div className={styles['dash-left-col']}>
           <AnimatePresence mode="popLayout">
             {prefs.leftWidgets.map((id, idx) => {
               const widget = renderWidget(id);
@@ -788,22 +789,22 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
         </div>
 
         <motion.div
-          className="dash-side-col"
+          className={styles['dash-side-col']}
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
         >
           <motion.div
             variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0 } }}
-            className="dash-side-card"
+            className={styles['dash-side-card']}
           >
-            <div className="dash-side-card-header">
-              <span className="dash-side-card-icon">🧩</span>
-              <span className="dash-side-card-title">Özet düzeni</span>
+            <div className={styles['dash-side-card-header']}>
+              <span className={styles['dash-side-card-icon']}>🧩</span>
+              <span className={styles['dash-side-card-title']}>Özet düzeni</span>
             </div>
-            <div className="dash-widget-item inactive">
-              <span className="dash-widget-item-icon">⚙️</span>
-              <span className="dash-widget-item-label inactive">
+            <div className={styles['dash-widget-item']} className={`${styles['dash-widget-item']} ${styles['inactive']}`}>
+              <span className={styles['dash-widget-item-icon']}>⚙️</span>
+              <span className={styles['dash-widget-item-label']} className={`${styles['dash-widget-item-label']} ${styles['inactive']}`}>
                 Widget yönetimi ve parlaklık kontrolleri Ayarlar &gt; Düzenleme Modu alanına taşındı.
               </span>
             </div>
@@ -811,13 +812,13 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
 
           <motion.div
             variants={{ hidden: { opacity: 0, x: 20 }, visible: { opacity: 1, x: 0 } }}
-            className="dash-side-card"
+            className={styles['dash-side-card']}
           >
-            <div className="dash-side-card-header">
-              <span className="dash-side-card-icon">⚡</span>
-              <span className="dash-side-card-title">Hızlı İşlemler</span>
+            <div className={styles['dash-side-card-header']}>
+              <span className={styles['dash-side-card-icon']}>⚡</span>
+              <span className={styles['dash-side-card-title']}>Hızlı İşlemler</span>
             </div>
-            <div className="dash-quick-grid">
+            <div className={styles['dash-quick-grid']}>
               {[
                 { label: 'Yeni Satış', icon: '🛒', tab: 'sales', color: '#10b981' },
                 { label: 'Ürün Ekle', icon: '📦', tab: 'products', color: '#3b82f6' },
@@ -831,12 +832,12 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
                   whileHover={{ scale: 1.02, background: `${q.color}18` }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="dash-quick-btn"
+                  className={styles['dash-quick-btn']}
                   style={{ background: `${q.color}08`, border: `1px solid ${q.color}18`, color: q.color }}
                 >
-                  <span className="dash-quick-btn-icon">{q.icon}</span>
+                  <span className={styles['dash-quick-btn-icon']}>{q.icon}</span>
                   {q.label}
-                  <motion.span className="dash-quick-btn-arrow" whileHover={{ x: 3, opacity: 1 }}>
+                  <motion.span className={styles['dash-quick-btn-arrow']} whileHover={{ x: 3, opacity: 1 }}>
                     →
                   </motion.span>
                 </motion.button>

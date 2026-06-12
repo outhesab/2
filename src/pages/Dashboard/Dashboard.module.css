@@ -1,0 +1,263 @@
+.dash-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dash-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.dash-badge-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-elevated);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.dash-badge-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dash-badge-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dash-storage-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.dash-storage-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.dash-storage-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.dash-storage-bar {
+  width: 60px;
+  height: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dash-storage-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.dash-storage-pct {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.dash-backup-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.dash-backup-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--text-muted);
+}
+
+.dash-gunsonu-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dash-gunsonu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dash-gunsonu-icon {
+  font-size: 1.2rem;
+}
+
+.dash-gunsonu-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dash-gunsonu-hint {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.dash-gunsonu-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dash-gunsonu-op {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.dash-gunsonu-result {
+  padding: 12px 24px;
+  border-radius: 16px;
+  text-align: center;
+  min-width: 160px;
+}
+
+.dash-gunsonu-result-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.dash-gunsonu-result-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.dash-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.dash-grid.side-panel {
+  grid-template-columns: 1fr 320px;
+}
+
+.dash-grid.no-side {
+  grid-template-columns: 1fr;
+}
+
+.dash-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dash-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dash-side-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.dash-side-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dash-side-card-icon {
+  font-size: 1.2rem;
+}
+
+.dash-side-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dash-widget-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.dash-widget-item.inactive {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.dash-widget-item-icon {
+  font-size: 1rem;
+}
+
+.dash-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.dash-quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.dash-quick-btn-icon {
+  margin-right: 10px;
+  font-size: 1.1rem;
+}
+
+.dash-quick-btn-arrow {
+  opacity: 0;
+  transition: all 0.2s ease;
+}
