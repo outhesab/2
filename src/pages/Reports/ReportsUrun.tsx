@@ -4,6 +4,7 @@ import { formatMoney } from '@/lib/utils-tr';
 import { KpiCard, SectionBox, EmptyChart } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import uStyles from './ReportsUrun.module.css';
 
 export function ReportsUrun({ db, start, end }: ReportProps) {
   const [sortBy, setSortBy] = useState<'ciro' | 'kar' | 'adet' | 'marj'>('ciro');
@@ -81,13 +82,7 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))',
-          gap: 12,
-        }}
-      >
+      <div className={styles.gridAuto130}>
         <KpiCard icon="📦" label="Toplam Ürün" value={String(stokDurum.toplam)} color="#06b6d4" />
         <KpiCard icon="✅" label="Normal Stok" value={String(stokDurum.normal)} color="#10b981" />
         <KpiCard icon="⚠️" label="Az Stok" value={String(stokDurum.az)} color="#f59e0b" />
@@ -98,7 +93,7 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
       <SectionBox
         title="🏆 Ürün Performansı"
         action={
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <div className={uStyles.filterRow}>
             {(['ciro', 'kar', 'adet', 'marj'] as const).map((s) => (
               <button
                 key={s}
@@ -117,35 +112,11 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
                 {s === 'ciro' ? 'Ciro' : s === 'kar' ? 'Kâr' : s === 'adet' ? 'Adet' : 'Marj'}
               </button>
             ))}
-            <button
-              onClick={handleExport}
-              style={{
-                background: 'rgba(16,185,129,0.12)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: 6,
-                color: '#10b981',
-                padding: '4px 10px',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-              }}
-            >
-              📥
-            </button>
+            <button onClick={handleExport} className={uStyles.btnSort}>📥</button>
           </div>
         }
       >
-        <div
-          style={{
-            marginBottom: 10,
-            padding: '7px 10px',
-            background: 'rgba(245,158,11,0.07)',
-            border: '1px solid rgba(245,158,11,0.2)',
-            borderRadius: 8,
-            fontSize: '0.75rem',
-            color: '#f59e0b',
-          }}
-        >
+        <div className={uStyles.infoBanner}>
           ℹ️ Kâr ve marj değerleri satış anındaki maliyete göre hesaplanır. Ürün maliyeti sonradan değiştirilirse geçmiş
           satışlar etkilenmez.
         </div>
@@ -153,25 +124,14 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
           <EmptyChart />
         ) : (
           <div className={styles.overflowAuto}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.83rem',
-              }}
-            >
+            <table className={styles.tableBase}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
+                <tr className={styles.trBold}>
                   {['#', 'Ürün', 'Ciro', 'Kâr', 'Marj', 'Adet', 'Stok'].map((h) => (
                     <th
                       key={h}
-                      style={{
-                        padding: '7px 10px',
-                        color: '#475569',
-                        fontWeight: 600,
-                        textAlign: h === 'Ürün' || h === '#' ? 'left' : 'right',
-                        whiteSpace: 'nowrap',
-                      }}
+                      className={uStyles.productTh}
+                      style={{ textAlign: h === 'Ürün' || h === '#' ? 'left' : 'right' }}
                     >
                       {h}
                     </th>
@@ -182,45 +142,11 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
                 {productStats.slice(0, 30).map((p, i) => {
                   const marj = p.ciro ? (p.kar / p.ciro) * 100 : 0;
                   return (
-                    <tr
-                      key={i}
-                      style={{
-                        borderBottom: '1px solid rgba(255,255,255,0.03)',
-                      }}
-                    >
-                      <td style={{ padding: '8px 10px', color: '#475569' }}>{i + 1}</td>
-                      <td
-                        style={{
-                          padding: '8px 10px',
-                          color: 'var(--text-primary)',
-                          fontWeight: 500,
-                          maxWidth: 200,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {p.name}
-                      </td>
-                      <td
-                        style={{
-                          padding: '8px 10px',
-                          color: '#10b981',
-                          fontWeight: 700,
-                          textAlign: 'right',
-                        }}
-                      >
-                        {formatMoney(p.ciro)}
-                      </td>
-                      <td
-                        style={{
-                          padding: '8px 10px',
-                          color: '#3b82f6',
-                          textAlign: 'right',
-                        }}
-                      >
-                        {formatMoney(p.kar)}
-                      </td>
+                    <tr key={i}>
+                      <td className={uStyles.productTdIndex}>{i + 1}</td>
+                      <td className={uStyles.productTdName}>{p.name}</td>
+                      <td className={uStyles.productTdCiro}>{formatMoney(p.ciro)}</td>
+                      <td className={uStyles.productTdKar}>{formatMoney(p.kar)}</td>
                       <td
                         style={{
                           padding: '8px 10px',
@@ -231,16 +157,8 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
                       >
                         %{marj.toFixed(1)}
                       </td>
-                      <td
-                        style={{
-                          padding: '8px 10px',
-                          color: 'var(--text-dim)',
-                          textAlign: 'right',
-                        }}
-                      >
-                        {p.adet}
-                      </td>
-                      <td style={{ padding: '8px 10px', textAlign: 'right' }}>
+                      <td className={uStyles.productTdAdet}>{p.adet}</td>
+                      <td className={uStyles.productTdStok}>
                         <span
                           style={{
                             color: p.stock === 0 ? '#ef4444' : p.stock <= 5 ? '#f59e0b' : '#10b981',

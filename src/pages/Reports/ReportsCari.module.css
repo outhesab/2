@@ -1,0 +1,35 @@
+.searchInput {
+  padding: 5px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 7px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  width: 120px;
+}
+.actionRow {
+  display: flex;
+  gap: 8px;
+}
+.cariTh {
+  padding: 7px 10px;
+  color: #475569;
+  font-weight: 600;
+}
+.cariTd {
+  padding: 8px 10px;
+}
+.cariTdName {
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.cariTdBalance {
+  padding: 8px 10px;
+  text-align: right;
+  font-weight: 700;
+}
+.cariTdPhone {
+  padding: 8px 10px;
+  color: var(--text-muted);
+}

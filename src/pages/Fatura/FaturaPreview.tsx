@@ -5,6 +5,7 @@ import { TotalRow } from '@/pages/FaturaHelpers';
 import { createInstallmentPlan, statusColors, statusLabels, lbl, inp } from '@/pages/FaturaHelpers.utils';
 import DOMPurify from 'dompurify';
 import { useState } from 'react';
+import styles from './FaturaPreview.module.css';
 
 interface FaturaPreviewProps {
   db: DB;
@@ -80,48 +81,16 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
 
   return (
     <Modal open={true} onClose={onClose} title={`📄 Fatura: ${previewInv.invoiceNo}`} maxWidth={640}>
-      <div
-        style={{
-          background: 'rgba(0,0,0,0.2)',
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: 18,
-            paddingBottom: 14,
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
+      <div className={styles.previewCard}>
+        <div className={styles.previewHeader}>
           <div>
-            <h3
-              style={{
-                color: 'var(--text-primary)',
-                fontWeight: 800,
-                fontSize: '1rem',
-                marginBottom: 4,
-              }}
-            >
-              {db.company.name || 'Şirketiniz'}
-            </h3>
-            {db.company.taxNo && <p style={{ color: '#475569', fontSize: '0.82rem' }}>VKN: {db.company.taxNo}</p>}
-            {db.company.phone && <p style={{ color: '#475569', fontSize: '0.82rem' }}>📞 {db.company.phone}</p>}
+            <h3 className={styles.companyName}>{db.company.name || 'Şirketiniz'}</h3>
+            {db.company.taxNo && <p className={styles.infoText}>VKN: {db.company.taxNo}</p>}
+            {db.company.phone && <p className={styles.infoText}>📞 {db.company.phone}</p>}
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <p
-              style={{
-                fontFamily: 'monospace',
-                color: '#ff7043',
-                fontWeight: 800,
-                fontSize: '1rem',
-              }}
-            >
-              {previewInv.invoiceNo}
-            </p>
-            <p style={{ color: '#475569', fontSize: '0.82rem' }}>{formatDate(previewInv.createdAt)}</p>
+          <div className={styles.rightAlign}>
+            <p className={styles.invoiceNo}>{previewInv.invoiceNo}</p>
+            <p className={styles.infoText}>{formatDate(previewInv.createdAt)}</p>
             <span
               style={{
                 background: `${statusColors[previewInv.status]}18`,
@@ -136,133 +105,43 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
             </span>
           </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <p
-            style={{
-              color: '#334155',
-              fontSize: '0.72rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: 4,
-            }}
-          >
-            {previewInv.type === 'satis' ? 'MÜŞTERİ' : 'TEDARİKÇİ'}
-          </p>
-          <p style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{previewInv.cariName}</p>
-          {previewInv.cariTaxNo && <p style={{ color: '#475569', fontSize: '0.82rem' }}>VKN: {previewInv.cariTaxNo}</p>}
-          {previewInv.cariAddress && <p style={{ color: '#475569', fontSize: '0.82rem' }}>{previewInv.cariAddress}</p>}
+        <div className={styles.customerSection}>
+          <p className={styles.customerLabel}>{previewInv.type === 'satis' ? 'MÜŞTERİ' : 'TEDARİKÇİ'}</p>
+          <p className={styles.customerName}>{previewInv.cariName}</p>
+          {previewInv.cariTaxNo && <p className={styles.infoText}>VKN: {previewInv.cariTaxNo}</p>}
+          {previewInv.cariAddress && <p className={styles.infoText}>{previewInv.cariAddress}</p>}
         </div>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginBottom: 14,
-          }}
-        >
+        <table className={styles.itemsTable}>
           <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <tr className={styles.itemsTheadRow}>
               {['Açıklama', 'Adet', 'Birim', 'KDV', 'Toplam'].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: '8px 10px',
-                    textAlign: 'left',
-                    color: '#334155',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  {h}
-                </th>
+                <th key={h} className={styles.itemsTh}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {previewInv.items.map((it, i) => (
-              <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                <td
-                  style={{
-                    padding: '8px 10px',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.88rem',
-                  }}
-                >
-                  {it.description}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 10px',
-                    color: 'var(--text-dim)',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  {it.quantity}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 10px',
-                    color: 'var(--text-dim)',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  {formatMoney(it.unitPrice)}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 10px',
-                    color: 'var(--text-dim)',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  %{it.vatRate}
-                </td>
-                <td
-                  style={{
-                    padding: '8px 10px',
-                    color: '#10b981',
-                    fontWeight: 700,
-                    fontSize: '0.88rem',
-                  }}
-                >
-                  {formatMoney(it.total)}
-                </td>
+              <tr key={i} className={styles.itemsTbodyRow}>
+                <td className={`${styles.itemsTd} ${styles.descCell}`}>{it.description}</td>
+                <td className={`${styles.itemsTd} ${styles.dimCell}`}>{it.quantity}</td>
+                <td className={`${styles.itemsTd} ${styles.dimCell}`}>{formatMoney(it.unitPrice)}</td>
+                <td className={`${styles.itemsTd} ${styles.dimCell}`}>%{it.vatRate}</td>
+                <td className={`${styles.itemsTd} ${styles.totalCell}`}>{formatMoney(it.total)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            paddingTop: 12,
-          }}
-        >
+        <div className={styles.totalsSection}>
           <TotalRow label="Ara Toplam" value={formatMoney(previewInv.subtotal)} />
           <TotalRow label="KDV" value={formatMoney(previewInv.vatTotal)} color="#3b82f6" />
           {previewInv.discount > 0 && (
             <TotalRow label="İskonto" value={`-${formatMoney(previewInv.discount)}`} color="#ef4444" />
           )}
-          <div
-            style={{
-              borderTop: '1px solid rgba(255,255,255,0.08)',
-              paddingTop: 8,
-              marginTop: 6,
-            }}
-          >
+          <div className={styles.totalsDivider}>
             <TotalRow label="GENEL TOPLAM" value={formatMoney(previewInv.total)} color="#10b981" big />
           </div>
         </div>
-        {previewInv.note && (
-          <p
-            style={{
-              color: '#475569',
-              fontSize: '0.82rem',
-              marginTop: 12,
-              fontStyle: 'italic',
-            }}
-          >
-            Not: {previewInv.note}
-          </p>
-        )}
+        {previewInv.note && <p className={styles.noteText}>Not: {previewInv.note}</p>}
       </div>
 
       {/* Taksit Planı Bölümü */}
@@ -271,44 +150,13 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         return (
-          <div
-            style={{
-              marginTop: 16,
-              background: 'rgba(0,0,0,0.15)',
-              borderRadius: 12,
-              padding: 16,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}
-            >
-              <span
-                style={{
-                  color: 'var(--text-dim)',
-                  fontWeight: 700,
-                  fontSize: '0.88rem',
-                }}
-              >
-                📅 Taksit Planı
-              </span>
+          <div className={styles.installmentSection}>
+            <div className={styles.installmentHeader}>
+              <span className={styles.installmentTitle}>📅 Taksit Planı</span>
               {installments.length === 0 && (
                 <button
                   onClick={() => setShowInstForm((v) => !v)}
-                  style={{
-                    background: 'rgba(139,92,246,0.15)',
-                    border: '1px solid rgba(139,92,246,0.3)',
-                    borderRadius: 8,
-                    color: '#a78bfa',
-                    padding: '5px 12px',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                  }}
+                  className={styles.createPlanBtn}
                 >
                   📅 Taksit Planı Oluştur
                 </button>
@@ -316,23 +164,8 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
             </div>
 
             {showInstForm && installments.length === 0 && (
-              <div
-                style={{
-                  background: 'rgba(0,0,0,0.2)',
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 12,
-                  display: 'grid',
-                  gap: 10,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 10,
-                  }}
-                >
+              <div className={styles.instForm}>
+                <div className={styles.instFormGrid}>
                   <div>
                     <label style={lbl}>Taksit Sayısı (2-24)</label>
                     <input
@@ -364,34 +197,16 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                     />
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div className={styles.formActions}>
                   <button
                     onClick={() => createInstallments(previewInv.id, previewInv.total)}
-                    style={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                      border: 'none',
-                      borderRadius: 8,
-                      color: '#fff',
-                      padding: '9px 0',
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                      fontSize: '0.85rem',
-                    }}
+                    className={styles.instCreateBtn}
                   >
                     ✅ Oluştur
                   </button>
                   <button
                     onClick={() => setShowInstForm(false)}
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 8,
-                      color: 'var(--text-muted)',
-                      padding: '9px 14px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                    }}
+                    className={styles.instCancelBtn}
                   >
                     İptal
                   </button>
@@ -400,22 +215,11 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
             )}
 
             {installments.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table className={styles.instTable}>
                 <thead>
-                  <tr style={{ background: 'rgba(0,0,0,0.2)' }}>
+                  <tr className={styles.instThead}>
                     {['#', 'Vade', 'Tutar', 'Durum', ''].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: '7px 10px',
-                          textAlign: 'left',
-                          color: '#334155',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {h}
-                      </th>
+                      <th key={h} className={styles.instTh}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -448,62 +252,15 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                           background: rowBg,
                         }}
                       >
-                        <td
-                          style={{
-                            padding: '8px 10px',
-                            color: 'var(--text-muted)',
-                            fontSize: '0.82rem',
-                          }}
-                        >
-                          {idx + 1}
+                        <td className={styles.instTdMuted}>{idx + 1}</td>
+                        <td className={styles.instTdPrimary}>{formatDate(inst.dueDate)}</td>
+                        <td className={styles.instTdGreen}>{formatMoney(inst.amount)}</td>
+                        <td className={styles.instTd}>
+                          <span style={{ color: statusColor, fontSize: '0.78rem', fontWeight: 700 }}>{statusLabel}</span>
                         </td>
-                        <td
-                          style={{
-                            padding: '8px 10px',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.82rem',
-                          }}
-                        >
-                          {formatDate(inst.dueDate)}
-                        </td>
-                        <td
-                          style={{
-                            padding: '8px 10px',
-                            color: '#10b981',
-                            fontWeight: 700,
-                            fontSize: '0.85rem',
-                          }}
-                        >
-                          {formatMoney(inst.amount)}
-                        </td>
-                        <td style={{ padding: '8px 10px' }}>
-                          <span
-                            style={{
-                              color: statusColor,
-                              fontSize: '0.78rem',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {statusLabel}
-                          </span>
-                        </td>
-                        <td style={{ padding: '8px 10px' }}>
+                        <td className={styles.instTd}>
                           {!inst.paid && (
-                            <button
-                              onClick={() => payInstallment(inst.id)}
-                              style={{
-                                background: 'rgba(16,185,129,0.15)',
-                                border: '1px solid rgba(16,185,129,0.3)',
-                                borderRadius: 6,
-                                color: '#10b981',
-                                padding: '3px 10px',
-                                cursor: 'pointer',
-                                fontWeight: 700,
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              ✅ Ödendi
-                            </button>
+                            <button onClick={() => payInstallment(inst.id)} className={styles.payBtn}>✅ Ödendi</button>
                           )}
                         </td>
                       </tr>
@@ -512,39 +269,18 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                 </tbody>
               </table>
             ) : (
-              !showInstForm && (
-                <p
-                  style={{
-                    color: '#334155',
-                    fontSize: '0.82rem',
-                    textAlign: 'center',
-                    padding: '10px 0',
-                  }}
-                >
-                  Henüz taksit planı yok
-                </p>
-              )
+              !showInstForm && <p className={styles.noInstText}>Henüz taksit planı yok</p>
             )}
           </div>
         );
       })()}
 
-      <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+      <div className={styles.actionRow}>
         <button
           onClick={() => {
             window.print();
           }}
-          style={{
-            flex: 1,
-            padding: '11px 0',
-            background: 'rgba(59,130,246,0.12)',
-            border: '1px solid rgba(59,130,246,0.25)',
-            borderRadius: 10,
-            color: '#60a5fa',
-            cursor: 'pointer',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-          }}
+          className={styles.printBtn}
         >
           🖨️ Yazdır
         </button>
@@ -567,17 +303,7 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
             w.document.close();
             w.print();
           }}
-          style={{
-            flex: 1,
-            padding: '11px 0',
-            background: 'rgba(16,185,129,0.12)',
-            border: '1px solid rgba(16,185,129,0.25)',
-            borderRadius: 10,
-            color: '#10b981',
-            cursor: 'pointer',
-            fontWeight: 700,
-            fontSize: '0.9rem',
-          }}
+          className={styles.pdfBtn}
         >
           📄 PDF İndir
         </button>

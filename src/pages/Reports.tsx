@@ -8,6 +8,7 @@ import { ReportsGenerator } from './Reports/ReportsGenerator';
 import { periodDates } from './Reports/ReportsUtils';
 import type { DB } from '@/types';
 import { Tab, Period } from './Reports/types';
+import styles from './Reports/Reports.module.css';
 
 interface Props {
   db: DB;
@@ -40,18 +41,7 @@ export default function Reports({ db }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Toolbar */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 10,
-          alignItems: 'center',
-          background: '#0d1b2e',
-          borderRadius: 12,
-          padding: '10px 14px',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
+      <div className={styles.toolbar}>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {periods.map((p) => (
             <button
@@ -78,48 +68,24 @@ export default function Reports({ db }: Props) {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8,
-                color: 'var(--text-primary)',
-                fontSize: '0.82rem',
-              }}
+              className={styles.dateInput}
             />
-            <span style={{ color: '#334155' }}>—</span>
+            <span className={styles.dateSep}>—</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              style={{
-                padding: '6px 10px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8,
-                color: 'var(--text-primary)',
-                fontSize: '0.82rem',
-              }}
+              className={styles.dateInput}
             />
           </div>
         )}
-        <div style={{ color: '#1e3a5f', fontSize: '0.75rem', marginLeft: 'auto' }}>
+        <div className={styles.dateDisplay}>
           {start.toLocaleDateString('tr-TR')} – {end.toLocaleDateString('tr-TR')}
         </div>
       </div>
 
       {/* Tab bar */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 4,
-          background: '#0d1b2e',
-          borderRadius: 12,
-          padding: 6,
-          border: '1px solid rgba(255,255,255,0.06)',
-          overflowX: 'auto',
-        }}
-      >
+      <div className={styles.tabBar}>
         {tabs.map((t) => (
           <button
             key={t.id}

@@ -1,0 +1,20 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.statIcon {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  color: #475569;
+  font-size: 0.72rem;
+  margin-top: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

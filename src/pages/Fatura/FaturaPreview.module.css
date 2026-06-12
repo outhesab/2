@@ -1,0 +1,274 @@
+.previewCard {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.companyName {
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.infoText {
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.rightAlign {
+  text-align: right;
+}
+
+.invoiceNo {
+  font-family: monospace;
+  color: #ff7043;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.customerSection {
+  margin-bottom: 16px;
+}
+
+.customerLabel {
+  color: #334155;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.customerName {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+}
+
+.itemsTheadRow {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.itemsTh {
+  padding: 8px 10px;
+  text-align: left;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.itemsTbodyRow {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.itemsTd {
+  padding: 8px 10px;
+}
+
+.descCell {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.dimCell {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.totalCell {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.totalsSection {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+.totalsDivider {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+.noteText {
+  color: #475569;
+  font-size: 0.82rem;
+  margin-top: 12px;
+  font-style: italic;
+}
+
+.installmentSection {
+  margin-top: 16px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.installmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.installmentTitle {
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.createPlanBtn {
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 8px;
+  color: #a78bfa;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.instForm {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.instFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.instCreateBtn {
+  flex: 1;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding: 9px 0;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.instCancelBtn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--text-muted);
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.instTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.instThead {
+  background: rgba(0,0,0,0.2);
+}
+
+.instTh {
+  padding: 7px 10px;
+  text-align: left;
+  color: #334155;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.instTd {
+  padding: 8px 10px;
+}
+
+.instTdMuted {
+  padding: 8px 10px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.instTdPrimary {
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.instTdGreen {
+  padding: 8px 10px;
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.payBtn {
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 6px;
+  color: #10b981;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.noInstText {
+  color: #334155;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.printBtn {
+  flex: 1;
+  padding: 11px 0;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 10px;
+  color: #60a5fa;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pdfBtn {
+  flex: 1;
+  padding: 11px 0;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 10px;
+  color: #10b981;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+}

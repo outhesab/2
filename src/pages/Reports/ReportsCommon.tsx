@@ -1,4 +1,5 @@
 import React from 'react';
+import ecss from './ReportsCommon.module.css';
 
 export const COLORS = ['#ff5722', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 export const TT_STYLE = {
@@ -17,19 +18,9 @@ export const CARD = {
 
 export function EmptyChart() {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 160,
-        color: '#334155',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-    >
-      <span style={{ fontSize: '2rem', opacity: 0.3 }}>📊</span>
-      <span style={{ fontSize: '0.82rem' }}>Veri yok</span>
+    <div className={ecss.emptyChart}>
+      <span className={ecss.emptyIcon}>📊</span>
+      <span className={ecss.emptyText}>Veri yok</span>
     </div>
   );
 }
@@ -97,30 +88,9 @@ export function SectionBox({
   action?: React.ReactNode;
 }) {
   return (
-    <div
-      style={{
-        background: '#111e33',
-        borderRadius: 14,
-        padding: 20,
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 16,
-        }}
-      >
-        <h3
-          style={{
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            fontSize: '0.95rem',
-            margin: 0,
-          }}
-        >
+    <div className={ecss.sectionBox}>
+      <div className={ecss.sectionHeader}>
+        <h3 className={ecss.sectionTitle}>
           {title}
         </h3>
         {action}

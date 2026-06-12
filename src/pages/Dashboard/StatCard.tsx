@@ -26,10 +26,7 @@ export function StatCard({
       className={`${styles.statcard} ${onClick ? styles.clickable : ''}`}
       style={{
         background: `linear-gradient(135deg, ${gradient})`,
-        border: '1px solid var(--glass-border, rgba(255,255,255,0.06))',
         boxShadow: `0 2px 8px ${color}10, var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))`,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
       }}
     >
       <div className={styles.bgIcon}>{icon}</div>

@@ -3,6 +3,7 @@ import { exportArrayToExcel as exportToExcel } from '@/lib/excelExport';
 import { formatDate } from '@/lib/utils-tr';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import gStyles from './ReportsGenerator.module.css';
 
 export function ReportsGenerator({ db, start, end }: ReportProps) {
   const [modules, setModules] = useState<Record<string, boolean>>({
@@ -81,18 +82,11 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          padding: 20,
-          borderRadius: 14,
-          border: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
-        <h3 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', marginBottom: 16 }}>
+      <div className={gStyles.card}>
+        <h3 className={gStyles.cardTitle}>
           Custom Report Generator
         </h3>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div className={gStyles.checkboxGroup}>
           {Object.entries(modules).map(([key, val]) => (
             <label
               key={key}
@@ -113,122 +107,56 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
                 type="checkbox"
                 checked={val}
                 onChange={(e) => setModules({ ...modules, [key]: e.target.checked })}
-                style={{ accentColor: '#ff5722' }}
+                className={gStyles.checkboxInput}
               />
               {key === 'stok' ? 'Stok' : key === 'cari' ? 'Cari' : key === 'kasa' ? 'Kasa' : 'Satış'}
             </label>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            onClick={generate}
-            style={{
-              background: '#ff5722',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              padding: '8px 20px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-            }}
-          >
+        <div className={gStyles.btnRow}>
+          <button onClick={generate} className={gStyles.btnGenerate}>
             Generate
           </button>
-          <button
-            onClick={downloadAll}
-            disabled={!generated}
-            style={{
-              background: 'rgba(16,185,129,0.12)',
-              border: '1px solid rgba(16,185,129,0.25)',
-              borderRadius: 8,
-              color: '#10b981',
-              padding: '8px 20px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-            }}
-          >
+          <button onClick={downloadAll} disabled={!generated} className={gStyles.btnDownloadAll}>
             Download All
           </button>
         </div>
       </div>
 
       {generated && (
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className={gStyles.generatedContainer}>
           {generated.map((rep, i) => (
-            <div
-              key={i}
-              style={{
-                background: '#111e33',
-                borderRadius: 14,
-                padding: 16,
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{rep.label}</span>
+            <div key={i} className={gStyles.resultCard}>
+              <div className={gStyles.resultHeader}>
+                <span className={gStyles.resultLabel}>{rep.label}</span>
                 <button
                   onClick={() => exportToExcel(rep.data, rep.label.toLowerCase().replace(' ', '_'))}
-                  style={{
-                    background: 'rgba(16,185,129,0.12)',
-                    border: '1px solid rgba(16,185,129,0.25)',
-                    borderRadius: 6,
-                    color: '#10b981',
-                    padding: '4px 8px',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                  }}
+                  className={gStyles.btnExportSmall}
                 >
                   📥
                 </button>
               </div>
               <div className={styles.overflowAuto}>
-                <table
-                  style={{
-                    width: '100%',
-                    borderCollapse: 'collapse',
-                    fontSize: '0.8rem',
-                  }}
-                >
+                <table className={gStyles.reportTable}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
                       {Object.keys(rep.data[0] || {}).map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: '6px 10px',
-                            color: '#475569',
-                            fontWeight: 600,
-                            textAlign: 'left',
-                          }}
-                        >
-                          {h}
-                        </th>
+                        <th key={h} className={gStyles.reportTh}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {rep.data.slice(0, 10).map((row, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <tr key={i} className={gStyles.reportTrBody}>
                         {Object.values(row).map((v, j) => (
-                          <td key={j} style={{ padding: '6px 10px', color: 'var(--text-dim)' }}>
-                            {v}
-                          </td>
+                          <td key={j} className={gStyles.reportTd}>{v}</td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {rep.data.length > 10 && (
-                  <div style={{ textAlign: 'center', padding: '8px', fontSize: '0.7rem', color: '#64748b' }}>
+                  <div className={gStyles.showingRow}>
                     Showing first 10 rows. Export for full data.
                   </div>
                 )}

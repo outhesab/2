@@ -4,6 +4,8 @@ import { formatMoney } from '@/lib/utils-tr';
 import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import rStyles from './Reports.module.css';
+import cStyles from './ReportsCari.module.css';
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts';
 
 export function ReportsCari({ db }: ReportProps) {
@@ -63,13 +65,7 @@ export function ReportsCari({ db }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
-          gap: 12,
-        }}
-      >
+      <div className={styles.gridAuto}>
         <KpiCard
           icon="📥"
           label="Toplam Alacak"
@@ -92,7 +88,7 @@ export function ReportsCari({ db }: ReportProps) {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className={rStyles.twoColGrid}>
         <SectionBox title="📊 Alacak Yaşlandırma (Müşteri)">
           {agingData.every((d) => d.value === 0) ? (
             <EmptyChart />
@@ -151,20 +147,12 @@ export function ReportsCari({ db }: ReportProps) {
       <SectionBox
         title="👥 Cari Listesi"
         action={
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className={cStyles.actionRow}>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Ara..."
-              style={{
-                padding: '5px 10px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 7,
-                color: 'var(--text-primary)',
-                fontSize: '0.8rem',
-                width: 120,
-              }}
+              className={cStyles.searchInput}
             />
             {(['all', 'musteri', 'tedarikci'] as const).map((f) => (
               <button
@@ -184,91 +172,52 @@ export function ReportsCari({ db }: ReportProps) {
                 {f === 'all' ? 'Tümü' : f === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
               </button>
             ))}
-            <button
-              onClick={handleExport}
-              style={{
-                background: 'rgba(16,185,129,0.12)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: 7,
-                color: '#10b981',
-                padding: '5px 10px',
-                cursor: 'pointer',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-              }}
-            >
-              📥
-            </button>
+            <button onClick={handleExport} className={styles.btnGreen}>📥</button>
           </div>
         }
       >
-        <div className={styles.overflowAuto}>
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '0.83rem',
-            }}
-          >
-            <thead>
-              <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
-                {['Ad', 'Tip', 'Bakiye', 'Telefon'].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      padding: '7px 10px',
-                      color: '#475569',
-                      fontWeight: 600,
-                      textAlign: h === 'Bakiye' ? 'right' : 'left',
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {cariList.slice(0, 50).map((c, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <td
-                    style={{
-                      padding: '8px 10px',
-                      color: 'var(--text-primary)',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {c.name}
-                  </td>
-                  <td style={{ padding: '8px 10px' }}>
-                    <span
+          <div className={styles.overflowAuto}>
+            <table className={styles.tableBase}>
+              <thead>
+                <tr className={styles.trBold}>
+                  {['Ad', 'Tip', 'Bakiye', 'Telefon'].map((h) => (
+                    <th
+                      key={h}
+                      className={cStyles.cariTh}
+                      style={{ textAlign: h === 'Bakiye' ? 'right' : 'left' }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {cariList.slice(0, 50).map((c, i) => (
+                  <tr key={i}>
+                    <td className={cStyles.cariTdName}>{c.name}</td>
+                    <td className={cStyles.cariTd}>
+                      <span
+                        className={
+                          c.type === 'musteri' ? styles.pillBlue : styles.pillYellow
+                        }
+                      >
+                        {c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
+                      </span>
+                    </td>
+                    <td
+                      className={cStyles.cariTdBalance}
                       style={{
-                        background: c.type === 'musteri' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
-                        color: c.type === 'musteri' ? '#60a5fa' : '#fbbf24',
-                        padding: '2px 8px',
-                        borderRadius: 12,
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
+                        color: c.balance > 0 ? '#ef4444' : c.balance < 0 ? '#10b981' : '#64748b',
                       }}
                     >
-                      {c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
-                    </span>
-                  </td>
-                  <td
-                    style={{
-                      padding: '8px 10px',
-                      textAlign: 'right',
-                      fontWeight: 700,
-                      color: c.balance > 0 ? '#ef4444' : c.balance < 0 ? '#10b981' : '#64748b',
-                    }}
-                  >
-                    {formatMoney(Math.abs(c.balance))} {c.balance > 0 ? '▲' : c.balance < 0 ? '▼' : ''}
-                  </td>
-                  <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{c.phone || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      {formatMoney(Math.abs(c.balance))} {c.balance > 0 ? '▲' : c.balance < 0 ? '▼' : ''}
+                    </td>
+                    <td className={cStyles.cariTdPhone}>{c.phone || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
       </SectionBox>
     </div>
   );

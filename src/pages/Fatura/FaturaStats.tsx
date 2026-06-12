@@ -1,16 +1,9 @@
-import { } from 'react';
+import styles from './FaturaStats.module.css';
 import { FaturaStats } from './types';
 
 export function FaturaStatsBar({ stats }: { stats: FaturaStats }) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-        gap: 12,
-        marginBottom: 18,
-      }}
-    >
+    <div className={styles.statsGrid}>
       {[
         {
           icon: '📄',
@@ -52,20 +45,9 @@ export function FaturaStatsBar({ stats }: { stats: FaturaStats }) {
             border: `1px solid ${s.color}20`,
           }}
         >
-          <div style={{ fontSize: '1rem', marginBottom: 4 }}>{s.icon}</div>
+          <div className={styles.statIcon}>{s.icon}</div>
           <div style={{ fontSize: '1.2rem', fontWeight: 900, color: s.color }}>{s.value}</div>
-          <div
-            style={{
-              color: '#475569',
-              fontSize: '0.72rem',
-              marginTop: 3,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {s.label}
-          </div>
+          <div className={styles.statLabel}>{s.label}</div>
         </div>
       ))}
     </div>

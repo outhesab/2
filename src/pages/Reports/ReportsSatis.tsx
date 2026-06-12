@@ -5,6 +5,8 @@ import { formatMoney } from '@/lib/utils-tr';
 import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import rStyles from './Reports.module.css';
+import sStyles from './ReportsSatis.module.css';
 import { COLORS } from './ReportsCommon';
 
 export function ReportsSatis({ db, start, end }: ReportProps) {
@@ -88,13 +90,7 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))',
-          gap: 12,
-        }}
-      >
+      <div className={styles.gridAuto}>
         <KpiCard icon="💰" label="Dönem Ciro" value={formatMoney(ciro)} color="#10b981" />
         <KpiCard
           icon="📈"
@@ -119,26 +115,10 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className={rStyles.twoColGrid}>
         <SectionBox
           title="📅 Aylık Ciro & Kâr"
-          action={
-            <button
-              onClick={handleExport}
-              style={{
-                background: 'rgba(16,185,129,0.12)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: 8,
-                color: '#10b981',
-                padding: '5px 12px',
-                cursor: 'pointer',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-              }}
-            >
-              📥 Excel
-            </button>
-          }
+          action={<button onClick={handleExport} className={sStyles.btnExport}>📥 Excel</button>}
         >
           {monthlyData.length === 0 ? (
             <EmptyChart />
@@ -192,25 +172,14 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
           <EmptyChart />
         ) : (
           <div className={styles.overflowAuto}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.85rem',
-              }}
-            >
+            <table className={styles.tableBase}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
+                <tr className={styles.trBold}>
                   {['Kategori', 'Ciro', 'Kâr', 'Marj %', 'Adet'].map((h) => (
                     <th
                       key={h}
-                      style={{
-                        padding: '8px 12px',
-                        color: '#475569',
-                        fontWeight: 600,
-                        textAlign: h === 'Kategori' ? 'left' : 'right',
-                        whiteSpace: 'nowrap',
-                      }}
+                      className={sStyles.catTh}
+                      style={{ textAlign: h === 'Kategori' ? 'left' : 'right' }}
                     >
                       {h}
                     </th>
@@ -219,45 +188,16 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
               </thead>
               <tbody>
                 {categoryData.map((c, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td
-                      style={{
-                        padding: '9px 12px',
-                        color: 'var(--text-primary)',
-                        fontWeight: 600,
-                      }}
-                    >
+                  <tr key={i}>
+                    <td className={sStyles.catTdName}>
                       <span
-                        style={{
-                          display: 'inline-block',
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          background: COLORS[i % COLORS.length],
-                          marginRight: 8,
-                        }}
+                        className={sStyles.catDot}
+                        style={{ background: COLORS[i % COLORS.length] }}
                       />
                       {c.name}
                     </td>
-                    <td
-                      style={{
-                        padding: '9px 12px',
-                        color: '#10b981',
-                        fontWeight: 700,
-                        textAlign: 'right',
-                      }}
-                    >
-                      {formatMoney(c.ciro)}
-                    </td>
-                    <td
-                      style={{
-                        padding: '9px 12px',
-                        color: '#3b82f6',
-                        textAlign: 'right',
-                      }}
-                    >
-                      {formatMoney(c.kar)}
-                    </td>
+                    <td className={sStyles.catTdCiro}>{formatMoney(c.ciro)}</td>
+                    <td className={sStyles.catTdKar}>{formatMoney(c.kar)}</td>
                     <td
                       style={{
                         padding: '9px 12px',
@@ -267,15 +207,7 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
                     >
                       %{c.ciro ? ((c.kar / c.ciro) * 100).toFixed(1) : 0}
                     </td>
-                    <td
-                      style={{
-                        padding: '9px 12px',
-                        color: 'var(--text-dim)',
-                        textAlign: 'right',
-                      }}
-                    >
-                      {c.adet}
-                    </td>
+                    <td className={sStyles.catTdAdet}>{c.adet}</td>
                   </tr>
                 ))}
               </tbody>

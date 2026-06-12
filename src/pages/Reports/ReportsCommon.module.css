@@ -1,0 +1,34 @@
+.emptyChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  color: #334155;
+  flex-direction: column;
+  gap: 8px;
+}
+.emptyIcon {
+  font-size: 2rem;
+  opacity: 0.3;
+}
+.emptyText {
+  font-size: 0.82rem;
+}
+.sectionBox {
+  background: #111e33;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sectionTitle {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin: 0;
+}

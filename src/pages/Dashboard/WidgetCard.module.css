@@ -1,0 +1,8 @@
+.widgetCard {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-bg, rgba(255,255,255,0.9));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.06));
+  box-shadow: var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

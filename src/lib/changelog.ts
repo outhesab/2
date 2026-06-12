@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.22.0',
+    date: '12 Haziran 2026',
+    title: 'CSS Module Migration — Dashboard, Fatura, Reports',
+    summary: 'Dashboard, Fatura ve Reports modüllerindeki tüm statik inline CSS stilleri .module.css dosyalarına taşındı. Toplam ~162 inline style CSS module class\'larına dönüştürüldü, 69 dinamik style (prop/state bağımlı) olduğu gibi bırakıldı. 16 yeni CSS module dosyası oluşturuldu.',
+    changes: [
+      { type: 'iyilestirme', text: 'Dashboard: StatCard, Oneriler, WidgetCard modüllerindeki 7 statik inline style CSS module\'a taşındı (Oneriler.module.css, WidgetCard.module.css).' },
+      { type: 'iyilestirme', text: 'Fatura: 6 component\'de ~75 statik inline style CSS module\'a taşındı (Fatura.module.css, FaturaPreview.module.css, FaturaForm.module.css, FaturaTable.module.css, FaturaToolbar.module.css, FaturaStats.module.css).' },
+      { type: 'iyilestirme', text: 'Reports: 8 component\'de ~80 statik inline style CSS module\'a taşındı (Reports.module.css, ReportsGenerator.module.css, ReportsUrun.module.css, ReportsCari.module.css, ReportsOzet.module.css, ReportsSatis.module.css, ReportsCommon.module.css, ReportsKasa.module.css).' },
+      { type: 'iyilestirme', text: 'Toplam 16 yeni .module.css dosyası oluşturuldu, ~162 inline style migrate edildi.' },
+    ],
+  },
+  {
     version: '3.21.5',
     date: '12 Haziran 2026',
     title: 'Raporlar Modülerizasyonu ve Veri Bütünlüğü Fixleri',

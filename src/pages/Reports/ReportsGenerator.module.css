@@ -1,0 +1,99 @@
+.card {
+  background: rgba(255,255,255,0.03);
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.cardTitle {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+.checkboxGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.checkboxInput {
+  accent-color: #ff5722;
+}
+.btnRow {
+  display: flex;
+  gap: 12px;
+}
+.btnGenerate {
+  background: #ff5722;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.btnDownloadAll {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 8px;
+  color: #10b981;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.generatedContainer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.resultCard {
+  background: #111e33;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.resultLabel {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.btnExportSmall {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 6px;
+  color: #10b981;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+.reportTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.reportTh {
+  padding: 6px 10px;
+  color: #475569;
+  font-weight: 600;
+  text-align: left;
+}
+.reportTrBody {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.reportTd {
+  padding: 6px 10px;
+  color: var(--text-dim);
+}
+.showingRow {
+  text-align: center;
+  padding: 8px;
+  font-size: 0.7rem;
+  color: #64748b;
+}

@@ -3,6 +3,7 @@ import { formatDate, formatMoney } from '@/lib/utils-tr';
 import type { DB, InvoiceItem } from '@/types';
 import { TotalRow, type FormState } from '@/pages/FaturaHelpers';
 import { lbl, inp, paymentLabels } from '@/pages/FaturaHelpers.utils';
+import styles from './FaturaForm.module.css';
 
 interface FaturaFormProps {
   db: DB;
@@ -40,9 +41,9 @@ export default function FaturaForm({
       title={editId ? '✏️ Fatura Düzenle' : `📄 Yeni ${form.type === 'satis' ? 'Satış' : 'Alış'} Faturası`}
       maxWidth={720}
     >
-      <div style={{ display: 'grid', gap: 14 }}>
+      <div className={styles.formContainer}>
         {/* Cari seçimi */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className={styles.cariGrid}>
           <div>
             <label style={lbl}>{form.type === 'satis' ? 'Müşteri' : 'Tedarikçi'} *</label>
             <select value={form.cariId} onChange={(e) => selectCari(e.target.value)} style={inp}>
@@ -84,61 +85,23 @@ export default function FaturaForm({
 
         {/* Kalemler */}
         <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 8,
-            }}
-          >
+          <div className={styles.itemsHeader}>
             <label style={{ ...lbl, marginBottom: 0 }}>Fatura Kalemleri</label>
-            <button
-              onClick={addItem}
-              style={{
-                background: 'rgba(59,130,246,0.12)',
-                border: 'none',
-                borderRadius: 6,
-                color: '#60a5fa',
-                padding: '4px 10px',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '0.78rem',
-              }}
-            >
-              + Kalem
-            </button>
+            <button onClick={addItem} className={styles.addItemBtn}>+ Kalem</button>
           </div>
-          <div
-            style={{
-              background: 'rgba(0,0,0,0.2)',
-              borderRadius: 10,
-              overflow: 'hidden',
-            }}
-          >
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className={styles.itemsTableWrap}>
+            <table className={styles.itemsTable}>
               <thead>
-                <tr style={{ background: 'rgba(0,0,0,0.2)' }}>
+                <tr className={styles.itemsTableHead}>
                   {['Açıklama', 'Adet', 'Birim ₺', 'KDV %', 'Toplam', ''].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: '8px 10px',
-                        textAlign: 'left',
-                        color: '#334155',
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {h}
-                    </th>
+                    <th key={h} className={styles.itemsTh}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {form.items.map((it, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td style={{ padding: '6px 8px' }}>
+                  <tr key={idx} className={styles.itemsRow}>
+                    <td className={styles.itemsTd}>
                       <input
                         value={it.description}
                         onChange={(e) => updateItem(idx, 'description', e.target.value)}
@@ -150,7 +113,7 @@ export default function FaturaForm({
                         placeholder="Ürün/Hizmet"
                       />
                     </td>
-                    <td style={{ padding: '6px 8px', width: 70 }}>
+                    <td className={styles.itemsTdNarrow}>
                       <input
                         type="number"
                         inputMode="decimal"
@@ -165,7 +128,7 @@ export default function FaturaForm({
                         }}
                       />
                     </td>
-                    <td style={{ padding: '6px 8px', width: 100 }}>
+                    <td className={styles.itemsTdWide}>
                       <input
                         type="number"
                         inputMode="decimal"
@@ -197,31 +160,12 @@ export default function FaturaForm({
                         <option value={20}>20</option>
                       </select>
                     </td>
-                    <td
-                      style={{
-                        padding: '6px 8px',
-                        color: '#10b981',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                    <td className={styles.totalTd}>
                       {formatMoney(it.quantity * it.unitPrice * (1 + it.vatRate / 100))}
                     </td>
-                    <td style={{ padding: '6px 8px', width: 30 }}>
+                    <td className={styles.itemsTd}>
                       {form.items.length > 1 && (
-                        <button
-                          onClick={() => removeItem(idx)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#ef4444',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                          }}
-                        >
-                          ×
-                        </button>
+                        <button onClick={() => removeItem(idx)} className={styles.removeBtn}>×</button>
                       )}
                     </td>
                   </tr>
@@ -232,16 +176,10 @@ export default function FaturaForm({
         </div>
 
         {/* Totals + Details */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className={styles.totalsGrid}>
           <div>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                }}
-              >
+            <div className={styles.detailsGrid}>
+              <div className={styles.paymentGrid}>
                 <div>
                   <label style={lbl}>Ödeme</label>
                   <select
@@ -313,23 +251,10 @@ export default function FaturaForm({
               </div>
             </div>
           </div>
-          <div
-            style={{
-              background: 'rgba(0,0,0,0.3)',
-              borderRadius: 12,
-              padding: '14px 16px',
-            }}
-          >
+          <div className={styles.totalsPanel}>
             <TotalRow label="Ara Toplam" value={formatMoney(formTotals.subtotal)} />
             <TotalRow label="KDV Toplam" value={formatMoney(formTotals.vatTotal)} color="#3b82f6" />
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                marginBottom: 8,
-              }}
-            >
+            <div className={styles.discountRow}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', flex: 1 }}>İskonto</span>
               <input
                 type="number"
@@ -351,31 +276,13 @@ export default function FaturaForm({
                 }}
               />
             </div>
-            <div
-              style={{
-                borderTop: '1px solid rgba(255,255,255,0.08)',
-                paddingTop: 10,
-                marginTop: 4,
-              }}
-            >
+            <div className={styles.discountDivider}>
               <TotalRow label="GENEL TOPLAM" value={formatMoney(formTotals.total)} color="#10b981" big />
             </div>
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          style={{
-            background: 'linear-gradient(135deg, #ff5722, #ff7043)',
-            border: 'none',
-            borderRadius: 12,
-            color: '#fff',
-            padding: '13px 0',
-            fontWeight: 800,
-            cursor: 'pointer',
-            fontSize: '1rem',
-          }}
-        >
+        <button onClick={handleSave} className={styles.saveBtn}>
           💾 {editId ? 'Güncelle' : 'Fatura Oluştur'}
         </button>
       </div>

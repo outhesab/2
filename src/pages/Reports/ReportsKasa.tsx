@@ -5,6 +5,8 @@ import { formatMoney } from '@/lib/utils-tr';
 import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import rStyles from './Reports.module.css';
+import kStyles from './ReportsKasa.module.css';
 import { COLORS } from './ReportsCommon';
 
 export function ReportsKasa({ db, start, end }: ReportProps) {
@@ -76,13 +78,7 @@ export function ReportsKasa({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))',
-          gap: 12,
-        }}
-      >
+      <div className={styles.gridAuto130}>
         <KpiCard icon="📥" label="Dönem Gelir" value={formatMoney(gelir)} color="#10b981" />
         <KpiCard icon="📤" label="Dönem Gider" value={formatMoney(gider)} color="#ef4444" />
         <KpiCard icon="⚖️" label="Net Akış" value={formatMoney(net)} color={net >= 0 ? '#10b981' : '#ef4444'} />
@@ -97,26 +93,10 @@ export function ReportsKasa({ db, start, end }: ReportProps) {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className={rStyles.twoColGrid}>
         <SectionBox
           title="📅 Aylık Nakit Akışı"
-          action={
-            <button
-              onClick={handleExport}
-              style={{
-                background: 'rgba(16,185,129,0.12)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: 8,
-                color: '#10b981',
-                padding: '5px 12px',
-                cursor: 'pointer',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-              }}
-            >
-              📥 Excel
-            </button>
-          }
+          action={<button onClick={handleExport} className={kStyles.btnExport}>📥 Excel</button>}
         >
           {monthlyKasa.length === 0 ? (
             <EmptyChart />

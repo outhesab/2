@@ -1,0 +1,60 @@
+.filterRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.infoBanner {
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #f59e0b;
+}
+.btnSort {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 6px;
+  color: #10b981;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.productTh {
+  padding: 7px 10px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.productTd {
+  padding: 8px 10px;
+}
+.productTdIndex {
+  color: #475569;
+}
+.productTdName {
+  color: var(--text-primary);
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.productTdCiro {
+  color: #10b981;
+  font-weight: 700;
+  text-align: right;
+}
+.productTdKar {
+  color: #3b82f6;
+  text-align: right;
+}
+.productTdAdet {
+  color: var(--text-dim);
+  text-align: right;
+}
+.productTdStok {
+  text-align: right;
+}

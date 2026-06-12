@@ -11,6 +11,8 @@ import {
 import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
+import rStyles from './Reports.module.css';
+import oStyles from './ReportsOzet.module.css';
 import { COLORS } from './ReportsCommon';
 
 export function ReportsOzet({ db, start, end }: ReportProps) {
@@ -75,13 +77,7 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
-          gap: 12,
-        }}
-      >
+      <div className={styles.gridAuto150}>
         <KpiCard
           icon="💰"
           label="Ciro"
@@ -154,79 +150,25 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
         )}
       </SectionBox>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className={rStyles.twoColGrid}>
         <SectionBox title="⚠️ Stok Uyarıları">
           {(() => {
             const out = getOutOfStockProducts(db);
             const low = getLowStockProducts(db);
             if (!out.length && !low.length)
-              return (
-                <div
-                  style={{
-                    color: '#10b981',
-                    fontSize: '0.85rem',
-                    padding: '12px 0',
-                  }}
-                >
-                  ✅ Tüm stoklar yeterli
-                </div>
-              );
+              return <div className={oStyles.allGood}>✅ Tüm stoklar yeterli</div>;
             return (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
-                  maxHeight: 200,
-                  overflowY: 'auto',
-                }}
-              >
+              <div className={oStyles.stockList}>
                 {out.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '6px 10px',
-                      background: 'rgba(239,68,68,0.08)',
-                      borderRadius: 8,
-                      border: '1px solid rgba(239,68,68,0.2)',
-                    }}
-                  >
-                    <span style={{ color: '#fca5a5', fontSize: '0.83rem' }}>{p.name}</span>
-                    <span
-                      style={{
-                        color: '#ef4444',
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                      }}
-                    >
-                      BĐTĐ
-                    </span>
+                  <div key={p.id} className={`${oStyles.stockItem} ${oStyles.stockItemOut}`}>
+                    <span className={`${oStyles.stockName} ${oStyles.stockNameOut}`}>{p.name}</span>
+                    <span className={`${oStyles.stockBadge} ${oStyles.stockBadgeOut}`}>BĐTĐ</span>
                   </div>
                 ))}
                 {low.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '6px 10px',
-                      background: 'rgba(245,158,11,0.08)',
-                      borderRadius: 8,
-                      border: '1px solid rgba(245,158,11,0.2)',
-                    }}
-                  >
-                    <span style={{ color: '#fcd34d', fontSize: '0.83rem' }}>{p.name}</span>
-                    <span
-                      style={{
-                        color: '#f59e0b',
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                      }}
-                    >
-                      {p.stock} adet
-                    </span>
+                  <div key={p.id} className={`${oStyles.stockItem} ${oStyles.stockItemLow}`}>
+                    <span className={`${oStyles.stockName} ${oStyles.stockNameLow}`}>{p.name}</span>
+                    <span className={`${oStyles.stockBadge} ${oStyles.stockBadgeLow}`}>{p.stock} adet</span>
                   </div>
                 ))}
               </div>
@@ -242,47 +184,14 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
               .slice(0, 5);
             if (!top.length) return <EmptyChart />;
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className={oStyles.topList}>
                 {top.map((c, i) => (
-                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: '50%',
-                        background: COLORS[i],
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        flexShrink: 0,
-                      }}
-                    >
+                  <div key={c.id} className={oStyles.topItem}>
+                    <span className={oStyles.topRank} style={{ background: COLORS[i] }}>
                       {i + 1}
                     </span>
-                    <span
-                      style={{
-                        flex: 1,
-                        color: '#cbd5e1',
-                        fontSize: '0.83rem',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {c.name}
-                    </span>
-                    <span
-                      style={{
-                        color: '#ef4444',
-                        fontWeight: 700,
-                        fontSize: '0.83rem',
-                      }}
-                    >
-                      {formatMoney(c.balance)}
-                    </span>
+                    <span className={oStyles.topName}>{c.name}</span>
+                    <span className={oStyles.topBalance}>{formatMoney(c.balance)}</span>
                   </div>
                 ))}
               </div>

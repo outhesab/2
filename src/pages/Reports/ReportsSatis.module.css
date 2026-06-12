@@ -1,0 +1,47 @@
+.btnExport {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 8px;
+  color: #10b981;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.catTh {
+  padding: 8px 12px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.catTd {
+  padding: 9px 12px;
+}
+.catTdName {
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.catDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.catTdCiro {
+  padding: 9px 12px;
+  color: #10b981;
+  font-weight: 700;
+  text-align: right;
+}
+.catTdKar {
+  padding: 9px 12px;
+  color: #3b82f6;
+  text-align: right;
+}
+.catTdAdet {
+  padding: 9px 12px;
+  color: var(--text-dim);
+  text-align: right;
+}

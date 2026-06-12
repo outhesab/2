@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { getOutOfStockProducts, getLowStockProducts, getOverdueMusteri } from '@/lib/dbUtils';
 import type { DB } from '@/types';
+import styles from './Oneriler.module.css';
 
 interface OnerilerProps {
   db: DB;
@@ -101,11 +102,6 @@ export function Oneriler({ db, onTabChange }: OnerilerProps) {
   if (tips.length === 0) return null;
 
   const levelColor: Record<string, string> = { warn: '#f59e0b', info: '#3b82f6', ok: '#10b981' };
-  const levelBg: Record<string, string> = {
-    warn: 'rgba(245,158,11,0.08)',
-    info: 'rgba(59,130,246,0.08)',
-    ok: 'rgba(16,185,129,0.08)',
-  };
 
   return (
     <motion.div
@@ -127,12 +123,7 @@ export function Oneriler({ db, onTabChange }: OnerilerProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.06, type: 'spring', stiffness: 260, damping: 24 }}
             whileHover={{ x: 4, borderColor: `${levelColor[tip.level]}40` }}
-            className="dash-tip-item"
-            style={{
-              background: levelBg[tip.level],
-              border: `1px solid ${levelColor[tip.level]}18`,
-              borderLeft: `3px solid ${levelColor[tip.level]}`,
-            }}
+            className={`dash-tip-item ${styles[`tip${tip.level.charAt(0).toUpperCase() + tip.level.slice(1)}`]}`}
           >
             <span className="dash-tip-icon">{tip.icon}</span>
             <span className="dash-tip-text">{tip.text}</span>
@@ -140,12 +131,7 @@ export function Oneriler({ db, onTabChange }: OnerilerProps) {
               onClick={() => onTabChange(tip.tab)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="dash-tip-action"
-              style={{
-                background: `${levelColor[tip.level]}18`,
-                border: `1px solid ${levelColor[tip.level]}30`,
-                color: levelColor[tip.level],
-              }}
+              className={`dash-tip-action ${styles[`btn${tip.level.charAt(0).toUpperCase() + tip.level.slice(1)}`]}`}
             >
               {tip.action} →
             </motion.button>

@@ -13,6 +13,7 @@ import FaturaForm from './Fatura/FaturaForm';
 import FaturaPreview from './Fatura/FaturaPreview';
 import type { Props } from './FaturaHelpers';
 import { FaturaFormState, FaturaStats } from './Fatura/types';
+import styles from './Fatura/Fatura.module.css';
 
 export default function Fatura({ db, save: dbSave }: Props) {
   const { showToast } = useToast();
@@ -313,7 +314,7 @@ export default function Fatura({ db, save: dbSave }: Props) {
   if (loading) return <SkeletonTable rows={6} cols={8} />;
 
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
+    <div className={styles.page}>
       <FaturaStatsBar stats={stats} />
       <FaturaToolbar
         search={search}

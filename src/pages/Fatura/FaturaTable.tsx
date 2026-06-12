@@ -1,6 +1,7 @@
 import { Invoice } from '@/types';
 import { formatDate, formatMoney } from '@/lib/utils-tr';
 import { statusColors, statusLabels, paymentLabels, miniBtn } from '@/pages/FaturaHelpers.utils';
+import styles from './FaturaTable.module.css';
 
 interface FaturaTableProps {
   invoices: Invoice[];
@@ -18,86 +19,39 @@ export function FaturaTable({
   onUpdateStatus,
 }: FaturaTableProps) {
   return (
-    <div
-      className="responsive-table-wrap"
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-        borderRadius: 16,
-        border: '1px solid rgba(255,255,255,0.07)',
-        overflow: 'hidden',
-      }}
-    >
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <div className={`responsive-table-wrap ${styles.tableContainer}`}>
+      <table className={styles.table}>
         <thead>
-          <tr style={{ background: 'rgba(0,0,0,0.3)' }}>
+          <tr className={styles.headerRow}>
             {['Fatura No', 'Tür', 'Müşteri/Tedarikçi', 'Tarih', 'Tutar', 'Durum', 'Ödeme', ''].map((h) => (
-              <th
-                key={h}
-                style={{
-                  padding: '12px 14px',
-                  textAlign: 'left',
-                  color: '#334155',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {h}
-              </th>
+              <th key={h} className={styles.headerCell}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {invoices.length === 0 ? (
             <tr>
-              <td colSpan={8} style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
-                Henüz fatura yok
-              </td>
+              <td colSpan={8} className={styles.emptyCell}>Henüz fatura yok</td>
             </tr>
           ) : (
             invoices.map((inv) => (
               <tr
                 key={inv.id}
-                style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                  cursor: 'pointer',
-                }}
+                className={styles.dataRow}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLTableRowElement).style.background = 'rgba(255,255,255,0.02)')
                 }
                 onMouseLeave={(e) => ((e.currentTarget as HTMLTableRowElement).style.background = 'transparent')}
               >
-                <td data-label="Fatura No" style={{ padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span
-                      style={{
-                        color: 'var(--text-primary)',
-                        fontWeight: 700,
-                        fontFamily: 'monospace',
-                        fontSize: '0.88rem',
-                      }}
-                    >
-                      {inv.invoiceNo}
-                    </span>
+                <td data-label="Fatura No" className={styles.cell}>
+                  <div className={styles.invoiceNoWrap}>
+                    <span className={styles.invoiceNo}>{inv.invoiceNo}</span>
                     {inv.saleId && (
-                      <span
-                        style={{
-                          background: 'rgba(139,92,246,0.15)',
-                          color: '#a78bfa',
-                          borderRadius: 5,
-                          padding: '1px 6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        🔗 Satış
-                      </span>
+                      <span className={styles.saleBadge}>🔗 Satış</span>
                     )}
                   </div>
                 </td>
-                <td data-label="Tür" style={{ padding: '12px 14px' }}>
+                <td data-label="Tür" className={styles.cell}>
                   <span
                     style={{
                       background: inv.type === 'satis' ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
@@ -111,39 +65,10 @@ export function FaturaTable({
                     {inv.type === 'satis' ? '📤 Satış' : '📥 Alış'}
                   </span>
                 </td>
-                <td
-                  data-label="Müşteri"
-                  style={{
-                    padding: '12px 14px',
-                    color: 'var(--text-primary)',
-                    fontWeight: 600,
-                    fontSize: '0.88rem',
-                  }}
-                >
-                  {inv.cariName}
-                </td>
-                <td
-                  data-label="Tarih"
-                  style={{
-                    padding: '12px 14px',
-                    color: '#475569',
-                    fontSize: '0.82rem',
-                  }}
-                >
-                  {formatDate(inv.createdAt)}
-                </td>
-                <td
-                  data-label="Tutar"
-                  style={{
-                    padding: '12px 14px',
-                    color: '#10b981',
-                    fontWeight: 700,
-                    fontSize: '0.92rem',
-                  }}
-                >
-                  {formatMoney(inv.total)}
-                </td>
-                <td data-label="Durum" style={{ padding: '12px 14px' }}>
+                <td data-label="Müşteri" className={styles.customerCell}>{inv.cariName}</td>
+                <td data-label="Tarih" className={styles.dateCell}>{formatDate(inv.createdAt)}</td>
+                <td data-label="Tutar" className={styles.amountCell}>{formatMoney(inv.total)}</td>
+                <td data-label="Durum" className={styles.cell}>
                   <span
                     style={{
                       background: `${statusColors[inv.status]}18`,
@@ -157,18 +82,9 @@ export function FaturaTable({
                     {statusLabels[inv.status]}
                   </span>
                 </td>
-                <td
-                  data-label="Ödeme"
-                  style={{
-                    padding: '12px 14px',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.82rem',
-                  }}
-                >
-                    {paymentLabels[inv.payment]}
-                  </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                <td data-label="Ödeme" className={styles.paymentCell}>{paymentLabels[inv.payment]}</td>
+                <td className={styles.actionCell}>
+                  <div className={styles.actionWrap}>
                     <button onClick={() => onPreview(inv.id)} title="Önizle" style={miniBtn}>
                       👁️
                     </button>
