@@ -1,8 +1,8 @@
 import { Modal } from '@/components/Modal';
 import { formatDate, formatMoney, genId } from '@/lib/utils-tr';
 import type { DB, Invoice } from '@/types';
-import { TotalRow } from './FaturaHelpers';
-import { createInstallmentPlan, statusColors, statusLabels, lbl, inp } from './FaturaHelpers.utils';
+import { TotalRow } from '../FaturaHelpers';
+import { createInstallmentPlan, statusColors, statusLabels, lbl, inp } from '../FaturaHelpers.utils';
 import DOMPurify from 'dompurify';
 import { useState } from 'react';
 

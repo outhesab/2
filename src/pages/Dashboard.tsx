@@ -1,10 +1,8 @@
-import { useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { formatMoney, formatDate } from '@/lib/utils-tr';
-import type { DB } from '@/types';
 import { saveBackupToFirebase, listBackupsFromFirebase, restoreBackupFromFirebase } from '@/hooks/useDB';
-import { loadConnConfig } from '@/lib/connConfig';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { logger } from '@/lib/logger';
 import { getAppVersion } from '@/lib/version';
@@ -30,219 +28,20 @@ import {
   getCategorySales,
   getOutOfStockProducts,
   getLowStockProducts,
-  getOverdueMusteri,
 } from '@/lib/dbUtils';
 
-interface Props {
-  db: DB;
-  onTabChange: (tab: string) => void;
-  save: (updater: (prev: DB) => DB) => void;
-}
+import { DashboardProps, StatCardData } from './Dashboard/types';
+import { loadDashboardPrefs, loadDashboardPrefsFromFirebase, chartStyle, chartAxisStyle } from './Dashboard/DashboardUtils';
+import { ScrollableCards } from './Dashboard/ScrollableCards';
+import { WidgetCard } from './Dashboard/WidgetCard';
+import { KasaSayimWidget } from './Dashboard/KasaSayimWidget';
+import { YedekHatirlatmaWidget } from './Dashboard/YedekHatirlatmaWidget';
+import { Oneriler } from './Dashboard/Oneriler';
+import { LegendDot, QuickStat, FormulaItem } from './Dashboard/DashboardCommon';
 
-interface StatCardData {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  color: string;
-  gradient: string;
-  sub?: string;
-  tab?: string;
-  trend?: number;
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-  gradient,
-  sub,
-  onClick,
-  trend,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  color: string;
-  gradient: string;
-  sub?: string;
-  onClick?: () => void;
-  trend?: number;
-}) {
-  return (
-    <motion.div
-      onClick={onClick}
-      whileHover={{ y: -4, scale: 1.02, borderColor: `${color}44` }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`dash-statcard${onClick ? ' clickable' : ''}`}
-      style={{
-        background: `linear-gradient(135deg, ${gradient})`,
-        border: '1px solid var(--glass-border, rgba(255,255,255,0.06))',
-        boxShadow: `0 2px 8px ${color}10, var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))`,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-    >
-      <div className="dash-statcard-bg-icon">{icon}</div>
-      <div
-        className="dash-statcard-accent-line"
-        style={{ background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }}
-      />
-      <div className="dash-statcard-icon">{icon}</div>
-      <div className="dash-statcard-value" style={{ color }}>
-        {value}
-      </div>
-      {trend !== undefined && (
-        <div className={`dash-statcard-trend ${trend >= 0 ? 'up' : 'down'}`}>
-          {trend >= 0 ? '▲' : '▼'} {Math.abs(trend).toFixed(1)}% dün
-        </div>
-      )}
-      <div className="dash-statcard-label">{label}</div>
-      {sub && <div className="dash-statcard-sub">{sub}</div>}
-      {onClick && (
-        <motion.div
-          className="dash-statcard-arrow"
-          style={{ color: `${color}50` }}
-          whileHover={{ x: 3, color }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
-          →
-        </motion.div>
-      )}
-    </motion.div>
-  );
-}
-
-function ScrollableCards({ cards, onTabChange }: { cards: StatCardData[]; onTabChange: (tab: string) => void }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, scroll: 0 });
-
-  const updateArrows = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 10);
-    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    updateArrows();
-    el.addEventListener('scroll', updateArrows, { passive: true });
-    const ro = new ResizeObserver(updateArrows);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener('scroll', updateArrows);
-      ro.disconnect();
-    };
-  }, [updateArrows]);
-
-  const scroll = (dir: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * 220, behavior: 'smooth' });
-  };
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
-    dragStart.current = { x: e.clientX, scroll: scrollRef.current?.scrollLeft || 0 };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    const dx = e.clientX - dragStart.current.x;
-    scrollRef.current.scrollLeft = dragStart.current.scroll - dx;
-  };
-  const onPointerUp = () => setIsDragging(false);
-
-  return (
-    <div className="dash-scroll-wrap">
-      <button className={`dash-nav-btn dash-nav-btn-left ${canLeft ? 'visible' : 'hidden'}`} onClick={() => scroll(-1)}>
-        ‹
-      </button>
-      <button
-        className={`dash-nav-btn dash-nav-btn-right ${canRight ? 'visible' : 'hidden'}`}
-        onClick={() => scroll(1)}
-      >
-        ›
-      </button>
-      <div
-        ref={scrollRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        className={`dash-scroll-inner${isDragging ? ' dragging' : ''}`}
-        style={{
-          maskImage: `linear-gradient(to right, ${canLeft ? 'transparent 0%, black 5%' : 'black 0%'}, ${canRight ? 'black 95%, transparent 100%' : 'black 100%'})`,
-        }}
-      >
-        {cards.map((card, i) => (
-          <div key={i} className="dash-scroll-item">
-            <StatCard {...card} onClick={card.tab ? () => onTabChange(card.tab!) : undefined} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function loadDashboardPrefs(): { leftWidgets: WidgetId[]; brightness: number } {
-  try {
-    const raw = localStorage.getItem('dashboardPrefs');
-    if (raw) return JSON.parse(raw);
-  } catch {
-    logger.warn('dashboard', "Dashboard tercihleri localStorage'dan okunamadı"); /* localStorage okuma hatası */
-  }
-  return { leftWidgets: ['chart', 'recentSales', 'tips', 'excelBar'], brightness: 100 };
-}
-
-function getDashboardPrefsUrl(): string | null {
-  const cfg = loadConnConfig();
-  if (!cfg.firebase.enabled || !cfg.firebase.projectId || !cfg.firebase.apiKey) return null;
-  return `https://firestore.googleapis.com/v1/projects/${cfg.firebase.projectId}/databases/(default)/documents/config/dashboardPrefs?key=${cfg.firebase.apiKey}`;
-}
-
-/* saveDashboardPrefs kaldırıldı — kullanılmıyor */
-
-async function loadDashboardPrefsFromFirebase(): Promise<{ leftWidgets: WidgetId[]; brightness: number } | null> {
-  try {
-    const url = getDashboardPrefsUrl();
-    if (!url) return null;
-    const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const raw = json?.fields?.data?.stringValue;
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    logger.warn('dashboard', "Firebase'den dashboard tercihleri alınamadı");
-    return null;
-  }
-}
-
-const chartStyle = {
-  contentStyle: {
-    background: 'var(--bg-elevated)',
-    border: '1px solid var(--border)',
-    borderRadius: 10,
-    fontSize: '0.82rem',
-    boxShadow: '0 8px 24px var(--shadow-lg)',
-  },
-  labelStyle: { color: 'var(--text-muted)' },
-  itemStyle: { color: 'var(--text-primary)' },
-};
-
-const chartAxisStyle = { fontSize: 11, fill: 'var(--text-dim)', fontFamily: "'Plus Jakarta Sans', sans-serif" };
-export default function Dashboard({ db, onTabChange, save }: Props) {
+export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
   const [prefs, setPrefs] = useState(loadDashboardPrefs);
 
-  // Açılışta Firebase'den en güncel prefs'i çek
   useEffect(() => {
     loadDashboardPrefsFromFirebase().then((fbPrefs) => {
       if (fbPrefs) {
@@ -251,6 +50,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
       }
     });
   }, []);
+
   const [backupPanel, setBackupPanel] = useState(false);
   const [backups, setBackups] = useState<{ id: string; version: number; label: string; createdAt: string }[]>([]);
   const [backupLoading, setBackupLoading] = useState(false);
@@ -282,7 +82,6 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
     if (!confirm(`"${backupId}" yedeğini geri yüklemek istediğinizden emin misiniz? Mevcut veriler değişecek.`)) return;
     setBackupLoading(true);
 
-    // Geri yükleme öncesi mevcut veriyi otomatik yedekle
     const preRestoreLabel = `onceki_${new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')}`;
     await saveBackupToFirebase(db, preRestoreLabel).catch(() =>
       logger.error('db', 'Geri yükleme öncesi yedek alınamadı'),
@@ -290,41 +89,20 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
 
     const restored = await restoreBackupFromFirebase(backupId);
     if (restored) {
-      // makeDefaultDB ile merge ederek eksik alanları tamamla
       save((prev) => {
         const merged = { ...prev, ...restored };
-        // Zorunlu array alanları boşsa koru
         const arrayKeys = [
-          'products',
-          'sales',
-          'suppliers',
-          'orders',
-          'cari',
-          'kasa',
-          'bankTransactions',
-          'matchRules',
-          'monitorRules',
-          'monitorLog',
-          'stockMovements',
-          'peletSuppliers',
-          'peletOrders',
-          'boruSuppliers',
-          'boruOrders',
-          'invoices',
-          'budgets',
-          'returns',
-          '_activityLog',
-          'ortakEmanetler',
-          'installments',
-          'partners',
-          'notes',
+          'products', 'sales', 'suppliers', 'orders', 'cari', 'kasa',
+          'bankTransactions', 'matchRules', 'monitorRules', 'monitorLog',
+          'stockMovements', 'peletSuppliers', 'peletOrders', 'boruSuppliers',
+          'boruOrders', 'invoices', 'budgets', 'returns', '_activityLog',
+          'ortakEmanetler', 'installments', 'partners', 'notes',
         ] as const;
         for (const key of arrayKeys) {
           if (!Array.isArray(merged[key])) (merged as Record<string, unknown>)[key] = prev[key] ?? [];
         }
         return merged;
       });
-      // Firebase'e de yaz (save() debounce'u beklemeden hemen)
       setTimeout(
         () =>
           saveBackupToFirebase(restored, `restore_sonrasi_${backupId.slice(0, 20)}`).catch(() =>
@@ -358,14 +136,11 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
     const revTrend = yestRevenue > 0 ? ((todayRevenue - yestRevenue) / yestRevenue) * 100 : 0;
 
     const { ciro: monthRevenue, kar: monthProfit } = getMonthSales(db);
-
     const outOfStock = getOutOfStockProducts(db).length;
     const lowStock = getLowStockProducts(db).length;
-
     const totalKasa = computeKasaToplam(db);
     const nakit = computeKasaByType(db, 'nakit');
     const banka = computeKasaByType(db, 'banka');
-
     const pendingOrders = db.orders.filter((o) => o.status === 'bekliyor').length;
     const totalReceivable = computeAlacak(db);
     const totalPayable = computeBorc(db);
@@ -376,22 +151,9 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
     const stokDeger = computeStokDeger(db);
 
     return {
-      todayRevenue,
-      todayProfit,
-      todaySalesCount: todaySales.length,
-      monthRevenue,
-      monthProfit,
-      outOfStock,
-      lowStock,
-      totalKasa,
-      nakit,
-      banka,
-      pendingOrders,
-      totalReceivable,
-      totalPayable,
-      netSermaye,
-      stokDeger,
-      revTrend,
+      todayRevenue, todayProfit, todaySalesCount: todaySales.length,
+      monthRevenue, monthProfit, outOfStock, lowStock,
+      totalKasa, nakit, banka, pendingOrders, totalReceivable, totalPayable, netSermaye, stokDeger, revTrend,
     };
   }, [db]);
 
@@ -500,7 +262,6 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
       name: cats.find((c) => c.id === id)?.name || id,
       value: v.ciro,
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db.sales, db.productCategories]);
 
   const recentSales = useMemo(
@@ -812,7 +573,7 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
           <WidgetCard title="🍩 Kategori Dağılımı" subtitle="Satış kategorileri">
             <ResponsiveContainer width="100%" height={190}>
               <BarChart data={categoryRevenue.slice(0, 6)} margin={{ top: 8, right: 8, bottom: 4, left: -8 }}>
-                <XAxis dataKey="name" tick={{ ...chartAxisStyle, fontSize: 10 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" tick={chartAxisStyle} axisLine={false} tickLine={false} />
                 <YAxis
                   tick={chartAxisStyle}
                   axisLine={false}
@@ -1085,404 +846,5 @@ export default function Dashboard({ db, onTabChange, save }: Props) {
         </motion.div>
       </div>
     </div>
-  );
-}
-
-// ── Gün Sonu Kasa Sayımı Widget ──────────────────────────────────────────────
-function KasaSayimWidget({ db }: { db: DB }) {
-  const [sayimlar, setSayimlar] = useState<Record<string, string>>({});
-  const [kaydedildi, setKaydedildi] = useState(false);
-
-  const kasalar = db.kasalar || [
-    { id: 'nakit', name: 'Nakit', icon: '💵' },
-    { id: 'banka', name: 'Banka', icon: '🏦' },
-  ];
-
-  const sistemBakiyeleri = kasalar.reduce(
-    (acc, k) => {
-      acc[k.id] = db.kasa
-        .filter((e) => !e.deleted && e.kasa === k.id)
-        .reduce((s, e) => s + (e.type === 'gelir' ? e.amount : -e.amount), 0);
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
-  const handleKaydet = () => {
-    const farklar = kasalar.map((k) => {
-      const sayilan = parseFloat(sayimlar[k.id] || '0') || 0;
-      const sistem = sistemBakiyeleri[k.id] || 0;
-      return { kasa: k.name, sayilan, sistem, fark: sayilan - sistem };
-    });
-    const log =
-      `Gün Sonu Sayım — ${new Date().toLocaleString('tr-TR')}\n` +
-      farklar
-        .map(
-          (f) =>
-            `${f.kasa}: Sayılan ${formatMoney(f.sayilan)} | Sistem ${formatMoney(f.sistem)} | Fark ${f.fark >= 0 ? '+' : ''}${formatMoney(f.fark)}`,
-        )
-        .join('\n');
-    logger.info('dashboard', 'Kasa Sayım', { log });
-    setKaydedildi(true);
-    setTimeout(() => setKaydedildi(false), 3000);
-  };
-
-  return (
-    <WidgetCard title="🏦 Gün Sonu Kasa Sayımı" subtitle="Fiziksel sayım vs sistem">
-      <div className="dash-tips-list">
-        {kasalar.map((k, i) => {
-          const sistem = sistemBakiyeleri[k.id] || 0;
-          const sayilan = parseFloat(sayimlar[k.id] || '') || 0;
-          const fark = sayimlar[k.id] !== undefined ? sayilan - sistem : null;
-          return (
-            <motion.div
-              key={k.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, type: 'spring', stiffness: 260, damping: 24 }}
-              whileHover={{ x: 2, background: 'var(--bg-elevated)' }}
-              className="dash-kasa-row"
-            >
-              <div>
-                <div className="dash-kasa-info-label">
-                  {k.icon} {k.name}
-                </div>
-                <div className="dash-kasa-info-sistem">Sistem: {formatMoney(sistem)}</div>
-              </div>
-              <input
-                type="number"
-                inputMode="decimal"
-                placeholder="Sayılan tutar"
-                value={sayimlar[k.id] || ''}
-                onChange={(e) => setSayimlar((prev) => ({ ...prev, [k.id]: e.target.value }))}
-                className="dash-kasa-input"
-              />
-              {fark !== null && (
-                <div className="dash-kasa-fark">
-                  <div
-                    className="dash-kasa-fark-value"
-                    style={{
-                      color:
-                        Math.abs(fark) < 1
-                          ? 'var(--color-success)'
-                          : fark > 0
-                            ? 'var(--color-info)'
-                            : 'var(--color-danger)',
-                    }}
-                  >
-                    {fark >= 0 ? '+' : ''}
-                    {formatMoney(fark)}
-                  </div>
-                  <div className="dash-kasa-fark-label">
-                    {Math.abs(fark) < 1 ? '✓ Eşit' : fark > 0 ? 'Fazla' : 'Eksik'}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          );
-        })}
-        <motion.button
-          onClick={handleKaydet}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`dash-kasa-kaydet-btn ${kaydedildi ? 'saved' : 'unsaved'}`}
-        >
-          {kaydedildi ? '✓ Sayım Kaydedildi' : '💾 Sayımı Kaydet'}
-        </motion.button>
-      </div>
-    </WidgetCard>
-  );
-}
-
-// ── Yedek Hatırlatma Widget ───────────────────────────────────────────────────
-function YedekHatirlatmaWidget() {
-  const lastBackup = localStorage.getItem('sobaYonetim_lastBackup');
-  const daysSince = lastBackup ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / 86400000) : null;
-
-  const handleBackup = () => {
-    // exportJSON'u tetiklemek için custom event
-    window.dispatchEvent(new CustomEvent('soba:exportJSON'));
-    localStorage.setItem('sobaYonetim_lastBackup', new Date().toISOString());
-  };
-
-  const isUrgent = daysSince === null || daysSince >= 7;
-  const isWarn = daysSince !== null && daysSince >= 3 && daysSince < 7;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-      className={`dash-yedek-card ${isUrgent ? 'urgent' : isWarn ? 'warn' : 'ok'}`}
-    >
-      <motion.div
-        animate={isUrgent ? { scale: [1, 1.15, 1] } : {}}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="dash-yedek-icon"
-      >
-        {isUrgent ? '⚠️' : isWarn ? '💾' : '✅'}
-      </motion.div>
-      <div className="dash-yedek-info">
-        <div className="dash-yedek-title">
-          {daysSince === null
-            ? 'Hiç yedek alınmadı!'
-            : daysSince === 0
-              ? 'Bugün yedek alındı'
-              : `Son yedek: ${daysSince} gün önce`}
-        </div>
-        <div className="dash-yedek-desc">
-          {isUrgent
-            ? 'Veri kaybı riskini önlemek için yedek alın'
-            : isWarn
-              ? 'Yakında yedek almanız önerilir'
-              : 'Yedek durumu iyi'}
-        </div>
-      </div>
-      <motion.button
-        onClick={handleBackup}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className={`dash-yedek-btn ${isUrgent ? 'urgent' : 'ok'}`}
-      >
-        💾 Yedek Al
-      </motion.button>
-    </motion.div>
-  );
-}
-
-function WidgetCard({
-  title,
-  subtitle,
-  children,
-  extra,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  extra?: React.ReactNode;
-}) {
-  return (
-    <motion.div
-      whileHover={{
-        scale: 1.01,
-        borderColor: 'var(--border-strong)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-      }}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className="dash-widget-card"
-      style={{
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        background: 'var(--glass-bg, rgba(255,255,255,0.9))',
-        border: '1px solid var(--glass-border, rgba(255,255,255,0.06))',
-        boxShadow: 'var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-    >
-      <div className={`dash-widget-card-header${subtitle ? '' : ' no-sub'}`}>
-        <div>
-          <h3 className="dash-widget-card-title">{title}</h3>
-          {subtitle && <p className="dash-widget-card-subtitle">{subtitle}</p>}
-        </div>
-        {extra}
-      </div>
-      {children}
-    </motion.div>
-  );
-}
-
-function Oneriler({ db, onTabChange }: { db: DB; onTabChange: (tab: string) => void }) {
-  const tips = useMemo(() => {
-    const list: { icon: string; text: string; action: string; tab: string; level: 'warn' | 'info' | 'ok' }[] = [];
-    const outStock = getOutOfStockProducts(db);
-    const lowStock = getLowStockProducts(db);
-    if (outStock.length > 0)
-      list.push({
-        icon: '⚠️',
-        text: `${outStock.length} ürün stok bitti: ${outStock
-          .slice(0, 2)
-          .map((p) => p.name)
-          .join(', ')}${outStock.length > 2 ? '...' : ''}`,
-        action: 'Ürünlere Git',
-        tab: 'products',
-        level: 'warn',
-      });
-    if (lowStock.length > 0)
-      list.push({
-        icon: '📦',
-        text: `${lowStock.length} üründe az stok uyarısı var`,
-        action: 'Stoka Git',
-        tab: 'stock',
-        level: 'warn',
-      });
-
-    const overdueMusteri = getOverdueMusteri(db);
-
-    if (overdueMusteri.length > 0) {
-      const toplam = overdueMusteri.reduce((s, c) => s + c.balance, 0);
-      const enEski = overdueMusteri.sort((a, b) => (b.days ?? 0) - (a.days ?? 0))[0];
-      list.unshift({
-        icon: '🔴',
-        text: `${overdueMusteri.length} müşteride ${toplam.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })} gecikmiş alacak — en eskisi ${enEski.name} (${enEski.days}g)`,
-        action: 'Cari Hesaplar',
-        tab: 'cari',
-        level: 'warn',
-      });
-    } else {
-      const toplar = db.cari.filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0);
-      if (toplar.length > 0)
-        list.push({
-          icon: '💳',
-          text: `${toplar.length} müşteride toplam ${toplar.reduce((s, c) => s + c.balance, 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })} alacak var`,
-          action: 'Cari Hesaplar',
-          tab: 'cari',
-          level: 'info',
-        });
-    }
-
-    const pendingOrders = db.orders.filter((o) => o.status === 'bekliyor');
-    if (pendingOrders.length > 0)
-      list.push({
-        icon: '🚚',
-        text: `${pendingOrders.length} bekleyen sipariş var`,
-        action: 'Tedarikçilere Git',
-        tab: 'suppliers',
-        level: 'info',
-      });
-    const unmatched = db.bankTransactions.filter((t) => t.status === 'unmatched');
-    if (unmatched.length > 0)
-      list.push({
-        icon: '🏦',
-        text: `${unmatched.length} banka işlemi eşleştirilmemiş`,
-        action: 'Bankaya Git',
-        tab: 'bank',
-        level: 'info',
-      });
-    const todaySales = db.sales.filter(
-      (s) =>
-        !s.deleted && new Date(s.createdAt).toDateString() === new Date().toDateString() && s.status === 'tamamlandi',
-    );
-    if (todaySales.length === 0 && db.products.length > 0)
-      list.push({
-        icon: '💡',
-        text: 'Bugün henüz satış yapılmadı. Hızlı satış için + butonunu kullanın.',
-        action: 'Satışlara Git',
-        tab: 'sales',
-        level: 'ok',
-      });
-    if (db.products.length === 0)
-      list.push({
-        icon: '🏁',
-        text: 'Başlamak için önce ürün ekleyin.',
-        action: 'Ürün Ekle',
-        tab: 'products',
-        level: 'ok',
-      });
-    return list.slice(0, 5);
-  }, [db]);
-
-  if (tips.length === 0) return null;
-
-  const levelColor: Record<string, string> = { warn: '#f59e0b', info: '#3b82f6', ok: '#10b981' };
-  const levelBg: Record<string, string> = {
-    warn: 'rgba(245,158,11,0.08)',
-    info: 'rgba(59,130,246,0.08)',
-    ok: 'rgba(16,185,129,0.08)',
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-      className="dash-tips-card"
-    >
-      <div className="dash-tips-header">
-        <span className="dash-tips-icon">💡</span>
-        <h3 className="dash-tips-title">Akıllı Öneriler</h3>
-        <div className="dash-tips-divider" />
-      </div>
-      <div className="dash-tips-list">
-        {tips.map((tip, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06, type: 'spring', stiffness: 260, damping: 24 }}
-            whileHover={{ x: 4, borderColor: `${levelColor[tip.level]}40` }}
-            className="dash-tip-item"
-            style={{
-              background: levelBg[tip.level],
-              border: `1px solid ${levelColor[tip.level]}18`,
-              borderLeft: `3px solid ${levelColor[tip.level]}`,
-            }}
-          >
-            <span className="dash-tip-icon">{tip.icon}</span>
-            <span className="dash-tip-text">{tip.text}</span>
-            <motion.button
-              onClick={() => onTabChange(tip.tab)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="dash-tip-action"
-              style={{
-                background: `${levelColor[tip.level]}18`,
-                border: `1px solid ${levelColor[tip.level]}30`,
-                color: levelColor[tip.level],
-              }}
-            >
-              {tip.action} →
-            </motion.button>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="dash-legend-row">
-      <div className="dash-legend-dot" style={{ background: color }} />
-      <span className="dash-legend-label">{label}</span>
-    </div>
-  );
-}
-
-function QuickStat({ label, value, color, icon }: { label: string; value: string; color: string; icon: string }) {
-  return (
-    <motion.div
-      whileHover={{ x: 4, background: `${color}08` }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="dash-quickstat-row"
-    >
-      <motion.div
-        whileHover={{ scale: 1.15, rotate: 5 }}
-        className="dash-quickstat-icon"
-        style={{ background: `${color}15` }}
-      >
-        {icon}
-      </motion.div>
-      <span className="dash-quickstat-label">{label}</span>
-      <span className="dash-quickstat-value" style={{ color }}>
-        {value}
-      </span>
-    </motion.div>
-  );
-}
-
-function FormulaItem({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.04, y: -2 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="dash-formula-item"
-      style={{ background: `${color}10`, border: `1px solid ${color}25` }}
-    >
-      <div className="dash-formula-label">{label}</div>
-      <div className="dash-formula-value" style={{ color }}>
-        {formatMoney(value)}
-      </div>
-    </motion.div>
   );
 }

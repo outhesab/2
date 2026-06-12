@@ -395,7 +395,7 @@ export function applyAction(prev: DB, action: DBAction): DB {
             type: 'gelir' as const,
             category: 'satis',
             amount: total,
-            kasa: payment === 'nakit' ? 'nakit' : 'pos',
+            kasa: payment === 'nakit' ? 'nakit' : 'banka',
             description: `AI Satış: ${product.name} x${qty}`,
             relatedId: sale.id,
             createdAt: now,

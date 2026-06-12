@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.21.5',
+    date: '12 Haziran 2026',
+    title: 'Raporlar Modülerizasyonu ve Veri Bütünlüğü Fixleri',
+    summary: 'Reports.tsx sayfası performans ve bakımlanabilirlik için 6 alt modüle ayrıldı. Firebase senkronizasyonundaki race condition (G4) ve AI satışlarında ödeme yönlendirme hatası (G5) giderildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'Reports.tsx monolitik yapıdan çıkarılıp ReportsOzet, ReportsSatis, ReportsUrun, ReportsCari, ReportsKasa ve ReportsGenerator modüllerine bölündü.' },
+      { type: 'duzeltme', text: 'src/hooks/db/dbHelpers.ts içinde scheduleFirebaseSave ile Firebase kayıtları ardışık hale getirildi (G4).' },
+      { type: 'duzeltme', text: 'src/lib/aiActions.ts içinde satış ödemeleri nakit/banka ayrımı düzeltildi (G5).' },
+    ],
+  },
+  {
     version: '3.21.4',
     date: '11 Haziran 2026',
     title: 'Quantum Link Sessiz Hata Düzeltmesi',
