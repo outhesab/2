@@ -802,9 +802,9 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
               <span className={styles['dash-side-card-icon']}>🧩</span>
               <span className={styles['dash-side-card-title']}>Özet düzeni</span>
             </div>
-            <div className={styles['dash-widget-item']} className={`${styles['dash-widget-item']} ${styles['inactive']}`}>
+            <div className={`${styles['dash-widget-item']} ${styles['inactive']}`}>
               <span className={styles['dash-widget-item-icon']}>⚙️</span>
-              <span className={styles['dash-widget-item-label']} className={`${styles['dash-widget-item-label']} ${styles['inactive']}`}>
+              <span className={`${styles['dash-widget-item-label']} ${styles['inactive']}`}>
                 Widget yönetimi ve parlaklık kontrolleri Ayarlar &gt; Düzenleme Modu alanına taşındı.
               </span>
             </div>
