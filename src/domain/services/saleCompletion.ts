@@ -1,6 +1,6 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { SaleIntent, StockMovementV2, CashTransaction, CariUpdate, IntentResult } from "@/domain/types";
+import type { SaleIntent, StockMovementV2, CariUpdate, CashTransaction, IntentResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
  
 function calcSubtotal(items: SaleIntent["items"]): number {
@@ -119,13 +119,13 @@ export function completeSale(
     });
   }
  
-  let cashTransaction: CashTransaction | null = null;
+  let kasaEntry: CashTransaction | null = null;
   const tahsilatNum = intent.tahsilat ?? total;
   const kalan = total - tahsilatNum;
   const fiiliTahsilat = intent.tahsilat === undefined && intent.payment === "cari" ? 0 : tahsilatNum;
   if (fiiliTahsilat > 0) {
     const kasaId = intent.payment === "cari" ? "nakit" : intent.payment;
-    cashTransaction = {
+    kasaEntry = {
       amount: fiiliTahsilat,
       type: "gelir",
       category: "satis",
@@ -163,13 +163,13 @@ export function completeSale(
       version: 1,
     })),
   ];
-  if (cashTransaction) {
+  if (kasaEntry) {
     events.push({
       id: genId(),
       type: "cash.recorded" as const,
       aggregateId: saleId,
       aggregateType: "cash" as const,
-      payload: cashTransaction as unknown as Record<string, unknown>,
+      payload: kasaEntry as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
     });
@@ -191,8 +191,8 @@ export function completeSale(
     data: {
       dbUpdates: {
         sale,
-        stockMovements: stockMovements.map(sm => ({ id: sm.productId, newStock: sm.after })),
-        cashTransaction: cashTransaction ? [cashTransaction] : undefined,
+        stockMovements: stockMovements.map(sm => ({ id: sm.productId, productId: sm.productId, newStock: sm.after })),
+        cashTransaction: kasaEntry ? [kasaEntry] : undefined,
         cari: cariUpdate ? [cariUpdate] : undefined,
       },
       events,
@@ -224,19 +224,34 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
     },
   ];
 
+  const cariUpdate = sale.cariId && sale.payment === 'cari'
+    ? [{ cariId: sale.cariId, balanceChange: -(sale.total || 0) }]
+    : undefined;
+
+  const kasaEntry: CashTransaction = {
+    amount: sale.total || 0,
+    type: 'gider',
+    category: 'satis_iptal',
+    kasa: 'nakit',
+    description: `Satış iptal: ${sale.id}`,
+    relatedId: sale.id,
+  };
+
   return {
     ok: true,
     data: {
       dbUpdates: {
-        sale: { ...sale, status: 'iptal', updatedAt: nowIso },
+        sale: { ...sale, status: 'iptal', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
+        cashTransaction: [kasaEntry],
+        ...(cariUpdate ? { cari: cariUpdate } : {}),
       },
       events,
     },
   };
 }
 
-export function returnSale(saleId: string, qty?: number | Record<string, number>, db: DB): IntentResult {
+export function returnSale(saleId: string, db: DB, qty?: number | Record<string, number>): IntentResult {
   const sale = db.sales.find((s) => s.id === saleId);
   if (!sale) return { ok: false, error: "Satış bulunamadı" };
   if (sale.status === 'iptal') return { ok: false, error: "İptal edilmiş satış iade edilemez" };
@@ -296,7 +311,7 @@ export function returnSale(saleId: string, qty?: number | Record<string, number>
     ok: true,
     data: {
       dbUpdates: {
-        sale: { ...sale, status: 'iade', updatedAt: nowIso },
+        sale: { ...sale, status: 'iade', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
       },
       events,

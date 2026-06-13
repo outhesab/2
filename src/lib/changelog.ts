@@ -20,6 +20,22 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.23.3',
+    date: '13 Haziran 2026',
+    title: 'Domain Service Entegrasyonu — Agent islemYap Fix',
+    summary: 'Agent islemYap metotları domain service\'lere yönlendirildi. Testler 40/40 pass ediyor.',
+    changes: [
+      { type: 'duzeltme', text: 'SatisAgent/fiyatDuzelt: applyIntentResult üzerinden kaydediyor, direkt DB yazmıyor.' },
+      { type: 'duzeltme', text: 'SatisAgent/iptalEt: cari bakiyesi düzeltiliyor, kasa gider kaydı ekleniyor.' },
+      { type: 'duzeltme', text: 'StokAgent/stok_guncelle: processStockUpdate domain service\'ine yönlendirildi.' },
+      { type: 'duzeltme', text: 'saleCompletion.ts: iptal ve iade işlemlerine returnedAt alanı eklendi.' },
+      { type: 'duzeltme', text: 'applyIntentResult: CashTransaction → KasaEntry dönüşümü (id, createdAt, updatedAt).' },
+      { type: 'duzeltme', text: 'domain/types.ts: DBUpdates.cashTransaction tipi CashTransaction[] olarak düzeltildi.' },
+      { type: 'duzeltme', text: 'dbHelpers.ts: stock.updated event handler StockMovementV2.type\'yi koruyor.' },
+      { type: 'iyilestirme', text: 'SatisAgent.test.ts ve StokAgent.test.ts yeni domain mimarisine güncellendi — 411 test pass.' },
+    ],
+  },
+  {
     version: '3.23.2',
     date: '13 Haziran 2026',
     title: 'Firebase Config — fairbaseweb.json\'dan .env\'e',

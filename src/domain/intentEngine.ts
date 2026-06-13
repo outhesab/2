@@ -17,7 +17,7 @@ export function processIntent(intent: Intent, db: DB): IntentResult {
       result = cancelSale(intent.payload.saleId, db); 
       break;
     case "sale_iade": 
-      result = returnSale(intent.payload.saleId, intent.payload.qty, db); 
+      result = returnSale(intent.payload.saleId, db, intent.payload.qty); 
       break;
     case "sale_fiyat_duzelt": 
       result = correctSalePrice(intent.payload.saleId, intent.payload.yeniFiyat, db); 
@@ -41,7 +41,7 @@ export function processIntent(intent: Intent, db: DB): IntentResult {
       result = processCariAdd(intent.payload, db); 
       break;
     default:
-      return { ok: false, error: `Bilinmeyen intent tipi: ${intent.type}` };
+      return { ok: false, error: `Bilinmeyen intent tipi` };
   }
 
   if (result.ok && result.data) {

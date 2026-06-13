@@ -29,7 +29,7 @@ export function processStockUpdate(
   const movement: StockMovementV2 = {
     id: movementId,
     productId,
-    productName: product.productName,
+    productName: product.name,
     type: type === "giris" ? "iade" : "satis",
     amount: delta,
     before,

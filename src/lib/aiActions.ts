@@ -46,7 +46,7 @@ export function stripActions(text: string): string {
 // Lookup helpers
 // ---------------------------------------------------------------------------
  
-function findBySimpleRef(items: Array<{ id: string; name: string; deleted?: boolean }>, idKey: string, nameKey: string, payload: Record<string, unknown>) {
+function findBySimpleRef<T extends { id: string; name: string; deleted?: boolean }>(items: T[], idKey: string, nameKey: string, payload: Record<string, unknown>): T | null {
   const idRef = String(payload[idKey] || '').trim();
   const nameRef = String(payload[nameKey] || '').trim();
   if (idRef) {

@@ -3,8 +3,9 @@ import { logger } from '@/lib/logger';
 import { validateTransaction } from '@/lib/ruleEngine';
 import { saveToFirebase } from './sync';
 import { getUserSession } from '@/lib/userManager';
-import type { DB, RuleViolation, AuditEntry } from '@/types';
-import type { IntentResult } from '@/domain/types';
+import { genId } from '@/lib/utils-tr';
+import type { DB, StockMovement, RuleViolation, AuditEntry, KasaEntry } from '@/types';
+import type { IntentResult, StockMovementV2 } from '@/domain/types';
 
 // G4 fix: shared pending promise reference
 let _firebasePromise: Promise<void> | null = null;
@@ -104,17 +105,53 @@ export function saveAppliedState(
 
 export function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
   if (!data) return prev;
-  const { dbUpdates } = data;
+  const { dbUpdates, events } = data;
   const next: DB = { ...prev };
 
-  if (dbUpdates.products) {
+  if (dbUpdates.stockMovements) {
+    next.products = next.products.map((p) => {
+      const update = dbUpdates.stockMovements!.find((u) => u.id === p.id || u.productId === p.id);
+      return update ? { ...p, stock: update.newStock } : p;
+    });
+  } else if (dbUpdates.products) {
     next.products = next.products.map((p) => {
       const update = dbUpdates.products!.find((u) => u.id === p.id);
       return update ? { ...p, stock: update.newStock } : p;
     });
   }
 
-  if (dbUpdates.kasa) {
+  if (events && events.length > 0) {
+    const now = new Date().toISOString();
+    for (const evt of events) {
+      if (evt.type === 'stock.deducted' || evt.type === 'stock.returned' || evt.type === 'stock.updated') {
+        const sm = evt.payload as unknown as StockMovementV2;
+        if (sm && sm.productId) {
+          next.stockMovements = [...(next.stockMovements || []), {
+            id: sm.id || evt.id,
+            productId: sm.productId,
+            productName: sm.productName || '',
+            type: (evt.type === 'stock.returned' ? 'iade' : sm.type === 'iade' ? 'giris' : sm.type === 'satis' ? 'satis' : 'duzeltme') as StockMovement['type'],
+            amount: sm.amount || 0,
+            before: sm.before || 0,
+            after: sm.after || 0,
+            note: '',
+            date: now,
+          }];
+        }
+      }
+    }
+  }
+
+  if (dbUpdates.cashTransaction) {
+    const nowIso = new Date().toISOString();
+    const kasaEntries: KasaEntry[] = dbUpdates.cashTransaction.map((ct) => ({
+      id: genId(),
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      ...ct,
+    }));
+    next.kasa = [...(next.kasa || []), ...kasaEntries];
+  } else if (dbUpdates.kasa) {
     next.kasa = [...(next.kasa || []), ...dbUpdates.kasa!];
   }
 
@@ -134,7 +171,12 @@ export function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
   }
 
   if (dbUpdates.sale) {
-    next.sales = [...(next.sales || []), dbUpdates.sale!];
+    const existingIndex = next.sales.findIndex((s) => s.id === dbUpdates.sale!.id);
+    if (existingIndex >= 0) {
+      next.sales[existingIndex] = { ...next.sales[existingIndex], ...dbUpdates.sale };
+    } else {
+      next.sales = [...next.sales, dbUpdates.sale!];
+    }
   }
 
   return {

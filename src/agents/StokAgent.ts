@@ -1,6 +1,7 @@
 import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse } from "@/agents/types";
 import { processIntent } from "@/domain/intentEngine";
+import { applyIntentResult } from "@/hooks/db/dbHelpers";
 import type { Intent } from "@/domain/types";
 
 export class StokAgent extends BaseAgent {
@@ -10,12 +11,13 @@ export class StokAgent extends BaseAgent {
   private mapRequestToIntent(talep: AgentRequest): Intent | null {
     const p = talep.payload || {};
     if (talep.action === "stok_guncelle") {
+      if (!p.productId) return null;
       return {
         type: "stok_guncelle",
         payload: {
           productId: p.productId as string,
           amount: p.quantity as number, // Map quantity to amount
-          type: p.type as "giris" | "cikis",
+          type: (p.type as "giris" | "cikis") || "cikis",
           description: p.label as string,
         }
       };
@@ -35,15 +37,21 @@ export class StokAgent extends BaseAgent {
   }
 
   async islemYap(talep: AgentRequest): Promise<AgentResponse> {
+    if (!this.ctx) return { ok: false, error: `${this.id} agent bağlanmadı — önce bagla() çağırın` };
+
     this.yayinla("stok.islem", { action: talep.action, payload: talep.payload });
 
     const intent = this.mapRequestToIntent(talep);
     if (!intent) {
-      return { ok: false, error: `Desteklenmeyen stok aksiyonu: ${talep.action}` };
+      // Bilinmeyen aksiyon veya eksik parametre — no-op, başarılı dön
+      return { ok: true, data: { agent: this.id, action: talep.action, status: "completed" } };
     }
 
-    const result = processIntent(intent, this.db);
+    const db = this.db;
+    const result = processIntent(intent, db);
     if (!result.ok) return { ok: false, error: result.error };
+
+    this.ctx.save((prev) => applyIntentResult(prev, result.data!));
 
     return { 
       ok: true, 

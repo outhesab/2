@@ -56,7 +56,9 @@ export type Intent =
 
 export interface DBUpdates {
   products?: Array<{ id: string; newStock: number }>;
+  stockMovements?: Array<{ id: string; productId: string; newStock: number }>;
   kasa?: KasaEntry[];
+  cashTransaction?: CashTransaction[];
   cari?: CariUpdate[];
   newProduct?: Product;
   newCari?: Cari;

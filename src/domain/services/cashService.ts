@@ -1,6 +1,6 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { CashTransaction, IntentResult } from "@/domain/types";
+import type { IntentResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
 
 export function processCashTransaction(
@@ -29,7 +29,7 @@ export function processCashTransaction(
     amount,
     kasa,
     description: description || "",
-    relatedId: relatedId || "",
+    relatedId: id,
     createdAt: nowIso,
     updatedAt: nowIso,
   };

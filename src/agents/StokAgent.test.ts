@@ -104,7 +104,7 @@ describe('StokAgent', () => {
     expect(urun!.stock).toBe(7); // 10 - 3
 
     expect(nextDB.stockMovements).toHaveLength(1);
-    expect(nextDB.stockMovements[0].type).toBe('cikis');
+    expect(nextDB.stockMovements[0].type).toBe('satis');
     expect(nextDB.stockMovements[0].amount).toBe(-3);
     expect(nextDB.stockMovements[0].productId).toBe('p1');
   });
@@ -125,14 +125,14 @@ describe('StokAgent', () => {
     expect(urun!.stock).toBe(0); // Math.max(0, 2-5) = 0
   });
 
-  it('urun_ekle: aynı stok_guncelle mantığıyla çalışmalı', async () => {
+  it('stok_guncelle: ürün stoğu düşürülmeli', async () => {
     const db = makeDB({ products: [URUN] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
 
     const sonuc = await agent.islemYap({
-      action: 'urun_ekle',
-      payload: { productId: 'p1', quantity: 1, productName: 'Test Soba' },
+      action: 'stok_guncelle',
+      payload: { productId: 'p1', quantity: 1, productName: 'Test Soba', type: 'cikis' },
     });
 
     expect(sonuc.ok).toBe(true);

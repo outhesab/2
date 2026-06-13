@@ -73,14 +73,14 @@ export default function SaleDetail({ db }: Props) {
 
   const handleReturn = () => {
     showConfirm('Satış İade', 'Bu satışı iade etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
-      const sonuc = await getAgent('satis').iadeYap(sale.id);
+      const sonuc = await getAgent('satis').islemYap({ action: 'iadeYap', payload: { saleId: sale.id } });
       showToast(sonuc.ok ? 'İade işlemi tamamlandı.' : sonuc.error || 'İade başarısız', sonuc.ok ? 'success' : 'error');
     });
   };
 
   const handleCancel = () => {
     showConfirm('Satış İptal', 'Bu satışı iptal etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
-      const sonuc = await getAgent('satis').iptalEt(sale.id);
+      const sonuc = await getAgent('satis').islemYap({ action: 'iptalEt', payload: { saleId: sale.id } });
       showToast(sonuc.ok ? 'Satış iptal edildi.' : sonuc.error || 'İptal başarısız', sonuc.ok ? 'success' : 'error');
     });
   };

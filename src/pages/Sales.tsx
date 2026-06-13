@@ -126,15 +126,17 @@ export default function Sales({ db, save: _save }: Props) {
         saleDate,
       };
 
-      const sonuc = await getAgent('satis').yeniSatis(params);
+      const sonuc = await getAgent('satis').islemYap({ action: 'yeniSatis', payload: params as unknown as Record<string, unknown> });
       if (!sonuc.ok) {
         showToast(sonuc.error || 'Satış kaydedilemedi', 'error');
         return;
       }
 
+      const resultData = sonuc.data as { intentResult: { data: { dbUpdates: { sale: { id: string; total: number } } } } };
+      const saleData = resultData.intentResult.data.dbUpdates.sale;
       playSound('sale');
-      toast.success(`Satış kaydedildi! ${formatMoney(sonuc.data!.total)}`);
-      setReceiptId(sonuc.data!.saleId);
+      toast.success(`Satış kaydedildi! ${formatMoney(saleData.total)}`);
+      setReceiptId(saleData.id);
       setItems([]);
       setCariId('');
       setPayment('nakit');
@@ -151,7 +153,7 @@ export default function Sales({ db, save: _save }: Props) {
     showConfirm('İade / İptal', 'Bu satışı iade etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
       setLoading(true);
       try {
-        const sonuc = await getAgent('satis').iadeYap(id);
+        const sonuc = await getAgent('satis').islemYap({ action: 'iadeYap', payload: { saleId: id } });
         if (sonuc.ok) {
           showToast('İade işlemi tamamlandı!', 'success');
         } else {
@@ -167,7 +169,7 @@ export default function Sales({ db, save: _save }: Props) {
     showConfirm('Satış İptal', 'Bu satışı iptal etmek istiyor musunuz? Stoklar geri yüklenecek.', async () => {
       setLoading(true);
       try {
-        const sonuc = await getAgent('satis').iptalEt(id);
+        const sonuc = await getAgent('satis').islemYap({ action: 'iptalEt', payload: { saleId: id } });
         if (sonuc.ok) {
           showToast('Satış iptal edildi!', 'success');
         } else {
