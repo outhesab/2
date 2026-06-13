@@ -102,7 +102,63 @@ src/hooks/db/sync.ts:
   onSyncStatus(listener) → subscribe idle/saving/saved/error/loading
 ```
 
-## 7. AI Servis Katmanı
+## 7. Domain Servis Katmanı (YENİ — v3.23+)
+
+`src/domain/services/` altında saf fonksiyonlar. Bağımlılıkları yok, test edilebilir.
+
+```typescript
+// Sale — src/domain/services/saleCompletion.ts
+completeSale(intent: SaleIntent, db: DB) → IntentResult
+cancelSale(saleId: string, db: DB) → IntentResult
+returnSale(saleId: string, db: DB, qty?) → IntentResult
+correctSalePrice(saleId: string, yeniFiyat, db: DB) → IntentResult
+
+// Cash — src/domain/services/cashService.ts
+processCashTransaction(type: 'gelir'|'gider', payload, db: DB) → IntentResult
+
+// Stock — src/domain/services/stockService.ts
+processStockUpdate(payload, db: DB) → IntentResult
+processProductAdd(payload, db: DB) → IntentResult
+
+// Cari — src/domain/services/cariService.ts
+processCariTahsilat(payload, db: DB) → IntentResult
+processCariAdd(payload, db: DB) → IntentResult
+```
+
+Tümü `IntentResult` döndürür:
+```typescript
+interface IntentResult {
+  ok: boolean;
+  error?: string;
+  data?: {
+    dbUpdates: DBUpdates;  // Değişiklikler
+    events: DomainEvent[]; // Yayınlanacak eventler
+  };
+}
+```
+
+### Domain Kullanımı
+
+```typescript
+// Doğrudan domain servis çağrısı (agent'sız)
+import { completeSale } from '@/domain';
+const result = completeSale(intent, db);
+
+// Agent üzerinden (orchestration için)
+const result = await getAgent('satis').islemYap({ action: 'yeniSatis', payload });
+```
+
+### Agent Akışı (Güncel)
+
+Agent'lar **thin wrapper** haline geldi:
+1. `mapRequestToIntent()` — isteği Intent'e çevir
+2. `processIntent()` — domain servise yönlendir
+3. `applyIntentResult()` — dbUpdates'i localStorage'a yaz
+4. Event'leri yayınla
+
+Eski `orchestrator.ts` ve `dispatchAgentFlow()` kaldırıldı (C1).
+
+## 8. AI Servis Katmanı
 
 ```
 src/lib/deepseek.ts:
@@ -114,20 +170,18 @@ src/lib/aiApi.ts:
   askClaude(systemPrompt, userMessage) → Response
   askGemini(systemPrompt, userMessage) → Response
 
-src/lib/aiActions.ts (603 satır):
+src/lib/aiActions.ts (338 satır):
   parseAIResponse(text) → AIAction[]
   validateAction(action) → boolean
-  applyAction(action, db) → DB
+  applyAction(action, db) → DB (artık applyIntentResult kullanır)
   fallbackChain(action, db) → revisedAction
-  // AI'nın ürettiği DB mutasyonlarını parse eder, doğrular, uygular
 
-src/lib/aiOffline.ts (489 satır):
+src/lib/aiOffline.ts (341 satır):
   offlineReply(userMessage, db) → string
   buildContext(db) → string (DB özeti AI prompt'u için)
-  // İnternet yokken AI yanıtı üretir (pattern eşleştirme + template)
 ```
 
-## 8. Raporlama Servisleri
+## 9. Raporlama Servisleri
 
 ```
 src/lib/excelExport.ts:

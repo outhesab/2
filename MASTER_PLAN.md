@@ -1,8 +1,11 @@
 # PARSPEL — Master İyileştirme Planı
 
 > Oluşturulma: 5 Haziran 2026
-> Son güncelleme: 10 Haziran 2026
-> Kapsam: ~136 madde (40+ tamamlandı, çoğu v3.7.1-3'te düzeltildi)
+> Son güncelleme: 13 Haziran 2026
+> Kapsam: ~70 madde (çoğu tamamlandı, v3.23.3 itibarıyla güncel)
+> 
+> ⚠️ Bu doküman v3.7.x referansıyla yazılmıştı. Kod şu an v3.23.3'te.
+> Çoğu madde tamamlandı. Güncel durum için AGENTS.md (Bölüm 9) bakın.
 
 ---
 
@@ -36,18 +39,18 @@
 
 ---
 
-## C — MİMARİ (8) — 2/8 tamam
+## C — MİMARİ (8) — 5/8 tamam
 
 | # | Sorun | Dosya | Durum |
 |---|-------|-------|-------|
-| C1 | `processIntent()` geçişi yarım: orchestrator deprecated ama hâlâ çalışıyor | `agents/` vs `domain/` | ✅ TAMAMLANDI |
-| C2 | Çift event sistemi: AgentBus + domainEventBus, ikisi de mitt | `agents/AgentBus.ts`, `domain/eventBus.ts` | ⬜ |
-| C3 | useDB monolit: 640 satırda 7 sorumluluk | `hooks/db/core.ts` | ✅ ZATEN BÖLÜNMÜŞ (index.ts 192 satır, 7 dosya) |
-| C4 | Agent sistemi over-engineering: 7 agent + permission + bus + orchestrator | `agents/` | ⬜ |
-| C5 | localStorage 5MB limiti aşılabilir, Firebase 1MB/doc limiti aşılabilir | `sync.ts:82` | ⬜ |
-| C6 | Settings.tsx hâlâ 4394 satır — bölme bitmemiş | `pages/Settings.tsx` | ✅ ZATEN BÖLÜNMÜŞ (292 satır, 19 alt modül) |
-| C7 | excel-merge.ts 769 satır — 4 parser + merge + diff + search + clean tek dosyada | `lib/excel-merge.ts` | ⬜ (654 satır mevcut) |
-| C8 | PWA manifest.json yok, service worker yok | `public/` | ⬜ |
+| C1 | `processIntent()` geçişi: orchestrator silindi, domain servisler tamam | `agents/` vs `domain/` | ✅ TAMAMLANDI |
+| C2 | Çift event sistemi: AgentBus + domainEventBus | `agents/AgentBus.ts`, `domain/eventBus.ts` | ⬜ Ertelendi |
+| C3 | useDB monolit | `hooks/db/` | ✅ 7 dosyaya bölündü |
+| C4 | Agent sadeleştirme | `agents/` | ⬜ |
+| C5 | localStorage 5MB limiti aşılabilir | `sync.ts:82` | ⬜ |
+| C6 | Settings.tsx | `pages/Settings.tsx` | ✅ 322 satır + 13 modül |
+| C7 | excel-merge.ts 742 satır | `lib/excel-merge.ts` | ⬜ |
+| C8 | PWA manifest + SW | `public/` | ✅ VitePWA ile aktif |
 
 ---
 
@@ -94,7 +97,7 @@
 
 ---
 
-## G — VERİ BÜTÜNLÜĞÜ (6) — 4/6 tamam
+## G — VERİ BÜTÜNLÜĞÜ (6) — ✅ 6/6 tamam
 
 | # | Sorun | Dosya:Sati | Durum |
 |---|-------|------------|-------|
@@ -161,41 +164,48 @@
 
 ---
 
-## L — WEEKLY_PLAN'DAKİ YAPILMAMIŞ 57 İŞ
+## L — WEEKLY_PLAN DURUMU
 
-> WEEKLY_PLAN.md'de 57 task'tan 38'i tamamlandı, 19'u kaldı
+> WEEKLY_PLAN.md'de 57 task'tan 52'si tamamlandı, 5'i kaldı (v3.23.2)
 
 | Hafta | Konu | Task Sayısı |
 |-------|------|:-----------:|
-| Week 1 | Güvenlik — DOMPurify, XSS, API key rotation, CSP | 7 |
-| Week 2 | Hata yönetimi — boş catch, logger, crash reporting | 5 |
-| Week 3 | Tip güvenliği — any temizliği, noUnusedLocals | 5 |
-| Week 4 | Test kapsamı — testing-library, lib testleri | 13 |
-| Week 5 | Test kapsamı — agent testleri, DB testleri | 8/12 |
-| Week 6 | Refactor — Settings/AIAsistan/Fatura bölme, dead code | 15 |
+| Week 1 | Güvenlik — DOMPurify, XSS, API key rotation, CSP | 7 ✅ |
+| Week 2 | Hata yönetimi — boş catch, logger, crash reporting | 5 ✅ |
+| Week 3 | Tip güvenliği — any temizliği, noUnusedLocals | 5 ✅ |
+| Week 4 | Test kapsamı — testing-library, lib testleri | 13 ✅ |
+| Week 5 | Test kapsamı — agent testleri, DB testleri | 12 (11✅) |
+| Week 6 | Refactor — Settings/AIAsistan/Fatura bölme, dead code | 15 ✅ |
+| **TOPLAM** | | **57 (52✅ 5⬜)** |
 
 ---
 
-## P — SAYFA BOYUT İHLALLERİ (11) — YENİ KEŞFEDİLDİ
+## P — SAYFA BOYUT İHLALLERİ (9)
 
 > **Kural:** Page component max 800 satır (AGENTS.md)  
-> **Gerçek Durum:** 11 sayfa kuralı ihlal ediyor  
+> **Gerçek Durum (v3.23.2):** 9 sayfa kuralı ihlal ediyor
 
 | # | Dosya | Satır | Aşım | Öncelik |
 |---|-------|------|------|---------|
-| P1 | `pages/Reports.tsx` | 116 | - | ✅ TAMAMLANDI |
-| P2 | `pages/Dashboard.tsx` | 823 | +23 | 🟡 DÜŞÜK |
-| P3 | `pages/AIAsistan.tsx` | 1354 | +554 | 🔴 KRİTİK |
-| P4 | `pages/Suppliers.tsx` | 1265 | +465 | 🔴 YÜKSEK |
-| P5 | `pages/settings/SettingsBackup.tsx` | 1156 | +356 | 🔴 YÜKSEK |
-| P6 | `pages/Monitor.tsx` | 1147 | +347 | 🟡 ORTA |
-| P7 | `pages/BugHunter.tsx` | 1070 | +270 | 🟡 ORTA |
-| P8 | `pages/Bank.tsx` | 1010 | +210 | 🟡 ORTA |
-| P9 | `pages/Cari.tsx` | 977 | +177 | 🟡 ORTA |
-| P10 | `pages/Products.tsx` | 811 | +11 | 🟢 DÜŞÜK |
-| P11 | `pages/AnomaliOneri.tsx` | 793 | - | ✅ TAMAMLANDI |
+| P1 | `pages/Suppliers.tsx` | 1298 | +498 | 🔴 KRİTİK |
+| P2 | `pages/settings/SettingsBackup.tsx` | 1206 | +406 | 🔴 YÜKSEK |
+| P3 | `pages/Monitor.tsx` | 1178 | +378 | 🔴 YÜKSEK |
+| P4 | `pages/BugHunter.tsx` | 1092 | +292 | 🟡 ORTA |
+| P5 | `pages/Bank.tsx` | 1031 | +231 | 🟡 ORTA |
+| P6 | `pages/Cari.tsx` | 1006 | +206 | 🟡 ORTA |
+| P7 | `pages/Dashboard.tsx` | 851 | +51 | 🟢 DÜŞÜK |
+| P8 | `pages/Products.tsx` | 833 | +33 | 🟢 DÜŞÜK |
+| P9 | `pages/AnomaliOneri.tsx` | 819 | +19 | 🟢 DÜŞÜK |
 
-**Tavsiye:** P1-P5 acil refactor gerektirir (toplam ~20 saat)
+### ✅ Bölünen Sayfalar
+| Dosya | Eski | Şimdi | |
+|-------|------|-------|--|
+| Reports.tsx | 1755 satır | 124 satır + 7 modül | ✅ |
+| AIAsistan.tsx | 1354 satır | 562 satır + 3 modül | ✅ |
+| Fatura.tsx | Devasa | 360 satır + 5 modül | ✅ |
+| Settings.tsx | 4394 satır | 322 satır + 13 modül | ✅ |
+
+**Tavsiye:** P1-P6 acil refactor gerektirir (toplam ~20 saat)
 
 ---
 
@@ -226,14 +236,13 @@
 
 ---
 
-## UYGULAMA SIRASI ÖNERİSİ (GÜNCELLENMİŞ)
+## KALAN İŞLER (Güncel — v3.23.3)
 
-```
-Hafta 1-2: G4, G5 (kritik buglar) + P1, P2 (Reports, Dashboard refactor)
-Hafta 3-4: P3, P4, P5 (AIAsistan, Suppliers, SettingsBackup refactor)
-Hafta 5-6: P6-P9 (Monitor, BugHunter, Bank, Cari refactor)
-Hafta 7:   C7 (excel-merge bölme) + F (performans)
-Hafta 8:   H (test) + I (spes) + J (accessibility)
+```text
+Hafta 1:   Suppliers.tsx böl (~4 saat)
+Hafta 2:   SettingsBackup.tsx + Monitor.tsx böl (~7 saat)
+Hafta 3:   BugHunter.tsx + Bank.tsx + Cari.tsx böl (~9 saat)
+Opsiyonel: C7 (excel-merge bölme), Domain testleri, Doküman güncelleme
 ```
 
-**Toplam tahmini iş:** ~40 saat (önceki tahmin: 100 saat ❌)
+**Toplam tahmini iş:** ~20 saat (önceki tahmin: 100 saat ❌ → 40 saat ❌ → 20 saat ✅)

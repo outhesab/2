@@ -33,6 +33,10 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'domain/types.ts: DBUpdates.cashTransaction tipi CashTransaction[] olarak düzeltildi.' },
       { type: 'duzeltme', text: 'dbHelpers.ts: stock.updated event handler StockMovementV2.type\'yi koruyor.' },
       { type: 'iyilestirme', text: 'SatisAgent.test.ts ve StokAgent.test.ts yeni domain mimarisine güncellendi — 411 test pass.' },
+      { type: 'duzeltme', text: 'DEVELOPMENT.md: orchestrator referansı kaldırıldı, PWA asset sayısı 74 olarak düzeltildi.' },
+      { type: 'duzeltme', text: 'CHANGELOG.md: eksik sürümler (v3.8→v3.23) eklendi.' },
+      { type: 'duzeltme', text: 'README.md: chunk boyutları ve test dizin bilgisi güncellendi.' },
+      { type: 'duzeltme', text: 'MASTER_PLAN.md: versiyon v3.23.3 olarak güncellendi.' },
     ],
   },
   {

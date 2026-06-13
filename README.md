@@ -113,7 +113,7 @@ pnpm run test:run
 pnpm exec vitest run src/lib/kapsamli-senaryo.test.ts
 ```
 
-Test dosyaları `src/lib/` ve `src/__tests__/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
+Test dosyaları `src/lib/`, `src/agents/`, `src/hooks/db/` ve `src/__tests__/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
 
 ---
 
@@ -127,17 +127,16 @@ pnpm run build
 
 | Chunk | Boyut | İçerik |
 |-------|-------|--------|
-| `index` | 245 KB | Ana uygulama kodu |
-| `vendor` | 235 KB | React 19 + ReactDOM |
-| `firebase` | 163 KB | Firebase Firestore SDK |
-| `charts` | 385 KB | Recharts / D3 grafikler |
-| `animations` | 129 KB | Framer Motion |
-| `ui` | 34 KB | Sonner (toast) |
-| `exceljs` | 1 MB | Excel işleme (lazy load) |
+| `index` | 366 KB | Ana uygulama kodu |
+| `vendor` | 234 KB | React 19 + ReactDOM |
+| `firebase` | 165 KB | Firebase Firestore SDK |
+| `charts` | 382 KB | Recharts / D3 grafikler |
+| `animations` | 128 KB | Framer Motion |
+| `exceljs` | 424 KB | Excel işleme (lazy load) |
 
 ### PWA
 
-Service Worker + Web Manifest aktif. 53 asset precache ile offline çalışma desteklenir. Google Fonts CacheFirst (1 yıl), Firebase API NetworkOnly olarak yapılandırılmıştır.
+Service Worker + Web Manifest aktif. 74 asset precache ile offline çalışma desteklenir. Google Fonts CacheFirst (1 yıl), Firebase API NetworkOnly olarak yapılandırılmıştır.
 
 Detaylı rapor: `PERFORMANCE_REPORT.md`
 

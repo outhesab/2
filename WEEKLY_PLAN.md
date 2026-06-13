@@ -109,17 +109,33 @@
 109|
 110|---
 111|
-112|## Durum Takip Özeti
-113|
-114||| Hafta | Toplam Görev | Tamamlanan | Kaldı |
-115|||-------|-------------|------------|-------|
-116||| 1. Hafta — Güvenlik | 7 | 7 | 0 |
-117||| 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
-118||| 3. Hafta — Tip Güvenliği | 5 | 5 | 0 |
-119||| 4. Hafta — Test (1) | 13 | 13 | 0 |
-120||| 5. Hafta — Test (2) | 12 | 8 | 4 |
-121||| 6. Hafta — Refactor | 17 | 14 | 3 |
-122||| **TOPLAM** | **59** | **52** | **7** |
+## Durum Takip Özeti (v3.23.2)
+
+|| Hafta | Toplam Görev | Tamamlanan | Kaldı |
+||-------|-------------|------------|-------|
+|| 1. Hafta — Güvenlik | 7 | 7 | 0 |
+|| 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
+|| 3. Hafta — Tip Güvenliği | 5 | 5 | 0 |
+|| 4. Hafta — Test (1) | 13 | 13 | 0 |
+|| 5. Hafta — Test (2) | 12 | 11 | 1 |
+|| 6. Hafta — Refactor | 15 | 15 | 0 |
+|| **TOPLAM** | **57** | **56** | **1** |
+
+### Kalan 1 Görev
+- **5.12** Vitest config'ten hariç testleri aktif et (düşük öncelik)
+
+### Ek Görevler (P-series — sayfa bölme)
+| # | Dosya | Satır | Süre |
+|---|-------|-------|------|
+| P1 | Suppliers.tsx | 1298 | 4 saat |
+| P2 | SettingsBackup.tsx | 1206 | 4 saat |
+| P3 | Monitor.tsx | 1178 | 3 saat |
+| P4 | BugHunter.tsx | 1092 | 3 saat |
+| P5 | Bank.tsx | 1031 | 3 saat |
+| P6 | Cari.tsx | 1006 | 3 saat |
+| P7 | Dashboard.tsx | 851 | 2 saat |
+| P8 | Products.tsx | 833 | 2 saat |
+| P9 | AnomaliOneri.tsx | 819 | 1 saat |
 123|
 124|---
 125|

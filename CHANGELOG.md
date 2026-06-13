@@ -6,6 +6,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [3.23.3] - 13 Haziran 2026
+
+### Hata Düzeltmeleri
+- Agent islemYap pipeline fix: SatisAgent/StokAgent domain servislere yönlendirildi
+- cancelSale: cari bakiyesi düzeltiliyor, kasa gider kaydı ekleniyor
+- returnSale: returnedAt alanı eklendi
+- applyIntentResult: CashTransaction → KasaEntry dönüşümü (id, createdAt, updatedAt)
+- 411 test pass, 40/40 test dosyası
+
+## [3.23.2] - 13 Haziran 2026
+
+### Firebase Config
+- Firebase config değerleri .env'ye taşındı, Firebase sync çalışır durumda
+
+## [3.23.1] - 13 Haziran 2026
+
+### Bakım
+- AIAsistan.tsx modülerizasyonu: ChatPanel, MessageList, ActionHistory, index.tsx
+- any tipleri temizlendi
+- orchestrator.ts silindi (C1), processIntent + applyIntentResult kullanılıyor
+- dead code temizliği (6.8): not-found.tsx, utils-tr.ts, version.ts, appConfig.ts
+
+## [3.22.1] - 12 Haziran 2026
+
+### Bakım
+- Reports.tsx bölündü (1755→124 satır + 7 modül)
+- Dashboard.tsx bölündü (1425→851 satır + 7 modül)
+- Fatura.tsx bölündü → 5 alt modül
+- Inline CSS → CSS Module (16 dosya, ~162 inline style)
+- G4: Firebase sync Queue ile düzeltildi
+- G5: Kasa/POS routing payment alanından
+
 ## [3.7.1] - 6 Haziran 2026
 
 ### Güvenlik

@@ -5,37 +5,47 @@ Bu belge, PARSPEL projesinin teknik yapısını ve geliştirme akışını açı
 ## Proje Yapısı
 
 ```
-clean-project/
-├── src/
-│   ├── main.tsx              # Entry point
-│   ├── App.tsx               # Root component (routing, auth, layout)
-│   ├── index.css             # Design tokens + global styles
-│   │
-│   ├── agents/               # 7 ajanlı multi-agent sistemi
-│   │   ├── BaseAgent.ts      # Soyut temel sınıf
-│   │   ├── AgentBus.ts       # mitt event emitter
-│   │   ├── orchestrator.ts   # Ajan orkestrasyonu
-│   │   └── *Agent.ts         # Satis, Stok, Kasa, Cari, Fatura, Rapor, DeepSeek
-│   │
-│   ├── components/           # Bileşenler
-│   │   ├── ui/               # 55 shadcn/ui primitive
-│   │   ├── layout/           # 8 layout bileşeni (Sidebar, Header, FAB, vb.)
-│   │   └── *.tsx             # 15 özel bileşen
-│   │
-│   ├── pages/                # 36 sayfa + 8 excelmerge alt sayfası
-│   ├── hooks/                # 11 hook + db/ alt modülleri
-│   ├── lib/                  # 41 yardımcı modül
-│   ├── stores/               # Zustand agentStore
-│   ├── theme/                # 3 premium tema
-│   ├── types/                # Tip tanımları
-│   ├── db/                   # IndexedDB/Dexie şeması
-│   └── config/               # Tab konfigürasyonu
+```
+src/
+├── main.tsx                  # Entry point
+├── App.tsx                   # Root component (routing, auth, layout)
+├── index.css                 # Design tokens + global styles
 │
-├── docs/                     # Teknik dokümanlar
-├── e2e/                      # Playwright testleri
-├── scripts/                  # Test ve yardımcı scriptler
-├── .github/workflows/        # CI/CD
-└── .simple-git-hooks/        # Pre-commit hook
+├── agents/                   # Multi-agent sistemi (thin wrapper)
+│   ├── BaseAgent.ts          # Soyut temel sınıf
+│   ├── AgentBus.ts           # mitt event emitter
+│   ├── index.ts              # Agent registry
+│   └── *Agent.ts             # Satis, Stok, Kasa, Cari, Fatura, Rapor, DeepSeek
+│
+├── domain/                   # Domain-Driven katmanı (YENİ)
+│   ├── types.ts              # Intent, IntentResult, DBUpdates
+│   ├── eventBus.ts           # DomainEventBus (typed pub/sub)
+│   ├── intentEngine.ts       # Central router: processIntent(intent, db)
+│   └── services/             # Saf fonksiyon servisler
+│       ├── saleCompletion.ts # completeSale, cancelSale, returnSale
+│       ├── cashService.ts    # processCashTransaction
+│       ├── stockService.ts   # processStockUpdate, processProductAdd
+│       └── cariService.ts    # processCariTahsilat, processCariAdd
+│
+├── components/               # Bileşenler
+│   ├── ui/                   # shadcn/ui primitives
+│   ├── layout/               # Layout bileşenleri (Sidebar, Header, FAB)
+│   └── *.tsx                 # Özel bileşenler
+│
+├── pages/                    # Sayfalar + alt modüller
+├── hooks/                    # React hook'ları
+│   └── db/                   # Veri katmanı (7 dosya)
+├── lib/                      # Utility kütüphaneleri
+├── stores/                   # Zustand agentStore
+├── theme/                    # Premium temalar
+├── types/                    # Tip tanımları
+└── config/                   # Tab konfigürasyonu
+
+docs/                         # Teknik dokümanlar
+e2e/                          # Playwright testleri
+.github/workflows/            # CI/CD
+.simple-git-hooks/            # Pre-commit hook
+```
 ```
 
 ## Mimari Kararlar
@@ -155,10 +165,10 @@ pnpm exec vitest run --coverage
 
 ## Performans
 
-- Ana JS bundle: ~245 KB (hedef: < 300 KB)
-- Toplam JS: ~3.0 MB
+- Ana JS bundle: ~366 KB (hedef: < 300 KB)
+- Toplam JS: ~2.9 MB
 - Lazy loading: Tüm sayfalar `React.lazy()` ile
-- PWA: 53 asset precache, offline çalışma
+- PWA: 74 asset precache, offline çalışma
 
 ## Sık Karşılaşılan Sorunlar
 

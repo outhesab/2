@@ -1,6 +1,13 @@
 # PARSPEL — Test Stratejisi
 
-> Versiyon: 3.10.0 | Tarih: 30 Mayıs 2026
+> Versiyon: 3.23.2 | Tarih: 13 Haziran 2026
+
+## Genel Durum
+
+- **Test dosyası:** 41 adet
+- **Total test:** 412 (411 ✅ / 1 ⬜)
+- **Süre:** ~49 saniye
+- **Framework:** Vitest + fast-check (property-based)
 
 ## 1. Test Piramidi
 

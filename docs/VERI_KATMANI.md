@@ -24,7 +24,7 @@
 | IndexedDB | Yedek | ~10ms | Tarayıcı silinmezse kalıcı |
 | Firebase | Bulut senkron | ~300ms | İnternet bağlantısına bağlı |
 
-## 2. Save Pipeline
+## 2. Save Pipeline (v3.23+)
 
 ```
 save(updater)
@@ -38,6 +38,41 @@ save(updater)
   ├─ 5. localStorage.setItem('sobaYonetim', JSON.stringify(nextDB))
   ├─ 6. IndexedDB'ye snapshot yedek (debounce: 5sn)
   └─ 7. Firebase sync (debounce: 1.2sn, 3 retry, sadece online ise)
+```
+
+### Domain Pipeline (Agent'lar için)
+
+Agent'lar artık domain servislerini kullanır:
+
+```
+agent.islemYap({ action, payload })
+  → mapRequestToIntent() → Intent
+  → processIntent(intent, db) → IntentResult { dbUpdates, events }
+  → applyIntentResult(prevDB, dbUpdates) → nextDB
+  → save(nextDB) → persist
+```
+
+`applyIntentResult()` (`src/hooks/db/dbHelpers.ts`):
+```typescript
+function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
+  // dbUpdates'teki products, sales, kasa, cari değişikliklerini prev DB'e uygular
+  // events dizisindeki event'leri domainEventBus üzerinden yayınlar
+}
+```
+
+### DBUpdates Tipi
+
+```typescript
+interface DBUpdates {
+  products?: Array<{ id: string; newStock: number }>;
+  stockMovements?: StockMovementV2[];
+  kasa?: KasaEntry[];
+  cashTransaction?: KasaEntry[];
+  cari?: CariUpdate[];
+  newProduct?: Product;
+  newCari?: Cari;
+  sale?: Sale;
+}
 ```
 
 **Kurallar:**

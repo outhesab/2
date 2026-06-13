@@ -2,27 +2,39 @@
 
 > Versiyon: 3.7.0 | Tarih: 29 Mayıs 2026
 
-## 1. Mimarî
+## 1. Mimarî (v3.23+)
 
 ```
-src/agents/
-├── BaseAgent.ts      # Soyut sınıf — bagla(), yetkiKontrolu(), yayinla()
-├── AgentBus.ts       # mitt event emitter singleton
-├── index.ts          # Agent registry (lazy singleton factory)
-├── orchestrator.ts   # planAgentFlow(), dispatchAgentFlow()
-├── types.ts          # AgentId, AgentPermission, AgentRequest/Response
-├── SatisAgent.ts     # Satış işlemleri (372 satır)
-├── StokAgent.ts      # Stok güncelleme
-├── KasaAgent.ts      # Kasa hareketleri
-├── CariAgent.ts      # Cari hesap yönetimi
-├── FaturaAgent.ts    # Fatura oluşturma
-├── RaporAgent.ts     # Raporlama / aktivite kaydı
-├── DeepSeekAgent.ts  # AI destekli analiz (146 satır)
-├── baseAgent.test.ts # BaseAgent testi
-└── AGENTS.md         # Dokümantasyon
-
-stores/
-└── agentStore.ts     # Zustand: activeAgent, busy, lastEvent
+src/
+├── agents/           # 7 agent — thin wrapper (islemYap → processIntent)
+│   ├── BaseAgent.ts      # Soyut sınıf — bagla(), islemYap(), yayinla()
+│   ├── AgentBus.ts       # mitt event emitter singleton
+│   ├── index.ts          # Agent registry + getAgent() overloads
+│   ├── SatisAgent.ts     # Satış işlemleri
+│   ├── StokAgent.ts      # Stok güncelleme
+│   ├── KasaAgent.ts      # Kasa hareketleri
+│   ├── CariAgent.ts      # Cari hesap yönetimi
+│   ├── FaturaAgent.ts    # Fatura oluşturma
+│   ├── RaporAgent.ts     # Raporlama / aktivite kaydı
+│   ├── DeepSeekAgent.ts  # AI destekli analiz
+│   └── AGENTS.md         # Dokümantasyon
+│
+├── domain/           # Domain-Driven katmanı (YENİ)
+│   ├── types.ts          # Intent, IntentResult, DBUpdates, SaleIntent
+│   ├── eventBus.ts       # DomainEventBus (typed pub/sub)
+│   ├── intentEngine.ts   # Central router: processIntent(intent, db)
+│   └── services/
+│       ├── saleCompletion.ts  # completeSale, cancelSale, returnSale
+│       ├── cashService.ts     # processCashTransaction
+│       ├── stockService.ts    # processStockUpdate, processProductAdd
+│       └── cariService.ts     # processCariTahsilat, processCariAdd
+│
+├── lib/              # Utility kütüphaneleri
+├── hooks/db/         # Veri katmanı (7 dosya)
+├── pages/            # 44 sayfa + alt modüller
+├── components/       # UI bileşenleri
+├── stores/           # Zustand agentStore
+└── theme/            # Premium temalar
 ```
 
 ## 2. AgentId'ler ve İzinler
@@ -95,7 +107,7 @@ AgentPermission: "{agentId}.{read|write}"
 | **RaporAgent** | Aktivite kaydı, istatistik | `raporKaydet(action, detail)` |
 | **DeepSeekAgent** | AI analiz, öneri | `analizYap(soru, db)`, `oneriGetir(db)` |
 
-## 5. İletişim Modeli
+## 5. İletişim Modeli (v3.23+)
 
 ```
 AgentBus (mitt singleton):
@@ -103,12 +115,19 @@ AgentBus (mitt singleton):
   - agentBus.on(type: string, handler: (event: AgentEvent) => void)
   - AgentEvent: { from, type, payload?, createdAt }
 
+DomainEventBus (typed event bus):
+  - domainEventBus.emit(event: DomainEvent)
+  - Her domain servis işlem sonucunda event yayınlar
+
 BaseAgent:
   - bagla(ctx: AgentContext) → { getDB, save } atar
   - yayinla(type, payload) → AgentBus.emit()
-  - onEvent(handler) → AgentBus.on()
+  - islemYap(talep) → mapRequestToIntent() → processIntent() → applyIntentResult() → save()
 
-Orchestrator:
-  - planAgentFlow(actionType) → AgentId[] (sıralı ajan listesi)
-  - dispatchAgentFlow(actionType, payload) → void (sırayla dispatch)
+İşlem Pipeline'ı:
+  Page → agent.islemYap({ action, payload })
+       → mapRequestToIntent() → Intent
+       → processIntent(intent, db) → domain service → { dbUpdates, events }
+       → applyIntentResult(prevDB, dbUpdates) → save()
+       → return result to page
 ```

@@ -135,6 +135,34 @@ Kurtarma sırası: localStorage bozuksa → IndexedDB → `dbDefaults`
 - **Agent:** Zustand `agentStore` (aktif agent, busy state)
 - **UI:** Component-local `useState`
 
+### Domain-Driven Mimari (v3.23+)
+
+Son session'larda **yeni domain katmanı** eklendi. Artık iş mantığı `src/domain/` altında saf fonksiyonlar olarak çalışır:
+
+```
+src/domain/
+├── types.ts              → Intent, IntentResult, DBUpdates, SaleIntent
+├── eventBus.ts            → DomainEventBus (typed pub/sub)
+├── intentEngine.ts        → Central router: processIntent(intent, db)
+└── services/
+    ├── saleCompletion.ts  → completeSale, cancelSale, returnSale, correctSalePrice
+    ├── cashService.ts     → processCashTransaction
+    ├── stockService.ts    → processStockUpdate, processProductAdd
+    └── cariService.ts     → processCariTahsilat, processCariAdd
+```
+
+**İşlem Pipeline'ı:**
+```
+Page → agent.islemYap({ action, payload })
+     → mapRequestToIntent() → Intent
+     → processIntent(intent, db)
+     → domain service (pure function) → { dbUpdates, events }
+     → applyIntentResult(prevDB, dbUpdates)
+     → save() → localStorage + IndexedDB + Firebase
+```
+
+**Önemli:** Agent'lar artık **thin wrapper** — tüm iş mantığı domain servislerinde. Agent'lar sadece HTTP isteklerini Intent'e çevirip sonucu kaydediyor.
+
 ### Multi-Agent Sistemi (7 Agent)
 
 | Agent | Rol |
@@ -304,25 +332,48 @@ expect(nextDB.field).toBe(expectedValue)
 
 ---
 
-## 9. AÇIK GÖREVLER (MASTER_PLAN & WEEKLY_PLAN)
+## 9. GÜNCEL DURUM (v3.23.2)
 
-### Kalan 15 Görev (Hafta 6 — Refactor)
-- **6.1** Settings.tsx → 6 modüle ayır: CompanySettings, UserSettings, ThemeSettings, FirebaseSettings, BackupSettings, ChangelogView
-- **6.2** AIAsistan.tsx → 3 parça: ChatPanel, MessageList, ActionHistory
-- **6.3** Fatura.tsx → 3 parça: FaturaList, FaturaForm, FaturaPDF
-- **6.7** Inline CSS → CSS Module (üst 10 sayfa)
-- **6.8** Dead code temizliği (5 yorum bloğu)
-- **5.9** `db/core.ts` test yaz
-- **5.10** `db/backup.ts` test yaz
-- **5.11** `db/sync.ts` test yaz
-- **5.12** Vitest config'ten hariç testleri aktif et
+### ✅ TAMAMLANAN REFACTORLAR
 
-### MASTER_PLAN Açık Maddeler
-- **G4** Firebase sync setTimeout uncached promise (`core.ts:332`)
-- **G5** Kasa/POS ödemeleri hep bankaya gidiyor (`aiActions.ts:432`)
-- **C1** processIntent() geçişi tamamlanmamış
-- **C2** Çift event sistemi (AgentBus + domainEventBus) birleştirilmeli
-- **C3** useDB monolit 640 satır — bölünmeli
+| Görev | Eski Durum | Şimdiki Durum |
+|-------|-----------|---------------|
+| **6.1** Settings.tsx → modüller | 4394 satır monolit | 322 satır + 13 modül ✅ |
+| **6.2** AIAsistan.tsx → 3 modül | 1354 satır | 562 satır + ChatPanel/MessageList/ActionHistory ✅ |
+| **6.3** Fatura.tsx → 3 modül | Devasa | 360 satır + 5 alt modül ✅ |
+| **6.7** Inline CSS → CSS Module | 162 inline style | 16 CSS modül dosyasına taşındı ✅ |
+| **6.8** Dead code temizliği | 249 issue | 0 issue ✅ |
+| **5.9-5.11** DB testleri | Yok | backup.test.ts (239), core.test.ts (180), sync.test.ts (186) ✅ |
+| **5.12** Vitest exclude | Eski kurallar | Temizlendi ✅ |
+| **C1** processIntent geçişi | Yarım | Tamamlandı — orchestrator.ts silindi ✅ |
+| **C3** useDB bölme | 640 satır | 7 dosyaya bölündü ✅ |
+| **G4** Firebase sync | setTimeout uncached | SyncQueue ile düzeltildi ✅ |
+| **G5** Kasa/POS routing | Hep bankaya | `payment` alanından routing ✅ |
+| **Reports.tsx** | 1755 satır | 124 satır + 7 modül (ReportsCari, ReportsKasa, ReportsOzet, ReportsSatis, ReportsUrun, ReportsCommon, ReportsGenerator) ✅ |
+| **Dashboard.tsx** | 1425 satır | 851 satır + Dashboard/ (7 bileşen) ✅ |
+
+### ❌ KALAN GÖREVLER
+
+#### Büyük Sayfalar (>800 satır, bölünmeli)
+| # | Dosya | Satır | Aşım | Süre |
+|---|-------|-------|------|------|
+| P1 | **Suppliers.tsx** | 1298 | +498 | 4 saat |
+| P2 | **SettingsBackup.tsx** | 1206 | +406 | 4 saat |
+| P3 | **Monitor.tsx** | 1178 | +378 | 3 saat |
+| P4 | **BugHunter.tsx** | 1092 | +292 | 3 saat |
+| P5 | **Bank.tsx** | 1031 | +231 | 3 saat |
+| P6 | **Cari.tsx** | 1006 | +206 | 3 saat |
+| P7 | **Dashboard.tsx** | 851 | +51 | 2 saat |
+| P8 | **Products.tsx** | 833 | +33 | 2 saat |
+
+#### Diğer
+| # | Görev | Detay |
+|---|-------|-------|
+| C2 | Çift event sistemi (AgentBus + domainEventBus) | Birleştirme ertelendi, migration sürüyor |
+| C4 | Agent sadeleştirme | Tüm agent'lar aynı pattern'da — tekilleştirilebilir |
+| — | Domain servis testleri | completeSale, cancelSale, returnSale, correctSalePrice için test yok |
+| — | excel-merge.ts (742 satır) | Hâlâ büyük, bölünmeli |
+| — | dataIntegrityChecker.ts (603 satır) | Sınırda |
 
 ---
 
@@ -373,17 +424,29 @@ OPENCODE_DISABLE_LSP_DOWNLOAD=true
 
 | Dosya | İçerik |
 |-------|--------|
+| `AGENTS.md` | Bu dosya — master kurallar |
 | `README.md` | Genel bakış, komutlar |
-| `MASTER_PLAN.md` | Bilinen sorunlar, ~136 madde |
-| `WEEKLY_PLAN.md` | 57 görev, 42 tamamlandı |
+| `MASTER_PLAN.md` | İyileştirme planı, ~70 madde (çoğu tamam) |
+| `WEEKLY_PLAN.md` | 57 görev, 52 tamamlandı |
 | `DEVELOPMENT.md` | Mimari, debug |
 | `CONTRIBUTING.md` | Branch, commit, PR |
+| `CHANGELOG.md` | Sürüm geçmişi (v1.0.0 → v3.23.2) |
 | `docs/VERI_KATMANI.md` | Veri katmanı detay |
 | `docs/AGENT_SISTEMI.md` | Agent akışları |
 | `docs/VERI_MODELI.md` | Şema, tablolar |
 | `docs/BILESEN_MIMARISI.md` | Component kuralları |
 | `docs/TEST_STRATEJISI.md` | Test pattern, coverage |
-| `.opencode/skills/` | Agent skill dosyaları |
+| `docs/API_SERVIS.md` | Servis katmanı, rule engine |
+| `docs/UI_UX.md` | UI/UX akışları |
+| `docs/UI_REVIEW_RAPORU.md` | UI inceleme raporu |
+| `docs/skin-plan.md` | Skin dönüşüm planı (koyu→açık tema) |
+| `src/agents/AGENTS.md` | Agent dokümantasyonu |
+| `src/components/AGENTS.md` | Bileşen mimarisi |
+| `src/lib/AGENTS.md` | Utility kütüphaneleri |
+| `src/hooks/AGENTS.md` | React hook'ları |
+| `src/pages/AGENTS.md` | Sayfa yapısı |
+| `.opencode/skills/` | AI agent skill dosyaları |
+| `opencode.json` | 16 AI agent yapılandırması |
 
 ---
 
