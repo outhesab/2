@@ -10,11 +10,24 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
     aaptOptions {
         ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         cruncherEnabled = false
     }
-}
+    signingConfigs {
+        release {
+            def propsFile = rootProject.file('keystore.properties')
+            if (propsFile.exists()) {
+                def props = new Properties()
+                props.load(propsFile.newDataInputStream())
+                storeFile file(props['store.file'])
+                storePassword props['store.password']
+                keyAlias props['key.alias']
+                keyPassword props['key.password']
+            }
+        }
+    }
     buildTypes {
         debug {
             minifyEnabled false
@@ -23,6 +36,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

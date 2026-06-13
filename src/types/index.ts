@@ -1,5 +1,13 @@
 // Soba Yönetim — Tam Tip Tanımları
 
+export interface DBError {
+  message: string;
+  code: string;
+  timestamp: string;
+  recoverable: boolean;
+  context?: Record<string, unknown>;
+}
+
 export interface Partner {
   id: string;
   name: string;
@@ -9,7 +17,6 @@ export interface Partner {
   createdAt: string;
 }
 
-// ─── Ürün Kategorisi ─────────────────────────────────────────────────────────
 export interface ProductCategory {
   id: string;        // 'soba', 'aksesuar', vb.
   name: string;      // 'Soba', 'Aksesuar', vb.
@@ -17,7 +24,6 @@ export interface ProductCategory {
   createdAt: string;
 }
 
-// ─── Ürün ────────────────────────────────────────────────────────────────────
 export interface Product {
   id: string;
   name: string;
@@ -37,7 +43,6 @@ export interface Product {
   updatedAt: string;
 }
 
-// ─── Satış ───────────────────────────────────────────────────────────────────
 export interface SaleItem {
   productId: string;
   productName: string;
@@ -75,7 +80,6 @@ export interface Sale {
   updatedAt: string;
 }
 
-// ─── Kasa ─────────────────────────────────────────────────────────────────────
 export interface Kasa {
   id: string;
   name: string;
@@ -96,7 +100,6 @@ export interface KasaEntry {
   updatedAt: string;
 }
 
-// ─── Cari ─────────────────────────────────────────────────────────────────────
 export interface Cari {
   id: string;
   name: string;
@@ -115,7 +118,6 @@ export interface Cari {
   updatedAt: string;
 }
 
-// ─── Tedarikçi & Sipariş ─────────────────────────────────────────────────────
 export interface Supplier {
   id: string;
   name: string;
@@ -167,7 +169,6 @@ export interface Order {
   updatedAt: string;
 }
 
-// ─── Domain Event (paylaşılan) ───────────────────────────────────────────────
 export interface DomainEvent {
   id: string;
   type: string;
@@ -178,7 +179,6 @@ export interface DomainEvent {
   version: number;
 }
 
-// ─── Fatura ──────────────────────────────────────────────────────────────────
 export interface InvoiceItem {
   description: string;
   quantity: number;
@@ -213,7 +213,6 @@ export interface Invoice {
   updatedAt: string;
 }
 
-// ─── Stok Hareketi ───────────────────────────────────────────────────────────
 export interface StockMovement {
   id: string;
   productId: string;
@@ -226,7 +225,6 @@ export interface StockMovement {
   date: string;
 }
 
-// ─── Pelet ───────────────────────────────────────────────────────────────────
 export interface PeletSupplier {
   id: string;
   name: string;
@@ -252,7 +250,6 @@ export interface PeletOrder {
   updatedAt: string;
 }
 
-// ─── Boru ─────────────────────────────────────────────────────────────────────
 export interface BoruSupplier {
   id: string;
   name: string;
@@ -277,7 +274,6 @@ export interface BoruOrder {
   updatedAt: string;
 }
 
-// ─── Bütçe ───────────────────────────────────────────────────────────────────
 export interface BudgetCategory {
   id: string;
   name: string;
@@ -302,7 +298,6 @@ export interface Budget {
   updatedAt: string;
 }
 
-// ─── Taksit ──────────────────────────────────────────────────────────────────
 export interface Installment {
   id: string;
   invoiceId: string;
@@ -314,7 +309,6 @@ export interface Installment {
   updatedAt: string;
 }
 
-// ─── Banka ───────────────────────────────────────────────────────────────────
 export interface BankTransaction {
   id: string;
   date: string;
@@ -329,7 +323,6 @@ export interface BankTransaction {
   createdAt: string;
 }
 
-// ─── Sistem ──────────────────────────────────────────────────────────────────
 export interface MonitorRule {
   id: string;
   isDefault?: boolean;
@@ -389,7 +382,6 @@ export interface OrtakEmanet {
   updatedAt?: string;
 }
 
-// ─── Şirket ──────────────────────────────────────────────────────────────────
 export interface Company {
   id: string;
   name?: string;
@@ -400,7 +392,6 @@ export interface Company {
   createdAt: string;
 }
 
-// ─── Not Defteri ──────────────────────────────────────────────────────────────
 export interface Note {
   id: string;
   title: string;
@@ -416,7 +407,6 @@ export interface Note {
   updatedAt: string;
 }
 
-// ─── Rule Engine ─────────────────────────────────────────────────────────────
 export interface RuleViolation {
   ruleId: string;
   ruleName: string;
@@ -425,7 +415,6 @@ export interface RuleViolation {
   relatedIds?: string[];
 }
 
-// ─── Audit Engine ─────────────────────────────────────────────────────────────
 export interface AuditEntry {
   id: string;
   action: string;
@@ -441,7 +430,6 @@ export interface AuditEntry {
   time: string;          // ISO string
 }
 
-// ─── BFCE Uyarlamaları ────────────────────────────────────────────────────────
 export interface AuditAnomaly {
   entryId: string;
   issue: string;
@@ -458,7 +446,6 @@ export interface AuditReport {
   warnedCount: number;
 }
 
-// ─── Voice API Types ─────────────────────────────────────────────────────────────
 export interface SpeechRecognition extends EventTarget {
   lang: string;
   continuous: boolean;
@@ -495,7 +482,6 @@ export interface SpeechRecognitionErrorEvent extends Event {
   error: string;
 }
 
-// ─── Veritabanı (Kök) ────────────────────────────────────────────────────────
 export interface DB {
   _version: number;
   products: Product[];

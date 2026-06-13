@@ -1,44 +1,42 @@
 import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse } from "@/agents/types";
-import { genId } from "@/lib/utils-tr";
+import { processIntent } from "@/domain/intentEngine";
+import type { Intent } from "@/domain/types";
 
 export class KasaAgent extends BaseAgent {
   readonly id = "kasa" as const;
   readonly yetkiler = ["kasa.read", "kasa.write", "rapor.read"] as const;
 
+  private mapRequestToIntent(talep: AgentRequest): Intent | null {
+    const p = talep.payload || {};
+    if (talep.action === "kasa_gelir" || talep.action === "kasa_gider") {
+      return {
+        type: talep.action as "kasa_gelir" | "kasa_gider",
+        payload: {
+          amount: p.amount as number,
+          kasa: p.kasa as string,
+          description: p.description as string,
+          category: p.category as string,
+        }
+      };
+    }
+    return null;
+  }
+
   async islemYap(talep: AgentRequest): Promise<AgentResponse> {
     this.yayinla("kasa.islem", { action: talep.action, payload: talep.payload });
-    if (!this.ctx) return { ok: false, error: "Agent bağlanmadı" };
 
-    try {
-      const payload = talep.payload || {};
-      if (talep.action === "kasa_gelir" || talep.action === "kasa_gider") {
-        const amount = payload.amount as number;
-        const type = talep.action === "kasa_gelir" ? "gelir" : "gider";
-
-        if (amount && amount > 0) {
-          this.save((prev) => ({
-            ...prev,
-            kasa: [
-              ...prev.kasa,
-              {
-                id: genId(),
-                type: type as "gelir" | "gider",
-                category: (payload.category as string) || "diger",
-                amount,
-                kasa: (payload.kasa as string) || "nakit",
-                description: (payload.description as string) || `Agent: ${talep.action}`,
-                relatedId: payload.relatedId as string,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            ],
-          }));
-        }
-      }
-      return { ok: true, data: { agent: this.id, action: talep.action, status: "completed" } };
-    } catch (error) {
-      return { ok: false, error: `Kasa hatası: ${error}` };
+    const intent = this.mapRequestToIntent(talep);
+    if (!intent) {
+      return { ok: false, error: `Desteklenmeyen kasa aksiyonu: ${talep.action}` };
     }
+
+    const result = processIntent(intent, this.db);
+    if (!result.ok) return { ok: false, error: result.error };
+
+    return { 
+      ok: true, 
+      data: { agent: this.id, action: talep.action, status: "completed", intentResult: result } 
+    };
   }
 }

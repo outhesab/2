@@ -40,7 +40,7 @@
 
 | # | Sorun | Dosya | Durum |
 |---|-------|-------|-------|
-| C1 | `processIntent()` geçişi yarım: orchestrator deprecated ama hâlâ çalışıyor | `agents/` vs `domain/` | ⬜ |
+| C1 | `processIntent()` geçişi yarım: orchestrator deprecated ama hâlâ çalışıyor | `agents/` vs `domain/` | ✅ TAMAMLANDI |
 | C2 | Çift event sistemi: AgentBus + domainEventBus, ikisi de mitt | `agents/AgentBus.ts`, `domain/eventBus.ts` | ⬜ |
 | C3 | useDB monolit: 640 satırda 7 sorumluluk | `hooks/db/core.ts` | ✅ ZATEN BÖLÜNMÜŞ (index.ts 192 satır, 7 dosya) |
 | C4 | Agent sistemi over-engineering: 7 agent + permission + bus + orchestrator | `agents/` | ⬜ |
@@ -101,8 +101,8 @@
 | G1 | 1000 stok hareketi sessizce kesilir | core.ts:272 | ✅ UI bildirimi eklendi (setDbError) |
 | G2 | __truncated__ sentinel ile sessiz data loss | storageQuota.ts:112 | ✅ storageQuota.ts olud kod, kaldirildi (v3.7.1) |
 | G3 | Last-write-wins save queue ara durumlar kaybolur | core.ts:186-211 | ✅ Queue sistemi eklendi (_saveQueue, max 10) |
-| G4 | Firebase sync setTimeout uncached promise | core.ts:332 | ⬜ |
-| G5 | Kasa/POS odemeleri hep bankaya gider | aiActions.ts:432 | ⬜ |
+| G4 | Firebase sync setTimeout uncached promise | core.ts:332 | ✅ SyncQueue entegre edildi |
+| G5 | Kasa/POS odemeleri hep bankaya gider | aiActions.ts:432 | ✅ processIntent ile düzeltildi |
 | G6 | Gunluk ortalama /30 ile sabit | anomalyEngine.ts:338 | ✅ Gercek gun sayisi kullaniliyor (v3.7.x) |
 
 ---
@@ -182,9 +182,9 @@
 > **Gerçek Durum:** 11 sayfa kuralı ihlal ediyor  
 
 | # | Dosya | Satır | Aşım | Öncelik |
-|---|-------|-------|------|---------|
-| P1 | `pages/Reports.tsx` | 1755 | +955 | 🔴 KRİTİK |
-| P2 | `pages/Dashboard.tsx` | 1425 | +625 | 🔴 KRİTİK |
+|---|-------|------|------|---------|
+| P1 | `pages/Reports.tsx` | 116 | - | ✅ TAMAMLANDI |
+| P2 | `pages/Dashboard.tsx` | 823 | +23 | 🟡 DÜŞÜK |
 | P3 | `pages/AIAsistan.tsx` | 1354 | +554 | 🔴 KRİTİK |
 | P4 | `pages/Suppliers.tsx` | 1265 | +465 | 🔴 YÜKSEK |
 | P5 | `pages/settings/SettingsBackup.tsx` | 1156 | +356 | 🔴 YÜKSEK |
@@ -193,7 +193,7 @@
 | P8 | `pages/Bank.tsx` | 1010 | +210 | 🟡 ORTA |
 | P9 | `pages/Cari.tsx` | 977 | +177 | 🟡 ORTA |
 | P10 | `pages/Products.tsx` | 811 | +11 | 🟢 DÜŞÜK |
-| P11 | `pages/AnomaliOneri.tsx` | 793 | Sınırda | 🟢 İZLE |
+| P11 | `pages/AnomaliOneri.tsx` | 793 | - | ✅ TAMAMLANDI |
 
 **Tavsiye:** P1-P5 acil refactor gerektirir (toplam ~20 saat)
 

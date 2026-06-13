@@ -86,26 +86,26 @@
 86|
 87|| # | Görev | Dosya | Durum |
 88||---|-------|-------|-------|
-89|| 6.1 | **Settings.tsx → 6 modüle ayrılacak** | `src/pages/Settings/` | ⬜ |
-90|| | ├─ CompanySettings.tsx | | ⬜ |
-91|| | ├─ UserSettings.tsx | | ⬜ |
-92|| | ├─ ThemeSettings.tsx | | ⬜ |
-93|| | ├─ FirebaseSettings.tsx | | ⬜ |
-94|| | ├─ BackupSettings.tsx | | ⬜ |
-95|| | └─ ChangelogView.tsx | | ⬜ |
-96|| 6.2 | **AIAsistan.tsx → 3 parçaya** | `src/pages/AIAsistan.tsx` | ⬜ |
-97|| | ├─ ChatPanel.tsx | | ⬜ |
-98|| | ├─ MessageList.tsx | | ⬜ |
-99|| | └─ ActionHistory.tsx | | ⬜ |
-100|| 6.3 | **Fatura.tsx → 3 parçaya** | `src/pages/Fatura.tsx` | ⬜ |
-101|| | ├─ FaturaList.tsx | | ⬜ |
-102|| | ├─ FaturaForm.tsx | | ⬜ |
-103|| | └─ FaturaPDF.tsx | | ⬜ |
+89|| 6.1 | **Settings.tsx → 6 modüle ayrılacak** | `src/pages/Settings/` | ✅ |
+90|| | ├─ CompanySettings.tsx | | ✅ |
+91|| | ├─ UserSettings.tsx | | ✅ |
+92|| | ├─ ThemeSettings.tsx | | ✅ |
+93|| | ├─ FirebaseSettings.tsx | | ✅ |
+94|| | ├─ BackupSettings.tsx | | ✅ |
+95|| | └─ ChangelogView.tsx | | ✅ |
+96|| 6.2 | **AIAsistan.tsx → 3 parçaya** | `src/pages/AIAsistan/` | ✅ |
+97|| | ├─ ChatPanel.tsx | | ✅ |
+98|| | ├─ MessageList.tsx | | ✅ |
+99|| | └─ ActionHistory.tsx | | ✅ |
+100|| 6.3 | **Fatura.tsx → 3 parçaya** | `src/pages/Fatura.tsx` | ✅ |
+101|| | ├─ FaturaList.tsx | | ✅ |
+102|| | ├─ FaturaForm.tsx | | ✅ |
+103|| | └─ FaturaPDF.tsx | | ✅ |
 104|| 6.4 | **`fast-check` → devDependencies** | `package.json` | ✅ (zaten devDep) |
 105|| 6.5 | **Capacitor ML Kit versiyon** ^8.x'e yükselt | `package.json` | ✅ |
 106|| 6.6 | **`react-hook-form` versiyon** sabitlenecek `^7.54.0` | `package.json` | ✅ |
-107|| 6.7 | **Inline CSS → CSS module** (üst 10 dosya) | `src/pages/` | ⬜ |
-108|| 6.8 | **Dead code temizliği** (5 adet yorum bloğu) | Farklı dosyalar | ⬜ |
+107|| 6.7 | **Inline CSS → CSS module** (üst 10 dosya) | `src/pages/` | ✅ |
+108|| 6.8 | **Dead code temizliği** (5 adet yorum bloğu) | Farklı dosyalar | ✅ |
 109|
 110|---
 111|
@@ -118,8 +118,8 @@
 118||| 3. Hafta — Tip Güvenliği | 5 | 5 | 0 |
 119||| 4. Hafta — Test (1) | 13 | 13 | 0 |
 120||| 5. Hafta — Test (2) | 12 | 8 | 4 |
-121||| 6. Hafta — Refactor | 15 | 0 | 15 |
-122||| **TOPLAM** | **57** | **38** | **19** |
+121||| 6. Hafta — Refactor | 17 | 14 | 3 |
+122||| **TOPLAM** | **59** | **52** | **7** |
 123|
 124|---
 125|

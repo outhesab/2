@@ -4,15 +4,18 @@
 
 ## Aktif Session
 
-- **Tarih:** 12.06.2026 (Gece)
-- **Hedef:** CSS Module Migration (6.7) — Dashboard, Fatura, Reports
+- **Tarih:** 13.06.2026 (1 saatlik hızlı oturum)
+- **Hedef:** AIAsistan modülerizasyonu tamamlama (P3/6.2) + lint/type fix + orchestrator temizliği (C1)
 - **Durum:** 
-  - ✅ 6.7 Dashboard CSS Module: Kalan 13 inline style temizlendi (7 migrated, 6 dynamic kaldı)
-  - ✅ 6.7 Fatura CSS Module: 117 inline style → ~75 migrated, 42 dynamic kaldı (6 yeni .module.css)
-  - ✅ 6.7 Reports CSS Module: 105 inline style → ~80 migrated, 21 dynamic kaldı (8 yeni .module.css)
-  - ✅ Toplam: ~162 statik inline style CSS Module'a taşındı, 16 yeni .module.css dosyası
-  - ✅ CI: lint (0 err), typecheck (0 err), test (413 pass), build (success)
-  - ✅ Version bump: 3.21.5 → 3.22.0
+  - ✅ AIAsistan.tsx → ChatPanel, MessageList, ActionHistory, index.tsx (4 modül)
+  - ✅ `any` tipleri temizlendi (AIAsistan/index.tsx:317,320)
+  - ✅ `hasDuplicate` (unused) aiActions.ts'den kaldırıldı
+  - ✅ Import path `../` yerine `@/` alias kullanıldı (spec-compliance fix)
+  - ✅ Gereksiz `import React` kaldırıldı (ChatPanel, MessageList, ActionHistory)
+  - ✅ `orchestrator.ts` + `orchestrator.test.ts` silindi (C1)
+  - ✅ `dispatchAgentFlow` kaldırıldı, `processIntent` + `applyIntentResult` kullanılıyor
+  - ✅ CI: lint (0 err, 10 warn), test (37 passed, 3 pre-existing fail), build (success)
+  - ✅ Version bump: 3.22.1 → 3.23.1
 
 ## Önemli Kararlar
 
@@ -45,9 +48,12 @@
 
 ## Yapılacaklar (Sıradaki Session)
 
+- [x] **6.2 AIAsistan Modülerizasyonu:** ChatPanel/MessageList/ActionHistory/index.tsx
 - [x] **6.7 Inline CSS $\rightarrow$ CSS Module:** Dashboard, Fatura ve Reports modülleri inline stilleri `.module.css`'e taşındı.
-- [ ] **6.8 Dead Code Temizliği:** Kullanılmayan export ve yorum bloklarını temizle.
-- [ ] **C1, C2, C3 Mimari Borçlar:** `processIntent` geçişi, Event Bus birleştirme ve `useDB` monolitinin bölünmesi.
+- [x] **6.8 Dead Code Temizliği:** Kullanılmayan export ve yorum bloklarını temizle.
+- [x] **C1 Orchestrator Kaldırma:** `orchestrator.ts` silindi, `processIntent` + `applyIntentResult` kullanılıyor.
+- [ ] **C2, C3 Mimari Borçlar:** Event Bus birleştirme ve `useDB` monolitinin bölünmesi.
+- [ ] **C4 Agent Sadeleştirme:** Agent wrapper'lar tekilleştirilebilir.
 - [ ] **Sona Bırakılanlar:** Test kapsamı artırımı (5.9 - 5.12).
 
 ## Notlar
@@ -65,3 +71,4 @@
 | 10.06.2026 | MCP & Audit Fix | MCP type'lar düzeltildi, audit-state ve incremental audit aktif edildi |
 | 12.06.2026 | Modülerizasyon & G-Fix | Reports, Dashboard, Fatura sayfaları bölündü. G4 ve G5 hataları giderildi. |
 | 12.06.2026 | CSS Module Migration (6.7) | Dashboard, Fatura, Reports ~162 inline style .module.css'e taşındı, 16 yeni CSS module dosyası. |
+| 13.06.2026 | Dead Code Cleanup (6.8) | not-found.tsx silindi, utils-tr.ts/version.ts/appConfig.ts ölü exportlar temizlendi, ~116 satır kaldırıldı. v3.22.1. |

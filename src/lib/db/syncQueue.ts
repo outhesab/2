@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 /**
  * SyncQueue — Firebase yazma işlemlerini sıralı hale getiren kuyruk sistemi.
  * Race condition'ları önler ve veri tutarlılığını sağlar.
@@ -14,7 +16,7 @@ export class SyncQueue {
         await operation();
       } catch (error) {
         // Hata durumunda kuyruğu bloklama, sadece logla
-        console.error('[SyncQueue] İşlem hatası:', error);
+        logger.error('sync', '[SyncQueue] İşlem hatası', { error });
       }
     });
     return this.queue;

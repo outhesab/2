@@ -1,12 +1,12 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { SaleIntent, StockMovementV2, CashTransaction, CariUpdate, SaleResult } from "@/domain/types";
+import type { SaleIntent, StockMovementV2, CashTransaction, CariUpdate, IntentResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
-
+ 
 function calcSubtotal(items: SaleIntent["items"]): number {
   return items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
 }
-
+ 
 function calcDiscountAmount(items: SaleIntent["items"], discountPercent: number, discountAmount?: number): number {
   if (discountAmount !== undefined && discountAmount > 0) return discountAmount;
   if (discountPercent > 0) {
@@ -14,19 +14,19 @@ function calcDiscountAmount(items: SaleIntent["items"], discountPercent: number,
   }
   return 0;
 }
-
+ 
 function calcProfit(items: SaleIntent["items"], discountAmount: number): number {
   return items.reduce((sum, i) => sum + (i.unitPrice - i.cost) * i.quantity, 0) - discountAmount;
 }
-
+ 
 function findProductCategory(db: DB, productId: string): string | undefined {
   return db.products.find((p) => p.id === productId)?.category;
 }
-
+ 
 function findCariName(db: DB, cariId: string): string | undefined {
   return db.cari.find((c) => c.id === cariId)?.name;
 }
-
+ 
 function buildSaleRecord(
   id: string,
   intent: SaleIntent,
@@ -69,15 +69,15 @@ function buildSaleRecord(
     updatedAt: nowIso,
   };
 }
-
+ 
 export function completeSale(
   intent: SaleIntent,
   db: DB,
-): { ok: true; data: SaleResult } | { ok: false; error: string } {
+): IntentResult {
   if (intent.items.length === 0) {
     return { ok: false, error: "En az bir ürün ekleyin" };
   }
-
+ 
   const yetersizStok = intent.items.filter((i) => {
     const p = db.products.find((x) => x.id === i.productId);
     return p && p.stock < i.quantity;
@@ -91,19 +91,19 @@ export function completeSale(
       .join("\n");
     return { ok: false, error: `Yetersiz stok:\n${mesaj}` };
   }
-
+ 
   const nowIso = intent.saleDate
     ? new Date(intent.saleDate).toISOString()
     : new Date().toISOString();
   const saleId = genId();
-
+ 
   const discountAmount = calcDiscountAmount(intent.items, intent.discount ?? 0, intent.discountAmount);
   const subtotal = calcSubtotal(intent.items);
   const total = subtotal - discountAmount;
   const profit = calcProfit(intent.items, discountAmount);
-
+ 
   const sale = buildSaleRecord(saleId, intent, db, subtotal, total, profit, discountAmount, nowIso);
-
+ 
   const stockMovements: StockMovementV2[] = [];
   for (const item of intent.items) {
     const product = db.products.find((p) => p.id === item.productId);
@@ -118,7 +118,7 @@ export function completeSale(
       after: before - decrease,
     });
   }
-
+ 
   let cashTransaction: CashTransaction | null = null;
   const tahsilatNum = intent.tahsilat ?? total;
   const kalan = total - tahsilatNum;
@@ -134,7 +134,7 @@ export function completeSale(
       relatedId: saleId,
     };
   }
-
+ 
   let cariUpdate: CariUpdate | null = null;
   if (intent.cariId && kalan > 0) {
     cariUpdate = {
@@ -142,13 +142,13 @@ export function completeSale(
       balanceChange: kalan,
     };
   }
-
+ 
   const events: DomainEvent[] = [
     {
       id: genId(),
-      type: "sale.completed",
+      type: "sale.completed" as const,
       aggregateId: saleId,
-      aggregateType: "sale",
+      aggregateType: "sale" as const,
       payload: { ...intent, total } as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
@@ -166,9 +166,9 @@ export function completeSale(
   if (cashTransaction) {
     events.push({
       id: genId(),
-      type: "cash.recorded",
+      type: "cash.recorded" as const,
       aggregateId: saleId,
-      aggregateType: "cash",
+      aggregateType: "cash" as const,
       payload: cashTransaction as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
@@ -177,22 +177,175 @@ export function completeSale(
   if (cariUpdate) {
     events.push({
       id: genId(),
-      type: "cari.updated",
+      type: "cari.updated" as const,
       aggregateId: cariUpdate.cariId,
-      aggregateType: "cari",
+      aggregateType: "cari" as const,
       payload: cariUpdate as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
     });
   }
+ 
+  return {
+    ok: true,
+    data: {
+      dbUpdates: {
+        sale,
+        stockMovements: stockMovements.map(sm => ({ id: sm.productId, newStock: sm.after })),
+        cashTransaction: cashTransaction ? [cashTransaction] : undefined,
+        cari: cariUpdate ? [cariUpdate] : undefined,
+      },
+      events,
+    },
+  };
+}
+
+export function cancelSale(saleId: string, db: DB): IntentResult {
+  const sale = db.sales.find((s) => s.id === saleId);
+  if (!sale) return { ok: false, error: "Satış bulunamadı" };
+  if (sale.status === 'iptal' || sale.status === 'iade') return { ok: false, error: "Bu satış zaten iptal edilmiş veya iade edilmiş" };
+
+  const nowIso = new Date().toISOString();
+  
+  const productUpdates = (sale.items || []).map(item => {
+    const p = db.products.find(prod => prod.id === item.productId);
+    return { id: item.productId, newStock: (p?.stock ?? 0) + item.quantity };
+  });
+
+  const events: DomainEvent[] = [
+    {
+      id: genId(),
+      type: "sale.cancelled" as const,
+      aggregateId: saleId,
+      aggregateType: "sale" as const,
+      payload: { saleId } as unknown as Record<string, unknown>,
+      timestamp: nowIso,
+      version: 1,
+    },
+  ];
 
   return {
     ok: true,
     data: {
-      sale,
-      stockMovements,
-      cashTransaction,
-      cariUpdate,
+      dbUpdates: {
+        sale: { ...sale, status: 'iptal', updatedAt: nowIso },
+        products: productUpdates,
+      },
+      events,
+    },
+  };
+}
+
+export function returnSale(saleId: string, qty?: number | Record<string, number>, db: DB): IntentResult {
+  const sale = db.sales.find((s) => s.id === saleId);
+  if (!sale) return { ok: false, error: "Satış bulunamadı" };
+  if (sale.status === 'iptal') return { ok: false, error: "İptal edilmiş satış iade edilemez" };
+
+  const nowIso = new Date().toISOString();
+  const totalSaleQty = sale.items?.reduce((s, i) => s + i.quantity, 0) || 0;
+  
+  const productUpdates: Array<{ id: string; newStock: number }> = [];
+  const stockMovements: StockMovementV2[] = [];
+
+  (sale.items || []).forEach(item => {
+    const p = db.products.find(prod => prod.id === item.productId);
+    const currentStock = p?.stock ?? 0;
+    
+    let iadeMiktar = 0;
+    if (typeof qty === 'object' && qty !== null) {
+      iadeMiktar = Math.min((qty as Record<string, number>)[item.productId] ?? item.quantity, item.quantity);
+    } else {
+      const ratio = qty !== undefined ? qty / totalSaleQty : 1;
+      iadeMiktar = Math.round(item.quantity * ratio);
+    }
+
+    productUpdates.push({ id: item.productId, newStock: currentStock + iadeMiktar });
+    stockMovements.push({
+      id: genId(),
+      productId: item.productId,
+      productName: item.productName,
+      type: "iade",
+      amount: iadeMiktar,
+      before: currentStock,
+      after: currentStock + iadeMiktar,
+    });
+  });
+
+  const events: DomainEvent[] = [
+    {
+      id: genId(),
+      type: "sale.returned" as const,
+      aggregateId: saleId,
+      aggregateType: "sale" as const,
+      payload: { saleId, qty } as unknown as Record<string, unknown>,
+      timestamp: nowIso,
+      version: 1,
+    },
+    ...stockMovements.map(sm => ({
+      id: genId(),
+      type: "stock.returned" as const,
+      aggregateId: sm.productId,
+      aggregateType: "stock" as const,
+      payload: sm as unknown as Record<string, unknown>,
+      timestamp: nowIso,
+      version: 1,
+    })),
+  ];
+
+  return {
+    ok: true,
+    data: {
+      dbUpdates: {
+        sale: { ...sale, status: 'iade', updatedAt: nowIso },
+        products: productUpdates,
+      },
+      events,
+    },
+  };
+}
+
+export function correctSalePrice(saleId: string, yeniFiyat: number | Record<string, number>, db: DB): IntentResult {
+  const sale = db.sales.find((s) => s.id === saleId);
+  if (!sale) return { ok: false, error: "Satış bulunamadı" };
+
+  const nowIso = new Date().toISOString();
+  const isPerItem = typeof yeniFiyat === 'object' && yeniFiyat !== null;
+
+  const updatedItems = (sale.items || []).map((item) => {
+    const itemPrice = isPerItem
+      ? ((yeniFiyat as Record<string, number>)[item.productId] ?? item.unitPrice)
+      : (yeniFiyat as number);
+    return { ...item, unitPrice: itemPrice };
+  });
+
+  const yeniTotal = updatedItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const yeniProfit = updatedItems.reduce((s, i) => s + (i.unitPrice - i.cost) * i.quantity, 0);
+
+  const events: DomainEvent[] = [
+    {
+      id: genId(),
+      type: "sale.price_corrected" as const,
+      aggregateId: saleId,
+      aggregateType: "sale" as const,
+      payload: { saleId, yeniFiyat } as unknown as Record<string, unknown>,
+      timestamp: nowIso,
+      version: 1,
+    },
+  ];
+
+  return {
+    ok: true,
+    data: {
+      dbUpdates: {
+        sale: {
+          ...sale,
+          items: updatedItems,
+          unitPrice: updatedItems[0]?.unitPrice ?? (yeniFiyat as number),
+          total: yeniTotal - (sale.discountAmount ?? 0),
+          profit: yeniProfit - (sale.discountAmount ?? 0),
+          updatedAt: nowIso,
+        },
+      },
       events,
     },
   };

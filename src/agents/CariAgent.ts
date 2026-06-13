@@ -1,41 +1,53 @@
 import { BaseAgent } from "@/agents/BaseAgent";
 import type { AgentRequest, AgentResponse } from "@/agents/types";
+import { processIntent } from "@/domain/intentEngine";
+import type { Intent } from "@/domain/types";
 
 export class CariAgent extends BaseAgent {
   readonly id = "cari" as const;
   readonly yetkiler = ["cari.read", "cari.write", "rapor.read"] as const;
 
+  private mapRequestToIntent(talep: AgentRequest): Intent | null {
+    const p = talep.payload || {};
+    if (talep.action === "cari_tahsilat") {
+      return {
+        type: "cari_tahsilat",
+        payload: {
+          cariId: p.cariId as string,
+          amount: p.amount as number,
+          kasa: p.kasa as string,
+        }
+      };
+    }
+    if (talep.action === "cari_ekle") {
+      return {
+        type: "cari_ekle",
+        payload: {
+          name: p.name as string,
+          taxNumber: p.taxNumber as string,
+          email: p.email as string,
+          phone: p.phone as string,
+          address: p.address as string,
+        }
+      };
+    }
+    return null;
+  }
+
   async islemYap(talep: AgentRequest): Promise<AgentResponse> {
     this.yayinla("cari.islem", { action: talep.action, payload: talep.payload });
-    if (!this.ctx) return { ok: false, error: "Agent bağlanmadı" };
 
-    try {
-      const payload = talep.payload || {};
-      if (talep.action === "cari_tahsilat") {
-        const cariId = payload.cariId as string;
-        const amount = payload.amount as number;
-        if (cariId && amount) {
-          this.save((prev) => ({
-            ...prev,
-            cari: prev.cari.map((c) =>
-              c.id === cariId
-                ? {
-                    ...c,
-                    balance: (c.balance || 0) - amount,
-                    lastTransaction: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                  }
-                : c,
-            ),
-          }));
-        }
-      }
-      if (talep.action === "cari_ekle") {
-        return { ok: true, data: { agent: this.id, action: talep.action, status: "completed", message: "Cari ekleme UI üzerinden yapılmalı" } };
-      }
-      return { ok: true, data: { agent: this.id, action: talep.action, status: "completed" } };
-    } catch (error) {
-      return { ok: false, error: `Cari hatası: ${error}` };
+    const intent = this.mapRequestToIntent(talep);
+    if (!intent) {
+      return { ok: false, error: `Desteklenmeyen cari aksiyonu: ${talep.action}` };
     }
+
+    const result = processIntent(intent, this.db);
+    if (!result.ok) return { ok: false, error: result.error };
+
+    return { 
+      ok: true, 
+      data: { agent: this.id, action: talep.action, status: "completed", intentResult: result } 
+    };
   }
 }

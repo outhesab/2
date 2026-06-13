@@ -1,15 +1,21 @@
-import type { DB, RuleViolation, AuditEntry } from '@/types';
 import { trimAuditLog } from '@/lib/auditEngine';
 import { logger } from '@/lib/logger';
 import { validateTransaction } from '@/lib/ruleEngine';
 import { saveToFirebase } from './sync';
 import { getUserSession } from '@/lib/userManager';
+import type { DB, RuleViolation, AuditEntry } from '@/types';
+import type { IntentResult } from '@/domain/types';
 
 // G4 fix: shared pending promise reference
 let _firebasePromise: Promise<void> | null = null;
 export function getFirebasePromise() {
   return _firebasePromise;
 }
+
+// Global sync lock for the main useDB useEffect
+let _pendingFirebasePromise: Promise<void> | null = null;
+export function getPendingFirebasePromise(): Promise<void> | null { return _pendingFirebasePromise; }
+export function setPendingFirebasePromise(p: Promise<void> | null): void { _pendingFirebasePromise = p; }
 
 async function scheduleFirebaseSave(db: DB): Promise<void> {
   const session = getUserSession();
@@ -94,4 +100,45 @@ export function saveAppliedState(
     scheduleFirebaseSave(withAudit);
   }, 1200);
   return withAudit;
+}
+
+export function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
+  if (!data) return prev;
+  const { dbUpdates } = data;
+  const next: DB = { ...prev };
+
+  if (dbUpdates.products) {
+    next.products = next.products.map((p) => {
+      const update = dbUpdates.products!.find((u) => u.id === p.id);
+      return update ? { ...p, stock: update.newStock } : p;
+    });
+  }
+
+  if (dbUpdates.kasa) {
+    next.kasa = [...(next.kasa || []), ...dbUpdates.kasa!];
+  }
+
+  if (dbUpdates.cari) {
+    next.cari = next.cari.map((c) => {
+      const update = dbUpdates.cari!.find((u) => u.cariId === c.id);
+      return update ? { ...c, balance: (c.balance || 0) + update.balanceChange } : c;
+    });
+  }
+
+  if (dbUpdates.newProduct) {
+    next.products = [...(next.products || []), dbUpdates.newProduct!];
+  }
+
+  if (dbUpdates.newCari) {
+    next.cari = [...(next.cari || []), dbUpdates.newCari!];
+  }
+
+  if (dbUpdates.sale) {
+    next.sales = [...(next.sales || []), dbUpdates.sale!];
+  }
+
+  return {
+    ...next,
+    _version: (prev._version || 0) + 1,
+  };
 }

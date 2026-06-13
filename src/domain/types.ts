@@ -1,4 +1,4 @@
-import type { SaleItem, DomainEvent } from "@/types";
+import type { Product, Sale, KasaEntry, Cari, DomainEvent } from "@/types";
 
 export interface SaleIntent {
   items: Array<{
@@ -19,6 +19,7 @@ export interface SaleIntent {
 }
 
 export interface StockMovementV2 {
+  id?: string;
   productId: string;
   productName: string;
   type: "satis" | "iade";
@@ -29,8 +30,8 @@ export interface StockMovementV2 {
 
 export interface CashTransaction {
   amount: number;
-  type: "gelir";
-  category: "satis";
+  type: "gelir" | "gider";
+  category: string;
   kasa: string;
   description: string;
   relatedId: string;
@@ -41,43 +42,32 @@ export interface CariUpdate {
   balanceChange: number;
 }
 
-export interface SaleResult {
-  sale: {
-    id: string;
-    cariId?: string;
-    cariName?: string;
-    customerName?: string;
-    productId?: string;
-    productName: string;
-    productCategory?: string;
-    quantity: number;
-    unitPrice: number;
-    cost: number;
-    items: SaleItem[];
-    subtotal: number;
-    discount: number;
-    discountAmount: number;
-    total: number;
-    profit: number;
-    payment: string;
-    status: "tamamlandi" | "completed";
-    createdAt: string;
-    updatedAt: string;
-  };
-  stockMovements: StockMovementV2[];
-  cashTransaction: CashTransaction | null;
-  cariUpdate: CariUpdate | null;
-  events: DomainEvent[];
-}
-
 export type Intent =
   | { type: "sale"; payload: SaleIntent }
+  | { type: "sale_iptal"; payload: { saleId: string } }
+  | { type: "sale_iade"; payload: { saleId: string; qty?: number | Record<string, number> } }
+  | { type: "sale_fiyat_duzelt"; payload: { saleId: string; yeniFiyat: number | Record<string, number> } }
   | { type: "kasa_gelir"; payload: { amount: number; kasa: string; description: string; category?: string } }
   | { type: "kasa_gider"; payload: { amount: number; kasa: string; description: string; category?: string } }
-  | { type: "cari_tahsilat"; payload: { cariId: string; amount: number; kasa: string } };
+  | { type: "stok_guncelle"; payload: { productId: string; amount: number; type: "giris" | "cikis"; description?: string } }
+  | { type: "urun_ekle"; payload: { productName: string; category?: string; initialStock?: number; unitPrice?: number } }
+  | { type: "cari_tahsilat"; payload: { cariId: string; amount: number; kasa: string } }
+  | { type: "cari_ekle"; payload: { name: string; taxNumber?: string; email?: string; phone?: string; address?: string } };
 
-export interface IntentResult<T = unknown> {
+export interface DBUpdates {
+  products?: Array<{ id: string; newStock: number }>;
+  kasa?: KasaEntry[];
+  cari?: CariUpdate[];
+  newProduct?: Product;
+  newCari?: Cari;
+  sale?: Sale;
+}
+
+export interface IntentResult {
   ok: boolean;
-  data?: T;
   error?: string;
+  data?: {
+    dbUpdates: DBUpdates;
+    events: DomainEvent[];
+  };
 }
