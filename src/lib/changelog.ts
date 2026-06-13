@@ -20,6 +20,51 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.24.2',
+    date: '13 Haziran 2026',
+    title: 'BugHunter.tsx Modülerizasyonu — 7 modüle bölündü',
+    summary: 'BugHunter.tsx (1092 satır) "Orchestrator + Modules" pattern\'ına taşındı. Eski dosya BugHunter/index.tsx oldu, 5 UI modülü + types.ts + TestRunner.ts ile 7 dosyaya ayrıldı. Eski BugHunter.tsx silindi, lazy import çalışmaya devam ediyor.',
+    changes: [
+      { type: 'iyilestirme', text: 'BugHunter/index.tsx (orchestrator): state yönetimi, filteredResults, runTests callback. 4 UI modülünü birleştirir.' },
+      { type: 'iyilestirme', text: 'BugHunter/types.ts: TestResult, BugReport, FilterType arayüzleri + STATUS_COLORS sabiti.' },
+      { type: 'iyilestirme', text: 'BugHunter/TestRunner.ts: TestRunner sınıfı (8 test kategorisi, 35+ test). Özgün dosyadan extract edildi.' },
+      { type: 'iyilestirme', text: 'BugHunter/BugStats.tsx: İstatistik kartları grid (6 kart: toplam, başarılı, başarısız, uyarı, kritik, skor).' },
+      { type: 'iyilestirme', text: 'BugHunter/BugToolbar.tsx: Arama inputu + filtre butonları (Tumu/Kritik/Başarısız/Uyarı/Başarılı).' },
+      { type: 'iyilestirme', text: 'BugHunter/BugResults.tsx: Test sonuçları detaylı liste (details/summary) + ResultDetail alt bileşeni.' },
+      { type: 'iyilestirme', text: 'BugHunter/BugEmptyState.tsx + BugEmptyResult.tsx: Boş durum bileşenleri (henüz test çalışmamış / filtre sonucu yok).' },
+    ],
+  },
+  {
+    version: '3.24.1',
+    date: '13 Haziran 2026',
+    title: 'Monitor.tsx Modülerizasyonu — 6 modüle bölündü',
+    summary: 'Monitor.tsx (1178 satır) "Orchestrator + Modules" pattern\'ına taşındı. Eski dosya Monitor/index.tsx oldu, 5 yardımcı modüle ayrıldı: MonitorOverview, MonitorIssues, MonitorRules, MonitorAuditLog, types. Eski Monitor.tsx silindi, lazy import çalışmaya devam ediyor.',
+    changes: [
+      { type: 'iyilestirme', text: 'Monitor → Monitor/index.tsx (orchestrator): state yönetimi, computed değerler (healthScore, summary, alerts, errorLogs), tab navigasyonu, alerts/errors/activity tabları.' },
+      { type: 'iyilestirme', text: 'Monitor/types.ts: ruleTypes, ruleLabels, levelColors, severityLabels, categoryLabels sabitleri ve getActionIcon yardımcısı.' },
+      { type: 'iyilestirme', text: 'Monitor/MonitorOverview.tsx: Sağlık skoru özet kartları (score, critical, warning, info, alarm).' },
+      { type: 'iyilestirme', text: 'Monitor/MonitorIssues.tsx: Veri bütünlüğü health tabı — severity/kategori filtreleri ve issue listesi.' },
+      { type: 'iyilestirme', text: 'Monitor/MonitorRules.tsx: Kural listesi, toggle/ekle/düzenle/sil işlemleri ve modal form.' },
+      { type: 'iyilestirme', text: 'Monitor/MonitorAuditLog.tsx: Denetim log tabı — status filtresi, expandable violation detayları.' },
+    ],
+  },
+  {
+    version: '3.24.0',
+    date: '13 Haziran 2026',
+    title: 'Bank.tsx Modülerizasyonu — 8 modüle bölündü',
+    summary: 'Bank.tsx (1031 satır) "Orchestrator + Modules" pattern\'ına taşındı. Ana sayfa 8 ayrı dosyaya bölündü: orchestrator, StatCard, BankStats, BankActions, BankFilters, BankTable, BankForm, types. Eski Bank.tsx silindi, import path değişmedi.',
+    changes: [
+      { type: 'iyilestirme', text: 'Bank.tsx → Bank/index.tsx (orchestrator): state yönetimi, handler\'lar, filtering/stat mantığı ve alt bileşen kompozisyonu.' },
+      { type: 'iyilestirme', text: 'Bank/types.ts: Props, BankFormState, StatusFilter, TypeFilter, BankStatsData, StatusLabel, STATUS_LABEL sabiti.' },
+      { type: 'iyilestirme', text: 'Bank/StatCard.tsx: Tekil istatistik kartı bileşeni.' },
+      { type: 'iyilestirme', text: 'Bank/BankStats.tsx: 6\'lı istatistik grid\'i (gelen/giden/bakiye/bekliyor/eşlendi/onaylı).' },
+      { type: 'iyilestirme', text: 'Bank/BankActions.tsx: Toolbar (ekle/toplu onay/excel/csv/ai-eşle/TableFilterBar).' },
+      { type: 'iyilestirme', text: 'Bank/BankFilters.tsx: Status + type filtre butonları.' },
+      { type: 'iyilestirme', text: 'Bank/BankTable.tsx: Banka hareketleri tablosu (satır bazlı onay/sil/cari eşle).' },
+      { type: 'iyilestirme', text: 'Bank/BankForm.tsx: Modal form (yeni işlem ekleme, cari eşleme).' },
+    ],
+  },
+  {
     version: '3.23.5',
     date: '13 Haziran 2026',
     title: 'UI Modernizasyonu Tamamlama — Cari & Products Inline Style Cleanup',
