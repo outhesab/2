@@ -20,6 +20,20 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.23.5',
+    date: '13 Haziran 2026',
+    title: 'UI Modernizasyonu Tamamlama — Cari & Products Inline Style Cleanup',
+    summary: '3.23.4\'te yarım kalan inline style → Tailwind migrasyonu tamamlandı. Products.tsx modal formları (Ekle/Düzenle + Toplu Fiyat) tamamen Tailwind + shadcn/ui\'ye dönüştürüldü. Cari.tsx\'teki son inline style noktaları (debtColor, bucket renkleri, segment badge) class-based yapıldı.',
+    changes: [
+      { type: 'iyilestirme', text: 'Products.tsx: Ürün Ekleme/Düzenleme modalı — lbl/inp style sabitleri kaldırıldı, Label/Input/Button shadcn/ui bileşenlerine geçildi.' },
+      { type: 'iyilestirme', text: 'Products.tsx: Toplu Fiyat Güncelleme modalı — inline style\'dan Tailwind class\'larına taşındı, Button bileşeni kullanıldı.' },
+      { type: 'iyilestirme', text: 'Products.tsx: İstatistik kartları renkleri hex → Tailwind class (text-emerald-500 vb.).' },
+      { type: 'iyilestirme', text: 'Products.tsx: Kullanılmayan Chip component kaldırıldı.' },
+      { type: 'iyilestirme', text: 'Cari.tsx: debtColor() fonksiyonu hex renk yerine Tailwind class döndürüyor.' },
+      { type: 'iyilestirme', text: 'Cari.tsx: Alacak yaşlandırma bucket renkleri ve segment badge (VIP/Normal/Riskli) class-based yapıldı.' },
+    ],
+  },
+  {
     version: '3.23.4',
     date: '13 Haziran 2026',
     title: 'UI Modernizasyonu — Cari & Ürün Sayfaları',

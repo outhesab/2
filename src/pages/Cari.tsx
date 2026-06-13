@@ -60,18 +60,18 @@ function debtColor(days: number | null): {
   bg: string;
   label: string;
 } {
-  if (days === null) return { color: '#64748b', bg: 'transparent', label: '' };
-  if (days <= 7) return { color: '#10b981', bg: 'rgba(16,185,129,0.1)', label: `${days}g` };
-  if (days <= 30) return { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', label: `${days}g` };
+  if (days === null) return { color: 'text-slate-500', bg: '', label: '' };
+  if (days <= 7) return { color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: `${days}g` };
+  if (days <= 30) return { color: 'text-amber-500', bg: 'bg-amber-500/10', label: `${days}g` };
   if (days <= 60)
     return {
-      color: '#ef4444',
-      bg: 'rgba(239,68,68,0.12)',
+      color: 'text-red-500',
+      bg: 'bg-red-500/10',
       label: `${days}g ⚠️`,
     };
   return {
-    color: '#dc2626',
-    bg: 'rgba(220,38,38,0.18)',
+    color: 'text-red-600',
+    bg: 'bg-red-600/20',
     label: `${days}g gecikmiş`,
   };
 }
@@ -336,28 +336,28 @@ export default function Cari({ db, save }: Props) {
                 {
                   label: '0–7 gün',
                   items: aging['0-7'],
-                  color: '#10b981',
+                  color: 'text-emerald-500',
                   bg: 'bg-emerald-500/10',
                   border: 'border-emerald-500/30',
                 },
                 {
                   label: '8–30 gün',
                   items: aging['8-30'],
-                  color: '#f59e0b',
+                  color: 'text-amber-500',
                   bg: 'bg-amber-500/10',
                   border: 'border-amber-500/30',
                 },
                 {
                   label: '31–60 gün',
                   items: aging['31-60'],
-                  color: '#ef4444',
+                  color: 'text-red-500',
                   bg: 'bg-red-500/10',
                   border: 'border-red-500/30',
                 },
                 {
                   label: '60+ gün',
                   items: aging['60+'],
-                  color: '#dc2626',
+                  color: 'text-red-600',
                   bg: 'bg-red-600/10',
                   border: 'border-red-600/30',
                 },
@@ -371,11 +371,11 @@ export default function Cari({ db, save }: Props) {
                   }}
                   className={`flex-1 min-w-[120px] ${bucket.bg} ${bucket.border} border rounded-xl p-3 cursor-pointer transition-all hover:scale-[1.02]`}
                 >
-                  <div style={{ color: bucket.color }} className="text-xl font-black leading-none">
+                  <div className={`text-xl font-black leading-none ${bucket.color}`}>
                     {bucket.items.length}
                     <span className="text-xs font-semibold ml-1 opacity-80">müşteri</span>
                   </div>
-                  <div style={{ color: bucket.color }} className="text-sm font-bold mt-1">
+                  <div className={`text-sm font-bold mt-1 ${bucket.color}`}>
                     {formatMoney(bucket.items.reduce((s, c) => s + c.balance, 0))}
                   </div>
                   <div className="text-slate-500 text-[0.65rem] mt-1">
@@ -552,17 +552,16 @@ export default function Cari({ db, save }: Props) {
                       {(() => {
                         const seg =
                           c.type === 'musteri' && c.balance > 50000
-                            ? { label: 'VIP', color: '#8b5cf6', bg: 'bg-violet-500/15' }
+                            ? { label: 'VIP', color: 'text-violet-500', bg: 'bg-violet-500/15' }
                             : c.type === 'musteri' && c.balance >= 0
-                              ? { label: 'Normal', color: '#10b981', bg: 'bg-emerald-500/12' }
+                              ? { label: 'Normal', color: 'text-emerald-500', bg: 'bg-emerald-500/12' }
                               : c.balance < -10000
-                                ? { label: 'Riskli', color: '#ef4444', bg: 'bg-red-500/12' }
+                                ? { label: 'Riskli', color: 'text-red-500', bg: 'bg-red-500/12' }
                                 : null;
                         if (!seg) return null;
                         return (
                           <span
-                            className={`ml-2 ${seg.bg} text-white rounded px-1.5 py-0.5 text-[0.68rem] font-bold align-middle`}
-                            style={{ color: seg.color }}
+                            className={`ml-2 ${seg.bg} ${seg.color} rounded px-1.5 py-0.5 text-[0.68rem] font-bold align-middle`}
                           >
                             {seg.label}
                           </span>
@@ -605,11 +604,7 @@ export default function Cari({ db, save }: Props) {
                     <td data-label="Borç Süresi" className="p-3">
                       {c.balance > 0 && c.debtDays !== null ? (
                         <Badge
-                          className={`font-bold text-[0.78rem] px-2 py-0 ${
-                            c.debtDays <= 7 ? 'bg-emerald-500/10 text-emerald-500' :
-                            c.debtDays <= 30 ? 'bg-amber-500/10 text-amber-500' :
-                            c.debtDays <= 60 ? 'bg-red-500/10 text-red-500' : 'bg-red-600/20 text-red-600'
-                          }`}
+                          className={`font-bold text-[0.78rem] px-2 py-0 ${dc.bg} ${dc.color}`}
                         >
                           {dc.label}
                         </Badge>

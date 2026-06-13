@@ -10,6 +10,7 @@ import { exportArrayToExcel } from '@/lib/excelExport';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DB, Product } from '@/types';
 import { useLocation } from 'wouter';
@@ -256,17 +257,16 @@ export default function Products({ db, save }: Props) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
-          { label: 'Toplam Ürün', value: String(db.products.length), color: '#3b82f6' },
-          { label: 'Stok Değeri', value: formatMoney(totalValue), color: '#10b981' },
-          { label: 'Biten Stok', value: String(outOfStock), color: '#ef4444' },
-          { label: 'Az Stok', value: String(lowStock), color: '#f59e0b' },
+          { label: 'Toplam Ürün', value: String(db.products.length), color: 'text-blue-500', border: 'border-blue-500/20' },
+          { label: 'Stok Değeri', value: formatMoney(totalValue), color: 'text-emerald-500', border: 'border-emerald-500/20' },
+          { label: 'Biten Stok', value: String(outOfStock), color: 'text-red-500', border: 'border-red-500/20' },
+          { label: 'Az Stok', value: String(lowStock), color: 'text-amber-500', border: 'border-amber-500/20' },
         ].map((s) => (
           <div
             key={s.label}
-            className="bg-card rounded-xl p-3 border transition-all hover:border-white/20"
-            style={{ borderColor: `${s.color}33` }}
+            className={`bg-card rounded-xl p-3 border transition-all hover:border-white/20 ${s.border}`}
           >
-            <div style={{ color: s.color }} className="text-lg font-black">
+            <div className={`text-lg font-black ${s.color}`}>
               {s.value}
             </div>
             <div className="text-muted-foreground text-[0.78rem] mt-1">
@@ -367,22 +367,21 @@ export default function Products({ db, save }: Props) {
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? '✏️ Ürün Düzenle' : '➕ Yeni Ürün'}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <div style={{ gridColumn: '1/-1' }}>
-            <label style={lbl}>Ürün Adı *</label>
-            <input
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <Label>Ürün Adı *</Label>
+            <Input
               value={form.name || ''}
               onChange={(e) => f('name', e.target.value)}
-              style={inp}
               placeholder="Ürün adı"
             />
           </div>
           <div>
-            <label style={lbl}>Kategori</label>
+            <Label>Kategori</Label>
             <select
               value={form.category || productCats[0]?.id || 'soba'}
               onChange={(e) => f('category', e.target.value)}
-              style={inp}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
             >
               {productCats.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -392,8 +391,8 @@ export default function Products({ db, save }: Props) {
             </select>
           </div>
           <div>
-            <label style={lbl}>Tedarikçi (opsiyonel)</label>
-            <select value={form.supplierId || ''} onChange={(e) => f('supplierId', e.target.value)} style={inp}>
+            <Label>Tedarikçi (opsiyonel)</Label>
+            <select value={form.supplierId || ''} onChange={(e) => f('supplierId', e.target.value)} className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none">
               <option value="">— Seçilmedi —</option>
               {db.suppliers
                 .filter((s) => !s.deleted)
@@ -405,30 +404,29 @@ export default function Products({ db, save }: Props) {
             </select>
           </div>
           <div>
-            <label style={lbl}>Marka</label>
-            <input
+            <Label>Marka</Label>
+            <Input
               value={form.brand || ''}
               onChange={(e) => f('brand', e.target.value)}
-              style={inp}
               placeholder="Marka"
             />
           </div>
           <div>
-            <label style={lbl}>Alış Fiyatı</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input
+            <Label>Alış Fiyatı</Label>
+            <div className="flex gap-1.5">
+              <Input
                 type="number"
                 inputMode="decimal"
                 value={form.cost || 0}
                 onChange={(e) => f('cost', parseFloat(e.target.value) || 0)}
-                style={{ ...inp, flex: 1 }}
                 min={0}
                 step={0.01}
+                className="flex-1"
               />
               <select
                 value={'costCurrency' in form ? (form as Record<string, string>).costCurrency : 'TRY'}
                 onChange={(e) => f('costCurrency', e.target.value as 'TRY' | 'USD' | 'EUR')}
-                style={{ ...inp, width: 70, flex: '0 0 70px' }}
+                className="w-[70px] p-2 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
               >
                 <option value="TRY">₺</option>
                 <option value="USD">$</option>
@@ -437,74 +435,61 @@ export default function Products({ db, save }: Props) {
             </div>
           </div>
           <div>
-            <label style={lbl}>Satış Fiyatı (₺)</label>
-            <input
+            <Label>Satış Fiyatı (₺)</Label>
+            <Input
               type="number"
               inputMode="decimal"
               value={form.price || 0}
               onChange={(e) => f('price', parseFloat(e.target.value) || 0)}
-              style={inp}
               min={0}
               step={0.01}
             />
           </div>
           <div>
-            <label style={lbl}>Stok</label>
-            <input
+            <Label>Stok</Label>
+            <Input
               type="number"
               inputMode="decimal"
               value={form.stock || 0}
               onChange={(e) => f('stock', parseInt(e.target.value) || 0)}
-              style={inp}
               min={0}
             />
           </div>
           <div>
-            <label style={lbl}>Min. Stok</label>
-            <input
+            <Label>Min. Stok</Label>
+            <Input
               type="number"
               inputMode="decimal"
               value={form.minStock || 5}
               onChange={(e) => f('minStock', parseInt(e.target.value) || 0)}
-              style={inp}
               min={0}
             />
           </div>
           <div>
-            <label style={lbl}>Barkod</label>
-            <input
+            <Label>Barkod</Label>
+            <Input
               value={form.barcode || ''}
               onChange={(e) => f('barcode', e.target.value)}
-              style={inp}
               placeholder="Barkod"
             />
           </div>
-          <div style={{ gridColumn: '1/-1' }}>
-            <label style={lbl}>Açıklama</label>
+          <div className="col-span-2">
+            <Label>Açıklama</Label>
             <textarea
               value={form.description || ''}
               onChange={(e) => f('description', e.target.value)}
-              style={{ ...inp, minHeight: 60, resize: 'vertical' as const }}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none min-h-[60px] resize-y"
             />
           </div>
           {form.cost && form.price ? (
-            <div
-              style={{
-                gridColumn: '1/-1',
-                background: '#0f172a',
-                borderRadius: 8,
-                padding: '10px 14px',
-                display: 'flex',
-                gap: 20,
-              }}
-            >
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            <div className="col-span-2 bg-slate-900 rounded-lg px-3.5 py-2.5 flex gap-5">
+              <span className="text-muted-foreground text-sm">
                 Markup:{' '}
                 <strong style={{ color: calcProfit(form.price, form.cost) >= 20 ? '#10b981' : '#f59e0b' }}>
                   %{calcProfit(form.price, form.cost)}
                 </strong>
               </span>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              <span className="text-muted-foreground text-sm">
                 Kâr:{' '}
                 <strong style={{ color: '#10b981' }}>
                   {formatMoney((form.price - form.cost) * (form.stock || 0))}
@@ -513,43 +498,21 @@ export default function Products({ db, save }: Props) {
             </div>
           ) : null}
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button
-            onClick={handleSave}
-            style={{
-              flex: 1,
-              background: '#10b981',
-              border: 'none',
-              borderRadius: 10,
-              color: '#fff',
-              padding: '11px 0',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
+        <div className="flex gap-2.5 mt-5">
+          <Button onClick={handleSave} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl">
             💾 Kaydet
-          </button>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              background: '#273548',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              color: 'var(--text-dim)',
-              padding: '11px 20px',
-              cursor: 'pointer',
-            }}
-          >
+          </Button>
+          <Button variant="outline" onClick={() => setModalOpen(false)} className="rounded-xl">
             İptal
-          </button>
+          </Button>
         </div>
       </Modal>
 
       <Modal open={bulkModal} onClose={() => setBulkModal(false)} title="📈 Toplu Fiyat Güncelle">
-        <div style={{ display: 'grid', gap: 14 }}>
+        <div className="grid gap-3.5">
           <div>
-            <label style={lbl}>Kategori</label>
-            <select value={bulkCat} onChange={(e) => setBulkCat(e.target.value)} style={inp}>
+            <Label>Kategori</Label>
+            <select value={bulkCat} onChange={(e) => setBulkCat(e.target.value)} className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none">
               <option value="all">Tüm Kategoriler</option>
               {productCats.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -559,36 +522,32 @@ export default function Products({ db, save }: Props) {
             </select>
           </div>
           <div>
-            <label style={lbl}>Yön</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <Label>Yön</Label>
+            <div className="flex gap-2">
               {(['up', 'down'] as const).map((d) => (
-                <button
+                <Button
                   key={d}
+                  variant="ghost"
                   onClick={() => setBulkDirection(d)}
-                  style={{
-                    flex: 1,
-                    padding: '9px 0',
-                    border: 'none',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    background: bulkDirection === d ? '#ff5722' : '#273548',
-                    color: bulkDirection === d ? '#fff' : '#94a3b8',
-                  }}
+                  className={`flex-1 rounded-lg font-semibold ${
+                    bulkDirection === d
+                      ? 'bg-[#ff5722] text-white hover:bg-[#e64a19]'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
                 >
                   {d === 'up' ? '📈 Zam' : '📉 İndirim'}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
           <div>
-            <label style={lbl}>{bulkDirection === 'up' ? 'Zam Yüzdesi (%)' : 'İndirim Yüzdesi (%)'} *</label>
-            <input
+            <Label>{bulkDirection === 'up' ? 'Zam Yüzdesi (%)' : 'İndirim Yüzdesi (%)'} *</Label>
+            <Input
               type="number"
               inputMode="decimal"
               value={bulkPct}
               onChange={(e) => setBulkPct(e.target.value)}
-              style={{ ...inp, fontSize: '1.5rem', fontWeight: 800, textAlign: 'center', padding: '16px' }}
+              className="text-2xl font-extrabold text-center py-4"
               placeholder="0"
               min={0}
               step={0.1}
@@ -602,19 +561,19 @@ export default function Products({ db, save }: Props) {
             const multiplier = bulkDirection === 'up' ? (100 + pct) / 100 : (100 - pct) / 100;
             const avgBefore = affected.length > 0 ? affected.reduce((s, p) => s + p.price, 0) / affected.length : 0;
             return (
-              <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '14px 16px' }}>
-                <div style={{ color: 'var(--text-dim)', fontSize: '0.82rem', marginBottom: 8 }}>Önizleme</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Etkilenen ürün:</span>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{affected.length}</span>
+              <div className="bg-white/5 rounded-xl px-4 py-3.5">
+                <div className="text-dim text-xs mb-2">Önizleme</div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-muted-foreground text-xs">Etkilenen ürün:</span>
+                  <span className="text-foreground font-bold">{affected.length}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Ort. fiyat (önce):</span>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{formatMoney(avgBefore)}</span>
+                <div className="flex justify-between mb-1">
+                  <span className="text-muted-foreground text-xs">Ort. fiyat (önce):</span>
+                  <span className="text-foreground font-bold">{formatMoney(avgBefore)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Ort. fiyat (sonra):</span>
-                  <span style={{ color: bulkDirection === 'up' ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground text-xs">Ort. fiyat (sonra):</span>
+                  <span style={{ color: bulkDirection === 'up' ? '#10b981' : '#ef4444' }} className="font-bold">
                     {formatMoney(avgBefore * multiplier)}
                   </span>
                 </div>
@@ -622,9 +581,8 @@ export default function Products({ db, save }: Props) {
             );
           })()}
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button
-            onClick={() => {
+        <div className="flex gap-2.5 mt-5">
+          <Button onClick={() => {
               const pct = parseFloat(bulkPct);
               if (!pct || pct <= 0) {
                 showToast('Geçerli yüzde girin!', 'error');
@@ -649,33 +607,12 @@ export default function Products({ db, save }: Props) {
               );
               setBulkModal(false);
               setBulkPct('');
-            }}
-            style={{
-              flex: 1,
-              background: '#f59e0b',
-              border: 'none',
-              borderRadius: 10,
-              color: '#fff',
-              padding: '11px 0',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
+            }} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">
             🔄 Uygula
-          </button>
-          <button
-            onClick={() => setBulkModal(false)}
-            style={{
-              background: '#273548',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              color: 'var(--text-dim)',
-              padding: '11px 20px',
-              cursor: 'pointer',
-            }}
-          >
+          </Button>
+          <Button variant="outline" onClick={() => setBulkModal(false)} className="rounded-xl">
             İptal
-          </button>
+          </Button>
         </div>
       </Modal>
       <VoiceAssistantButton />
@@ -683,76 +620,4 @@ export default function Products({ db, save }: Props) {
   );
 }
 
-const lbl: React.CSSProperties = {
-  display: 'block',
-  marginBottom: 6,
-  color: 'var(--text-dim)',
-  fontSize: '0.85rem',
-  fontWeight: 500,
-};
-const inp: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 14px',
-  background: 'rgba(15,23,42,0.6)',
-  border: '1px solid var(--border)',
-  borderRadius: 10,
-  color: 'var(--text-primary)',
-  fontSize: '0.9rem',
-  boxSizing: 'border-box',
-};
 
-function Chip({
-  label,
-  active,
-  onClick,
-  danger,
-  warning,
-  count,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-  danger?: boolean;
-  warning?: boolean;
-  count?: number;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '7px 14px',
-        border: 'none',
-        borderRadius: 10,
-        cursor: 'pointer',
-        fontWeight: 600,
-        fontSize: '0.83rem',
-        background: active ? '#ff5722' : danger ? 'rgba(239,68,68,0.1)' : warning ? 'rgba(245,158,11,0.1)' : '#273548',
-        color: active ? '#fff' : danger ? '#ef4444' : warning ? '#f59e0b' : '#94a3b8',
-        transition: 'all 0.2s',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-      }}
-    >
-      {label}{' '}
-      {count !== undefined && count > 0 && (
-        <span
-          style={{
-            background: active ? 'rgba(255,255,255,0.2)' : danger ? '#ef4444' : '#f59e0b',
-            color: '#fff',
-            borderRadius: '50%',
-            minWidth: 18,
-            height: 18,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.72rem',
-            fontWeight: 800,
-          }}
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  );
-}
