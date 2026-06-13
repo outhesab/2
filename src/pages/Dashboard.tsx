@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaCh
 import { formatMoney, formatDate } from '@/lib/utils-tr';
 import { saveBackupToFirebase, listBackupsFromFirebase, restoreBackupFromFirebase } from '@/hooks/useDB';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { logger } from '@/lib/logger';
 import { getAppVersion } from '@/lib/version';
 import { BRAND_NAME } from '@/config/brand';
@@ -428,10 +429,21 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
                   <div className={`dash-sale-icon ${s.status === 'tamamlandi' ? 'completed' : 'returned'}`}>
                     {s.status === 'tamamlandi' ? '✓' : '↩'}
                   </div>
-                  <div className="dash-sale-info">
-                    <div className="dash-sale-name">{s.productName}</div>
-                    <div className="dash-sale-date">{formatDate(s.createdAt)}</div>
-                  </div>
+                  <div className="flex items-center gap-3">
+                  <Avatar className="size-8">
+                    <AvatarFallback className="bg-secondary text-xs font-semibold text-secondary-foreground">
+                        {s.productName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <div className="dash-sale-name font-medium">{s.productName}</div>
+                          <div className="dash-sale-date text-xs text-muted-foreground">{formatDate(s.createdAt)}</div>
+                        </div>
+                      </div>
                   <div className="dash-sale-amount">
                     <div className={`dash-sale-total ${s.status === 'tamamlandi' ? 'completed' : ''}`}>
                       {formatMoney(s.total)}

@@ -1,6 +1,6 @@
 /**
- * Giriş Ekranı — Kullanıcı Adı + Şifre
- * Kullanıcılar Firebase config/users dökümanında saklanır
+ * LoginScreen — Modern 2-Panel Kurumsal Karşılama Ekranı
+ * Veri Katmanı: Firebase + localStorage (userManager.ts)
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
@@ -10,11 +10,15 @@ import {
   loadUsers, createUser, startGuestSession, isGuestSession,
   getGuestSessionRemaining, type AppUser,
 } from '@/lib/userManager';
-import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Zap, Sparkles } from 'lucide-react';
+import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Zap, Sparkles, ShieldCheck } from 'lucide-react';
+import { ParspelLogo } from '@/components/logo/ParspelLogo';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export { hashPassword as hashPass } from '@/lib/userManager';
 
-// ── Oturum hook ────────────────────────────────────────────────────────────
+// ── Oturum Hook ────────────────────────────────────────────────────────────
 export function useAuth() {
   const [authed, setAuthed] = useState(() => !!getUserSession());
   const [currentUser, setCurrentUser] = useState(() => getUserSession());
@@ -62,28 +66,7 @@ export function useAuth() {
   return { authed, login, logout, currentUser, guestTimeLeft };
 }
 
-// ── Parçacıklar ────────────────────────────────────────────────────────────
-const PARTICLES = Array.from({ length: 55 }, (_, i) => ({
-  size: 2 + ((i * 7) % 5),
-  left: (i * 19.3) % 100,
-  delay: (i * 1.37) % 22,
-  duration: 14 + ((i * 3.1) % 24),
-  color: i % 4 === 0 ? '#ff5722' : i % 4 === 1 ? '#ff9800' : i % 4 === 2 ? '#ffb74d' : 'rgba(255,255,255,0.6)',
-  glow: i % 4 === 0,
-}));
-
-function Particle({ p }: { p: typeof PARTICLES[number] }) {
-  return (
-    <div className="login-particle" style={{
-      width: p.size, height: p.size,
-      background: p.color, left: `${p.left}%`, bottom: '-5%', opacity: 0,
-      animation: `floatUp ${p.duration}s ${p.delay}s infinite`,
-      boxShadow: p.glow ? `0 0 8px 2px rgba(255,87,34,0.5)` : 'none',
-    }} />
-  );
-}
-
-// ── Ana bileşen ────────────────────────────────────────────────────────────
+// ── Ana Bileşen ────────────────────────────────────────────────────────────
 export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, remember: boolean) => void }) {
   const [username, setUsername] = useState('');
   const [pass, setPass] = useState('');
@@ -95,7 +78,6 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
   const [success, setSuccess] = useState(false);
   const [fbStatus, setFbStatus] = useState<'connecting' | 'ready' | 'error'>('connecting');
   const [statusMsg, setStatusMsg] = useState('Bağlanılıyor…');
-  const [time, setTime] = useState(new Date());
   const usernameRef = useRef<HTMLInputElement>(null);
 
   // Kayıt modu
@@ -104,74 +86,69 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
   const [capsLock, setCapsLock] = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const checkUsers = useCallback(async () => {
-    setFbStatus('connecting');
-    setStatusMsg('Firebase\'e bağlanılıyor…');
-    try {
-      const users = await loadUsers();
-      if (!navigator.onLine && users.length > 0) {
-        setFbStatus('ready');
-        setStatusMsg(`Çevrimdışı giriş modu — ${users.filter(u => u.active).length} yerel kullanıcı hazır`);
-      } else if (!navigator.onLine && users.length === 0) {
+    const checkUsers = async () => {
+      setFbStatus('connecting');
+      setStatusMsg('Firebase\'e bağlanılıyor…');
+      try {
+        const users = await loadUsers();
+        if (!navigator.onLine && users.length > 0) {
+          setFbStatus('ready');
+          setStatusMsg(`Çevrimdışı giriş modu — ${users.filter(u => u.active).length} yerel kullanıcı hazır`);
+        } else if (!navigator.onLine && users.length === 0) {
+          setFbStatus('error');
+          setStatusMsg('İnternet kapalı ve yerel kullanıcı bulunamadı');
+        } else if (users.length === 0) {
+          setFbStatus('ready');
+          setStatusMsg('Henüz kayıtlı kullanıcı yok — kayıt olun');
+          setRegisterMode(true);
+        } else {
+          setFbStatus('ready');
+          setStatusMsg(`${users.filter(u => u.active).length} kullanıcı hazır`);
+        }
+      } catch {
+        logger.warn('auth', 'Firebase bağlantısı kurulamadı');
         setFbStatus('error');
-        setStatusMsg('İnternet kapalı ve yerel kullanıcı bulunamadı');
-      } else if (users.length === 0) {
-        setFbStatus('ready');
-        setStatusMsg('Henüz kayıtlı kullanıcı yok — kayıt olun');
-        setRegisterMode(true);
-      } else {
-        setFbStatus('ready');
-        setStatusMsg(`${users.filter(u => u.active).length} kullanıcı hazır`);
+        setStatusMsg('Firebase bağlantısı kurulamadı');
       }
-    } catch {
-      logger.warn('auth', 'Firebase bağlantısı kurulamadı');
-      setFbStatus('error');
-      setStatusMsg('Firebase bağlantısı kurulamadı');
-    }
-    setTimeout(() => usernameRef.current?.focus(), 300);
+      setTimeout(() => usernameRef.current?.focus(), 300);
+    };
+    checkUsers();
   }, []);
-
-  useEffect(() => { checkUsers(); }, [checkUsers]);
 
   const doShake = () => { setShake(true); setTimeout(() => setShake(false), 600); };
 
-    const handleLogin = async (userOverride?: string, passOverride?: string) => {
-      const u = userOverride ?? username;
-      const p = passOverride ?? pass;
-      if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
-      if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
-      setLoading(true); setError('');
+  const handleLogin = async (userOverride?: string, passOverride?: string) => {
+    const u = userOverride ?? username;
+    const p = passOverride ?? pass;
+    if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
+    if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
+    setLoading(true); setError('');
 
-      // Demo kullanıcı kontrolü: demo29605 her zaman giriş yapabilir (database boş olsa bile)
-      if (u.trim() === 'demo29605' && p.trim() === 'demo1234') {
-        const demoUser: AppUser = { id: 'demo_id', username: 'Demo Kullanıcı', passwordHash: 'demo1234', role: 'admin', active: true, createdAt: new Date().toISOString() };
-        setSuccess(true);
-        setTimeout(() => onLogin(demoUser, remember), 900);
-        setLoading(false);
-        return;
-      }
-
-      const users = await loadUsers();
-      if (users.length === 0) {
-        setError('Henüz kayıtlı kullanıcı yok. Lütfen kayıt olun.');
-        setRegisterMode(true);
-        setLoading(false);
-        return;
-      }
-      const user = await loginUser(u.trim(), p);
-      if (user) {
-        setSuccess(true);
-        setTimeout(() => onLogin(user, remember), 900);
-      } else {
-        setError('Kullanıcı adı veya şifre hatalı');
-        doShake(); setPass('');
-      }
+    if (u.trim() === 'demo29605' && p.trim() === 'demo1234') {
+      const demoUser: AppUser = { id: 'demo_id', username: 'Demo Kullanıcı', passwordHash: 'demo1234', role: 'admin', active: true, createdAt: new Date().toISOString() };
+      setSuccess(true);
+      setTimeout(() => onLogin(demoUser, remember), 900);
       setLoading(false);
-    };
+      return;
+    }
+
+    const users = await loadUsers();
+    if (users.length === 0) {
+      setError('Henüz kayıtlı kullanıcı yok. Lütfen kayıt olun.');
+      setRegisterMode(true);
+      setLoading(false);
+      return;
+    }
+    const user = await loginUser(u.trim(), p);
+    if (user) {
+      setSuccess(true);
+      setTimeout(() => onLogin(user, remember), 900);
+    } else {
+      setError('Kullanıcı adı veya şifre hatalı');
+      doShake(); setPass('');
+    }
+    setLoading(false);
+  };
 
   const handleRegister = async () => {
     if (!username.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
@@ -199,215 +176,204 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
     setCapsLock(e.getModifierState('CapsLock'));
   };
 
-  const fbDots = { connecting: '◌', ready: '●', error: '✕' };
-
   return (
-    <div className="login-overlay">
-
-
-      {/* Arka plan */}
-      <div className="login-bg-gradient" />
-      <div className="login-bg-glow" />
-      {PARTICLES.map((p, i) => <Particle key={i} p={p} />)}
-
-      {/* Üst bilgi */}
-      <div className="login-header">
-        {BRAND_NAME} · {BRAND_SUBTITLE}
-      </div>
-      <div className="login-clock">
-        {time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-      </div>
-      <div className="login-fb-status">
-        <span className={`login-fb-dot ${fbStatus}`} style={{ animation: fbStatus === 'connecting' ? 'loginFbDot 1.2s ease-in-out infinite' : 'none' }}>{fbDots[fbStatus]}</span>
-        <span className="login-fb-label">Firebase</span>
-      </div>
-
-      {/* Kart */}
-      <div className={`login-card-wrap${success ? ' success' : shake ? ' shake' : ' enter'}`}>
-        {success && (
-          <div className="login-success-ring">
-            <div className="login-success-ring-inner" />
+    <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-10">
+      <div className={`grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all ${shake ? 'animate-shake' : ''} lg:grid-cols-[1.05fr_1fr]`}>
+        
+        {/* SOL PANEL: Marka Kimliği */}
+        <aside className="relative hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
+          <div className="flex items-center gap-3">
+            <ParspelLogo className="size-10 bg-primary-foreground/15" />
+            <div className="leading-tight">
+              <p className="font-heading text-lg font-bold">{BRAND_NAME}</p>
+              <p className="text-xs text-primary-foreground/70">Soba Yönetim Sistemi</p>
+            </div>
           </div>
-        )}
 
-        <div className="login-card">
-          {/* Logo */}
-          <div className="login-logo-wrap">
-              <div className="login-logo-circle">
-                {success ? <Sparkles size={32} /> : <Zap size={32} />}
-              </div>
-            <h1 className="login-title">
-              {BRAND_NAME}
-            </h1>
-            <p className="login-subtitle">
-              {fbStatus === 'connecting'
-                ? 'Bağlanılıyor…'
-                : fbStatus === 'error'
-                  ? statusMsg
-                  : registerMode
-                    ? 'Yeni müşteri kaydı oluşturun'
-                    : 'Kullanıcı adı ve şifrenizle giriş yapın'}
+          <div className="space-y-4">
+            <h2 className="text-pretty font-heading text-3xl font-bold leading-tight">
+              Müşteri ve cihaz kayıtlarınızı tek panelden yönetin.
+            </h2>
+            <p className="text-pretty text-sm leading-relaxed text-primary-foreground/80">
+              Soba kurulumları, servis takibi ve müşteri geçmişi güvenle saklanır. Hızlı, sade ve kurumsal bir deneyim.
             </p>
           </div>
 
-          {/* Bağlanıyor skeleton */}
-          {fbStatus === 'connecting' && (
-            <div className="login-skeleton">
-              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
-              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
-              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '40%', height: 20, borderRadius: 8 }} /></div>
-              <div className="login-skeleton-row"><div className="login-skeleton-shape" style={{ width: '100%', height: 52, borderRadius: 14 }} /></div>
-            </div>
-          )}
+          <ul className="space-y-3 text-sm">
+            {[
+              "Anlık servis ve bakım takibi", 
+              "Şifrelenmiş müşteri kayıtları", 
+              "Çok kullanıcılı erişim"
+            ].map((item) => (
+              <li key={item} className="flex items-center gap-3 text-primary-foreground/85">
+                <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-          {/* Hata + misafir */}
-          {fbStatus === 'error' && (
-            <div className="login-error-box">
-              <div className="login-error-title"><AlertTriangle size={14} /> Bağlantı Hatası</div>
-              <div className="login-error-desc">Firebase'e erişilemiyor. Yerel kullanıcı yoksa internete bağlanıp bir kez giriş yapın.</div>
-              <button className="login-guest-btn" onClick={() => {
-                const guest = startGuestSession();
-                setSuccess(true);
-                setTimeout(() => onLogin(guest, false), 900);
-              }}>
-                <Zap size={16} /> 15dk Misafir Girişi
-              </button>
-            </div>
-          )}
+        {/* SAĞ PANEL: Form alanı */}
+        <div className="flex flex-col justify-center px-6 py-10 sm:px-10">
+          <div className="mb-8 flex flex-col items-center text-center lg:hidden">
+            <ParspelLogo className="size-14" />
+            <h1 className="mt-3 font-heading text-2xl font-bold text-foreground">{BRAND_NAME}</h1>
+            <p className="text-sm text-muted-foreground">Soba Yönetim Sistemi</p>
+          </div>
 
-          {/* Form */}
-          {(fbStatus === 'ready' || fbStatus === 'error') && (
-            <form className="login-form" onSubmit={handleSubmit}>
-              {/* Kullanıcı adı */}
-              <div className="login-field">
-                <User className="login-field-icon" size={18} />
-                <input
-                  ref={usernameRef}
-                  className={`login-input${error ? ' error' : ''}`}
-                  type="text"
-                  name="username"
+          <div className="mb-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground">
+              {registerMode ? "Yeni müşteri kaydı" : "Hoş geldiniz"}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {registerMode 
+                ? "Sisteme erişim için hesap bilgilerinizi oluşturun." 
+                : "Sisteme erişim için hesap bilgilerinizi girin."}
+            </p>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label htmlFor="username">Kullanıcı adı</Label>
+              <div className="relative">
+                <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input 
+                  id="username" 
+                  placeholder="Kullanıcı adı" 
+                  className="h-11 pl-10" 
+                  autoComplete="username" 
                   value={username}
-                  onChange={e => { setUsername(e.target.value); setError(''); }}
-                  placeholder="Kullanıcı adı"
-                  autoComplete="username"
+                  onChange={e => setUsername(e.target.value)}
                 />
               </div>
+            </div>
 
-              {/* Şifre */}
-              <div className="login-field">
-                <Lock className="login-field-icon" size={18} />
-                <input
-                  className={`login-input${error ? ' error' : ''}`}
-                  type={showPass ? 'text' : 'password'}
-                  name="password"
+            <div className="space-y-2">
+              <Label htmlFor="password">Şifre</Label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input 
+                  id="password" 
+                  type={showPass ? "text" : "password"} 
+                  placeholder="En az 4 karakter" 
+                  className="h-11 pl-10 pr-10" 
+                  autoComplete="current-password"
                   value={pass}
-                  onChange={e => { setPass(e.target.value); setError(''); }}
-                  onKeyDown={handleCapsLock}
-                  placeholder="Şifre (en az 4 karakter)"
-                  autoComplete={registerMode ? 'new-password' : 'current-password'}
+                  onChange={e => setPass(e.target.value)}
                 />
-                <button className="login-pass-toggle" onClick={() => setShowPass(v => !v)} aria-label={showPass ? 'Şifreyi gizle' : 'Şifreyi göster'}>
-                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-
-              {/* Şifre tekrar (kayıt modu) */}
-              {registerMode && (
-                <div className="login-field">
-                  <KeyRound className="login-field-icon" size={18} />
-                  <input
-                    className={`login-input${error ? ' error' : ''}`}
-                    type={showPass ? 'text' : 'password'}
-                    value={pass2}
-                    onChange={e => { setPass2(e.target.value); setError(''); }}
-                    onKeyDown={handleCapsLock}
-                    placeholder="Şifreyi tekrar girin"
-                    autoComplete="new-password"
-                  />
-                </div>
-              )}
-
-              {/* Caps Lock uyarısı */}
-              {capsLock && (
-                <div className="login-capslock-warn">
-                  <AlertTriangle size={14} /> Caps Lock açık!
-                </div>
-              )}
-
-              {/* Hata mesajı */}
-              {error && (
-                <div className="login-error-msg">
-                  <AlertTriangle size={16} /> {error}
-                </div>
-              )}
-
-              {/* Beni hatırla (sadece giriş) */}
-              {!registerMode && (
-                <label className="login-remember">
-                  <input className="login-remember-checkbox" type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
-                  <span className="login-remember-text">Beni hatırla <span className="login-remember-hint">(30 gün)</span></span>
-                </label>
-              )}
-
-              {/* Demo hızlı giriş */}
-              {!registerMode && (
                 <button
                   type="button"
-                  className="login-demo-btn"
-                  onClick={() => handleLogin('demo29605', 'demo1234')}
-                  disabled={loading}
+                  onClick={() => setShowPass(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <Sparkles size={16} /> Demo Hesap ile Hızlı Giriş
-                </button>
-              )}
-
-              {/* Buton */}
-              <button
-                type="submit"
-                className="login-btn"
-                disabled={loading}
-              >
-                {loading
-                  ? <span className="login-btn-loading">
-                      <span className="login-spinner" />
-                      {registerMode ? 'Kaydediliyor…' : 'Doğrulanıyor…'}
-                    </span>
-                  : registerMode ? <><UserPlus size={18} /> Kayıt Ol</> : <><LogIn size={18} /> Giriş Yap</>
-                }
-              </button>
-
-              {/* Kayıt / Giriş geçiş linki */}
-              <div className="login-switch-row">
-                <button type="button" className="login-switch-btn" onClick={() => { setRegisterMode(v => !v); setError(''); setPass(''); setPass2(''); }}>
-                  {registerMode ? 'Zaten hesabın var mı? Giriş Yap' : 'Hesabın yok mu? Kayıt Ol'}
+                  {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+            </div>
 
-              {/* Misafir girişi (ready modunda da göster) */}
-              {!registerMode && (
-                <div className="login-guest-row">
-                  <button type="button" className="login-guest-link" onClick={() => {
-                    const guest = startGuestSession();
-                    setSuccess(true);
-                    setTimeout(() => onLogin(guest, false), 900);
-                  }}>
-                    <Zap size={14} /> 15dk Misafir Girişi
-                  </button>
+            {registerMode && (
+              <div className="space-y-2">
+                <Label htmlFor="password-confirm">Şifre tekrar</Label>
+                <div className="relative">
+                  <KeyRound className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input 
+                    id="password-confirm" 
+                    type="password" 
+                    placeholder="Şifreyi tekrar girin" 
+                    className="h-11 pl-10" 
+                    autoComplete="new-password"
+                    value={pass2}
+                    onChange={e => setPass2(e.target.value)}
+                  />
                 </div>
-              )}
-            </form>
-          )}
+              </div>
+            )}
 
-          {/* Yeniden bağlan */}
+            {capsLock && (
+              <div className="flex items-center gap-2 text-xs text-destructive font-medium">
+                <AlertTriangle className="size-3" /> Caps Lock açık!
+              </div>
+            )}
+
+            {error && (
+              <div className="flex items-center gap-2 text-xs text-destructive font-medium">
+                <AlertTriangle className="size-3" /> {error}
+              </div>
+            )}
+
+            {!registerMode && (
+              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="rounded border-border bg-background" 
+                  checked={remember} 
+                  onChange={e => setRemember(e.target.checked)} 
+                />
+                <span>Beni hatırla <span className="text-xs opacity-70">(30 gün)</span></span>
+              </label>
+            )}
+
+            {!registerMode && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full h-11 gap-2 text-sm font-semibold" 
+                onClick={() => handleLogin('demo29605', 'demo1234')}
+                disabled={loading}
+              >
+                <Sparkles className="size-4" /> Demo Hesap ile Hızlı Giriş
+              </Button>
+            )}
+
+            <Button 
+              type="submit" 
+              className="h-11 w-full gap-2 text-sm font-semibold"
+              disabled={loading}
+            >
+              {loading 
+                ? <span className="flex items-center justify-center gap-2">
+                    <RefreshCw className="size-4 animate-spin" /> 
+                    {registerMode ? 'Kaydediliyor…' : 'Doğrulanıyor…'}
+                  </span> 
+                : registerMode ? <><UserPlus className="size-4" /> Kayıt Ol</> : <><LogIn className="size-4" /> Giriş Yap</>}
+            </Button>
+
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              {registerMode 
+                ? "Zaten hesabın var mı? " 
+                : "Hesabın yok mu? "}
+              <button 
+                type="button" 
+                className="font-semibold text-primary hover:underline"
+                onClick={() => { setRegisterMode(!registerMode); setError(''); setPass(''); setPass2(''); }}
+              >
+                {registerMode ? 'Giriş Yap' : 'Kayıt Ol'}
+              </button>
+            </div>
+          </form>
+
           {fbStatus === 'error' && (
-            <button className="login-retry-btn" onClick={checkUsers} disabled={loading}>
-              <RefreshCw size={16} /> Yeniden Bağlan
-            </button>
+            <div className="mt-6 p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-center">
+              <div className="flex items-center justify-center gap-2 text-destructive font-semibold mb-2">
+                <AlertTriangle className="size-4" /> Bağlantı Hatası
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                Firebase'e erişilemiyor. Yerel kullanıcı yoksa internete bağlanıp bir kez giriş yapın.
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1.5" 
+                onClick={() => {
+                  // checkUsers is defined inside useEffect, but for accessibility we can just call it or reload
+                  window.location.reload();
+                }}
+                disabled={loading}
+              >
+                <RefreshCw className="size-3" /> Yeniden Bağlan
+              </Button>
+            </div>
           )}
-        </div>
-
-        <div className="login-footer">
-          {BRAND_NAME} &copy; {new Date().getFullYear()} · v{getBrandVersion()} · Veriler Firebase'de güvenle saklanır
         </div>
       </div>
     </div>

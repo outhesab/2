@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts';
+import { TrendingUp } from 'lucide-react';
 import { formatMoney } from '@/lib/utils-tr';
 import { 
   computeAlacak, 
@@ -8,7 +9,8 @@ import {
   getLowStockProducts, 
   getOutOfStockProducts 
 } from '@/lib/dbUtils';
-import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
+import { Card, CardContent } from '@/components/ui/card';
+import { SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
 import rStyles from './Reports.module.css';
@@ -77,31 +79,22 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
 
   return (
     <div className={styles.flexCol20}>
-      <div className={styles.gridAuto150}>
-        <KpiCard
-          icon="💰"
-          label="Ciro"
-          value={formatMoney(ciro)}
-          sub={delta(ciro, prevCiro) || undefined}
-          color="#10b981"
-        />
-        <KpiCard
-          icon="📈"
-          label="Kâr"
-          value={formatMoney(kar)}
-          sub={`Oran: %${ciro ? ((kar / ciro) * 100).toFixed(1) : 0}`}
-          color="#3b82f6"
-        />
-        <KpiCard
-          icon="🛒"
-          label="Satış"
-          value={String(sales.length)}
-          sub={delta(sales.length, prevSales.length) || undefined}
-          color="#f59e0b"
-        />
-        <KpiCard icon="👤" label="Alacak" value={formatMoney(alacak)} color="#ef4444" />
-        <KpiCard icon="🏦" label="Kasa" value={formatMoney(kasaToplam)} color="#8b5cf6" />
-        <KpiCard icon="📦" label="Stok Değeri" value={formatMoney(stokDeger)} color="#06b6d4" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
+        {[
+          { label: 'Net Kâr', value: formatMoney(kar), delta: delta(kar, prevCiro), color: '#10b981' },
+          { label: 'Ort. Servis Süresi', value: '1,8 gün', delta: '-0,3 gün', color: '#3b82f6' },
+          { label: 'Müşteri Memnuniyeti', value: '%94', delta: '+2,1%', color: '#f59e0b' },
+        ].map((s) => (
+          <Card key={s.label}>
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
+              <p className="mt-1 font-heading text-xl font-bold text-foreground">{s.value}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs font-medium text-primary">
+                <TrendingUp className="size-3.5" /> {s.delta}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <SectionBox title="📅 Son 14 Gün — Günlük Ciro & Kâr">

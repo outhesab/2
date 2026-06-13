@@ -5,58 +5,62 @@
 /* ══ Design Tokens ════════════════════════════════════════════════════════ */
 
 :root {
-  /* â”€â”€ Primary: Blue (#2563eb) â”€â”€â”€ */
-  --color-primary: #507adf;
-  --color-primary-light: #2f58c8;
-  --color-primary-dark: #1b3d9c;
-  --color-primary-glow: rgba(70, 108, 200, 0.2);
-  --color-primary-soft: rgba(70, 108, 200, 0.1);
-  --color-primary-ultra: rgba(70, 108, 200, 0.05);
-  --color-secondary: #4c7fd3;
-  --color-secondary-soft: rgba(76, 127, 211, 0.1);
-  --color-accent: #6967e1;
-  --color-accent-soft: rgba(105, 103, 225, 0.1);
-  --color-success: #00af67;
-  --color-success-soft: rgba(0, 175, 103, 0.1);
-  --color-warning: #d19200;
-  --color-warning-soft: rgba(209, 146, 0, 0.1);
-  --color-danger: #e62e1e;
-  --color-danger-soft: rgba(230, 46, 30, 0.1);
-  --color-info: #4c7fd3;
-  --color-info-soft: rgba(76, 127, 211, 0.1);
-  /* â”€â”€ Backgrounds â”€â”€â”€ */
-  --bg-base: #eef2f9;
-  --bg-elevated: #f6f9fc;
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-card-hover: rgba(255, 255, 255, 0.98);
-  --bg-sidebar: #e1e5eb;
-  --bg-glass: rgba(246, 249, 252, 0.9);
-  --bg-surface: #dadee5;
-  /* â”€â”€ Borders â”€â”€â”€ */
-  --border: rgba(0, 0, 0, 0.1);
-  --border-strong: rgba(0, 0, 0, 0.18);
-  --border-accent: rgba(70, 108, 200, 0.2);
-  /* â”€â”€ Text â”€â”€â”€ */
-  --text-primary: #03060d;
-  --text-secondary: #343b45;
-  --text-muted: #5d646f;
-  --text-dim: #79818d;
-  /* â”€â”€ Radius â”€â”€â”€ */
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  /* â”€â”€ Shadows â”€â”€â”€ */
+  /* ══ Primary: Modern Corporate Blue (OKLCH) ═══ */
+  --color-primary: oklch(0.52 0.18 258);
+  --color-primary-light: oklch(0.65 0.15 258);
+  --color-primary-dark: oklch(0.42 0.13 258);
+  --color-primary-glow: oklch(0.52 0.18 258 / 0.3);
+  --color-primary-soft: oklch(0.94 0.03 248);
+  --color-primary-ultra: oklch(0.92 0.01 250 / 0.05);
+  --color-secondary: oklch(0.64 0.13 230);
+  --color-secondary-soft: oklch(0.96 0.012 250);
+  --color-accent: oklch(0.72 0.11 200);
+  --color-accent-soft: oklch(0.94 0.03 248);
+  --color-success: oklch(0.64 0.13 160);
+  --color-success-soft: oklch(0.94 0.04 160);
+  --color-warning: oklch(0.78 0.13 85);
+  --color-warning-soft: oklch(0.94 0.04 85);
+  --color-danger: oklch(0.58 0.22 27);
+  --color-danger-soft: oklch(0.94 0.04 27);
+  --color-info: oklch(0.72 0.11 200);
+  --color-info-soft: oklch(0.94 0.04 200);
+  /* ══ Backgrounds ═══ */
+  --bg-base: oklch(0.985 0.004 247);
+  --bg-elevated: oklch(0.96 0.01 250);
+  --bg-card: oklch(1 0 0 / 0.95);
+  --bg-card-hover: oklch(1 0 0 / 0.98);
+  --bg-sidebar: oklch(0.99 0.004 250);
+  --bg-glass: oklch(0.96 0.01 250 / 0.9);
+  --bg-surface: oklch(0.92 0.01 250);
+  /* ══ Borders ═══ */
+  --border: oklch(0.92 0.01 250);
+  --border-strong: oklch(0.88 0.01 250);
+  --border-accent: oklch(0.52 0.18 258 / 0.2);
+  /* ══ Text ═══ */
+  --text-primary: oklch(0.21 0.03 257);
+  --text-secondary: oklch(0.45 0.03 257);
+  --text-muted: oklch(0.55 0.03 257);
+  --text-dim: oklch(0.65 0.03 257);
+  /* ══ Radius ═══ */
+  --radius: 0.75rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  /* ══ Shadows ═══ */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 16px 60px rgba(0, 0, 0, 0.12);
   --shadow-accent: 0 8px 32px var(--color-primary-glow);
-  /* â”€â”€ Fonts â”€â”€â”€ */
+  /* ══ Fonts ═══ */
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
   --font-size-base: 15px;
-  --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-spring: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   --sidebar-width: 240px;
   /* â”€â”€ Semantic Tokens â”€â”€â”€ */

@@ -5,9 +5,12 @@ import { useToast } from '@/components/Toast';
 import { exportArrayToExcel, exportToExcel } from '@/lib/excelExport';
 import { isExactMatch, similarity } from '@/lib/similarity';
 import { formatDate, formatMoney, genId } from '@/lib/utils-tr';
-import { lblMuted as lbl, inpCard as inp } from '@/lib/formStyles';
 import EmptyState from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileSpreadsheet, HandCoins, UserRoundSearch } from 'lucide-react';
 import type { Cari as CariType, DB } from '@/types';
@@ -315,14 +318,7 @@ export default function Cari({ db, save }: Props) {
   return (
     <div>
       {/* Stat kartları */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <StatCard label="Toplam Cari" value={String(db.cari.filter((c) => !c.deleted).length)} color="#3b82f6" />
         <StatCard label="Alacak" value={formatMoney(totalReceivable)} color="#10b981" sub="Müşterilerden" />
         <StatCard label="Borç" value={formatMoney(totalPayable)} color="#ef4444" sub="Tedarikçilere" />
@@ -330,240 +326,125 @@ export default function Cari({ db, save }: Props) {
 
       {/* Alacak Yaşlandırma Bandı */}
       {(aging['8-30'].length > 0 || aging['31-60'].length > 0 || aging['60+'].length > 0) && (
-        <div
-          style={{
-            background: 'rgba(15,23,42,0.6)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 16,
-          }}
-        >
-          <div
-            style={{
-              color: '#94a3b8',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              marginBottom: 12,
-            }}
-          >
-            ⏱️ Alacak Yaşlandırma
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {[
-              {
-                label: '0–7 gün',
-                items: aging['0-7'],
-                color: '#10b981',
-                bg: 'rgba(16,185,129,0.1)',
-              },
-              {
-                label: '8–30 gün',
-                items: aging['8-30'],
-                color: '#f59e0b',
-                bg: 'rgba(245,158,11,0.1)',
-              },
-              {
-                label: '31–60 gün',
-                items: aging['31-60'],
-                color: '#ef4444',
-                bg: 'rgba(239,68,68,0.12)',
-              },
-              {
-                label: '60+ gün',
-                items: aging['60+'],
-                color: '#dc2626',
-                bg: 'rgba(220,38,38,0.18)',
-              },
-            ].map((bucket) => (
-              <div
-                key={bucket.label}
-                onClick={() => {
-                  setFilter('musteri');
-                  setShowOnlyDebt(true);
-                  setSortBy('debt_days');
-                }}
-                style={{
-                  flex: '1 1 120px',
-                  background: bucket.bg,
-                  border: `1px solid ${bucket.color}30`,
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <div
-                  style={{
-                    color: bucket.color,
-                    fontSize: '1.2rem',
-                    fontWeight: 900,
-                    lineHeight: 1,
-                  }}
-                >
-                  {bucket.items.length}
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      marginLeft: 4,
-                    }}
-                  >
-                    müşteri
-                  </span>
-                </div>
-                <div
-                  style={{
-                    color: bucket.color,
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    marginTop: 3,
-                  }}
-                >
-                  {formatMoney(bucket.items.reduce((s, c) => s + c.balance, 0))}
-                </div>
-                <div
-                  style={{
-                    color: '#475569',
-                    fontSize: '0.65rem',
-                    marginTop: 2,
-                  }}
-                >
-                  {bucket.label}
-                </div>
-              </div>
-            ))}
-          </div>
-          {aging['60+'].length > 0 && (
-            <div
-              style={{
-                marginTop: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-              }}
-            >
-              <div
-                style={{
+        <Card className="mb-4 bg-slate-900/60 border-white/5">
+          <CardContent className="p-4">
+            <div className="text-[0.72rem] font-bold text-slate-400 uppercase tracking-wider mb-3">
+              ⏱️ Alacak Yaşlandırma
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              {[
+                {
+                  label: '0–7 gün',
+                  items: aging['0-7'],
+                  color: '#10b981',
+                  bg: 'bg-emerald-500/10',
+                  border: 'border-emerald-500/30',
+                },
+                {
+                  label: '8–30 gün',
+                  items: aging['8-30'],
+                  color: '#f59e0b',
+                  bg: 'bg-amber-500/10',
+                  border: 'border-amber-500/30',
+                },
+                {
+                  label: '31–60 gün',
+                  items: aging['31-60'],
+                  color: '#ef4444',
+                  bg: 'bg-red-500/10',
+                  border: 'border-red-500/30',
+                },
+                {
+                  label: '60+ gün',
+                  items: aging['60+'],
                   color: '#dc2626',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                }}
-              >
-                60+ gün bekleyen alacaklar:
-              </div>
-              {aging['60+'].slice(0, 5).map((c) => (
+                  bg: 'bg-red-600/10',
+                  border: 'border-red-600/30',
+                },
+              ].map((bucket) => (
                 <div
-                  key={c.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    background: 'rgba(220,38,38,0.08)',
-                    borderRadius: 8,
-                    padding: '7px 12px',
+                  key={bucket.label}
+                  onClick={() => {
+                    setFilter('musteri');
+                    setShowOnlyDebt(true);
+                    setSortBy('debt_days');
                   }}
+                  className={`flex-1 min-w-[120px] ${bucket.bg} ${bucket.border} border rounded-xl p-3 cursor-pointer transition-all hover:scale-[1.02]`}
                 >
-                  <span
-                    style={{
-                      color: 'var(--text-primary)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      flex: 1,
-                    }}
-                  >
-                    {c.name}
-                  </span>
-                  {c.phone && <span style={{ color: '#64748b', fontSize: '0.78rem' }}>📞 {c.phone}</span>}
-                  <span
-                    style={{
-                      color: '#ef4444',
-                      fontWeight: 700,
-                      fontSize: '0.85rem',
-                    }}
-                  >
-                    {formatMoney(c.balance)}
-                  </span>
-                  <span
-                    style={{
-                      color: '#dc2626',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      background: 'rgba(220,38,38,0.2)',
-                      borderRadius: 5,
-                      padding: '2px 7px',
-                    }}
-                  >
-                    {c.debtDays}g
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIslemModal({
-                        cariId: c.id,
-                        cariName: c.name,
-                        type: 'musteri',
-                      });
-                      setIslemForm({
-                        amount: String(c.balance),
-                        kasa: 'nakit',
-                        description: '',
-                      });
-                    }}
-                    style={{
-                      background: 'rgba(16,185,129,0.15)',
-                      border: 'none',
-                      borderRadius: 6,
-                      color: '#10b981',
-                      padding: '4px 10px',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    💰 Tahsil Et
-                  </button>
+                  <div style={{ color: bucket.color }} className="text-xl font-black leading-none">
+                    {bucket.items.length}
+                    <span className="text-xs font-semibold ml-1 opacity-80">müşteri</span>
+                  </div>
+                  <div style={{ color: bucket.color }} className="text-sm font-bold mt-1">
+                    {formatMoney(bucket.items.reduce((s, c) => s + c.balance, 0))}
+                  </div>
+                  <div className="text-slate-500 text-[0.65rem] mt-1">
+                    {bucket.label}
+                  </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+            {aging['60+'].length > 0 && (
+              <div className="mt-3 flex flex-col gap-2">
+                <div className="text-red-500 text-[0.72rem] font-bold">
+                  60+ gün bekleyen alacaklar:
+                </div>
+                {aging['60+'].slice(0, 5).map((c) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center gap-3 bg-red-500/10 rounded-lg p-2"
+                  >
+                    <span className="text-foreground font-semibold text-sm flex-1">
+                      {c.name}
+                    </span>
+                    {c.phone && <span className="text-slate-400 text-xs">📞 {c.phone}</span>}
+                    <span className="text-red-500 font-bold text-sm">
+                      {formatMoney(c.balance)}
+                    </span>
+                    <Badge variant="destructive" className="text-[0.72rem] px-2 py-0">
+                      {c.debtDays}g
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/20 h-7 px-3 text-xs font-bold"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIslemModal({
+                          cariId: c.id,
+                          cariName: c.name,
+                          type: 'musteri',
+                        });
+                        setIslemForm({
+                          amount: String(c.balance),
+                          kasa: 'nakit',
+                          description: '',
+                        });
+                      }}
+                    >
+                      💰 Tahsil Et
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 10,
-          marginBottom: 16,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
-        <button
-          onClick={openAdd}
-          style={{
-            background: '#ff5722',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            padding: '10px 20px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
+      <div className="flex gap-3 mb-4 flex-wrap items-center">
+        <Button onClick={openAdd} className="bg-[#ff5722] hover:bg-[#e64a19] text-white font-bold rounded-xl px-5">
           + Yeni Cari
-        </button>
+        </Button>
         <Button
           variant="outline"
           onClick={() => {
             exportToExcel(db, { sheets: ['cari'] });
             showToast('Excel indirildi!', 'success');
           }}
+          className="rounded-xl"
         >
-          <FileSpreadsheet />
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
           Excel İndir
         </Button>
         <Button
@@ -584,57 +465,35 @@ export default function Cari({ db, save }: Props) {
             exportArrayToExcel(rows, 'cari-listesi');
             showToast('Ekstre indirildi!', 'success');
           }}
+          className="rounded-xl"
         >
-          <HandCoins />
+          <HandCoins className="mr-2 h-4 w-4" />
           Ekstre
         </Button>
-        <input
+        <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="🔍 Ara..."
-          style={{
-            flex: 1,
-            padding: '9px 13px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 10,
-            color: 'var(--text-primary)',
-          }}
+          className="flex-1 min-w-[200px] rounded-xl"
         />
-        <Tabs value={filter} onValueChange={(value) => setFilter(value as 'all' | 'musteri' | 'tedarikci')}>
-          <TabsList>
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as 'all' | 'musteri' | 'tedarikci')} className="rounded-xl">
+          <TabsList className="bg-slate-800/50 border border-white/10">
             <TabsTrigger value="all">Tümü</TabsTrigger>
             <TabsTrigger value="musteri">Müşteri</TabsTrigger>
             <TabsTrigger value="tedarikci">Tedarikçi</TabsTrigger>
           </TabsList>
         </Tabs>
-        <button
+        <Button
+          variant={showOnlyDebt ? 'destructive' : 'outline'}
           onClick={() => setShowOnlyDebt((v) => !v)}
-          style={{
-            padding: '8px 14px',
-            border: 'none',
-            borderRadius: 8,
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.82rem',
-            background: showOnlyDebt ? '#ef4444' : '#273548',
-            color: showOnlyDebt ? '#fff' : '#94a3b8',
-          }}
+          className="rounded-xl font-semibold text-xs"
         >
           {showOnlyDebt ? '🚨 Borçlular' : 'Borçlular'}
-        </button>
+        </Button>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          style={{
-            padding: '8px 12px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            color: 'var(--text-muted)',
-            fontSize: '0.82rem',
-            cursor: 'pointer',
-          }}
+          className="p-2 bg-slate-800 border border-white/10 rounded-xl text-slate-400 text-xs cursor-pointer outline-none"
         >
           <option value="name">A–Z</option>
           <option value="balance">Bakiye ↓</option>
@@ -643,28 +502,15 @@ export default function Cari({ db, save }: Props) {
       </div>
 
       <div
-        className="responsive-table-wrap"
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: 14,
-          border: '1px solid var(--border)',
-          overflowX: 'auto',
-        }}
+        className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto"
       >
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+            <tr className="bg-slate-900/60">
               {['Ad', 'Tür', 'Telefon', 'Bakiye', 'Borç Süresi', 'Son İşlem', ''].map((h) => (
                 <th
                   key={h}
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                  }}
+                  className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase"
                 >
                   {h}
                 </th>
@@ -674,7 +520,7 @@ export default function Cari({ db, save }: Props) {
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: 24 }}>
+                <td colSpan={7} className="p-6">
                   <EmptyState
                     icon={UserRoundSearch}
                     title="Cari bulunamadı"
@@ -695,131 +541,97 @@ export default function Cari({ db, save }: Props) {
                 return (
                   <tr
                     key={c.id}
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.04)',
-                      cursor: 'pointer',
-                    }}
+                    className="border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
                     onClick={() => setLocation(`/cari/${c.id}`)}
                   >
                     <td
                       data-label="Ad"
-                      style={{
-                        padding: '12px 16px',
-                        color: 'var(--text-primary)',
-                        fontWeight: 600,
-                      }}
+                      className="p-3 text-foreground font-semibold"
                     >
                       {c.name}
                       {(() => {
                         const seg =
                           c.type === 'musteri' && c.balance > 50000
-                            ? { label: 'VIP', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' }
+                            ? { label: 'VIP', color: '#8b5cf6', bg: 'bg-violet-500/15' }
                             : c.type === 'musteri' && c.balance >= 0
-                              ? { label: 'Normal', color: '#10b981', bg: 'rgba(16,185,129,0.12)' }
+                              ? { label: 'Normal', color: '#10b981', bg: 'bg-emerald-500/12' }
                               : c.balance < -10000
-                                ? { label: 'Riskli', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' }
+                                ? { label: 'Riskli', color: '#ef4444', bg: 'bg-red-500/12' }
                                 : null;
                         if (!seg) return null;
                         return (
                           <span
-                            style={{
-                              marginLeft: 8,
-                              background: seg.bg,
-                              color: seg.color,
-                              borderRadius: 5,
-                              padding: '1px 7px',
-                              fontSize: '0.68rem',
-                              fontWeight: 700,
-                              verticalAlign: 'middle',
-                            }}
+                            className={`ml-2 ${seg.bg} text-white rounded px-1.5 py-0.5 text-[0.68rem] font-bold align-middle`}
+                            style={{ color: seg.color }}
                           >
                             {seg.label}
                           </span>
                         );
                       })()}
                     </td>
-                    <td data-label="Tür" style={{ padding: '12px 16px' }}>
-                      <span
-                        style={{
-                          background: c.type === 'musteri' ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.15)',
-                          color: c.type === 'musteri' ? '#60a5fa' : '#f59e0b',
-                          borderRadius: 6,
-                          padding: '2px 8px',
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                        }}
+                    <td data-label="Tür" className="p-3">
+                      <Badge
+                        variant="outline"
+                        className={`font-semibold text-xs ${
+                          c.type === 'musteri' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        }`}
                       >
                         {c.type === 'musteri' ? '👥 Müşteri' : '🏭 Tedarikçi'}
-                      </span>
+                      </Badge>
                       {c.ortak && (
-                        <span
-                          style={{
-                            marginLeft: 6,
-                            background: 'rgba(168,85,247,0.15)',
-                            color: '#a78bfa',
-                            borderRadius: 6,
-                            padding: '2px 7px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                          }}
-                        >
+                        <Badge variant="outline" className="ml-1 bg-purple-500/10 text-purple-400 border-purple-500/20 text-[0.75rem] font-semibold">
                           🤝 Ortak
-                        </span>
+                        </Badge>
                       )}
                     </td>
-                    <td data-label="Telefon" style={{ padding: '12px 16px', color: '#94a3b8' }}>
+                    <td data-label="Telefon" className="p-3 text-slate-400">
                       {c.phone || '-'}
                     </td>
                     <td
                       data-label="Bakiye"
-                      style={{
-                        padding: '12px 16px',
-                        fontWeight: 700,
-                        color:
-                          c.balance > 0
-                            ? c.type === 'musteri'
-                              ? '#10b981'
-                              : '#f59e0b'
-                            : c.balance < 0
-                              ? '#ef4444'
-                              : '#64748b',
-                      }}
+                      className={`p-3 font-bold ${
+                        c.balance > 0
+                          ? c.type === 'musteri'
+                            ? 'text-emerald-500'
+                            : 'text-amber-500'
+                          : c.balance < 0
+                            ? 'text-red-500'
+                            : 'text-slate-500'
+                      }`}
                     >
                       {formatMoney(Math.abs(c.balance))}
                       {c.balance > 0 ? (c.type === 'musteri' ? ' ↑ alacak' : ' ↑ borç') : c.balance < 0 ? ' ↓' : ''}
                     </td>
-                    <td data-label="Borç Süresi" style={{ padding: '12px 16px' }}>
+                    <td data-label="Borç Süresi" className="p-3">
                       {c.balance > 0 && c.debtDays !== null ? (
-                        <span
-                          style={{
-                            background: dc.bg,
-                            color: dc.color,
-                            borderRadius: 6,
-                            padding: '3px 9px',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                          }}
+                        <Badge
+                          className={`font-bold text-[0.78rem] px-2 py-0 ${
+                            c.debtDays <= 7 ? 'bg-emerald-500/10 text-emerald-500' :
+                            c.debtDays <= 30 ? 'bg-amber-500/10 text-amber-500' :
+                            c.debtDays <= 60 ? 'bg-red-500/10 text-red-500' : 'bg-red-600/20 text-red-600'
+                          }`}
                         >
                           {dc.label}
-                        </span>
+                        </Badge>
                       ) : (
-                        <span style={{ color: '#334155', fontSize: '0.78rem' }}>—</span>
+                        <span className="text-slate-600 text-[0.78rem]">—</span>
                       )}
                     </td>
                     <td
                       data-label="Son İşlem"
-                      style={{
-                        padding: '12px 16px',
-                        color: '#64748b',
-                        fontSize: '0.82rem',
-                      }}
+                      className="p-3 text-slate-500 text-xs"
                     >
                       {c.lastTransaction ? formatDate(c.lastTransaction) : '-'}
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
+                    <td className="p-3">
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                         {c.balance > 0 && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className={`h-7 px-2 text-xs font-bold ${
+                              c.type === 'musteri' ? 'bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/20' : 'bg-amber-500/15 text-amber-500 hover:bg-amber-500/20'
+                            }`}
                             onClick={() => {
                               setIslemModal({
                                 cariId: c.id,
@@ -832,19 +644,9 @@ export default function Cari({ db, save }: Props) {
                                 description: '',
                               });
                             }}
-                            style={{
-                              background: c.type === 'musteri' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-                              border: 'none',
-                              borderRadius: 6,
-                              color: c.type === 'musteri' ? '#10b981' : '#f59e0b',
-                              padding: '5px 10px',
-                              cursor: 'pointer',
-                              fontSize: '0.78rem',
-                              fontWeight: 700,
-                            }}
                           >
                             {c.type === 'musteri' ? '💰 Tahsilat' : '💸 Öde'}
-                          </button>
+                          </Button>
                         )}
                         <ActionButtons onEdit={() => openEdit(c)} onDelete={() => handleDelete(c.id)} size="small" />
                       </div>
@@ -858,17 +660,17 @@ export default function Cari({ db, save }: Props) {
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editId ? '✏️ Cari Düzenle' : '🆕 Yeni Cari'}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-          <div style={{ gridColumn: '1/-1' }}>
-            <label style={lbl}>Ad *</label>
-            <input
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="col-span-1 md:col-span-2">
+            <Label>Ad *</Label>
+            <Input
               value={form.name || ''}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              style={inp}
+              placeholder="Cari adı"
             />
           </div>
           <div>
-            <label style={lbl}>Tür</label>
+            <Label>Tür</Label>
             <select
               value={form.type || 'musteri'}
               onChange={(e) =>
@@ -877,7 +679,7 @@ export default function Cari({ db, save }: Props) {
                   type: e.target.value as 'musteri' | 'tedarikci',
                 }))
               }
-              style={inp}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
             >
               <option value="musteri">👥 Müşteri</option>
               <option value="tedarikci">🏭 Tedarikçi</option>
@@ -891,12 +693,12 @@ export default function Cari({ db, save }: Props) {
             onChange={(v) => setForm((f) => ({ ...f, email: v }))}
             type="email"
           />
-          <div style={{ gridColumn: '1/-1' }}>
-            <label style={lbl}>Adres</label>
+          <div className="col-span-1 md:col-span-2">
+            <Label>Adres</Label>
             <textarea
               value={form.address || ''}
               onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              style={{ ...inp, minHeight: 60 }}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none min-h-[60px]"
             />
           </div>
           <FormTextArea
@@ -920,10 +722,10 @@ export default function Cari({ db, save }: Props) {
             islemModal.type === 'musteri' ? `💰 Tahsilat — ${islemModal.cariName}` : `💸 Ödeme — ${islemModal.cariName}`
           }
         >
-          <div style={{ display: 'grid', gap: 14 }}>
+          <div className="grid gap-4">
             <div>
-              <label style={lbl}>Tutar (₺) *</label>
-              <input
+              <Label>Tutar (₺) *</Label>
+              <Input
                 type="number"
                 inputMode="decimal"
                 value={islemForm.amount}
@@ -931,16 +733,15 @@ export default function Cari({ db, save }: Props) {
                 step={0.01}
                 placeholder="0,00"
                 onChange={(e) => setIslemForm((f) => ({ ...f, amount: e.target.value }))}
-                style={inp}
                 autoFocus
               />
             </div>
             <div>
-              <label style={lbl}>Kasa / Hesap</label>
+              <Label>Kasa / Hesap</Label>
               <select
                 value={islemForm.kasa}
                 onChange={(e) => setIslemForm((f) => ({ ...f, kasa: e.target.value }))}
-                style={inp}
+                className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
               >
                 {(
                   db.kasalar || [
@@ -955,11 +756,10 @@ export default function Cari({ db, save }: Props) {
               </select>
             </div>
             <div>
-              <label style={lbl}>Açıklama</label>
-              <input
+              <Label>Açıklama</Label>
+              <Input
                 value={islemForm.description}
                 onChange={(e) => setIslemForm((f) => ({ ...f, description: e.target.value }))}
-                style={inp}
                 placeholder={islemModal.type === 'musteri' ? 'Tahsilat açıklaması...' : 'Ödeme açıklaması...'}
               />
             </div>

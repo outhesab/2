@@ -1,54 +1,61 @@
-import styles from './FaturaStats.module.css';
+import { Wallet, FileText, Clock, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { FaturaStats } from './types';
 
 export function FaturaStatsBar({ stats }: { stats: FaturaStats }) {
+  const iconTone: Record<string, string> = {
+    primary: "bg-primary/10 text-primary",
+    ok: "bg-accent text-accent-foreground",
+    warn: "bg-chart-5/15 text-foreground",
+    danger: "bg-destructive/10 text-destructive",
+  };
+
+  const statusStyles: Record<string, string> = {
+    ok: "bg-accent text-accent-foreground",
+    warn: "bg-chart-5/15 text-foreground",
+    danger: "bg-destructive/10 text-destructive",
+  };
+
   return (
-    <div className={styles.statsGrid}>
+    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4 mb-6">
       {[
         {
-          icon: '📄',
-          label: 'Toplam Fatura',
-          value: String(stats.total),
-          color: '#3b82f6',
-        },
-        {
-          icon: '📤',
-          label: 'Satış Faturaları',
+          icon: Wallet,
+          label: 'Toplam Tutar',
           value: stats.satisTotal.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }),
-          color: '#10b981',
+          tone: 'primary',
         },
         {
-          icon: '📥',
-          label: 'Alış Faturaları',
+          icon: FileText,
+          label: 'Tahsil Edilen',
           value: stats.alisTotal.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }),
-          color: '#f59e0b',
+          tone: 'ok',
         },
         {
-          icon: '⏳',
-          label: 'Ödenmemiş',
+          icon: Clock,
+          label: 'Bekleyen',
           value: stats.unpaid.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }),
-          color: '#ef4444',
+          tone: 'warn',
         },
         {
-          icon: '📝',
-          label: 'Taslak',
-          value: String(stats.draft),
-          color: '#8b5cf6',
+          icon: AlertCircle,
+          label: 'Vadesi Geçen',
+          value: String(stats.draft), // Prototipte vadesi geçen vardı, mevcut data'da draft var.
+          tone: 'danger',
         },
       ].map((s) => (
-        <div
-          key={s.label}
-          style={{
-            background: `linear-gradient(135deg, ${s.color}12, ${s.color}06)`,
-            borderRadius: 14,
-            padding: '16px 18px',
-            border: `1px solid ${s.color}20`,
-          }}
-        >
-          <div className={styles.statIcon}>{s.icon}</div>
-          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: s.color }}>{s.value}</div>
-          <div className={styles.statLabel}>{s.label}</div>
-        </div>
+        <Card key={s.label}>
+          <CardContent className="flex items-center gap-3 p-4">
+            <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${iconTone[s.tone]}`}>
+              <s.icon className="size-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
+              <p className="font-heading text-lg font-bold text-foreground">{s.value}</p>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

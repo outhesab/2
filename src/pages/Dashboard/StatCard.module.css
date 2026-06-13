@@ -1,83 +1,101 @@
 .statcard {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border, rgba(255,255,255,0.06));
+  position: relative;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100px;
+  box-shadow: var(--shadow-sm);
 }
 
 .clickable {
   cursor: pointer;
 }
 
-.bgIcon {
-  position: absolute;
-  right: -10px;
-  bottom: -10px;
-  font-size: 4rem;
-  opacity: 0.1;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.accentLine {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  z-index: 1;
-}
-
-.icon {
-  position: relative;
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   z-index: 2;
 }
 
-.value {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin: 8px 0;
-  position: relative;
-  z-index: 2;
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-primary-soft);
+  font-size: 1.2rem;
 }
 
 .trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.7rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  position: relative;
-  z-index: 2;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 100px;
 }
 
 .trend.up {
   color: var(--color-success);
+  background: var(--color-success-soft);
 }
 
 .trend.down {
   color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.value {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 8px;
 }
 
 .label {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--text-muted);
-  position: relative;
-  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .sub {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-dim);
-  margin-top: 4px;
-  position: relative;
-  z-index: 2;
+  margin-top: 2px;
 }
 
 .arrow {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.2rem;
-  z-index: 2;
+  right: 16px;
+  bottom: 16px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.clickable:hover .arrow {
+  color: var(--color-primary);
+  transform: translateX(3px);
 }

@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.23.4',
+    date: '13 Haziran 2026',
+    title: 'UI Modernizasyonu — Cari & Ürün Sayfaları',
+    summary: 'Cari ve Ürün sayfaları Base-Nova standartlarına göre modernize edildi. Tüm inline stiller kaldırılıp Tailwind CSS ve shadcn/ui primitiflerine geçildi. Radius ve renk paleti güncellendi.',
+    changes: [
+      { type: 'iyilestirme', text: 'Cari.tsx: Base-Nova standartlarına geçiş, alacak yaşlandırma bandı ve cari tablosu modernize edildi.' },
+      { type: 'iyilestirme', text: 'Products.tsx: Ürün kartları, kategori filtreleri ve stok uyarıları modernize edildi.' },
+      { type: 'iyilestirme', text: 'Tüm inline style\'lar kaldırıldı, Tailwind CSS ve shadcn/ui (Card, Button, Input, Badge, Label) bileşenleri entegre edildi.' },
+    ],
+  },
+  {
     version: '3.23.3',
     date: '13 Haziran 2026',
     title: 'Domain Service Entegrasyonu — Agent islemYap Fix',

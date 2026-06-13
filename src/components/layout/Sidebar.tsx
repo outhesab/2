@@ -1,7 +1,8 @@
-import { type LucideIcon, Sparkles } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
 import { TABS, type TabGroup, type TabId } from "@/config/tabs";
 import { formatMoney } from "@/lib/utils-tr";
+import { ParspelLogo } from '@/components/logo/ParspelLogo';
 
 interface SidebarProps {
   isMobile: boolean;
@@ -58,10 +59,10 @@ export default function Sidebar({
     <aside className={`app-sidebar ${isMobile && !sidebarOpen ? 'mobile-closed' : 'mobile-open'}`}>
       <div className="app-sidebar-logo-wrap">
         <div className="app-sidebar-logo-row">
-          <div className="app-sidebar-logo-icon" aria-hidden="true"><Sparkles size={20} /></div>
-          <div className="app-sidebar-logo-text-wrap">
-            <div className="app-sidebar-logo-title">{BRAND_NAME}</div>
-            <div className="app-sidebar-logo-subtitle">{BRAND_SUBTITLE} · v{getBrandVersion()}</div>
+          <ParspelLogo className="size-9" />
+          <div className="leading-tight">
+            <p className="font-heading text-sm font-bold text-sidebar-foreground">{BRAND_NAME}</p>
+            <p className="text-[11px] text-muted-foreground">Yönetim Paneli</p>
           </div>
           {isMobile && <button onClick={() => setSidebarOpen(false)} className="app-sidebar-close-btn">✕</button>}
         </div>

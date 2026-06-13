@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { } from 'react';
 import type { StatCardData } from './types';
 import styles from './StatCard.module.css';
@@ -12,7 +13,6 @@ export function StatCard({
   label,
   value,
   color,
-  gradient,
   sub,
   onClick,
   trend,
@@ -20,40 +20,27 @@ export function StatCard({
   return (
     <motion.div
       onClick={onClick}
-      whileHover={{ y: -4, scale: 1.02, borderColor: `${color}44` }}
+      whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`${styles.statcard} ${onClick ? styles.clickable : ''}`}
-      style={{
-        background: `linear-gradient(135deg, ${gradient})`,
-        boxShadow: `0 2px 8px ${color}10, var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.1))`,
-      }}
     >
-      <div className={styles.bgIcon}>{icon}</div>
-      <div
-        className={styles.accentLine}
-        style={{ background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }}
-      />
-      <div className={styles.icon}>{icon}</div>
-      <div className={styles.value} style={{ color }}>
-        {value}
-      </div>
-      {trend !== undefined && (
-        <div className={`${styles.trend} ${trend >= 0 ? styles.up : styles.down}`}>
-          {trend >= 0 ? '▲' : '▼'} {Math.abs(trend).toFixed(1)}% dün
+      <div className={styles.cardContent}>
+        <div className={styles.headerRow}>
+          <div className={styles.iconWrapper} style={{ color }}>{icon}</div>
+          {trend !== undefined && (
+            <div className={`${styles.trend} ${trend >= 0 ? styles.up : styles.down}`}>
+              {trend >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+              <span>{Math.abs(trend).toFixed(1)}%</span>
+            </div>
+          )}
         </div>
-      )}
-      <div className={styles.label}>{label}</div>
-      {sub && <div className={styles.sub}>{sub}</div>}
+        <div className={styles.value}>{value}</div>
+        <div className={styles.label}>{label}</div>
+        {sub && <div className={styles.sub}>{sub}</div>}
+      </div>
       {onClick && (
-        <motion.div
-          className={styles.arrow}
-          style={{ color: `${color}50` }}
-          whileHover={{ x: 3, color }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
-          →
-        </motion.div>
+        <div className={styles.arrow}>→</div>
       )}
     </motion.div>
   );

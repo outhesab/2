@@ -7,6 +7,10 @@ import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { genId, formatMoney, calcProfit } from '@/lib/utils-tr';
 import { exportArrayToExcel } from '@/lib/excelExport';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import type { DB, Product } from '@/types';
 import { useLocation } from 'wouter';
 
@@ -149,23 +153,12 @@ export default function Products({ db, save }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-        <button
-          onClick={openAdd}
-          style={{
-            background: '#ff5722',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            padding: '10px 20px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
-        >
+      <div className="flex gap-3 mb-5 items-center flex-wrap">
+        <Button onClick={openAdd} className="bg-[#ff5722] hover:bg-[#e64a19] text-white font-bold rounded-xl px-5">
           + Yeni Ürün
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => {
             const rows = activeProducts.map((p) => ({
               Ad: p.name,
@@ -180,126 +173,88 @@ export default function Products({ db, save }: Props) {
             exportArrayToExcel(rows, 'urun-listesi');
             showToast('Excel indirildi!', 'success');
           }}
-          style={{
-            background: 'rgba(99,102,241,0.12)',
-            border: '1px solid rgba(99,102,241,0.25)',
-            borderRadius: 10,
-            color: '#818cf8',
-            padding: '10px 16px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-          }}
+          className="rounded-xl"
         >
           📊 Excel
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => setBulkModal(true)}
-          style={{
-            background: 'rgba(245,158,11,0.12)',
-            border: '1px solid rgba(245,158,11,0.25)',
-            borderRadius: 10,
-            color: '#f59e0b',
-            padding: '10px 16px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-          }}
+          className="rounded-xl text-amber-500 border-amber-500/20 bg-amber-500/10 hover:bg-amber-500/20"
         >
           📈 Toplu Fiyat
-        </button>
-        <input
+        </Button>
+        <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="🔍 Ürün ara..."
-          style={{
-            flex: 1,
-            minWidth: 200,
-            padding: '10px 14px',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 10,
-            color: 'var(--text-primary)',
-            fontSize: '0.9rem',
-          }}
+          className="flex-1 min-w-[200px] rounded-xl"
         />
       </div>
 
       {siparisOnerisi.length > 0 && (
-        <div
-          style={{
-            background: 'rgba(245,158,11,0.08)',
-            border: '1px solid rgba(245,158,11,0.25)',
-            borderRadius: 12,
-            padding: '12px 16px',
-            marginBottom: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            flexWrap: 'wrap',
-          }}
-        >
-          <span style={{ fontSize: '1.2rem' }}>⚠️</span>
-          <div style={{ flex: 1 }}>
-            <span style={{ color: '#fcd34d', fontWeight: 700, fontSize: '0.88rem' }}>
-              {siparisOnerisi.length} ürün sipariş gerektirir:{' '}
-            </span>
-            <span style={{ color: 'var(--text-dim)', fontSize: '0.82rem' }}>
-              {siparisOnerisi
-                .slice(0, 4)
-                .map((p) => p.name)
-                .join(', ')}
-              {siparisOnerisi.length > 4 ? ` +${siparisOnerisi.length - 4} daha` : ''}
-            </span>
-          </div>
-          <button
-            onClick={() => setFilter('low')}
-            style={{
-              background: 'rgba(245,158,11,0.15)',
-              border: '1px solid rgba(245,158,11,0.3)',
-              borderRadius: 8,
-              color: '#f59e0b',
-              padding: '6px 14px',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Listele →
-          </button>
-        </div>
+        <Card className="mb-4 bg-amber-500/10 border-amber-500/25">
+          <CardContent className="p-3 flex items-center gap-3 flex-wrap">
+            <span className="text-xl">⚠️</span>
+            <div className="flex-1">
+              <span className="text-amber-400 font-bold text-sm">
+                {siparisOnerisi.length} ürün sipariş gerektirir:{' '}
+              </span>
+              <span className="text-slate-400 text-xs">
+                {siparisOnerisi
+                  .slice(0, 4)
+                  .map((p) => p.name)
+                  .join(', ')}
+                {siparisOnerisi.length > 4 ? ` +${siparisOnerisi.length - 4} daha` : ''}
+              </span>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="bg-amber-500/15 text-amber-500 hover:bg-amber-500/20 h-8 px-3 text-xs font-bold rounded-lg"
+              onClick={() => setFilter('low')}
+            >
+              Listele →
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        <Chip label="Tümü" active={filter === 'all'} onClick={() => setFilter('all')} />
+      <div className="flex gap-2 mb-5 flex-wrap">
+        <Button
+          variant={filter === 'all' ? 'default' : 'outline'}
+          onClick={() => setFilter('all')}
+          className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === 'all' ? 'bg-orange-600 hover:bg-orange-700' : ''}`}
+        >
+          Tümü
+        </Button>
         {productCats.map((c) => (
-          <Chip key={c.id} label={`${c.icon} ${c.name}`} active={filter === c.id} onClick={() => setFilter(c.id)} />
+          <Button
+            key={c.id}
+            variant={filter === c.id ? 'default' : 'outline'}
+            onClick={() => setFilter(c.id)}
+            className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === c.id ? 'bg-orange-600 hover:bg-orange-700' : ''}`}
+          >
+            {c.icon} {c.name}
+          </Button>
         ))}
-        <Chip
-          label="🔴 Biten"
-          active={filter === 'zero'}
+        <Button
+          variant={filter === 'zero' ? 'destructive' : 'outline'}
           onClick={() => setFilter('zero')}
-          danger={outOfStock > 0}
-          count={outOfStock}
-        />
-        <Chip
-          label="⚠️ Az"
-          active={filter === 'low'}
+          className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === 'zero' ? 'bg-red-600' : ''}`}
+        >
+          🔴 Biten {outOfStock > 0 && <Badge variant="destructive" className="ml-1 px-1 h-4">{outOfStock}</Badge>}
+        </Button>
+        <Button
+          variant={filter === 'low' ? 'outline' : 'outline'}
           onClick={() => setFilter('low')}
-          warning={lowStock > 0}
-          count={lowStock}
-        />
+          className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === 'low' ? 'border-amber-500 text-amber-500 bg-amber-500/10' : ''}`}
+        >
+          ⚠️ Az {lowStock > 0 && <Badge variant="outline" className="ml-1 px-1 h-4 border-amber-500 text-amber-500 bg-amber-500/10">{lowStock}</Badge>}
+        </Button>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
           { label: 'Toplam Ürün', value: String(db.products.length), color: '#3b82f6' },
           { label: 'Stok Değeri', value: formatMoney(totalValue), color: '#10b981' },
@@ -308,22 +263,22 @@ export default function Products({ db, save }: Props) {
         ].map((s) => (
           <div
             key={s.label}
-            style={{
-              background: 'var(--bg-card)',
-              borderRadius: 10,
-              padding: '14px 16px',
-              border: `1px solid ${s.color}22`,
-            }}
+            className="bg-card rounded-xl p-3 border transition-all hover:border-white/20"
+            style={{ borderColor: `${s.color}33` }}
           >
-            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 2 }}>{s.label}</div>
+            <div style={{ color: s.color }} className="text-lg font-black">
+              {s.value}
+            </div>
+            <div className="text-muted-foreground text-[0.78rem] mt-1">
+              {s.label}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {products.length === 0 ? (
-          <div style={{ gridColumn: '1/-1' }}>
+          <div className="col-span-full">
             <EmptyState
               icon={PackageSearch}
               title="Ürün bulunamadı"
@@ -346,96 +301,66 @@ export default function Products({ db, save }: Props) {
                   ? { color: '#f59e0b', label: `⚠️ Az: ${p.stock}` }
                   : { color: '#10b981', label: `✓ ${p.stock} adet` };
             return (
-              <div
-                key={p.id}
-                style={{
-                  background: 'var(--bg-card)',
-                  borderRadius: 12,
-                  border: `1px solid ${p.stock === 0 ? '#ef444433' : p.stock <= p.minStock ? '#f59e0b33' : '#334155'}`,
-                  padding: 16,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)')}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.transform = '')}
+              <Card 
+                key={p.id} 
+                className={`group transition-all hover:-translate-y-1 ${p.stock === 0 ? 'border-red-500/30' : p.stock <= p.minStock ? 'border-amber-500/30' : 'border-slate-500/30'}`}
               >
-                <div style={{ fontSize: '2.2rem', marginBottom: 10, textAlign: 'center' }}>
-                  {getCategoryIcon(p.category)}
-                </div>
-                <h4 style={{ fontWeight: 700, marginBottom: 4, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                  {p.name}
-                </h4>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: 10 }}>
-                  {p.brand ? `${p.brand} · ` : ''}
-                  {getCategoryName(p.category)}
-                </p>
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}
-                >
-                  <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '1rem' }}>
-                    {formatMoney(p.price)}
-                  </span>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: marginColor }}>%{margin} markup</span>
-                </div>
-                {p.costCurrency && p.costCurrency !== 'TRY' && (
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-                    Alış: {p.cost} {p.costCurrency}
+                <CardContent className="p-4">
+                  <div className="text-4xl mb-3 text-center">{getCategoryIcon(p.category)}</div>
+                  <h4 className="font-bold mb-1 text-foreground text-sm line-clamp-1">
+                    {p.name}
+                  </h4>
+                  <p className="text-muted-foreground text-xs mb-3">
+                    {p.brand ? `${p.brand} · ` : ''}
+                    {getCategoryName(p.category)}
+                  </p>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-foreground text-base">
+                      {formatMoney(p.price)}
+                    </span>
+                    <span style={{ color: marginColor }} className="text-xs font-bold">
+                      %{margin} markup
+                    </span>
                   </div>
-                )}
-                <div style={{ color: stockStatus.color, fontSize: '0.85rem', fontWeight: 600, marginBottom: 10 }}>
-                  {stockStatus.label}
-                </div>
-                {p.barcode && (
-                  <div style={{ fontSize: '0.72rem', color: '#475569', marginBottom: 10 }}>🔖 {p.barcode}</div>
-                )}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => setLocation(`/urunler/${p.id}`)}
-                    style={{
-                      flex: 1,
-                      background: 'rgba(16,185,129,0.1)',
-                      border: '1px solid rgba(16,185,129,0.2)',
-                      borderRadius: 8,
-                      color: '#34d399',
-                      padding: '7px 0',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.82rem',
-                    }}
-                  >
-                    Detay
-                  </button>
-                  <button
-                    onClick={() => openEdit(p)}
-                    style={{
-                      flex: 1,
-                      background: 'rgba(59,130,246,0.1)',
-                      border: '1px solid rgba(59,130,246,0.2)',
-                      borderRadius: 8,
-                      color: '#60a5fa',
-                      padding: '7px 0',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.82rem',
-                    }}
-                  >
-                    ✏️ Düzenle
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    style={{
-                      background: 'rgba(239,68,68,0.1)',
-                      border: '1px solid rgba(239,68,68,0.2)',
-                      borderRadius: 8,
-                      color: '#ef4444',
-                      padding: '7px 10px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                    }}
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
+                  {p.costCurrency && p.costCurrency !== 'TRY' && (
+                    <div className="text-slate-500 text-[0.72rem] mb-2">
+                      Alış: {p.cost} {p.costCurrency}
+                    </div>
+                  )}
+                  <div style={{ color: stockStatus.color }} className="text-sm font-semibold mb-3">
+                    {stockStatus.label}
+                  </div>
+                  {p.barcode && (
+                    <div className="text-slate-500 text-[0.72rem] mb-3">🔖 {p.barcode}</div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 h-8 text-xs font-semibold rounded-lg"
+                      onClick={() => setLocation(`/urunler/${p.id}`)}
+                    >
+                      Detay
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 h-8 text-xs font-semibold rounded-lg"
+                      onClick={() => openEdit(p)}
+                    >
+                      ✏️ Düzenle
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="bg-red-500/10 text-red-500 hover:bg-red-500/20 h-8 px-2 rounded-lg"
+                      onClick={() => handleDelete(p.id)}
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             );
           })
         )}

@@ -44,7 +44,7 @@ export default function Header({
     <header className={`app-header ${isMobile ? 'mobile' : 'desktop'}`}>
       {isMobile && <button onClick={() => setSidebarOpen((o) => !o)} className="app-header-menu-btn">☰</button>}
       <div className={`app-header-title-wrap ${isMobile ? 'mobile' : 'desktop'}`}>
-        <h1 className={`app-header-title ${isMobile ? 'mobile' : 'desktop'}`}>
+        <h1 className={`app-header-title font-heading ${isMobile ? 'mobile' : 'desktop'}`}>
           <span className={`app-header-title-icon ${activeGroupClass}`}>
             {ActiveIcon ? <ActiveIcon className="size-4" /> : null}
           </span>
