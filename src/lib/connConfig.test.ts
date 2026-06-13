@@ -49,12 +49,12 @@ describe('connConfig', () => {
   });
 
   describe('DEFAULT_CONN', () => {
-    it('should have firebase disabled by default', () => {
-      expect(DEFAULT_CONN.firebase.enabled).toBe(false);
+    it('should have firebase enabled when env vars are set', () => {
+      expect(DEFAULT_CONN.firebase.enabled).toBe(true);
     });
 
-    it('should have activeProvider none', () => {
-      expect(DEFAULT_CONN.activeProvider).toBe('none');
+    it('should have activeProvider firebase when env vars are set', () => {
+      expect(DEFAULT_CONN.activeProvider).toBe('firebase');
     });
 
     it('should have supabase disabled', () => {

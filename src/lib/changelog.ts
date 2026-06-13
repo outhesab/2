@@ -20,15 +20,41 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
-    version: '3.22.1',
+    version: '3.23.2',
     date: '13 Haziran 2026',
-    title: 'Dead Code Temizliği (6.8)',
-    summary: 'Kullanılmayan exportlar, dosyalar ve importlar temizlendi. FormatMoneyShort, isUUID, todayISO, dateOnly gibi hiç kullanılmayan fonksiyonlar utils-tr.ts\'den kaldırıldı. version.ts ve appConfig.ts\'deki ölü exportlar temizlendi. excelmerge/not-found.tsx duplicate\'i silindi.',
+    title: 'Firebase Config — fairbaseweb.json\'dan .env\'e',
+    summary: 'Parent dizindeki fairbaseweb.json ve env/.env dosyalarından Firebase config değerleri repo_2/.env\'ye taşındı. Firebase sync artık çalışır durumda.',
     changes: [
-      { type: 'kaldirildi', text: 'src/pages/excelmerge/not-found.tsx: duplicate 404 sayfası silindi (src/pages/not-found.tsx kullanılıyor).' },
-      { type: 'kaldirildi', text: 'src/lib/utils-tr.ts: formatMoneyShort, isUUID, todayISO, dateOnly — hiç import edilmeyen 4 fonksiyon kaldırıldı.' },
-      { type: 'kaldirildi', text: 'src/lib/version.ts: VERSION_DATE, getVersionDate, getDBVersion, getConfigVersion, validateVersionFormat, isVersionGte, getVersionInfo — kullanılmayan 8 export temizlendi.' },
-      { type: 'kaldirildi', text: 'src/lib/appConfig.ts: ALL_EMOJIS, resolveIcon, AppIcon, IconSource — kullanılmayan ikon sistemi exportları temizlendi.' },
+      { type: 'iyilestirme', text: 'Firebase API key, authDomain, projectId, storageBucket, messagingSenderId, appId .env\'ye eklendi.' },
+      { type: 'iyilestirme', text: 'connConfig.test.ts güncellendi — Firebase env var\'ları dolu olduğunda enabled=true bekler.' },
+    ],
+  },
+  {
+    version: '3.23.1',
+    date: '13 Haziran 2026',
+    title: 'AIAsistan Modülerizasyonu ve Lint/Type Fix',
+    summary: 'AIAsistan.tsx monolitik yapısı ChatPanel, MessageList, ActionHistory ve ana index.tsx olarak 4 modüle ayrıldı. `any` tipleri temizlendi, unused `hasDuplicate` kaldırıldı. Import path\'lerde `../` relative kullanımı `@/` alias ile değiştirildi. AgentBus + processIntent geçişi tamamlandı, eski orchestrator.ts kaldırıldı.',
+    changes: [
+      { type: 'iyilestirme', text: 'AIAsistan.tsx → 4 modüle ayrıldı: ChatPanel, MessageList, ActionHistory, index.tsx (6.2).' },
+      { type: 'duzeltme', text: 'tryApiInternal `any` tipleri temizlendi (index.tsx:317,320).' },
+      { type: 'duzeltme', text: 'aiActions.ts: unused `hasDuplicate` fonksiyonu kaldırıldı.' },
+      { type: 'duzeltme', text: 'Import path fix: AIAsistan alt modüllerinde `../` → `@/` alias kullanıldı.' },
+      { type: 'duzeltme', text: 'ChatPanel/MessageList/ActionHistory: gereksiz `import React` kaldırıldı.' },
+      { type: 'kaldirildi', text: 'src/agents/orchestrator.ts ve orchestrator.test.ts kaldırıldı (C1).' },
+      { type: 'iyilestirme', text: '`dispatchAgentFlow` kaldırıldı, `processIntent` + `applyIntentResult` kullanılıyor.' },
+      { type: 'iyilestirme', text: 'Yanlış dosya path\'i düzeltildi: AIAHelpers importları `./ai/AIAHelpers` → `@/pages/ai/AIAHelpers`.' },
+    ],
+  },
+  {
+    version: '3.23.0',
+    date: '13 Haziran 2026',
+    title: 'Veri KatmanÄ± ModÃ¼lerizasyonu â€” useDB & useDBActions Refactor',
+    summary: 'useDB monolitik yapÄ±sÄ± parçalanarak useDBQueries, useDBActions, useDBBackup ve useDBSync olarak modÃ¼ler hale getirildi. Veri katmanÄ± daha bakÄ±mlar ve test edilebilir bir yapÄ±ya kavuÅŸtu.',
+    changes: [
+      { type: 'iyilestirme', text: 'useDB hook\'u modÃ¼ler hale getirildi: useDBQueries, useDBActions, useDBBackup ve useDBSync olarak ayrÄ±lÄ± dÃ¼şÃ¼nÃ¼ldi.' },
+      { type: 'iyilestirme', text: 'useDBActions: undo, save, saveGuarded, logActivity ve saveWithLog fonksiyonlarÄ± tek bir hook altÄ±nda toplandÄ±.' },
+      { type: 'iyilestirme', text: 'useDBSync: Firebase senkronizasyonu ve IndexedDB snapshot mekanizmasÄ± ayrÄ± bir hook olarak dÃ¼zenlendi.' },
+      { type: 'duzeltme', text: 'useDBSync.ts: useEffect cleanup fonksiyonunda syncTimer.current kullanımı dÃ¼zeltildi (ref value warning).' },
     ],
   },
   {
