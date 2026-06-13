@@ -6,7 +6,7 @@ import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
 import { genId } from "@/lib/utils-tr";
 import { lbl, inp } from "@/lib/formStyles";
-import { ModalActions, CheckboxField } from "../pageHelpers";
+import { ModalActions, CheckboxField } from "@/pages/pageHelpers";
 import type { DB, MonitorRule } from "@/types";
 import { ruleTypes, ruleLabels, levelColors } from "./types";
 

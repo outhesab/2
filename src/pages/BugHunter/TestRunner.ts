@@ -1,40 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
+import type { TestResult } from './types';
 
-// ============================================================================
-// TİP TANIMLARI
-// ============================================================================
-
-interface TestResult {
-  id: string;
-  category: string;
-  subCategory: string;
-  testName: string;
-  status: 'pass' | 'fail' | 'warning' | 'critical' | 'pending' | 'running';
-  message: string;
-  details?: string;
-  timestamp: number;
-  duration: number;
-  severity: 1 | 2 | 3 | 4 | 5;
-  fix?: string;
-}
-
-interface BugReport {
-  totalTests: number;
-  passed: number;
-  failed: number;
-  warnings: number;
-  critical: number;
-  results: TestResult[];
-  startTime: number;
-  endTime: number;
-  score: number;
-  grade: string;
-}
-// ============================================================================
-// TEST RUNNER CLASS
-// ============================================================================
-
-class TestRunner {
+export class TestRunner {
   private results: TestResult[] = [];
   private testId = 0;
 
@@ -64,8 +30,7 @@ class TestRunner {
     });
   }
 
-  // 1. JAVASCRIPT TEMELLERI
-  testJavaScriptFundamentals() {
+  private testJavaScriptFundamentals() {
     const cat = '1. JavaScript Temelleri';
     const sum = 0.1 + 0.2;
     if (sum !== 0.3) {
@@ -191,8 +156,7 @@ class TestRunner {
     }
   }
 
-  // 2. REACT STATE
-  testReactStateManagement() {
+  private testReactStateManagement() {
     const cat = '2. React State Yonetimi';
     const mockState = { accounts: [{ id: 1, balance: 1000 }] };
     const mutatedState = mockState;
@@ -261,8 +225,7 @@ class TestRunner {
     );
   }
 
-  // 3. MUHASEBE HESAPLAMALARI
-  testAccountingCalculations() {
+  private testAccountingCalculations() {
     const cat = '3. Muhasebe Hesaplamalari';
     const kdvAmount = 1000 * 0.18;
     this.addResult(
@@ -352,8 +315,7 @@ class TestRunner {
     );
   }
 
-  // 4. FORM DOGRULAMA
-  testFormValidation() {
+  private testFormValidation() {
     const cat = '4. Form Dogrulama';
     const validateTCKN = (tckn: string): boolean => {
       if (tckn.length !== 11 || tckn[0] === '0') return false;
@@ -430,8 +392,7 @@ class TestRunner {
     );
   }
 
-  // 5. API & NETWORK
-  testAPIAndNetwork() {
+  private testAPIAndNetwork() {
     const cat = '5. API & Network';
     const checks = [
       [
@@ -496,8 +457,7 @@ class TestRunner {
     });
   }
 
-  // 6. GUVENLIK
-  testSecurity() {
+  private testSecurity() {
     const cat = '6. Guvenlik';
     this.addResult(
       cat,
@@ -585,8 +545,7 @@ class TestRunner {
     );
   }
 
-  // 7. PERFORMANS
-  testPerformance() {
+  private testPerformance() {
     const cat = '7. Performans';
     const checks = [
       [
@@ -633,8 +592,7 @@ class TestRunner {
     });
   }
 
-  // 8. VERİ BUTUNLUGU
-  testDataIntegrity() {
+  private testDataIntegrity() {
     const cat = '8. Veri Butunlugu';
     this.addResult(
       cat,
@@ -691,402 +649,4 @@ class TestRunner {
     this.testDataIntegrity();
     return this.results;
   }
-}
-// ============================================================================
-// UI COMPONENT
-// ============================================================================
-
-export default function BugHunter() {
-  const [report, setReport] = useState<BugReport | null>(null);
-  const [running, setRunning] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'critical' | 'fail' | 'warning' | 'pass'>('all');
-  const [search, setSearch] = useState('');
-  const runnerRef = useRef<TestRunner | null>(null);
-
-  const runTests = useCallback(() => {
-    setRunning(true);
-    const startTime = Date.now();
-    setTimeout(() => {
-      if (!runnerRef.current) runnerRef.current = new TestRunner();
-      const results = runnerRef.current.runAll();
-      const endTime = Date.now();
-      const passed = results.filter((r) => r.status === 'pass').length;
-      const failed = results.filter((r) => r.status === 'fail').length;
-      const warnings = results.filter((r) => r.status === 'warning').length;
-      const critical = results.filter((r) => r.status === 'critical').length;
-      const score = Math.round((passed / results.length) * 100);
-      const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 70 ? 'C' : score >= 60 ? 'D' : 'F';
-      setReport({
-        totalTests: results.length,
-        passed,
-        failed,
-        warnings,
-        critical,
-        results,
-        startTime,
-        endTime,
-        score,
-        grade,
-      });
-      setRunning(false);
-    }, 100);
-  }, []);
-
-  const filteredResults =
-    report?.results.filter((r) => {
-      if (filter !== 'all' && r.status !== filter) return false;
-      if (
-        search &&
-        !r.testName.toLowerCase().includes(search.toLowerCase()) &&
-        !r.message.toLowerCase().includes(search.toLowerCase())
-      )
-        return false;
-      return true;
-    }) || [];
-
-  const statusColors = {
-    pass: {
-      bg: 'rgba(16,185,129,0.1)',
-      border: 'rgba(16,185,129,0.3)',
-      text: '#10b981',
-      icon: '✓',
-    },
-    fail: {
-      bg: 'rgba(239,68,68,0.1)',
-      border: 'rgba(239,68,68,0.3)',
-      text: '#ef4444',
-      icon: '✗',
-    },
-    warning: {
-      bg: 'rgba(245,158,11,0.1)',
-      border: 'rgba(245,158,11,0.3)',
-      text: '#f59e0b',
-      icon: '⚠',
-    },
-    critical: {
-      bg: 'rgba(220,38,38,0.15)',
-      border: 'rgba(220,38,38,0.4)',
-      text: '#dc2626',
-      icon: '🚨',
-    },
-    pending: {
-      bg: 'rgba(100,116,139,0.1)',
-      border: 'rgba(100,116,139,0.2)',
-      text: '#64748b',
-      icon: '○',
-    },
-    running: {
-      bg: 'rgba(59,130,246,0.1)',
-      border: 'rgba(59,130,246,0.3)',
-      text: '#3b82f6',
-      icon: '⟳',
-    },
-  };
-
-  return (
-    <div style={{ padding: '20px', maxWidth: 1400, margin: '0 auto' }}>
-      <div
-        style={{
-          background: 'linear-gradient(135deg,rgba(220,38,38,0.1),rgba(239,68,68,0.05))',
-          border: '1px solid rgba(220,38,38,0.3)',
-          borderRadius: 16,
-          padding: '20px 24px',
-          marginBottom: 20,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 12,
-          }}
-        >
-          <span style={{ fontSize: '2rem' }}>🐛</span>
-          <div style={{ flex: 1 }}>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                color: '#f1f5f9',
-              }}
-            >
-              Bug Hunter
-            </h1>
-            <p
-              style={{
-                margin: '4px 0 0',
-                fontSize: '0.85rem',
-                color: 'var(--text-dim)',
-              }}
-            >
-              Kapsamli Hata Ayiklama & Test Sistemi — React Muhasebe Uygulamasi
-            </p>
-          </div>
-          <button
-            onClick={runTests}
-            disabled={running}
-            style={{
-              background: running ? 'rgba(100,116,139,0.2)' : 'linear-gradient(135deg,#dc2626,#ef4444)',
-              border: 'none',
-              borderRadius: 10,
-              color: '#fff',
-              padding: '12px 24px',
-              fontWeight: 700,
-              cursor: running ? 'not-allowed' : 'pointer',
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              opacity: running ? 0.6 : 1,
-            }}
-          >
-            {running ? '⟳ Testler Calisiyor...' : '▶ Testleri Baslat'}
-          </button>
-        </div>
-        {report && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: 10,
-              marginTop: 16,
-            }}
-          >
-            {[
-              {
-                label: 'Toplam Test',
-                value: report.totalTests,
-                color: 'var(--text-muted)',
-              },
-              { label: 'Basarili', value: report.passed, color: '#10b981' },
-              { label: 'Basarisiz', value: report.failed, color: '#ef4444' },
-              { label: 'Uyari', value: report.warnings, color: '#f59e0b' },
-              { label: 'Kritik', value: report.critical, color: '#dc2626' },
-              {
-                label: 'Skor',
-                value: `${report.score}% (${report.grade})`,
-                color: report.score >= 80 ? '#10b981' : report.score >= 60 ? '#f59e0b' : '#ef4444',
-              },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                style={{
-                  background: 'rgba(0,0,0,0.2)',
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                  textAlign: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.4rem',
-                    fontWeight: 800,
-                    color: stat.color,
-                  }}
-                >
-                  {stat.value}
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--text-dim)',
-                    marginTop: 2,
-                  }}
-                >
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {report && (
-        <>
-          <div
-            style={{
-              display: 'flex',
-              gap: 10,
-              marginBottom: 16,
-              flexWrap: 'wrap',
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Test ara..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                flex: 1,
-                minWidth: 200,
-                padding: '10px 14px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 10,
-                color: '#f1f5f9',
-                fontSize: '0.85rem',
-              }}
-            />
-            {(['all', 'critical', 'fail', 'warning', 'pass'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                style={{
-                  padding: '10px 16px',
-                  borderRadius: 8,
-                  border: 'none',
-                  background: filter === f ? 'rgba(255,87,34,0.2)' : 'rgba(255,255,255,0.05)',
-                  color: filter === f ? '#ff7043' : '#94a3b8',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: '0.82rem',
-                }}
-              >
-                {f === 'all'
-                  ? 'Tumu'
-                  : f === 'critical'
-                    ? 'Kritik'
-                    : f === 'fail'
-                      ? 'Basarisiz'
-                      : f === 'warning'
-                        ? 'Uyari'
-                        : 'Basarili'}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {filteredResults.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>
-                <div style={{ fontSize: '2rem', marginBottom: 8 }}>🔍</div>
-                <p>Filtreye uygun test sonucu bulunamadi</p>
-              </div>
-            ) : (
-              filteredResults.map((result) => {
-                const style = statusColors[result.status];
-                return (
-                  <details
-                    key={result.id}
-                    style={{
-                      background: style.bg,
-                      border: `1px solid ${style.border}`,
-                      borderRadius: 12,
-                      padding: '14px 18px',
-                    }}
-                  >
-                    <summary
-                      style={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        fontWeight: 600,
-                        color: '#f1f5f9',
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      <span style={{ fontSize: '1.1rem' }}>{style.icon}</span>
-                      <span style={{ flex: 1 }}>{result.testName}</span>
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          background: 'rgba(0,0,0,0.2)',
-                          padding: '3px 8px',
-                          borderRadius: 6,
-                          color: 'var(--text-dim)',
-                        }}
-                      >
-                        {result.category} › {result.subCategory}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          background: style.bg,
-                          border: `1px solid ${style.border}`,
-                          padding: '2px 8px',
-                          borderRadius: 6,
-                          color: style.text,
-                          fontWeight: 700,
-                        }}
-                      >
-                        Sev: {result.severity}
-                      </span>
-                    </summary>
-                    <div
-                      style={{
-                        marginTop: 12,
-                        paddingTop: 12,
-                        borderTop: '1px solid rgba(255,255,255,0.1)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          color: 'var(--text-primary)',
-                          fontSize: '0.85rem',
-                          marginBottom: 8,
-                        }}
-                      >
-                        <strong>Mesaj:</strong> {result.message}
-                      </div>
-                      {result.details && (
-                        <div
-                          style={{
-                            background: 'rgba(0,0,0,0.3)',
-                            borderRadius: 8,
-                            padding: '10px 12px',
-                            marginBottom: 8,
-                            fontSize: '0.8rem',
-                            color: '#cbd5e1',
-                            whiteSpace: 'pre-wrap',
-                          }}
-                        >
-                          <strong>Detay:</strong>
-                          <br />
-                          {result.details}
-                        </div>
-                      )}
-                      {result.fix && (
-                        <div
-                          style={{
-                            background: 'rgba(16,185,129,0.1)',
-                            border: '1px solid rgba(16,185,129,0.2)',
-                            borderRadius: 8,
-                            padding: '10px 12px',
-                            fontSize: '0.8rem',
-                            color: '#6ee7b7',
-                          }}
-                        >
-                          <strong>✓ Cozum:</strong>
-                          <br />
-                          {result.fix}
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                );
-              })
-            )}
-          </div>
-        </>
-      )}
-
-      {!report && !running && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            color: 'var(--text-muted)',
-          }}
-        >
-          <div style={{ fontSize: '4rem', marginBottom: 16, opacity: 0.3 }}>🐛</div>
-          <p style={{ fontSize: '1.1rem', fontWeight: 600 }}>Testleri baslatmak icin yukardaki butona tiklayin</p>
-          <p style={{ fontSize: '0.85rem', marginTop: 8 }}>
-            JavaScript, React, Muhasebe, Form, API, Guvenlik, Performans ve Veri Butunlugu testleri calistirilacak
-          </p>
-        </div>
-      )}
-    </div>
-  );
 }

@@ -2,15 +2,15 @@
  * LoginScreen — Modern 2-Panel Kurumsal Karşılama Ekranı
  * Veri Katmanı: Firebase + localStorage (userManager.ts)
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
+import { useState, useEffect, useRef } from 'react';
+import { BRAND_NAME } from "@/config/brand";
 import { logger } from '@/lib/logger';
 import {
   loginUser, getUserSession, setUserSession, clearUserSession,
-  loadUsers, createUser, startGuestSession, isGuestSession,
+  loadUsers, createUser, isGuestSession,
   getGuestSessionRemaining, type AppUser,
 } from '@/lib/userManager';
-import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Zap, Sparkles, ShieldCheck } from 'lucide-react';
+import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Sparkles, ShieldCheck } from 'lucide-react';
 import { ParspelLogo } from '@/components/logo/ParspelLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,15 +75,15 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
   const [shake, setShake] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [, setSuccess] = useState(false);
   const [fbStatus, setFbStatus] = useState<'connecting' | 'ready' | 'error'>('connecting');
-  const [statusMsg, setStatusMsg] = useState('Bağlanılıyor…');
+  const [, setStatusMsg] = useState('Bağlanılıyor…');
   const usernameRef = useRef<HTMLInputElement>(null);
 
   // Kayıt modu
   const [registerMode, setRegisterMode] = useState(false);
   const [pass2, setPass2] = useState('');
-  const [capsLock, setCapsLock] = useState(false);
+  const [capsLock] = useState(false);
 
   useEffect(() => {
     const checkUsers = async () => {
@@ -172,9 +172,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
     else handleLogin();
   };
 
-  const handleCapsLock = (e: React.KeyboardEvent) => {
-    setCapsLock(e.getModifierState('CapsLock'));
-  };
+  // CapsLock handler available if needed
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-10">

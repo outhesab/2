@@ -1,17 +1,10 @@
 import { Wallet, FileText, Clock, AlertCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { FaturaStats } from './types';
 
 export function FaturaStatsBar({ stats }: { stats: FaturaStats }) {
   const iconTone: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
-    ok: "bg-accent text-accent-foreground",
-    warn: "bg-chart-5/15 text-foreground",
-    danger: "bg-destructive/10 text-destructive",
-  };
-
-  const statusStyles: Record<string, string> = {
     ok: "bg-accent text-accent-foreground",
     warn: "bg-chart-5/15 text-foreground",
     danger: "bg-destructive/10 text-destructive",

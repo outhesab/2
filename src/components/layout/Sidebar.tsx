@@ -1,5 +1,5 @@
 import { type LucideIcon } from "lucide-react";
-import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
+import { BRAND_NAME } from "@/config/brand";
 import { TABS, type TabGroup, type TabId } from "@/config/tabs";
 import { formatMoney } from "@/lib/utils-tr";
 import { ParspelLogo } from '@/components/logo/ParspelLogo';

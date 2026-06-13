@@ -10,7 +10,7 @@ import {
 } from "@/lib/dataIntegrityChecker";
 import { formatDate, formatMoney } from "@/lib/utils-tr";
 import type { AuditEntry, DB } from "@/types";
-import { TabButton } from "../pageHelpers";
+import { TabButton } from "@/pages/pageHelpers";
 import { getActionIcon, levelColors } from "./types";
 import MonitorOverview from "./MonitorOverview";
 import MonitorIssues from "./MonitorIssues";

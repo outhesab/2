@@ -2,12 +2,9 @@ import { useMemo } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { formatMoney } from '@/lib/utils-tr';
-import { 
-  computeAlacak, 
-  computeKasaToplam, 
-  computeStokDeger, 
-  getLowStockProducts, 
-  getOutOfStockProducts 
+import {
+  getLowStockProducts,
+  getOutOfStockProducts
 } from '@/lib/dbUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
@@ -40,15 +37,12 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
     [db.sales, prevStart, start],
   );
 
-  const ciro = sales.reduce((s, x) => s + x.total, 0);
   const kar = sales.reduce((s, x) => s + x.profit, 0);
   const prevCiro = prevSales.reduce((s, x) => s + x.total, 0);
   const delta = (curr: number, prev: number) =>
     prev === 0 ? null : `${curr >= prev ? '▲' : '▼'} %${Math.abs(((curr - prev) / prev) * 100).toFixed(1)}`;
 
-  const alacak = computeAlacak(db);
-  const kasaToplam = computeKasaToplam(db);
-  const stokDeger = computeStokDeger(db);
+  // computed values: alacak, kasaToplam, stokDeger available if needed
 
   const dailyData = useMemo(() => {
     const map: Record<string, { ciro: number; kar: number }> = {};
