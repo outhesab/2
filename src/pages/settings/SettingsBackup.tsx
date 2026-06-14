@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/pages/SettingsCard';
 import { mergeRestoreDB, saveBackupToFirebase, type RestoreReport } from '@/hooks/useDB';
@@ -179,7 +179,7 @@ export function FullRestorePanel({
   const fileRef = useRef<HTMLInputElement>(null);
   const [lastReport, setLastReport] = useState<RestoreReport | null>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (fileRef.current) fileRef.current.value = '';
@@ -272,7 +272,7 @@ export function FullRestorePanel({
       },
       true,
     );
-  };
+  }, [showConfirm, showToast, save, db]);
 
   return (
     <Card title="🔁 Tam Geri Yükleme">
@@ -330,7 +330,7 @@ export function SelectiveRestore({
   >([]);
   const [lastReport, setLastReport] = useState<RestoreReport | null>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
@@ -363,21 +363,21 @@ export function SelectiveRestore({
     };
     reader.readAsText(file);
     if (fileRef.current) fileRef.current.value = '';
-  };
+  }, [showToast]);
 
-  const toggleSection = (key: string) => {
+  const toggleSection = useCallback((key: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
       return next;
     });
-  };
+  }, []);
 
-  const selectAll = () => setSelected(new Set(available.map((a) => a.key)));
-  const selectNone = () => setSelected(new Set());
+  const selectAll = useCallback(() => setSelected(new Set(available.map((a) => a.key))), [available]);
+  const selectNone = useCallback(() => setSelected(new Set()), []);
 
-  const doRestore = () => {
+  const doRestore = useCallback(() => {
     if (!fileData || selected.size === 0) return;
     const selCount = available.filter((a) => selected.has(a.key)).reduce((s, a) => s + a.count, 0);
     showConfirm(
@@ -409,15 +409,15 @@ export function SelectiveRestore({
       },
       true,
     );
-  };
+  }, [fileData, selected, available, showConfirm, showToast, save, db]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setFileData(null);
     setFileName('');
     setSelected(new Set());
     setAvailable([]);
     setLastReport(null);
-  };
+  }, []);
 
   return (
     <Card title="📂 Seçimli Geri Yükleme">
@@ -467,32 +467,18 @@ export function SelectiveRestore({
                 <div
                   key={section.key}
                   onClick={() => toggleSection(section.key)}
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] cursor-pointer transition-all duration-150"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 14px',
                     background: isSelected ? 'rgba(59,130,246,0.08)' : 'rgba(0,0,0,0.2)',
                     border: `1px solid ${isSelected ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.04)'}`,
-                    borderRadius: 10,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
                   }}
                 >
                   <div
+                    className="flex items-center justify-center shrink-0 w-[22px] h-[22px] rounded-[6px] text-xs font-bold"
                     style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 6,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
                       background: isSelected ? 'var(--color-info)' : 'rgba(255,255,255,0.06)',
                       border: `1px solid ${isSelected ? '#3b82f6' : 'rgba(255,255,255,0.12)'}`,
                       color: 'var(--text-primary)',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      flexShrink: 0,
                     }}
                   >
                     {isSelected ? '✓' : ''}
@@ -500,10 +486,9 @@ export function SelectiveRestore({
                   <span className="text-base">{section.icon}</span>
                   <div className="flex-1">
                     <div
+                      className="font-semibold text-sm"
                       style={{
                         color: isSelected ? 'var(--text-primary)' : 'var(--text-muted)',
-                        fontWeight: 600,
-                        fontSize: '0.82rem',
                       }}
                     >
                       {section.label}
@@ -608,7 +593,7 @@ export function SmartImportManager({
   const [csvMappings, setCsvMappings] = useState<CsvColumnMapping[]>([]);
   const [csvTarget, setCsvTarget] = useState<string>('cari');
 
-  const detectFieldMappings = (data: Record<string, unknown>) => {
+  const detectFieldMappings = useCallback((data: Record<string, unknown>) => {
     const unknown: string[] = [];
     const autoMapped: Record<string, string> = {};
     const knownAll = new Set([
@@ -634,9 +619,9 @@ export function SmartImportManager({
       }
     });
     return { unknown, autoMapped };
-  };
+  }, []);
 
-  const applyMappings = (data: Record<string, unknown>, mappings: Record<string, string>): Record<string, unknown> => {
+  const applyMappings = useCallback((data: Record<string, unknown>, mappings: Record<string, string>): Record<string, unknown> => {
     const result: Record<string, unknown> = { ...data };
     Object.entries(mappings).forEach(([src, dst]) => {
       if (dst && dst !== '' && result[src] !== undefined) {
@@ -649,9 +634,9 @@ export function SmartImportManager({
       }
     });
     return result;
-  };
+  }, []);
 
-  const detectConflicts = (data: Record<string, unknown>): ConflictInfo[] => {
+  const detectConflicts = useCallback((data: Record<string, unknown>): ConflictInfo[] => {
     const checks: Array<{
       entity: string;
       label: string;
@@ -675,9 +660,9 @@ export function SmartImportManager({
         return { entity, label, byId, byName, total: byId + byName };
       })
       .filter((c) => c.total > 0);
-  };
+  }, [db]);
 
-  const analyzeData = (data: Record<string, unknown>) => {
+  const analyzeData = useCallback((data: Record<string, unknown>) => {
     const errs: string[] = [];
     const warns: string[] = [];
     const st: Record<string, number> = {};
@@ -697,9 +682,27 @@ export function SmartImportManager({
     else if ((data._version as number) < 1)
       warns.push(`Eski versiyon (${data._version}) — bazı alanlar eksik olabilir`);
     return { errs, warns, st };
-  };
+  }, []);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const proceedToPreview = useCallback((data: Record<string, unknown>, userMappings: Record<string, string>) => {
+    const allMappings = { ...legacyMapped, ...userMappings };
+    const resolved = applyMappings(data, allMappings);
+    const { errs, warns, st } = analyzeData(resolved);
+    const detectedConflicts = detectConflicts(resolved);
+    const initRes: Record<string, ConflictResolution> = {};
+    detectedConflicts.forEach((c) => {
+      initRes[c.entity] = 'overwrite';
+    });
+    setMapped(resolved);
+    setErrors(errs);
+    setWarnings(warns);
+    setStats(st);
+    setConflicts(detectedConflicts);
+    setResolutions(initRes);
+    setStage('preview');
+  }, [legacyMapped, applyMappings, analyzeData, detectConflicts]);
+
+  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
@@ -754,7 +757,7 @@ export function SmartImportManager({
     };
     reader.readAsText(file);
     if (fileRef.current) fileRef.current.value = '';
-  };
+  }, [proceedToPreview, detectFieldMappings]);
 
   const applyCsvImport = () => {
     if (csvRows.length === 0) return;
@@ -806,25 +809,7 @@ export function SmartImportManager({
     data[csvTarget] = items;
     setRawData(data);
     proceedToPreview(data, {});
-  };
-
-  const proceedToPreview = (data: Record<string, unknown>, userMappings: Record<string, string>) => {
-    const allMappings = { ...legacyMapped, ...userMappings };
-    const resolved = applyMappings(data, allMappings);
-    const { errs, warns, st } = analyzeData(resolved);
-    const detectedConflicts = detectConflicts(resolved);
-    const initRes: Record<string, ConflictResolution> = {};
-    detectedConflicts.forEach((c) => {
-      initRes[c.entity] = 'overwrite';
-    });
-    setMapped(resolved);
-    setErrors(errs);
-    setWarnings(warns);
-    setStats(st);
-    setConflicts(detectedConflicts);
-    setResolutions(initRes);
-    setStage('preview');
-  };
+   };
 
   const doImport = () => {
     if (!mapped) return;
@@ -914,7 +899,7 @@ export function SmartImportManager({
     );
   };
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setStage('idle');
     setRawData(null);
     setMapped(null);
@@ -929,7 +914,7 @@ export function SmartImportManager({
     setCsvRows([]);
     setCsvMappings([]);
     setCsvTarget('cari');
-  };
+  }, []);
 
   const btnStyle = (active: boolean, color: string) => ({
     padding: '6px 14px',

@@ -92,18 +92,22 @@ export function useDBActions(
     [setDbError, undoStackRef, syncTimer],
   );
 
-  const save = useCallback(
-    (updater: (prev: DB) => DB) => {
-      setDb((prev) => processSave(prev, updater, { action: 'save', entity: 'DB', blockMsg: 'İşlem engellendi', captureUndo: true }));
+  const _save = useCallback(
+    (updater: (prev: DB) => DB, guarded: boolean) => {
+      const action = guarded ? 'save_guarded' : 'save';
+      setDb((prev) => processSave(prev, updater, { action, entity: 'DB', blockMsg: 'İşlem engellendi', captureUndo: true, guarded }));
     },
     [setDb, processSave],
   );
 
+  const save = useCallback(
+    (updater: (prev: DB) => DB) => _save(updater, false),
+    [_save],
+  );
+
   const saveGuarded = useCallback(
-    (updater: (prev: DB) => DB) => {
-      setDb((prev) => processSave(prev, updater, { action: 'save_guarded', entity: 'DB', blockMsg: 'İşlem engellendi', captureUndo: true, guarded: true }));
-    },
-    [setDb, processSave],
+    (updater: (prev: DB) => DB) => _save(updater, true),
+    [_save],
   );
 
   const undo = useCallback((): boolean => {

@@ -20,6 +20,32 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.27.1',
+    date: '15 Haziran 2026',
+    title: 'C5 D E F Kod kalitesi iyileştirmeleri',
+    summary: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı. E1: DomainEvent payload cast\'leri düzeltildi (as unknown gereksiz kullanımı azaltıldı). E2: SatisAgent payload cast\'leri doğrulama fonksiyonları ile değiştirildi. F1/F2: SettingsBackup event handler\'ları useCallback\'e sarıldı, statik inline style\'lar className\'e taşındı.',
+    changes: [
+      { type: 'iyilestirme', text: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı (useDBActions.ts).' },
+      { type: 'duzeltme', text: 'E1: saleCompletion.ts\'deki as unknown as Record<string, unknown> cast\'leri temizlendi, sadece zorunlu olanlarda bırakıldı.' },
+      { type: 'iyilestirme', text: 'E2: SatisAgent payload doğrulaması — asString/asNumber/asPaymentType/asSaleItem validasyon fonksiyonları eklendi.' },
+      { type: 'iyilestirme', text: 'F1: SettingsBackup event handler\'ları (handleFile, doRestore, reset, toggleSection, selectAll/None) useCallback\'e sarıldı.' },
+      { type: 'iyilestirme', text: 'F2: SettingsBackup statik inline style\'lar className\'e taşındı (section list, checkbox, label).' },
+    ],
+  },
+  {
+    version: '3.27.0',
+    date: '15 Haziran 2026',
+    title: 'C4 Agent sadeleştirme — DomainAgent base class',
+    summary: '4 domain agent\'ı (Satis, Stok, Kasa, Cari) aynı islemYap pipeline\'ını paylaşan DomainAgent base class\'ı altında birleştirildi. KasaAgent ve CariAgent\'daki save bug\'ı (processIntent çağrılıp sonucun kaydedilmemesi) fix\'lendi.',
+    changes: [
+      { type: 'iyilestirme', text: 'DomainAgent.ts eklendi: 4 agent ortak islemYap pipeline\'ı tek base class\'ta toplandı.' },
+      { type: 'iyilestirme', text: 'SatisAgent.ts: 68→33 satır, islemYap pipeline\'ı DomainAgent\'a taşındı, sadece yetki kontrolü kaldı.' },
+      { type: 'iyilestirme', text: 'StokAgent.ts: 61→32 satır, islemYap tamamen kaldırıldı.' },
+      { type: 'iyilestirme', text: 'KasaAgent.ts: 42→30 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
+      { type: 'iyilestirme', text: 'CariAgent.ts: 53→43 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
+    ],
+  },
+  {
     version: '3.26.1',
     date: '15 Haziran 2026',
     title: 'Dashboard.tsx küçültme (863→398 satır)',
