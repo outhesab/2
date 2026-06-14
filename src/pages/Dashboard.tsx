@@ -475,7 +475,7 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
             }
           >
             {stats.outOfStock > 0 && (
-              <motion.div
+              <motion.div key="out-of-stock"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
@@ -493,7 +493,7 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
               </motion.div>
             )}
             {stats.lowStock > 0 && (
-              <motion.div
+              <motion.div key="low-stock"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}

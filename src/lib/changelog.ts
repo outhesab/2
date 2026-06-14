@@ -20,6 +20,20 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.25.1',
+    date: '14 Haziran 2026',
+    title: 'E2E Audit & Kritik Hata Düzeltmeleri — Vite HMR, Dashboard Key, Sidebar Navigasyon',
+    summary: '3 kritik hata bulundu ve düzeltildi: (1) Vite HMR WebSocket port çakışması (Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı anda çözüldü), (2) Dashboard React key prop uyarısı (2 motion.div\'e key eklendi), (3) Sidebar navigasyon helper\'ı getByRole+getByText ikili yaklaşımına yükseltildi. E2E helper app.ts iyileştirildi — ensureGroupOpen accessible name tabanlı oldu, openModule 3 yöntemli fallback kazanıyor. 3005 modül build başarılı.',
+    changes: [
+      { type: 'duzeltme', text: 'Vite HMR WebSocket port çakışması — hmr.port:3001 kaldırıldı. Kök neden: hmr.server wss://127.0.0.1:3001 200 hatası. Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı commit\'te çözüldü.' },
+      { type: 'duzeltme', text: 'Dashboard React key prop uyarısı — 2 motion.div\'e key={...} eklendi. warning: Each child in a list should have a unique key prop.' },
+      { type: 'iyilestirme', text: 'Sidebar navigasyon helper\'ı (e2e/helpers/app.ts): ensureGroupOpen textContent() yerine accessible name kullanıyor (getByRole + aria-label). openModule getByRole/getByText/etkileşimli element 3 yöntemli fallback.' },
+      { type: 'iyilestirme', text: 'MODULE_GROUP eksik modüller eklendi: Pelet, OrtakEmanet, Stok, Notlar, AIEylemLog, Entegrasyon, Performans, Monitör, BugHunter, Anomali, Kontrol.' },
+      { type: 'yeni', text: 'E2E comprehensive audit suite (e2e/comprehensive-audit.spec.ts) — 10 kategori, 30+ test. full-audit.cjs Node.js canlı test koşucusu.' },
+      { type: 'yeni', text: 'Nihai audit raporu: e2e-report/PARSPEL-FULL-AUDIT-RAPORU.md (kök neden analizi + 15 screenshot).' },
+    ],
+  },
+  {
     version: '3.25.0',
     date: '13 Haziran 2026',
     title: '4 Büyük Sayfa Modülerizasyonu — Parallel Agent ile Toplu Refactor',

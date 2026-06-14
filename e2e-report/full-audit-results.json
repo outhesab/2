@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "date": "2026-06-13T17:46:07.105Z",
+    "duration": 231717
+  },
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "warnings": 7,
+    "errors": 7
+  },
+  "pages": [
+    {
+      "route": "/",
+      "name": "Ana Sayfa",
+      "loadTime": 45086,
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "sidebarOk": true
+    },
+    {
+      "route": "Özet",
+      "url": "http://127.0.0.1:3000/dashboard",
+      "h1": "Özet",
+      "loadTime": 4327,
+      "urlOk": true
+    },
+    {
+      "route": "Ürünler",
+      "url": "http://127.0.0.1:3000/products",
+      "h1": "Ürünler",
+      "loadTime": 3980,
+      "urlOk": true
+    },
+    {
+      "route": "Satış",
+      "url": "http://127.0.0.1:3000/sales",
+      "h1": "Satış",
+      "loadTime": 3889,
+      "urlOk": true
+    },
+    {
+      "route": "Fatura",
+      "url": "http://127.0.0.1:3000/fatura",
+      "h1": "Fatura",
+      "loadTime": 4749,
+      "urlOk": true
+    },
+    {
+      "route": "Cari",
+      "url": "http://127.0.0.1:3000/cari",
+      "h1": "Cari",
+      "loadTime": 4320,
+      "urlOk": true
+    },
+    {
+      "route": "Kasa",
+      "url": "http://127.0.0.1:3000/kasa",
+      "h1": "Kasa",
+      "loadTime": 2890,
+      "urlOk": true
+    },
+    {
+      "route": "Bütçe",
+      "url": "http://127.0.0.1:3000/butce",
+      "h1": "Bütçe",
+      "loadTime": 6711,
+      "urlOk": true
+    },
+    {
+      "route": "Banka",
+      "url": "http://127.0.0.1:3000/bank",
+      "h1": "H1 YOK",
+      "loadTime": 4305,
+      "urlOk": true
+    }
+  ],
+  "crud": [],
+  "performance": {
+    "domInteractive": 586,
+    "domContentLoaded": 20633,
+    "domComplete": 20679,
+    "loadComplete": 20679,
+    "responseEnd": 112,
+    "type": "navigate",
+    "domLatency": 20093
+  },
+  "consoleErrors": [
+    "Each child in a list should have a unique \"key\" prop.%s%s See https://react.dev/link/warning-keys for more information. \n\nCheck the render method of `div`.  It was passed a child from Dashboard.",
+    "WebSocket connection to 'ws://127.0.0.1:3001/?token=z4a3P7-XhrLr' failed: Error during WebSocket handshake: Unexpected response code: 200",
+    "[vite] failed to connect to websocket (Error: WebSocket closed without opened.). ",
+    "%c[ERROR] %c[system] %cYakalanmamış Promise reddi color:#ef4444; font-weight:bold color:#8b5cf6; font-weight:600 color:#cbd5e1 {reason: WebSocket closed without opened., stack: Error: WebSocket closed without opened.\n    at Web…mous> (http://127.0.0.1:3000/@vite/client:454:22)}",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "%o\n\n%s\n\n%s\n TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:3000/src/pages/Bank.tsx?t=1781370574054 The above error occurred in the <Context> component. React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.",
+    "[ErrorBoundary] TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:3000/src/pages/Bank.tsx?t=1781370574054 \n    at Route (http://127.0.0.1:3000/node_modules/.vite/deps/wouter.js?v=4bd7d0ef:303:16)\n    at Switch (http://127.0.0.1:3000/node_modules/.vite/deps/wouter.js?v=4bd7d0ef:360:17)\n    at Suspense (<anonymous>)\n    at main (<anonymous>)\n    at div (<anonymous>)\n    at div (<anonymous>)\n    at AppContent (http://127.0.0.1:3000/src/App.tsx?t=1781372734478:128:3)\n    at Router (http://127.0.0.1:3000/node_modules/.vite/deps/wouter.js?v=4bd7d0ef:254:17)\n    at ConfirmProvider (http://127.0.0.1:3000/src/components/ConfirmDialog.tsx:42:35)\n    at ErrorBoundary (http://127.0.0.1:3000/src/components/ErrorBoundary.tsx:34:5)\n    at App (http://127.0.0.1:3000/src/App.tsx?t=1781372734478:754:65)\n    at ThemeProvider (http://127.0.0.1:3000/src/theme/ThemeProvider.tsx:29:33)"
+  ],
+  "pageErrors": [
+    "WebSocket closed without opened.",
+    "WebSocket closed without opened."
+  ],
+  "responsive": [
+    {
+      "w": 375,
+      "h": 667,
+      "name": "Mobil 375x667",
+      "scrollHeight": 667,
+      "scrollWidth": 375,
+      "hasNav": true,
+      "buttons": 58,
+      "visibleText": "PARSPEL\n\nYönetim Paneli\n\n✕\nHIZLI ERİŞİM\nFavori modüller\nÖzet\nSatış\nÜrünler\nKasa\nCari\n▶\nANA\n4\nÖzet\n★\n"
+    },
+    {
+      "w": 768,
+      "h": 1024,
+      "name": "Tablet 768x1024",
+      "scrollHeight": 0,
+      "scrollWidth": 752,
+      "hasNav": false,
+      "buttons": 0,
+      "visibleText": ""
+    },
+    {
+      "w": 1024,
+      "h": 768,
+      "name": "Tablet Yatay 1024x768",
+      "scrollHeight": 768,
+      "scrollWidth": 1024,
+      "hasNav": true,
+      "buttons": 43,
+      "visibleText": "PARSPEL\n\nYönetim Paneli\n\nHIZLI ERİŞİM\nFavori modüller\nÖzet\nSatış\nÜrünler\nKasa\nCari\n▶\nANA\n4\nÖzet\n★\nÜr"
+    },
+    {
+      "w": 1440,
+      "h": 900,
+      "name": "Desktop 1440x900",
+      "scrollHeight": 0,
+      "scrollWidth": 1424,
+      "hasNav": false,
+      "buttons": 0,
+      "visibleText": ""
+    }
+  ],
+  "issues": [
+    "Tedarikçi: sidebar butonu yok",
+    "Pelet: sidebar butonu yok",
+    "Banka: H1 bulunamadı",
+    "AI Asistan butonu görünmüyor"
+  ],
+  "dbCheck": {
+    "loaded": true,
+    "version": 1,
+    "stats": {
+      "products": 3,
+      "suppliers": 1,
+      "orders": 0,
+      "cari": 1,
+      "sales": 0,
+      "kasa": 0,
+      "stockMovements": 0,
+      "bankTransactions": 0,
+      "invoices": 0,
+      "budgets": 0,
+      "returns": 0,
+      "matchRules": 0,
+      "monitorRules": 0,
+      "monitorLog": 0,
+      "peletSuppliers": 0,
+      "peletOrders": 0,
+      "boruSuppliers": 0,
+      "boruOrders": 0,
+      "ortakEmanetler": 0,
+      "installments": 0,
+      "partners": 0,
+      "notes": 0,
+      "_activityLog": 1,
+      "_auditLog": 0,
+      "kasalar": 3,
+      "company": "object",
+      "settings": "object",
+      "pelletSettings": "object",
+      "productCategories": 3
+    },
+    "issues": []
+  },
+  "uiChecks": {
+    "themeColor": "#0a0e27",
+    "fontFamily": "\"DM Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", system-ui, sans-serif",
+    "bgColor": "rgb(247, 250, 252)",
+    "hasLoadingSpinner": true,
+    "hasNotifications": false,
+    "hasAIButton": false,
+    "hasSearch": true,
+    "localStorageSize": 1.3115234375
+  }
+}

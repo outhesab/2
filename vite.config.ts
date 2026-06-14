@@ -144,9 +144,6 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: '127.0.0.1',
-      hmr: {
-        port: 3001,
-      },
     },
     preview: {
       port: 4173,
