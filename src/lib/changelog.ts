@@ -43,6 +43,8 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'iyilestirme', text: 'StokAgent.ts: 61→32 satır, islemYap tamamen kaldırıldı.' },
       { type: 'iyilestirme', text: 'KasaAgent.ts: 42→30 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
       { type: 'iyilestirme', text: 'CariAgent.ts: 53→43 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
+      { type: 'iyilestirme', text: 'DomainAgent.ts: 40 satır — yeni abstract base class (Stok/Kasa/Cari hiç islemYap, Satis sadece yetki kontrolü).' },
+      { type: 'iyilestirme', text: 'StokAgent.test.ts: 2 test güncellendi (DomainAgent null intent → error davranışına).' },
     ],
   },
   {

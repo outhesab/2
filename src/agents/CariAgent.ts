@@ -1,13 +1,12 @@
-import { BaseAgent } from "@/agents/BaseAgent";
-import type { AgentRequest, AgentResponse } from "@/agents/types";
-import { processIntent } from "@/domain/intentEngine";
+import { DomainAgent } from "@/agents/DomainAgent";
+import type { AgentRequest } from "@/agents/types";
 import type { Intent } from "@/domain/types";
 
-export class CariAgent extends BaseAgent {
+export class CariAgent extends DomainAgent {
   readonly id = "cari" as const;
   readonly yetkiler = ["cari.read", "cari.write", "rapor.read"] as const;
 
-  private mapRequestToIntent(talep: AgentRequest): Intent | null {
+  protected mapRequestToIntent(talep: AgentRequest): Intent | null {
     const p = talep.payload || {};
     if (talep.action === "cari_tahsilat") {
       return {
@@ -32,22 +31,5 @@ export class CariAgent extends BaseAgent {
       };
     }
     return null;
-  }
-
-  async islemYap(talep: AgentRequest): Promise<AgentResponse> {
-    this.yayinla("cari.islem", { action: talep.action, payload: talep.payload });
-
-    const intent = this.mapRequestToIntent(talep);
-    if (!intent) {
-      return { ok: false, error: `Desteklenmeyen cari aksiyonu: ${talep.action}` };
-    }
-
-    const result = processIntent(intent, this.db);
-    if (!result.ok) return { ok: false, error: result.error };
-
-    return { 
-      ok: true, 
-      data: { agent: this.id, action: talep.action, status: "completed", intentResult: result } 
-    };
   }
 }

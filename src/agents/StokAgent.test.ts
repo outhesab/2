@@ -141,9 +141,9 @@ describe('StokAgent', () => {
     expect(urun!.stock).toBe(9);
   });
 
-  it('stok_guncelle: productId yoksa değişiklik yapmamalı', async () => {
+  it('stok_guncelle: productId yoksa hata döndürmeli', async () => {
     const db = makeDB({ products: [URUN] });
-    const { ctx, getDB } = makeContext(db);
+    const { ctx } = makeContext(db);
     agent.bagla(ctx);
 
     const sonuc = await agent.islemYap({
@@ -151,11 +151,7 @@ describe('StokAgent', () => {
       payload: { quantity: 3 },
     });
 
-    expect(sonuc.ok).toBe(true);
-    const nextDB = getDB();
-    const urun = nextDB.products.find((p) => p.id === 'p1');
-    expect(urun!.stock).toBe(10);
-    expect(nextDB.stockMovements).toHaveLength(0);
+    expect(sonuc.ok).toBe(false);
   });
 
   it('bagla() çağrılmamışsa hata döndürmeli', async () => {
@@ -167,13 +163,12 @@ describe('StokAgent', () => {
     expect(sonuc.error).toContain('bağlanmadı');
   });
 
-  it('bilinmeyen aksiyon başarılı dönmeli ama değişiklik yapmamalı', async () => {
+  it('bilinmeyen aksiyon hata döndürmeli', async () => {
     const db = makeDB({ products: [URUN] });
-    const { ctx, getDB } = makeContext(db);
+    const { ctx } = makeContext(db);
     agent.bagla(ctx);
 
     const sonuc = await agent.islemYap({ action: 'bilinmeyen' });
-    expect(sonuc.ok).toBe(true);
-    expect(getDB().stockMovements).toHaveLength(0);
+    expect(sonuc.ok).toBe(false);
   });
 });
