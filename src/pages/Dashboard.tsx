@@ -264,7 +264,7 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
       name: cats.find((c) => c.id === id)?.name || id,
       value: v.ciro,
     }));
-  }, [db.sales, db.productCategories]);
+  }, [db]);
 
   const recentSales = useMemo(
     () =>

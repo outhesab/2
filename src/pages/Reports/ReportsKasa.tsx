@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts';
 import { exportArrayToExcel as exportToExcel } from '@/lib/excelExport';
 import { formatMoney } from '@/lib/utils-tr';
-import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
+import { KpiCard, SectionBox, EmptyChart } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
 import rStyles from './Reports.module.css';
 import kStyles from './ReportsKasa.module.css';
-import { COLORS } from './ReportsCommon';
+const { COLORS, TT_STYLE } = EmptyChart;
 
 export function ReportsKasa({ db, start, end }: ReportProps) {
   const entries = useMemo(
@@ -15,10 +15,13 @@ export function ReportsKasa({ db, start, end }: ReportProps) {
     [db.kasa, start, end],
   );
   
-  const kasalar = db.kasalar || [
-    { id: 'nakit', name: 'Nakit', icon: '💵' },
-    { id: 'banka', name: 'Banka', icon: '🏦' },
-  ];
+  const kasalar = useMemo(
+    () => db.kasalar || [
+      { id: 'nakit', name: 'Nakit', icon: '💵' },
+      { id: 'banka', name: 'Banka', icon: '🏦' },
+    ],
+    [db.kasalar],
+  );
 
   const gelir = entries.filter((e) => e.type === 'gelir').reduce((s, e) => s + e.amount, 0);
   const gider = entries.filter((e) => e.type === 'gider').reduce((s, e) => s + e.amount, 0);

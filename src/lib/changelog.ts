@@ -20,6 +20,21 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.25.2',
+    date: '14 Haziran 2026',
+    title: 'CI Cleanup — 10 lint warning, 17 test failure, typecheck fixes',
+    summary: 'Tüm lint warningleri, typecheck hataları ve 17 adet test hatası temizlendi. Voice NLP parser\'da action detection word-boundary regex\'e geçirildi, discount detection normalize edildi. Product matcher quantity stripping yeniden yazıldı. Version consistency testleri düzeltildi. Domain servislerde unused parameter prefix\'i eklendi. ReportsCommon.tsx static property pattern\'ine taşındı.',
+    changes: [
+      { type: 'duzeltme', text: '10 adet lint warning temizlendi: domain servis unused `db` parameter prefix, Dashboard/Reports useMemo dep, ReportsCommon constant static property pattern.' },
+      { type: 'duzeltme', text: 'Voice NLP parser action detection: `text.includes()` -> word-boundary regex (`\bkeyword\b`) ile değiştirildi. "satis" keyword kümesinden "yap" kaldırıldı (çok geneldi).' },
+      { type: 'duzeltme', text: 'Voice NLP parser discount detection regex normalize edilmiş text\'e uygun hale getirildi (yüzde -> yuzde).' },
+      { type: 'duzeltme', text: 'Product matcher `stripQuantityWords`: baştaki sayı+apostrof koruması eklendi ("2 tane 80\'lik soba" -> "80\'lik soba"), birim sözcük eşleştirmesi string başında da çalışıyor ("iki tane klima" -> "klima").' },
+      { type: 'duzeltme', text: 'Voice sale executor `executeConfirmedSale` tek argümanlı imzaya geçirildi (test uyumu).' },
+      { type: 'duzeltme', text: 'Version consistency testleri: package.json 3.25.1\'e güncellendi, APP_DEFAULT_VERSION eklendi.' },
+      { type: 'duzeltme', text: 'Typecheck: cariService/stockService body içinde `db` -> `_db` referans düzeltmesi, ReportsCommon KpiCard CARD -> CARD_OBJ.' },
+    ],
+  },
+  {
     version: '3.25.1',
     date: '14 Haziran 2026',
     title: 'E2E Audit & Kritik Hata Düzeltmeleri — Vite HMR, Dashboard Key, Sidebar Navigasyon',

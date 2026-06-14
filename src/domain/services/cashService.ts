@@ -11,7 +11,7 @@ export function processCashTransaction(
     description: string;
     category?: string;
   },
-  db: DB
+  _db: DB
 ): IntentResult {
   const { amount, kasa, description, category } = payload;
 

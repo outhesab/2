@@ -1,15 +1,15 @@
 import React from 'react';
 import ecss from './ReportsCommon.module.css';
 
-export const COLORS = ['#ff5722', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
-export const TT_STYLE = {
+const COLORS_ARRAY = ['#ff5722', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+const TT_STYLE_OBJ = {
   background: '#0f172a',
   border: '1px solid #334155',
   borderRadius: 8,
   color: 'var(--text-primary)',
   fontSize: '0.82rem',
 };
-export const CARD = {
+const CARD_OBJ = {
   background: 'linear-gradient(135deg,#1a2740,#0f1e35)',
   borderRadius: 14,
   padding: '16px 18px',
@@ -25,6 +25,11 @@ export function EmptyChart() {
   );
 }
 
+// Attach constants to EmptyChart (only components should be top-level exports for Fast Refresh)
+EmptyChart.COLORS = COLORS_ARRAY;
+EmptyChart.TT_STYLE = TT_STYLE_OBJ;
+EmptyChart.CARD = CARD_OBJ;
+
 export function KpiCard({
   label,
   value,
@@ -39,7 +44,7 @@ export function KpiCard({
   icon: string;
 }) {
   return (
-    <div style={{ ...CARD, borderColor: `${color}25` }}>
+    <div style={{ ...CARD_OBJ, borderColor: `${color}25` }}>
       <div
         style={{
           display: 'flex',

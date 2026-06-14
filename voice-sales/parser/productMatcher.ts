@@ -27,9 +27,17 @@ export function findBestProductMatch(
 
   let bestMatch: MatchResult | null = null;
   let bestScore = 0;
+  let hadDeletedExactMatch = false;
 
   for (const product of products) {
-    if (product.deleted) continue;
+    // Track if a deleted product would have been an exact match
+    if (product.deleted) {
+      const normalizedName = normalizeText(product.name);
+      if (normalizedName === normalizedQuery || normalizedName.includes(normalizedQuery) || normalizedQuery.includes(normalizedName)) {
+        hadDeletedExactMatch = true;
+      }
+      continue;
+    }
 
     const normalizedName = normalizeText(product.name);
     const nameTokens = tokenize(normalizedName);
@@ -37,6 +45,18 @@ export function findBestProductMatch(
     // Strategy 1: Exact substring match (highest priority)
     if (normalizedName.includes(normalizedQuery) || normalizedQuery.includes(normalizedName)) {
       const score = 0.95;
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = { id: product.id, name: product.name, price: product.price, cost: product.cost, stock: product.stock, score };
+      }
+      continue;
+    }
+
+    // Strategy 1b: Compressed match — remove spaces around numbers (handles "80 lik" vs "80lik")
+    const compressedQuery = normalizedQuery.replace(/(\d)\s+(?=[a-z])/g, '$1');
+    const compressedName = normalizedName.replace(/(\d)\s+(?=[a-z])/g, '$1');
+    if (compressedName.includes(compressedQuery) || compressedQuery.includes(compressedName)) {
+      const score = 0.9;
       if (score > bestScore) {
         bestScore = score;
         bestMatch = { id: product.id, name: product.name, price: product.price, cost: product.cost, stock: product.stock, score };
@@ -59,6 +79,11 @@ export function findBestProductMatch(
         bestMatch = { id: product.id, name: product.name, price: product.price, cost: product.cost, stock: product.stock, score: levScore };
       }
     }
+  }
+
+  // If the only good match was a deleted product and remaining matches have low score, return null
+  if (hadDeletedExactMatch && bestScore < 0.7) {
+    return null;
   }
 
   return bestScore >= threshold ? bestMatch : null;
@@ -148,11 +173,17 @@ export function extractQuantity(text: string): number {
     if (normalized.startsWith(word)) return num;
   }
 
-  // Suffix: "üçü", "beşini", "ikisi"
-  const suffixMatch = normalized.match(/^(bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on)(si|i|ü|si|ını|ini)/);
-  if (suffixMatch) {
-    const word = suffixMatch[1];
-    return numberWords[word] || 1;
+  // Suffix: "üçü" → normalized "ucu", "beşini" → "besini", "ikisi" → "ikisi"
+  // Match number root (normalized) + any extra suffix characters
+  const normalizedRoots: Record<string, string> = {
+    'bir': 'bir', 'iki': 'iki', 'uc': 'üç', 'dort': 'dört',
+    'bes': 'beş', 'alti': 'altı', 'yedi': 'yedi', 'sekiz': 'sekiz',
+    'dokuz': 'dokuz', 'on': 'on',
+  };
+  for (const [normRoot, originalWord] of Object.entries(normalizedRoots)) {
+    if (normalized.startsWith(normRoot) && normalized.length > normRoot.length) {
+      return numberWords[originalWord] || 1;
+    }
   }
 
   // Default: 1
@@ -162,21 +193,30 @@ export function extractQuantity(text: string): number {
 /**
  * Strip quantity words from query to get product name.
  * "2 tane 80'lik soba" → "80'lik soba"
+ * "iki tane klima" → "klima"
+ * "bir adet tüp" → "tüp"
+ * "5 kilo kömür" → "kömür"
+ * Preserves Turkish characters and apostrophes.
  */
 export function stripQuantityWords(text: string): string {
-  const normalized = normalizeText(text);
+  let result = text;
 
-  // Remove leading numbers
-  let result = normalized.replace(/^\d+\s*/, '');
+  // Step 1: Remove leading number followed by unit: "2 tane ", "5 kilo "
+  // Must NOT match if the number is part of product name (e.g., "80'lik")
+  result = result.replace(/^(\d+)\s+(?:tane|adet|parça|kilo|kg|litre|lt|paket|kutu|şişe|bidon|metre|mt)\s+/i, '$1 ');
 
-  // Remove Turkish number words
+  // Step 2: Remove leading digits only if followed by whitespace or end
+  // This handles "2 80'lik soba" → "80'lik soba" but NOT "80'lik soba" → "'lik soba"
+  result = result.replace(/^\d+(?=\s|$)/, '');
+
+  // Step 3: Remove Turkish number words
   const numberWords = ['bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz', 'on', 'yirmi', 'otuz', 'kırk', 'elli', 'yüz', 'bin'];
   for (const word of numberWords) {
-    result = result.replace(new RegExp(`^${word}\\s*`), '');
+    result = result.replace(new RegExp(`^${word}\\s+`, 'i'), '');
   }
 
-  // Remove quantity suffixes
-  result = result.replace(/\s*(tane|adet|parça|kilo|kg|litre|lt|metre|mt|adet|paket|kutu|şişe|bidon)\s*/g, ' ');
+  // Step 4: Remove unit words (at start or after whitespace)
+  result = result.replace(/(?:^|\s+)(?:tane|adet|parça|kilo|kg|litre|lt|metre|mt|paket|kutu|şişe|bidon)(?:\s+|$)/gi, ' ');
 
   return result.trim();
 }

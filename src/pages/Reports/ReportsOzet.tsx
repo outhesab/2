@@ -7,12 +7,12 @@ import {
   getOutOfStockProducts
 } from '@/lib/dbUtils';
 import { Card, CardContent } from '@/components/ui/card';
-import { SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
+import { SectionBox, EmptyChart } from './ReportsCommon';
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
 import rStyles from './Reports.module.css';
 import oStyles from './ReportsOzet.module.css';
-import { COLORS } from './ReportsCommon';
+const { COLORS, TT_STYLE } = EmptyChart;
 
 export function ReportsOzet({ db, start, end }: ReportProps) {
   const sales = useMemo(
@@ -24,17 +24,18 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
     [db.sales, start, end],
   );
   
-  const prevStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
   const prevSales = useMemo(
-    () =>
-      db.sales.filter(
+    () => {
+      const prevStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
+      return db.sales.filter(
         (s) =>
           s.status === 'tamamlandi' &&
           !s.deleted &&
           new Date(s.createdAt) >= prevStart &&
           new Date(s.createdAt) < start,
-      ),
-    [db.sales, prevStart, start],
+      );
+    },
+    [db.sales, start, end],
   );
 
   const kar = sales.reduce((s, x) => s + x.profit, 0);

@@ -5,11 +5,11 @@ import type { DomainEvent } from "@/types";
 
 export function processStockUpdate(
   payload: { productId: string; amount: number; type: "giris" | "cikis"; description?: string },
-  db: DB
+  _db: DB
 ): IntentResult {
   const { productId, amount, type } = payload;
 
-  const product = db.products.find((p) => p.id === productId);
+  const product = _db.products.find((p) => p.id === productId);
   if (!product) {
     return { ok: false, error: "Ürün bulunamadı" };
   }
@@ -63,7 +63,7 @@ export function processStockUpdate(
 
 export function processProductAdd(
   payload: { productName: string; category?: string; initialStock?: number; unitPrice?: number },
-  db: DB
+  _db: DB
 ): IntentResult {
   const id = genId();
   const nowIso = new Date().toISOString();

@@ -5,7 +5,7 @@ import type { DomainEvent } from "@/types";
 
 export function processCariTahsilat(
   payload: { cariId: string; amount: number; kasa: string },
-  db: DB
+  _db: DB
 ): IntentResult {
   const { cariId, amount } = payload;
 
@@ -13,7 +13,7 @@ export function processCariTahsilat(
     return { ok: false, error: "Tahsilat tutarı 0'dan büyük olmalıdır" };
   }
 
-  const cari = db.cari.find((c) => c.id === cariId);
+  const cari = _db.cari.find((c) => c.id === cariId);
   if (!cari) {
     return { ok: false, error: "Cari hesap bulunamadı" };
   }
@@ -50,7 +50,7 @@ export function processCariTahsilat(
 
 export function processCariAdd(
   payload: { name: string; taxNumber?: string; email?: string; phone?: string; address?: string },
-  db: DB
+  _db: DB
 ): IntentResult {
   const id = genId();
   const nowIso = new Date().toISOString();

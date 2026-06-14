@@ -11,18 +11,18 @@ import type {
 // ─── Action Keywords ────────────────────────────────────────────
 
 const ACTION_KEYWORDS: Record<VoiceCommandAction, string[]> = {
-  satis: ['sat', 'satış', 'yap', 'oluştur', 'kaydet', 'ekle', 'fatura', 'kes'],
-  iptal: ['iptal', 'sil', 'geri al', 'vazgeç'],
-  iade: ['iade', 'geri ver', 'geri', 'döndür'],
-  fiyat_duzelt: ['fiyat', 'düzelt', 'değiştir', 'güncelle', 'indirim'],
+  satis: ['sat', 'satis', 'olustur', 'kaydet', 'ekle', 'fatura', 'kes'],
+  iptal: ['iptal', 'sil', 'geri al', 'vazgec'],
+  iade: ['iade', 'geri ver', 'geri', 'dondur'],
+  fiyat_duzelt: ['fiyat', 'duzelt', 'degistir', 'guncelle', 'indirim'],
   unknown: [],
 };
 
 const PAYMENT_KEYWORDS: Record<PaymentMethod, string[]> = {
-  nakit: ['nakit', 'peşin', 'elden', 'nakit para'],
-  kart: ['kart', 'kredi kartı', 'banka kartı', 'kartla', 'kart ile', 'pos'],
+  nakit: ['nakit', 'pesin', 'elden', 'nakit para'],
+  kart: ['kart', 'kredi karti', 'banka karti', 'kartla', 'kart ile', 'pos'],
   havale: ['havale', 'eft', 'banka', 'transfer', 'havale ile'],
-  cari: ['cari', 'borç', 'vadeli', 'hesaba', 'hesap'],
+  cari: ['cari', 'borc', 'vadeli', 'hesaba', 'hesap'],
 };
 
 const DISCOUNT_KEYWORDS = ['indirim', 'indir', 'düş', 'yüzde', '%'];
@@ -69,7 +69,10 @@ function detectAction(text: string): VoiceCommandAction {
 
   for (const [action, keywords] of Object.entries(ACTION_KEYWORDS)) {
     for (const keyword of keywords) {
-      if (text.includes(keyword)) {
+      // Use word-boundary matching to avoid partial matches (e.g., "sat" in "satisi")
+      const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      if (regex.test(text)) {
         scores[action as VoiceCommandAction] += 1;
       }
     }
@@ -164,10 +167,11 @@ function detectOptions(
 ): VoiceSaleOptions {
   const options: VoiceSaleOptions = {};
 
-  // Discount detection
-  const discountMatch = text.match(/(\d+)\s*(?:yüzde|%)\s*(?:indirim)?/);
+  // Discount detection - "10 yüzde indirim" or "yüzde 10 indirim"
+  // Note: text is already normalized (ü→u, etc.), so use "yuzde"
+  const discountMatch = text.match(/(?:(\d+)\s*(?:yuzde|%)|(?:yuzde|%)\s*(\d+))\s*(?:indirim)?/);
   if (discountMatch) {
-    options.discount = parseInt(discountMatch[1], 10);
+    options.discount = parseInt(discountMatch[1] || discountMatch[2], 10);
   }
 
   const tlDiscountMatch = text.match(/(\d+)\s*(?:tl|₺|lira)\s*(?:indirim)?/);
@@ -219,19 +223,19 @@ function normalizeTranscript(text: string): string {
     .replace(/ş/g, 's')
     .replace(/ç/g, 'c')
     .replace(/ğ/g, 'g')
-    .replace(/[.,!?;:'"]/g, ' ')
+    .replace(/[.,!?;:"]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 function hasQuantityIndicator(text: string): boolean {
-  const quantityWords = ['tane', 'adet', 'parça', 'kilo', 'kg', 'litre', 'lt', 'paket', 'kutu'];
-  const numberPattern = /\d+|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on/;
+  const quantityWords = ['tane', 'adet', 'parca', 'kilo', 'kg', 'litre', 'lt', 'paket', 'kutu'];
+  const numberPattern = /\d+|bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on/;
   return quantityWords.some((w) => text.includes(w)) || numberPattern.test(text);
 }
 
 function hasCancelIndicator(text: string): boolean {
-  return ['iptal', 'sil', 'geri al', 'vazgeç'].some((w) => text.includes(w));
+  return ['iptal', 'sil', 'geri al', 'vazgec'].some((w) => text.includes(w));
 }
 
 function extractQuantityFromText(text: string): number {
@@ -241,11 +245,23 @@ function extractQuantityFromText(text: string): number {
     'yirmi': 20, 'otuz': 30, 'kırk': 40, 'elli': 50,
   };
 
-  // Direct number
-  const numMatch = text.match(/(\d+)/);
-  if (numMatch) return parseInt(numMatch[1], 10);
+  // First: check for Turkish number word at the start of text (word boundary)
+  const textStart = text.split(/\s+/)[0];
+  if (textStart in numberWords) {
+    return numberWords[textStart];
+  }
 
-  // Turkish word
+  // Second: look for leading numeric digits (before any product identifier)
+  // Match number at start or number followed by unit word
+  const leadingNum = text.match(/^(\d+)\s*(?:tane|adet|parça|kilo|kg|litre|lt|paket|kutu|şişe|bidon|metre|mt)\b/);
+  if (leadingNum) return parseInt(leadingNum[1], 10);
+
+  // Third: generic number anywhere (may be part of product name like "80'lik")
+  // Only use this if preceded by a quantity word
+  const unitMatch = text.match(/(?:tane|adet|parça|kilo|kg)\s+(\d+)/);
+  if (unitMatch) return parseInt(unitMatch[1], 10);
+
+  // Fourth: look for Turkish word anywhere in text
   for (const [word, num] of Object.entries(numberWords)) {
     if (text.includes(word)) return num;
   }
@@ -256,13 +272,14 @@ function extractQuantityFromText(text: string): number {
 function stripQuantityFromText(text: string): string {
   let result = text;
 
-  // Remove leading numbers
+  // Remove leading numbers (only when followed by unit or at start)
+  result = result.replace(/^\d+\s+(?:tane|adet|parça|kilo|kg|litre|lt|paket|kutu|şişe|bidon|metre|mt)\s+/g, '');
   result = result.replace(/^\d+\s*/, '');
 
   // Remove Turkish number words
   const numberWords = ['bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz', 'on', 'yirmi', 'otuz', 'kırk', 'elli'];
   for (const word of numberWords) {
-    result = result.replace(new RegExp(`^${word}\\s*`), '');
+    result = result.replace(new RegExp(`^${word}\\s+`), '');
   }
 
   // Remove unit words

@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { exportArrayToExcel as exportToExcel } from '@/lib/excelExport';
 import { formatMoney } from '@/lib/utils-tr';
-import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
+import { KpiCard, SectionBox, EmptyChart } from './ReportsCommon';
+const { TT_STYLE } = EmptyChart;
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
 import rStyles from './Reports.module.css';
@@ -12,7 +13,6 @@ export function ReportsCari({ db }: ReportProps) {
   const [filter, setFilter] = useState<'all' | 'musteri' | 'tedarikci'>('musteri');
   const [search, setSearch] = useState('');
 
-  const now = new Date();
   const cariList = useMemo(() => {
     let list = db.cari.filter((c) => !c.deleted && (filter === 'all' ? true : c.type === filter));
     if (search) list = list.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
@@ -20,6 +20,7 @@ export function ReportsCari({ db }: ReportProps) {
   }, [db.cari, filter, search]);
 
   const agingData = useMemo(() => {
+    const now = new Date();
     const buckets = { '0-30': 0, '31-60': 0, '61-90': 0, '90+': 0 };
     db.cari
       .filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)

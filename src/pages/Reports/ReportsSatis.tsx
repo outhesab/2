@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { exportArrayToExcel as exportToExcel } from '@/lib/excelExport';
 import { formatMoney } from '@/lib/utils-tr';
-import { KpiCard, SectionBox, EmptyChart, TT_STYLE } from './ReportsCommon';
+import { KpiCard, SectionBox, EmptyChart } from './ReportsCommon';
+const { COLORS, TT_STYLE } = EmptyChart;
 import { ReportProps } from './types';
 import styles from '@/styles/common.module.css';
 import rStyles from './Reports.module.css';
 import sStyles from './ReportsSatis.module.css';
-import { COLORS } from './ReportsCommon';
 
 export function ReportsSatis({ db, start, end }: ReportProps) {
   const sales = useMemo(

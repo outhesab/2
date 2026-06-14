@@ -96,12 +96,32 @@ export async function executeVoiceSale(
 /**
  * Execute sale after confirmation.
  * Called when user confirms a low-confidence command.
+ * Accepts a single VoiceCommand and builds the SaleIntent internally.
  */
 export async function executeConfirmedSale(
-  intent: SaleIntent,
-  originalCommand: VoiceCommand,
+  command: VoiceCommand,
 ): Promise<VoiceSaleResult> {
-  return performSale(intent, originalCommand);
+  const db = getDB();
+  if (!db) {
+    return {
+      success: false,
+      error: 'Veritabanı erişilebilir değil.',
+      parsedCommand: command,
+      needsConfirmation: false,
+    };
+  }
+
+  const buildResult = buildSaleIntent(command, db);
+  if (!buildResult.success || !buildResult.intent) {
+    return {
+      success: false,
+      error: buildResult.errors.join(' ') || 'Ürün eşleştirilemedi.',
+      parsedCommand: command,
+      needsConfirmation: false,
+    };
+  }
+
+  return performSale(buildResult.intent, command);
 }
 
 // ─── Internal ───────────────────────────────────────────────────
