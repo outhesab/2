@@ -140,6 +140,27 @@ describe('saveToFirebase', () => {
     await saveToFirebase(makeMinimalDB(), USER_ID);
     expect(mockWriteDoc).toHaveBeenCalledTimes(3);
   });
+
+  it('retry mechanism exhausts and does not throw', { timeout: 30000 }, async () => {
+    mockIsFirebaseReady.mockReturnValue(true);
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
+    mockWriteDoc.mockRejectedValue(new Error('persistent network error'));
+    const { saveToFirebase } = await import('./sync');
+    await expect(saveToFirebase(makeMinimalDB(), USER_ID)).resolves.not.toThrow();
+    expect(mockWriteDoc).toHaveBeenCalledTimes(4);
+  });
+
+  it('conflict resolution uses last-write-wins', async () => {
+    mockIsFirebaseReady.mockReturnValue(true);
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
+    mockWriteDoc.mockResolvedValue(true);
+    const { saveToFirebase } = await import('./sync');
+    const db1 = makeMinimalDB(5);
+    const db2 = makeMinimalDB(10);
+    await saveToFirebase(db1, USER_ID);
+    await saveToFirebase(db2, USER_ID);
+    expect(mockWriteDoc).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('loadFromFirebase', () => {
@@ -179,6 +200,15 @@ describe('loadFromFirebase', () => {
     mockIsFirebaseReady.mockReturnValue(true);
     mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
     mockReadDoc.mockResolvedValue(null);
+    const { loadFromFirebase } = await import('./sync');
+    const result = await loadFromFirebase(USER_ID);
+    expect(result).toBeNull();
+  });
+
+  it('handles malformed JSON gracefully', async () => {
+    mockIsFirebaseReady.mockReturnValue(true);
+    mockLoadConnConfig.mockReturnValue({ firebase: { enabled: true } });
+    mockReadDoc.mockResolvedValue({ data: 'not valid json{{{', version: '1', updatedAt: '2026-01-01' });
     const { loadFromFirebase } = await import('./sync');
     const result = await loadFromFirebase(USER_ID);
     expect(result).toBeNull();

@@ -187,6 +187,31 @@ const zeroAmountRule: Rule = {
 // ─── Kural Listesi (genişletilebilir) ────────────────────────────────────────
 
 /**
+ * Kural 5: Minimum Stok
+ * Stok minStock değerinin altına düştüğünde uyarı verir (severity: warn).
+ */
+const minStockRule: Rule = {
+  id: "min_stock",
+  name: "Minimum Stok",
+  severity: "warn",
+  evaluate: (_prevDB: DB, nextDB: DB): RuleViolation[] => {
+    const violations: RuleViolation[] = [];
+    for (const p of nextDB.products) {
+      if (!p.deleted && p.minStock > 0 && p.stock > 0 && p.stock <= p.minStock) {
+        violations.push({
+          ruleId: "min_stock",
+          ruleName: "Minimum Stok",
+          message: `"${p.name}" stoğu minimum seviyenin altında (${p.stock}/${p.minStock}).`,
+          severity: "warn",
+          relatedIds: [p.id],
+        });
+      }
+    }
+    return violations;
+  },
+};
+
+/**
  * Aktif kural listesi.
  * Yeni kural eklemek için bu diziye Rule nesnesi ekle — başka dosya değişikliği gerekmez.
  */
@@ -195,6 +220,7 @@ export const rules: Rule[] = [
   negativeKasaRule,
   duplicateTransactionRule,
   zeroAmountRule,
+  minStockRule,
 ];
 
 // ─── Ana Fonksiyon ────────────────────────────────────────────────────────────

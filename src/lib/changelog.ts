@@ -20,6 +20,28 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.26.1',
+    date: '15 Haziran 2026',
+    title: 'Dashboard.tsx küçültme (863→398 satır)',
+    summary: 'Dashboard.tsx 863 satırdan 398 satıra indirildi. renderWidget fonksiyonu (tüm widget kasları + chartData/categoryRevenue/recentSales/recentActivity memoları) WidgetRenderer.tsx\'e taşındı. statCards useMemo\'su useStatCards hook\'una çıkarıldı.',
+    changes: [
+      { type: 'iyilestirme', text: 'Dashboard.tsx: renderWidget (328 satır) + 4 veri memo\'su WidgetRenderer.tsx\'e taşındı.' },
+      { type: 'iyilestirme', text: 'Dashboard.tsx: statCards useMemo (72 satır) useStatCards hook\'una çıkarıldı (useStatCards.tsx).' },
+      { type: 'kaldirildi', text: 'Dashboard.tsx: recharts, lucide-react, formatDate, Avatar, getCategorySales, WidgetCard, Oneriler import\'ları temizlendi (WidgetRenderer\'a taşındı).' },
+    ],
+  },
+  {
+    version: '3.26.0',
+    date: '15 Haziran 2026',
+    title: 'Test coverage — H10 min_stock, domain service tests, DB coverage',
+    summary: 'min_stock kuralı eklendi (severity: warn). completeSale/cancelSale/returnSale/correctSalePrice için 16 domain servis testi. DB katmanı core/backup/sync için coverage artırıldı. Toplam 27 yeni test.',
+    changes: [
+      { type: 'yeni', text: 'Rule Engine: min_stock kuralı eklendi — stok minStock altına düştüğünde warn ihlali üretir.' },
+      { type: 'iyilestirme', text: 'Domain servis testleri: completeSale, cancelSale, returnSale, correctSalePrice için 16 test yazıldı (saleCompletion.test.ts).' },
+      { type: 'iyilestirme', text: 'DB coverage: core.test.ts (4 yeni test: save loading, error callback, manualBackup shape, undo empty), backup.test.ts (2 yeni test: fullRestoreDB empty/version), sync.test.ts (3 yeni test: malformed JSON, retry exhaust, conflict).' },
+    ],
+  },
+  {
     version: '3.25.2',
     date: '14 Haziran 2026',
     title: 'CI Cleanup — 10 lint warning, 17 test failure, typecheck fixes',

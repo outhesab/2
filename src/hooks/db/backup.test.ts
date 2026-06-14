@@ -142,6 +142,30 @@ describe('restoreBackupFromFirebase', () => {
   });
 });
 
+describe('fullRestoreDB', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns default DB when raw is empty', async () => {
+    const { fullRestoreDB } = await import('./backup');
+    const raw = {} as DB;
+    const def = makeMinimalDB(0);
+    def.company = { id: 'default', name: '', phone: '', address: '', taxNo: '', createdAt: '' };
+    const { db, report } = fullRestoreDB(raw, def);
+    expect(db._version).toBe(0);
+    expect(Array.isArray(report.warnings)).toBe(true);
+  });
+
+  it('preserves version from raw DB', async () => {
+    const { fullRestoreDB } = await import('./backup');
+    const raw = makeMinimalDB(42);
+    const def = makeMinimalDB(0);
+    const { db } = fullRestoreDB(raw, def);
+    expect(db._version).toBe(42);
+  });
+});
+
 describe('mergeRestoreDB', () => {
   beforeEach(() => {
     vi.clearAllMocks();

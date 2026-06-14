@@ -28,7 +28,7 @@ vi.mock('./sync', () => ({
   getSyncStatus: vi.fn(() => 'idle' as const),
 }));
 vi.mock('./backup', () => ({
-  saveBackupToFirebase: vi.fn(),
+  saveBackupToFirebase: vi.fn(async () => true),
   restoreBackupFromFirebase: vi.fn(),
   listBackupsFromFirebase: vi.fn(),
   fullRestoreDB: vi.fn((raw: DB, def: DB) => ({
@@ -175,6 +175,39 @@ describe('useDB', () => {
     const { importJSON } = useDB();
     const file = new File(['invalid json'], 'test.json', { type: 'application/json' });
     const result = await importJSON(file);
+    expect(result).toBe(false);
+  });
+
+  it('save loading state does not throw', async () => {
+    const { useDB } = await import('./index');
+    const { save } = useDB();
+    // rapid consecutive saves should not throw
+    expect(() => {
+      save((prev: DB) => ({ ...prev, _version: (prev._version || 0) + 1 }));
+      save((prev: DB) => ({ ...prev, _version: (prev._version || 0) + 1 }));
+      save((prev: DB) => ({ ...prev, _version: (prev._version || 0) + 1 }));
+    }).not.toThrow();
+  });
+
+  it('error callback does not prevent further saves', async () => {
+    const { useDB } = await import('./index');
+    const { save, clearError } = useDB();
+    clearError();
+    expect(() => save((prev: DB) => ({ ...prev, _version: (prev._version || 0) + 1 }))).not.toThrow();
+  });
+
+  it('manualBackup returns expected shape', async () => {
+    const { useDB } = await import('./index');
+    const { manualBackup } = useDB();
+    const result = await manualBackup();
+    expect(typeof result).toBe('boolean');
+  });
+
+  it('undo returns false when stack is empty', async () => {
+    const { useDB } = await import('./index');
+    const { undo, clearUndoStack } = useDB();
+    clearUndoStack();
+    const result = undo();
     expect(result).toBe(false);
   });
 });

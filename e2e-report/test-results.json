@@ -1,0 +1,140 @@
+{
+  "pages": [
+    {
+      "name": "Ana Sayfa",
+      "url": "/",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/dashboard",
+      "url": "/dashboard",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/products",
+      "url": "/products",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/sales",
+      "url": "/sales",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/fatura",
+      "url": "/fatura",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/suppliers",
+      "url": "/suppliers",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/stock",
+      "url": "/stock",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/cari",
+      "url": "/cari",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/kasa",
+      "url": "/kasa",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/bank",
+      "url": "/bank",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/monitor",
+      "url": "/monitor",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "name": "/bughunter",
+      "url": "/bughunter",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 1,
+      "pageErrors": 0
+    },
+    {
+      "name": "/anomali",
+      "url": "/anomali",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 1,
+      "pageErrors": 0
+    },
+    {
+      "name": "/settings",
+      "url": "/settings",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 1,
+      "pageErrors": 0
+    },
+    {
+      "name": "/notlar",
+      "url": "/notlar",
+      "title": "PARSPEL — Soba Yönetim Sistemi",
+      "heading": "PARSPEL",
+      "consoleErrors": 1,
+      "pageErrors": 0
+    }
+  ],
+  "errors": [
+    "Sidebar navigation bulunamadı",
+    "/reports: page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/reports\"",
+    "/kontrol: page.goto: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3000/kontrol\""
+  ],
+  "timestamp": "2026-06-13T17:12:29.583Z",
+  "consoleErrors": [
+    "[2026-06-13T17:14:47.121Z]  @firebase/firestore: Firestore (12.14.0_lite): RPC_ERROR HTTP error has no status"
+  ],
+  "performance": {
+    "domContentLoaded": "5331",
+    "loadComplete": "5346",
+    "domInteractive": "1887",
+    "domComplete": "5346",
+    "responseEnd": "1708",
+    "type": "navigate"
+  }
+}
