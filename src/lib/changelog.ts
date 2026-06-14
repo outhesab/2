@@ -20,9 +20,10 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
-    version: '3.27.1',
+    version: '3.28.0',
     date: '15 Haziran 2026',
-    title: 'C5 D E F Kod kalitesi iyileştirmeleri',
+    title: 'P2 SettingsBackup Modularizasyonu — Tüm Kalan Görevler Tamam',
+    summary: 'P2 SettingsBackup.tsx 1191→5 modüle bölündü (types, parseCsv, FullRestorePanel, SelectiveRestore, SmartImportManager). Tüm kalan görevler tamamlandı: P7 Dashboard 863→398, C4 DomainAgent, 29 yeni test, C5+D+E+F fix.',
     summary: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı. E1: DomainEvent payload cast\'leri düzeltildi (as unknown gereksiz kullanımı azaltıldı). E2: SatisAgent payload cast\'leri doğrulama fonksiyonları ile değiştirildi. F1/F2: SettingsBackup event handler\'ları useCallback\'e sarıldı, statik inline style\'lar className\'e taşındı.',
     changes: [
       { type: 'iyilestirme', text: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı (useDBActions.ts).' },
