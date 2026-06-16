@@ -173,6 +173,10 @@ export function completeSale(
     });
   }
  
+  const cariUpdate = intent.payment === "cari" && intent.cariId
+    ? [{ cariId: intent.cariId, balanceChange: total }]
+    : undefined;
+
   return {
     ok: true,
     data: {
@@ -180,6 +184,7 @@ export function completeSale(
         sale,
         products: stockMovements.map(sm => ({ id: sm.productId, newStock: sm.after })),
         cashTransaction: kasaEntry ? [kasaEntry] : undefined,
+        cari: cariUpdate,
       },
       events,
     },
@@ -220,6 +225,10 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
     relatedId: sale.id,
   };
 
+  const cariUpdate = sale.payment === "cari" && sale.cariId
+    ? [{ cariId: sale.cariId, balanceChange: -(sale.total || 0) }]
+    : undefined;
+
   return {
     ok: true,
     data: {
@@ -227,6 +236,7 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
         sale: { ...sale, status: 'iptal', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
         cashTransaction: [kasaEntry],
+        cari: cariUpdate,
       },
       events,
     },
@@ -315,6 +325,10 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
     });
   }
 
+  const cariUpdate = sale.payment === "cari" && sale.cariId
+    ? [{ cariId: sale.cariId, balanceChange: -returnedTotal }]
+    : undefined;
+
   return {
     ok: true,
     data: {
@@ -322,6 +336,7 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
         sale: { ...sale, status: 'iade', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
         cashTransaction: kasaEntry ? [kasaEntry] : undefined,
+        cari: cariUpdate,
       },
       events,
     },

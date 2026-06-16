@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest';
 import { loadConnConfig, saveConnConfig, DEFAULT_CONN, type ConnConfig } from './connConfig';
 
 vi.mock('@/lib/logger', () => ({
@@ -10,6 +10,11 @@ vi.mock('@/lib/firebase', () => ({
   writeDoc: vi.fn(),
   isFirebaseReady: vi.fn(() => true),
 }));
+
+beforeAll(() => {
+  vi.stubEnv('VITE_FIREBASE_PROJECT_ID', 'test-project');
+  vi.stubEnv('VITE_FIREBASE_API_KEY', 'test-api-key');
+});
 
 const STORAGE_KEY = 'sobaConnConfig';
 

@@ -50,6 +50,9 @@ export class SatisAgent extends DomainAgent {
   readonly yetkiler = ["satis.read", "satis.write", "kasa.read", "stok.read", "cari.read", "rapor.read"] as const;
 
   async islemYap(talep: AgentRequest): Promise<AgentResponse> {
+    if (!this.ctx) {
+      return { ok: false, error: `${this.id} agent bağlanmadı - önce bagla() çağrın` };
+    }
     if (!this.yetkiKontrolu("satis.write")) {
       return { ok: false, error: `${this.id} agent'ının bu işlem için yetkisi yok` };
     }

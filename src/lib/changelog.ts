@@ -29,6 +29,10 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'auditEngine: Satışlardan cari bakiye hesaplarken payment !== "cari" filtresi eklendi — yanlış cari bakiye sapması düzeltildi.' },
       { type: 'iyilestirme', text: 'dbUtils: calculateCariBalance() domain yardımcısı eklendi — sadece payment === "cari" satışları dikkate alır.' },
       { type: 'duzeltme', text: 'lint: FullSystemStressTest.test.ts untracked dosyası kaldırıldı (bloklayan lint hataları içeriyordu).' },
+      { type: 'duzeltme', text: 'saleCompletion: completeSale/cancelSale/returnSale cari bakiye güncellemesi eklendi — SatisAgent.test düzeldi.' },
+      { type: 'duzeltme', text: 'SatisAgent: ctx kontrolü eklendi (deleted product check öncesi) — bagla hatası düzeldi.' },
+      { type: 'duzeltme', text: 'package.json: 3.28.0 → 3.29.1 (version-consistency testi için).' },
+      { type: 'duzeltme', text: 'connConfig.test: vi.stubEnv ile Firebase env var\'ları mocklandı — CI\'da bağımsız çalışır.' },
     ],
   },
   {
