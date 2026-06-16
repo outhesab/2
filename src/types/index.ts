@@ -73,6 +73,7 @@ export interface Sale {
   invoiceNo?: string;
   status: 'tamamlandi' | 'iade' | 'iptal' | 'completed';
   items: SaleItem[];
+  dueDate?: string;
   _domainEventLog?: DomainEvent[];
   returnedAt?: string;
   deleted?: boolean;

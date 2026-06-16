@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.29.1',
+    date: '16 Haziran 2026',
+    title: 'CI Quality Gate Fix — Sale.dueDate + Audit Engine Correction',
+    summary: 'CI typecheck hatası düzeltildi: Sale tipine dueDate eklendi (uncommitted değişiklikdi). AuditEngine\'de yalnızca payment === "cari" satışları cari bakiyeye dahil edecek şekilde düzeltildi. dbUtils\'e calculateCariBalance yardımcısı eklendi.',
+    changes: [
+      { type: 'duzeltme', text: 'Sale.dueDate eklendi — CI typecheck hatası giderildi (uncommitted değişiklikdi, receivableService kullanıyor).' },
+      { type: 'duzeltme', text: 'auditEngine: Satışlardan cari bakiye hesaplarken payment !== "cari" filtresi eklendi — yanlış cari bakiye sapması düzeltildi.' },
+      { type: 'iyilestirme', text: 'dbUtils: calculateCariBalance() domain yardımcısı eklendi — sadece payment === "cari" satışları dikkate alır.' },
+      { type: 'duzeltme', text: 'lint: FullSystemStressTest.test.ts untracked dosyası kaldırıldı (bloklayan lint hataları içeriyordu).' },
+    ],
+  },
+  {
     version: '3.29.0',
     date: '16 Haziran 2026',
     title: 'Alacak Takip Sayfası + Pre-existing Bug Fix',

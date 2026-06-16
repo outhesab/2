@@ -1,5 +1,19 @@
 import type { DB, Cari } from "@/types";
 
+export function calculateCariBalance(db: DB, cariId: string): number {
+  // 1. Satışlardan gelen toplam borç (Sadece payment === 'cari' olanlar)
+  const salesTotal = db.sales
+    .filter((s) => !s.deleted && s.status === "tamamlandi" && s.cariId === cariId && s.payment === "cari")
+    .reduce((sum, s) => sum + s.total, 0);
+
+  // 2. Kasa kayıtlarından gelen toplam tahsilat/ödeme
+  const kasaTotal = db.kasa
+    .filter((k) => !k.deleted && k.cariId === cariId)
+    .reduce((sum, k) => sum + (k.type === "gelir" ? -k.amount : k.amount), 0);
+
+  return salesTotal + kasaTotal;
+}
+
 export function computeAlacak(db: DB): number {
   return db.cari
     .filter((c) => !c.deleted && c.type === "musteri" && c.balance > 0)

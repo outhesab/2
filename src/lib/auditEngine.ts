@@ -185,14 +185,15 @@ export function runFullAudit(db: DB): AuditReport {
     );
   }
 
-  // Satışlardan cari bakiye katkısını hesapla
-  const cariSaleBalances = new Map<string, number>();
-  for (const sale of db.sales) {
-    if (sale.deleted || sale.status !== "tamamlandi") continue;
-    if (!sale.cariId) continue;
-    const cur = cariSaleBalances.get(sale.cariId) ?? 0;
-    cariSaleBalances.set(sale.cariId, cur + sale.total);
-  }
+    // Satışlardan cari bakiye katkısını hesapla
+    const cariSaleBalances = new Map<string, number>();
+    for (const sale of db.sales) {
+      if (sale.deleted || sale.status !== "tamamlandi") continue;
+      if (!sale.cariId || sale.payment !== "cari") continue;
+      const cur = cariSaleBalances.get(sale.cariId) ?? 0;
+      cariSaleBalances.set(sale.cariId, cur + sale.total);
+    }
+
 
   // Cari bakiye tutarsızlığı kontrolü
   for (const cari of db.cari) {
