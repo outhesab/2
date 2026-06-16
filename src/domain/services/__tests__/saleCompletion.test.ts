@@ -79,6 +79,59 @@ describe('completeSale', () => {
     expect(result.data!.dbUpdates.sale!.total).toBe(180);
     expect(result.data!.dbUpdates.sale!.discountAmount).toBe(20);
   });
+
+  it('cari satışta bakiye güncellemesi yapar', () => {
+    const prevDB = makeDBWithProduct();
+    const result = completeSale(makeSaleIntent({ payment: 'cari', cariId: 'cari1', tahsilat: 0 }), prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.cari).toBeDefined();
+    expect(result.data!.dbUpdates.cari).toHaveLength(1);
+    expect(result.data!.dbUpdates.cari![0].cariId).toBe('cari1');
+    expect(result.data!.dbUpdates.cari![0].balanceChange).toBe(200);
+  });
+
+  it('nakit satışta cari güncellemesi olmaz', () => {
+    const prevDB = makeDBWithProduct();
+    const result = completeSale(makeSaleIntent({ payment: 'nakit', tahsilat: 200 }), prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.cari).toBeUndefined();
+  });
+
+  it('dueDate hesaplaması doğru çalışır', () => {
+    const prevDB = makeDBWithProduct();
+    const result = completeSale(makeSaleIntent({ payment: 'cari', cariId: 'cari1', dueDays: 45, tahsilat: 0 }), prevDB);
+    expect(result.ok).toBe(true);
+    const sale = result.data!.dbUpdates.sale!;
+    expect(sale.dueDate).toBeDefined();
+    const dueDate = new Date(sale.dueDate as string);
+    expect(dueDate.getTime()).toBeGreaterThan(new Date(sale.createdAt).getTime());
+  });
+
+  it('çoklu ürün satışı yapar', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.products.push({
+      id: 'urun2', name: 'Test Ürün 2', category: 'aksesuar', cost: 30, price: 80,
+      stock: 20, minStock: 5, deleted: false, createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    });
+    const result = completeSale(makeSaleIntent({
+      items: [
+        { productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60 },
+        { productId: 'urun2', productName: 'Test Ürün 2', quantity: 3, unitPrice: 80, cost: 30 },
+      ],
+      tahsilat: 440,
+    }), prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.sale!.total).toBe(440);
+    expect(result.data!.dbUpdates.products).toHaveLength(2);
+  });
+
+  it('explicit discountAmount kullanır', () => {
+    const prevDB = makeDBWithProduct();
+    const result = completeSale(makeSaleIntent({ discountAmount: 50, tahsilat: 150 }), prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.sale!.discountAmount).toBe(50);
+    expect(result.data!.dbUpdates.sale!.total).toBe(150);
+  });
 });
 
 describe('cancelSale', () => {
@@ -113,6 +166,44 @@ describe('cancelSale', () => {
     const result = cancelSale('s1', prevDB);
     expect(result.ok).toBe(false);
     expect(result.error).toContain('zaten iptal');
+  });
+
+  it('cari ödemeli satış iptalinde bakiye düşer', () => {
+    const prevDB = makeDBWithProduct();
+    const saleResult = completeSale(makeSaleIntent({ payment: 'cari', cariId: 'cari1', tahsilat: 0 }), prevDB);
+    expect(saleResult.ok).toBe(true);
+    const sale = saleResult.data!.dbUpdates.sale!;
+    prevDB.sales = [sale];
+
+    const result = cancelSale(sale.id, prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.cari).toBeDefined();
+    expect(result.data!.dbUpdates.cari![0].balanceChange).toBe(-(sale.total));
+  });
+
+  it('iade edilmiş satış iptal edilemez', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test', quantity: 1, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 0, subtotal: 100, total: 100, profit: 40,
+      payment: 'nakit', status: 'iade' as const, items: [],
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = cancelSale('s1', prevDB);
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('zaten iptal');
+  });
+
+  it('iptal stok geri yükler', () => {
+    const prevDB = makeDBWithProduct();
+    const saleResult = completeSale(makeSaleIntent(), prevDB);
+    const sale = saleResult.data!.dbUpdates.sale!;
+    prevDB.sales = [sale];
+
+    const result = cancelSale(sale.id, prevDB);
+    expect(result.ok).toBe(true);
+    const productUpdate = result.data!.dbUpdates.products![0];
+    expect(productUpdate.newStock).toBe(prevDB.products[0].stock + 2);
   });
 });
 
@@ -150,6 +241,52 @@ describe('returnSale', () => {
     const result = returnSale('olmayan-id', prevDB);
     expect(result.ok).toBe(false);
     expect(result.error).toBe('Satış bulunamadı');
+  });
+
+  it('kısmi iade sadece belirtilen miktar kadar stok döndürür', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
+      payment: 'nakit', status: 'tamamlandi' as const,
+      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = returnSale('s1', prevDB, 1);
+    expect(result.ok).toBe(true);
+    const productUpdate = result.data!.dbUpdates.products![0];
+    expect(productUpdate.newStock).toBe(11);
+  });
+
+  it('cari ödemeli satış iadesinde bakiye düşer', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
+      payment: 'cari', status: 'tamamlandi' as const,
+      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+      cariId: 'cari1',
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = returnSale('s1', prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.cari).toBeDefined();
+    expect(result.data!.dbUpdates.cari![0].balanceChange).toBe(-200);
+  });
+
+  it('stok geri yükleme kontrolü', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
+      payment: 'nakit', status: 'tamamlandi' as const,
+      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = returnSale('s1', prevDB);
+    expect(result.ok).toBe(true);
+    const productUpdate = result.data!.dbUpdates.products![0];
+    expect(productUpdate.newStock).toBe(12);
   });
 });
 
@@ -193,5 +330,34 @@ describe('correctSalePrice', () => {
     const updatedItems = result.data!.dbUpdates.sale!.items;
     expect(updatedItems.find((i: { productId: string }) => i.productId === 'urun1')?.unitPrice).toBe(150);
     expect(updatedItems.find((i: { productId: string }) => i.productId === 'urun2')?.unitPrice).toBe(200);
+  });
+
+  it('fiyat düzeltme discount korur', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 20, subtotal: 200, total: 180, profit: 60,
+      payment: 'nakit', status: 'tamamlandi' as const,
+      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = correctSalePrice('s1', 120, prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.sale!.total).toBe(220);
+    expect(result.data!.dbUpdates.sale!.discountAmount).toBe(20);
+  });
+
+  it('sıfır fiyat düzeltme hatasız çalışır', () => {
+    const prevDB = makeDBWithProduct();
+    prevDB.sales = [{
+      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
+      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
+      payment: 'nakit', status: 'tamamlandi' as const,
+      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+      createdAt: '2026-01-01', updatedAt: '2026-01-01',
+    }];
+    const result = correctSalePrice('s1', 0, prevDB);
+    expect(result.ok).toBe(true);
+    expect(result.data!.dbUpdates.sale!.total).toBe(0);
   });
 });

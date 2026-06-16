@@ -1,105 +1,16 @@
 import { logger } from "@/lib/logger";
 import { assertSafeSpreadsheetFile, downloadAoASheetsAsXlsx, makeSafeHeaders, parseCsvText, readSafeWorkbook } from "./safeXlsx";
+import type {
+  SheetData, ExcelFile, DiffRow, SheetDiff, FileDiff, SearchResult,
+  MergeOptions, MergeReport, MergeResult, CleanOptions, CleanResult, JoinType,
+} from "./excel-merge-types";
+import { cellToString, applyCleanOptions, fuzzyMatch, formatFileSize, cleanSheetData } from "./excel-merge-utils";
 
-export interface SheetData {
-  name: string;
-  headers: string[];
-  rows: Record<string, string | number | boolean | null>[];
-  rawRows: (string | number | boolean | null)[][];
-}
-
-export interface ExcelFile {
-  id: string;
-  name: string;
-  size: number;
-  uploadedAt: Date;
-  sheets: SheetData[];
-  isRecovery: boolean;
-  fileType: "excel" | "csv" | "json" | "xml";
-}
-
-export interface DiffRow {
-  rowIndex: number;
-  status: "added" | "removed" | "modified" | "unchanged";
-  oldValues?: Record<string, string | number | boolean | null>;
-  newValues?: Record<string, string | number | boolean | null>;
-  changedCells?: string[];
-}
-
-export interface SheetDiff {
-  sheetName: string;
-  rows: DiffRow[];
-  addedCount: number;
-  removedCount: number;
-  modifiedCount: number;
-  unchangedCount: number;
-}
-
-export interface FileDiff {
-  fileA: ExcelFile;
-  fileB: ExcelFile;
-  sheets: SheetDiff[];
-}
-
-export interface SearchResult {
-  fileId: string;
-  fileName: string;
-  sheetName: string;
-  rowIndex: number;
-  colName: string;
-  value: string | number | boolean | null;
-  matchType: "exact" | "contains" | "regex" | "wildcard";
-}
-
-export type JoinType = "inner" | "left" | "right" | "fullOuter" | "verticalUnion";
-
-export interface CleanOptions {
-  trimWhitespace: boolean;
-  deduplicateRows: boolean;
-  fillNullsWithEmpty: boolean;
-  standardizeCase: "none" | "upper" | "lower" | "title";
-  standardizeDates: boolean;
-}
-
-export interface MergeOptions {
-  keyColumn: string;
-  strategy: "latest" | "first" | "union" | "intersection";
-  joinType: JoinType;
-  sheets: string[];
-  fuzzyMatch: boolean;
-  fuzzyThreshold: number;
-  cleanOptions: CleanOptions;
-}
-
-export interface MergeReport {
-  totalInputRows: number;
-  matchedRows: number;
-  unmatchedFromA: number;
-  unmatchedFromB: number;
-  totalOutputRows: number;
-  duplicatesRemoved: number;
-  nullsFilled: number;
-  fuzzyMatchCount: number;
-  columnConflicts: Array<{ column: string; conflictCount: number }>;
-  skippedRows: number;
-}
-
-export interface MergeResult {
-  headers: string[];
-  rows: Record<string, string | number | boolean | null>[];
-  sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }>;
-  report: MergeReport;
-}
-
-export interface CleanResult {
-  headers: string[];
-  rows: Record<string, string | number | boolean | null>[];
-  originalCount: number;
-  cleanedCount: number;
-  duplicatesRemoved: number;
-  nullsFilled: number;
-  trimmedCells: number;
-}
+export type {
+  SheetData, ExcelFile, DiffRow, SheetDiff, FileDiff, SearchResult,
+  MergeOptions, MergeReport, MergeResult, CleanOptions, CleanResult, JoinType,
+};
+export { formatFileSize, cleanSheetData };
 
 function buildExcelResult(file: File, sheets: SheetData[], fileType: ExcelFile['fileType']): ExcelFile {
   return {
@@ -300,115 +211,6 @@ export async function parseXmlFile(file: File): Promise<ExcelFile> {
   return buildExcelResult(file, [{ name: "XML Veri", headers, rows, rawRows: [] }], "xml");
 }
 
-function cellToString(val: string | number | boolean | null): string {
-  if (val == null) return "";
-  return String(val).trim();
-}
-
-export function levenshtein(a: string, b: string): number {
-  const m = a.length;
-  const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
-    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
-  );
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1];
-      } else {
-        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-      }
-    }
-  }
-  return dp[m][n];
-}
-
-export function fuzzyMatch(a: string, b: string, threshold: number): boolean {
-  const al = a.toLowerCase();
-  const bl = b.toLowerCase();
-  if (al === bl) return true;
-  const maxLen = Math.max(al.length, bl.length);
-  if (maxLen === 0) return true;
-  const dist = levenshtein(al, bl);
-  const similarity = 1 - dist / maxLen;
-  return similarity >= threshold;
-}
-
-function applyCleanOptions(
-  rows: Record<string, string | number | boolean | null>[],
-  headers: string[],
-  opts: CleanOptions
-): { rows: Record<string, string | number | boolean | null>[]; nullsFilled: number; trimmedCells: number; duplicatesRemoved: number } {
-  let nullsFilled = 0;
-  let trimmedCells = 0;
-  let duplicatesRemoved = 0;
-
-  let result = rows.map((row) => {
-    const newRow: Record<string, string | number | boolean | null> = {};
-    for (const h of headers) {
-      let val = row[h];
-
-      if (opts.fillNullsWithEmpty && val == null) {
-        val = "";
-        nullsFilled++;
-      }
-
-      if (typeof val === "string") {
-        if (opts.trimWhitespace) {
-          const trimmed = val.trim();
-          if (trimmed !== val) trimmedCells++;
-          val = trimmed;
-        }
-        if (opts.standardizeCase !== "none") {
-          if (opts.standardizeCase === "upper") val = val.toUpperCase();
-          else if (opts.standardizeCase === "lower") val = val.toLowerCase();
-          else if (opts.standardizeCase === "title") {
-            val = val.replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
-          }
-        }
-      }
-
-      newRow[h] = val;
-    }
-    return newRow;
-  });
-
-  if (opts.deduplicateRows) {
-    const seen = new Set<string>();
-    const deduped: typeof result = [];
-    for (const row of result) {
-      const key = JSON.stringify(headers.map((h) => row[h]));
-      if (!seen.has(key)) {
-        seen.add(key);
-        deduped.push(row);
-      } else {
-        duplicatesRemoved++;
-      }
-    }
-    result = deduped;
-  }
-
-  return { rows: result, nullsFilled, trimmedCells, duplicatesRemoved };
-}
-
-export function cleanSheetData(sheet: SheetData, opts: CleanOptions): CleanResult {
-  const originalCount = sheet.rows.length;
-  const { rows, nullsFilled, trimmedCells, duplicatesRemoved } = applyCleanOptions(
-    sheet.rows,
-    sheet.headers,
-    opts
-  );
-  return {
-    headers: sheet.headers,
-    rows,
-    originalCount,
-    cleanedCount: rows.length,
-    duplicatesRemoved,
-    nullsFilled,
-    trimmedCells,
-  };
-}
-
 export function diffSheets(
   sheetA: SheetData,
   sheetB: SheetData,
@@ -578,9 +380,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
   if (joinType === "verticalUnion") {
     const { rows, sourceInfo } = buildRowsAndSource(allSheets);
     const { rows: cleaned } = applyCleanAndReport(rows, allHeaders, cleanOptions, report);
-    const newSourceInfo: typeof sourceInfo = {};
-    cleaned.forEach((_, i) => { newSourceInfo[i] = sourceInfo[i]; });
-    return { headers: allHeaders, rows: cleaned, sourceInfo: newSourceInfo, report };
+    return { headers: allHeaders, rows: cleaned, sourceInfo, report };
   }
 
   if (!keyColumn || !allSheets[0].sheet.headers.includes(keyColumn)) {
@@ -733,10 +533,4 @@ export function exportReportToExcel(report: MergeReport, fileName: string): void
     ["Atlanan Satir", report.skippedRows],
   ];
   void downloadAoASheetsAsXlsx([{ name: "Birlestirme Raporu", rows }], fileName);
-}
-
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

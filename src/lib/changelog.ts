@@ -33,6 +33,8 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'duzeltme', text: 'SatisAgent: ctx kontrolü eklendi (deleted product check öncesi) — bagla hatası düzeldi.' },
       { type: 'duzeltme', text: 'package.json: 3.28.0 → 3.29.1 (version-consistency testi için).' },
       { type: 'duzeltme', text: 'connConfig.test: vi.stubEnv ile Firebase env var\'ları mocklandı — CI\'da bağımsız çalışır.' },
+      { type: 'iyilestirme', text: 'saleCompletion.test: 13 yeni test eklendi (cari balance, dueDate, çoklu ürün, kısmi iade vb.) — 16→29 test.' },
+      { type: 'iyilestirme', text: 'C7: excel-merge.ts 742 satır → 3 modüle bölündü (excel-merge-types.ts, excel-merge-utils.ts, excel-merge.ts).' },
     ],
   },
   {
