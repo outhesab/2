@@ -1,4 +1,3 @@
-export { domainEventBus } from "./eventBus";
 export { processIntent } from "./intentEngine";
 export { completeSale } from "./services/saleCompletion";
 export type {

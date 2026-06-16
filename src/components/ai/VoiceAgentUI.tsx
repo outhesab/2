@@ -186,7 +186,7 @@ export default function VoiceAgentUI({
 
         {/* Alt Kontroller (Glassmorphism) */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 p-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-6 py-3">
-          <button className="p-2 text-white/40 hover:text-white transition-colors">
+          <button className="p-2 text-white/40 hover:text-white transition-colors" aria-label="Ayarlar">
             <Settings size={20} />
           </button>
           <div className="w-px h-6 bg-white/10" />
@@ -197,7 +197,7 @@ export default function VoiceAgentUI({
             {state === 'idle' ? <Mic size={24} className="text-white" /> : <MicOff size={24} className="text-white" />}
           </button>
           <div className="w-px h-6 bg-white/10" />
-          <button className="p-2 text-white/40 hover:text-white transition-colors">
+          <button className="p-2 text-white/40 hover:text-white transition-colors" aria-label="Mesaj">
             <MessageSquare size={20} />
           </button>
         </div>

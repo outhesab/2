@@ -223,7 +223,7 @@ export default function Cizelge({ db }: Props) {
 
         {viewMode === "month" ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button onClick={prevMonth} style={navBtn}>
+            <button onClick={prevMonth} style={navBtn} aria-label="Önceki ay">
               ‹
             </button>
             <span

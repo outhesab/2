@@ -7,14 +7,18 @@ function calcSubtotal(items: SaleIntent["items"]): number {
   return items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
 }
  
-function calcDiscountAmount(items: SaleIntent["items"], discountPercent: number, discountAmount?: number): number {
+function calcDiscountAmount(items: SaleIntent["items"], discountPercent: number, discountAmount?: number, subtotal?: number): number {
   if (discountAmount !== undefined && discountAmount > 0) return discountAmount;
   if (discountPercent > 0) {
-    return Math.round(calcSubtotal(items) * (discountPercent / 100));
+    return Math.round((subtotal ?? calcSubtotal(items)) * (discountPercent / 100));
   }
   return 0;
 }
  
+function toPayload<T>(data: T): Record<string, unknown> {
+  return data as unknown as Record<string, unknown>;
+}
+
 function calcProfit(items: SaleIntent["items"], discountAmount: number): number {
   return items.reduce((sum, i) => sum + (i.unitPrice - i.cost) * i.quantity, 0) - discountAmount;
 }
@@ -104,8 +108,8 @@ export function completeSale(
     : new Date().toISOString();
   const saleId = genId();
  
-  const discountAmount = calcDiscountAmount(intent.items, intent.discount ?? 0, intent.discountAmount);
   const subtotal = calcSubtotal(intent.items);
+  const discountAmount = calcDiscountAmount(intent.items, intent.discount ?? 0, intent.discountAmount, subtotal);
   const total = subtotal - discountAmount;
   const profit = calcProfit(intent.items, discountAmount);
  
@@ -141,13 +145,12 @@ export function completeSale(
   }
  
   const events: DomainEvent[] = [
-
     {
       id: genId(),
       type: "sale.completed" as const,
       aggregateId: saleId,
       aggregateType: "sale" as const,
-      payload: { ...intent, total } as Record<string, unknown>,
+      payload: toPayload({ ...intent, total }),
       timestamp: nowIso,
       version: 1,
     },
@@ -156,18 +159,18 @@ export function completeSale(
       type: "stock.deducted" as const,
       aggregateId: sm.productId,
       aggregateType: "stock" as const,
-  payload: sm as unknown as Record<string, unknown>,
-       timestamp: nowIso,
-       version: 1,
-     })),
-   ];
-   if (kasaEntry) {
-     events.push({
-       id: genId(),
-       type: "cash.recorded" as const,
-       aggregateId: saleId,
-       aggregateType: "cash" as const,
-       payload: kasaEntry as unknown as Record<string, unknown>,
+      payload: toPayload(sm),
+      timestamp: nowIso,
+      version: 1,
+    })),
+  ];
+  if (kasaEntry) {
+    events.push({
+      id: genId(),
+      type: "cash.recorded" as const,
+      aggregateId: saleId,
+      aggregateType: "cash" as const,
+      payload: toPayload(kasaEntry),
       timestamp: nowIso,
       version: 1,
     });
@@ -210,7 +213,7 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
       type: "sale.cancelled" as const,
       aggregateId: saleId,
       aggregateType: "sale" as const,
-      payload: { saleId } as Record<string, unknown>,
+      payload: toPayload({ saleId }),
       timestamp: nowIso,
       version: 1,
     },
@@ -298,19 +301,19 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
       type: "sale.returned" as const,
       aggregateId: saleId,
       aggregateType: "sale" as const,
-      payload: { saleId, qty, returnedTotal } as Record<string, unknown>,
+      payload: toPayload({ saleId, qty, returnedTotal }),
       timestamp: nowIso,
       version: 1,
     },
     ...stockMovements.map(sm => ({
-       id: genId(),
-       type: "stock.returned" as const,
-       aggregateId: sm.productId,
-       aggregateType: "stock" as const,
-       payload: sm as unknown as Record<string, unknown>,
-       timestamp: nowIso,
-       version: 1,
-     })),
+      id: genId(),
+      type: "stock.returned" as const,
+      aggregateId: sm.productId,
+      aggregateType: "stock" as const,
+      payload: toPayload(sm),
+      timestamp: nowIso,
+      version: 1,
+    })),
   ];
 
   if (kasaEntry) {
@@ -319,7 +322,7 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
       type: "cash.recorded" as const,
       aggregateId: saleId,
       aggregateType: "cash" as const,
-      payload: kasaEntry as unknown as Record<string, unknown>,
+      payload: toPayload(kasaEntry),
       timestamp: nowIso,
       version: 1,
     });
@@ -367,7 +370,7 @@ export function correctSalePrice(saleId: string, yeniFiyat: number | Record<stri
       type: "sale.price_corrected" as const,
       aggregateId: saleId,
       aggregateType: "sale" as const,
-      payload: { saleId, yeniFiyat } as Record<string, unknown>,
+      payload: toPayload({ saleId, yeniFiyat }),
       timestamp: nowIso,
       version: 1,
     },

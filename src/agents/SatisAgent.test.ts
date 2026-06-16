@@ -375,4 +375,88 @@ describe("SatisAgent", () => {
     expect(sonuc.ok).toBe(false);
     expect(sonuc.error).toContain("Desteklenmeyen");
   });
+
+  // ── H9: Discount calculation ────────────────────────────────────────────
+
+  it("yeniSatis: yüzde iskonto total ve profit hesaplarını etkilemeli", async () => {
+    const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
+    const { ctx, getDB } = makeContext(db);
+    agent.bagla(ctx);
+
+    const params = {
+      ...validParams,
+      discount: 10,
+      discountAmount: 0,
+    };
+    const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
+    expect(sonuc.ok).toBe(true);
+
+    const nextDB = getDB();
+    const satis = nextDB.sales[0];
+    const expectedSubtotal = SOBA_PROD.price * 2;
+    const expectedDiscount = Math.round(expectedSubtotal * 0.1);
+    const expectedTotal = expectedSubtotal - expectedDiscount;
+    expect(satis.subtotal).toBe(expectedSubtotal);
+    expect(satis.discountAmount).toBe(expectedDiscount);
+    expect(satis.total).toBe(expectedTotal);
+  });
+
+  it("yeniSatis: sabit iskonto tutarı total'den düşülmeli", async () => {
+    const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
+    const { ctx, getDB } = makeContext(db);
+    agent.bagla(ctx);
+
+    const sabitIskonto = 500;
+    const params = {
+      ...validParams,
+      discount: 0,
+      discountAmount: sabitIskonto,
+    };
+    const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
+    expect(sonuc.ok).toBe(true);
+
+    const nextDB = getDB();
+    const satis = nextDB.sales[0];
+    const expectedTotal = SOBA_PROD.price * 2 - sabitIskonto;
+    expect(satis.discountAmount).toBe(sabitIskonto);
+    expect(satis.total).toBe(expectedTotal);
+  });
+
+  // ── H9: Banka (havale) payment routing ──────────────────────────────────
+
+  it("yeniSatis: havale ödemede kasa kaydı havale kasasına gider", async () => {
+    const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
+    const { ctx, getDB } = makeContext(db);
+    agent.bagla(ctx);
+
+    const params = { ...validParams, payment: "havale" as const };
+    const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
+    expect(sonuc.ok).toBe(true);
+
+    const nextDB = getDB();
+    const saleId = getSaleData(sonuc).id;
+    const kasaKaydi = nextDB.kasa.find((k) => k.relatedId === saleId);
+    expect(kasaKaydi).toBeDefined();
+    expect(kasaKaydi!.kasa).toBe("havale");
+    expect(kasaKaydi!.amount).toBe(SOBA_PROD.price * 2);
+  });
+
+  // ── H9: POS (kart) payment routing ──────────────────────────────────────
+
+  it("yeniSatis: kart ödemede kasa kaydı kart kasasına gider", async () => {
+    const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
+    const { ctx, getDB } = makeContext(db);
+    agent.bagla(ctx);
+
+    const params = { ...validParams, payment: "kart" as const };
+    const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
+    expect(sonuc.ok).toBe(true);
+
+    const nextDB = getDB();
+    const saleId = getSaleData(sonuc).id;
+    const kasaKaydi = nextDB.kasa.find((k) => k.relatedId === saleId);
+    expect(kasaKaydi).toBeDefined();
+    expect(kasaKaydi!.kasa).toBe("kart");
+    expect(kasaKaydi!.amount).toBe(SOBA_PROD.price * 2);
+  });
 });

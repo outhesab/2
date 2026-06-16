@@ -166,9 +166,10 @@ pnpm exec vitest run --coverage
 ## Performans
 
 - Ana JS bundle: ~366 KB (hedef: < 300 KB)
-- Toplam JS: ~2.9 MB
+- Toplam JS: ~3.25 MB
 - Lazy loading: Tüm sayfalar `React.lazy()` ile
-- PWA: 74 asset precache, offline çalışma
+- PWA: 72 asset precache, offline çalışma
+- `design-tokens.css` ayrıldı — tema değişkenleri burada
 
 ## Sık Karşılaşılan Sorunlar
 

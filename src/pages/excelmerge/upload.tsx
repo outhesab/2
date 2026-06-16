@@ -191,6 +191,7 @@ export default function UploadPage({ files, onFilesChange }: UploadPageProps) {
                     className="shrink-0 text-muted-foreground hover:text-destructive"
                     onClick={() => removeFile(file.id)}
                     data-testid={`button-remove-${file.id}`}
+                    aria-label="Dosyayı kaldır"
                   >
                     <X className="w-4 h-4" />
                   </Button>

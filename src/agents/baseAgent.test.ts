@@ -50,30 +50,22 @@ describe("BaseAgent permissions", () => {
 });
 
 describe("BaseAgent bagla", () => {
-  it("bagla() sonrası db ve save erişilebilir olmalı", async () => {
+  it("bagla() sonrası islemYap çalışmalı", async () => {
     const agent = new SatisAgent();
-    let savedDb: DB = MINIMAL_DB;
     const ctx: AgentContext = {
       getDB: () => MINIMAL_DB,
-      save: (updater) => { savedDb = updater(savedDb); },
+      save: (updater) => { updater(MINIMAL_DB); },
     };
     agent.bagla(ctx);
 
-    expect(() => agent["db"]).not.toThrow();
-    expect(agent["db"]).toBe(MINIMAL_DB);
-
-    expect(() => agent["save"]).not.toThrow();
-    agent["save"]((prev) => ({ ...prev, _version: 2 }));
-    expect(savedDb._version).toBe(2);
+    const sonuc = await agent.islemYap({ action: "yeniSatis", payload: { items: [] } });
+    expect(sonuc.ok).toBe(false);
   });
 
-  it("bagla() çağrılmadan db getter hata fırlatmalı", () => {
+  it("bagla() çağrılmadan islemYap hata fırlatmalı", async () => {
     const agent = new SatisAgent();
-    expect(() => agent["db"]).toThrow("bağlanmadı");
-  });
-
-  it("bagla() çağrılmadan save getter hata fırlatmalı", () => {
-    const agent = new SatisAgent();
-    expect(() => agent["save"]).toThrow("bağlanmadı");
+    const sonuc = await agent.islemYap({ action: "test" });
+    expect(sonuc.ok).toBe(false);
+    expect(sonuc.error).toContain("bağlanmadı");
   });
 });

@@ -51,7 +51,9 @@ export type LogCategory =
   | 'utils-tr'
   | 'version'
   | 'voice'
-  | 'VoiceAgent';
+  | 'VoiceAgent'
+  | 'a11y'
+  | 'coverage';
 
 export interface CrashReport {
   id: string;

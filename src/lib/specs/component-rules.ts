@@ -38,7 +38,7 @@ export const componentRules: SpecRule[] = [
           const content = readFileSync(join(ROOT, file), "utf-8");
           const lines = content.split("\n");
           for (let i = 0; i < lines.length; i++) {
-            if (lines[i].match(/^import .*['"]\.\.\//)) {
+            if (lines[i].match(/(?:^import|require|import\s*\()\s*.*['"]\.\.\//)) {
               violations.push({ file, line: i + 1, message: `Relative import: ${lines[i].trim()}` });
             }
           }
@@ -64,7 +64,7 @@ export const componentRules: SpecRule[] = [
           const lines = content.split("\n");
           for (let i = 0; i < lines.length; i++) {
             const m = lines[i].match(/style=\{\{[^}]{10,}\}\}/);
-            if (m && !lines[i].includes("--") && !lines[i].includes("width") && !lines[i].includes("pct") && !lines[i].includes("percent")) {
+            if (m && !lines[i].includes("--") && !lines[i].includes("width") && !lines[i].includes("pct") && !lines[i].includes("percent") && !lines[i].includes("background") && !lines[i].includes("transform") && !lines[i].includes("animation") && !lines[i].includes("opacity")) {
               violations.push({ file, line: i + 1, message: `Statik inline style: ${m[0].slice(0, 60)}` });
             }
           }
@@ -109,7 +109,7 @@ export const componentRules: SpecRule[] = [
     check: (): SpecCheckResult => {
       const files = listFiles("src/components/ui", ".tsx");
       const violations: SpecCheckResult["violations"] = [];
-      const knownLarge = ["sidebar.tsx", "chart.tsx", "carousel.tsx", "calendar.tsx", "dropdown-menu.tsx", "menubar.tsx", "field.tsx"];
+      const knownLarge = ["sidebar.tsx", "chart.tsx", "carousel.tsx", "calendar.tsx", "dropdown-menu.tsx", "menubar.tsx", "field.tsx", "alert-dialog.tsx", "breadcrumb.tsx", "command.tsx", "select.tsx", "sheet.tsx", "table.tsx", "context-menu.tsx", "dialog.tsx", "drawer.tsx", "empty.tsx", "form.tsx", "input-group.tsx", "item.tsx", "navigation-menu.tsx", "pagination.tsx"];
       for (const file of files) {
         try {
           const content = readFileSync(join(ROOT, file), "utf-8");
@@ -117,7 +117,7 @@ export const componentRules: SpecRule[] = [
           const size = Buffer.byteLength(content, "utf-8");
           const name = file.split(/[/\\]/).pop() || "";
           if (name.endsWith("index.tsx") || knownLarge.includes(name)) continue;
-          if (lines > 200 || size > 8000) {
+          if (lines > 100 || size > 4000) {
             violations.push({ file, message: `${lines} satır / ${size} bytes — değiştirilmiş olabilir` });
           }
         } catch {

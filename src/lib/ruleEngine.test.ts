@@ -556,6 +556,37 @@ describe('min_stock kuralı', () => {
   });
 });
 
+describe('min_stock kuralı — ek testler (H10)', () => {
+  it('stok minStock üstündeyse ihlal üretmez (sınır durumu)', () => {
+    const prev = makeDB();
+    const next = makeDB({ products: [makeProduct({ stock: 3, minStock: 2 })] });
+    const violations = validateTransaction(prev, next);
+    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+  });
+
+  it('stok 0 ve minStock > 0 ise ihlal üretmez (stok > 0 koşulu)', () => {
+    const prev = makeDB();
+    const next = makeDB({ products: [makeProduct({ stock: 0, minStock: 3 })] });
+    const violations = validateTransaction(prev, next);
+    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+  });
+
+  it('birden çok ürün min_stock altındayken her biri için ayrı ihlal üretilmeli', () => {
+    const prev = makeDB();
+    const next = makeDB({
+      products: [
+        makeProduct({ id: 'p1', stock: 1, minStock: 3 }),
+        makeProduct({ id: 'p2', stock: 2, minStock: 5 }),
+        makeProduct({ id: 'p3', stock: 10, minStock: 2 }),
+      ],
+    });
+    const violations = validateTransaction(prev, next);
+    const minStockViolations = violations.filter(v => v.ruleId === 'min_stock');
+    expect(minStockViolations).toHaveLength(2);
+    expect(minStockViolations.every(v => v.severity === 'warn')).toBe(true);
+  });
+});
+
 describe('TRANSACTION_LIMIT sabiti', () => {
   it('100_000 değerinde export edilir', () => {
     expect(TRANSACTION_LIMIT).toBe(100_000);

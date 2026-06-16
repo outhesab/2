@@ -360,93 +360,97 @@ describe("🏪 Gerçek Uygulama Entegrasyon Testleri", () => {
   // ══════════════════════════════════════════════════════════════════════════
 
   describe("Senaryo 1: Tam iş günü — açılış → satışlar → tahsilat → kapanış", () => {
-    // Başlangıç: 30 soba (1.200 ₺/ad), nakit kasada 5.000 ₺ açılış bakiyesi
-    const soba = makeProduct("soba-001", "Standart Soba", 30, 1_200, 800);
-    const musteri = makeCari("cari-001", "Mehmet Demir", 0);
+    function createGunSonuState() {
+      const soba = makeProduct("soba-001", "Standart Soba", 30, 1_200, 800);
+      const musteri = makeCari("cari-001", "Mehmet Demir", 0);
 
-    // Açılış kasası
-    const acilisKasaEntry: KasaEntry = {
-      id: "acilis-001",
-      type: "gelir",
-      category: "acilis",
-      amount: 5_000,
-      kasa: "nakit",
-      description: "Gün başı açılış bakiyesi",
-      createdAt: now(),
-      updatedAt: now(),
-    };
+      const acilisKasaEntry: KasaEntry = {
+        id: "acilis-001",
+        type: "gelir",
+        category: "acilis",
+        amount: 5_000,
+        kasa: "nakit",
+        description: "Gün başı açılış bakiyesi",
+        createdAt: now(),
+        updatedAt: now(),
+      };
 
-    let db = makeDB({
-      products: [soba],
-      cari: [musteri],
-      kasa: [acilisKasaEntry],
-    });
+      let db = makeDB({
+        products: [soba],
+        cari: [musteri],
+        kasa: [acilisKasaEntry],
+      });
 
-    // Sabah: 3 nakit soba satışı
-    const violations: ReturnType<typeof validateTransaction> = [];
+      const violations: ReturnType<typeof validateTransaction> = [];
 
-    const sabahSatis1 = satisYap(db, "soba-001", 2, "nakit");
-    violations.push(...sabahSatis1.violations);
-    db = sabahSatis1.nextDB;
+      const sabahSatis1 = satisYap(db, "soba-001", 2, "nakit");
+      violations.push(...sabahSatis1.violations);
+      db = sabahSatis1.nextDB;
 
-    const sabahSatis2 = satisYap(db, "soba-001", 1, "banka");
-    violations.push(...sabahSatis2.violations);
-    db = sabahSatis2.nextDB;
+      const sabahSatis2 = satisYap(db, "soba-001", 1, "banka");
+      violations.push(...sabahSatis2.violations);
+      db = sabahSatis2.nextDB;
 
-    // Öğlen: Cari satış (5 soba veresiye)
-    const oglenSatis = cariSatisYap(db, "soba-001", 5, "cari-001");
-    violations.push(...oglenSatis.violations);
-    db = oglenSatis.nextDB;
+      const oglenSatis = cariSatisYap(db, "soba-001", 5, "cari-001");
+      violations.push(...oglenSatis.violations);
+      db = oglenSatis.nextDB;
 
-    // Öğle arası: elektrik faturası gideri
-    const gider1 = giderEkle(db, 1_500, "nakit", "Elektrik faturası");
-    violations.push(...gider1.violations);
-    db = gider1.nextDB;
+      const gider1 = giderEkle(db, 1_500, "nakit", "Elektrik faturası");
+      violations.push(...gider1.violations);
+      db = gider1.nextDB;
 
-    // Akşam: Tahsilat (Mehmet Demir 3.000 ₺ ödüyor)
-    const tahsilat1 = tahsilatYap(db, "cari-001", 3_000, "nakit");
-    violations.push(...tahsilat1.violations);
-    db = tahsilat1.nextDB;
+      const tahsilat1 = tahsilatYap(db, "cari-001", 3_000, "nakit");
+      violations.push(...tahsilat1.violations);
+      db = tahsilat1.nextDB;
 
-    // Son pos satışı
-    const aksamSatis = satisYap(db, "soba-001", 1, "pos");
-    violations.push(...aksamSatis.violations);
-    db = aksamSatis.nextDB;
+      const aksamSatis = satisYap(db, "soba-001", 1, "pos");
+      violations.push(...aksamSatis.violations);
+      db = aksamSatis.nextDB;
+
+      return { db, violations };
+    }
 
     it("gün boyunca kural ihlali olmamalı", () => {
+      const { violations } = createGunSonuState();
       expect(violations).toHaveLength(0);
     });
 
     it("toplam satış adedi 9 olmalı (2+1+5+1)", () => {
-      expect(db.sales).toHaveLength(4); // 4 satış işlemi
+      const { db } = createGunSonuState();
+      expect(db.sales).toHaveLength(4);
       const toplamAdet = db.sales.reduce((s, sale) => s + sale.quantity, 0);
       expect(toplamAdet).toBe(9);
     });
 
     it("stok 30 → 21 olmalı (9 soba satıldı)", () => {
+      const { db } = createGunSonuState();
       const s = db.products.find((p) => p.id === "soba-001")!;
       expect(s.stock).toBe(21);
     });
 
     it("nakit kasa: 5000 + 2400 - 1500 + 3000 = 8900 ₺", () => {
-      // acilis: +5000, sabahSatis1 (2×1200=2400): +2400, gider1: -1500, tahsilat1: +3000
+      const { db } = createGunSonuState();
       expect(kasaBakiyesi(db, "nakit")).toBe(8_900);
     });
 
     it("banka kasa: sabahSatis2 (1200) = 1200 ₺", () => {
+      const { db } = createGunSonuState();
       expect(kasaBakiyesi(db, "banka")).toBe(1_200);
     });
 
     it("pos kasa: aksamSatis (1200) = 1200 ₺", () => {
+      const { db } = createGunSonuState();
       expect(kasaBakiyesi(db, "pos")).toBe(1_200);
     });
 
     it("cari bakiyesi: 6000 (5 soba veresiye) - 3000 (tahsilat) = 3000 ₺", () => {
+      const { db } = createGunSonuState();
       const cari = db.cari.find((c) => c.id === "cari-001")!;
       expect(cari.balance).toBe(3_000);
     });
 
     it("stok hareketleri 4 kayıt içermeli (her satış için 1)", () => {
+      const { db } = createGunSonuState();
       expect(db.stockMovements).toHaveLength(4);
     });
   });
@@ -456,26 +460,28 @@ describe("🏪 Gerçek Uygulama Entegrasyon Testleri", () => {
   // ══════════════════════════════════════════════════════════════════════════
 
   describe("Senaryo 2: Kasa bakiyesi yetersizken gider ekleme engellenir", () => {
-    // Kasada sadece 500 ₺ var, 1000 ₺ gider girilmeye çalışılıyor
-    const acilisKasa: KasaEntry = {
-      id: "acilis-002",
-      type: "gelir",
-      category: "acilis",
-      amount: 500,
-      kasa: "nakit",
-      description: "Açılış",
-      createdAt: now(),
-      updatedAt: now(),
-    };
-    const db0 = makeDB({ kasa: [acilisKasa] });
-
-    const { violations } = giderEkle(db0, 1_000, "nakit", "Kira ödemesi");
+    function createGiderResult() {
+      const acilisKasa: KasaEntry = {
+        id: "acilis-002",
+        type: "gelir",
+        category: "acilis",
+        amount: 500,
+        kasa: "nakit",
+        description: "Açılış",
+        createdAt: now(),
+        updatedAt: now(),
+      };
+      const db0 = makeDB({ kasa: [acilisKasa] });
+      return giderEkle(db0, 1_000, "nakit", "Kira ödemesi");
+    }
 
     it("negative_kasa ihlali üretmeli", () => {
+      const { violations } = createGiderResult();
       expect(violations.some((v) => v.ruleId === "negative_kasa")).toBe(true);
     });
 
     it("ihlal severity block olmalı", () => {
+      const { violations } = createGiderResult();
       const v = violations.find((v) => v.ruleId === "negative_kasa")!;
       expect(v.severity).toBe("block");
     });
@@ -486,44 +492,47 @@ describe("🏪 Gerçek Uygulama Entegrasyon Testleri", () => {
   // ══════════════════════════════════════════════════════════════════════════
 
   describe("Senaryo 3: İki farklı ürün, bağımsız stok takibi", () => {
-    const boru = makeProduct(
-      "boru-001",
-      "Baca Borusu",
-      50,
-      200,
-      120,
-      "aksesuar",
-    );
-    const soba = makeProduct("soba-002", "Lüks Soba", 10, 3_000, 2_000);
-    let db = makeDB({ products: [boru, soba] });
+    function createCokluUrunState() {
+      const boru = makeProduct("boru-001", "Baca Borusu", 50, 200, 120, "aksesuar");
+      const soba = makeProduct("soba-002", "Lüks Soba", 10, 3_000, 2_000);
+      let db = makeDB({ products: [boru, soba] });
 
-    const s1 = satisYap(db, "boru-001", 10, "nakit");
-    db = s1.nextDB;
-    const s2 = satisYap(db, "soba-002", 3, "banka");
-    db = s2.nextDB;
+      const s1 = satisYap(db, "boru-001", 10, "nakit");
+      db = s1.nextDB;
+      const s2 = satisYap(db, "soba-002", 3, "banka");
+      db = s2.nextDB;
+
+      return { db, s1, s2 };
+    }
 
     it("boru stok 50 → 40 olmalı", () => {
+      const { db } = createCokluUrunState();
       expect(db.products.find((p) => p.id === "boru-001")!.stock).toBe(40);
     });
 
     it("soba stok 10 → 7 olmalı", () => {
+      const { db } = createCokluUrunState();
       expect(db.products.find((p) => p.id === "soba-002")!.stock).toBe(7);
     });
 
     it("nakit kasada 10 × 200 = 2000 ₺ olmalı", () => {
+      const { db } = createCokluUrunState();
       expect(kasaBakiyesi(db, "nakit")).toBe(2_000);
     });
 
     it("banka kasada 3 × 3000 = 9000 ₺ olmalı", () => {
+      const { db } = createCokluUrunState();
       expect(kasaBakiyesi(db, "banka")).toBe(9_000);
     });
 
     it("toplam kâr: (10×80) + (3×1000) = 800 + 3000 = 3800 ₺", () => {
+      const { db } = createCokluUrunState();
       const toplamKar = db.sales.reduce((s, sale) => s + sale.profit, 0);
       expect(toplamKar).toBe(3_800);
     });
 
     it("iki ayrı satış için kural ihlali olmamalı", () => {
+      const { s1, s2 } = createCokluUrunState();
       expect([...s1.violations, ...s2.violations]).toHaveLength(0);
     });
   });
@@ -533,25 +542,28 @@ describe("🏪 Gerçek Uygulama Entegrasyon Testleri", () => {
   // ══════════════════════════════════════════════════════════════════════════
 
   describe("Senaryo 4: Cari satış → kısmi tahsilatlar → sıfır bakiye", () => {
-    const soba = makeProduct("soba-001", "Standart Soba", 20, 1_200, 800);
-    const musteri = makeCari("cari-001", "Ali Veli", 0);
-    let db = makeDB({ products: [soba], cari: [musteri] });
+    function createTahsilatState() {
+      const soba = makeProduct("soba-001", "Standart Soba", 20, 1_200, 800);
+      const musteri = makeCari("cari-001", "Ali Veli", 0);
+      let db = makeDB({ products: [soba], cari: [musteri] });
 
-    // 5 soba veresiye: bakiye = 6000
-    const satis = cariSatisYap(db, "soba-001", 5, "cari-001");
-    db = satis.nextDB;
+      const satis = cariSatisYap(db, "soba-001", 5, "cari-001");
+      db = satis.nextDB;
 
-    // 3 farklı tutarda tahsilat: 3000 + 2000 + 1000 = 6000
-    const t1 = tahsilatYap(db, "cari-001", 3_000, "nakit");
-    db = t1.nextDB;
+      const t1 = tahsilatYap(db, "cari-001", 3_000, "nakit");
+      db = t1.nextDB;
 
-    const t2 = tahsilatYap(db, "cari-001", 2_000, "nakit");
-    db = t2.nextDB;
+      const t2 = tahsilatYap(db, "cari-001", 2_000, "nakit");
+      db = t2.nextDB;
 
-    const t3 = tahsilatYap(db, "cari-001", 1_000, "nakit");
-    db = t3.nextDB;
+      const t3 = tahsilatYap(db, "cari-001", 1_000, "nakit");
+      db = t3.nextDB;
+
+      return { db, satis, t1, t2, t3 };
+    }
 
     it("tüm işlemler kural ihlalsiz tamamlanmalı", () => {
+      const { satis, t1, t2, t3 } = createTahsilatState();
       const allViolations = [
         ...satis.violations,
         ...t1.violations,
@@ -562,11 +574,13 @@ describe("🏪 Gerçek Uygulama Entegrasyon Testleri", () => {
     });
 
     it("cari bakiyesi 0 olmalı (6000 - 3000 - 2000 - 1000 = 0)", () => {
+      const { db } = createTahsilatState();
       const cari = db.cari.find((c) => c.id === "cari-001")!;
       expect(cari.balance).toBe(0);
     });
 
     it("nakit kasaya 3000+2000+1000 = 6000 ₺ tahsilat girmiş olmalı", () => {
+      const { db } = createTahsilatState();
       expect(kasaBakiyesi(db, "nakit")).toBe(6_000);
     });
   });

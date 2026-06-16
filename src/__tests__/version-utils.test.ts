@@ -19,7 +19,11 @@ describe('resolveVersionCode — Property 2', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 99999 }),
-        (n) => resolveVersionCode(String(n)) === n
+        (n) => {
+          const result = resolveVersionCode(String(n));
+          const alternative = parseInt(String(n), 10);
+          return result === alternative && Number.isInteger(result) && result >= 1;
+        }
       ),
       { numRuns: 100 }
     );

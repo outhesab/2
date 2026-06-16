@@ -11,15 +11,9 @@ describe('Spec Compliance', () => {
         if (rule.severity === 'info') {
           it(`${icon} ${rule.title} (info)`, () => {
             expect(rule.violations).toBeInstanceOf(Array);
-            if (!rule.passed && rule.violations.length > 0) {
-              // info seviyesi — geçmezse uyarı olarak logla
-              console.warn(
-                `[INFO] ${rule.id}:`,
-                rule.violations
-                  .slice(0, 3)
-                  .map((v) => v.file)
-                  .join(', '),
-              );
+            for (const v of rule.violations) {
+              expect(typeof v.file).toBe('string');
+              expect(typeof v.message).toBe('string');
             }
           });
         } else {

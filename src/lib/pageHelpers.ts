@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { genId } from './utils-tr';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export function upsertSupplier<T extends { id: string }>(
   prev: Record<string, any>,

@@ -4,6 +4,9 @@ import { errorRules } from "./error-rules";
 import { navigationRules } from "./navigation-rules";
 import { dataRules } from "./data-rules";
 import { testRules } from "./test-rules";
+import { componentCoverageRules } from "./component-coverage-rules";
+import { accessibilityRules } from "./accessibility-rules";
+import { performanceBudgetRules } from "./performance-budget-rules";
 
 const ALL_RULES: SpecRule[] = [
   ...componentRules,
@@ -11,6 +14,9 @@ const ALL_RULES: SpecRule[] = [
   ...navigationRules,
   ...dataRules,
   ...testRules,
+  ...componentCoverageRules,
+  ...accessibilityRules,
+  ...performanceBudgetRules,
 ];
 
 export function getAllRules(): SpecRule[] {

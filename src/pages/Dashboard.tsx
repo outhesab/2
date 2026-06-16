@@ -210,7 +210,7 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
         <div className="dash-backup-panel">
           <div className="dash-backup-header">
             <span className="dash-backup-title">💾 Yedek Yönetimi</span>
-            <button onClick={() => setBackupPanel(false)} className="dash-backup-close">
+            <button onClick={() => setBackupPanel(false)} className="dash-backup-close" aria-label="Kapat">
               ✕
             </button>
           </div>

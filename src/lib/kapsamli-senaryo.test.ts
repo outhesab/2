@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest';
 import { validateTransaction } from './ruleEngine';
 import { similarity } from './similarity';
 
-const TEST_DATE = '2020-01-01';
+const TEST_DATE = new Date(Date.UTC(2020, 0, 1)).toISOString().slice(0, 10);
 
 // ─── Yardımcı: ID ve Zaman ────────────────────────────────────────────────────
 

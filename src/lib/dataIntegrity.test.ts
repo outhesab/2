@@ -286,13 +286,16 @@ function makeDBWithSizeMB(targetMB: number): DB {
   const targetBytes = targetMB * 1024 * 1024;
   const needed = targetBytes - baseSize;
   if (needed > 0) {
-    // Her note ~1000 karakter; gerekli sayıda ekle
-    const chunkSize = process.env.CI ? 900 : 1000;
-    const count = Math.ceil(needed / chunkSize);
+    // Dinamik boyut hesaplama: her note'un kapladığı gerçek boyutu ölç
+    const sampleContent = 'A'.repeat(1000);
+    const sampleNote = { id: 'n0', title: 'x', content: sampleContent, createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' };
+    const bytesPerNote = JSON.stringify(sampleNote).length;
+    const count = Math.max(1, Math.ceil(needed / bytesPerNote));
+    const contentLength = Math.floor(1000 * (needed / count / bytesPerNote));
     db.notes = Array.from({ length: count }, (_, i) => ({
       id: `n${i}`,
       title: 'x',
-      content: 'A'.repeat(chunkSize),
+      content: 'A'.repeat(Math.max(1, contentLength)),
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
     }));

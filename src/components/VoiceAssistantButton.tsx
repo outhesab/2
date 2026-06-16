@@ -8,6 +8,7 @@ export const VoiceAssistantButton = () => {
     <button
       onClick={isListening ? stopListening : startListening}
       title="Sesli Asistan"
+      aria-label="Sesli Asistan"
       style={{
         position: 'fixed',
         bottom: 24,

@@ -20,6 +20,15 @@ const META: SpecMeta[] = [
   { id: "NO_DIRECT_DB_WRITE", spec: "VERI_KATMANI", title: "doğrudan sobaYonetim DB key'ine yazmak yasak — save() kullanılmalı", severity: "error" },
   { id: "NO_DB_JSON_PARSE_IN_PAGES", spec: "VERI_KATMANI", title: "Sayfalarda doğrudan sobaYonetim JSON parse etmek yasak", severity: "error" },
   { id: "VERSION_CONSISTENCY_TEST_EXISTS", spec: "TEST_STRATEJISI", title: "Cross-file consistency testi mevcut olmalı", severity: "error" },
+  { id: "PAGE_COMPONENT_SIZE_LIMIT", spec: "BILESEN_KAPSAM", title: "Sayfa bileşenleri 800 satırı geçmemeli", severity: "info" },
+  { id: "CUSTOM_COMPONENT_SIZE_LIMIT", spec: "BILESEN_KAPSAM", title: "Özel bileşenler 150 satırı geçmemeli", severity: "info" },
+  { id: "LOADING_STATE_REQUIRED", spec: "BILESEN_KAPSAM", title: "Sayfalarda loading state kontrolü var", severity: "info" },
+  { id: "STRICT_MODE_ACTIVE", spec: "ERISILEBILIRLIK", title: "React StrictMode aktif olmalı", severity: "error" },
+  { id: "ERROR_BOUNDARY_IN_MAIN", spec: "ERISILEBILIRLIK", title: "ErrorBoundary main.tsx'te aktif", severity: "error" },
+  { id: "ICON_BUTTON_ARIA_LABEL", spec: "ERISILEBILIRLIK", title: "Icon-only button'larda aria-label bulunmalı", severity: "info" },
+  { id: "INDEX_HTML_HAS_SPINNER", spec: "PERFORMANS_BUTCESI", title: "index.html'de JS yüklenirken gösterilecek loading spinner olmalı", severity: "info" },
+  { id: "COMPONENT_COUNT_CHECK", spec: "PERFORMANS_BUTCESI", title: "React.lazy() tüm sayfalarda kullanılmalı", severity: "error" },
+  { id: "NO_CONSOLE_LOG_LEFTOVER", spec: "PERFORMANS_BUTCESI", title: "console.log bırakılmamalı (logger.ts kullanılmalı)", severity: "info" },
 ];
 
 function toSpecRule(m: SpecMeta): SpecRule {

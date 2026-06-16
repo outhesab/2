@@ -5,6 +5,10 @@ import type { SpecRule, SpecCheckResult } from './types';
 
 const ROOT = process.cwd();
 
+function camelToKebab(str: string): string {
+  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 export const navigationRules: SpecRule[] = [
   {
     id: 'ALL_ROUTES_LAZY',
@@ -32,30 +36,36 @@ export const navigationRules: SpecRule[] = [
   {
     id: 'TAB_ROUTE_MATCH',
     spec: 'NAVIGASYON',
-    title: "Her tab için TABS ve TAB_PATHS'de eşleşen kayıt olmalı",
+    title: "Her tab için App.tsx'de eşleşen Route path'i olmalı",
     severity: 'error',
     check: (): SpecCheckResult => {
       try {
         const tabs = readFileSync(join(ROOT, 'src/config/tabs.ts'), 'utf-8');
+        const app = readFileSync(join(ROOT, 'src/App.tsx'), 'utf-8');
         const tabIds: string[] = [];
         const tabMatches = tabs.matchAll(/id:\s*["'](\w+-?\w+)["']/g);
         for (const m of tabMatches) tabIds.push(m[1]);
 
-        const tabPathsSection = tabs.split('TAB_PATHS:')[1] || '';
-        const pathMatches = tabPathsSection.matchAll(/(\w+):\s*["']/g);
-        const tabPaths = new Set<string>();
-        for (const m of pathMatches) tabPaths.add(m[1]);
+        const routePaths = new Set<string>();
+        const routeMatches = app.matchAll(/Route\s+path=["']\/([\w-]+)["']/g);
+        for (const m of routeMatches) routePaths.add(m[1]);
+
+        const lazyImports = new Set<string>();
+        const importMatches = app.matchAll(/import\(['"]@\/pages\/(\w+)['"]\)/g);
+        for (const m of importMatches) lazyImports.add(m[1].toLowerCase());
 
         const violations: SpecCheckResult['violations'] = [];
         for (const id of tabIds) {
-          if (!tabPaths.has(id)) {
-            violations.push({ file: 'src/config/tabs.ts', message: `"${id}" tab'i için eşleşen route bulunamadı` });
+          const kebabId = camelToKebab(id);
+          const idLower = id.toLowerCase();
+          if (!routePaths.has(id) && !routePaths.has(kebabId) && !routePaths.has(id.replace(/-/g, '')) && !lazyImports.has(idLower)) {
+            violations.push({ file: 'src/App.tsx', message: `"${id}" tab'i için eşleşen Route path'i bulunamadı` });
           }
         }
         return { passed: violations.length === 0, violations };
       } catch {
-        logger.warn('navigation', 'tabs.ts okunurken hata oluştu');
-        return { passed: false, violations: [{ file: 'src/config/tabs.ts', message: 'Okunamadı' }] };
+        logger.warn('navigation', 'tabs.ts veya App.tsx okunurken hata oluştu');
+        return { passed: false, violations: [{ file: 'src/App.tsx', message: 'Okunamadı' }] };
       }
     },
   },

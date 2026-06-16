@@ -1,6 +1,5 @@
 import type { DB } from "@/types";
 import type { Intent, IntentResult } from "./types";
-import { domainEventBus } from "./eventBus";
 import { completeSale, cancelSale, returnSale, correctSalePrice } from "./services/saleCompletion";
 import { processCashTransaction } from "./services/cashService";
 import { processStockUpdate, processProductAdd } from "./services/stockService";
@@ -42,13 +41,6 @@ export function processIntent(intent: Intent, db: DB): IntentResult {
       break;
     default:
       return { ok: false, error: `Bilinmeyen intent tipi` };
-  }
-
-  if (result.ok && result.data) {
-    // Eventleri yayınla
-    for (const event of result.data.events) {
-      domainEventBus.emit(event);
-    }
   }
 
   return result;

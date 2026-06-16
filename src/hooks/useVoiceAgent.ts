@@ -7,13 +7,14 @@ export function useVoiceAgent(onMessageReceived: (text: string) => Promise<strin
   const [state, setState] = useState<AgentState>('idle');
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null);
+  type SpeechRecognitionCtor = new () => SpeechRecognition;
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     // Web Speech API init
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognitionConstructor: SpeechRecognitionCtor | undefined =
+      (window as unknown as Record<string, unknown>).SpeechRecognition as SpeechRecognitionCtor | undefined ||
+      (window as unknown as Record<string, unknown>).webkitSpeechRecognition as SpeechRecognitionCtor | undefined;
     if (!SpeechRecognitionConstructor) {
       logger.error('VoiceAgent', 'Tarayıcı ses tanıma (SpeechRecognition) desteklemiyor');
       return;

@@ -443,6 +443,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                 size="icon"
                 className="h-auto shrink-0"
                 data-testid="button-send"
+                aria-label="Gönder"
               >
                 <Send className="w-4 h-4" />
               </Button>
