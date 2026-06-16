@@ -15,6 +15,83 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 - applyIntentResult: CashTransaction → KasaEntry dönüşümü (id, createdAt, updatedAt)
 - 411 test pass, 40/40 test dosyası
 
+## [3.23.4] - 13 Haziran 2026
+
+### Bakım
+- Cari ve Ürün sayfaları Base-Nova standartlarına modernize edildi
+- Tüm inline style'lar kaldırıldı, Tailwind CSS ve shadcn/ui bileşenleri entegre edildi
+
+## [3.23.5] - 13 Haziran 2026
+
+### Bakım
+- Products.tsx: Ekleme/Düzenleme modalı ve Toplu Fiyat modalı Tailwind + shadcn/ui'ye dönüştürüldü
+- Cari.tsx: debtColor ve alacak yaşlandırma bucket renkleri class-based yapıldı
+
+## [3.25.0] - 13 Haziran 2026
+
+### Bakım
+- 4 paralel agent ile Suppliers/Monitor/BugHunter/Bank sayfaları modülerize edildi (toplam 3421 satır monolit temizlendi)
+
+## [3.25.1] - 14 Haziran 2026
+
+### Hata Düzeltmeleri
+- Vite HMR WebSocket port çakışması giderildi
+- Dashboard React key prop uyarısı düzeltildi
+- Sidebar navigasyon helper E2E iyileştirmeleri
+
+## [3.25.2] - 14 Haziran 2026
+
+### Bakım
+- 10 lint warning, 17 test hatası, typecheck fix'leri temizlendi
+- Voice NLP parser action detection iyileştirildi
+
+## [3.26.0] - 15 Haziran 2026
+
+### Yeni
+- Rule Engine: min_stock kuralı eklendi (severity: warn)
+- 16 domain servis testi (saleCompletion.test.ts)
+- DB core/backup/sync coverage artırıldı
+
+## [3.26.1] - 15 Haziran 2026
+
+### Bakım
+- Dashboard.tsx 863→398 satır (WidgetRenderer + useStatCards)
+- 3005 modül build
+
+## [3.27.0] - 15 Haziran 2026
+
+### Bakım
+- C4 Agent sadeleştirme: 4 agent DomainAgent base class altında birleştirildi
+- KasaAgent/CariAgent save bug fix (processIntent sonucu kaydedilmiyordu)
+
+## [3.28.0] - 15 Haziran 2026
+
+### Bakım
+- P2 SettingsBackup: 1191→5 modüle bölündü
+- D1: save/saveGuarded ortak _save helper
+- E2: SatisAgent validasyon fonksiyonları
+- F1/F2: SettingsBackup useCallback + className
+
+## [3.29.0] - 16 Haziran 2026
+
+### Yeni
+- Receivables (Alacak Takip) sayfası — gecikmiş cari alacaklar
+- SaleIntent.dueDays desteği
+
+### Hata Düzeltmeleri
+- completeSale: yanlış "status: iade" fix
+- CariAgent/KasaAgent AgentResponse tip hatası düzeltildi
+- Login sayfası renkleri @theme bloğu ile düzeltildi
+
+## [3.29.1] - 16 Haziran 2026
+
+### Hata Düzeltmeleri
+- Sale.dueDate type eklendi (CI typecheck)
+- auditEngine: sadece payment === "cari" satışları cari bakiyeye dahil et
+- cari balance güncellemesi completeSale/cancelSale/returnSale'e eklendi
+- 13 yeni domain test (29 test)
+- C7: excel-merge.ts 3 modüle bölündü
+
 ## [3.23.2] - 13 Haziran 2026
 
 ### Firebase Config

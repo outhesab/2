@@ -332,7 +332,7 @@ expect(nextDB.field).toBe(expectedValue)
 
 ---
 
-## 9. GÜNCEL DURUM (v3.23.2)
+## 9. GÜNCEL DURUM (v3.29.1)
 
 ### ✅ TAMAMLANAN REFACTORLAR
 
@@ -347,33 +347,37 @@ expect(nextDB.field).toBe(expectedValue)
 | **5.12** Vitest exclude | Eski kurallar | Temizlendi ✅ |
 | **C1** processIntent geçişi | Yarım | Tamamlandı — orchestrator.ts silindi ✅ |
 | **C3** useDB bölme | 640 satır | 7 dosyaya bölündü ✅ |
+| **C4** Agent sadeleştirme | 4 agent ayrı islemYap | DomainAgent base class (~40 satır) ✅ |
+| **C7** excel-merge.ts bölme | 742 satır | 3 modül: types, utils, core (~350 satır) ✅ |
 | **G4** Firebase sync | setTimeout uncached | SyncQueue ile düzeltildi ✅ |
 | **G5** Kasa/POS routing | Hep bankaya | `payment` alanından routing ✅ |
-| **Reports.tsx** | 1755 satır | 124 satır + 7 modül (ReportsCari, ReportsKasa, ReportsOzet, ReportsSatis, ReportsUrun, ReportsCommon, ReportsGenerator) ✅ |
+| **Reports.tsx** | 1755 satır | 124 satır + 7 modül ✅ |
 | **Dashboard.tsx** | 1425 satır | 851 satır + Dashboard/ (7 bileşen) ✅ |
+| **P1 Suppliers.tsx** | 1298 satır | 5 modül (index 736) ✅ |
+| **P2 SettingsBackup.tsx** | 1206 satır | 5 modüle bölündü ✅ |
+| **P3 Monitor.tsx** | 1178 satır | 5 modül (index 372) ✅ |
+| **P4 BugHunter.tsx** | 1092 satır | 6 modül (index 133) ✅ |
+| **P5 Bank.tsx** | 1031 satır | 7 modül (index 516) ✅ |
+| **P7 Dashboard.tsx** | 851 satır | 398 satır + 9 bileşen ✅ |
+| **P8 Products.tsx** | 833 satır | 623 satır ✅ |
+| — | **Domain servis testleri** | Yok | 29 test ✅ |
+| — | **CI quality gate** | Kesintili | Tam yeşil (lint/typecheck/test/build) ✅ |
 
 ### ❌ KALAN GÖREVLER
 
-#### Büyük Sayfalar (>800 satır, bölünmeli)
-| # | Dosya | Satır | Aşım | Süre |
-|---|-------|-------|------|------|
-| P1 | **Suppliers.tsx** | 1298 | +498 | 4 saat |
-| P2 | **SettingsBackup.tsx** | 1206 | +406 | 4 saat |
-| P3 | **Monitor.tsx** | 1178 | +378 | 3 saat |
-| P4 | **BugHunter.tsx** | 1092 | +292 | 3 saat |
-| P5 | **Bank.tsx** | 1031 | +231 | 3 saat |
-| P6 | **Cari.tsx** | 1006 | +206 | 3 saat |
-| P7 | **Dashboard.tsx** | 851 | +51 | 2 saat |
-| P8 | **Products.tsx** | 833 | +33 | 2 saat |
+#### Sayfa Boyutu (>800 satır, sınırda)
+| # | Dosya | Satır | Aşım |
+|---|-------|-------|------|
+| P6 | **Cari.tsx** | 801 | +1 (sınırda) |
+| P9 | **AnomaliOneri.tsx** | 819 | +19 (sınırda) |
 
-#### Diğer
+#### Diğer (düşük öncelikli)
 | # | Görev | Detay |
 |---|-------|-------|
 | C2 | Çift event sistemi (AgentBus + domainEventBus) | Birleştirme ertelendi, migration sürüyor |
-| C4 | Agent sadeleştirme | Tüm agent'lar aynı pattern'da — tekilleştirilebilir |
-| — | Domain servis testleri | completeSale, cancelSale, returnSale, correctSalePrice için test yok |
-| — | excel-merge.ts (742 satır) | Hâlâ büyük, bölünmeli |
 | — | dataIntegrityChecker.ts (603 satır) | Sınırda |
+| D-F-H-I-J-K | ~45 kod kalitesi maddesi | Tekrar, tip, performans, test kalitesi, a11y, dökümantasyon (tümü LOW) |
+| — | CHANGELOG.md root (v3.23.3'te kalmış) | src/lib/changelog.ts ile senkronize edilmeli |
 
 ---
 
