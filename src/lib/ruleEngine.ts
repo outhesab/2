@@ -28,16 +28,15 @@ interface Rule {
   evaluate: (prevDB: DB, nextDB: DB) => RuleViolation[];
 }
 
-// ─── Yardımcı: Kasa Bakiyesi Hesapla ─────────────────────────────────────────
+// ─── Yardımcılar ───────────────────────────────────────────────────────────────
 
-function computeKasaBalances(entries: KasaEntry[]): Map<string, number> {
-  const map = new Map<string, number>();
+function computeSingleKasaBalance(entries: KasaEntry[], kasaId: string): number {
+  let balance = 0;
   for (const e of entries) {
-    if (e.deleted) continue;
-    const cur = map.get(e.kasa) ?? 0;
-    map.set(e.kasa, cur + (e.type === "gelir" ? e.amount : -e.amount));
+    if (e.deleted || e.kasa !== kasaId) continue;
+    balance += (e.type === "gelir" ? e.amount : -e.amount);
   }
-  return map;
+  return balance;
 }
 
 // ─── Kurallar ─────────────────────────────────────────────────────────────────
@@ -50,10 +49,14 @@ const negativeStockRule: Rule = {
   id: "negative_stock",
   name: "Negatif Stok",
   severity: "block",
-  evaluate: (_prevDB: DB, nextDB: DB): RuleViolation[] => {
+  evaluate: (prevDB: DB, nextDB: DB): RuleViolation[] => {
     const violations: RuleViolation[] = [];
     for (const p of nextDB.products) {
       if (!p.deleted && p.stock < 0) {
+        // Eğer prevDB'de zaten negatifse bu kuralı tetikleme (mevcut hataları görmezden gel, yeni hata yaratma)
+        const prevP = prevDB.products.find(x => x.id === p.id);
+        if (prevP && prevP.stock < 0) continue;
+
         violations.push({
           ruleId: "negative_stock",
           ruleName: "Negatif Stok",
@@ -75,10 +78,21 @@ const negativeKasaRule: Rule = {
   id: "negative_kasa",
   name: "Negatif Kasa Bakiyesi",
   severity: "block",
-  evaluate: (_prevDB: DB, nextDB: DB): RuleViolation[] => {
+  evaluate: (prevDB: DB, nextDB: DB): RuleViolation[] => {
     const violations: RuleViolation[] = [];
-    const balances = computeKasaBalances(nextDB.kasa);
-    for (const [kasaId, balance] of balances) {
+    
+    // Sadece bu işlemle değişen kasaları tespit et
+    const prevKasaIds = new Set(prevDB.kasa.map((k) => k.id));
+    const affectedKasaIds = new Set<string>();
+    
+    for (const k of nextDB.kasa) {
+      if (!prevKasaIds.has(k.id) && !k.deleted) {
+        affectedKasaIds.add(k.kasa);
+      }
+    }
+
+    for (const kasaId of affectedKasaIds) {
+      const balance = computeSingleKasaBalance(nextDB.kasa, kasaId);
       if (balance < -0.001) {
         violations.push({
           ruleId: "negative_kasa",
@@ -107,7 +121,6 @@ const duplicateTransactionRule: Rule = {
     const now = Date.now();
     const windowStart = now - DUPLICATE_WINDOW_MS;
 
-    // nextDB'de prevDB'de olmayan yeni kasa kayıtlarını bul
     const prevIds = new Set(prevDB.kasa.map((k) => k.id));
     const newEntries = nextDB.kasa.filter(
       (k) => !prevIds.has(k.id) && !k.deleted,
@@ -116,7 +129,6 @@ const duplicateTransactionRule: Rule = {
     for (const newEntry of newEntries) {
       if (!newEntry.cariId || !newEntry.amount) continue;
 
-      // Son 60 saniyede aynı cariId + amount + kasa kombinasyonu var mı?
       const duplicate = prevDB.kasa.find(
         (k) =>
           !k.deleted &&
@@ -143,7 +155,6 @@ const duplicateTransactionRule: Rule = {
 /**
  * Kural 4: Sıfır veya Negatif Tutar
  * KasaEntry.amount <= 0 veya Sale.total <= 0 olan işlemleri engelle.
- * (BFCE limitRule uyarlaması)
  */
 const zeroAmountRule: Rule = {
   id: "zero_amount",
@@ -154,7 +165,6 @@ const zeroAmountRule: Rule = {
     const prevKasaIds = new Set(prevDB.kasa.map((k) => k.id));
     const prevSaleIds = new Set(prevDB.sales.map((s) => s.id));
 
-    // Yeni kasa kayıtlarında sıfır/negatif tutar kontrolü
     for (const k of nextDB.kasa) {
       if (!prevKasaIds.has(k.id) && !k.deleted && k.amount <= 0) {
         violations.push({
@@ -167,7 +177,6 @@ const zeroAmountRule: Rule = {
       }
     }
 
-    // Yeni satışlarda sıfır/negatif toplam kontrolü
     for (const s of nextDB.sales) {
       if (!prevSaleIds.has(s.id) && !s.deleted && s.total <= 0) {
         violations.push({
@@ -179,12 +188,9 @@ const zeroAmountRule: Rule = {
         });
       }
     }
-
     return violations;
   },
 };
-
-// ─── Kural Listesi (genişletilebilir) ────────────────────────────────────────
 
 /**
  * Kural 5: Minimum Stok
@@ -211,10 +217,6 @@ const minStockRule: Rule = {
   },
 };
 
-/**
- * Aktif kural listesi.
- * Yeni kural eklemek için bu diziye Rule nesnesi ekle — başka dosya değişikliği gerekmez.
- */
 export const rules: Rule[] = [
   negativeStockRule,
   negativeKasaRule,
@@ -223,20 +225,6 @@ export const rules: Rule[] = [
   minStockRule,
 ];
 
-// ─── Ana Fonksiyon ────────────────────────────────────────────────────────────
-
-/**
- * Tüm kuralları çalıştırır ve ihlalleri döndürür.
- *
- * - Senkron çalışır (async/await yok)
- * - 50ms timeout korumalı
- * - Her kural kendi try/catch bloğuna sahip
- * - Tüm fonksiyon try/catch ile sarılı — hata durumunda boş dizi döner
- *
- * @param prevDB - Güncelleme öncesi DB durumu
- * @param nextDB - Güncelleme sonrası DB durumu (updater(prevDB) sonucu)
- * @returns İhlal listesi — boşsa kural ihlali yok
- */
 export function validateTransaction(prevDB: DB, nextDB: DB): RuleViolation[] {
   const startTime = performance.now();
 
@@ -244,7 +232,6 @@ export function validateTransaction(prevDB: DB, nextDB: DB): RuleViolation[] {
     const allViolations: RuleViolation[] = [];
 
     for (const rule of rules) {
-      // Timeout kontrolü
       if (performance.now() - startTime > RULE_TIMEOUT_MS) {
         logger.warn(
           "ruleEngine",
@@ -261,7 +248,6 @@ export function validateTransaction(prevDB: DB, nextDB: DB): RuleViolation[] {
         const violations = rule.evaluate(prevDB, nextDB);
         allViolations.push(...violations);
       } catch (ruleError) {
-        // Tek bir kuralın hatası diğer kuralları etkilemez
         logger.warn(
           "ruleEngine",
           `Kural "${rule.id}" değerlendirme hatası — atlandı`,
@@ -274,7 +260,6 @@ export function validateTransaction(prevDB: DB, nextDB: DB): RuleViolation[] {
 
     return allViolations;
   } catch (e) {
-    // Tüm fonksiyon hatası — fail-open: boş dizi döndür, uygulama çökmez
     logger.warn(
       "ruleEngine",
       "validateTransaction beklenmedik hata — kural değerlendirmesi atlandı",

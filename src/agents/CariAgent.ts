@@ -6,6 +6,18 @@ export class CariAgent extends DomainAgent {
   readonly id = "cari" as const;
   readonly yetkiler = ["cari.read", "cari.write", "rapor.read"] as const;
 
+  async islemYap(talep: AgentRequest) {
+    const p = talep.payload ?? {};
+    const cariId = (p as Record<string, unknown>).cariId as string | undefined;
+    if (cariId) {
+      const cari = this.db.cari.find(c => c.id === cariId);
+      if (!cari || cari.deleted) {
+        return { ok: false, error: `CARI HATASI: ${cariId} ID'li cari hesap bulunamadı veya silinmiş.` };
+      }
+    }
+    return super.islemYap(talep);
+  }
+
   protected mapRequestToIntent(talep: AgentRequest): Intent | null {
     const p = talep.payload || {};
     if (talep.action === "cari_tahsilat") {

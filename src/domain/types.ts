@@ -16,6 +16,7 @@ export interface SaleIntent {
   discountAmount?: number;
   tahsilat?: number;
   saleDate?: string;
+  dueDays?: number;
 }
 
 export interface StockMovementV2 {

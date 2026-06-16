@@ -20,11 +20,30 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.29.0',
+    date: '16 Haziran 2026',
+    title: 'Alacak Takip Sayfası + Pre-existing Bug Fix',
+    summary: 'Yeni Receivables (Alacak Takip) sayfası eklendi — gecikmiş cari alacakları listeler, detaylı döküm sunar. saleCompletion.ts\'deki C1 refactor artıkları temizlendi (productUpdates, cariUpdate, kalan). CariAgent/KasaAgent AgentResponse tip hatası düzeltildi. ruleEngine.ts prevProductIds ve cariService.ts CariUpdate temizlendi.',
+    changes: [
+      { type: 'yeni', text: 'Receivables (Alacak Takip) sayfası — gecikmiş cari borçları listeler, arama/ filtreleme ve expandable satır detayı.' },
+      { type: 'yeni', text: 'receivableService.getOverdueReceivables — domain servisi, vadesi geçmiş cari satışları hesaplar.' },
+      { type: 'yeni', text: 'SaleIntent.dueDays desteği — satışa özel vade günü belirleme.' },
+      { type: 'iyilestirme', text: 'Alacak Takip — 4 istatistik kartı (gecikmiş alacak, ortalama gün, müşteri sayısı, cari bakiye).' },
+      { type: 'duzeltme', text: 'completeSale: yanlış "status: iade" + missing productUpdates fix\'lendi.' },
+      { type: 'duzeltme', text: 'CariAgent / KasaAgent: AgentResponse tipi kaldırıldı (DomainAgent base\'den inherit).' },
+      { type: 'duzeltme', text: 'ruleEngine: kullanılmayan prevProductIds temizlendi.' },
+      { type: 'duzeltme', text: 'saleCompletion: dead code (cariUpdate, kalan) temizlendi.' },
+      { type: 'duzeltme', text: 'cariService: kullanılmayan CariUpdate import\'ı temizlendi.' },
+      { type: 'duzeltme', text: 'receivableService: any tip + @ts-ignore temizlendi, totalCariBalance eklendi.' },
+      { type: 'duzeltme', text: 'changelog v3.28.0: duplicate summary property birleştirildi.' },
+      { type: 'duzeltme', text: 'Login sayfası renkleri: @theme bloğu eklendi — Tailwind v4 utility class\'ları CSS değişkenlerine bağlandı.' },
+    ],
+  },
+  {
     version: '3.28.0',
     date: '15 Haziran 2026',
     title: 'P2 SettingsBackup Modularizasyonu — Tüm Kalan Görevler Tamam',
-    summary: 'P2 SettingsBackup.tsx 1191→5 modüle bölündü (types, parseCsv, FullRestorePanel, SelectiveRestore, SmartImportManager). Tüm kalan görevler tamamlandı: P7 Dashboard 863→398, C4 DomainAgent, 29 yeni test, C5+D+E+F fix.',
-    summary: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı. E1: DomainEvent payload cast\'leri düzeltildi (as unknown gereksiz kullanımı azaltıldı). E2: SatisAgent payload cast\'leri doğrulama fonksiyonları ile değiştirildi. F1/F2: SettingsBackup event handler\'ları useCallback\'e sarıldı, statik inline style\'lar className\'e taşındı.',
+    summary: 'P2 SettingsBackup Modularizasyonu — 1191→5 modüle bölündü. D1: save/saveGuarded ortak _save helper. E1: saleCompletion.ts cast temizliği. E2: SatisAgent validasyon. F1/F2: SettingsBackup useCallback + className.',
     changes: [
       { type: 'iyilestirme', text: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı (useDBActions.ts).' },
       { type: 'duzeltme', text: 'E1: saleCompletion.ts\'deki as unknown as Record<string, unknown> cast\'leri temizlendi, sadece zorunlu olanlarda bırakıldı.' },

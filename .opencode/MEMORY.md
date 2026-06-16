@@ -4,19 +4,27 @@
 
 ## Aktif Session
 
-- **Tarih:** 13.06.2026 (3 saatlik parallel agent session)
-- **Hedef:** 4 büyük sayfayı parallel agent'larla modülerize etme (P1/P3/P4/P5)
+- **Tarih:** 15-16 Haziran 2026 
+- **Hedef:** PROTOCOL.md oluşturma + iletişim sorunlarını çözme
 - **Durum:** 
-  - ✅ **Parallel Agent Denemesi:** 4 general agent aynı anda başlatıldı, hepsi başarılı
-  - ✅ **Suppliers.tsx (1265→5 modül):** Suppliers/index + SupplierList/Form/Order + types
-  - ✅ **Monitor.tsx (1147→6 modül):** Monitor/index + Overview/Issues/Rules/AuditLog + types
-  - ✅ **BugHunter.tsx (1092→7 modül):** BugHunter/index + TestRunner + 5 UI modülü + types
-  - ✅ **Bank.tsx (1031→8 modül):** Bank/index + StatCard/Stats/Actions/Filters/Table/Form + types
-  - ✅ **Toplam:** 4 eski monolitik dosya silindi (3421 satır), 26 yeni modül dosyası oluşturuldu
-  - ✅ Pre-existing TS6133 hataları temizlendi (LoginScreen, Sidebar, FaturaStats, ReportsOzet)
-  - ✅ Monitor relative import fix: ../pageHelpers → @/pages/pageHelpers
-  - ✅ CI: lint (0 err), typecheck (0 err), test (all pass except 14 pre-existing), build (success)
-  - ✅ Version bump: 3.23.3 → 3.25.0
+  - ✅ PROTOCOL.md oluşturuldu (`.opencode/PROTOCOL.md`)
+  - ✅ Sinyal sistemi tanımlandı (!tamamla, !görev, !apk, !durum, !temizlik)
+  - ✅ Hata yönetimi kuralları (bahane yasak, kabul et-düzelt-geç)
+  - ✅ MEMORY.md protokol referansı eklendi
+  - ✅ Tüm P-görevleri tamamlandı (v3.28.0)
+  - ✅ C4 Agent sadeleştirme tamam
+  - ✅ 29 yeni test eklendi
+
+## Çalışma Protokolü
+
+`.opencode/PROTOCOL.md` dosyası AI agent için bağlayıcı kurallar içerir.
+Her session başında okunması zorunludur.
+
+Sinyal sistemi:
+- `!görev X` → spesifik görev
+- `!tamamla` → tüm kalan görevleri bitir
+- `!apk` → build + APK
+- `!durum` → 3 satır özet, sonra devam
 
 ## Önemli Kararlar
 

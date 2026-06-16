@@ -1,6 +1,6 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { SaleIntent, StockMovementV2, CariUpdate, CashTransaction, IntentResult } from "@/domain/types";
+import type { SaleIntent, StockMovementV2, CashTransaction, IntentResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
  
 function calcSubtotal(items: SaleIntent["items"]): number {
@@ -39,6 +39,12 @@ function buildSaleRecord(
 ) {
   const firstItem = intent.items[0];
   const totalQty = intent.items.reduce((s, i) => s + i.quantity, 0);
+  
+  // Vade hesaplama
+  const dueDays = intent.dueDays ?? 30;
+  const dueDate = new Date(nowIso);
+  dueDate.setDate(dueDate.getDate() + dueDays);
+
   return {
     id,
     cariId: intent.cariId || undefined,
@@ -67,6 +73,7 @@ function buildSaleRecord(
     })),
     createdAt: nowIso,
     updatedAt: nowIso,
+    dueDate: dueDate.toISOString(),
   };
 }
  
@@ -120,9 +127,7 @@ export function completeSale(
   }
  
   let kasaEntry: CashTransaction | null = null;
-  const tahsilatNum = intent.tahsilat ?? total;
-  const kalan = total - tahsilatNum;
-  const fiiliTahsilat = intent.tahsilat === undefined && intent.payment === "cari" ? 0 : tahsilatNum;
+  const fiiliTahsilat = intent.tahsilat === undefined && intent.payment === "cari" ? 0 : (intent.tahsilat ?? total);
   if (fiiliTahsilat > 0) {
     const kasaId = intent.payment === "cari" ? "nakit" : intent.payment;
     kasaEntry = {
@@ -135,15 +140,8 @@ export function completeSale(
     };
   }
  
-  let cariUpdate: CariUpdate | null = null;
-  if (intent.cariId && kalan > 0) {
-    cariUpdate = {
-      cariId: intent.cariId,
-      balanceChange: kalan,
-    };
-  }
- 
   const events: DomainEvent[] = [
+
     {
       id: genId(),
       type: "sale.completed" as const,
@@ -174,31 +172,20 @@ export function completeSale(
       version: 1,
     });
   }
-  if (cariUpdate) {
-    events.push({
-      id: genId(),
-      type: "cari.updated" as const,
-      aggregateId: cariUpdate.cariId,
-      aggregateType: "cari" as const,
-      payload: cariUpdate as unknown as Record<string, unknown>,
-      timestamp: nowIso,
-      version: 1,
-    });
-  }
  
   return {
     ok: true,
     data: {
       dbUpdates: {
         sale,
-        stockMovements: stockMovements.map(sm => ({ id: sm.productId, productId: sm.productId, newStock: sm.after })),
+        products: stockMovements.map(sm => ({ id: sm.productId, newStock: sm.after })),
         cashTransaction: kasaEntry ? [kasaEntry] : undefined,
-        cari: cariUpdate ? [cariUpdate] : undefined,
       },
       events,
     },
   };
 }
+
 
 export function cancelSale(saleId: string, db: DB): IntentResult {
   const sale = db.sales.find((s) => s.id === saleId);
@@ -224,10 +211,6 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
     },
   ];
 
-  const cariUpdate = sale.cariId && sale.payment === 'cari'
-    ? [{ cariId: sale.cariId, balanceChange: -(sale.total || 0) }]
-    : undefined;
-
   const kasaEntry: CashTransaction = {
     amount: sale.total || 0,
     type: 'gider',
@@ -244,7 +227,6 @@ export function cancelSale(saleId: string, db: DB): IntentResult {
         sale: { ...sale, status: 'iptal', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
         cashTransaction: [kasaEntry],
-        ...(cariUpdate ? { cari: cariUpdate } : {}),
       },
       events,
     },
@@ -261,6 +243,7 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
   
   const productUpdates: Array<{ id: string; newStock: number }> = [];
   const stockMovements: StockMovementV2[] = [];
+  let returnedTotal = 0;
 
   (sale.items || []).forEach(item => {
     const p = db.products.find(prod => prod.id === item.productId);
@@ -273,7 +256,8 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
       const ratio = qty !== undefined ? qty / totalSaleQty : 1;
       iadeMiktar = Math.round(item.quantity * ratio);
     }
-
+    
+    returnedTotal += iadeMiktar * item.unitPrice;
     productUpdates.push({ id: item.productId, newStock: currentStock + iadeMiktar });
     stockMovements.push({
       id: genId(),
@@ -286,13 +270,25 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
     });
   });
 
+  // Finansal Geri Dönüşler
+  const kasaEntry: CashTransaction | null = sale.payment !== 'cari' 
+    ? {
+        amount: returnedTotal,
+        type: 'gider',
+        category: 'iade',
+        kasa: sale.payment,
+        description: `İade: ${sale.productName}`,
+        relatedId: saleId,
+      } 
+    : null;
+
   const events: DomainEvent[] = [
     {
       id: genId(),
       type: "sale.returned" as const,
       aggregateId: saleId,
       aggregateType: "sale" as const,
-      payload: { saleId, qty } as Record<string, unknown>,
+      payload: { saleId, qty, returnedTotal } as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
     },
@@ -302,10 +298,22 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
        aggregateId: sm.productId,
        aggregateType: "stock" as const,
        payload: sm as unknown as Record<string, unknown>,
+       timestamp: nowIso,
+       version: 1,
+     })),
+  ];
+
+  if (kasaEntry) {
+    events.push({
+      id: genId(),
+      type: "cash.recorded" as const,
+      aggregateId: saleId,
+      aggregateType: "cash" as const,
+      payload: kasaEntry as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
-    })),
-  ];
+    });
+  }
 
   return {
     ok: true,
@@ -313,11 +321,13 @@ export function returnSale(saleId: string, db: DB, qty?: number | Record<string,
       dbUpdates: {
         sale: { ...sale, status: 'iade', updatedAt: nowIso, returnedAt: nowIso },
         products: productUpdates,
+        cashTransaction: kasaEntry ? [kasaEntry] : undefined,
       },
       events,
     },
   };
 }
+
 
 export function correctSalePrice(saleId: string, yeniFiyat: number | Record<string, number>, db: DB): IntentResult {
   const sale = db.sales.find((s) => s.id === saleId);

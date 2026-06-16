@@ -53,6 +53,17 @@ export class SatisAgent extends DomainAgent {
     if (!this.yetkiKontrolu("satis.write")) {
       return { ok: false, error: `${this.id} agent'ının bu işlem için yetkisi yok` };
     }
+
+    // Silinmiş kayıt kontrolü (Sertleştirme)
+    if (talep.payload && Array.isArray((talep.payload as Record<string, unknown>).items)) {
+      for (const item of ((talep.payload as Record<string, unknown>).items as Array<Record<string, unknown>>)) {
+        const p = this.db.products.find(x => x.id === item.productId);
+        if (!p || p.deleted) {
+          return { ok: false, error: `SATIŞ HATASI: ${item.productName || item.productId} ürünü sistemde bulunamadı veya silinmiş.` };
+        }
+      }
+    }
+
     return super.islemYap(talep);
   }
 
@@ -75,6 +86,7 @@ export class SatisAgent extends DomainAgent {
             discountAmount: asNumber(p.discountAmount),
             tahsilat: asNumber(p.tahsilat),
             saleDate: asString(p.saleDate),
+            dueDays: asNumber(p.dueDays),
           },
         };
       }

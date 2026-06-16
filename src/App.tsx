@@ -56,6 +56,7 @@ const Notlar = lazy(() => import('@/pages/Notlar'));
 const OrtakEmanet = lazy(() => import('@/pages/OrtakEmanet'));
 const Partners = lazy(() => import('@/pages/Partners'));
 const Pelet = lazy(() => import('@/pages/Pelet'));
+const Receivables = lazy(() => import('@/pages/Receivables'));
 const Products = lazy(() => import('@/pages/Products'));
 const ProductDetail = lazy(() => import('@/pages/ProductDetail'));
 const Reports = lazy(() => import('@/pages/Reports'));
@@ -399,6 +400,9 @@ function AppContent({
               </Route>
               <Route path="/ortak-emanet">
                 <OrtakEmanet db={db} save={save} />
+              </Route>
+              <Route path="/receivables">
+                <Receivables />
               </Route>
               <Route path="/cari">
                 <Cari db={db} save={save} />

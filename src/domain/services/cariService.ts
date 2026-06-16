@@ -1,6 +1,6 @@
 import { genId } from "@/lib/utils-tr";
 import type { DB } from "@/types";
-import type { CariUpdate, IntentResult } from "@/domain/types";
+import type { IntentResult } from "@/domain/types";
 import type { DomainEvent } from "@/types";
 
 export function processCariTahsilat(
@@ -20,12 +20,9 @@ export function processCariTahsilat(
 
   const nowIso = new Date().toISOString();
   
-  const cariUpdate: CariUpdate = {
-    cariId,
-    balanceChange: -amount,
-  };
-
+  // Cari bakiye artık dinamik hesaplandığı için balanceChange kaldırıldı.
   const events: DomainEvent[] = [
+
     {
       id: genId(),
       type: "cari.collected" as const,
@@ -41,7 +38,7 @@ export function processCariTahsilat(
     ok: true,
     data: {
       dbUpdates: {
-        cari: [cariUpdate],
+        // Cari bakiye güncellenmiyor, kayıtlar üzerinden dinamik hesaplanıyor.
       },
       events,
     },
