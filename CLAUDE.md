@@ -1,3 +1,11 @@
+<!-- AUTO-GENERATED FROM AGENTS.md — DO NOT EDIT DIRECTLY -->
+
+
+> **Bu dosya otomatik üretilmiştir.** Asıl kaynak: `AGENTS.md`.
+> Manuel düzenleme yapma — değişiklikler üzerine yazılır.
+> Senkron için: `pnpm run sync:agents`
+
+---
 # AGENTS.md — PARSPEL Agent Talimatları (Hızlı Referans)
 
 > Bu dosya her AI agent/tool için zorunlu okumadır. **İlk önce §0 SIFIR-TOLERANS, sonra §1 Değişiklik Protokolü.**

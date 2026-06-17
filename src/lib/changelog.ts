@@ -20,6 +20,39 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.31.2',
+    date: '18 Haziran 2026',
+    title: 'AGENTS.md Sadeleştirme + Symlink Stratejisi (Aşama 1 & 2)',
+    summary: 'AGENTS.md 810 satırdan 111 satıra indirildi (-%86). Detaylı kurallar docs/agents/ altına modüler hale getirildi (10 dosya). CLAUDE.md (Claude Code) ve .cursor/rules/rules.mdc (Cursor IDE) shim dosyaları otomatik üretiliyor — tek canonical kaynak (AGENTS.md) üzerinden multi-tool uyumluluk. Pre-commit hook drift tespit ederek commit\'i engelliyor. 50+ kaynak üzerinde yapılan context vortex araştırması temel alınarak tasarlandı.',
+    changes: [
+      // Aşama 1: AGENTS.md sadeleştirme
+      { type: 'iyilestirme', text: 'AGENTS.md 810→111 satır: sadece kritik kurallar, referans linkleri (sıfır-tolerans, değişiklik protokolü, mimari, standartlar).' },
+      { type: 'yeni', text: 'docs/agents/sifir-tolerans.md: korunan sistemler ve yasak davranışlar detaylı liste.' },
+      { type: 'yeni', text: 'docs/agents/degisiklik-protokolu.md: 6 adımlı değişiklik protokolü, 3-dosya versiyon senkron kuralı.' },
+      { type: 'yeni', text: 'docs/agents/komutlar-ve-ci.md: tüm pnpm komutları, CI pipeline sırası.' },
+      { type: 'yeni', text: 'docs/agents/mimari-detay.md: veri katmanı, agent sistemi, multi-domain mimari.' },
+      { type: 'yeni', text: 'docs/agents/standartlar.md: TypeScript, React, Tailwind, testing standartları.' },
+      { type: 'yeni', text: 'docs/agents/versiyonlama.md: semantic versioning, 3-dosya senkron kuralı, changelog formatı.' },
+      { type: 'yeni', text: 'docs/agents/tuzaklar.md: 15+ yaygın tuzak ve çözümleri (pre-commit blok, RuleEngine timeout, saveGuarded).' },
+      { type: 'yeni', text: 'docs/agents/performans.md: chunk limitleri, lazy loading, code splitting stratejisi.' },
+      { type: 'yeni', text: 'docs/agents/deploy.md: branch modeli, pre-commit/push hook\'lar, rollback, env yönetimi.' },
+      { type: 'yeni', text: 'docs/agents/opencode-mcp.md: agent listesi, MCP sırası, skill sistemi, context management.' },
+      { type: 'iyilestirme', text: 'AGENTS.md §11 (Semantic Versiyonlama): 3-dosya senkron kuralı ve güncelleme zorunluluğu eklendi.' },
+      { type: 'iyilestirme', text: 'AGENTS.md §8 (Yaygın Tuzaklar): "Version inconsistency" tuzağı ve çözümü tabloya eklendi.' },
+      // Aşama 2: Symlink (shim) stratejisi
+      { type: 'yeni', text: 'scripts/sync-agent-files.mjs: AGENTS.md\'den CLAUDE.md ve .cursor/rules/rules.mdc üretir. --check modu drift tespit eder.' },
+      { type: 'yeni', text: 'scripts/check-agents-drift.mjs: pre-commit hook wrapper, net hata mesajı + çözüm önerisi.' },
+      { type: 'yeni', text: 'CLAUDE.md: Claude Code için otomatik üretilen shim dosyası (canonical: AGENTS.md).' },
+      { type: 'yeni', text: '.cursor/rules/rules.mdc: Cursor IDE için YAML frontmatter\'lı shim (alwaysApply: true, globs: **/*.{ts,tsx,js,jsx,json,md}).' },
+      { type: 'yeni', text: 'package.json scripts: "sync:agents" (generate) ve "check:agents" (drift check) eklendi.' },
+      { type: 'yeni', text: 'package.json simple-git-hooks: pre-commit → check-agents-drift.mjs (drift varsa commit engellenir).' },
+      { type: 'yeni', text: 'docs/agents/symlink-stratejisi.md: strateji dokümanı, neden symlink değil, workflow örnekleri.' },
+      // Versiyon
+      { type: 'duzeltme', text: 'package.json: 3.31.0 → 3.31.1 → 3.31.2 (version consistency test başarısızlığı düzeltildi, Aşama 2 ile birlikte).' },
+      { type: 'iyilestirme', text: 'MEMORY.md: "Context Vortex Çözümü" bölümü eklendi — araştırma bulguları ve 3 aşamalı yol haritası, Aşama 2 tamamlandı.' },
+    ],
+  },
+  {
     version: '3.31.1',
     date: '18 Haziran 2026',
     title: 'voice-sales Entegrasyonu — TS/Lint Düzeltmeleri, Kök Temizlik',

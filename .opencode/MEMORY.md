@@ -4,15 +4,14 @@
 
 ## Aktif Session
 
-- **Tarih:** 17 Haziran 2026 
-- **Hedef:** v3.31.0 — C2 domainEventBus + Listeners, 5 sayfa refactor, CHANGELOG.md sync
-- **Durum:** 
-  - ✅ C2 domainEventBus: mitt-based pub/sub + 3 listener (agentBridge, auditLogger, notification)
-  - ✅ 5 sayfa inline→Tailwind: AnomaliOneri (−474), SaleFormModal (−496), Sales, Stock, Kasa
-  - ✅ CariAgent.test.ts timeout fix
-  - ✅ Lint/Typecheck/Test(555)/Build — tam yeşil
-  - ✅ CHANGELOG.md root sync (v3.23.3→v3.31.0)
-  - ✅ MEMORY.md güncellemesi
+- **Tarih:** 18 Haziran 2026
+- **Hedef:** v3.31.2 — AGENTS.md sadeleştirme + Aşama 2 symlink stratejisi
+- **Durum:**
+  - ✅ Aşama 1: AGENTS.md 810→111 satır, docs/agents/ modüler yapı
+  - ✅ Aşama 2: Symlink stratejisi (shim files) — CLAUDE.md + .cursor/rules/rules.mdc
+  - ✅ Pre-commit hook: drift tespit + commit engelleme
+  - ✅ CI yeşil (lint, typecheck, 555 test passed, 1 skipped)
+  - ✅ Version consistency korundu (3.31.2)
 
 ## Çalışma Protokolü
 
@@ -25,11 +24,30 @@ Sinyal sistemi:
 - `!apk` → build + APK
 - `!durum` → 3 satır özet, sonra devam
 
+## Context Vortex Çözümü (Araştırma Sonucu)
+
+**Problem:** AI agent'lar her session başında projeyi baştan okuyor (vortex), 65K+ satır context bloat.
+
+**Çözüm:** Aşamalı uygulama:
+- ✅ Aşama 1 (18.06.2026): AGENTS.md 810→111 satır, detaylar docs/agents/ altına taşındı
+- ✅ Aşama 2 (18.06.2026): Symlink stratejisi (shim files) — CLAUDE.md + .cursor/rules/rules.mdc otomatik generate
+- ⏳ Aşama 3 (plan): External Memory Layer (State Registry) — CI başarılı olduğunda proven facts otomatik yazılsın
+
+**Araştırma kaynakları (50+):** mem0.ai, axiomstudio.ai, zylos.ai, Cursor, Aider, Cline, Devin, Claude Code, arxiv akademik makaleler (CWL, Continuum Memory, VikingMem, WorldDB, Memori).
+
+**Endüstri standartları:**
+- 4-Katmanlı bellek: In-Prompt → Ephemeral Working → Durable Project → Organizational
+- Stable prefix önce, dynamic sonra (60-80% cost reduction)
+- 60-70% threshold = early warning, 80% = rotation
+- Hard constraints system prompt'un tepesinde pinned
+- AGENTS.md 200 satır limiti (aşılırsa agent kuralları görmezden gelir)
+
 ## Önemli Kararlar
 
 - **Refactor Stratejisi:** Sayfa boyutu ihlalleri (P-series) önceliklendirildi. Monolitik sayfalar "Orchestrator + Modules" pattern'ına taşındı.
 - **Sync Architecture:** Firebase kayıtları için `SyncQueue` mantığında ardışık (sequential) kayıt yapısına geçildi.
 - **Test Yaklaşımı:** Büyük refactor süreci bitene kadar kapsamlı test yazımı sona ertelendi; sadece kritik değişikliklerde mini-testler uygulanıyor.
+- **AGENTS.md Politikası:** Kök AGENTS.md max 200 satır (araştırma destekli). Detaylar docs/agents/ altında modüler.
 
 ## Optimizasyon Kuralları (ZORUNLU)
 
