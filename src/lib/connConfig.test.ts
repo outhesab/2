@@ -1,6 +1,5 @@
-import { describe, expect, it, vi, beforeEach, } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-// Sır: Değişkenleri importlardan ÖNCE veya en tepede Vitest'e bildiriyoruz
 vi.stubEnv('VITE_FIREBASE_PROJECT_ID', 'test-project');
 vi.stubEnv('VITE_FIREBASE_API_KEY', 'test-api-key');
 
