@@ -25,5 +25,6 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "editor.codeActions.triggerOnFocusChange": true,
-  "editor.wordWrap": "on"
+"editor.wordWrap": "on",
+"editor.inlineSuggest.edits.showCollapsed": true
 }

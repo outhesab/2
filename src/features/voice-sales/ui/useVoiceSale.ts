@@ -1,10 +1,10 @@
 // voice-sales/ui/useVoiceSale.ts
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { VoiceSaleState, VoiceCommand, VoiceSaleResult, SpeechState } from '../types';
+import type { VoiceSaleState, VoiceCommand, SpeechState } from '../types';
 import { VoiceSpeechRecognizer } from '../speech/speechRecognizer';
 import { parseVoiceCommand } from '../parser/voiceNlpParser';
-import { executeVoiceSale, executeConfirmedSale } from '../executor/voiceSaleExecutor';
+import { executeVoiceSale } from '../executor/voiceSaleExecutor';
 import type { SaleIntent } from '@/domain/types';
 
 const INITIAL_STATE: VoiceSaleState = {
@@ -23,72 +23,9 @@ export function useVoiceSale() {
   const pendingIntentRef = useRef<SaleIntent | null>(null);
   const pendingCommandRef = useRef<VoiceCommand | null>(null);
 
-  // Initialize recognizer
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const recognizer = new VoiceSpeechRecognizer({
-      lang: 'tr-TR',
-      continuous: false,
-      interimResults: true,
-      silenceTimeoutMs: 3000,
-    });
-
-    recognizer.onStateChange = (speechState: SpeechState) => {
-      setState((prev) => ({ ...prev, speechState }));
-    };
-
-    recognizer.onTranscript = (result) => {
-      if (result.isFinal) {
-        setState((prev) => ({
-          ...prev,
-          transcript: result.text,
-          interimTranscript: '',
-        }));
-        // Auto-parse on final transcript
-        handleTranscript(result.text);
-      } else {
-        setState((prev) => ({
-          ...prev,
-          interimTranscript: result.text,
-        }));
-      }
-    };
-
-    recognizer.onError = (error) => {
-      setState((prev) => ({
-        ...prev,
-        speechState: 'error',
-        error: error.message,
-        isProcessing: false,
-      }));
-    };
-
-    recognizer.onListeningEnd = () => {
-      setState((prev) => ({
-        ...prev,
-        speechState: prev.speechState === 'error' ? 'error' : 'idle',
-      }));
-    };
-
-    recognizerRef.current = recognizer;
-
-    return () => {
-      recognizer.destroy();
-      recognizerRef.current = null;
-    };
-  }, []);
-
-  // Parse transcript and optionally execute
-  const handleTranscript = useCallback((text: string) => {
-    const command = parseVoiceCommand(text);
-    setState((prev) => ({ ...prev, parsedCommand: command }));
-
-    // Auto-execute if confidence is high enough
-    if (command.confidence >= 0.7 && command.action === 'satis' && command.items.length > 0) {
-      executeCommand(command);
-    }
-  }, []);
+  // Ref-based callbacks to break circular deps between effect ↔ handleTranscript
+  const handleTranscriptRef = useRef<(text: string) => void>(() => {});
+  const executeCommandRef = useRef<(command: VoiceCommand) => Promise<void>>(async () => {});
 
   // Execute voice command
   const executeCommand = useCallback(async (command: VoiceCommand) => {
@@ -131,6 +68,77 @@ export function useVoiceSale() {
         error: err instanceof Error ? err.message : 'Bilinmeyen hata.',
       }));
     }
+  }, []);
+
+  // Parse transcript and optionally execute
+  const handleTranscript = useCallback((text: string) => {
+    const command = parseVoiceCommand(text);
+    setState((prev) => ({ ...prev, parsedCommand: command }));
+
+    // Auto-execute if confidence is high enough
+    if (command.confidence >= 0.7 && command.action === 'satis' && command.items.length > 0) {
+      executeCommandRef.current(command);
+    }
+  }, []);
+
+  // Keep refs in sync so the effect closure always sees the latest function
+  executeCommandRef.current = executeCommand;
+  handleTranscriptRef.current = handleTranscript;
+
+  // Initialize recognizer (stable — uses refs to avoid stale closure deps)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const recognizer = new VoiceSpeechRecognizer({
+      lang: 'tr-TR',
+      continuous: false,
+      interimResults: true,
+      silenceTimeoutMs: 3000,
+    });
+
+    recognizer.onStateChange = (speechState: SpeechState) => {
+      setState((prev) => ({ ...prev, speechState }));
+    };
+
+    recognizer.onTranscript = (result) => {
+      if (result.isFinal) {
+        setState((prev) => ({
+          ...prev,
+          transcript: result.text,
+          interimTranscript: '',
+        }));
+        // Auto-parse on final transcript — use ref to avoid dep-cycle
+        handleTranscriptRef.current(result.text);
+      } else {
+        setState((prev) => ({
+          ...prev,
+          interimTranscript: result.text,
+        }));
+      }
+    };
+
+    recognizer.onError = (error) => {
+      setState((prev) => ({
+        ...prev,
+        speechState: 'error',
+        error: error.message,
+        isProcessing: false,
+      }));
+    };
+
+    recognizer.onListeningEnd = () => {
+      setState((prev) => ({
+        ...prev,
+        speechState: prev.speechState === 'error' ? 'error' : 'idle',
+      }));
+    };
+
+    recognizerRef.current = recognizer;
+
+    return () => {
+      recognizer.destroy();
+      recognizerRef.current = null;
+    };
   }, []);
 
   // Confirm pending sale
@@ -201,7 +209,7 @@ export function useVoiceSale() {
 
     try {
       await recognizerRef.current.start();
-    } catch (err) {
+    } catch {
       // Error handled by onError callback
     }
   }, []);

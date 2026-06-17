@@ -35,15 +35,15 @@ Referans dokümanlar:
 
 | Dosya | İçerik |
 |-------|--------|
+| `AGENTS.md` | Master kurallar (sıfır tolerans, protokol, standartlar) |
 | `opencode.json` | Proje kuralları, komutlar, bağımlılıklar |
-| `PARSPEL_MASTER_PROJE_DOKUMANI.txt` | Master proje dokümanı |
-| `docs/VERI_MODELI.md` | Veri şeması, tablolar, ilişkiler |
-| `docs/KULLANICI_SENARYOLARI.md` | 6 detaylı kullanıcı senaryosu |
-| `docs/API_SERVIS.md` | Servis katmanı, kural motoru, AI |
-| `docs/AGENT_SISTEMI.md` | Multi-agent mimarisi, flow diyagramları |
-| `docs/PERFORMANS.md` | Build chunk analizi, PWA yapılandırması |
-| `docs/UI_UX.md` | UI/UX wireframe, navigasyon, offline-first |
-| `docs/FIGMA.md` | Tasarım sistemi, kurulum rehberi |
+| `docs/technical/ARCHITECTURE.md` | Mimari: agent sistemi, bileşenler, navigasyon |
+| `docs/technical/DATA_LAYER.md` | Veri katmanı, model, servisler |
+| `docs/technical/UI_UX.md` | UI/UX akışları, Figma, skin planı |
+| `docs/technical/TEST_STRATEGY.md` | Test pattern, coverage |
+| `docs/logs/CHANGELOG.md` | Sürüm geçmişi |
+| `docs/management/MASTER_PLAN.md` | İyileştirme planı |
+| `docs/management/WEEKLY_PLAN.md` | Haftalık plan |
 | `src/agents/AGENTS.md` | Agent dokümantasyonu |
 | `src/components/AGENTS.md` | Bileşen mimarisi |
 | `src/lib/AGENTS.md` | Utility kütüphaneleri |

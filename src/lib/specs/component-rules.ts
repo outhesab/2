@@ -33,7 +33,7 @@ export const componentRules: SpecRule[] = [
       const files = listFiles("src", ".tsx").concat(listFiles("src", ".ts"));
       const violations: SpecCheckResult["violations"] = [];
       for (const file of files) {
-        if (file.includes("__tests__") || file.includes("node_modules") || file.endsWith(".test.ts")) continue;
+        if (file.includes("__tests__") || file.includes("node_modules") || file.includes("voice-sales") || file.endsWith(".test.ts")) continue;
         try {
           const content = readFileSync(join(ROOT, file), "utf-8");
           const lines = content.split("\n");

@@ -1,8 +1,7 @@
 // voice-sales/speech/speechRecognizer.test.ts
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { VoiceSpeechRecognizer } from './speechRecognizer';
-import type { SpeechConfig } from '../types';
 
 // ─── Mock SpeechRecognition ─────────────────────────────────────
 
@@ -17,7 +16,7 @@ class MockSpeechRecognition implements EventTarget {
   onend: (() => void) | null = null;
   onstart: (() => void) | null = null;
 
-  private listeners: Map<string, Set<Function>> = new Map();
+  private listeners: Map<string, Set<EventListener>> = new Map();
 
   addEventListener(type: string, listener: EventListener) {
     if (!this.listeners.has(type)) this.listeners.set(type, new Set());
@@ -61,7 +60,7 @@ class MockSpeechRecognition implements EventTarget {
           length: 1,
           0: { transcript: text, confidence },
         },
-        item(i: number) { return (this as any)[i]; },
+        item(i: number) { return (this as Record<number, unknown>)[i] as { transcript: string; confidence: number }; },
       },
     } as unknown as Event;
     this.onresult?.(event);
@@ -72,15 +71,34 @@ class MockSpeechRecognition implements EventTarget {
   }
 }
 
+// Helper: register a mock SpeechRecognition constructor on the global window
+// without violating no-explicit-any. The cast is safe because the mock implements
+// the same shape expected by the recognizer at runtime.
+function setMockSpeechRecognition(
+  ctor: typeof MockSpeechRecognition,
+  key: 'SpeechRecognition' | 'webkitSpeechRecognition' = 'SpeechRecognition',
+) {
+  (window as unknown as Record<string, unknown>)[key] = ctor as unknown;
+}
+
+// Helper: delete a SpeechRecognition key from the global window
+function deleteMockSpeechRecognition(key: 'SpeechRecognition' | 'webkitSpeechRecognition' = 'SpeechRecognition') {
+  delete (window as unknown as Record<string, unknown>)[key];
+}
+
+// Helper: access the private `recognition` field on a VoiceSpeechRecognizer for test injection
+function getRecognitionInstance(recognizer: VoiceSpeechRecognizer): MockSpeechRecognition {
+  return (recognizer as unknown as { recognition: MockSpeechRecognition }).recognition;
+}
+
 // Setup global mock
 beforeEach(() => {
-  (globalThis as any).window = (globalThis as any).window || {};
-  (globalThis as any).window.SpeechRecognition = MockSpeechRecognition;
+  setMockSpeechRecognition(MockSpeechRecognition, 'SpeechRecognition');
 });
 
 afterEach(() => {
-  delete (globalThis as any).window.SpeechRecognition;
-  delete (globalThis as any).window.webkitSpeechRecognition;
+  deleteMockSpeechRecognition('SpeechRecognition');
+  deleteMockSpeechRecognition('webkitSpeechRecognition');
 });
 
 // ─── Tests ───────────────────────────────────────────────────────
@@ -88,19 +106,19 @@ afterEach(() => {
 describe('VoiceSpeechRecognizer', () => {
   describe('isSupported', () => {
     it('returns true when SpeechRecognition is available', () => {
-      (globalThis as any).window.SpeechRecognition = MockSpeechRecognition;
+      setMockSpeechRecognition(MockSpeechRecognition, 'SpeechRecognition');
       expect(VoiceSpeechRecognizer.isSupported()).toBe(true);
     });
 
     it('returns true when webkitSpeechRecognition is available', () => {
-      delete (globalThis as any).window.SpeechRecognition;
-      (globalThis as any).window.webkitSpeechRecognition = MockSpeechRecognition;
+      deleteMockSpeechRecognition('SpeechRecognition');
+      setMockSpeechRecognition(MockSpeechRecognition, 'webkitSpeechRecognition');
       expect(VoiceSpeechRecognizer.isSupported()).toBe(true);
     });
 
     it('returns false when no API is available', () => {
-      delete (globalThis as any).window.SpeechRecognition;
-      delete (globalThis as any).window.webkitSpeechRecognition;
+      deleteMockSpeechRecognition('SpeechRecognition');
+      deleteMockSpeechRecognition('webkitSpeechRecognition');
       expect(VoiceSpeechRecognizer.isSupported()).toBe(false);
     });
   });
@@ -147,7 +165,7 @@ describe('VoiceSpeechRecognizer', () => {
       await recognizer.start();
 
       // Access the mock recognition instance
-      const mockRec = (recognizer as any).recognition as MockSpeechRecognition;
+      const mockRec = getRecognitionInstance(recognizer);
       mockRec.simulateResult('İki tane', 0.8, false);
 
       expect(transcripts.length).toBeGreaterThan(0);
@@ -164,7 +182,7 @@ describe('VoiceSpeechRecognizer', () => {
 
       await recognizer.start();
 
-      const mockRec = (recognizer as any).recognition as MockSpeechRecognition;
+      const mockRec = getRecognitionInstance(recognizer);
       mockRec.simulateResult("80'lik soba", 0.92, true);
 
       const finalResults = transcripts.filter((t) => t.isFinal);
@@ -184,7 +202,7 @@ describe('VoiceSpeechRecognizer', () => {
 
       await recognizer.start();
 
-      const mockRec = (recognizer as any).recognition as MockSpeechRecognition;
+      const mockRec = getRecognitionInstance(recognizer);
       mockRec.simulateResult('İki tane', 0.9, true);
       mockRec.simulateResult("80'lik soba", 0.85, true);
 
@@ -205,11 +223,11 @@ describe('VoiceSpeechRecognizer', () => {
 
       await recognizer.start();
 
-      const mockRec = (recognizer as any).recognition as MockSpeechRecognition;
+      const mockRec = getRecognitionInstance(recognizer);
       mockRec.simulateError('not-allowed');
 
-      expect(errorReceived?.code).toBe('no-permission');
-      expect(errorReceived?.message).toContain('Mikrofon');
+      expect(errorReceived!.code).toBe('no-permission');
+      expect(errorReceived!.message).toContain('Mikrofon');
 
       recognizer.destroy();
     });
@@ -224,14 +242,14 @@ describe('VoiceSpeechRecognizer', () => {
       // Wait for silence timeout
       await new Promise((resolve) => setTimeout(resolve, 150));
 
-      expect(errorReceived?.code).toBe('timeout');
+      expect(errorReceived!.code).toBe('timeout');
 
       recognizer.destroy();
     });
 
     it('rejects start when not supported', async () => {
-      delete (globalThis as any).window.SpeechRecognition;
-      delete (globalThis as any).window.webkitSpeechRecognition;
+      deleteMockSpeechRecognition('SpeechRecognition');
+      deleteMockSpeechRecognition('webkitSpeechRecognition');
 
       const recognizer = new VoiceSpeechRecognizer();
       await expect(recognizer.start()).rejects.toMatchObject({ code: 'not-supported' });
@@ -245,7 +263,7 @@ describe('VoiceSpeechRecognizer', () => {
 
       await recognizer.start();
 
-      const mockRec = (recognizer as any).recognition as MockSpeechRecognition;
+      const mockRec = getRecognitionInstance(recognizer);
       mockRec.simulateResult('test', 0.9, true);
 
       recognizer.resetTranscript();

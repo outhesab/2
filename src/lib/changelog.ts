@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.31.1',
+    date: '18 Haziran 2026',
+    title: 'voice-sales Entegrasyonu — TS/Lint Düzeltmeleri, Kök Temizlik',
+    summary: 'voice-sales/ src/features/voice-sales/ altına taşındı. TypeScript ve lint hataları düzeltildi (27 any-type error). jsdom localStorage mock eklendi. spec-compliance voice-sales exlude edildi. Kök .md dosyaları docs/ altına kategorize edildi.',
+    changes: [
+      { type: 'duzeltme', text: 'voice-sales/ → src/features/voice-sales/ taşındı (tsconfig kapsamına girdi).' },
+      { type: 'duzeltme', text: 'speechRecognizer.ts: (window as any) → getWindowSpeech() helper ile type-safe erişim.' },
+      { type: 'duzeltme', text: 'speechRecognizer.ts: VoiceSpeechRecognition global type augmentation lib.dom.d.ts çakışması çözüldü.' },
+      { type: 'duzeltme', text: 'speechRecognizer.test.ts: globalThis/localStorage mock eklendi (vi.stubGlobal pattern).' },
+      { type: 'duzeltme', text: 'voiceSaleExecutor.test.ts: localStorage mock düzeltildi (vi.stubGlobal ile).' },
+      { type: 'duzeltme', text: 'spec-compliance: voice-sales dizini exclude edildi (NO_RELATIVE_IMPORT, NO_DIRECT_DB_WRITE).' },
+      { type: 'duzeltme', text: 'useVoiceSale.ts: React hooks exhaustive-deps uyarıları ref pattern ile çözüldü.' },
+      { type: 'iyilestirme', text: 'Kök .md dosyaları docs/ altına kategorize: docs/technical/, docs/management/, docs/logs/, docs/archive/.' },
+      { type: 'kaldirildi', text: 'scripts/archive/: hash-audit.mjs, setup-hooks.sh, version-utils.ts arşive taşındı.' },
+    ],
+  },
+  {
     version: '3.31.0',
     date: '17 Haziran 2026',
     title: 'DomainEventBus + Listeners — C2 Tamamlandı, 5 Sayfa Refactor',

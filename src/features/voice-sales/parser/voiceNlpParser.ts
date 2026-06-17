@@ -108,7 +108,7 @@ function detectPayment(text: string): PaymentMethod | undefined {
 
 // ─── Item Extraction ────────────────────────────────────────────
 
-function extractItems(normalized: string, rawText: string): VoiceItem[] {
+function extractItems(normalized: string, _rawText: string): VoiceItem[] {
   const items: VoiceItem[] = [];
 
   // Pattern: "[quantity] [unit] [product name] [payment]"
@@ -163,7 +163,7 @@ function extractItems(normalized: string, rawText: string): VoiceItem[] {
 
 function detectOptions(
   text: string,
-  context?: { lastSaleId?: string; lastSaleItems?: Array<{ productId: string; productName: string }> },
+  _context?: { lastSaleId?: string; lastSaleItems?: Array<{ productId: string; productName: string }> },
 ): VoiceSaleOptions {
   const options: VoiceSaleOptions = {};
 

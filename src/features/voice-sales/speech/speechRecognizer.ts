@@ -9,36 +9,15 @@ import type {
 import { DEFAULT_SPEECH_CONFIG } from '../types';
 
 // Web Speech API type declarations (browser built-in)
-interface SpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
-  resultIndex: number;
-}
+// Using minimal local interfaces to avoid conflicts with lib.dom.d.ts
 
-interface SpeechRecognitionResultList {
-  length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionResult {
-  isFinal: boolean;
-  length: number;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string;
-  confidence: number;
-}
-
-interface SpeechRecognition extends EventTarget {
+interface VoiceSpeechRecognition {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
   maxAlternatives: number;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: Event & { error: string }) => void) | null;
+  onresult: ((event: VoiceSpeechRecognitionEvent) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
   onend: (() => void) | null;
   onstart: (() => void) | null;
   start(): void;
@@ -46,15 +25,41 @@ interface SpeechRecognition extends EventTarget {
   abort(): void;
 }
 
-declare global {
-  interface Window {
-    SpeechRecognition?: new () => SpeechRecognition;
-    webkitSpeechRecognition?: new () => SpeechRecognition;
-  }
+interface VoiceSpeechRecognitionEvent {
+  results: VoiceSpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface VoiceSpeechRecognitionResultList {
+  readonly length: number;
+  readonly [index: number]: VoiceSpeechRecognitionResult;
+}
+
+interface VoiceSpeechRecognitionResult {
+  readonly isFinal: boolean;
+  readonly length: number;
+  readonly [index: number]: VoiceSpeechRecognitionAlternative;
+}
+
+interface VoiceSpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+// Global type augmentation for browser SpeechRecognition API
+// Using a scoped helper to avoid conflicts with lib.dom.d.ts
+
+interface WindowSpeech {
+  SpeechRecognition?: new () => VoiceSpeechRecognition;
+  webkitSpeechRecognition?: new () => VoiceSpeechRecognition;
+}
+
+function getWindowSpeech(): WindowSpeech {
+  return window as WindowSpeech;
 }
 
 export class VoiceSpeechRecognizer {
-  private recognition: SpeechRecognition | null = null;
+  private recognition: VoiceSpeechRecognition | null = null;
   private config: SpeechConfig;
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
   private state: SpeechState = 'idle';
@@ -74,7 +79,8 @@ export class VoiceSpeechRecognizer {
   /** Check if browser supports speech recognition */
   static isSupported(): boolean {
     if (typeof window === 'undefined') return false;
-    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const win = getWindowSpeech();
+    return !!(win.SpeechRecognition) || !!(win.webkitSpeechRecognition);
   }
 
   /** Get current state */
@@ -107,28 +113,31 @@ export class VoiceSpeechRecognizer {
       }
 
       try {
-        const RecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const win = getWindowSpeech();
+        const RecognitionClass = win.SpeechRecognition || win.webkitSpeechRecognition;
         if (!RecognitionClass) {
           throw new Error('SpeechRecognition not available');
         }
 
         this.recognition = new RecognitionClass();
-        this.recognition.lang = this.config.lang;
-        this.recognition.continuous = this.config.continuous;
-        this.recognition.interimResults = this.config.interimResults;
-        this.recognition.maxAlternatives = this.config.maxAlternatives;
+        if (!this.recognition) throw new Error('Failed to create SpeechRecognition instance');
+        const rec = this.recognition;
+        rec.lang = this.config.lang;
+        rec.continuous = this.config.continuous;
+        rec.interimResults = this.config.interimResults;
+        rec.maxAlternatives = this.config.maxAlternatives;
 
         this.transcriptAccumulator = [];
         this.confidenceAccumulator = [];
 
-        this.recognition.onstart = () => {
+        rec.onstart = () => {
           this.setState('listening');
           this.onListeningStart?.();
           this.startSilenceTimer();
           resolve();
         };
 
-        this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+        rec.onresult = (event) => {
           this.resetSilenceTimer();
 
           let interimTranscript = '';
@@ -181,7 +190,7 @@ export class VoiceSpeechRecognizer {
           }
         };
 
-        this.recognition.onerror = (event: Event & { error: string }) => {
+        rec.onerror = (event) => {
           const errorMap: Record<string, SpeechError['code']> = {
             'not-allowed': 'no-permission',
             'network': 'network',
@@ -203,7 +212,7 @@ export class VoiceSpeechRecognizer {
           this.onError?.({ code, message: messages[code] });
         };
 
-        this.recognition.onend = () => {
+        rec.onend = () => {
           this.clearSilenceTimer();
           if (this.state === 'listening') {
             this.setState('idle');
@@ -211,7 +220,7 @@ export class VoiceSpeechRecognizer {
           this.onListeningEnd?.();
         };
 
-        this.recognition.start();
+        rec.start();
       } catch (err) {
         this.setState('error');
         const error: SpeechError = {

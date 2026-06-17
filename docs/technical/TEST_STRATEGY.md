@@ -1,13 +1,14 @@
 # PARSPEL — Test Stratejisi
 
-> Versiyon: 3.23.2 | Tarih: 13 Haziran 2026
+> Versiyon: 3.31.0 | Tarih: 17 Haziran 2026
+> Test: 555+ test, Vitest + fast-check (property-based)
 
 ## Genel Durum
 
-- **Test dosyası:** 41 adet
-- **Total test:** 412 (411 ✅ / 1 ⬜)
-- **Süre:** ~49 saniye
 - **Framework:** Vitest + fast-check (property-based)
+- **Test dosyası:** 40+ adet
+- **Total test:** 555+ (tamamı ✅)
+- **Süre:** ~49 saniye
 
 ## 1. Test Piramidi
 
@@ -24,11 +25,11 @@
 ╱──────────────────────╲
 ```
 
-| Seviye | Araç | Hız | Adet | Kapsam |
-|--------|------|-----|------|--------|
-| Unit | vitest + fast-check | ~1ms/test | Çok (100+) | Saf fonksiyonlar: ruleEngine, auditEngine, similarity, utils |
-| Integration | vitest | ~10ms/test | Orta (20-50) | prevDB → işlem → nextDB senaryoları, multi-agent flow |
-| E2E | Playwright | ~1s/test | Az (5-10) | Firebase sync, export/import, login akışı |
+| Seviye | Araç | Hız | Kapsam |
+|--------|------|-----|--------|
+| Unit | vitest + fast-check | ~1ms/test | Saf fonksiyonlar: ruleEngine, auditEngine, similarity, utils |
+| Integration | vitest | ~10ms/test | prevDB → işlem → nextDB senaryoları, multi-agent flow |
+| E2E | Playwright | ~1s/test | Firebase sync, export/import, login akışı |
 
 ## 2. Test Dosyası Konumlandırma
 
@@ -52,7 +53,7 @@ src/
     └── setup.ts
 ```
 
-**Kural:** Test, test ettiği fonksiyonla aynı dizinde olur (`co-located`). Sadece global/proje-seviyesi testler `__tests__/` içine konur.
+**Kural:** Test, test ettiği fonksiyonla aynı dizinde olur (`co-located`).
 
 ## 3. Test Pattern'leri
 
@@ -102,50 +103,29 @@ describe('version consistency', () => {
 });
 ```
 
-**Kapsam:** Her cross-cutting concern (versiyon, tema, config) için bir consistency testi yazılır.
-
-## 4. Test Edilmesi Gerekenler
-
-| Öncelik | Ne test edilmeli | Örnek |
-|---------|-----------------|-------|
-| P0 (block) | RuleEngine kuralları | negatif stok, negatif kasa, duplicate transaction |
-| P0 (block) | DB save/get döngüsü | save → get → aynı veri |
-| P0 (block) | Versiyon tutarlılığı | package.json ↔ changelog ↔ appConfig |
-| P1 (önemli) | AuditEngine diff | prev/next doğru farkı çıkarıyor mu |
-| P1 (önemli) | AnomalyEngine dedektörleri | 8 dedektörün her biri |
-| P1 (önemli) | Utils-tr | formatMoney, formatDate, genId |
-| P2 (orta) | Similarity algoritması | Benzerlik skoru doğru mu |
-| P2 (orta) | Dışa aktarım (excelExport) | JSON → Excel dönüşümü |
-
-## 5. CI Entegrasyonu
+## 4. CI Pipeline
 
 ```
 CI pipeline:
   ├── lint          (eslint src --max-warnings 100)
   ├── typecheck     (tsc --noEmit)
-  ├── test:run      (vitest run)          ← P0 testleri burada
+  ├── test:run      (vitest run)
   ├── coverage      (vitest run --coverage)
   └── build         (vite build)
 ```
 
-## 6. Coverage Hedefleri
+## 5. Coverage Hedefleri
 
-| Modül | Hedef | Durum |
-|-------|-------|-------|
-| ruleEngine | %100 | coverage var |
-| auditEngine | %90+ | coverage var |
-| similarity | %90+ | coverage var |
-| utils-tr | %90+ | coverage var |
-| version | %100 | coverage var |
-| UI bileşenleri | Yok | coverage yok |
+| Modül | Hedef |
+|-------|-------|
+| ruleEngine | %100 |
+| auditEngine | %90+ |
+| similarity | %90+ |
+| utils-tr | %90+ |
+| version | %100 |
+| UI bileşenleri | Yok (bakım maliyeti > fayda) |
 
-## 7. Yazılmayan Testler
-
-- **UI render testleri:** 36 sayfa + 78 bileşen var. Render testi yazılmaz (bakım maliyeti > fayda).
-- **E2E:** Sadece kritik akışlar (login, sync, backup) — Playwright ile 5-10 test.
-- **Snapshot testleri:** Kesinlikle yok. Snapshot'lar anlamsız değişikliklerle bozulur.
-
-## 8. Test Verisi Üretimi
+## 6. Test Verisi Üretimi
 
 ```typescript
 function createTestDB(): DB {

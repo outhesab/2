@@ -1,6 +1,6 @@
 // voice-sales/executor/voiceSaleExecutor.test.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { executeVoiceSale, executeConfirmedSale } from './voiceSaleExecutor';
 import type { VoiceCommand } from '../types';
 import type { DB } from '@/types';
@@ -47,23 +47,31 @@ function createMockDB(overrides: Partial<DB> = {}): DB {
     monitorLog: [],
     matchRules: [],
     returns: [],
-    company: { name: '' },
+    company: { id: 'c1', name: '', createdAt: '2026-01-01' },
     settings: {},
     notes: [],
     ...overrides,
   };
 }
 
-// ─── Mock getDB ─────────────────────────────────────────────────
+// ─── Mock localStorage ────────────────────────────────────────────
 
-vi.mock('@/hooks/db/index', () => ({
-  getDB: () => createMockDB(),
-}));
+const mockStore: Record<string, string> = {};
+vi.stubGlobal('localStorage', {
+  getItem: (key: string) => mockStore[key] ?? null,
+  setItem: (key: string, val: string) => { mockStore[key] = val; },
+  removeItem: (key: string) => { delete mockStore[key]; },
+  clear: () => { Object.keys(mockStore).forEach((k) => delete mockStore[k]); },
+  get length() { return Object.keys(mockStore).length; },
+  key: (i: number) => Object.keys(mockStore)[i] ?? null,
+});
 
-vi.mock('@/lib/db/storage', () => ({
-  saveToStorage: vi.fn(() => true),
-  saveToIndexedSnapshot: vi.fn(() => Promise.resolve()),
-}));
+// ─── Setup localStorage for readDB() ─────────────────────────────
+
+beforeEach(() => {
+  // jsdom'da localStorage.setItem çalışır, doğrudan kullan
+  localStorage.setItem('sobaYonetim', JSON.stringify(createMockDB()));
+});
 
 // ─── Tests ──────────────────────────────────────────────────────
 

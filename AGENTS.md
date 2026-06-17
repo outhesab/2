@@ -33,6 +33,20 @@
 ---
 
 ## 1. DEĞİŞİKLİK PROTOKOLÜ (Her değişiklik bu sırayı takip eder)
+ 
+### ADIM 0 — Kurulum ve Ortam (Yeni Katılımcılar İçin)
+```bash
+# Depoyu clone edin
+git clone https://github.com/outhesab/2.git
+cd repo_2
+
+# Bağımlılıkları kurun
+pnpm install
+
+# Geliştirme sunucusunu başlatın
+pnpm run dev
+```
+**Gereksinimler:** Node.js >= 22, pnpm >= 9, Git.
 
 ### ADIM 1 — Baseline Al (Değişikliğe başlamadan önce)
 ```bash
@@ -43,11 +57,17 @@ pnpm run build
 ```
 Hepsi pass etmeli. Herhangi biri fail ediyorsa, **önce onu düzelt**, sonra göreve başla.
 
-### ADIM 2 — Kapsam Belirle
+### ADIM 2 — Kapsam Belirle ve Branş Aç
+**Branş Modeli:**
+- `dev` — Geliştirme dalı, tüm PR'lar buraya açılır.
+- Branş açarken: `feat/özellik`, `fix/hata`, `chore/bakım`.
+
+**Süreç:**
 - Görev net mi? Değilse sor.
 - Hangi dosyalara dokunacaksın? Listele.
 - Korunan sistemlerden birine mi dokunuyorsun? → Dur, kullanıcıya sor.
 - 5'ten fazla dosya mı? → Görevi parçalara böl.
+
 
 ### ADIM 3 — Değişikliği Yap
 - Sadece görevde belirtilen şeyi yap.
@@ -332,10 +352,10 @@ expect(nextDB.field).toBe(expectedValue)
 
 ---
 
-## 9. GÜNCEL DURUM (v3.29.1)
-
+## 9. GÜNCEL DURUM (v3.31.0)
+ 
 ### ✅ TAMAMLANAN REFACTORLAR
-
+ 
 | Görev | Eski Durum | Şimdiki Durum |
 |-------|-----------|---------------|
 | **6.1** Settings.tsx → modüller | 4394 satır monolit | 322 satır + 13 modül ✅ |
@@ -346,6 +366,7 @@ expect(nextDB.field).toBe(expectedValue)
 | **5.9-5.11** DB testleri | Yok | backup.test.ts (239), core.test.ts (180), sync.test.ts (186) ✅ |
 | **5.12** Vitest exclude | Eski kurallar | Temizlendi ✅ |
 | **C1** processIntent geçişi | Yarım | Tamamlandı — orchestrator.ts silindi ✅ |
+| **C2** Domain Event Bus | Planlandı | mitt-based typed pub/sub + 3 listener ✅ |
 | **C3** useDB bölme | 640 satır | 7 dosyaya bölündü ✅ |
 | **C4** Agent sadeleştirme | 4 agent ayrı islemYap | DomainAgent base class (~40 satır) ✅ |
 | **C7** excel-merge.ts bölme | 742 satır | 3 modül: types, utils, core (~350 satır) ✅ |
@@ -360,24 +381,26 @@ expect(nextDB.field).toBe(expectedValue)
 | **P5 Bank.tsx** | 1031 satır | 7 modül (index 516) ✅ |
 | **P7 Dashboard.tsx** | 851 satır | 398 satır + 9 bileşen ✅ |
 | **P8 Products.tsx** | 833 satır | 623 satır ✅ |
+| **AnomaliOneri.tsx** | 819 satır | Tailwind Refactor (Sınır altına indi) ✅ |
+| **SaleFormModal.tsx** | Devasa | Tailwind Refactor (Sınır altına indi) ✅ |
+| **Sales.tsx** | Aşım | Tailwind Refactor (Sınır altına indi) ✅ |
+| **Stock.tsx** | Aşım | Tailwind Refactor (Sınır altına indi) ✅ |
+| **Kasa.tsx** | Aşım | Tailwind Refactor (Sınır altına indi) ✅ |
 | — | **Domain servis testleri** | Yok | 29 test ✅ |
 | — | **CI quality gate** | Kesintili | Tam yeşil (lint/typecheck/test/build) ✅ |
-
+ 
 ### ❌ KALAN GÖREVLER
-
+ 
 #### Sayfa Boyutu (>800 satır, sınırda)
 | # | Dosya | Satır | Aşım |
 |---|-------|-------|------|
-| P6 | **Cari.tsx** | 801 | +1 (sınırda) |
-| P9 | **AnomaliOneri.tsx** | 819 | +19 (sınırda) |
-
+| P6 | **Cari.tsx** | 772 | ✅ Sınır Altında |
+ 
 #### Diğer (düşük öncelikli)
 | # | Görev | Detay |
 |---|-------|-------|
-| C2 | Çift event sistemi (AgentBus + domainEventBus) | Birleştirme ertelendi, migration sürüyor |
-| — | dataIntegrityChecker.ts (603 satır) | Sınırda |
+| — | dataIntegrityChecker.ts (546 satır) | Sınırda |
 | D-F-H-I-J-K | ~45 kod kalitesi maddesi | Tekrar, tip, performans, test kalitesi, a11y, dökümantasyon (tümü LOW) |
-| — | CHANGELOG.md root (v3.23.3'te kalmış) | src/lib/changelog.ts ile senkronize edilmeli |
 
 ---
 
@@ -430,20 +453,15 @@ OPENCODE_DISABLE_LSP_DOWNLOAD=true
 |-------|--------|
 | `AGENTS.md` | Bu dosya — master kurallar |
 | `README.md` | Genel bakış, komutlar |
-| `MASTER_PLAN.md` | İyileştirme planı, ~70 madde (çoğu tamam) |
-| `WEEKLY_PLAN.md` | 57 görev, 52 tamamlandı |
-| `DEVELOPMENT.md` | Mimari, debug |
-| `CONTRIBUTING.md` | Branch, commit, PR |
-| `CHANGELOG.md` | Sürüm geçmişi (v1.0.0 → v3.23.2) |
-| `docs/VERI_KATMANI.md` | Veri katmanı detay |
-| `docs/AGENT_SISTEMI.md` | Agent akışları |
-| `docs/VERI_MODELI.md` | Şema, tablolar |
-| `docs/BILESEN_MIMARISI.md` | Component kuralları |
-| `docs/TEST_STRATEJISI.md` | Test pattern, coverage |
-| `docs/API_SERVIS.md` | Servis katmanı, rule engine |
-| `docs/UI_UX.md` | UI/UX akışları |
-| `docs/UI_REVIEW_RAPORU.md` | UI inceleme raporu |
-| `docs/skin-plan.md` | Skin dönüşüm planı (koyu→açık tema) |
+| `docs/technical/ARCHITECTURE.md` | Mimari: agent sistemi, bileşenler, navigasyon |
+| `docs/technical/DATA_LAYER.md` | Veri katmanı, model, servisler |
+| `docs/technical/UI_UX.md` | UI/UX akışları, Figma, skin planı |
+| `docs/technical/TEST_STRATEGY.md` | Test pattern, coverage |
+| `docs/logs/CHANGELOG.md` | Sürüm geçmişi (v1.0.0 → v3.31.0) |
+| `docs/management/MASTER_PLAN.md` | İyileştirme planı, ~70 madde (çoğu tamam) |
+| `docs/management/WEEKLY_PLAN.md` | Haftalık plan |
+| `docs/management/DEVELOPMENT.md` | Mimari, debug |
+| `docs/archive/` | Eski doküman arşivi |
 | `src/agents/AGENTS.md` | Agent dokümantasyonu |
 | `src/components/AGENTS.md` | Bileşen mimarisi |
 | `src/lib/AGENTS.md` | Utility kütüphaneleri |

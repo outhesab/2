@@ -1,8 +1,8 @@
 // voice-sales/parser/voiceIntentBuilder.ts
 
-import type { DB, Product } from '@/types';
+import type { DB } from '@/types';
 import type { SaleIntent } from '@/domain/types';
-import type { VoiceCommand, VoiceItem, VoiceSaleOptions } from '../types';
+import type { VoiceCommand, VoiceItem } from '../types';
 import { findBestProductMatch } from './productMatcher';
 
 export interface IntentBuildResult {
@@ -78,7 +78,7 @@ export function buildSaleIntent(
       // Warn if stock is insufficient
       if (match.stock < item.quantity) {
         warnings.push(
-          `"${match.name}" stokta ${match.stank} adet var, ${item.quantity} adet isteniyor.`,
+          `"${match.name}" stokta ${match.stock} adet var, ${item.quantity} adet isteniyor.`,
         );
       }
     } else {

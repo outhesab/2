@@ -2,11 +2,24 @@
 
 import { completeSale } from '@/domain/services/saleCompletion';
 import { applyIntentResult } from '@/hooks/db/dbHelpers';
-import { getDB } from '@/hooks/db/index';
-import { saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';
 import type { SaleIntent } from '@/domain/types';
 import type { VoiceCommand, VoiceSaleResult } from '../types';
 import { buildSaleIntent } from '../parser/voiceIntentBuilder';
+import type { DB } from '@/types';
+
+/**
+ * Read DB directly from localStorage (non-React context helper).
+ */
+function readDB(): DB | null {
+  try {
+    const raw = localStorage.getItem('sobaYonetim');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as DB;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 export interface ExecutorOptions {
   /** Require confirmation before executing (for low-confidence commands) */
@@ -50,7 +63,7 @@ export async function executeVoiceSale(
   }
 
   // 2. Get current DB state (fresh snapshot — TOCTOU-safe)
-  const db = getDB();
+  const db = readDB();
   if (!db) {
     return {
       success: false,
@@ -101,7 +114,7 @@ export async function executeVoiceSale(
 export async function executeConfirmedSale(
   command: VoiceCommand,
 ): Promise<VoiceSaleResult> {
-  const db = getDB();
+  const db = readDB();
   if (!db) {
     return {
       success: false,
@@ -132,7 +145,7 @@ async function performSale(
 ): Promise<VoiceSaleResult> {
   try {
     // 1. Get FRESH db snapshot at execution time (TOCTOU-safe)
-    const db = getDB();
+    const db = readDB();
     if (!db) {
       return {
         success: false,
@@ -157,9 +170,8 @@ async function performSale(
     // 3. Apply DB updates
     const nextDB = applyIntentResult(db, result.data);
 
-    // 4. Persist
-    saveToStorage(nextDB);
-    await saveToIndexedSnapshot(nextDB);
+    // 4. Persist to localStorage (direct write — voice-sales bypasses React hook)
+    localStorage.setItem('sobaYonetim', JSON.stringify(nextDB));
 
     // 5. Build success result
     const sale = result.data.dbUpdates.sale;
