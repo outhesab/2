@@ -2,8 +2,6 @@ import { Modal } from '@/components/Modal';
 import { MobileSelect } from '@/components/MobileSelect';
 import { formatMoney } from '@/lib/utils-tr';
 import type { DB, SaleItem } from '@/types';
-import { lbl, sinpStyle } from './salesStyles';
-import { Row } from './SalesHelpers';
 
 interface SaleFormModalProps {
   open: boolean;
@@ -70,11 +68,11 @@ export default function SaleFormModal({
   kalan,
 }: SaleFormModalProps) {
   return (
-    <Modal open={open} onClose={onClose} title="🛒 Yeni Satış" maxWidth={680}>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+    <Modal open={open} onClose={onClose} title="🛒 Yeni Satış" maxWidth={720}>
+      <div className="flex flex-col md:flex-row gap-6">
         {/* Sol: Ürünler */}
-        <div style={{ flex: '1 1 300px' }}>
-          <label style={lbl}>Ürün Ekle</label>
+        <div className="flex-1 min-w-[300px]">
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase">Ürün Ekle</label>
           <select
             tabIndex={1}
             onChange={(e) => {
@@ -83,7 +81,7 @@ export default function SaleFormModal({
                 e.target.value = '';
               }
             }}
-            style={sinpStyle}
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all mb-4"
           >
             <option value="">-- Ürün Seç --</option>
             {urunler
@@ -95,333 +93,233 @@ export default function SaleFormModal({
                 </option>
               ))}
           </select>
-          {items.map((item, idx) => (
-            <div
-              key={item.productId}
-              style={{
-                display: 'flex',
-                gap: 8,
-                alignItems: 'center',
-                marginTop: 8,
-                background: '#0f172a',
-                borderRadius: 8,
-                padding: '8px 10px',
-              }}
-            >
-              <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.88rem' }}>{item.productName}</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={item.quantity}
-                min={1}
-                tabIndex={10 + idx * 2}
-                onChange={(e) => updateQty(item.productId, parseInt(e.target.value) || 0)}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    updateQty(item.productId, item.quantity + 1);
-                  }
-                  if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    updateQty(item.productId, item.quantity - 1);
-                  }
-                }}
-                style={{
-                  width: 55,
-                  background: 'var(--bg-card)',
-                  border: '1px solid #334155',
-                  borderRadius: 6,
-                  color: 'var(--text-primary)',
-                  padding: '4px 6px',
-                  textAlign: 'center',
-                }}
-              />
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>×</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                value={item.unitPrice}
-                step={0.01}
-                tabIndex={11 + idx * 2}
-                onChange={(e) => updatePrice(item.productId, parseFloat(e.target.value) || 0)}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    updatePrice(item.productId, item.unitPrice + 1);
-                  }
-                  if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    updatePrice(item.productId, Math.max(0, item.unitPrice - 1));
-                  }
-                }}
-                style={{
-                  width: 80,
-                  background: 'var(--bg-card)',
-                  border: '1px solid #334155',
-                  borderRadius: 6,
-                  color: 'var(--text-primary)',
-                  padding: '4px 6px',
-                }}
-              />
-              <span
-                style={{
-                  color: item.unitPrice - item.cost >= 0 ? '#10b981' : '#ef4444',
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  whiteSpace: 'nowrap',
-                  minWidth: 60,
-                  textAlign: 'right',
-                }}
+          
+          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+            {items.map((item, idx) => (
+              <div
+                key={item.productId}
+                className="flex gap-3 items-center p-3 bg-slate-900/60 border border-white/5 rounded-xl transition-all hover:border-white/10"
               >
-                ₺{((item.unitPrice - item.cost) * item.quantity).toFixed(0)}
-              </span>
-              <button
-                tabIndex={-1}
-                onClick={() => removeItem(item.productId)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#ef4444',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+                <span className="flex-1 text-foreground text-sm font-medium truncate">{item.productName}</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={item.quantity}
+                    min={1}
+                    tabIndex={10 + idx * 2}
+                    onChange={(e) => updateQty(item.productId, parseInt(e.target.value) || 0)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowUp') { e.preventDefault(); updateQty(item.productId, item.quantity + 1); }
+                      if (e.key === 'ArrowDown') { e.preventDefault(); updateQty(item.productId, item.quantity - 1); }
+                    }}
+                    className="w-14 bg-slate-950 border border-border rounded-lg py-1 text-center text-sm font-bold text-foreground outline-none focus:ring-1 ring-blue-500/50"
+                  />
+                  <span className="text-slate-600 text-xs">×</span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={item.unitPrice}
+                    step={0.01}
+                    tabIndex={11 + idx * 2}
+                    onChange={(e) => updatePrice(item.productId, parseFloat(e.target.value) || 0)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowUp') { e.preventDefault(); updatePrice(item.productId, item.unitPrice + 1); }
+                      if (e.key === 'ArrowDown') { e.preventDefault(); updatePrice(item.productId, Math.max(0, item.unitPrice - 1)); }
+                    }}
+                    className="w-20 bg-slate-950 border border-border rounded-lg py-1 px-2 text-right text-sm font-bold text-foreground outline-none focus:ring-1 ring-blue-500/50"
+                  />
+                  <span
+                    className={`text-xs font-black w-16 text-right ${item.unitPrice - item.cost >= 0 ? 'text-emerald-500' : 'text-red-500'}`}
+                  >
+                    ₺{((item.unitPrice - item.cost) * item.quantity).toFixed(0)}
+                  </span>
+                  <button
+                    tabIndex={-1}
+                    onClick={() => removeItem(item.productId)}
+                    className="text-red-500 hover:text-red-400 p-1 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Sağ: Ödeme & Özet */}
-        <div style={{ flex: '1 1 220px' }}>
-          <label style={lbl}>
-            Müşteri <span style={{ color: '#ef4444' }}>*</span>
-          </label>
-          <MobileSelect
-            value={cariId}
-            onChange={setCariId}
-            label="Müşteri Seç"
-            placeholder="-- Müşteri Seç (zorunlu) --"
-            options={cariList
-              .filter((c) => c.type === 'musteri' && !c.ortak && !c.deleted)
-              .map((c) => ({
-                value: c.id,
-                label: c.name,
-                sub: c.phone || undefined,
-              }))}
-            style={{
-              borderColor: !cariId ? 'rgba(239,68,68,0.4)' : undefined,
-            }}
-          />
-
-          <label style={{ ...lbl, marginTop: 12 }}>Satış Tarihi</label>
-          <input
-            type="datetime-local"
-            value={saleDate}
-            onChange={(e) => setSaleDate(e.target.value)}
-            max={new Date().toISOString().slice(0, 16)}
-            style={{ ...sinpStyle, marginBottom: 4 }}
-          />
-          {saleDate.slice(0, 10) !== new Date().toISOString().slice(0, 10) && (
-            <div
+        <div className="flex-1 min-w-[260px] space-y-4">
+          <div>
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase">
+              Müşteri <span className="text-red-500">*</span>
+            </label>
+            <MobileSelect
+              value={cariId}
+              onChange={setCariId}
+              label="Müşteri Seç"
+              placeholder="-- Müşteri Seç (zorunlu) --"
+              options={cariList
+                .filter((c) => c.type === 'musteri' && !c.ortak && !c.deleted)
+                .map((c) => ({
+                  value: c.id,
+                  label: c.name,
+                  sub: c.phone || undefined,
+                }))}
               style={{
-                fontSize: '0.72rem',
-                color: '#f59e0b',
-                marginBottom: 8,
-              }}
-            >
-              ⚠️ Geçmiş tarihli kayıt
-            </div>
-          )}
-
-          <label style={{ ...lbl, marginTop: 12 }}>Ödeme Şekli</label>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {[
-              ...(kasalar || [
-                { id: 'nakit', name: 'Nakit', icon: '💵' },
-                { id: 'banka', name: 'Banka', icon: '🏦' },
-              ]),
-              { id: 'cari', name: 'Cari', icon: '👤' },
-            ].map((k, i) => (
-              <button
-                key={k.id}
-                tabIndex={3 + i}
-                onClick={() => setPayment(k.id)}
-                style={{
-                  flex: 1,
-                  padding: '8px 6px',
-                  border: 'none',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.82rem',
-                  background: payment === k.id ? '#ff5722' : '#273548',
-                  color: payment === k.id ? '#fff' : '#94a3b8',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {k.icon} {k.name}
-              </button>
-            ))}
-          </div>
-
-          <label style={{ ...lbl, marginTop: 12 }}>İskonto</label>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <input
-              tabIndex={7}
-              type="number"
-              inputMode="decimal"
-              value={discount}
-              min={0}
-              onChange={(e) => setDiscount(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  setDiscount((d) => String((parseFloat(d) || 0) + 1));
-                }
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  setDiscount((d) => String(Math.max(0, (parseFloat(d) || 0) - 1)));
-                }
-              }}
-              style={{
-                flex: 1,
-                background: '#0f172a',
-                border: '1px solid #334155',
-                borderRadius: 8,
-                color: 'var(--text-primary)',
-                padding: '8px 10px',
+                borderColor: !cariId ? 'rgba(239,68,68,0.4)' : undefined,
               }}
             />
-            <select
-              tabIndex={8}
-              value={discountType}
-              onChange={(e) => setDiscountType(e.target.value as 'percent' | 'amount')}
-              style={{
-                background: '#0f172a',
-                border: '1px solid #334155',
-                borderRadius: 8,
-                color: 'var(--text-primary)',
-                padding: '8px 10px',
-              }}
-            >
-              <option value="percent">%</option>
-              <option value="amount">₺</option>
-            </select>
           </div>
 
-          {/* TAHSİLAT */}
-          <label style={{ ...lbl, marginTop: 12 }}>
-            Tahsil Edilen Tutar
-            {kalan > 0 && tahsilat !== '' && (
-              <span
-                style={{
-                  color: '#f59e0b',
-                  marginLeft: 8,
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                }}
-              >
-                Kalan: {formatMoney(kalan)} → Cariye
-              </span>
+          <div>
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase">Satış Tarihi</label>
+            <input
+              type="datetime-local"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
+              max={new Date().toISOString().slice(0, 16)}
+              className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+            />
+            {saleDate.slice(0, 10) !== new Date().toISOString().slice(0, 10) && (
+              <div className="text-[0.65rem] text-amber-500 mt-1">
+                ⚠️ Geçmiş tarihli kayıt
+              </div>
             )}
-            {kalan < 0 && tahsilat !== '' && (
-              <span
-                style={{
-                  color: '#10b981',
-                  marginLeft: 8,
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                }}
-              >
-                Para üstü: {formatMoney(-kalan)}
-              </span>
-            )}
-          </label>
-          <input
-            tabIndex={9}
-            type="number"
-            inputMode="decimal"
-            value={tahsilat}
-            placeholder={formatMoney(total) + ' (tam tutar)'}
-            min={0}
-            step={0.01}
-            onChange={(e) => setTahsilat(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                setTahsilat(String((tahsilatNum || total) + 1));
-              }
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                setTahsilat(String(Math.max(0, (tahsilatNum || total) - 1)));
-              }
-            }}
-            style={{
-              width: '100%',
-              background:
-                kalan > 0 && tahsilat !== ''
-                  ? 'rgba(245,158,11,0.08)'
-                  : kalan < 0 && tahsilat !== ''
-                    ? 'rgba(16,185,129,0.08)'
-                    : '#0f172a',
-              border: `1px solid ${kalan > 0 && tahsilat !== '' ? '#f59e0b' : kalan < 0 && tahsilat !== '' ? '#10b981' : '#334155'}`,
-              borderRadius: 8,
-              color: 'var(--text-primary)',
-              padding: '10px 14px',
-              boxSizing: 'border-box',
-              fontSize: '1rem',
-              fontWeight: 600,
-            }}
-          />
+          </div>
 
-          <div
-            style={{
-              background: '#0f172a',
-              borderRadius: 8,
-              padding: 14,
-              marginTop: 14,
-            }}
-          >
-            <Row label="Ara Toplam" value={formatMoney(subtotal)} />
-            {discountAmount > 0 && <Row label="İskonto" value={`-${formatMoney(discountAmount)}`} color="#ef4444" />}
-            <Row label="TOPLAM" value={formatMoney(total)} big color="#10b981" />
-            {tahsilat !== '' && <Row label="Tahsilat" value={formatMoney(tahsilatNum)} color="#3b82f6" />}
-            {tahsilat !== '' && kalan > 0 && <Row label="Kalan (Cari)" value={formatMoney(kalan)} color="#f59e0b" />}
-            {tahsilat !== '' && kalan < 0 && <Row label="Para Üstü" value={formatMoney(-kalan)} color="#10b981" />}
-            <Row label="Kâr" value={formatMoney(profit)} color={profit >= 0 ? '#10b981' : '#ef4444'} />
+          <div>
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase">Ödeme Şekli</label>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                ...(kasalar || [
+                  { id: 'nakit', name: 'Nakit', icon: '💵' },
+                  { id: 'banka', name: 'Banka', icon: '🏦' },
+                ]),
+                { id: 'cari', name: 'Cari', icon: '👤' },
+              ].map((k, i) => (
+                <button
+                  key={k.id}
+                  tabIndex={3 + i}
+                  onClick={() => setPayment(k.id)}
+                  className={`flex-1 py-2 px-1 rounded-lg text-xs font-bold transition-all ${
+                    payment === k.id 
+                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' 
+                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  {k.icon} {k.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase">İskonto</label>
+            <div className="flex gap-2">
+              <input
+                tabIndex={7}
+                type="number"
+                inputMode="decimal"
+                value={discount}
+                min={0}
+                onChange={(e) => setDiscount(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp') { e.preventDefault(); setDiscount((d) => String((parseFloat(d) || 0) + 1)); }
+                  if (e.key === 'ArrowDown') { e.preventDefault(); setDiscount((d) => String(Math.max(0, (parseFloat(d) || 0) - 1))); }
+                }}
+                className="flex-1 p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+              />
+              <select
+                tabIndex={8}
+                value={discountType}
+                onChange={(e) => setDiscountType(e.target.value as 'percent' | 'amount')}
+                className="p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+              >
+                <option value="percent">%</option>
+                <option value="amount">₺</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase flex justify-between items-center">
+              Tahsil Edilen
+              {kalan > 0 && tahsilat !== '' && (
+                <span className="text-amber-500 text-[0.65rem] font-bold">
+                  Kalan: {formatMoney(kalan)} → Cariye
+                </span>
+              )}
+              {kalan < 0 && tahsilat !== '' && (
+                <span className="text-emerald-500 text-[0.65rem] font-bold">
+                  Para üstü: {formatMoney(-kalan)}
+                </span>
+              )}
+            </label>
+            <input
+              tabIndex={9}
+              type="number"
+              inputMode="decimal"
+              value={tahsilat}
+              placeholder={formatMoney(total) + ' (tam tutar)'}
+              min={0}
+              step={0.01}
+              onChange={(e) => setTahsilat(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp') { e.preventDefault(); setTahsilat(String((tahsilatNum || total) + 1)); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); setTahsilat(String(Math.max(0, (tahsilatNum || total) - 1))); }
+              }}
+              className={`w-full p-3 rounded-xl text-foreground text-lg font-black outline-none transition-all border-2 ${
+                kalan > 0 && tahsilat !== ''
+                  ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
+                  : kalan < 0 && tahsilat !== ''
+                    ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
+                    : 'bg-slate-950 border-border text-foreground'
+              }`}
+            />
+          </div>
+
+          <div className="bg-slate-950 border border-border rounded-xl p-4 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-500">Ara Toplam</span>
+              <span className="text-foreground font-medium">{formatMoney(subtotal)}</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">İskonto</span>
+                <span className="text-red-500 font-medium">-{formatMoney(discountAmount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-base pt-2 border-t border-white/10">
+              <span className="text-foreground font-bold">TOPLAM</span>
+              <span className="text-emerald-500 font-black">{formatMoney(total)}</span>
+            </div>
+            {tahsilat !== '' && (
+              <div className="flex justify-between text-xs pt-1 text-slate-400">
+                <span>Tahsilat</span>
+                <span>{formatMoney(tahsilatNum)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-xs pt-1 text-slate-500">
+              <span>Tahmini Kâr</span>
+              <span className={profit >= 0 ? 'text-emerald-500' : 'text-red-500'}>
+                {formatMoney(profit)}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+      <div className="flex gap-3 mt-6">
         <button
           tabIndex={50}
           onClick={saveSale}
-          style={{
-            flex: 1,
-            background: '#ff5722',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            padding: '12px 0',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.95rem',
-          }}
+          className="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-orange-600/20"
         >
           💾 Satışı Kaydet — {formatMoney(tahsilatNum)} tahsilat
         </button>
         <button
           tabIndex={51}
           onClick={onClose}
-          style={{
-            background: '#273548',
-            border: '1px solid #334155',
-            borderRadius: 10,
-            color: 'var(--text-dim)',
-            padding: '12px 20px',
-            cursor: 'pointer',
-          }}
+          className="px-6 bg-slate-800 hover:bg-slate-700 text-slate-400 py-3 rounded-xl text-sm transition-all"
         >
           İptal
         </button>

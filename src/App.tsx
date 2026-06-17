@@ -8,6 +8,7 @@ import { getAllAgents } from '@/agents';
 import type { AgentContext } from '@/agents/types';
 import { useToast } from '@/components/Toast';
 import { onSyncStatus, useDB, type SyncStatus } from '@/hooks/useDB';
+import { setupDomainListeners } from '@/domain';
 import { applyUIPrefs, loadUIPrefs, loadUIPrefsFromFirebase, saveUIPrefs } from '@/hooks/useUIPrefs';
 import { loadConnConfigFromFirebase, saveConnConfig } from '@/lib/connConfig';
 import { getAppVersion, getVersionTitle } from '@/lib/version';
@@ -95,10 +96,21 @@ function AppContent({
   guestTimeLeft: number;
 }) {
   const { db, save, exportJSON, importJSON, undo } = useDB();
+  const { showToast } = useToast();
+
   useEffect(() => {
     const ctx: AgentContext = { getDB: () => db, save };
     getAllAgents().forEach((agent) => agent.bagla(ctx));
   }, [db, save]);
+
+  // Domain Event Bus listener'larını kur
+  useEffect(() => {
+    const cleanup = setupDomainListeners({
+      save,
+      showToast: (msg, type) => showToast(msg, type),
+    });
+    return cleanup;
+  }, [save, showToast]);
   const [location, setLocation] = useLocation();
   const activeTab = getActiveTabFromLocation(location);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -117,7 +129,6 @@ function AppContent({
   const [uiPrefs, setUiPrefs] = useState(loadUIPrefs);
   const isOnline = useOnlineStatus();
   const prevOnline = useRef(isOnline);
-  const { showToast } = useToast();
 
   // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
   useEffect(() => {

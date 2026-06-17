@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { CariAgent } from "@/agents/CariAgent";
 
 describe("CariAgent", () => {
-  it("should export the agent class", async () => {
-    const mod = await import("@/agents/CariAgent");
-    expect(mod.CariAgent).toBeDefined();
-    expect(typeof mod.CariAgent).toBe("function");
+  it("should export the agent class", () => {
+    expect(CariAgent).toBeDefined();
+    expect(typeof CariAgent).toBe("function");
   });
 });

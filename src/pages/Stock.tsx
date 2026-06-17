@@ -8,10 +8,12 @@ import type { DB } from '@/types';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonTable } from '@/components/SkeletonLoaders';
 import { PackageSearch } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
-
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
 
 export default function Stock({ db, save }: Props) {
   const { showToast } = useToast();
@@ -126,38 +128,58 @@ export default function Stock({ db, save }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 14, marginBottom: 20 }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <StatCard label="Toplam Ürün" value={String(activeProducts.length)} color="#3b82f6" />
         <StatCard label="Stok Değeri" value={`₺${(totalValue / 1000).toFixed(1)}K`} color="#10b981" />
         <StatCard label="Biten Stok" value={String(outOfStock)} color="#ef4444" />
         <StatCard label="Az Stok" value={String(lowStock)} color="#f59e0b" />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={() => setAdjustModal(true)} style={{ background: '#ff5722', border: 'none', borderRadius: 10, color: '#fff', padding: '10px 20px', fontWeight: 700, cursor: 'pointer' }}>⚙️ Stok Ayarla</button>
-        <button onClick={() => { exportToExcel(db, { sheets: ['stok'] }); showToast('Excel indirildi!', 'success'); }} style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, color: '#10b981', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>📊 Excel İndir</button>
-        {(['products', 'abc', 'dead', 'history'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ padding: '9px 16px', border: 'none', borderRadius: 10, cursor: 'pointer', fontWeight: 600, background: tab === t ? '#ff5722' : '#273548', color: tab === t ? '#fff' : '#94a3b8' }}>
-            {t === 'products' ? '📦 Ürünler' : t === 'abc' ? '📊 ABC' : t === 'dead' ? '💀 Ölü Stok' : '📋 Hareketler'}
-          </button>
-        ))}
+      <div className="flex gap-3 mb-4 items-center flex-wrap">
+        <Button onClick={() => setAdjustModal(true)} className="bg-[#ff5722] hover:bg-[#e64a19] text-white font-bold rounded-xl px-5">
+          ⚙️ Stok Ayarla
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => { exportToExcel(db, { sheets: ['stok'] }); showToast('Excel indirildi!', 'success'); }}
+          className="rounded-xl"
+        >
+          📊 Excel İndir
+        </Button>
+        <div className="flex gap-2">
+          {(['products', 'abc', 'dead', 'history'] as const).map(t => (
+            <Button
+              key={t}
+              variant={tab === t ? 'default' : 'outline'}
+              onClick={() => setTab(t)}
+              className={`rounded-xl px-3 h-8 text-xs font-semibold ${tab === t ? 'bg-[#ff5722] hover:bg-[#e64a19]' : ''}`}
+            >
+              {t === 'products' ? '📦 Ürünler' : t === 'abc' ? '📊 ABC' : t === 'dead' ? '💀 Ölü Stok' : '📋 Hareketler'}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {tab === 'products' && (
         <>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Ürün ara..." style={{ marginBottom: 14, width: '100%', padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box' }} />
-          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <Input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            placeholder="🔍 Ürün ara..." 
+            className="mb-4 w-full rounded-xl" 
+          />
+          <div className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                <tr className="bg-slate-900/60">
                   {['Ürün', 'Kategori', 'Stok', 'Min.Stok', 'Durum', ''].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {sortedProducts.length === 0 ? (
-                  <tr><td colSpan={6} style={{ padding: 24 }}>
+                  <tr><td colSpan={6} className="p-6">
                     <EmptyState
                       icon={PackageSearch}
                       title="Ürün bulunamadı"
@@ -167,20 +189,29 @@ export default function Stock({ db, save }: Props) {
                     />
                   </td></tr>
                 ) : sortedProducts.map(p => {
-                  const stockStatus = p.stock === 0 ? { color: '#ef4444', label: '🔴 Bitti', bg: 'rgba(239,68,68,0.1)' } : p.stock <= p.minStock ? { color: '#f59e0b', label: '⚠️ Az', bg: 'rgba(245,158,11,0.1)' } : { color: '#10b981', label: '✓ Normal', bg: 'rgba(16,185,129,0.1)' };
+                  const stockStatus = p.stock === 0 ? { color: '#ef4444', label: '🔴 Bitti', bg: 'bg-red-500/10' } : p.stock <= p.minStock ? { color: '#f59e0b', label: '⚠️ Az', bg: 'bg-amber-500/10' } : { color: '#10b981', label: '✓ Normal', bg: 'bg-emerald-500/10' };
                   const catIcon = (db.productCategories || []).find(c => c.id === p.category)?.icon || '📦';
                   const catName = (db.productCategories || []).find(c => c.id === p.category)?.name || p.category;
                   return (
-                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{catIcon} {p.name}</td>
-                      <td data-label="Kategori" style={{ padding: '12px 16px', color: 'var(--text-dim)', fontSize: '0.85rem' }}>{catName}</td>
-                      <td data-label="Stok" style={{ padding: '12px 16px', color: p.stock === 0 ? '#ef4444' : p.stock <= p.minStock ? '#f59e0b' : '#10b981', fontWeight: 700, fontSize: '1rem' }}>{p.stock}</td>
-                      <td data-label="Min.Stok" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{p.minStock}</td>
-                      <td data-label="Durum" style={{ padding: '12px 16px' }}>
-                        <span style={{ background: stockStatus.bg, color: stockStatus.color, borderRadius: 6, padding: '3px 10px', fontSize: '0.82rem', fontWeight: 600 }}>{stockStatus.label}</span>
+                    <tr key={p.id} className="border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                      <td data-label="Ürün" className="p-3 text-foreground font-semibold">{catIcon} {p.name}</td>
+                      <td data-label="Kategori" className="p-3 text-slate-400 text-sm">{catName}</td>
+                      <td data-label="Stok" className="p-3 font-bold text-base" style={{ color: stockStatus.color }}>{p.stock}</td>
+                      <td data-label="Min.Stok" className="p-3 text-muted-foreground">{p.minStock}</td>
+                      <td data-label="Durum" className="p-3">
+                        <Badge variant="outline" className={`font-semibold text-xs ${stockStatus.bg} ${stockStatus.color.replace('#', 'text-')} border-transparent`}>
+                          {stockStatus.label}
+                        </Badge>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <button onClick={() => { setForm(f => ({ ...f, productId: p.id })); setAdjustModal(true); }} style={{ background: 'rgba(255,87,34,0.1)', border: 'none', borderRadius: 6, color: '#ff5722', padding: '5px 10px', cursor: 'pointer', fontSize: '0.82rem' }}>⚙️ Ayarla</button>
+                      <td className="p-3">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 h-7 px-3 text-xs font-bold rounded-lg"
+                          onClick={() => { setForm(f => ({ ...f, productId: p.id })); setAdjustModal(true); }}
+                        >
+                          ⚙️ Ayarla
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -193,32 +224,32 @@ export default function Stock({ db, save }: Props) {
 
       {tab === 'abc' && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             {(['A', 'B', 'C'] as const).map(cls => {
               const d = abcSummary[cls];
               const colors: Record<string, string> = { A: '#10b981', B: '#3b82f6', C: '#64748b' };
               const labels: Record<string, string> = { A: 'A — %80 Ciro (Kritik)', B: 'B — %15 Ciro (Orta)', C: 'C — %5 Ciro (Düşük)' };
               return (
-                <div key={cls} style={{ background: `${colors[cls]}10`, borderRadius: 12, padding: '14px 16px', border: `1px solid ${colors[cls]}25` }}>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: colors[cls] }}>{d.count} ürün</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-dim)', marginTop: 4 }}>{labels[cls]}</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>Ciro: ₺{(d.revenue / 1000).toFixed(0)}K</div>
+                <div key={cls} className={`rounded-xl p-4 border transition-all hover:scale-[1.02] ${colors[cls] === '#10b981' ? 'bg-emerald-500/10 border-emerald-500/25' : colors[cls] === '#3b82f6' ? 'bg-blue-500/10 border-blue-500/25' : 'bg-slate-500/10 border-slate-500/25'}`}>
+                  <div style={{ color: colors[cls] }} className="text-2xl font-black">{d.count} ürün</div>
+                  <div className="text-slate-400 text-xs font-medium mt-1">{labels[cls]}</div>
+                  <div className="text-slate-500 text-xs mt-1">Ciro: ₺{(d.revenue / 1000).toFixed(0)}K</div>
                 </div>
               );
             })}
           </div>
-          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
+          <div className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                <tr className="bg-slate-900/60">
                   {['Sınıf', 'Ürün', 'Ciro', 'Ciro %', 'Küm.%', 'Adet', 'Kâr'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {abcData.length === 0 ? (
-                  <tr><td colSpan={7} style={{ padding: 24 }}>
+                  <tr><td colSpan={7} className="p-6">
                     <EmptyState
                       icon={PackageSearch}
                       title="ABC verisi yok"
@@ -228,16 +259,22 @@ export default function Stock({ db, save }: Props) {
                 ) : abcData.map((v, _i) => {
                   const clsColor = v.class === 'A' ? '#10b981' : v.class === 'B' ? '#3b82f6' : '#64748b';
                   return (
-                    <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td data-label="Sınıf" style={{ padding: '12px 16px' }}>
-                        <span style={{ background: `${clsColor}20`, color: clsColor, borderRadius: 6, padding: '2px 10px', fontWeight: 700, fontSize: '0.9rem' }}>{v.class}</span>
+                    <tr key={v.id} className="border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                      <td data-label="Sınıf" className="p-3">
+                        <Badge variant="outline" className={`font-bold text-xs ${v.class === 'A' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : v.class === 'B' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+                          {v.class}
+                        </Badge>
                       </td>
-                      <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{v.name}</td>
-                      <td data-label="Ciro" style={{ padding: '12px 16px', color: '#10b981', fontWeight: 700 }}>₺{(v.revenue / 1000).toFixed(1)}K</td>
-                      <td data-label="Ciro %" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>%{v.revenuePct.toFixed(1)}</td>
-                      <td data-label="Küm.%"><div style={{ height: 6, borderRadius: 3, background: '#273548', overflow: 'hidden', maxWidth: 80 }}><div style={{ width: `${v.cumulPct}%`, height: 6, borderRadius: 3, background: clsColor }} /></div></td>
-                      <td data-label="Adet" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>{v.qty}</td>
-                      <td data-label="Kâr" style={{ padding: '12px 16px', color: v.profit >= 0 ? '#f59e0b' : '#ef4444' }}>₺{(v.profit / 1000).toFixed(1)}K</td>
+                      <td data-label="Ürün" className="p-3 text-foreground font-semibold">{v.name}</td>
+                      <td data-label="Ciro" className="p-3 text-emerald-500 font-bold">₺{(v.revenue / 1000).toFixed(1)}K</td>
+                      <td data-label="Ciro %" className="p-3 text-slate-400">%{v.revenuePct.toFixed(1)}</td>
+                      <td data-label="Küm.%" className="p-3">
+                        <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden max-w-[80px]">
+                          <div style={{ width: `${v.cumulPct}%`, background: clsColor }} className="h-full rounded-full" />
+                        </div>
+                      </td>
+                      <td data-label="Adet" className="p-3 text-slate-400">{v.qty}</td>
+                      <td data-label="Kâr" className={`p-3 font-semibold ${v.profit >= 0 ? 'text-amber-500' : 'text-red-500'}`}>₺{(v.profit / 1000).toFixed(1)}K</td>
                     </tr>
                   );
                 })}
@@ -249,34 +286,34 @@ export default function Stock({ db, save }: Props) {
 
       {tab === 'dead' && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 14 }}>
-            <div style={{ background: '#ef444410', borderRadius: 12, padding: '14px 16px', border: '1px solid #ef444425' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ef4444' }}>{deadStock.length}</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Ölü Stok (90+ gün)</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="rounded-xl p-4 border bg-red-500/10 border-red-500/25 transition-all hover:scale-[1.02]">
+              <div className="text-2xl font-black text-red-500">{deadStock.length}</div>
+              <div className="text-slate-400 text-xs font-medium mt-1">Ölü Stok (90+ gün)</div>
             </div>
-            <div style={{ background: '#f59e0b10', borderRadius: 12, padding: '14px 16px', border: '1px solid #f59e0b25' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f59e0b' }}>{formatMoney(deadStockValue)}</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Bağlı Sermaye</div>
+            <div className="rounded-xl p-4 border bg-amber-500/10 border-amber-500/25 transition-all hover:scale-[1.02]">
+              <div className="text-2xl font-black text-amber-500">{formatMoney(deadStockValue)}</div>
+              <div className="text-slate-400 text-xs font-medium mt-1">Bağlı Sermaye</div>
             </div>
-            <div style={{ background: '#3b82f610', borderRadius: 12, padding: '14px 16px', border: '1px solid #3b82f625' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#3b82f6' }}>
+            <div className="rounded-xl p-4 border bg-blue-500/10 border-blue-500/25 transition-all hover:scale-[1.02]">
+              <div className="text-2xl font-black text-blue-500">
                 {deadStock.length > 0 ? `₺${(deadStockValue / deadStock.length / 1000).toFixed(0)}K` : '—'}
               </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 4 }}>Ort. Ürün Değeri</div>
+              <div className="text-slate-400 text-xs font-medium mt-1">Ort. Ürün Değeri</div>
             </div>
           </div>
-          <div className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
+          <div className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                <tr className="bg-slate-900/60">
                   {['Ürün', 'Stok', 'Maliyet', 'Değer', 'Son Hareket', 'Gün'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {deadStock.length === 0 ? (
-                  <tr><td colSpan={6} style={{ padding: 24 }}>
+                  <tr><td colSpan={6} className="p-6">
                     <EmptyState
                       icon={PackageSearch}
                       title="Ölü stok bulunamadı"
@@ -284,13 +321,13 @@ export default function Stock({ db, save }: Props) {
                     />
                   </td></tr>
                 ) : deadStock.map(p => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td data-label="Ürün" style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{p.name}</td>
-                    <td data-label="Stok" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 700 }}>{p.stock}</td>
-                    <td data-label="Maliyet" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>{formatMoney(p.cost)}</td>
-                    <td data-label="Değer" style={{ padding: '12px 16px', color: '#f59e0b', fontWeight: 700 }}>{formatMoney(p.cost * p.stock)}</td>
-                    <td data-label="Son Hareket" style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{formatDate(p.lastMovement)}</td>
-                    <td data-label="Gün" style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 600 }}>{p.daysSince}g</td>
+                  <tr key={p.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td data-label="Ürün" className="p-3 text-foreground font-semibold">{p.name}</td>
+                    <td data-label="Stok" className="p-3 text-red-500 font-bold">{p.stock}</td>
+                    <td data-label="Maliyet" className="p-3 text-slate-400">{formatMoney(p.cost)}</td>
+                    <td data-label="Değer" className="p-3 text-amber-500 font-bold">{formatMoney(p.cost * p.stock)}</td>
+                    <td data-label="Son Hareket" className="p-3 text-muted-foreground text-xs">{formatDate(p.lastMovement)}</td>
+                    <td data-label="Gün" className="p-3 text-red-500 font-semibold">{p.daysSince}g</td>
                   </tr>
                 ))}
               </tbody>
@@ -301,9 +338,21 @@ export default function Stock({ db, save }: Props) {
 
       {tab === 'history' && (
         <>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-            <input value={histSearch} onChange={e => { setHistSearch(e.target.value); setHistPage(1); }} placeholder="🔍 Ürün ara..." style={{ flex: 1, minWidth: 160, padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', boxSizing: 'border-box' }} />
-            <select value={histTypeFilter} onChange={e => { setHistTypeFilter(e.target.value); setHistPage(1); }} style={{ padding: '9px 13px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', cursor: 'pointer' }}>
+          <div className="flex gap-3 mb-4 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
+              <input 
+                value={histSearch} 
+                onChange={e => { setHistSearch(e.target.value); setHistPage(1); }} 
+                placeholder="Ürün ara..." 
+                className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-foreground text-sm focus:ring-2 ring-blue-500/20 outline-none transition-all" 
+              />
+            </div>
+            <select 
+              value={histTypeFilter} 
+              onChange={e => { setHistTypeFilter(e.target.value); setHistPage(1); }} 
+              className="px-3 py-2 bg-card border border-border rounded-xl text-foreground text-sm cursor-pointer outline-none focus:ring-2 ring-blue-500/20 transition-all"
+            >
               <option value="">Tüm İşlemler</option>
               <option value="satis">🛒 Satış</option>
               <option value="iade">↩️ İade</option>
@@ -312,18 +361,18 @@ export default function Stock({ db, save }: Props) {
               <option value="duzeltme">⚙️ Düzeltme</option>
             </select>
           </div>
-          <div ref={movTableRef} className="responsive-table-wrap" style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
+          <div ref={movTableRef} className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+                <tr className="bg-slate-900/60">
                   {['Tarih', 'Ürün', 'İşlem', 'Miktar', 'Önceki', 'Sonraki', 'Not'].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase' }}>{h}</th>
+                    <th key={h} className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {pagedMovements.length === 0 ? (
-                  <tr><td colSpan={7} style={{ padding: 24 }}>
+                  <tr><td colSpan={7} className="p-6">
                     <EmptyState
                       icon={PackageSearch}
                       title="Hareket bulunamadı"
@@ -336,14 +385,18 @@ export default function Stock({ db, save }: Props) {
                   const typeMap: Record<string, { label: string; color: string }> = { giris: { label: '📥 Giriş', color: '#10b981' }, cikis: { label: '📤 Çıkış', color: '#ef4444' }, satis: { label: '🛒 Satış', color: '#3b82f6' }, iade: { label: '↩️ İade', color: '#8b5cf6' }, duzeltme: { label: '⚙️ Düzeltme', color: '#f59e0b' }, siparis: { label: '📦 Sipariş', color: '#8b5cf6' } };
                   const t = typeMap[m.type] || { label: m.type, color: 'var(--text-dim)' };
                   return (
-                    <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td data-label="Tarih" style={{ padding: '11px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{formatDate(m.date)}</td>
-                      <td data-label="Ürün" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{m.productName}</td>
-                      <td data-label="İşlem" style={{ padding: '11px 16px' }}><span style={{ color: t.color, fontWeight: 600, fontSize: '0.85rem' }}>{t.label}</span></td>
-                      <td data-label="Miktar" style={{ padding: '11px 16px', color: m.amount >= 0 ? '#10b981' : '#ef4444', fontWeight: 700 }}>{m.amount > 0 ? '+' : ''}{m.amount}</td>
-                      <td data-label="Önceki" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{m.before}</td>
-                      <td data-label="Sonraki" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontWeight: 600 }}>{m.after}</td>
-                      <td data-label="Not" style={{ padding: '11px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{m.note || '-'}</td>
+                    <tr key={m.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td data-label="Tarih" className="p-3 text-muted-foreground text-xs">{formatDate(m.date)}</td>
+                      <td data-label="Ürün" className="p-3 text-foreground font-semibold">{m.productName}</td>
+                      <td data-label="İşlem" className="p-3">
+                        <span style={{ color: t.color }} className="font-semibold text-xs">{t.label}</span>
+                      </td>
+                      <td data-label="Miktar" className={`p-3 font-bold ${m.amount >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                        {m.amount > 0 ? '+' : ''}{m.amount}
+                      </td>
+                      <td data-label="Önceki" className="p-3 text-slate-400">{m.before}</td>
+                      <td data-label="Sonraki" className="p-3 text-foreground font-bold">{m.after}</td>
+                      <td data-label="Not" className="p-3 text-muted-foreground text-xs">{m.note || '-'}</td>
                     </tr>
                   );
                 })}
@@ -351,55 +404,87 @@ export default function Stock({ db, save }: Props) {
             </table>
           </div>
           {totalHistPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 14 }}>
-              <button onClick={() => { setHistPage(p => Math.max(1, p - 1)); scrollToMovTable(); }} disabled={histPage === 1} style={{ padding: '6px 14px', background: histPage === 1 ? '#1e293b' : '#273548', border: '1px solid var(--border)', borderRadius: 8, color: histPage === 1 ? '#334155' : '#94a3b8', cursor: histPage === 1 ? 'default' : 'pointer', fontWeight: 600 }}>← Önceki</button>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Sayfa {histPage} / {totalHistPages} (toplam {sortedMovements.length} kayıt)</span>
-              <button onClick={() => { setHistPage(p => Math.min(totalHistPages, p + 1)); scrollToMovTable(); }} disabled={histPage === totalHistPages} style={{ padding: '6px 14px', background: histPage === totalHistPages ? '#1e293b' : '#273548', border: '1px solid var(--border)', borderRadius: 8, color: histPage === totalHistPages ? '#334155' : '#94a3b8', cursor: histPage === totalHistPages ? 'default' : 'pointer', fontWeight: 600 }}>Sonraki →</button>
+            <div className="flex justify-center items-center gap-3 mt-4">
+              <button 
+                onClick={() => { setHistPage(p => Math.max(1, p - 1)); scrollToMovTable(); }} 
+                disabled={histPage === 1} 
+                className={`px-4 py-2 rounded-xl border font-semibold text-xs transition-all ${histPage === 1 ? 'bg-slate-900 text-slate-600 border-border cursor-default' : 'bg-card text-slate-400 border-border hover:bg-slate-800 hover:text-white cursor-pointer'}`}
+              >
+                ← Önceki
+              </button>
+              <span className="text-muted-foreground text-xs font-medium">
+                Sayfa {histPage} / {totalHistPages} <span className="opacity-50 ml-1">(toplam {sortedMovements.length} kayıt)</span>
+              </span>
+              <button 
+                onClick={() => { setHistPage(p => Math.min(totalHistPages, p + 1)); scrollToMovTable(); }} 
+                disabled={histPage === totalHistPages} 
+                className={`px-4 py-2 rounded-xl border font-semibold text-xs transition-all ${histPage === totalHistPages ? 'bg-slate-900 text-slate-600 border-border cursor-default' : 'bg-card text-slate-400 border-border hover:bg-slate-800 hover:text-white cursor-pointer'}`}
+              >
+                Sonraki →
+              </button>
             </div>
           )}
         </>
       )}
 
       <Modal open={adjustModal} onClose={() => setAdjustModal(false)} title="⚙️ Stok Ayarla">
-        <div style={{ display: 'grid', gap: 14 }}>
+        <div className="grid gap-4">
           <div>
-            <label style={lbl}>Ürün *</label>
-            <select value={form.productId} onChange={e => setForm(f => ({ ...f, productId: e.target.value }))} style={inp}>
+            <label className="block mb-2 text-slate-400 text-sm font-medium">Ürün *</label>
+            <select 
+              value={form.productId} 
+              onChange={e => setForm(f => ({ ...f, productId: e.target.value }))} 
+              className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+            >
               <option value="">-- Ürün Seç --</option>
               {activeProducts.map(p => <option key={p.id} value={p.id}>{p.name} (Stok: {p.stock})</option>)}
             </select>
           </div>
           <div>
-            <label style={lbl}>İşlem Türü</label>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <label className="block mb-2 text-slate-400 text-sm font-medium">İşlem Türü</label>
+            <div className="flex gap-2">
               {(['giris', 'cikis', 'duzeltme'] as const).map(t => (
-                <button key={t} onClick={() => setForm(f => ({ ...f, type: t }))} style={{ flex: 1, padding: '9px 0', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', background: form.type === t ? '#ff5722' : '#273548', color: form.type === t ? '#fff' : '#94a3b8' }}>
+                <button 
+                  key={t} 
+                  onClick={() => setForm(f => ({ ...f, type: t }))} 
+                  className={`flex-1 py-2 rounded-xl font-semibold text-xs transition-all ${form.type === t ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                >
                   {t === 'giris' ? '📥 Giriş' : t === 'cikis' ? '📤 Çıkış' : '⚙️ Düzeltme'}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <label style={lbl}>{form.type === 'duzeltme' ? 'Yeni Stok Miktarı' : 'Miktar'}</label>
-            <input type="number" inputMode="decimal" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} style={inp} min={0} placeholder="0" />
+            <label className="block mb-2 text-slate-400 text-sm font-medium">{form.type === 'duzeltme' ? 'Yeni Stok Miktarı' : 'Miktar'}</label>
+            <input 
+              type="number" 
+              inputMode="decimal" 
+              value={form.amount} 
+              onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} 
+              className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+              min={0} 
+              placeholder="0" 
+            />
           </div>
           <div>
-            <label style={lbl}>Not</label>
-            <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} style={inp} placeholder="Opsiyonel not..." />
+            <label className="block mb-2 text-slate-400 text-sm font-medium">Not</label>
+            <input 
+              value={form.note} 
+              onChange={e => setForm(f => ({ ...f, note: e.target.value }))} 
+              className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+              placeholder="Opsiyonel not..." 
+            />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button onClick={handleAdjust} style={{ flex: 1, background: '#10b981', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>💾 Kaydet</button>
-          <button onClick={() => setAdjustModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+        <div className="flex gap-3 mt-6">
+          <button onClick={handleAdjust} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95">💾 Kaydet</button>
+          <button onClick={() => setAdjustModal(false)} className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all">İptal</button>
         </div>
       </Modal>
       <VoiceAssistantButton />
     </div>
   );
 }
-
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };
 
 function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (

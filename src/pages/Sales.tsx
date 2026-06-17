@@ -9,12 +9,14 @@ import type { DB, SaleItem } from '@/types';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import EmptyState from '@/components/EmptyState';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, FileSpreadsheet, Plus } from 'lucide-react';
 import { SkeletonTable } from '@/components/SkeletonLoaders';
 import { useLocation } from 'wouter';
 import SaleFormModal from './SaleFormModal';
-import { StatCard } from './SalesHelpers';
-import { sinp, paymentLabels } from './salesStyles';
+import { paymentLabels } from './salesStyles';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
 
 interface Props {
@@ -202,50 +204,31 @@ export default function Sales({ db, save: _save }: Props) {
 
   return (
     <div>
-      <div
-        className="stat-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <StatCard
-          label="Bugün Satış"
-          value={String(todayStats.count)}
-          sub={formatMoney(todayStats.revenue)}
-          color="#10b981"
-        />
-        <StatCard label="Bugün Ciro" value={formatMoney(todayStats.revenue)} color="#3b82f6" />
-        <StatCard label="Bugün Kâr" value={formatMoney(todayStats.profit)} color="#f59e0b" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+        <div className="rounded-xl p-4 border bg-emerald-500/10 border-emerald-500/25 transition-all hover:scale-[1.02]">
+          <div className="text-2xl font-black text-emerald-500">{String(todayStats.count)}</div>
+          <div className="text-slate-400 text-xs font-medium mt-1">Bugün Satış</div>
+          <div className="text-slate-500 text-xs mt-1">Toplam Ciro: {formatMoney(todayStats.revenue)}</div>
+        </div>
+        <div className="rounded-xl p-4 border bg-blue-500/10 border-blue-500/25 transition-all hover:scale-[1.02]">
+          <div className="text-2xl font-black text-blue-500">{formatMoney(todayStats.revenue)}</div>
+          <div className="text-slate-400 text-xs font-medium mt-1">Bugün Ciro</div>
+        </div>
+        <div className="rounded-xl p-4 border bg-amber-500/10 border-amber-500/25 transition-all hover:scale-[1.02]">
+          <div className="text-2xl font-black text-amber-500">{formatMoney(todayStats.profit)}</div>
+          <div className="text-slate-400 text-xs font-medium mt-1">Bugün Kâr</div>
+        </div>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 12,
-          alignItems: 'center',
-          marginBottom: 16,
-          flexWrap: 'wrap',
-        }}
-      >
-        <button
-          onClick={() => setModalOpen(true)}
-          style={{
-            background: '#ff5722',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            padding: '10px 20px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-          }}
+      <div className="flex gap-3 mb-4 items-center flex-wrap">
+        <Button 
+          onClick={() => setModalOpen(true)} 
+          className="bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl px-5 gap-2 transition-all active:scale-95"
         >
-          + Yeni Satış
-        </button>
-        <button
+          <Plus size={16} /> Yeni Satış
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => {
             exportToExcel(db, {
               sheets: ['satislar'],
@@ -254,78 +237,56 @@ export default function Sales({ db, save: _save }: Props) {
             });
             showToast('Excel indirildi!', 'success');
           }}
-          style={{
-            background: 'rgba(16,185,129,0.15)',
-            border: '1px solid rgba(16,185,129,0.3)',
-            borderRadius: 10,
-            color: '#10b981',
-            padding: '10px 16px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-          }}
+          className="rounded-xl gap-2"
         >
-          📊 Excel İndir
-        </button>
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="🔍 Ürün ara..." style={sinp} />
-        <input
+          <FileSpreadsheet className="h-4 w-4" />
+          Excel İndir
+        </Button>
+        <div className="relative flex-1 min-w-[200px]">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
+          <Input 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)} 
+            placeholder="Ürün ara..." 
+            className="pl-9 rounded-xl"
+          />
+        </div>
+        <Input
           type="date"
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
-          style={{ ...sinp, width: 160 }}
+          className="rounded-xl w-[160px]"
         />
-        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} style={{ ...sinp, width: 160 }} />
-        <div style={{ display: 'flex', gap: 6 }}>
+        <Input 
+          type="date" 
+          value={dateTo} 
+          onChange={(e) => setDateTo(e.target.value)} 
+          className="rounded-xl w-[160px]" 
+        />
+        <div className="flex gap-2">
           {(['all', 'tamamlandi', 'iade', 'iptal'] as const).map((f) => (
-            <button
+            <Button
               key={f}
+              variant={filter === f ? 'default' : 'outline'}
               onClick={() => setFilter(f)}
-              style={{
-                padding: '8px 14px',
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                background: filter === f ? '#ff5722' : '#273548',
-                color: filter === f ? '#fff' : '#94a3b8',
-              }}
+              className={`rounded-xl px-3 h-8 text-xs font-semibold transition-all ${filter === f ? 'bg-orange-600 hover:bg-orange-500 text-white' : 'text-slate-400'}`}
             >
               {f === 'all' ? 'Tümü' : f === 'tamamlandi' ? '✓ Tamamlandı' : f === 'iade' ? '↩ İade' : '✕ İptal'}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       <div
-        className="responsive-table-wrap"
-        style={{
-          background: 'var(--bg-card)',
-          borderRadius: 14,
-          border: '1px solid #334155',
-          overflowX: 'auto',
-        }}
+        className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto"
       >
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
+            <tr className="bg-slate-900/60">
               {['Tarih', 'Ürün', 'Müşteri', 'Miktar', 'Tutar', 'Kâr', 'Ödeme', 'Durum', ''].map((h) => (
                 <th
                   key={h}
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    textTransform: 'uppercase',
-                  }}
+                  className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase"
                 >
                   {h}
                 </th>
@@ -335,7 +296,7 @@ export default function Sales({ db, save: _save }: Props) {
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ padding: 24 }}>
+                <td colSpan={9} className="p-6">
                   <EmptyState
                     icon={ShoppingCart}
                     title="Satış bulunamadı"
@@ -352,138 +313,88 @@ export default function Sales({ db, save: _save }: Props) {
               </tr>
             ) : (
               sorted.map((s) => (
-                <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <tr key={s.id} className="border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
                   <td
                     data-label="Tarih"
-                    style={{
-                      padding: '12px 16px',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.82rem',
-                    }}
+                    className="p-3 text-muted-foreground text-xs"
                   >
                     {formatDate(s.createdAt)}
                   </td>
                   <td
                     data-label="Ürün"
-                    style={{
-                      padding: '12px 16px',
-                      color: 'var(--text-primary)',
-                      fontWeight: 600,
-                    }}
+                    className="p-3 text-foreground font-semibold"
                   >
                     {s.productName}
                   </td>
                   <td
                     data-label="Müşteri"
-                    style={{
-                      padding: '12px 16px',
-                      color: 'var(--text-dim)',
-                      fontSize: '0.85rem',
-                    }}
+                    className="p-3 text-slate-400 text-sm"
                   >
                     {db.cari.find((c) => c.id === s.cariId)?.name || '-'}
                   </td>
-                  <td data-label="Miktar" style={{ padding: '12px 16px', color: 'var(--text-dim)' }}>
+                  <td data-label="Miktar" className="p-3 text-slate-400">
                     {s.quantity}
                   </td>
                   <td
                     data-label="Tutar"
-                    style={{
-                      padding: '12px 16px',
-                      color: '#10b981',
-                      fontWeight: 700,
-                    }}
+                    className="p-3 text-emerald-500 font-bold"
                   >
                     {formatMoney(s.total)}
                   </td>
                   <td
                     data-label="Kâr"
-                    style={{
-                      padding: '12px 16px',
-                      color: s.profit >= 0 ? '#10b981' : '#ef4444',
-                      fontWeight: 600,
-                    }}
+                    className={`p-3 font-semibold ${s.profit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}
                   >
                     {formatMoney(s.profit)}
                   </td>
-                  <td data-label="Ödeme" style={{ padding: '12px 16px' }}>
-                    <span
-                      style={{
-                        background: 'rgba(59,130,246,0.15)',
-                        color: '#60a5fa',
-                        borderRadius: 6,
-                        padding: '2px 8px',
-                        fontSize: '0.8rem',
-                      }}
+                  <td data-label="Ödeme" className="p-3">
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-500/10 text-blue-400 border-blue-500/20 font-semibold text-xs"
                     >
                       {(db.kasalar || []).find((k) => k.id === s.payment)?.name ||
                         paymentLabels[s.payment] ||
                         s.payment}
-                    </span>
+                    </Badge>
                   </td>
-                  <td data-label="Durum" style={{ padding: '12px 16px' }}>
-                    <span
-                      style={{
-                        background: s.status === 'tamamlandi' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-                        color: s.status === 'tamamlandi' ? '#10b981' : '#ef4444',
-                        borderRadius: 6,
-                        padding: '2px 8px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                      }}
+                  <td data-label="Durum" className="p-3">
+                    <Badge
+                      variant="outline"
+                      className={`font-semibold text-xs ${
+                        s.status === 'tamamlandi' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                      }`}
                     >
                       {s.status === 'tamamlandi' ? '✓ Tamamlandı' : s.status === 'iade' ? '↩ İade' : '✕ İptal'}
-                    </span>
+                    </Badge>
                   </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      <button
+                  <td className="p-3">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 h-7 px-2 text-xs font-semibold rounded-lg"
                         onClick={() => setLocation(`/satis/${s.id}`)}
-                        style={{
-                          background: 'rgba(59,130,246,0.1)',
-                          border: 'none',
-                          borderRadius: 6,
-                          color: '#60a5fa',
-                          padding: '4px 10px',
-                          cursor: 'pointer',
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                        }}
                       >
                         Detay
-                      </button>
+                      </Button>
                       {s.status === 'tamamlandi' && (
                         <>
-                          <button
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="bg-red-500/10 text-red-500 hover:bg-red-500/20 h-7 px-2 text-xs font-semibold rounded-lg"
                             onClick={() => handleReturn(s.id)}
-                            style={{
-                              background: 'rgba(239,68,68,0.1)',
-                              border: 'none',
-                              borderRadius: 6,
-                              color: '#ef4444',
-                              padding: '4px 10px',
-                              cursor: 'pointer',
-                              fontSize: '0.8rem',
-                              fontWeight: 600,
-                            }}
                           >
                             ↩ İade
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 h-7 px-2 text-xs font-semibold rounded-lg"
                             onClick={() => handleCancel(s.id)}
-                            style={{
-                              background: 'rgba(245,158,11,0.1)',
-                              border: 'none',
-                              borderRadius: 6,
-                              color: '#f59e0b',
-                              padding: '4px 10px',
-                              cursor: 'pointer',
-                              fontSize: '0.8rem',
-                              fontWeight: 600,
-                            }}
                           >
                             ✕ İptal
-                          </button>
+                          </Button>
                         </>
                       )}
                     </div>

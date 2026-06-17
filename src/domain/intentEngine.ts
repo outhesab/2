@@ -4,6 +4,20 @@ import { completeSale, cancelSale, returnSale, correctSalePrice } from "./servic
 import { processCashTransaction } from "./services/cashService";
 import { processStockUpdate, processProductAdd } from "./services/stockService";
 import { processCariTahsilat, processCariAdd } from "./services/cariService";
+import { domainEventBus } from "./eventBus";
+
+function emitEvents(result: IntentResult): void {
+  if (!result.ok || !result.data) return;
+  const events = result.data.events;
+  if (!events || events.length === 0) return;
+  for (const event of events) {
+    try {
+      domainEventBus.emit(event);
+    } catch {
+      // Tek event hatası tüm intent'i çökertmesin
+    }
+  }
+}
 
 export function processIntent(intent: Intent, db: DB): IntentResult {
   let result: IntentResult;
@@ -42,6 +56,9 @@ export function processIntent(intent: Intent, db: DB): IntentResult {
     default:
       return { ok: false, error: `Bilinmeyen intent tipi` };
   }
+
+  // Domain event'leri bus üzerinden yayınla (asenkron, try/catch korumalı)
+  emitEvents(result);
 
   return result;
 }

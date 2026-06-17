@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from 'react';
@@ -186,35 +187,60 @@ export default function Kasa({ db, save }: Props) {
 
   const EntryModal = ({ type, open, onClose }: { type: 'gelir' | 'gider'; open: boolean; onClose: () => void }) => (
     <Modal open={open} onClose={onClose} title={type === 'gelir' ? '💚 Gelir Ekle' : '🔴 Gider Ekle'}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Tutar (₺) *</label>
-          <input type="number" inputMode="decimal" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} style={inp} placeholder="0,00" min={0} step={0.01} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2">
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Tutar (₺) *</label>
+          <input 
+            type="number" 
+            inputMode="decimal" 
+            value={form.amount} 
+            onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+            placeholder="0,00" 
+            min={0} 
+            step={0.01} 
+          />
         </div>
         <div>
-          <label style={lbl}>Kasa</label>
-          <select value={form.kasa} onChange={e => setForm(f => ({ ...f, kasa: e.target.value }))} style={inp}>
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Kasa</label>
+          <select 
+            value={form.kasa} 
+            onChange={e => setForm(f => ({ ...f, kasa: e.target.value }))} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+          >
             {kasalar.map(k => <option key={k.id} value={k.id}>{k.icon} {k.name}</option>)}
           </select>
         </div>
         <div>
-          <label style={lbl}>Kategori</label>
-          <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} style={inp}>
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Kategori</label>
+          <select 
+            value={form.category} 
+            onChange={e => setForm(f => ({ ...f, category: e.target.value }))} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+          >
             <option value="">Seçin</option>
             {(type === 'gelir' ? incomeCategories : expenseCategories).map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Cari (opsiyonel)</label>
-          <select value={form.cariId} onChange={e => setForm(f => ({ ...f, cariId: e.target.value }))} style={inp}>
+        <div className="sm:col-span-2">
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Cari (opsiyonel)</label>
+          <select 
+            value={form.cariId} 
+            onChange={e => setForm(f => ({ ...f, cariId: e.target.value }))} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+          >
             <option value="">-- Cari Seç --</option>
             {db.cari.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         {type === 'gelir' && form.category === 'ortak_tahsilat' && (
-          <div style={{ gridColumn: '1/-1' }}>
-            <label style={lbl}>Ortak *</label>
-            <select value={form.partnerId} onChange={e => setForm(f => ({ ...f, partnerId: e.target.value }))} style={inp}>
+          <div className="sm:col-span-2">
+            <label className="block mb-1.5 text-slate-400 text-xs font-medium">Ortak *</label>
+            <select 
+              value={form.partnerId} 
+              onChange={e => setForm(f => ({ ...f, partnerId: e.target.value }))} 
+              className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
+            >
               <option value="">-- Ortak Seç --</option>
               {(db.partners || []).map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -222,16 +248,29 @@ export default function Kasa({ db, save }: Props) {
             </select>
           </div>
         )}
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Açıklama</label>
-          <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={inp} placeholder="Açıklama..." />
+        <div className="sm:col-span-2">
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Açıklama</label>
+          <input 
+            value={form.description} 
+            onChange={e => setForm(f => ({ ...f, description: e.target.value }))} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+            placeholder="Açıklama..." 
+          />
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-        <button onClick={() => saveEntry(type)} style={{ flex: 1, background: type === 'gelir' ? '#10b981' : '#ef4444', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>
+      <div className="flex gap-3 mt-6">
+        <button 
+          onClick={() => saveEntry(type)} 
+          className={`flex-1 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95 ${type === 'gelir' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-red-600 hover:bg-red-500'}`}
+        >
           💾 Kaydet
         </button>
-        <button onClick={onClose} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>İptal</button>
+        <button 
+          onClick={onClose} 
+          className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all"
+        >
+          İptal
+        </button>
       </div>
     </Modal>
   );
@@ -240,7 +279,7 @@ export default function Kasa({ db, save }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gap: 12, marginBottom: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+      <div className="grid gap-3 mb-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Kasa', value: totalBakiye, icon: WalletCards },
           { label: 'Nakit', value: bakiyeler.nakit || 0, icon: Coins },
@@ -249,43 +288,49 @@ export default function Kasa({ db, save }: Props) {
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.label} style={{ background: 'var(--bg-card)', borderRadius: 14, padding: '16px 20px', border: '1px solid var(--border)', cursor: item.label !== "Kasa" ? 'pointer' : 'default' }} onClick={item.label === "Nakit" ? () => setKasaFilter("nakit") : item.label === "Banka" ? () => setKasaFilter("banka") : undefined}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase' }}>
+            <div 
+              key={item.label} 
+              className={`rounded-xl p-4 border bg-card transition-all hover:scale-[1.02] cursor-pointer ${item.label === "Kasa" ? 'cursor-default' : 'hover:border-blue-500/30'}`} 
+              onClick={item.label === "Nakit" ? () => setKasaFilter("nakit") : item.label === "Banka" ? () => setKasaFilter("banka") : undefined}
+            >
+              <div className="text-muted-foreground text-[0.7rem] mb-1 flex items-center gap-2 uppercase font-semibold">
                 <Icon size={14} /> {item.label}
               </div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: item.value >= 0 ? 'var(--text-primary)' : '#ef4444' }}>{formatMoney(item.value)}</div>
-              {item.label === "POS" ? (
-                <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Ziraat {formatMoney(posBakiyeleri.pos_ziraat)}</span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>İş {formatMoney(posBakiyeleri.pos_is)}</span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>YapıKredi {formatMoney(posBakiyeleri.pos_yk)}</span>
+              <div className={`text-2xl font-black ${item.value >= 0 ? 'text-foreground' : 'text-red-500'}`}>
+                {formatMoney(item.value)}
+              </div>
+              {item.label === "POS" && (
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <span className="text-[0.65rem] text-slate-500 bg-slate-900/40 px-1.5 py-0.5 rounded">Ziraat {formatMoney(posBakiyeleri.pos_ziraat)}</span>
+                  <span className="text-[0.65rem] text-slate-500 bg-slate-900/40 px-1.5 py-0.5 rounded">İş {formatMoney(posBakiyeleri.pos_is)}</span>
+                  <span className="text-[0.65rem] text-slate-500 bg-slate-900/40 px-1.5 py-0.5 rounded">YK {formatMoney(posBakiyeleri.pos_yk)}</span>
                 </div>
-              ) : null}
+              )}
             </div>
           );
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="flex gap-3 mb-4 flex-wrap items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus />
+            <Button className="gap-2">
+              <Plus size={16} />
               Yeni İşlem
-              <ChevronDown />
+              <ChevronDown size={16} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => setIncomeModal(true)}>Gelir</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setExpenseModal(true)}>Gider</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIncomeModal(true)} className="cursor-pointer">Gelir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setExpenseModal(true)} className="cursor-pointer">Gider</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="outline" onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }}>
-          <WalletCards />
+        <Button variant="outline" onClick={() => { setSayimForm(Object.fromEntries(kasalar.map(k => [k.id, '']))); setSayimModal(true); }} className="gap-2">
+          <WalletCards size={16} />
           Gün Sonu Sayım
         </Button>
-        <Button variant="outline" onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }}>
-          <Download />
+        <Button variant="outline" onClick={() => { exportToExcel(db, { sheets: ['kasa'] }); showToast('Excel indirildi!', 'success'); }} className="gap-2">
+          <Download size={16} />
           Excel İndir
         </Button>
         <TableFilterBar
@@ -304,7 +349,14 @@ export default function Kasa({ db, save }: Props) {
             <TabsTrigger value="gider">Gider</TabsTrigger>
           </TabsList>
         </Tabs>
-        {kasaFilter !== 'all' && <button onClick={() => setKasaFilter('all')} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, background: '#334155', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.82rem' }}>✕ Filtre Kaldır</button>}
+        {kasaFilter !== 'all' && (
+          <button 
+            onClick={() => setKasaFilter('all')} 
+            className="px-3 py-1.5 bg-slate-800 text-slate-400 rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors"
+          >
+            ✕ Filtre Kaldır
+          </button>
+        )}
       </div>
 
       <TableWrapper
@@ -327,21 +379,25 @@ export default function Kasa({ db, save }: Props) {
         colSpan={7}
       >
         {sorted.map(e => (
-          <tr key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-            <td data-label="Tarih" style={{ padding: '11px 16px', color: '#64748b', fontSize: '0.82rem' }}>{formatDate(e.createdAt)}</td>
-            <td data-label="Açıklama" style={{ padding: '11px 16px', color: 'var(--text-primary)', fontSize: '0.9rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.description || '-'}</td>
-            <td data-label="Kategori" style={{ padding: '11px 16px', color: 'var(--text-dim)', fontSize: '0.82rem' }}>{catLabels[e.category] || e.category || '-'}</td>
-            <td data-label="Kasa" style={{ padding: '11px 16px', color: 'var(--text-dim)' }}>{kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}</td>
-            <td data-label="Tutar" style={{ padding: '11px 16px', fontWeight: 700, color: e.type === 'gelir' ? '#10b981' : '#ef4444' }}>
-              {e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}
-            </td>
-            <td data-label="Tür" style={{ padding: '11px 16px' }}>
-              <span style={{ background: e.type === 'gelir' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: e.type === 'gelir' ? '#10b981' : '#ef4444', borderRadius: 6, padding: '2px 8px', fontSize: '0.8rem', fontWeight: 600 }}>
-                {e.type === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
+          <tr key={e.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <td data-label="Tarih" className="p-3 text-muted-foreground text-xs">{formatDate(e.createdAt)}</td>
+            <td data-label="Açıklama" className="p-3 text-foreground text-sm font-medium max-w-[200px] truncate">{e.description || '-'}</td>
+            <td data-label="Kategori" className="p-3 text-slate-400 text-xs">{catLabels[e.category] || e.category || '-'}</td>
+            <td data-label="Kasa" className="p-3 text-slate-400 text-xs">
+              <span className="flex items-center gap-1.5">
+                {kasalar.find(k => k.id === e.kasa)?.icon} {e.kasa}
               </span>
             </td>
-            <td style={{ padding: '11px 16px' }}>
-              <button onClick={() => deleteEntry(e.id)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.9rem' }}>🗑️</button>
+            <td data-label="Tutar" className={`p-3 font-bold ${e.type === 'gelir' ? 'text-emerald-500' : 'text-red-500'}`}>
+              {e.type === 'gelir' ? '+' : '-'}{formatMoney(e.amount)}
+            </td>
+            <td data-label="Tür" className="p-3">
+              <Badge variant="outline" className={`text-[10px] font-bold ${e.type === 'gelir' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                {e.type === 'gelir' ? '💚 Gelir' : '🔴 Gider'}
+              </Badge>
+            </td>
+            <td className="p-3">
+              <button onClick={() => deleteEntry(e.id)} className="text-red-500 hover:text-red-400 transition-colors p-1">🗑️</button>
             </td>
           </tr>
         ))}
@@ -351,38 +407,53 @@ export default function Kasa({ db, save }: Props) {
       <EntryModal type="gider" open={expenseModal} onClose={() => setExpenseModal(false)} />
 
       <Modal open={sayimModal} onClose={() => setSayimModal(false)} title="📋 Gün Sonu Sayım">
-        <div style={{ marginBottom: 14 }}>
-          <label style={lbl}>Tarih</label>
-          <input type="date" value={sayimDate} onChange={e => setSayimDate(e.target.value)} style={inp} />
+        <div className="mb-4">
+          <label className="block mb-1.5 text-slate-400 text-xs font-medium">Tarih</label>
+          <input 
+            type="date" 
+            value={sayimDate} 
+            onChange={e => setSayimDate(e.target.value)} 
+            className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+          />
         </div>
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="grid gap-3">
           {kasalar.map(k => {
             const fiziki = parseFloat(sayimForm[k.id] || '0') || 0;
             const sistem = bakiyeler[k.id] || 0;
             const fark = fiziki - sistem;
-            const farkColor = fark > 0 ? '#10b981' : fark < 0 ? '#ef4444' : '#64748b';
+            const farkColor = fark > 0 ? 'text-emerald-500' : fark < 0 ? 'text-red-500' : 'text-slate-500';
+            const borderColor = fark > 0 ? 'border-emerald-500/30' : fark < 0 ? 'border-red-500/30' : 'border-border';
+            const bgColor = fark > 0 ? 'bg-emerald-500/5' : fark < 0 ? 'bg-red-500/5' : 'bg-slate-900/40';
             return (
-              <div key={k.id} style={{ background: 'rgba(15,23,42,0.4)', borderRadius: 12, padding: '14px 16px', border: `1px solid ${fark !== 0 ? farkColor + '30' : 'rgba(255,255,255,0.06)'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <div>
-                    <span style={{ fontSize: '1.2rem', marginRight: 6 }}>{k.icon}</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{k.name}</span>
+              <div key={k.id} className={`rounded-xl p-4 border transition-all ${borderColor} ${bgColor}`}>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{k.icon}</span>
+                    <span className="text-foreground font-bold">{k.name}</span>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.72rem' }}>Sistem Bakiyesi</div>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{formatMoney(sistem)}</div>
+                  <div className="text-right">
+                    <div className="text-slate-500 text-[0.65rem] uppercase font-semibold">Sistem Bakiyesi</div>
+                    <div className="text-foreground font-bold">{formatMoney(sistem)}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ ...lbl, fontSize: '0.75rem', marginBottom: 4 }}>Fiziki Sayım</label>
-                    <input type="number" inputMode="decimal" value={sayimForm[k.id] || ''} onChange={e => setSayimForm(f => ({ ...f, [k.id]: e.target.value }))} style={{ ...inp, padding: '14px 16px', fontSize: '1.4rem', fontWeight: 800, textAlign: 'center' }} placeholder="0,00" step={0.01} />
+                <div className="flex gap-3 items-center">
+                  <div className="flex-1">
+                    <label className="block mb-1 text-slate-500 text-[0.7rem] font-medium">Fiziki Sayım</label>
+                    <input 
+                      type="number" 
+                      inputMode="decimal" 
+                      value={sayimForm[k.id] || ''} 
+                      onChange={e => setSayimForm(f => ({ ...f, [k.id]: e.target.value }))} 
+                      className="w-full p-3 bg-slate-950 border border-border rounded-xl text-center text-xl font-black outline-none focus:ring-2 ring-blue-500/20 transition-all" 
+                      placeholder="0,00" 
+                      step={0.01} 
+                    />
                   </div>
                 </div>
                 {sayimForm[k.id] && sayimForm[k.id] !== '' && (
-                  <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: 8, background: fark !== 0 ? `${farkColor}10` : 'transparent' }}>
-                    <span style={{ color: '#64748b', fontSize: '0.82rem' }}>Fark</span>
-                    <span style={{ color: farkColor, fontWeight: 800, fontSize: '1.1rem' }}>{fark >= 0 ? '+' : ''}{formatMoney(fark)}</span>
+                  <div className={`mt-3 flex justify-between items-center p-2 rounded-lg ${fark !== 0 ? 'bg-slate-900/60' : 'bg-transparent'}`}>
+                    <span className="text-slate-500 text-xs">Fark</span>
+                    <span className={`font-black text-lg ${farkColor}`}>{fark >= 0 ? '+' : ''}{formatMoney(fark)}</span>
                   </div>
                 )}
               </div>
@@ -390,15 +461,15 @@ export default function Kasa({ db, save }: Props) {
           })}
         </div>
         {sayimToplamFark > 0 && (
-          <div style={{ marginTop: 14, padding: '12px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-            <span style={{ color: '#fca5a5', fontWeight: 700, fontSize: '0.95rem' }}>
+          <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+            <span className="text-red-400 font-bold text-sm flex items-center gap-2">
               ⚠️ Toplam Fark: {formatMoney(sayimToplamFark)} — Sayım sonuçlarını kontrol edin.
             </span>
           </div>
         )}
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button onClick={gunSonuSayimPDF} style={{ flex: 1, background: '#8b5cf6', border: 'none', borderRadius: 10, color: '#fff', padding: '11px 0', fontWeight: 700, cursor: 'pointer' }}>🖨️ PDF Yazdır</button>
-          <button onClick={() => setSayimModal(false)} style={{ background: '#273548', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-dim)', padding: '11px 20px', cursor: 'pointer' }}>Kapat</button>
+        <div className="flex gap-3 mt-6">
+          <button onClick={gunSonuSayimPDF} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95">🖨️ PDF Yazdır</button>
+          <button onClick={() => setSayimModal(false)} className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all">Kapat</button>
         </div>
       </Modal>
       <VoiceAssistantButton />
@@ -406,5 +477,4 @@ export default function Kasa({ db, save }: Props) {
   );
 }
 
-const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 500 };
-const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', background: 'rgba(15,23,42,0.6)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem', boxSizing: 'border-box' };
+

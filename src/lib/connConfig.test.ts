@@ -4,6 +4,7 @@ process.env.VITE_FIREBASE_API_KEY = 'test-api-key';
 
 // Eğer projenizde Vite'ın import.meta.env yapısı kullanılıyorsa garantiye almak için:
 if (typeof globalThis !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).import = { meta: { env: { VITE_FIREBASE_PROJECT_ID: 'test-project', VITE_FIREBASE_API_KEY: 'test-api-key' } } };
 }
 

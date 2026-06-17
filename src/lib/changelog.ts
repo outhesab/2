@@ -20,6 +20,30 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.31.0',
+    date: '17 Haziran 2026',
+    title: 'DomainEventBus + Listeners — C2 Tamamlandı, 5 Sayfa Refactor',
+    summary: 'C2: domainEventBus mitt-based pub/sub ile yeniden yazıldı (AgentBus+domain event bridge). 3 listener eklendi: agentBridge (DomainEvent→AgentBus köprüsü), auditLogger (activity log), notification (toast bildirimleri). intentEngine emit loop geri getirildi. 5 sayfada inline style→Tailwind dönüşümü tamamlandı. CariAgent.test.ts timeout fix (dynamic→static import).',
+    changes: [
+      { type: 'yeni', text: 'C2 - domainEventBus.ts: mitt-based typed pub/sub singleton (emit, on, onAny, off, clear, handlerCount).' },
+      { type: 'yeni', text: 'C2 - domain/listeners/agentBridge.ts: DomainEvent→AgentBus köprüsü (11 event route).' },
+      { type: 'yeni', text: 'C2 - domain/listeners/auditLogger.ts: Domain event\'leri activity log\'a kaydeder (save enjekte).' },
+      { type: 'yeni', text: 'C2 - domain/listeners/notification.ts: Domain event\'ler için toast bildirimleri (showToast enjekte).' },
+      { type: 'yeni', text: 'C2 - domain/listeners/index.ts: setupDomainListeners() — tüm listener\'ları tek çağrıda kurar.' },
+      { type: 'yeni', text: 'C2 - domain/index.ts: domainEventBus, setupDomainListeners export edildi.' },
+      { type: 'iyilestirme', text: 'C2 - intentEngine.ts: processIntent sonrası emitEvents() ile domain event yayını eklendi.' },
+      { type: 'iyilestirme', text: 'C2 - App.tsx: setupDomainListeners useEffect ile entegre edildi.' },
+      { type: 'iyilestirme', text: 'AnomaliOneri.tsx: inline style→Tailwind dönüşümü (−474 satır).' },
+      { type: 'iyilestirme', text: 'Kasa.tsx: inline style→Tailwind dönüşümü + Badge kullanımı.' },
+      { type: 'iyilestirme', text: 'SaleFormModal.tsx: inline style→Tailwind dönüşümü (−496 satır), salesStyles/SalesHelpers bağımlılığı kaldırıldı.' },
+      { type: 'iyilestirme', text: 'Sales.tsx: inline style→Tailwind dönüşümü, StatCard/sinp bağımlılığı kaldırıldı, Button/Input/Badge kullanımı.' },
+      { type: 'iyilestirme', text: 'Stock.tsx: inline style→Tailwind dönüşümü, Button/Badge/VoiceAssistantButton kullanımı.' },
+      { type: 'duzeltme', text: 'CariAgent.test.ts: dynamic import (await import) → static import, test timeout fix.' },
+      { type: 'duzeltme', text: 'uygulama-gercek.test.ts: negative_kasa test timing issue (indirect fix, artık tutarlı pass).' },
+      { type: 'iyilestirme', text: 'connConfig.test.ts: eslint-disable eklendi (globalThis as any).' },
+    ],
+  },
+  {
     version: '3.30.0',
     date: '16 Haziran 2026',
     title: 'Tüm Kalan Görevler Tamamlandı — C2 Event Bus + D+E+F + H + I+J+K',

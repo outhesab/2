@@ -23,24 +23,24 @@ interface Props {
 
 const SEV_STYLE: Record<AnomalySeverity, { bg: string; border: string; text: string; badge: string; icon: string }> = {
   critical: {
-    bg: 'rgba(239, 68, 68, 0.08)',
-    border: 'rgba(239, 68, 68, 0.3)',
-    text: 'var(--color-danger, #ef4444)',
-    badge: 'rgba(239, 68, 68, 0.15)',
+    bg: 'bg-red-500/10',
+    border: 'border-red-500/30',
+    text: 'text-red-500',
+    badge: 'bg-red-500/20',
     icon: '🔴',
   },
   warning: {
-    bg: 'rgba(245, 158, 11, 0.08)',
-    border: 'rgba(245, 158, 11, 0.3)',
-    text: 'var(--color-warning, #f59e0b)',
-    badge: 'rgba(245, 158, 11, 0.15)',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/30',
+    text: 'text-amber-500',
+    badge: 'bg-amber-500/20',
     icon: '🟡',
   },
   info: {
-    bg: 'rgba(59, 130, 246, 0.08)',
-    border: 'rgba(59, 130, 246, 0.25)',
-    text: 'var(--color-info, #3b82f6)',
-    badge: 'rgba(59, 130, 246, 0.15)',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/30',
+    text: 'text-blue-500',
+    badge: 'bg-blue-500/20',
     icon: '🔵',
   },
 };
@@ -74,122 +74,57 @@ function AnomalyCard({
   const [expanded, setExpanded] = useState(false);
   const s = isResolved
     ? {
-        bg: 'rgba(16, 185, 129, 0.06)',
-        border: 'rgba(16, 185, 129, 0.2)',
-        text: 'var(--color-success, #10b981)',
-        badge: 'rgba(16, 185, 129, 0.12)',
+        bg: 'bg-emerald-500/[0.06]',
+        border: 'border-emerald-500/20',
+        text: 'text-emerald-500',
+        badge: 'bg-emerald-500/[0.12]',
         icon: '✅',
       }
     : SEV_STYLE[anomaly.severity];
 
   return (
     <div
-      style={{
-        background: s.bg,
-        border: `1px solid ${s.border}`,
-        borderRadius: 14,
-        overflow: 'hidden',
-        opacity: isResolved ? 0.6 : 1,
-        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-      className="hover:scale-[1.01] hover:shadow-lg transition-all"
+      className={`${s.bg} border ${s.border} overflow-hidden rounded-[14px] transition-all hover:scale-[1.01] hover:shadow-lg ${isResolved ? 'opacity-60' : 'opacity-100'}`}
     >
       {/* Header */}
       <button
         onClick={() => setExpanded((e) => !e)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '14px 18px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
+        className="w-full flex items-center gap-2.5 px-[18px] py-[14px] bg-transparent border-none cursor-pointer text-left"
       >
-        <span style={{ fontSize: '1rem', flexShrink: 0 }}>{s.icon}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontWeight: 700,
-              color: 'var(--text-primary, #f1f5f9)',
-              fontSize: '0.88rem',
-              marginBottom: 2,
-            }}
-          >
+        <span className="text-base shrink-0">{s.icon}</span>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-slate-100 text-sm mb-0.5">
             {anomaly.title}
             {isResolved && (
-              <span style={{ marginLeft: 8, fontSize: '0.72rem', color: 'var(--color-success, #10b981)' }}>
+              <span className="ml-2 text-[0.72rem] text-emerald-500">
                 ✓ Çözüldü
               </span>
             )}
           </div>
-          <div
-            style={{
-              color: 'var(--text-muted, #94a3b8)',
-              fontSize: '0.78rem',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <div className="text-slate-400 text-xs overflow-hidden text-ellipsis whitespace-nowrap">
             {anomaly.detail}
           </div>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            gap: 6,
-            flexShrink: 0,
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '0.7rem',
-              background: s.badge,
-              color: s.text,
-              padding: '2px 8px',
-              borderRadius: 6,
-              fontWeight: 700,
-            }}
-          >
+        <div className="flex gap-1.5 shrink-0 items-center">
+          <span className={`text-[0.7rem] ${s.badge} ${s.text} px-2 py-0.5 rounded-md font-bold`}>
             {CAT_LABEL[anomaly.category]}
           </span>
-          <span style={{ color: '#475569', fontSize: '0.8rem' }}>{expanded ? '▲' : '▼'}</span>
+          <span className="text-slate-600 text-xs">{expanded ? '▲' : '▼'}</span>
         </div>
       </button>
 
       {/* Expanded */}
       {expanded && (
-        <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${s.border}` }}>
-          <div
-            style={{
-              paddingTop: 12,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}
-          >
+        <div className={`px-[18px] pb-4 border-t ${s.border}`}>
+          <div className="pt-3 flex flex-col gap-2.5">
             {/* Öneri */}
-            <div
-              style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                borderRadius: 8,
-                padding: '10px 12px',
-                fontSize: '0.82rem',
-                color: '#6ee7b7',
-              }}
-            >
+            <div className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-lg px-3 py-2.5 text-[0.82rem] text-emerald-300">
               <strong>💡 Öneri:</strong> {anomaly.suggestion}
             </div>
 
             {/* Hızlı düzeltmeler */}
             {anomaly.quickFixes.length > 0 && !isResolved && (
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="flex gap-2 flex-wrap">
                 {anomaly.quickFixes
                   .filter((f) => f.canAutoFix)
                   .map((fix, i) => (
@@ -197,17 +132,7 @@ function AnomalyCard({
                       key={i}
                       onClick={() => onFix(fix)}
                       disabled={isFixing}
-                      style={{
-                        background: isFixing ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#ff5722,#ff7043)',
-                        border: 'none',
-                        borderRadius: 8,
-                        color: '#fff',
-                        padding: '8px 14px',
-                        fontWeight: 700,
-                        cursor: isFixing ? 'not-allowed' : 'pointer',
-                        fontSize: '0.8rem',
-                        opacity: isFixing ? 0.5 : 1,
-                      }}
+                      className={`${isFixing ? 'bg-white/5 cursor-not-allowed opacity-50' : 'bg-[linear-gradient(135deg,#ff5722,#ff7043)] cursor-pointer opacity-100'} border-none rounded-lg text-white px-3.5 py-2 font-bold text-xs`}
                     >
                       {isFixing ? '⏳ Uygulanıyor...' : fix.label}
                     </button>
@@ -217,14 +142,7 @@ function AnomalyCard({
                   .map((fix, i) => (
                     <div
                       key={i}
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 8,
-                        padding: '8px 14px',
-                        fontSize: '0.78rem',
-                        color: '#64748b',
-                      }}
+                      className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2 text-[0.78rem] text-slate-500"
                     >
                       ⚠️ {fix.label} — Manuel müdahale gerekli
                     </div>
@@ -235,17 +153,7 @@ function AnomalyCard({
             {/* AI'ya sor */}
             <button
               onClick={() => onAskAI(anomaly)}
-              style={{
-                background: 'rgba(99,102,241,0.1)',
-                border: '1px solid rgba(99,102,241,0.25)',
-                borderRadius: 8,
-                color: '#818cf8',
-                padding: '8px 14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                alignSelf: 'flex-start',
-              }}
+              className="bg-indigo-500/10 border border-indigo-500/25 rounded-lg text-indigo-400 px-3.5 py-2 font-semibold cursor-pointer text-xs self-start"
             >
               🤖 AI'ya Sor
             </button>
@@ -343,119 +251,47 @@ export default function AnomaliOneri({ db, save }: Props) {
   }, [report.anomalies.length]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="flex flex-col gap-4">
       {/* Header */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.06))',
-          border: '1px solid rgba(99,102,241,0.2)',
-          borderRadius: 16,
-          padding: '16px 20px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            marginBottom: 14,
-          }}
-        >
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-              borderRadius: 14,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              flexShrink: 0,
-            }}
-          >
+      <div className="bg-[linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.06))] border border-indigo-500/20 rounded-2xl p-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="size-12 bg-[linear-gradient(135deg,#6366f1,#8b5cf6)] rounded-xl flex items-center justify-center text-2xl shrink-0">
             🔍
           </div>
-          <div style={{ flex: 1 }}>
-            <h2
-              style={{
-                fontWeight: 800,
-                color: '#f1f5f9',
-                fontSize: '1.1rem',
-                margin: 0,
-              }}
-            >
+          <div className="flex-1">
+            <h2 className="font-black text-slate-100 text-lg m-0">
               Anomali & Öneri
             </h2>
-            <p
-              style={{
-                color: '#475569',
-                fontSize: '0.78rem',
-                margin: '3px 0 0',
-              }}
-            >
+            <p className="text-slate-600 text-xs m-0 mt-0.5">
               Canlı veri analizi — {report.anomalies.length} anomali tespit edildi
-              {report.partial && <span style={{ color: '#f59e0b', marginLeft: 8 }}>⚠️ Kısmi sonuç (timeout)</span>}
+              {report.partial && <span className="text-amber-500 ml-2">⚠️ Kısmi sonuç (timeout)</span>}
             </p>
           </div>
           <button
             onClick={() => setRefreshKey((k) => k + 1)}
-            style={{
-              background: 'rgba(99,102,241,0.1)',
-              border: '1px solid rgba(99,102,241,0.25)',
-              borderRadius: 10,
-              color: '#818cf8',
-              padding: '8px 16px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '0.82rem',
-            }}
+            className="bg-indigo-500/10 border border-indigo-500/25 rounded-xl text-indigo-400 px-4 py-2 font-bold cursor-pointer text-xs hover:bg-indigo-500/20 transition-all active:scale-95"
           >
             🔄 Yenile
           </button>
         </div>
 
         {/* Özet kartlar */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: 10,
-          }}
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {/* Sağlık Skoru Göstergesi (Gauge) */}
-          <div
-            style={{
-              position: 'relative',
-              background: 'radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.03) 0%, transparent 60%)',
-              borderRadius: 14,
-              padding: '10px 14px',
-              textAlign: 'center',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="relative bg-white/[0.03] rounded-xl p-2.5 text-center overflow-hidden">
             {/* Glow efekti */}
             <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] size-20 rounded-full opacity-[0.12] blur-[20px] pointer-events-none"
               style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -40%)',
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
                 background:
                   report.healthScore >= 80
                     ? 'var(--color-success, #00af67)'
                     : report.healthScore >= 60
                       ? 'var(--color-warning, #d19200)'
                       : 'var(--color-danger, #e62e1e)',
-                opacity: 0.12,
-                filter: 'blur(20px)',
-                pointerEvents: 'none',
               }}
             />
-            <svg viewBox="0 0 140 80" style={{ width: '100%', height: 70, display: 'block' }}>
+            <svg viewBox="0 0 140 80" className="w-full h-[70px] block">
               <defs>
                 <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="var(--color-danger, #e62e1e)" />
@@ -490,73 +326,38 @@ export default function AnomaliOneri({ db, save }: Props) {
                 opacity={0.35}
               />
             </svg>
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 8,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                textAlign: 'center',
-              }}
-            >
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center">
               <div
-                style={{
-                  fontSize: '1.6rem',
-                  fontWeight: 800,
-                  color: scoreColor,
-                  lineHeight: 1,
-                  textShadow: `0 0 16px ${scoreColor}40`,
-                }}
+                className="text-2xl font-black leading-none"
+                style={{ color: scoreColor, textShadow: `0 0 16px ${scoreColor}40` }}
               >
                 {report.healthScore}
               </div>
-              <div
-                style={{
-                  fontSize: '0.65rem',
-                  color: 'var(--text-muted, #5d646f)',
-                  marginTop: 3,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  fontWeight: 600,
-                }}
-              >
+              <div className="text-[0.6rem] text-slate-500 uppercase tracking-widest font-semibold mt-1">
                 Sağlık Skoru
               </div>
             </div>
           </div>
           {[
-            { label: 'Kritik', value: report.summary.critical, color: '#ef4444' },
-            { label: 'Uyarı', value: report.summary.warning, color: '#f59e0b' },
-            { label: 'Bilgi', value: report.summary.info, color: '#3b82f6' },
-            { label: 'Toplam', value: report.summary.total, color: '#94a3b8' },
+            { label: 'Kritik', value: report.summary.critical, color: 'text-red-500' },
+            { label: 'Uyarı', value: report.summary.warning, color: 'text-amber-500' },
+            { label: 'Bilgi', value: report.summary.info, color: 'text-blue-500' },
+            { label: 'Toplam', value: report.summary.total, color: 'text-slate-400' },
           ].map((s, i) => (
             <div
               key={i}
-              style={{
-                background: 'rgba(0,0,0,0.25)',
-                borderRadius: 10,
-                padding: '10px 14px',
-                textAlign: 'center',
-              }}
+              className="bg-black/25 rounded-xl p-2.5 text-center"
             >
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: 2 }}>{s.label}</div>
+              <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
+              <div className="text-[0.65rem] text-slate-600 mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Trend Grafiği */}
         {trendData.length > 1 && (
-          <div style={{ marginTop: 12 }}>
-            <div
-              style={{
-                color: '#475569',
-                fontSize: '0.68rem',
-                marginBottom: 4,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
+          <div className="mt-3">
+            <div className="text-slate-600 text-[0.6rem] mb-1 uppercase tracking-wider">
               Anomali Trendi (30 gün)
             </div>
             <ResponsiveContainer width="100%" height={64}>
@@ -595,70 +396,27 @@ export default function AnomaliOneri({ db, save }: Props) {
 
       {/* AI mesajı */}
       {aiMessage && (
-        <div
-          style={{
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: 12,
-            padding: '14px 18px',
-            display: 'flex',
-            gap: 12,
-            alignItems: 'flex-start',
-          }}
-        >
-          <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>🤖</span>
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                color: '#818cf8',
-                fontWeight: 700,
-                fontSize: '0.82rem',
-                marginBottom: 6,
-              }}
-            >
+        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-[18px] py-[14px] flex gap-3 items-start">
+          <span className="text-xl shrink-0">🤖</span>
+          <div className="flex-1">
+            <div className="text-indigo-400 font-bold text-xs mb-1.5">
               AI Asistan'a Gönderilecek Mesaj
             </div>
-            <pre
-              style={{
-                color: '#94a3b8',
-                fontSize: '0.78rem',
-                whiteSpace: 'pre-wrap',
-                margin: 0,
-                fontFamily: 'inherit',
-              }}
-            >
+            <pre className="text-slate-400 text-xs whitespace-pre-wrap m-0 font-inherit">
               {aiMessage}
             </pre>
-            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <div className="flex gap-2 mt-2.5">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(aiMessage).catch(() => logger.warn('anomali', 'Panoya yazılamadı'));
                 }}
-                style={{
-                  background: 'rgba(99,102,241,0.15)',
-                  border: '1px solid rgba(99,102,241,0.3)',
-                  borderRadius: 7,
-                  color: '#818cf8',
-                  padding: '6px 12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: '0.78rem',
-                }}
+                className="bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-indigo-400 px-3 py-1.5 font-semibold cursor-pointer text-xs hover:bg-indigo-500/30 transition-all"
               >
                 📋 Kopyala
               </button>
               <button
                 onClick={() => setAiMessage('')}
-                style={{
-                  background: 'none',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 7,
-                  color: '#475569',
-                  padding: '6px 12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: '0.78rem',
-                }}
+                className="bg-transparent border border-white/10 rounded-lg text-slate-600 px-3 py-1.5 font-semibold cursor-pointer text-xs hover:bg-white/5 transition-all"
               >
                 ✕ Kapat
               </button>
@@ -668,44 +426,23 @@ export default function AnomaliOneri({ db, save }: Props) {
       )}
 
       {/* Filtreler */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 8,
-          flexWrap: 'wrap',
-          alignItems: 'center',
-        }}
-      >
+      <div className="flex gap-2 flex-wrap items-center">
         <input
           type="text"
           placeholder="Anomali ara..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{
-            flex: 1,
-            minWidth: 180,
-            padding: '9px 14px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 10,
-            color: '#f1f5f9',
-            fontSize: '0.85rem',
-          }}
+          className="flex-1 min-w-[180px] p-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-slate-100 text-sm outline-none focus:ring-2 ring-indigo-500/20 transition-all"
         />
         {(['all', 'critical', 'warning', 'info'] as const).map((sev) => (
           <button
             key={sev}
             onClick={() => setFilterSev(sev)}
-            style={{
-              padding: '9px 14px',
-              borderRadius: 8,
-              border: 'none',
-              background: filterSev === sev ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-              color: filterSev === sev ? '#818cf8' : '#64748b',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-            }}
+            className={`px-3.5 py-2 rounded-lg border-none font-semibold cursor-pointer text-xs transition-all ${
+              filterSev === sev 
+                ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' 
+                : 'bg-white/[0.04] text-slate-500 hover:bg-white/10'
+            }`}
           >
             {sev === 'all' ? 'Tümü' : sev === 'critical' ? '🔴 Kritik' : sev === 'warning' ? '🟡 Uyarı' : '🔵 Bilgi'}
           </button>
@@ -713,15 +450,7 @@ export default function AnomaliOneri({ db, save }: Props) {
         <select
           value={filterCat}
           onChange={(e) => setFilterCat(e.target.value as AnomalyCategory | 'all')}
-          style={{
-            padding: '9px 12px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 8,
-            color: '#94a3b8',
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-          }}
+          className="p-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-slate-400 text-xs cursor-pointer outline-none focus:ring-2 ring-indigo-500/20 transition-all"
         >
           <option value="all">Tüm Kategoriler</option>
           {Object.entries(CAT_LABEL).map(([k, v]) => (
@@ -734,24 +463,18 @@ export default function AnomaliOneri({ db, save }: Props) {
 
       {/* Anomali listesi */}
       {filtered.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            color: '#334155',
-          }}
-        >
-          <div style={{ fontSize: '3rem', marginBottom: 12, opacity: 0.3 }}>
+        <div className="text-center py-16 text-slate-800">
+          <div className="text-5xl mb-3 opacity-30">
             {report.anomalies.length === 0 ? '✅' : '🔍'}
           </div>
-          <p style={{ fontWeight: 600, fontSize: '1rem' }}>
+          <p className="font-semibold text-base m-0">
             {report.anomalies.length === 0
               ? 'Anomali tespit edilmedi — veriler temiz görünüyor!'
               : 'Seçili filtrelere uyan anomali yok.'}
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {filtered.map((anomaly) => (
             <AnomalyCard
               key={anomaly.id}
@@ -767,41 +490,20 @@ export default function AnomaliOneri({ db, save }: Props) {
 
       {/* Kategori özeti */}
       {report.summary.total > 0 && (
-        <div
-          style={{
-            background: 'rgba(0,0,0,0.2)',
-            border: '1px solid rgba(255,255,255,0.05)',
-            borderRadius: 14,
-            padding: '14px 18px',
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              color: '#94a3b8',
-              fontSize: '0.8rem',
-              marginBottom: 10,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
+        <div className="bg-black/20 border border-white/5 rounded-xl p-3.5">
+          <div className="font-bold text-slate-400 text-xs mb-2 uppercase tracking-wider">
             Kategori Dağılımı
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div className="flex flex-wrap gap-2">
             {Object.entries(report.summary.byCategory).map(([cat, count]) => (
               <button
                 key={cat}
                 onClick={() => setFilterCat(cat as AnomalyCategory)}
-                style={{
-                  background: filterCat === cat ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${filterCat === cat ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 8,
-                  padding: '6px 12px',
-                  cursor: 'pointer',
-                  color: filterCat === cat ? '#818cf8' : '#64748b',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                }}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                  filterCat === cat 
+                    ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400' 
+                    : 'bg-white/[0.04] border-white/[0.07] text-slate-500 hover:bg-white/10'
+                }`}
               >
                 {CAT_LABEL[cat as AnomalyCategory]} ({count})
               </button>
@@ -811,7 +513,7 @@ export default function AnomaliOneri({ db, save }: Props) {
       )}
 
       {/* Oluşturulma zamanı */}
-      <div style={{ textAlign: 'right', color: '#1e3a5f', fontSize: '0.72rem' }}>
+      <div className="text-right text-slate-800 text-[0.65rem]">
         Son analiz: {new Date(report.generatedAt).toLocaleTimeString('tr-TR')}
       </div>
     </div>
