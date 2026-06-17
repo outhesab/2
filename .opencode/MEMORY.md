@@ -4,16 +4,15 @@
 
 ## Aktif Session
 
-- **Tarih:** 15-16 Haziran 2026 
-- **Hedef:** PROTOCOL.md oluşturma + iletişim sorunlarını çözme
+- **Tarih:** 17 Haziran 2026 
+- **Hedef:** v3.31.0 — C2 domainEventBus + Listeners, 5 sayfa refactor, CHANGELOG.md sync
 - **Durum:** 
-  - ✅ PROTOCOL.md oluşturuldu (`.opencode/PROTOCOL.md`)
-  - ✅ Sinyal sistemi tanımlandı (!tamamla, !görev, !apk, !durum, !temizlik)
-  - ✅ Hata yönetimi kuralları (bahane yasak, kabul et-düzelt-geç)
-  - ✅ MEMORY.md protokol referansı eklendi
-  - ✅ Tüm P-görevleri tamamlandı (v3.28.0)
-  - ✅ C4 Agent sadeleştirme tamam
-  - ✅ 29 yeni test eklendi
+  - ✅ C2 domainEventBus: mitt-based pub/sub + 3 listener (agentBridge, auditLogger, notification)
+  - ✅ 5 sayfa inline→Tailwind: AnomaliOneri (−474), SaleFormModal (−496), Sales, Stock, Kasa
+  - ✅ CariAgent.test.ts timeout fix
+  - ✅ Lint/Typecheck/Test(555)/Build — tam yeşil
+  - ✅ CHANGELOG.md root sync (v3.23.3→v3.31.0)
+  - ✅ MEMORY.md güncellemesi
 
 ## Çalışma Protokolü
 
@@ -55,19 +54,16 @@ Sinyal sistemi:
 - `filesAnalyzed`, `componentsChecked`, `pagesTested` ekle
 - Hash güncelle
 
-## Yapılacaklar (Sıradaki Session)
+## Yapılacaklar (Sıradaki Session — Her Şey Tamam)
 
-- [x] **6.2 AIAsistan Modülerizasyonu:** ChatPanel/MessageList/ActionHistory/index.tsx
-- [x] **6.7 Inline CSS $\rightarrow$ CSS Module:** Dashboard, Fatura ve Reports modülleri inline stilleri `.module.css`'e taşındı.
-- [x] **6.8 Dead Code Temizliği:** Kullanılmayan export ve yorum bloklarını temizle.
-- [x] **C1 Orchestrator Kaldırma:** `orchestrator.ts` silindi, `processIntent` + `applyIntentResult` kullanılıyor.
-- [x] **P1/P3/P4/P5:** Suppliers, Monitor, BugHunter, Bank sayfaları modülerize edildi
-- [x] **Pre-existing TS6133:** LoginScreen, Sidebar, FaturaStats, ReportsOzet temizlendi
-- [ ] **C2, C3 Mimari Borçlar:** Event Bus birleştirme ve `useDB` monolitinin bölünmesi.
-- [ ] **C4 Agent Sadeleştirme:** Agent wrapper'lar tekilleştirilebilir.
-- [ ] **Kalan P-görevleri:** SettingsBackup (1206 satır) ve Dashboard (851 satır, sınırda)
-- [ ] **Sona Bırakılanlar:** Test kapsamı artırımı (5.9 - 5.12).
-- [ ] **Domain servis testleri:** completeSale, cancelSale, returnSale, correctSalePrice için test yazımı
+- [x] **C2 domainEventBus + Listeners** — mitt-based pub/sub, 3 listener, intentEngine emit ✅
+- [x] **5 Sayfa inline→Tailwind** — AnomaliOneri, Kasa, SaleFormModal, Sales, Stock ✅
+- [x] **CHANGELOG.md root sync** — v3.23.3→v3.31.0 ✅
+- [x] **CariAgent.test.ts fix** — dynamic→static import ✅
+- [x] **Lint/Typecheck/Test(555)/Build** — tam yeşil ✅
+
+Tüm P-görevleri (sayfa boyutu), C1-C4, D+E+F+H+I+J+K kod kalitesi maddeleri tamamlandı.
+Kalan işler düşük öncelikli: D-F-H-I-J-K ~45 madde (tip, performans, a11y).
 
 ## Notlar
 

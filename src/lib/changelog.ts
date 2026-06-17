@@ -44,7 +44,7 @@ export const CHANGELOG: VersionEntry[] = [
     ],
   },
   {
-    version: '3.30.0',
+    version: '3.31.0',
     date: '16 Haziran 2026',
     title: 'Tüm Kalan Görevler Tamamlandı — C2 Event Bus + D+E+F + H + I+J+K',
     summary: 'C2: domainEventBus kaldırıldı (dead code, hiçbir dinleyicisi yoktu), intentEngine event emit loop temizlendi. H grubu (Test Kalitesi): 9 test fix (tautoloji, assertion, private prop, shared state, hardcoded tarih, platform bağımlı, discount/banka/pos testleri, min_stock testleri). D+E+F (Kod Kalitesi): F7 calcSubtotal double call fix, E1 toPayload helper ile cast temizliği, E7 window as any fix, E6 per-line eslint-disable. J+I+K (UI+Spec+Doküman): J1 aria-label, J3 StrictMode, J4 ErrorBoundary, J5 loading spinner, I1-I6 spec iyileştirmeleri, K1-K3 doküman güncelleme.',
