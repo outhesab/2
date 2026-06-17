@@ -1,8 +1,13 @@
+// Dosyadaki her şeyden, hatta importlardan bile önce değişkenleri doğrudan atıyoruz
+process.env.VITE_FIREBASE_PROJECT_ID = 'test-project';
+process.env.VITE_FIREBASE_API_KEY = 'test-api-key';
+
+// Eğer projenizde Vite'ın import.meta.env yapısı kullanılıyorsa garantiye almak için:
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any).import = { meta: { env: { VITE_FIREBASE_PROJECT_ID: 'test-project', VITE_FIREBASE_API_KEY: 'test-api-key' } } };
+}
+
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-
-vi.stubEnv('VITE_FIREBASE_PROJECT_ID', 'test-project');
-vi.stubEnv('VITE_FIREBASE_API_KEY', 'test-api-key');
-
 import { loadConnConfig, saveConnConfig, DEFAULT_CONN, type ConnConfig } from './connConfig';
 
 vi.mock('@/lib/logger', () => ({
