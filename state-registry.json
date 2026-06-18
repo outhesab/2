@@ -1,0 +1,194 @@
+{
+  "version": "3.31.3",
+  "generatedAt": "2026-06-18T08:10:07.492Z",
+  "git": {
+    "branch": "dev",
+    "commit": "3745693",
+    "commitFull": "374569325146d16c8355834378c4bae4bd4236c3",
+    "commitMessage": "fix: Unicode encoding düzeltmesi - Suppliers + Fatura (v3.31.3)",
+    "commitDate": "2026-06-18 10:55:55 +0300"
+  },
+  "ci": {
+    "status": "pass",
+    "checkedAt": "2026-06-18T08:10:07.492Z"
+  },
+  "codebase": {
+    "tsFiles": 187,
+    "tsxFiles": 207,
+    "cssFiles": 31,
+    "totalLOC": 70717,
+    "dependencies": 62,
+    "devDependencies": 41
+  },
+  "agents": [
+    {
+      "name": "CariAgent",
+      "file": "src/agents/CariAgent.ts"
+    },
+    {
+      "name": "DeepSeekAgent",
+      "file": "src/agents/DeepSeekAgent.ts"
+    },
+    {
+      "name": "FaturaAgent",
+      "file": "src/agents/FaturaAgent.ts"
+    },
+    {
+      "name": "KasaAgent",
+      "file": "src/agents/KasaAgent.ts"
+    },
+    {
+      "name": "RaporAgent",
+      "file": "src/agents/RaporAgent.ts"
+    },
+    {
+      "name": "SatisAgent",
+      "file": "src/agents/SatisAgent.ts"
+    },
+    {
+      "name": "StokAgent",
+      "file": "src/agents/StokAgent.ts"
+    }
+  ],
+  "pages": [
+    {
+      "id": "dashboard",
+      "label": "Özet"
+    },
+    {
+      "id": "products",
+      "label": "Ürünler"
+    },
+    {
+      "id": "sales",
+      "label": "Satış"
+    },
+    {
+      "id": "fatura",
+      "label": "Fatura"
+    },
+    {
+      "id": "suppliers",
+      "label": "Tedarikçi"
+    },
+    {
+      "id": "pelet",
+      "label": "Pelet"
+    },
+    {
+      "id": "boruTed",
+      "label": "Boru Tedarik"
+    },
+    {
+      "id": "ortakEmanet",
+      "label": "Ortak Emanet"
+    },
+    {
+      "id": "cari",
+      "label": "Cari"
+    },
+    {
+      "id": "receivables",
+      "label": "Alacak Takip"
+    },
+    {
+      "id": "kasa",
+      "label": "Kasa"
+    },
+    {
+      "id": "butce",
+      "label": "Bütçe"
+    },
+    {
+      "id": "bank",
+      "label": "Banka"
+    },
+    {
+      "id": "reports",
+      "label": "Raporlar"
+    },
+    {
+      "id": "cizelge",
+      "label": "Çizelge"
+    },
+    {
+      "id": "stock",
+      "label": "Stok"
+    },
+    {
+      "id": "monitor",
+      "label": "İzleme"
+    },
+    {
+      "id": "kontrol",
+      "label": "Kontrol"
+    },
+    {
+      "id": "anomali",
+      "label": "Anomali"
+    },
+    {
+      "id": "entegrasyon",
+      "label": "Entegrasyon"
+    },
+    {
+      "id": "excelmerge",
+      "label": "Veri Birleştir"
+    },
+    {
+      "id": "notlar",
+      "label": "Not Defteri"
+    },
+    {
+      "id": "partners",
+      "label": "Ortaklar"
+    },
+    {
+      "id": "settings",
+      "label": "Ayarlar"
+    },
+    {
+      "id": "bughunter",
+      "label": "Bug Hunter"
+    },
+    {
+      "id": "excelimport",
+      "label": "Excel İçe Aktar"
+    },
+    {
+      "id": "aiEylemLog",
+      "label": "AI Eylem Log"
+    },
+    {
+      "id": "specdashboard",
+      "label": "Spec"
+    }
+  ],
+  "protectedFiles": [
+    "src/lib/ruleEngine.ts",
+    "src/hooks/db/core.ts",
+    "src/agents/AgentBus.ts",
+    "src/lib/auditEngine.ts",
+    "src/lib/changelog.ts"
+  ],
+  "rules": {
+    "maxWarnings": 100,
+    "testCommand": "pnpm run test:run",
+    "ciOrder": [
+      "lint",
+      "typecheck",
+      "test:run",
+      "build"
+    ],
+    "versionFiles": [
+      "package.json",
+      "src/lib/changelog.ts",
+      "src/config/brand.ts"
+    ]
+  },
+  "contextVortex": {
+    "strategy": "read-first",
+    "description": "Agent baslatmadan once bu dosyayi oku. Proven facts burada. Gereksiz dosya taramayi azalt.",
+    "estimatedTokenSavings": "60-80%"
+  }
+}

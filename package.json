@@ -36,6 +36,7 @@
     "build:check": "pnpm install --no-frozen-lockfile && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
     "sync:agents": "node scripts/sync-agent-files.mjs",
     "check:agents": "node scripts/sync-agent-files.mjs --check",
+    "registry": "node scripts/generate-registry.mjs",
     "prepare": "simple-git-hooks",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "echo ok",
