@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.31.3',
+    date: '18 Haziran 2026',
+    title: 'Unicode Encoding Düzeltmesi (Suppliers + Fatura)',
+    summary: 'Suppliers modulundeki 5 dosyada (ve Fatura.tsx) Unicode escape sequence lari gercek Turk karakterleri ile degistirildi.',
+    changes: [
+      { type: 'duzeltme', text: 'Suppliers/index.tsx: 74 adet Unicode escape sequence gercek karakterlerle degistirildi.' },
+      { type: 'duzeltme', text: 'Suppliers/types.ts: statusLabels ve catLabels escape leri duzeltildi.' },
+      { type: 'duzeltme', text: 'Suppliers/SupplierOrder.tsx, SupplierList.tsx, SupplierForm.tsx: buton metinleri, label lar, empty state mesajlari duzeltildi.' },
+      { type: 'duzeltme', text: 'Fatura.tsx: Mojibake sorunu duzeltildi.' },
+      { type: 'iyilestirme', text: 'Toplam 105 adet Unicode escape in gercek karakterlere donusturulmesiyle canli site metinleri dogru gorunuyor.' },
+    ],
+  },
+  {
     version: '3.31.2',
     date: '18 Haziran 2026',
     title: 'AGENTS.md Sadeleştirme + Symlink Stratejisi (Aşama 1 & 2)',

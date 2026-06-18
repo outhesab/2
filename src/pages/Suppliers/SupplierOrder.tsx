@@ -50,15 +50,15 @@ export default function SupplierOrder({
   );
 
   return (
-    <Modal open={open} onClose={onClose} title="\uD83D\uDCE6 Sipari\u015F Ver" maxWidth={620}>
+    <Modal open={open} onClose={onClose} title="\uD83D\uDCE6 Sipariş Ver" maxWidth={620}>
       <div>
-        <label style={lbl}>Tedarik\u00E7i *</label>
+        <label style={lbl}>Tedarikçi *</label>
         <select
           value={orderSupplierId}
           onChange={(e) => setOrderSupplierId(e.target.value)}
           style={{ ...inp, marginBottom: 12 }}
         >
-          <option value="">-- Tedarik\u00E7i Se\u00E7 --</option>
+          <option value="">-- Tedarikçi Seç --</option>
           {db.suppliers.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -246,7 +246,7 @@ export default function SupplierOrder({
       <ModalActions
         onSave={onSave}
         onCancel={onClose}
-        saveLabel="\uD83D\uDCE6 Sipari\u015F Ver"
+        saveLabel="\uD83D\uDCE6 Sipariş Ver"
         saveColor="#ff5722"
       />
     </Modal>

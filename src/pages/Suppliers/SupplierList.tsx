@@ -77,7 +77,7 @@ export default function SupplierList({
             cursor: 'pointer',
           }}
         >
-          + Yeni Tedarik\u00E7i
+          + Yeni Tedarikçi
         </button>
         <button
           onClick={onNewOrder}
@@ -91,7 +91,7 @@ export default function SupplierList({
             cursor: 'pointer',
           }}
         >
-          \uD83D\uDCE6 Sipari\u015F Ver
+          \uD83D\uDCE6 Sipariş Ver
         </button>
         <input
           value={search}
@@ -138,8 +138,8 @@ export default function SupplierList({
           <div style={{ gridColumn: '1/-1' }}>
             <EmptyState
               icon={Truck}
-              title="Tedarik\u00E7i bulunamad\u0131"
-              description="Arama veya filtre kriterlerine uygun tedarik\u00E7i bulunamad\u0131."
+              title="Tedarikçi bulunamadı"
+              description="Arama veya filtre kriterlerine uygun tedarikçi bulunamadı."
               actionLabel="Filtreleri temizle"
               onAction={() => onSearchChange('')}
             />
@@ -209,7 +209,7 @@ export default function SupplierList({
                   }}
                 >
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                    {s.totalOrders || 0} sipari\u015F
+                    {s.totalOrders || 0} sipariş
                   </span>
                   <span style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 700 }}>
                     {formatMoney(s.totalAmount || 0)}
@@ -255,7 +255,7 @@ export default function SupplierList({
                         fontWeight: 600,
                       }}
                     >
-                      \uD83D\uDCE6 Sipari\u015Fler
+                      \uD83D\uDCE6 Siparişler
                     </button>
                     <ActionButtons
                       onEdit={() => onEdit(s)}

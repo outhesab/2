@@ -103,7 +103,7 @@ export default function Fatura({ db, save: dbSave }: Props) {
 
   const handleSave = () => {
     if (!form.cariName) {
-      showToast('MüÅŸteri/Tedarikçi adı gerekli!', 'error');
+      showToast('Müşteri/Tedarikçi adı gerekli!', 'error');
       return;
     }
     if (form.items.length === 0 || form.items.every((it) => !it.description)) {

@@ -32,7 +32,7 @@ export default function SupplierForm({
     <Modal
       open={open}
       onClose={onClose}
-      title={editId ? '\u270F\uFE0F Tedarik\u00E7i D\u00FCzenle' : '\u2795 Yeni Tedarik\u00E7i'}
+      title={editId ? '✏ Tedarikçi Düzenle' : '➕ Yeni Tedarikçi'}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <div style={{ gridColumn: '1/-1' }}>
@@ -62,8 +62,8 @@ export default function SupplierForm({
                 }}
               >
                 {forceSave
-                  ? '\u26A0\uFE0F Yine de kaydetmek i\u00E7in tekrar "Kaydet" e t\u0131klay\u0131n'
-                  : '\uD83D\uDD34 Benzer tedarik\u00E7iler bulundu:'}
+                  ? '⚠ Yine de kaydetmek için tekrar "Kaydet" e tıklayın'
+                  : '\uD83D\uDD34 Benzer tedarikçiler bulundu:'}
               </p>
               {dupWarning.map((d, i) => (
                 <p
@@ -74,7 +74,7 @@ export default function SupplierForm({
                     margin: '2px 0',
                   }}
                 >
-                  \u2022 {d.name}{' '}
+                  • {d.name}{' '}
                   <span
                     style={{
                       color: d.score >= 90 ? '#ef4444' : '#f59e0b',
@@ -132,7 +132,7 @@ export default function SupplierForm({
         onSave={onSave}
         onCancel={onClose}
         saveColor={forceSave ? '#f59e0b' : '#10b981'}
-        saveLabel={forceSave ? '\u26A0\uFE0F Yine de Kaydet' : '\uD83D\uDCBE Kaydet'}
+        saveLabel={forceSave ? '⚠ Yine de Kaydet' : '\uD83D\uDCBE Kaydet'}
       />
     </Modal>
   );

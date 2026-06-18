@@ -37,9 +37,9 @@ export const catColors: Record<string, string> = {
 };
 
 export const catLabels: Record<string, string> = {
-  genel: '\u{1F3ED} Genel',
-  pelet: '\u{1F33E} Pelet',
-  boru: '\u{1F527} Boru',
+  genel: '🏭 Genel',
+  pelet: '🌾 Pelet',
+  boru: '🔧 Boru',
 };
 
 export const statusColors: Record<string, string> = {
@@ -50,8 +50,8 @@ export const statusColors: Record<string, string> = {
 };
 
 export const statusLabels: Record<string, string> = {
-  bekliyor: '\u23F3 Bekliyor',
-  yolda: '\u{1F69A} Yolda',
-  tamamlandi: '\u2713 Tamamland\u0131',
-  iptal: '\u2715 \u0130ptal',
+  bekliyor: '⏳ Bekliyor',
+  yolda: '🚚 Yolda',
+  tamamlandi: '✓ Tamamlandı',
+  iptal: '✕ İptal',
 };

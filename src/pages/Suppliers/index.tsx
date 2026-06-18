@@ -79,7 +79,7 @@ export default function Suppliers({ db, save }: Props) {
 
   const saveSupplier = () => {
     if (!form.name) {
-      showToast('Tedarik\u00E7i ad\u0131 gerekli!', 'error');
+      showToast('Tedarikçi adı gerekli!', 'error');
       return;
     }
     if (dupWarning.length > 0 && !forceSave) {
@@ -105,7 +105,7 @@ export default function Suppliers({ db, save }: Props) {
               updatedAt: nowIso,
             };
         }
-        showToast('Tedarik\u00E7i g\u00FCncellendi!');
+        showToast('Tedarikçi güncellendi!');
       } else {
         const newId = genId();
         suppliers.push({
@@ -132,7 +132,7 @@ export default function Suppliers({ db, save }: Props) {
           balance: 0,
         };
         cari.push(yeniCari);
-        showToast('Tedarik\u00E7i eklendi, cari kayd\u0131 otomatik a\u00E7\u0131ld\u0131!', 'success');
+        showToast('Tedarikçi eklendi, cari kaydı otomatik açıldı!', 'success');
       }
       return { ...prev, suppliers, cari };
     });
@@ -143,7 +143,7 @@ export default function Suppliers({ db, save }: Props) {
     if (!orderSupplierId) {
       if (db.suppliers.length === 0) {
         showToast(
-          '\u00D6nce tedarik\u00E7i ekleyin! Tedarik\u00E7iler sekmesine y\u00F6nlendiriliyorsunuz...',
+          'Önce tedarikçi ekleyin! Tedarikçiler sekmesine yönlendiriliyorsunuz...',
           'error',
         );
         setTimeout(() => {
@@ -152,11 +152,11 @@ export default function Suppliers({ db, save }: Props) {
         }, 1500);
         return;
       }
-      showToast('Tedarik\u00E7i se\u00E7in!', 'error');
+      showToast('Tedarikçi seçin!', 'error');
       return;
     }
     if (orderItems.length === 0) {
-      showToast('\u00DCr\u00FCn ekleyin!', 'error');
+      showToast('Ürün ekleyin!', 'error');
       return;
     }
     const amount = orderItems.reduce((s, i) => s + i.lineTotal, 0);
@@ -188,7 +188,7 @@ export default function Suppliers({ db, save }: Props) {
       );
       return { ...prev, orders: [...prev.orders, order], suppliers };
     });
-    showToast('Sipari\u015F olu\u015Fturuldu!');
+    showToast('Sipariş oluşturuldu!');
     setOrderItems([]);
     setOrderSupplierId('');
     setDeliveryDate('');
@@ -200,8 +200,8 @@ export default function Suppliers({ db, save }: Props) {
 
   const deleteSupplier = (id: string) => {
     showConfirm(
-      'Tedarik\u00E7i Sil',
-      'Tedarik\u00E7i ve ili\u015Fkili cari kayd\u0131 gizlenecek. Devam etmek istiyor musunuz?',
+      'Tedarikçi Sil',
+      'Tedarikçi ve ilişkili cari kaydı gizlenecek. Devam etmek istiyor musunuz?',
       () => {
         const nowIso = new Date().toISOString();
         save((prev) => ({
@@ -234,7 +234,7 @@ export default function Suppliers({ db, save }: Props) {
 
       if (status === 'tamamlandi') {
         if (order.stockCompleted) {
-          showToast('Sipari\u015F tamamland\u0131!');
+          showToast('Sipariş tamamlandı!');
           return newState;
         }
         const totalOrderAmount = order.amount || 1;
@@ -276,7 +276,7 @@ export default function Suppliers({ db, save }: Props) {
               amount: i.qty,
               before: prev.products.find((p) => p.id === i.productId)?.stock || 0,
               after: (prev.products.find((p) => p.id === i.productId)?.stock || 0) + i.qty,
-              note: `Sipari\u015F #${id.slice(0, 8)}${supplier ? ' \u2014 ' + supplier.name : ''}`,
+              note: `Sipariş #${id.slice(0, 8)}${supplier ? ' \u2014 ' + supplier.name : ''}`,
               date: new Date().toISOString(),
             })),
         ];
@@ -293,10 +293,10 @@ export default function Suppliers({ db, save }: Props) {
         });
         if (missingProducts.length > 0) {
           showToast(
-            `Sipari\u015F tamamland\u0131! \u26A0\uFE0F Bulunamayan \u00FCr\u00FCnler atland\u0131: ${missingProducts.join(', ')}`,
+            `Sipariş tamamlandı! ⚠ Bulunamayan ürünler atlandı: ${missingProducts.join(', ')}`,
           );
         } else {
-          showToast('Sipari\u015F tamamland\u0131! Stok ve cari g\u00FCncellendi.');
+          showToast('Sipariş tamamlandı! Stok ve cari güncellendi.');
         }
         newState = {
           ...newState,
@@ -314,8 +314,8 @@ export default function Suppliers({ db, save }: Props) {
 
   const revertOrder = (id: string) => {
     showConfirm(
-      'Sipari\u015F Geri Al',
-      'Bu sipari\u015Fi geri almak istiyor musunuz? Stok ve cari de\u011Fi\u015Fiklikleri geri al\u0131nacak.',
+      'Sipariş Geri Al',
+      'Bu siparişi geri almak istiyor musunuz? Stok ve cari değişiklikleri geri alınacak.',
       () => {
         save((prev) => {
           const order = prev.orders.find((o) => o.id === id);
@@ -339,7 +339,7 @@ export default function Suppliers({ db, save }: Props) {
                 0,
                 (prev.products.find((p) => p.id === i.productId)?.stock || 0) - i.qty,
               ),
-              note: 'Sipari\u015F geri al\u0131nd\u0131',
+              note: 'Sipariş geri alındı',
               date: nowIso,
             })),
           ];
@@ -355,7 +355,7 @@ export default function Suppliers({ db, save }: Props) {
           );
           return { ...prev, orders, products, stockMovements, cari };
         });
-        showToast('Sipari\u015F geri al\u0131nd\u0131! Stok ve cari g\u00FCncellendi.');
+        showToast('Sipariş geri alındı! Stok ve cari güncellendi.');
       },
     );
   };
@@ -448,7 +448,7 @@ export default function Suppliers({ db, save }: Props) {
               color: tab === t ? '#fff' : '#94a3b8',
             }}
           >
-            {t === 'suppliers' ? '\u{1F3ED} Tedarik\u00E7iler' : '\uD83D\uDCE6 Sipari\u015Fler'}
+            {t === 'suppliers' ? '🏭 Tedarikçiler' : '\uD83D\uDCE6 Siparişler'}
           </button>
         ))}
       </div>
@@ -495,7 +495,7 @@ export default function Suppliers({ db, save }: Props) {
                 cursor: 'pointer',
               }}
             >
-              + Sipari\u015F Ver
+              + Sipariş Ver
             </button>
             <select
               value={selectedSup}
@@ -508,7 +508,7 @@ export default function Suppliers({ db, save }: Props) {
                 color: 'var(--text-primary)',
               }}
             >
-              <option value="">T\u00FCm Tedarik\u00E7iler</option>
+              <option value="">Tüm Tedarikçiler</option>
               {db.suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -533,7 +533,7 @@ export default function Suppliers({ db, save }: Props) {
             >
               <thead>
                 <tr style={{ background: 'rgba(15,23,42,0.6)' }}>
-                  {['Tarih', 'Tedarik\u00E7i', '\u00DCr\u00FCnler', 'Tutar', 'Durum', ''].map((h) => (
+                  {['Tarih', 'Tedarikçi', 'Ürünler', 'Tutar', 'Durum', ''].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -556,8 +556,8 @@ export default function Suppliers({ db, save }: Props) {
                     <td colSpan={6} style={{ padding: 24 }}>
                       <EmptyState
                         icon={Truck}
-                        title="Sipari\u015F bulunamad\u0131"
-                        description="Hen\u00FCz kaydedilmi\u015F sipari\u015F bulunmamaktad\u0131r."
+                        title="Sipariş bulunamadı"
+                        description="Henüz kaydedilmiş sipariş bulunmamaktadır."
                       />
                     </td>
                   </tr>
@@ -578,7 +578,7 @@ export default function Suppliers({ db, save }: Props) {
                         {formatDate(o.createdAt)}
                       </td>
                       <td
-                        data-label="Tedarik\u00E7i"
+                        data-label="Tedarikçi"
                         style={{
                           padding: '12px 16px',
                           color: 'var(--text-primary)',
@@ -588,7 +588,7 @@ export default function Suppliers({ db, save }: Props) {
                         {db.suppliers.find((s) => s.id === o.supplierId)?.name || '-'}
                       </td>
                       <td
-                        data-label="\u00DCr\u00FCnler"
+                        data-label="Ürünler"
                         style={{
                           padding: '12px 16px',
                           color: 'var(--text-dim)',
@@ -653,7 +653,7 @@ export default function Suppliers({ db, save }: Props) {
                                 fontSize: '0.78rem',
                               }}
                             >
-                              \u2713 Tamamla
+                              ✓ Tamamla
                             </button>
                           </div>
                         )}
@@ -670,7 +670,7 @@ export default function Suppliers({ db, save }: Props) {
                               fontSize: '0.78rem',
                             }}
                           >
-                            \u2713 Tamamla
+                            ✓ Tamamla
                           </button>
                         )}
                         {o.status === 'tamamlandi' && (
