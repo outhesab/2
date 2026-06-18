@@ -6,6 +6,7 @@
 
 import { logger } from '@/lib/logger';
 import { Capacitor } from '@capacitor/core';
+import { Encoding } from '@capacitor/filesystem';
 
 // ── Bildirim İzni ─────────────────────────────────────────────────────────────
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -83,7 +84,7 @@ export async function saveFileToDevice(
       path: filename,
       data,
       directory: Directory.Documents,
-      encoding: 'utf8' as never,
+      encoding: Encoding.UTF8,
     });
     return true;
   } catch (e) {

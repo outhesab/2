@@ -1,22 +1,22 @@
 {
-  "version": "3.31.3",
-  "generatedAt": "2026-06-18T08:10:07.492Z",
+  "version": "3.32.0",
+  "generatedAt": "2026-06-18T09:59:15.446Z",
   "git": {
     "branch": "dev",
-    "commit": "3745693",
-    "commitFull": "374569325146d16c8355834378c4bae4bd4236c3",
-    "commitMessage": "fix: Unicode encoding düzeltmesi - Suppliers + Fatura (v3.31.3)",
-    "commitDate": "2026-06-18 10:55:55 +0300"
+    "commit": "3063d84",
+    "commitFull": "3063d84835a68609cb07b806218aaf3a6e46dd7f",
+    "commitMessage": "feat: Aşama 3 - State Registry (External Memory Layer)",
+    "commitDate": "2026-06-18 11:17:18 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-18T08:10:07.492Z"
+    "checkedAt": "2026-06-18T09:59:15.448Z"
   },
   "codebase": {
     "tsFiles": 187,
     "tsxFiles": 207,
     "cssFiles": 31,
-    "totalLOC": 70717,
+    "totalLOC": 70841,
     "dependencies": 62,
     "devDependencies": 41
   },
@@ -188,7 +188,10 @@
   },
   "contextVortex": {
     "strategy": "read-first",
-    "description": "Agent baslatmadan once bu dosyayi oku. Proven facts burada. Gereksiz dosya taramayi azalt.",
-    "estimatedTokenSavings": "60-80%"
+    "description": "Agent baslatmadan once bu dosyayi oku. Proven facts burada. Gereksiz dosya taramayi azalt. Detayli proje analizi icin docs/agents/proje-analizi.md ye bak.",
+    "estimatedTokenSavings": "60-80%",
+    "referenceDocs": [
+      "docs/agents/proje-analizi.md"
+    ]
   }
 }

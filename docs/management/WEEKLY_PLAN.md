@@ -78,7 +78,7 @@
 78|| 5.9 | `db/core.ts` test yazılacak | `src/hooks/db/core.test.ts` | ⬜ |
 79|| 5.10 | `db/backup.ts` test yazılacak | `src/hooks/db/backup.test.ts` | ⬜ |
 80|| 5.11 | `db/sync.ts` test yazılacak | `src/hooks/db/sync.test.ts` | ⬜ |
-81|| 5.12 | `Vitest config`'ten hariç testler aktif edilecek | `vite.config.ts` | ⬜ |
+81|| 5.12 | `Vitest config`'ten hariç testler aktif edilecek | `vite.config.ts` | ✅ |
 82|
 83|---
 84|
@@ -117,12 +117,11 @@
 || 2. Hafta — Hata Yönetimi | 5 | 5 | 0 |
 || 3. Hafta — Tip Güvenliği | 5 | 5 | 0 |
 || 4. Hafta — Test (1) | 13 | 13 | 0 |
-|| 5. Hafta — Test (2) | 12 | 11 | 1 |
+|| 5. Hafta — Test (2) | 12 | 12 | 0 |
 || 6. Hafta — Refactor | 15 | 15 | 0 |
-|| **TOPLAM** | **57** | **56** | **1** |
+|| **TOPLAM** | **57** | **57** | **0** |
 
-### Kalan 1 Görev
-- **5.12** Vitest config'ten hariç testleri aktif et (düşük öncelik)
+### ✅ Tüm Görevler Tamamlandı!
 
 ### Ek Görevler (P-series — sayfa bölme)
 | # | Dosya | Satır | Süre |

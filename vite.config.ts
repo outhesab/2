@@ -167,8 +167,6 @@ export default defineConfig(({ mode }) => {
           'src/**/*.test.ts',
           'src/**/*.test.tsx',
           'src/**/*.d.ts',
-          'src/__tests__/**',
-          'src/agents/**',
           '**/node_modules/**',
         ],
         thresholds: {

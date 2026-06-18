@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ExcelFile } from "@/lib/excel-merge";
-import DOMPurify from 'dompurify';
 import {
   analyzeOffline,
   buildFileContext,
@@ -276,13 +275,25 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
     "Olagandisi veya hatalı gorunen veri var mi?",
   ];
 
-  const renderMarkdown = (text: string) => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\n\n/g, "<br/><br/>")
-      .replace(/\n- /g, "<br/>• ")
-      .replace(/\n/g, "<br/>");
-  };
+  /** React-based line renderer — **bold** support */
+  function renderBoldLines(text: string, lineKey: number): React.ReactNode {
+    const parts: React.ReactNode[] = [];
+    const regex = /\*\*(.+?)\*\*/g;
+    let lastIdx = 0;
+    let match: RegExpExecArray | null;
+    let key = 0;
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIdx) {
+        parts.push(text.slice(lastIdx, match.index));
+      }
+      parts.push(<strong key={`b-${lineKey}-${key++}`}>{match[1]}</strong>);
+      lastIdx = match.index + match[0].length;
+    }
+    if (lastIdx < text.length) {
+      parts.push(text.slice(lastIdx));
+    }
+    return parts.length > 0 ? parts : text;
+  }
 
   const getProgressWidthClass = (count: number, maxCount: number) => {
     const raw = maxCount > 0 ? (count / maxCount) * 100 : 0;
@@ -402,10 +413,16 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                           <span className="text-xs">Dusunuyor...</span>
                         </div>
                       ) : (
-                        <div
-                          className="prose prose-sm max-w-none dark:prose-invert"
-                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(msg.content)) }}
-                        />
+                        <div className="prose prose-sm max-w-none dark:prose-invert">
+                          {msg.content.split('\n').map((line, li) => (
+                            <span key={li}>
+                              {li > 0 && <br />}
+                              {line.startsWith('- ')
+                                ? <><span className="mr-1">•</span>{renderBoldLines(line.slice(2), li)}</>
+                                : renderBoldLines(line, li)}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </>
                   ) : (

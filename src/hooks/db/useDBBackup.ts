@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import type { DB } from '@/types';
+import { Encoding } from '@capacitor/filesystem';
 import {
   saveBackupToFirebase,
   restoreBackupFromFirebase,
@@ -28,7 +29,7 @@ export function useDBBackup(
           path: filename,
           data,
           directory: Directory.Documents,
-          encoding: 'utf8' as never,
+          encoding: Encoding.UTF8,
         });
         alert(`✅ Yedek kaydedildi!\nKonum: Belgeler/${filename}`);
         return;

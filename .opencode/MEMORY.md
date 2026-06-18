@@ -5,13 +5,17 @@
 ## Aktif Session
 
 - **Tarih:** 18 Haziran 2026
-- **Hedef:** v3.31.2 — AGENTS.md sadeleştirme + Aşama 2 symlink stratejisi
+- **Hedef:** v3.32.0 — Kalan MASTER_PLAN maddeleri + WEEKLY_PLAN 5.12 + Aşama 3 Registry
 - **Durum:**
-  - ✅ Aşama 1: AGENTS.md 810→111 satır, docs/agents/ modüler yapı
-  - ✅ Aşama 2: Symlink stratejisi (shim files) — CLAUDE.md + .cursor/rules/rules.mdc
-  - ✅ Pre-commit hook: drift tespit + commit engelleme
-  - ✅ CI yeşil (lint, typecheck, 555 test passed, 1 skipped)
-  - ✅ Version consistency korundu (3.31.2)
+  - ✅ Tüm kalan ~45 madde tarandı, ~30'u zaten çözülmüş, 6'sı fix'lendi
+  - ✅ J2: dangerouslySetInnerHTML → React-based rendering (AIAHelpers, ai-asistan)
+  - ✅ H1: P1 tautoloji test → real property-based test
+  - ✅ E8: 'utf8' as never → Encoding.UTF8 (Capacitor enum)
+  - ✅ WEEKLY_PLAN 5.12: coverage exclude temizliği (son task kapandı 🏁)
+  - ✅ Aşama 3: State Registry otomasyonu — pre-commit drift tespiti eklendi
+  - ✅ v3.32.0: changelog + package.json + state-registry senkron
+  - ✅ pre-commit: agent drift + registry drift çift kontrol
+  - ✅ CI yeşil (lint, typecheck, 555 test passed, 1 skipped, build)
 
 ## Çalışma Protokolü
 
@@ -81,7 +85,7 @@ Sinyal sistemi:
 - [x] **Lint/Typecheck/Test(555)/Build** — tam yeşil ✅
 
 Tüm P-görevleri (sayfa boyutu), C1-C4, D+E+F+H+I+J+K kod kalitesi maddeleri tamamlandı.
-Kalan işler düşük öncelikli: D-F-H-I-J-K ~45 madde (tip, performans, a11y).
+Kalan ~45 madde taranıp çoğunun zaten çözüldüğü tespit edildi. v3.32.0 ile son 6 madde fix'lenerek kapatıldı.
 
 ## Notlar
 
@@ -100,3 +104,5 @@ Kalan işler düşük öncelikli: D-F-H-I-J-K ~45 madde (tip, performans, a11y).
 | 12.06.2026 | CSS Module Migration (6.7) | Dashboard, Fatura, Reports ~162 inline style .module.css'e taşındı, 16 yeni CSS module dosyası. |
 | 13.06.2026 | Dead Code Cleanup (6.8) | not-found.tsx silindi, utils-tr.ts/version.ts/appConfig.ts ölü exportlar temizlendi, ~116 satır kaldırıldı. v3.22.1. |
 | 13.06.2026 | 4 Sayfa Parallel Modülerizasyon | 4 general agent ile Suppliers/Monitor/BugHunter/Bank toplam 26 modüle bölündü. 3421 satır monolit silindi. v3.25.0. |
+| 18.06.2026 | MASTER_PLAN Kalan Maddeler | ~45 madde taranıp 30'unun zaten çözüldüğü tespit edildi. J2/H1/E8 fix'lendi, K4/K5/D2-D7/F5 zaten çözülmüş. v3.32.0. |
+| 18.06.2026 | WEEKLY_PLAN 5.12 + Aşama 3 Registry | Coverage exclude temizliği, pre-commit registry drift tespiti, agent drift + registry drift çift kontrol. 57/57 task tamam 🏁. |

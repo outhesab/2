@@ -13,6 +13,15 @@
 
 ---
 
+## ⚡ HIZLI BAŞLANGIÇ (Context Vortex Önleme)
+
+**Her session başında şunu oku:** `state-registry.json` (1KB, ~50ms)
+- Proven facts: versiyon, test sayısı (555), sayfa listesi (28), korunan dosyalar
+- Gereksiz dosya taramayı azalt → **%60-80 token tasarrufu**
+- Registry'yi yenile: `pnpm run registry`
+
+---
+
 ## §0. SIFIR-TOLERANS KURALLARI
 
 ### Korunan Sistemler — ASLA Dokunma

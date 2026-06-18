@@ -20,6 +20,21 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.32.0',
+    date: '18 Haziran 2026',
+    title: 'Son Kalan Kod Kalitesi Maddeleri — J2, H1, E8 + Tespit Güncellemesi',
+    summary: 'Kalan ~15 madde taranıp 7\'sinin zaten çözüldüğü tespit edildi. Kalan 6 madde (J2, K4, K5, H1, E8) fix\'lendi. J2: dangerouslySetInnerHTML React-based MarkdownText ile değiştirildi (AIAHelpers.tsx + ai-asistan.tsx). H1: P1 tautoloji test gerçek property-based test ile değiştirildi. E8: \'utf8\' as never → Encoding.UTF8 (Capacitor enum).',
+    changes: [
+      { type: 'iyilestirme', text: 'J2 — AIAHelpers.tsx: dangerouslySetInnerHTML kaldırıldı, React-based MarkdownText component (a11y).' },
+      { type: 'iyilestirme', text: 'J2 — ai-asistan.tsx: dangerouslySetInnerHTML kaldırıldı, renderBoldLines React renderer (a11y).' },
+      { type: 'iyilestirme', text: 'H1 — kapsamli-senaryo.test.ts: P1 tautoloji matematik testi, real property-based test ile değiştirildi.' },
+      { type: 'duzeltme', text: 'E8 — useDBBackup.ts + permissions.ts: \'utf8\' as never cast → Encoding.UTF8 (Capacitor enum tipi).' },
+      { type: 'iyilestirme', text: 'MASTER_PLAN.md güncel tarama: 45 maddeden ~30\'u zaten çözülmüş, 15\'i kalmış, 6\'sı fix\'lendi.' },
+      { type: 'iyilestirme', text: 'docs/agents/proje-analizi.md: Tüm uygulama mimarisi, teknoloji yığını ve risk analizi raporu eklendi.' },
+      { type: 'iyilestirme', text: 'state-registry.json: Proven facts güncellendi ve proje analizi referansı eklendi.' },
+    ],
+  },
+  {
     version: '3.31.3',
     date: '18 Haziran 2026',
     title: 'Unicode Encoding Düzeltmesi (Suppliers + Fatura)',

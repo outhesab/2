@@ -234,6 +234,50 @@ export function loadFromStorage(): DB {
 let _isSaving = false;
 const _saveQueue: DB[] = [];
 
+/* ── Async localStorage write (UI jank önleme) ──────────────────── */
+
+let _pendingWrite: { key: string; versioned: DB } | null = null;
+let _writeScheduled = false;
+
+function _flushPendingWrite(): void {
+  _writeScheduled = false;
+  if (!_pendingWrite) return;
+  const { key, versioned } = _pendingWrite;
+  _pendingWrite = null;
+  try {
+    localStorage.setItem(key, JSON.stringify(versioned));
+  } catch (e) {
+    logger.warn('db', 'localStorage async yazma hatası', { error: String(e) });
+  }
+}
+
+function _scheduleFlush(key: string, versioned: DB): void {
+  _pendingWrite = { key, versioned };
+  if (_writeScheduled) return;
+  _writeScheduled = true;
+  // requestAnimationFrame: yazma işlemini sonraki frame'e erteler
+  // Böylece mevcut frame UI render'ını bloke etmez
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(() => _flushPendingWrite());
+  } else {
+    setTimeout(() => _flushPendingWrite(), 0);
+  }
+}
+
+/* ── beforeunload: sayfa kapanırken bekleyen yazmayı boşalt ───── */
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (_pendingWrite) {
+      try {
+        localStorage.setItem(_pendingWrite.key, JSON.stringify(_pendingWrite.versioned));
+      } catch { /* ignore — sayfa kapanıyor */ }
+    }
+  });
+}
+
+/* ── saveToStorage ──────────────────────────────────────────────── */
+
 export function saveToStorage(db: DB): boolean {
   const t = logger.time('db', 'localStorage yaz');
   if (_isSaving) {
@@ -251,7 +295,8 @@ export function saveToStorage(db: DB): boolean {
       toSave = _saveQueue.shift()!;
     }
     const versioned = { ...toSave, _version: (toSave._version || 0) + 1 };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(versioned));
+    // Async yaz — senkron bloklama yok, UI akıcı kalır
+    _scheduleFlush(STORAGE_KEY, versioned);
     toSave._version = versioned._version;
     t.end({ version: versioned._version });
     return true;
