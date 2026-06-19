@@ -20,6 +20,23 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.32.1',
+    date: '18 Haziran 2026',
+    title: 'voice-sales localStorage Fix + Kod Kalitesi (any→unknown, Tailwind, Test, TTS)',
+    summary: 'voiceSaleExecutor.ts: localStorage direkt yazma → save() pipeline (AGENTS.md §0). pageHelpers.ts: 7 any → unknown + DB tip güvenliği. voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts). VoiceSaleButton.tsx: inline style → Tailwind. voiceIntentBuilder: buildSaleIntentPartial partial success fix. 17 yeni test (572 total). TTS sesli geribildirim (useVoiceSale + audio.ts speak). Fallow dead-code audit — kritik yok.',
+    changes: [
+      { type: 'duzeltme', text: 'voiceSaleExecutor.ts: localStorage.setItem bypass → saveToStorage() + saveToIndexedSnapshot() + AuditEntry (AGENTS.md §0).' },
+      { type: 'iyilestirme', text: 'pageHelpers.ts: 7 adet any → unknown + DB tipi + reusable asArray/asDB helper (eslint-disable kaldırıldı).' },
+      { type: 'iyilestirme', text: 'voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts custom type, DOM lib uyumlu).' },
+      { type: 'iyilestirme', text: 'VoiceSaleButton.tsx: tüm inline styles → Tailwind utility classları (1 inline style kaldı: fontFamily:inherit).' },
+      { type: 'iyilestirme', text: 'voiceIntentBuilder.ts: buildSaleIntentPartial yeniden yazıldı — unmatched item olsa bile matched items ile intent oluşturur.' },
+      { type: 'yeni', text: 'voiceIntentBuilder.test.ts: 17 test (success, error, warning, options, partial success).' },
+      { type: 'yeni', text: 'useVoiceSale.ts: TTS entegrasyonu — satış başarılı/hata/onay durumlarında speechSynthesis geribildirim.' },
+      { type: 'iyilestirme', text: 'Fallow dead-code audit: kritik bulgu yok, tüm basamaklar yeşil.' },
+      { type: 'iyilestirme', text: 'Toplam test: 555→572 (+17), 46/47 dosya pass, 1 skip (ci-config).' },
+    ],
+  },
+  {
     version: '3.32.0',
     date: '18 Haziran 2026',
     title: 'Son Kalan Kod Kalitesi Maddeleri — J2, H1, E8 + Tespit Güncellemesi',

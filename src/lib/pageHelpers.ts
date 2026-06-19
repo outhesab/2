@@ -1,39 +1,59 @@
 import { genId } from './utils-tr';
+import type { DB } from '@/types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+type CastDB = Record<string, unknown>;
+type Entry = { id: string };
 
-export function upsertSupplier<T extends { id: string }>(
-  prev: Record<string, any>,
+function asDB(prev: DB): CastDB {
+  return prev as unknown as CastDB;
+}
+
+function fromDB(prev: DB, mutated: CastDB): DB {
+  return mutated as unknown as DB;
+}
+
+function asArray<T>(items: unknown): T[] {
+  return (Array.isArray(items) ? items : []) as T[];
+}
+
+export function upsertSupplier<T extends Entry>(
+  prev: DB,
   dbKey: string,
   form: Partial<T>,
   editId: string | null,
   nowIso: string,
   defaults: Partial<T> = {},
-): any {
-  const arr = [...prev[dbKey]];
+): DB {
+  const db = asDB(prev);
+  const arr = [...asArray<Entry>(db[dbKey])];
   if (editId) {
-    const i = arr.findIndex((s: any) => s.id === editId);
-    if (i >= 0) arr[i] = { ...arr[i], ...form, updatedAt: nowIso };
+    const i = arr.findIndex((s) => s.id === editId);
+    if (i >= 0) arr[i] = { ...arr[i], ...form, updatedAt: nowIso } as Entry;
   } else {
-    arr.push({ id: genId(), createdAt: nowIso, updatedAt: nowIso, ...defaults, ...form });
+    arr.push({ id: genId(), createdAt: nowIso, updatedAt: nowIso, ...defaults, ...form } as Entry);
   }
-  return { ...prev, [dbKey]: arr };
+  return fromDB(prev, { ...db, [dbKey]: arr });
 }
 
-export function addOrder(prev: Record<string, any>, dbKey: string, order: Record<string, any>, nowIso: string): any {
-  return {
-    ...prev,
-    [dbKey]: [...prev[dbKey], { id: genId(), createdAt: nowIso, updatedAt: nowIso, ...order }],
-  };
+export function addOrder(prev: DB, dbKey: string, order: Record<string, unknown>, nowIso: string): DB {
+  const db = asDB(prev);
+  return fromDB(prev, {
+    ...db,
+    [dbKey]: [...asArray<Record<string, unknown>>(db[dbKey]), { id: genId(), createdAt: nowIso, updatedAt: nowIso, ...order }],
+  });
 }
 
-export function removeById(prev: Record<string, any>, dbKey: string, id: string): any {
-  return { ...prev, [dbKey]: prev[dbKey].filter((s: any) => s.id !== id) };
+export function removeById(prev: DB, dbKey: string, id: string): DB {
+  const db = asDB(prev);
+  return fromDB(prev, { ...db, [dbKey]: asArray<Entry>(db[dbKey]).filter((s) => s.id !== id) });
 }
 
-export function updateStatusInDB(prev: Record<string, any>, dbKey: string, id: string, status: string): any {
-  return {
-    ...prev,
-    [dbKey]: prev[dbKey].map((o: any) => (o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o)),
-  };
+export function updateStatusInDB(prev: DB, dbKey: string, id: string, status: string): DB {
+  const db = asDB(prev);
+  return fromDB(prev, {
+    ...db,
+    [dbKey]: asArray<Entry & { status?: string; updatedAt?: string }>(db[dbKey]).map((o) =>
+      o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o,
+    ),
+  });
 }

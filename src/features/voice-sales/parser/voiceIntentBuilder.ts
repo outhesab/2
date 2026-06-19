@@ -159,19 +159,63 @@ export function buildSaleIntentPartial(
   command: VoiceCommand,
   db: DB,
 ): IntentBuildResult {
-  const result = buildSaleIntent(command, db);
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const unmatchedItems: VoiceItem[] = [];
+  const matchedItems: SaleIntent['items'] = [];
 
-  // If we have at least one matched item, return partial success
-  if (result.intent && result.intent.items.length > 0) {
+  // Validate action
+  if (command.action !== 'satis') {
     return {
-      ...result,
-      success: true,
-      warnings: [
-        ...result.warnings,
-        `${result.unmatchedItems.length} ürün eşleşmedi, ${result.intent.items.length} ürün işleniyor.`,
-      ],
+      success: false,
+      errors: [`"${command.action}" işlemi için IntentBuilder desteklenmiyor. Sadece "satis" desteklenir.`],
+      warnings: [],
+      unmatchedItems: command.items,
     };
   }
 
-  return result;
+  // Try to match each item individually
+  for (const item of command.items) {
+    const match = findBestProductMatch(item.productQuery, db.products, 0.4);
+    if (match) {
+      matchedItems.push({
+        productId: match.id,
+        productName: match.name,
+        quantity: item.quantity,
+        unitPrice: match.price,
+        cost: match.cost,
+      });
+      if (match.score < 0.6) {
+        warnings.push(`"${item.productQuery}" → "${match.name}" eşleşmesi zayıf (${Math.round(match.score * 100)}%).`);
+      }
+      if (match.stock < item.quantity) {
+        warnings.push(`"${match.name}" stokta ${match.stock} adet var, ${item.quantity} adet isteniyor.`);
+      }
+    } else {
+      unmatchedItems.push(item);
+      errors.push(`"${item.productQuery}" ürünü bulunamadı.`);
+    }
+  }
+
+  // No items matched at all → fail
+  if (matchedItems.length === 0) {
+    return { success: false, errors, warnings, unmatchedItems };
+  }
+
+  // Build intent from matched items
+  const intent: SaleIntent = {
+    items: matchedItems,
+    payment: command.payment || 'nakit',
+  };
+  if (command.options) {
+    if (command.options.discount !== undefined) intent.discount = command.options.discount;
+    if (command.options.discountAmount !== undefined) intent.discountAmount = command.options.discountAmount;
+    if (command.options.cariId) intent.cariId = command.options.cariId;
+    if (command.options.customerName) intent.customerName = command.options.customerName;
+    if (command.options.saleDate) intent.saleDate = command.options.saleDate;
+  }
+
+  warnings.push(`${unmatchedItems.length} ürün eşleşmedi, ${matchedItems.length} ürün işleniyor.`);
+
+  return { success: true, intent, errors, warnings, unmatchedItems };
 }

@@ -5,6 +5,7 @@ import type { VoiceSaleState, VoiceCommand, SpeechState } from '../types';
 import { VoiceSpeechRecognizer } from '../speech/speechRecognizer';
 import { parseVoiceCommand } from '../parser/voiceNlpParser';
 import { executeVoiceSale } from '../executor/voiceSaleExecutor';
+import { speak } from '@/lib/audio';
 import type { SaleIntent } from '@/domain/types';
 
 const INITIAL_STATE: VoiceSaleState = {
@@ -37,6 +38,7 @@ export function useVoiceSale() {
       if (result.needsConfirmation && result.confirmationMessage) {
         // Store pending intent for confirmation
         pendingCommandRef.current = command;
+        speak('Lütfen onaylayın.');
         setState((prev) => ({
           ...prev,
           isProcessing: false,
@@ -44,6 +46,10 @@ export function useVoiceSale() {
           error: null,
         }));
       } else if (result.success) {
+        const totalStr = result.sale
+          ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0 }).format(result.sale.total)
+          : '';
+        speak(`Satış tamamlandı, toplam ${totalStr}`);
         setState((prev) => ({
           ...prev,
           isProcessing: false,
@@ -54,6 +60,7 @@ export function useVoiceSale() {
           parsedCommand: null,
         }));
       } else {
+        speak(`Hata: ${result.error || 'İşlem başarısız.'}`);
         setState((prev) => ({
           ...prev,
           isProcessing: false,

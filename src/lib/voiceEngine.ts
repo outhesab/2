@@ -2,7 +2,6 @@
  * PARSPEL — Voice Engine (STT)
  * Web Speech API kullanarak sesli komutları metne çevirir.
  */
-import type { SpeechRecognitionEvent, SpeechRecognitionErrorEvent } from '@/types';
 
 export interface VoiceRecognitionOptions {
   lang?: string;
@@ -11,13 +10,12 @@ export interface VoiceRecognitionOptions {
 }
 
 export class VoiceEngine {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private recognition: any;
+  private recognition: SpeechRecognition | null = null;
   private isListening: boolean = false;
 
   constructor(options: VoiceRecognitionOptions = {}) {
     const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognitionConstructor) {
       throw new Error('Tarayıcınız ses tanıma (SpeechRecognition) özelliğini desteklemiyor.');
     }
@@ -32,21 +30,21 @@ export class VoiceEngine {
     if (this.isListening) return;
 
     this.isListening = true;
-    this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+    this.recognition!.onresult = (event) => {
       const text = event.results[0][0].transcript;
       onResult(text);
     };
 
-    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    this.recognition!.onerror = (event) => {
       onError(event.error);
       this.isListening = false;
     };
 
-    this.recognition.onend = () => {
+    this.recognition!.onend = () => {
       this.isListening = false;
     };
 
-    this.recognition.start();
+    this.recognition!.start();
   }
 
   stop(): void {

@@ -179,15 +179,13 @@ async function performSale(
     const entry: AuditEntry = {
       id: genId(),
       action: 'create',
-      entityType: 'sale',
+      entity: 'sale',
       entityId: saleResult?.id || 'voice-sale',
-      userId: 'voice-sales',
-      userName: 'Sesli Satış',
-      before: '',
-      after: JSON.stringify(saleResult || {}),
-      violations: [],
-      source: 'voice-sales',
-      timestamp: new Date().toISOString(),
+      prevValue: undefined,
+      nextValue: saleResult ? JSON.stringify(saleResult) : undefined,
+      sessionId: 'voice-sales',
+      status: 'applied',
+      time: new Date().toISOString(),
     };
     const withAudit: DB = {
       ...nextDB,
@@ -197,7 +195,7 @@ async function performSale(
     void saveToIndexedSnapshot(withAudit);
 
     // 5. Build success result
-    logger.info('voice-sales', 'Satış tamamlandı', {
+    logger.info('voice', 'Satış tamamlandı', {
       saleId: saleResult?.id,
       total: saleResult?.total,
       items: intent.items.length,
