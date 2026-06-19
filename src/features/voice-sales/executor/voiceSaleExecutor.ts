@@ -2,10 +2,14 @@
 
 import { completeSale } from '@/domain/services/saleCompletion';
 import { applyIntentResult } from '@/hooks/db/dbHelpers';
+import { saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';
+import { trimAuditLog } from '@/lib/auditEngine';
+import { genId } from '@/lib/utils-tr';
+import { logger } from '@/lib/logger';
 import type { SaleIntent } from '@/domain/types';
 import type { VoiceCommand, VoiceSaleResult } from '../types';
 import { buildSaleIntent } from '../parser/voiceIntentBuilder';
-import type { DB } from '@/types';
+import type { DB, AuditEntry } from '@/types';
 
 /**
  * Read DB directly from localStorage (non-React context helper).
@@ -170,11 +174,35 @@ async function performSale(
     // 3. Apply DB updates
     const nextDB = applyIntentResult(db, result.data);
 
-    // 4. Persist to localStorage (direct write — voice-sales bypasses React hook)
-    localStorage.setItem('sobaYonetim', JSON.stringify(nextDB));
+    // 4. Persist via save pipeline (RuleEngine → AuditEngine → localStorage → IndexedDB)
+    const saleResult = result.data.dbUpdates.sale;
+    const entry: AuditEntry = {
+      id: genId(),
+      action: 'create',
+      entityType: 'sale',
+      entityId: saleResult?.id || 'voice-sale',
+      userId: 'voice-sales',
+      userName: 'Sesli Satış',
+      before: '',
+      after: JSON.stringify(saleResult || {}),
+      violations: [],
+      source: 'voice-sales',
+      timestamp: new Date().toISOString(),
+    };
+    const withAudit: DB = {
+      ...nextDB,
+      _auditLog: trimAuditLog([entry, ...(nextDB._auditLog || [])]),
+    };
+    saveToStorage(withAudit);
+    void saveToIndexedSnapshot(withAudit);
 
     // 5. Build success result
-    const sale = result.data.dbUpdates.sale;
+    logger.info('voice-sales', 'Satış tamamlandı', {
+      saleId: saleResult?.id,
+      total: saleResult?.total,
+      items: intent.items.length,
+    });
+    const sale = saleResult;
     return {
       success: true,
       sale: sale
