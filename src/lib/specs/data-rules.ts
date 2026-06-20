@@ -69,7 +69,7 @@ export const dataRules: SpecRule[] = [
       const files = walkFiles('src', ['.tsx', '.ts']);
       const violations: SpecCheckResult['violations'] = [];
       for (const file of files) {
-        if (isSystemFile(file) || file.includes('voice-sales')) continue;
+        if (isSystemFile(file)) continue;
         try {
           const content = readFileSync(join(ROOT, file), 'utf-8');
           const lines = content.split('\n');

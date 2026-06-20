@@ -20,6 +20,22 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.40.0',
+    date: '21 Haziran 2026',
+    title: 'v3.40.0 — Code Cleanup: Dead Code & Orphan Deps Temizliği',
+    summary: 'Kapsamlı kod temizlik (Kademe 1+2+3). Ölü voice-sales modülü (14 dosya, 2554 satır), 33 ölü shadcn UI component (3818 satır), MenuViewModel.tsx, ve 22 orphan npm paketi kaldırıldı. shadcn-declarations.d.ts 260→90 satıra indirildi. .gitignore güncellendi, state-registry yenilendi. Toplam ~6600 satır ölü kod temizlendi.',
+    changes: [
+      { type: 'kaldirildi', text: 'features/voice-sales/ modülü (14 dosya, 2554 satır) — spec kuralları güncellendi.' },
+      { type: 'kaldirildi', text: '33 ölü shadcn UI component (0 import, 3818 satır): accordion, alert-dialog, aspect-ratio, breadcrumb, button-group, calendar, carousel, chart, checkbox, collapsible, command, context-menu, drawer, field, form, hover-card, input-group, input-otp, item, kbd, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, sidebar, slider, sonner, spinner, toggle-group.' },
+      { type: 'kaldirildi', text: 'MenuViewModel.tsx (43 satır) — 0 referans.' },
+      { type: 'kaldirildi', text: '22 orphan npm paketi: @hookform/resolvers, @radix-ui/react-accordion/alert-dialog/aspect-ratio/checkbox/collapsible/context-menu/hover-card/menubar/navigation-menu/popover/progress/radio-group/scroll-area/slider/toggle-group/toast, cmdk, input-otp, react-day-picker, react-hook-form, react-resizable-panels, vaul.' },
+      { type: 'iyilestirme', text: 'shadcn-declarations.d.ts temizlendi: 237 satır kaldırıldı (260→90). Sadece framer-motion, firebase kaldı.' },
+      { type: 'iyilestirme', text: '.gitignore: e2e-report/ eklendi.' },
+      { type: 'iyilestirme', text: 'Spec rules (component-rules.ts, data-rules.ts): voice-sales exclusion filter kaldırıldı.' },
+      { type: 'duzeltme', text: 'RAPOR_1.md ve RAPOR_2.md\'deki hatalı iddialar düzeltildi: streamUtils.ts (5 import canlı), agentConfig.ts (dosya mevcut değil).' },
+    ],
+  },
+  {
     version: '3.39.0',
     date: '20 Haziran 2026',
     title: 'v3.39.0 — Soba Nexus AI: WhatsApp Bridge (Müşteri Mesaj Otomasyonu)',

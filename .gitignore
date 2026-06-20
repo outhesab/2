@@ -9,6 +9,7 @@ build/
 test-report/
 test-results/
 playwright-report/
+e2e-report/
 
 # Android build
 android/.gradle/

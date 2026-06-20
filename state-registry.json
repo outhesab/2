@@ -1,23 +1,23 @@
 {
-  "version": "3.33.0",
-  "generatedAt": "2026-06-20T15:10:00.000Z",
+  "version": "3.40.0",
+  "generatedAt": "2026-06-20T21:15:26.355Z",
   "git": {
     "branch": "dev",
-    "commit": "current",
-    "commitFull": "",
-    "commitMessage": "chore: final sync and verification",
-    "commitDate": "2026-06-20"
+    "commit": "45f71e2",
+    "commitFull": "45f71e2aa1468e094073406cef14abed25cdb992",
+    "commitMessage": "feat(nexus): voice-only guvenli isletim vizyonu - 7 sutun (v3.34.0 -> v3.39.0)",
+    "commitDate": "2026-06-20 23:53:14 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-20T00:00:00.000Z"
+    "checkedAt": "2026-06-20T21:15:26.356Z"
   },
   "codebase": {
-    "tsFiles": 190,
-    "tsxFiles": 210,
+    "tsFiles": 197,
+    "tsxFiles": 181,
     "cssFiles": 31,
-    "totalLOC": 71200,
-    "dependencies": 62,
+    "totalLOC": 69090,
+    "dependencies": 39,
     "devDependencies": 41
   },
   "agents": [
@@ -188,10 +188,7 @@
   },
   "contextVortex": {
     "strategy": "read-first",
-    "description": "Agent baslatmadan once bu dosyayi oku. Proven facts burada. Gereksiz dosya taramayi azalt. Detayli proje analizi icin docs/agents/proje-analizi.md ye bak.",
-    "estimatedTokenSavings": "60-80%",
-    "referenceDocs": [
-      "docs/agents/proje-analizi.md"
-    ]
+    "description": "Agent baslatmadan once bu dosyayi oku. Proven facts burada. Gereksiz dosya taramayi azalt.",
+    "estimatedTokenSavings": "60-80%"
   }
 }
