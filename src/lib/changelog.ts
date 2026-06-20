@@ -20,6 +20,76 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.39.0',
+    date: '20 Haziran 2026',
+    title: 'v3.39.0 — Soba Nexus AI: WhatsApp Bridge (Müşteri Mesaj Otomasyonu)',
+    summary: 'Ses-only işletim vizyonunun 7. ve son sütunu: WhatsAppBridge. Müşteri WhatsApp mesajları otomatik parse edilir, telefonla cari tanınır, fiyat/stok/bakiye/sipariş durumuna nazik Türkçe cevap üretilir. Frontend parsing core; üretim webhook entegrasyonu backend gerektirir (modül injectable tasarlandı). NexusExecutive WhatsApp simülasyon komutu da destekler.',
+    changes: [
+      { type: 'yeni', text: 'WhatsAppBridge.ts: Müşteri mesaj otomasyonu — identifyCustomerByPhone (son 10 hane normalize eşleştirme), parseWhatsAppIntent (greeting/price/stock/balance/order_status/business_hours/human_request/unknown), formatWhatsAppReply (her intent için nazik Türkçe cevap, müşteri adıyla), findProduct (toleranslı), processIncomingWhatsApp (tam pipeline), WhatsAppBridge singleton.' },
+      { type: 'yeni', text: 'WhatsAppBridge.test.ts: 34 test — telefon tanıma (6 senaryo), intent parsing (11 senaryo), reply üretimi (10 senaryo), tam pipeline (4 senaryo), singleton.' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: WHATSAPP SIM PATH eklendi — isWhatsAppSimCommand + extractWhatsAppMessage, "whatsapptan 0555... dedi: merhaba" formatını simüle eder.' },
+      { type: 'duzeltme', text: 'WhatsAppBridge: Order.cariId yok (Order tedarikçi siparişi) → order_status artık sales kayıtlarını kullanır (müşteri siparişi = sale).' },
+    ],
+  },
+  {
+    version: '3.38.0',
+    date: '20 Haziran 2026',
+    title: 'v3.38.0 — Soba Nexus AI: Weather Proactive Engine (Hava → Stok Önerisi)',
+    summary: 'Ses-only işletim vizyonunun 6. sütunu: WeatherProactiveEngine. "Hava durumu analizi", "stok kontrol" komutları hava verisi + DB stok geçmişi ile proaktif öneriler üretir. Sıcaklık 5°C düşüş → +%30 talep → stok yetersizse "X adet sipariş öneririm". Soba/boru/pelet kategorileri otomatik tanınır. OpenWeatherMap API injectable, offline mock fallback mevcut.',
+    changes: [
+      { type: 'yeni', text: 'WeatherProactiveEngine.ts: Proaktif zeka — WeatherData tipi, estimateDemandMultiplier (cooling 5°C→1.3, 3°C→1.15, 1°C→1.05), estimateDailySales (son 30 gün), analyzeWeatherImpact (soba/boru/pelet kategorileri, talep-stok karşılaştırması, restock_suggestion/opportunity/weather_demand alert tipleri), generateProactiveMessage (öncelik sıralı, en fazla 3 detay), mockWeatherFetcher + createOpenWeatherFetcher (injectable API), WeatherProactiveEngine singleton (1 saat cooldown).' },
+      { type: 'yeni', text: 'WeatherProactiveEngine.test.ts: 27 test — demandMultiplier (6 senaryo), dailySales (5 senaryo), analyzeWeatherImpact (7 senaryo), generateProactiveMessage (4 senaryo), mockWeatherFetcher, engine state machine (4 senaryo).' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: PROAKTIF HAVA PATH eklendi — isProactiveWeatherCommand ("hava durumu", "stok kontrol", "hava etkisi" algılama), weatherProactiveEngine.check() entegrasyonu, sonuç finalData ile arayüze aktarılır.' },
+    ],
+  },
+  {
+    version: '3.37.0',
+    date: '20 Haziran 2026',
+    title: 'v3.37.0 — Soba Nexus AI: Voice Undo Engine (Sesle Son İşlemi Geri Al)',
+    summary: 'Ses-only işletim vizyonunun 5. sütunu: VoiceUndoEngine. "Son satışı iptal et", "son gideri geri al", "son işlemi geri al" komutları AIActionLog üzerinden son applied işlemi tespit edip uygun undo Intent’i üretir ve confirmation gateway’inden geçer. Sale undo tam destek, kasa gelir/gider ters kayıt, cari tahsilat ileri tarih için işaretlendi.',
+    changes: [
+      { type: 'yeni', text: 'VoiceUndoEngine.ts: Sesle geri alma çekirdeği — parseUndoCommand (sale/gelir/gider/tahsilat/any/unknown hedef ayrıştırma), findLastUndoableAction (AIActionLog status=applied, undoable actionType filtresi, son tarihten eskiye), buildUndoIntent (sale→sale_iptal, kasa_gelir↔kasa_gider ters kayıt, cari_tahsilat not-implemented), resolveUndo (tam pipeline).' },
+      { type: 'yeni', text: 'VoiceUndoEngine.test.ts: 30 test — parseUndoCommand (9 senaryo), findLastUndoableAction (6 senaryo), buildUndoIntent (8 senaryo), resolveUndo (7 tam pipeline senaryosu).' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: UNDO PATH eklendi — isUndoCommand ile "son ... geri al" algılama, resolveUndo + confirmation gateway entegrasyonu, targetDescription read-back\'e eklenir.' },
+    ],
+  },
+  {
+    version: '3.36.0',
+    date: '20 Haziran 2026',
+    title: 'v3.36.0 — Soba Nexus AI: Voice Sale Composer (Çok Adımlı Sesli Satış)',
+    summary: 'Ses-only işletim vizyonunun 4. sütunu: VoiceSaleComposer. Artık kullanıcı bir satışı parça parça sesle inşa edebiliyor — "yeni satış" → "2 tane 80lik ekle" → "Ali’ye sat" → "yüzde 10 indirim" → "kartla" → "sat" → onay. Composer, draft’ı adım adım günceller, "durum" ile özet verir, "80liği çıkar" ile item siler, "80liği 3 tane yap" ile adet günceller. Finalize çıktısı SaleIntent olarak confirmation gateway’inden geçer.',
+    changes: [
+      { type: 'yeni', text: 'VoiceSaleComposer.ts: Multi-turn voice sale composer — findProductByName (toleranslı ürün arama), parseComposerCommand (kelime-bazlı, 11 komut tipi: add_item/set_cari/set_discount/set_payment/remove_item/set_qty/set_unit_price/finalize/cancel/status/unknown), applyCommandToDraft (draft güncelleme), draftToSaleIntent (validation ile SaleIntent üretimi), summarizeDraft (TTS için özet), stateful VoiceSaleComposer singleton.' },
+      { type: 'yeni', text: 'VoiceSaleComposer.test.ts: 51 test — ürün arama, 11 komut tipi parsing, draft uygulama, SaleIntent üretimi, özet, state machine (çok adımlı satış akışı, cancel, status, finalize boş hata, unknown, aynı ürün merge).' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: Composer mode entegrasyonu — "yeni satış"/"satış başlat" komutu composer moduna geçer, her sesli komut composer.process() ile işlenir, finalize → confirmation gateway, cancel → mode kapanır. Yeni composer_active result tipi + startComposer/stopComposer/isComposerActive metodları.' },
+      { type: 'duzeltme', text: 'NexusExecutive.ts: logger kategorileri "NexusExecutive" → "ai" (geçerli LogCategory). Bu pre-existing typecheck hatasını da düzeltti (32→31).' },
+    ],
+  },
+  {
+    version: '3.35.0',
+    date: '20 Haziran 2026',
+    title: 'v3.35.0 — Soba Nexus AI: Voice Confirmation Gateway (Ses-Only Güvenlik Çekirdeği)',
+    summary: 'Sesle güvenli işlem vizyonunun temel taşı: VoiceConfirmationGateway. Artık tüm write aksiyonlar (satış, kasa, stok, cari) execute öncesi sesli read-back ve açık onay gerektiriyor. "100 TL gider yaz" → sistem "100 TL gider, nakit kasasından. Onaylıyor musunuz?" diye soruyor; sadece "evet" yanıtında çalışıyor. Yanlış duyulmuş komutlar artık maddi zarar veremez.',
+    changes: [
+      { type: 'yeni', text: 'VoiceConfirmationGateway.ts: Güvenlik çekirdeği — requiresConfirmation (write aksiyon seti), generateReadBack (her aksiyon için doğal Türkçe okuma metni), parseConfirmation (onay/red/belgisiz ayrıştırma, STT hatalarına toleranslı, çelişkide güvenlik tarafı), stateful gateway (pending state machine, 15sn timeout, üst üste istek koruması).' },
+      { type: 'yeni', text: 'VoiceConfirmationGateway.test.ts: 27 test — requiresConfirmation matrisi, 9 aksiyon tipi için read-back üretimi, onay/red/belgisiz parsing, state machine (idle/pending/confirm/reject/cancel/timeout/üst üste istek).' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: ACTION PATH artık write aksiyonları gateway üzerinden geçiriyor. Yeni pending_confirmation result tipi + submitConfirmation(text) metodu (UI sesli onay akışı için) + cancelPendingConfirmation.' },
+    ],
+  },
+  {
+    version: '3.34.0',
+    date: '20 Haziran 2026',
+    title: 'v3.34.0 — Soba Nexus AI: Cross-Entity Discount Memory (MEMORY PATH)',
+    summary: 'Nexus AI’a 5. yönlendirme yolu eklendi: MEMORY PATH. "Ali’nin indirimini Ahmet’e de uygula" kalıbı algılanıp, geçmiş satışlardan indirim kalıbı çıkarılarak hedef cariye transfer önerisi üretiliyor. Çekirdek saf fonksiyonlar (pure) ile deterministik ve offline-first; LLM yalnızca belirsiz durumlarda devreye girer.',
+    changes: [
+      { type: 'yeni', text: 'DiscountMemoryModule.ts: Cross-entity discount memory engine — findCariByName (toleranslı isim eşleştirme), recallDiscountHistory (indirimli satış geçmişi), extractDiscountPattern (yüzde/tutar kalıbı çıkarımı), proposeDiscountTransfer (transfer önerisi), applyDiscountProposalToPayload (sale payload enjeksiyonu).' },
+      { type: 'yeni', text: 'DiscountMemoryModule.test.ts: 24 co-located test — isim eşleştirme, geçmiş hatırlama, kalıp çıkarımı, transfer önerisi, payload enjeksiyonu senaryoları.' },
+      { type: 'yeni', text: 'NexusRouter.ts: MEMORY PATH (5. yol) eklendi. detectDiscountTransfer — token-tabanlı "indirim ... uygula" kalıbı algılama, Türkçe ek/apostrof varyasyonlarına dayanıklı.' },
+      { type: 'iyilestirme', text: 'NexusExecutive.ts: MEMORY PATH sonuçlarını yöneten dal eklendi; applicable öneriler için suggestedAction (SatisAgent’a gönderilecek payload) üretiliyor.' },
+      { type: 'iyilestirme', text: 'nexus-verification.test.ts: MEMORY PATH için yeni test eklendi (Ali→Ahmet indirim transferi senaryosu).' },
+    ],
+  },
+  {
     version: '3.33.0',
     date: '20 Haziran 2026',
     title: 'v3.33.0 — Soba Nexus AI: Reasoning Filter & Fast-Path Intents',

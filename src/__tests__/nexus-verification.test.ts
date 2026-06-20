@@ -74,4 +74,40 @@ describe('Soba Nexus AI Verification', () => {
     expect(instance1).toBeDefined();
     expect(typeof instance1.speak).toBe('function');
   });
+
+  it('should route to MEMORY path for cross-entity discount transfer', async () => {
+    // Ali'ye indirimli satış ekleyelim (mevcut mockDB'deki Ahmet Yılmaz hedef)
+    const dbWithMemory: DB = {
+      ...mockDB,
+      cari: [
+        ...mockDB.cari,
+        { id: 'c-ali', name: 'Ali Yılmaz', balance: 0, deleted: false, type: 'musteri' },
+      ],
+      sales: [{
+        id: 's1',
+        cariId: 'c-ali',
+        cariName: 'Ali Yılmaz',
+        productName: 'Soba 80lik',
+        productCategory: 'soba',
+        quantity: 1,
+        unitPrice: 5000,
+        cost: 4000,
+        discount: 10,
+        discountAmount: 500,
+        subtotal: 5000,
+        total: 4500,
+        profit: 500,
+        payment: 'nakit',
+        status: 'tamamlandi',
+        items: [{ productId: 'p1', productName: 'Soba 80lik', quantity: 1, unitPrice: 5000, cost: 4000, total: 5000 }],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as import('@/types').Sale],
+    };
+    const result = await nexusRouter.route("Ali'nin indirimini Ahmet'e de uygula", dbWithMemory, {});
+    expect(result.type).toBe('memory');
+    expect(result.memoryProposal).toBeDefined();
+    expect(result.memoryProposal?.applicable).toBe(true);
+    expect(result.memoryProposal?.toCari?.name).toBe('Ahmet Yılmaz');
+  });
 });
