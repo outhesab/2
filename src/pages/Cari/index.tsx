@@ -275,7 +275,7 @@ export default function Cari({ db, save }: Props) {
           />
         </Modal>
       )}
-      // <VoiceAssistantButton /> removed
+      {/* VoiceAssistantButton removed in favor of SobaNexus */}
     </div>
   );
 }

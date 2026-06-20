@@ -62,9 +62,13 @@ Referans dokümanlar:
 - **Fatura** — Satış ve alış faturaları, taksit planı
 - **Raporlar & Dashboard** — Günlük ciro, kâr, stok değeri
 - **Offline-First** — localStorage birincil depolama, Firebase Firestore opsiyonel bulut sync
-- **Multi-Agent Sistemi** — 7 ajan (Satış, Kasa, Cari, Stok, Fatura, Rapor, DeepSeek), mitt tabanlı AgentBus
+- **Multi-Agent Sistemi** — 7 ajan (Satış, Kasa, Cari, Stok, Fatura, Rapor, DeepSeek), mitt tabanlı AgentBus + domainEventBus
 - **Rule Engine** — Her işlemde otomatik kural kontrolü (negatif stok, negatif kasa, sıfır tutar, mükerrer işlem)
 - **Audit Log** — Tüm işlemlerin denetim kaydı
+- **Soba Nexus AI** — Sesli komut ile satış, stok, cari sorgulama; Reasoning Filter + Fast-Path Intent'ler
+- **Voice-Sales** — Doğal dil ile sesli satış işlemi (speech-to-text + NLP parser)
+- **BatchQueue** — Toplu veri işleme kuyruğu, SafeIO güvenli yazma katmanı
+- **State Registry** — External Memory Layer, AI agent'lar için proven facts önbelleği
 - **PWA** — Service Worker + Web Manifest, offline çalışma desteği
 - **Android** — Capacitor 8 ile native APK
 
@@ -81,8 +85,10 @@ Referans dokümanlar:
 | State | Zustand |
 | Mobil | Capacitor 8 (Android) |
 | Test | Vitest + fast-check (property-based) |
-| Depolama | localStorage + Firebase Firestore (opsiyonel) |
-| AI | DeepSeek (API) |
+| Depolama | localStorage + Dexie (IndexedDB) + Firebase Firestore (opsiyonel) |
+| AI | DeepSeek (API) + Soba Nexus AI (sesli asistan) |
+| Voice | Web Speech API + NLP parser |
+| Registry | State Registry (AI context optimization) |
 | PWA | vite-plugin-pwa + workbox |
 
 ---
@@ -113,7 +119,9 @@ pnpm run test:run
 pnpm exec vitest run src/lib/kapsamli-senaryo.test.ts
 ```
 
-Test dosyaları `src/lib/` ve `src/__tests__/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
+Test dosyaları `src/lib/`, `src/agents/` ve `src/__tests__/` altında bulunur. Testler UI bağımlılığı olmadan saf fonksiyon olarak çalışır (`prevDB → işlem → nextDB` pattern).
+
+Property-based testler için `fast-check` kullanılır. Tüm testler CI pipeline'ında (`lint → typecheck → test:run → build`) otomatik çalışır.
 
 ---
 
@@ -134,10 +142,11 @@ pnpm run build
 | `animations` | 129 KB | Framer Motion |
 | `ui` | 34 KB | Sonner (toast) |
 | `exceljs` | 1 MB | Excel işleme (lazy load) |
+| `nexus` | 85 KB | Soba Nexus AI (sesli asistan) |
 
 ### PWA
 
-Service Worker + Web Manifest aktif. 53 asset precache ile offline çalışma desteklenir. Google Fonts CacheFirst (1 yıl), Firebase API NetworkOnly olarak yapılandırılmıştır.
+Service Worker + Web Manifest aktif. Asset precache ile offline çalışma desteklenir. Google Fonts CacheFirst (1 yıl), Firebase API NetworkOnly olarak yapılandırılmıştır.
 
 Detaylı rapor: `PERFORMANCE_REPORT.md`
 

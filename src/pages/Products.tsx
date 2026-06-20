@@ -615,7 +615,7 @@ export default function Products({ db, save }: Props) {
           </Button>
         </div>
       </Modal>
-      // <VoiceAssistantButton /> removed
+      {/* VoiceAssistantButton removed in favor of SobaNexus */}
     </div>
   );
 }

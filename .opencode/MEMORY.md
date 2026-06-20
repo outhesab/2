@@ -4,18 +4,16 @@
 
 ## Aktif Session
 
-- **Tarih:** 18 Haziran 2026
-- **Hedef:** v3.32.0 — Kalan MASTER_PLAN maddeleri + WEEKLY_PLAN 5.12 + Aşama 3 Registry
+- **Tarih:** 20 Haziran 2026
+- **Hedef:** v3.33.0 — GitHub sync + doküman güncelleme
 - **Durum:**
-  - ✅ Tüm kalan ~45 madde tarandı, ~30'u zaten çözülmüş, 6'sı fix'lendi
-  - ✅ J2: dangerouslySetInnerHTML → React-based rendering (AIAHelpers, ai-asistan)
-  - ✅ H1: P1 tautoloji test → real property-based test
-  - ✅ E8: 'utf8' as never → Encoding.UTF8 (Capacitor enum)
-  - ✅ WEEKLY_PLAN 5.12: coverage exclude temizliği (son task kapandı 🏁)
-  - ✅ Aşama 3: State Registry otomasyonu — pre-commit drift tespiti eklendi
-  - ✅ v3.32.0: changelog + package.json + state-registry senkron
-  - ✅ pre-commit: agent drift + registry drift çift kontrol
-  - ✅ CI yeşil (lint, typecheck, 555 test passed, 1 skipped, build)
+  - ✅ GitHub'dan son değişiklikler çekildi (6 commit, v3.32.1→v3.33.0)
+  - ✅ Soba Nexus AI: Reasoning Filter + Fast-Path Intent'ler eklendi
+  - ✅ Cari sayfası modüler hale getirildi (CariList/CariDetail/CariForm/CariHelpers)
+  - ✅ BatchQueue + SafeIO eklendi
+  - ✅ QuickSale kaldırıldı, Settings içerik sayfaları ayrıldı
+  - ✅ SatisAgent discount/banka/pos testleri tamam (18 test pass)
+  - ✅ Local == Remote tam senkron
 
 ## Çalışma Protokolü
 
@@ -35,7 +33,7 @@ Sinyal sistemi:
 **Çözüm:** Aşamalı uygulama:
 - ✅ Aşama 1 (18.06.2026): AGENTS.md 810→111 satır, detaylar docs/agents/ altına taşındı
 - ✅ Aşama 2 (18.06.2026): Symlink stratejisi (shim files) — CLAUDE.md + .cursor/rules/rules.mdc otomatik generate
-- ⏳ Aşama 3 (plan): External Memory Layer (State Registry) — CI başarılı olduğunda proven facts otomatik yazılsın
+- ✅ Aşama 3 (20.06.2026): State Registry (External Memory Layer) — `state-registry.json`, `generate-registry.mjs`, pre-commit drift tespiti
 
 **Araştırma kaynakları (50+):** mem0.ai, axiomstudio.ai, zylos.ai, Cursor, Aider, Cline, Devin, Claude Code, arxiv akademik makaleler (CWL, Continuum Memory, VikingMem, WorldDB, Memori).
 
@@ -86,10 +84,10 @@ Sinyal sistemi:
 
 Tüm P-görevleri (sayfa boyutu), C1-C4, D+E+F+H+I+J+K kod kalitesi maddeleri tamamlandı.
 Kalan ~45 madde taranıp çoğunun zaten çözüldüğü tespit edildi. v3.32.0 ile son 6 madde fix'lenerek kapatıldı.
+SatisAgent discount/banka/pos testleri de eklendi ve geçiyor (18/18).
 
 ## Notlar
 
-- `SatisAgent`'daki discount/banka/pos testleri eksik, refactor sonrası tamamlanacak.
 - Firebase sync için `_firebasePromise` referansı `dbHelpers.ts` üzerinden yönetiliyor.
 
 ---
@@ -106,3 +104,4 @@ Kalan ~45 madde taranıp çoğunun zaten çözüldüğü tespit edildi. v3.32.0 
 | 13.06.2026 | 4 Sayfa Parallel Modülerizasyon | 4 general agent ile Suppliers/Monitor/BugHunter/Bank toplam 26 modüle bölündü. 3421 satır monolit silindi. v3.25.0. |
 | 18.06.2026 | MASTER_PLAN Kalan Maddeler | ~45 madde taranıp 30'unun zaten çözüldüğü tespit edildi. J2/H1/E8 fix'lendi, K4/K5/D2-D7/F5 zaten çözülmüş. v3.32.0. |
 | 20.06.2026 | Soba Nexus AI Optimization | Reasoning Filter ve Fast-Path Intent'ler eklendi, Router ve VoiceIntent optimize edildi. v3.33.0. |
+| 20.06.2026 | GitHub pull + doküman güncelleme | 6 commit çekildi (v3.32.1→v3.33.0), MEMORY.md/AGENTS.md/WEEKLY_PLAN güncellendi, state-registry v3.33.0. |

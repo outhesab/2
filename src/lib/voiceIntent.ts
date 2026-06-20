@@ -12,7 +12,8 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
   const input = text.toLowerCase().trim();
 
   // --- FAST PATH: Regex-based intent detection (Offline & Instant) ---
-  // Pattern: "100 TL gider", "500 lira gider yaz"
+  
+  // 1. Kasa İşlemleri (Gelir/Gider)
   const giderMatch = input.match(/(\d+)\s*(tl|lira)\s*gider/);
   if (giderMatch) {
     return {
@@ -21,7 +22,6 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
     };
   }
 
-  // Pattern: "200 TL gelir", "1000 lira gelir kaydet"
   const gelirMatch = input.match(/(\d+)\s*(tl|lira)\s*gelir/);
   if (gelirMatch) {
     return {
@@ -30,13 +30,27 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
     };
   }
 
-  // Pattern: "500 TL tahsilat", "Ahmet'ten 200 tl tahsilat"
+  // 2. Cari İşlemler (Tahsilat)
   const tahsilatMatch = input.match(/(\d+)\s*(tl|lira)\s*tahsilat/);
   if (tahsilatMatch) {
     return {
       action: 'cari_tahsilat',
       payload: { amount: parseInt(tahsilatMatch[1]), kasa: 'nakit', cariName: '' },
     };
+  }
+
+  // 3. Genel Yönetim Komutları (Offline Keywords)
+  if (input.includes('yeni satış') || input.includes('satış başlat') || input.includes('satış yap')) {
+    return { action: 'sale', payload: { items: [], payment: 'nakit' } };
+  }
+  if (input.includes('müşteri ekle') || input.includes('cari ekle')) {
+    return { action: 'cari_ekle', payload: { name: '', type: 'musteri' } };
+  }
+  if (input.includes('ürün ekle')) {
+    return { action: 'urun_ekle', payload: { name: '', category: 'soba' } };
+  }
+  if (input.includes('satışı iptal et') || input.includes('satış iptal')) {
+    return { action: 'iptal', payload: { saleId: '' } };
   }
 
   // --- SMART PATH: LLM-based intent detection ---

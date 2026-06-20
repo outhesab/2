@@ -1,4 +1,3 @@
-import { Kbd } from "@/components/ui/kbd";
 import type { LucideIcon } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useState, useMemo, useRef, useEffect, useDeferredValue } from "react";
@@ -87,7 +86,6 @@ export default function GlobalSearch({ onNavigate, db, favoriteTabs }: GlobalSea
           placeholder="Ürün, müşteri veya komut ara..."
           className="global-search-input"
         />
-        {!query && <Kbd className="global-search-kbd">⌘K</Kbd>}
         {query && <button onClick={() => { setQuery(''); setOpen(false); }} className="global-search-clear" aria-label="Temizle">×</button>}
       </div>
       {open && results.length > 0 && (

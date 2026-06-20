@@ -1,11 +1,11 @@
 {
-  "version": "3.32.3",
-  "generatedAt": "2026-06-20T00:00:00.000Z",
+  "version": "3.33.0",
+  "generatedAt": "2026-06-20T15:10:00.000Z",
   "git": {
     "branch": "dev",
     "commit": "current",
     "commitFull": "",
-    "commitMessage": "feat: v3.32.2 - BatchQueue, Page Refactor (Suppliers+Cari), Test Kalitesi, Performans",
+    "commitMessage": "chore: final sync and verification",
     "commitDate": "2026-06-20"
   },
   "ci": {

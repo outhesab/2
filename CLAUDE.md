@@ -178,4 +178,4 @@ Yeni kütüphane: `npx bundlephobia <paket>` → 50KB altı kabul.
 
 ---
 
-**Son güncelleme:** 18 Haziran 2026 · v3.31.1
+**Son güncelleme:** 20 Haziran 2026 · v3.33.0

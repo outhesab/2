@@ -21,94 +21,90 @@ export function offlineReply(db: DB, query: string): string {
   const kasaToplam = computeKasaToplam(db);
   const nakit = computeKasaByType(db, 'nakit');
   const banka = computeKasaByType(db, 'banka');
+  const marj = ciro > 0 ? ((kar / ciro) * 100).toFixed(1) : '0';
 
-  if (q.includes('stok') || q.includes('ürün') || q.includes('sipariş')) {
-    const out = getOutOfStockProducts(db);
-    const low = getLowStockProducts(db);
-    const stokDeger = computeStokDeger(db);
-    const totalUrun = db.products.filter((p) => !p.deleted).length;
-    return `📦 **Stok Ozeti**\n- Toplam urun: ${totalUrun} | Stok degeri: ${formatMoney(stokDeger)}\n- Stok biten: ${out.length}${
-      out.length
-        ? '\n  ' +
-          out
-            .slice(0, 5)
-            .map((p) => `• ${p.name}`)
-            .join('\n  ')
-        : ''
-    }\n- Az stoklu: ${low.length}${
-      low.length
-        ? '\n  ' +
-          low
-            .slice(0, 5)
-            .map((p) => `• ${p.name} (${p.stock}/${p.minStock})`)
-            .join('\n  ')
-        : ''
-    }\n\n⚠️ *Cevrimdisi mod - derin analiz icin internet gerekli*`;
+  // --- 1. SATIŞ & PERFORMANS ANALİZİ ---
+  if (
+    q.includes('satış') || q.includes('analiz') || q.includes('performans') || 
+    q.includes('bu ay') || q.includes('kâr') || q.includes('marj') || q.includes('ciro')
+  ) {
+    // Geçen ay karşılaştırması
+    const today = new Date();
+    const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+    const lastMonthCiro = db.sales
+      .filter(s => !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt) >= lastMonthStart && new Date(s.createdAt) <= lastMonthEnd)
+      .reduce((sum, s) => sum + s.total, 0);
+    
+    const buyume = lastMonthCiro > 0 ? (((ciro - lastMonthCiro) / lastMonthCiro) * 100).toFixed(1) : 'N/A';
+
+    // En çok satan ürün
+    const prodAgg = getProductSalesAgg(db);
+    const topProd = Object.entries(prodAgg)
+      .sort((a, b) => b[1].adet - a[1].adet)[0];
+
+    return `📊 **Satış Performans Analizi**\n- Bu Ay Ciro: ${formatMoney(ciro)}\n- Bu Ay Kâr: ${formatMoney(kar)} (%${marj} marj)\n- Geçen Aya Göre: ${buyume === 'N/A' ? 'Veri yok' : `%${buyume} büyüme`}\n- En Çok Satan: ${topProd ? `${topProd[0]} (${topProd[1].adet} adet)` : 'Veri yok'}\n\n⚠️ *Cevrimdisi mod - detaylar için internet gerekli*`;
   }
-  if (q.includes('kasa') || q.includes('nakit') || q.includes('para') || q.includes('sermaye')) {
+
+  // --- 2. KASA & SERMAYE DURUMU ---
+  if (q.includes('kasa') || q.includes('nakit') || q.includes('para') || q.includes('sermaye') || q.includes('banka')) {
     const alacak = computeAlacak(db);
     const borc = computeBorc(db);
     const netSermaye = kasaToplam + alacak - borc;
-    return `💰 **Kasa ve Sermaye**\n- Nakit: ${formatMoney(nakit)}\n- Banka: ${formatMoney(banka)}\n- Toplam Kasa: ${formatMoney(kasaToplam)}\n- Musteri Alacagi: ${formatMoney(alacak)}\n- Tedarikci Borcu: ${formatMoney(borc)}\n- **Net Sermaye: ${formatMoney(netSermaye)}**\n\n⚠️ *Cevrimdisi mod*`;
+    return `💰 **Finansal Durum**\n- Nakit: ${formatMoney(nakit)}\n- Banka: ${formatMoney(banka)}\n- Toplam Kasa: ${formatMoney(kasaToplam)}\n- Musteri Alacakları: ${formatMoney(alacak)}\n- Tedarikci Borçları: ${formatMoney(borc)}\n- **Net Sermaye: ${formatMoney(netSermaye)}**\n\n⚠️ *Cevrimdisi mod*`;
   }
-  if (
-    q.includes('alacak') ||
-    q.includes('borç') ||
-    q.includes('cari') ||
-    q.includes('müşteri') ||
-    q.includes('tahsilat')
-  ) {
+
+  // --- 3. CARİ & ALACAK TAKİBİ ---
+  if (q.includes('alacak') || q.includes('borç') || q.includes('cari') || q.includes('müşteri') || q.includes('tahsilat')) {
     const alacak = computeAlacak(db);
     const topBorclu = getTopBorclu(db);
     const overdue = getOverdueMusteri(db);
-    return `👤 **Cari ve Alacak Ozeti**\n- Toplam alacak: ${formatMoney(alacak)}\n- Alacakli musteri: ${topBorclu.length}\n\n**En Yuksek 5 Alacak:**\n${topBorclu.map((c) => `- ${c.name}: ${formatMoney(c.balance)}`).join('\n') || 'Yok'}${
+    return `👤 **Cari ve Alacak Özeti**\n- Toplam Alacak: ${formatMoney(alacak)}\n- Alacaklı Müşteri Sayısı: ${topBorclu.length}\n\n**En Yüksek 5 Alacak:**\n${topBorclu.map((c) => `- ${c.name}: ${formatMoney(c.balance)}`).join('\n') || 'Yok'}${
       overdue.length > 0
-        ? `\n\n⚠️ **Gecikmis Alacaklar (30+ gun):**\n${overdue
+        ? `\n\n⚠️ **Gecikmiş Alacaklar (30+ gün):**\n${overdue
             .slice(0, 5)
-            .map((c) => `- ${c.name}: ${formatMoney(c.balance)} - ${c.days} gun`)
+            .map((c) => `- ${c.name}: ${formatMoney(c.balance)} (${c.days} gün)`)
             .join('\n')}`
         : ''
     }`;
   }
-  if (
-    q.includes('satış') ||
-    q.includes('analiz') ||
-    q.includes('performans') ||
-    q.includes('bu ay') ||
-    q.includes('kâr')
-  ) {
-    const marj = ciro > 0 ? ((kar / ciro) * 100).toFixed(1) : '0';
-    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const topProducts = Object.entries(
-      db.sales
-        .filter((s) => !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt) >= monthStart)
-        .reduce(
-          (acc, s) => {
-            acc[s.productName] = (acc[s.productName] || 0) + s.total;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-    )
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-    return `📊 **Bu Ay Satis Ozeti**\n- ${monthSales.length} satis\n- Ciro: ${formatMoney(ciro)}\n- Kar: ${formatMoney(kar)} (%${marj} marj)\n\n**Bu Ay Top 3 Urun:**\n${topProducts.map(([n, v], i) => `${i + 1}. ${n}: ${formatMoney(v)}`).join('\n') || 'Veri yok'}\n\n⚠️ *Cevrimdisi mod - karsilastirmali analiz icin internet gerekli*`;
+
+  // --- 4. STOK DURUMU ---
+  if (q.includes('stok') || q.includes('ürün') || q.includes('sipariş') || q.includes('biten')) {
+    const out = getOutOfStockProducts(db);
+    const low = getLowStockProducts(db);
+    const stokDeger = computeStokDeger(db);
+    const totalUrun = db.products.filter((p) => !p.deleted).length;
+    return `📦 **Stok Özeti**\n- Toplam Ürün: ${totalUrun} | Stok Değeri: ${formatMoney(stokDeger)}\n- Stok Biten: ${out.length}${
+      out.length
+        ? '\n  ' + out.slice(0, 5).map((p) => `• ${p.name}`).join('\n  ')
+        : ''
+    }\n- Az Stoklu: ${low.length}${
+      low.length
+        ? '\n  ' + low.slice(0, 5).map((p) => `• ${p.name} (${p.stock}/${p.minStock})`).join('\n  ')
+        : ''
+    }\n\n⚠️ *Cevrimdisi mod*`;
   }
-  if (q.includes('risk') || q.includes('kritik') || q.includes('öneri') || q.includes('ipucu')) {
+
+  // --- 5. RİSK & ÖNERİ ANALİZİ ---
+  if (q.includes('risk') || q.includes('kritik') || q.includes('öneri') || q.includes('ipucu') || q.includes('ne yapmalıyım')) {
     const out = getOutOfStockProducts(db).length;
     const low = getLowStockProducts(db).length;
     const alacak = computeAlacak(db);
     const riskler: string[] = [];
-    if (kasaToplam < 5000) riskler.push(`💸 Kasa dusuk: ${formatMoney(kasaToplam)}`);
-    if (out > 0) riskler.push(`📦 ${out} urunde stok bitti`);
-    if (low > 0) riskler.push(`⚠️ ${low} urunde az stok`);
-    if (alacak > 50000) riskler.push(`💳 Yuksek alacak: ${formatMoney(alacak)}`);
-    if (db.orders.filter((o) => o.status === 'bekliyor').length > 3)
-      riskler.push(`🚚 ${db.orders.filter((o) => o.status === 'bekliyor').length} bekleyen siparis`);
-    return `🔴 **Kritik Durumlar**\n${riskler.length > 0 ? riskler.map((r, i) => `${i + 1}. ${r}`).join('\n') : '✅ Kritik durum tespit edilmedi'}\n\n⚠️ *Cevrimdisi mod - detayli analiz icin internet gerekli*`;
+    if (kasaToplam < 5000) riskler.push(`💸 Kasa seviyesi düşük: ${formatMoney(kasaToplam)}`);
+    if (out > 0) riskler.push(`📦 ${out} ürünün stoğu tamamen bitti`);
+    if (low > 0) riskler.push(`⚠️ ${low} ürün kritik stok seviyesinin altında`);
+    if (alacak > 100000) riskler.push(`💳 Yüksek alacak riski: ${formatMoney(alacak)}`);
+    if (db.orders.filter((o) => o.status === 'bekliyor').length > 5)
+      riskler.push(`🚚 ${db.orders.filter((o) => o.status === 'bekliyor').length} bekleyen sipariş birikti`);
+    
+    return `🔴 **İşletme Risk Analizi**\n${riskler.length > 0 ? riskler.map((r, i) => `${i + 1}. ${r}`).join('\n') : '✅ Şu an için kritik bir risk tespit edilmedi.'}\n\n💡 *Öneri: Stokları kontrol edip sipariş geçmeyi ve gecikmiş alacaklar için müşterilerle iletişime geçmeyi unutmayın.*`;
   }
-  return `🔌 **Cevrimdisi Mod**\n\nInternet baglantisi olmadigindan AI analizi yapilamiyor.\n\nSorabileceginiz konular:\n- Stok durumu\n- Kasa ve sermaye ozeti\n- Musteri alacaklari\n- Bu ay satislar\n- Kritik riskler`;
+
+  return `🔌 **Çevrimdışı Mod**\n\nİnternet bağlantısı olmadığı için detaylı AI analizi yapılamıyor. Ancak şunları sorabilirsiniz:\n- "Bu ay satışlar nasıl?"\n- "Kasada ne kadar para var?"\n- "Hangi ürünlerin stoğu bitti?"\n- "Kimlerin borcu var?"\n- "Kritik riskler neler?"`;
 }
+
 
 export function buildContext(
   db: DB,

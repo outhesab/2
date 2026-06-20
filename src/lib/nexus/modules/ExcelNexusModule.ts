@@ -47,7 +47,7 @@ export class ExcelNexusModule {
   public async queryCloudAI(
     query: string, 
     files: ExcelFile[], 
-    messages: any[] = []
+    messages: unknown[] = []
   ): Promise<string> {
     const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
     const fileContext = this.prepareContext(files);
@@ -104,7 +104,7 @@ export class ExcelNexusModule {
    * Bridges a file-based insight to an internal agent action.
    * Example: "Dosyadaki toplam tutarı kasaya ekle"
    */
-  public async bridgeToAgent(insight: string, agentId: string, payload: any) {
+  public async bridgeToAgent(insight: string, agentId: string, payload: unknown) {
     const { getAgent } = await import('@/agents');
     const agent = getAgent(agentId);
     

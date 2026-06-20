@@ -439,7 +439,7 @@ export default function Sales({ db, save: _save }: Props) {
         paraUstu={-kalan}
       />
 
-      // <VoiceAssistantButton /> removed
+      {/* VoiceAssistantButton removed in favor of SobaNexus */}
     </div>
   );
 }

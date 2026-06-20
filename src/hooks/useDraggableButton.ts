@@ -41,7 +41,7 @@ export function useDraggableButton(
     );
     const newY = Math.max(
       8,
-      Math.min(window.innerHeight - 64, startRef.current.by - dy),
+      Math.min(window.innerHeight - 64, startRef.current.by + dy),
     );
     setPos({ x: newX, y: newY });
   }, []);

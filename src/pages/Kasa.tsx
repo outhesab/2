@@ -472,7 +472,7 @@ export default function Kasa({ db, save }: Props) {
           <button onClick={() => setSayimModal(false)} className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all">Kapat</button>
         </div>
       </Modal>
-// <VoiceAssistantButton /> removed
+{/* VoiceAssistantButton removed in favor of SobaNexus */}
     </div>
   );
 }

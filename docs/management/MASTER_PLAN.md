@@ -1,4 +1,4 @@
-# PARSPEL — Master İyileştirme Planı
+﻿# PARSPEL — Master İyileştirme Planı
 
 > Oluşturulma: 5 Haziran 2026
 > Son güncelleme: 13 Haziran 2026
@@ -159,7 +159,7 @@
 | K1 | "PWA 53 asset precache" yazıyor ama manifest/sw yok | `DEVELOPMENT.md:162` |
 | K2 | "design-tokens.css ayrıldı" yazmıyor | `DEVELOPMENT.md:12` |
 | K3 | Build boyutu ~3.25MB ama 3.0MB yazıyor | `DEVELOPMENT.md:158` |
-| K4 | CSP meta tag var ama WEEKLY_PLAN'da `[ ]` (bitmemiş işaretli) | `WEEKLY_PLAN.md` |
+| K4 | CSP meta tag var ve WEEKLY_PLAN'da [x] isaretli (cozulmus) | [x] |
 | K5 | `.env.example`'da değişken eksik | `.env.example` |
 
 ---

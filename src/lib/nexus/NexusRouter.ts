@@ -41,7 +41,7 @@ export class NexusRouter {
    */
   public async route(input: string, db: DB, context: {
     isFileContext?: boolean,
-    currentFiles?: any[],
+    currentFiles?: unknown[],
     adminMode?: boolean,
   }): Promise<RouteResult> {
     const query = input.toLowerCase().trim();
