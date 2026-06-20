@@ -174,7 +174,7 @@ async function performSale(
     // 3. Apply DB updates
     const nextDB = applyIntentResult(db, result.data);
 
-    // 4. Persist via save pipeline (RuleEngine → AuditEngine → localStorage → IndexedDB)
+    // 4. Persist via save pipeline (forceSync: true for atomic voice operations)
     const saleResult = result.data.dbUpdates.sale;
     const entry: AuditEntry = {
       id: genId(),
@@ -191,7 +191,7 @@ async function performSale(
       ...nextDB,
       _auditLog: trimAuditLog([entry, ...(nextDB._auditLog || [])]),
     };
-    saveToStorage(withAudit);
+    saveToStorage(withAudit, true);
     void saveToIndexedSnapshot(withAudit);
 
     // 5. Build success result

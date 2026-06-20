@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.32.3',
+    date: '20 Haziran 2026',
+    title: 'v3.32.3 — Hızlı Satış (QuickSale) Kaldırma + Kod Kalitesi',
+    summary: 'Hızlı Satış özelliği ve FAB butonu kaldırıldı. Content sayfaları (About, Roadmap, Changelog, Support) düzeltildi. voice-sales-simulation.test.ts: rawText eklendi, banka→kart düzeltildi.',
+    changes: [
+      { type: 'kaldirildi', text: 'QuickSaleModal.tsx: Hızlı Satış modalı silindi.' },
+      { type: 'kaldirildi', text: 'FAB.tsx: Hızlı Satış butonu ve sale action kaldırıldı.' },
+      { type: 'duzeltme', text: 'Content sayfaları (About, Roadmap, Changelog, Support): encoding düzeltildi, gereksiz importlar temizlendi.' },
+      { type: 'duzeltme', text: 'voice-sales-simulation.test.ts: rawText property eklendi, payment banka→kart düzeltildi.' },
+      { type: 'duzeltme', text: 'Settings.tsx: AboutPanel import ve lsKB değişkeni kaldırıldı (kullanılmıyordu).' },
+    ],
+  },
+  {
     version: '3.32.2',
     date: '20 Haziran 2026',
     title: 'v3.32.2 — Tüm Kalan Maddeler: BatchQueue, Sayfa Refactor, Test Kalitesi, Performans',

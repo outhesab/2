@@ -21,7 +21,6 @@ import { SettingsPeletPanel } from './settings/SettingsPelet';
 import { VeriOnarim } from './settings/SettingsRepair';
 import { ShortcutsPanel } from './settings/SettingsShortcuts';
 import { KategoriYonetim } from './settings/SettingsKategoriYonetim';
-import { AboutPanel } from './settings/SettingsAboutPanel';
 import { AgentSettingsPanel } from './settings/SettingsAgentPanel';
 import { ArayuzAyarlari } from './SettingsArayuz';
 import { BaglantiAyarlari } from './SettingsBaglanti';
@@ -117,8 +116,6 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
   ];
 
   const totalRecords = dataStats.reduce((s, d) => s + d.count, 0);
-
-  const lsKB = Math.round(new Blob([localStorage.getItem('sobaYonetim') || '']).size / 1024);
 
   return (
     <div className="p-4 max-w-4xl mx-auto overflow-hidden">

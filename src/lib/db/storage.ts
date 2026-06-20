@@ -278,9 +278,9 @@ if (typeof window !== 'undefined') {
 
 /* ── saveToStorage ──────────────────────────────────────────────── */
 
-export function saveToStorage(db: DB): boolean {
+export function saveToStorage(db: DB, forceSync = false): boolean {
   const t = logger.time('db', 'localStorage yaz');
-  if (_isSaving) {
+  if (_isSaving && !forceSync) {
     _saveQueue.push(db);
     if (_saveQueue.length > 10) {
       const dropped = _saveQueue.splice(0, _saveQueue.length - 10);
@@ -295,8 +295,13 @@ export function saveToStorage(db: DB): boolean {
       toSave = _saveQueue.shift()!;
     }
     const versioned = { ...toSave, _version: (toSave._version || 0) + 1 };
-    // Async yaz — senkron bloklama yok, UI akıcı kalır
-    _scheduleFlush(STORAGE_KEY, versioned);
+    
+    if (forceSync) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(versioned));
+    } else {
+      _scheduleFlush(STORAGE_KEY, versioned);
+    }
+    
     toSave._version = versioned._version;
     t.end({ version: versioned._version });
     return true;

@@ -1,13 +1,12 @@
 /**
  * Roadmap.tsx — Ürün Yol Haritası
- * 
- * PARSPEL'in gelecek vizyonunu ve geliştirme aşamalarını 
+ *
+ * PARSPEL'in gelecek vizyonunu ve geliştirme aşamalarını
  * kullanıcıya sunan etkileşimli zaman çizelgesi.
  */
 
-import React from 'react';
 import { Rocket, CheckCircle2, Clock, CircleDot } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface RoadmapItem {
@@ -28,13 +27,13 @@ const ROADMAP_DATA: RoadmapItem[] = [
   },
   {
     title: 'Agent-Based Yönetim Sistemi',
-    description: 'Satis, Stok, Cari ve Kasa ajanlarının geliştirilmesi; iş mantığının ajanlara devredilmesi.',
+    description: 'Satış, Stok, Cari ve Kasa ajanlarının geliştirilmesi; iş mantığının ajanlara devredilmesi.',
     status: 'completed',
     category: 'yapay-zeka',
     date: 'v3.10.0',
   },
   {
-    P1: 'Sayfa Modernizasyonu ve Modülerizasyon',
+    title: 'Sayfa Modernizasyonu ve Modülerizasyon',
     description: 'Tüm ana sayfaların (Suppliers, Cari, Monitor vb.) monolit yapıdan kurtarılıp modüler hale getirilmesi.',
     status: 'completed',
     category: 'ux',
@@ -72,9 +71,9 @@ const ROADMAP_DATA: RoadmapItem[] = [
 
 const StatusIcon = ({ status }: { status: RoadmapItem['status'] }) => {
   switch (status) {
-    case 'completed': return <CheckCircle2 className=\"w-5 h-5 text-green-500\" />;
-    case 'in-progress': return <CircleDot className=\"w-5 h-5 text-blue-500 animate-pulse\" />;
-    case 'planned': return <Clock className=\"w-5 h-5 text-slate-400\" />;
+    case 'completed': return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+    case 'in-progress': return <CircleDot className="w-5 h-5 text-blue-500 animate-pulse" />;
+    case 'planned': return <Clock className="w-5 h-5 text-slate-400" />;
   }
 };
 
@@ -86,42 +85,42 @@ const CategoryBadge = ({ category }: { category: RoadmapItem['category'] }) => {
     'yapay-zeka': { label: 'AI/ML', color: 'bg-amber-100 text-amber-700 border-amber-200' },
   };
   const { label, color } = config[category];
-  return <Badge variant=\"outline\" className={\`\${color} font-medium\`}>{label}</Badge>;
+  return <Badge variant="outline" className={`${color} font-medium`}>{label}</Badge>;
 };
 
 export default function Roadmap() {
   return (
-    <div className=\"max-w-4xl mx-auto p-6 space-y la-8\">
-      <div className=\"text-center space-y-4 mb-12\">
-        <div className=\"inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-2\">
-          <Rocket className=\"w-8 h-8 text-primary\" />
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="text-center space-y-4 mb-12">
+        <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-2">
+          <Rocket className="w-8 h-8 text-primary" />
         </div>
-        <h1 className=\"text-3xl font-bold tracking-tight\">Yol Haritası</h1>
-        <p className=\"text-muted-foreground max-w-2xl mx-auto\">
-          PARSPEL'in gelişim yolculuğu. Mevcut yeteneklerimizi geliştirirken, 
+        <h1 className="text-3xl font-bold tracking-tight">Yol Haritası</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          PARSPEL'in gelişim yolculuğu. Mevcut yeteneklerimizi geliştirirken,
           geleceğin akıllı işletme yönetim sistemini inşa ediyoruz.
         </p>
       </div>
 
-      <div className=\"relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-slate-300 before:to-slate-200\">
+      <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-slate-300 before:to-slate-200">
         {ROADMAP_DATA.map((item, index) => (
-          <div key={index} className=\"relative pl-12 group\">
-            <div className=\"absolute left-0 top-1 z-10 flex items-center justify-center w-10 h-10 bg-background border-2 border-primary rounded-full shadow-sm group-hover:scale-110 transition-transform duration-200\">
+          <div key={index} className="relative pl-12 group">
+            <div className="absolute left-0 top-1 z-10 flex items-center justify-center w-10 h-10 bg-background border-2 border-primary rounded-full shadow-sm group-hover:scale-110 transition-transform duration-200">
               <StatusIcon status={item.status} />
             </div>
-            
-            <Card className=\"transition-all duration-300 group-hover:shadow-md group-hover:border-primary/30\">
-              <CardHeader className=\"pb-2\">
-                <div className=\"flex items-center justify-between gap-2 mb-1\">
-                  <CardTitle className=\"text-lg font-semibold\">{item.title}</CardTitle>
-                  <div className=\"flex items-center gap-2\">
+
+            <Card className="transition-all duration-300 group-hover:shadow-md group-hover:border-primary/30">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <CardTitle className="text-lg font-semibold">{item.title}</CardTitle>
+                  <div className="flex items-center gap-2">
                     <CategoryBadge category={item.category} />
                     {item.date && (
-                      <span className=\"text-xs text-muted-foreground font-mono\">{item.date}</span>
+                      <span className="text-xs text-muted-foreground font-mono">{item.date}</span>
                     )}
                   </div>
                 </div>
-                <CardDescription className=\"text-sm leading-relaxed">
+                <CardDescription className="text-sm leading-relaxed">
                   {item.description}
                 </CardDescription>
               </CardHeader>

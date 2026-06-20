@@ -2,7 +2,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState, useRef, useEffect } from 'react';
 import { useDraggableButton } from '@/hooks/useDraggableButton';
 import { Modal } from '@/components/Modal';
-import { QuickSaleModal } from '@/components/QuickSaleModal';
 import { QuickIncomeModal } from '@/components/QuickIncomeModal';
 import { QuickProductModal } from '@/components/QuickProductModal';
 import type { DB } from '@/types';
@@ -15,7 +14,7 @@ interface FABProps {
   uiPrefs: UIPrefs;
 }
 
-type QuickModal = 'sale' | 'gelir' | 'gider' | 'product' | null;
+type QuickModal = 'gelir' | 'gider' | 'product' | null;
 
 export default function FAB({ db, save, onOpenAI, uiPrefs }: FABProps) {
   const [open, setOpen] = useState(false);
@@ -27,14 +26,12 @@ export default function FAB({ db, save, onOpenAI, uiPrefs }: FABProps) {
   const ai = useDraggableButton('aiBtnPos', { x: 28, y: 28 });
 
   const actions = [
-    { id: 'sale' as const, label: 'Hızlı Satış', icon: '🛒', color: '#ff5722' },
     { id: 'product' as const, label: 'Ürün Ekle', icon: '📦', color: '#3b82f6' },
     { id: 'gelir' as const, label: 'Gelir Ekle', icon: '💚', color: '#10b981' },
     { id: 'gider' as const, label: 'Gider Ekle', icon: '🔴', color: '#ef4444' },
   ];
 
   const titles: Record<string, string> = {
-    sale: '🛒 Hızlı Satış',
     gelir: '💚 Hızlı Gelir',
     gider: '🔴 Hızlı Gider',
     product: '📦 Hızlı Ürün Ekle',
@@ -99,7 +96,6 @@ export default function FAB({ db, save, onOpenAI, uiPrefs }: FABProps) {
       )}
       {modal && (
         <Modal open={true} onClose={() => setModal(null)} title={titles[modal] || ''} maxWidth={480}>
-          {modal === 'sale' && <QuickSaleModal db={db} save={save} onClose={() => setModal(null)} />}
           {modal === 'gelir' && <QuickIncomeModal db={db} save={save} onClose={() => setModal(null)} type="gelir" />}
           {modal === 'gider' && <QuickIncomeModal db={db} save={save} onClose={() => setModal(null)} type="gider" />}
           {modal === 'product' && <QuickProductModal db={db} save={save} onClose={() => setModal(null)} />}
