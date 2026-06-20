@@ -20,6 +20,25 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.32.2',
+    date: '20 Haziran 2026',
+    title: 'v3.32.2 — Tüm Kalan Maddeler: BatchQueue, Sayfa Refactor, Test Kalitesi, Performans',
+    summary: 'A1: BatchQueue<T> generic class (9 test). A2: Anomali async. A3: Storage monitor. A4+A5: excel-merge split. B1: Suppliers refactor (1298→~1030 satır, 6 modül). B6: Cari refactor (801→6 modül, 1.143 satır). C5: makeDB() shared utility (8 test dosyası güncellendi). 582/583 test pass, 48 test dosyası.',
+    changes: [
+      { type: 'yeni', text: 'A1 — batchQueue.ts: Generic BatchQueue<T> async batch utility (flushInterval, coalescing, maxQueueDepth, dispose).' },
+      { type: 'yeni', text: 'A1 — batchQueue.test.ts: 9 test (flush, coalescing, flushNow, dispose, error handling).' },
+      { type: 'yeni', text: 'A3 — useStorageMonitor.ts: React hook ile localStorage boyut monitörü + UI uyarı bileşeni.' },
+      { type: 'iyilestirme', text: 'A3 — safeIO.ts: STORAGE_LIMIT (5MB), StorageStatus, getStorageUsage(), doluluk >%80 uyarısı.' },
+      { type: 'iyilestirme', text: 'A2 — anomalyEngine.ts: runAnomalyDetectionAsync() + yieldToMain() (ana thread blokajsız).' },
+      { type: 'iyilestirme', text: 'A2 — AnomaliOneri.tsx: async deteksiyon + loading spinner + progress label.' },
+      { type: 'iyilestirme', text: 'A4+A5 — excel-merge.ts → src/lib/excel-merge/: parser.ts, mergeEngine.ts, index.ts.' },
+      { type: 'iyilestirme', text: 'B1 — Suppliers.tsx refactor: index.tsx (~220), SupplierList (~180), SupplierForm (~120), SupplierDetail (~130), SupplierOrder (~190), SupplierHelpers (~70).' },
+      { type: 'iyilestirme', text: 'B6 — Cari.tsx refactor (801→6 modül): index (~261), CariList (~337), CariForm (~93), CariIslemModal (~85), CariDetail (~266), CariHelpers (~101).' },
+      { type: 'iyilestirme', text: 'C5 — testUtils.ts: makeDB() shared utility (8 test dosyası güncellendi: ruleEngine, auditEngine, dataIntegrityChecker, StokAgent, SatisAgent, uygulama-gercek, gercekci-senaryolar, soba-satis-senaryosu, kapsamli-senaryo).' },
+      { type: 'iyilestirme', text: 'C5 — Toplam 48 test dosyası, 582 test pass (572→582, +10 BatchQueue test).' },
+    ],
+  },
+  {
     version: '3.32.1',
     date: '18 Haziran 2026',
     title: 'voice-sales localStorage Fix + Kod Kalitesi (any→unknown, Tailwind, Test, TTS)',

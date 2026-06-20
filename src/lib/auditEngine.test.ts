@@ -9,45 +9,7 @@ import type { AuditEntry, DB, KasaEntry, RuleViolation } from '@/types';
 import * as fc from 'fast-check';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { computeDiff, createAuditEntry, getSessionId, runFullAudit, trimAuditLog } from './auditEngine';
-
-// ─── Test Yardımcıları ────────────────────────────────────────────────────────
-
-function makeDB(overrides: Partial<DB> = {}): DB {
-  const now = new Date().toISOString();
-  return {
-    _version: 1,
-    products: [],
-    sales: [],
-    suppliers: [],
-    orders: [],
-    cari: [],
-    kasa: [],
-    kasalar: [{ id: 'nakit', name: 'Nakit', icon: '💵' }],
-    bankTransactions: [],
-    matchRules: [],
-    monitorRules: [],
-    monitorLog: [],
-    stockMovements: [],
-    peletSuppliers: [],
-    peletOrders: [],
-    boruSuppliers: [],
-    boruOrders: [],
-    invoices: [],
-    budgets: [],
-    returns: [],
-    _activityLog: [],
-    _auditLog: [],
-    company: { id: 'c1', createdAt: now },
-    settings: {},
-    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-    ortakEmanetler: [],
-    installments: [],
-    partners: [],
-    productCategories: [],
-    notes: [],
-    ...overrides,
-  };
-}
+import { makeDB } from '@/__tests__/testUtils';
 
 function makeKasaEntry(overrides: Partial<KasaEntry> = {}): KasaEntry {
   const now = new Date().toISOString();

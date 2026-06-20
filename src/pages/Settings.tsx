@@ -28,6 +28,10 @@ import { BaglantiAyarlari } from './SettingsBaglanti';
 import { Card } from './SettingsCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Roadmap from './settings/content/Roadmap';
+import About from './settings/content/About';
+import Changelog from './settings/content/Changelog';
+import Support from './settings/content/Support';
 
 interface Props {
   db: DB;
@@ -53,7 +57,10 @@ type Tab =
   | 'data'
   | 'security'
   | 'sysmap'
-  | 'about';
+  | 'about'
+  | 'roadmap'
+  | 'changelog'
+  | 'support';
 
 export default function Settings({ db, save, exportJSON, importJSON: _importJSON }: Props) {
   const { showToast: _showToast } = useToast();
@@ -165,9 +172,18 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           <TabsTrigger value="sysmap" className="whitespace-nowrap">
             🗺️ Harita
           </TabsTrigger>
-          <TabsTrigger value="about" className="whitespace-nowrap">
-            ℹ️ Hakkında
-          </TabsTrigger>
+           <TabsTrigger value="about" className="whitespace-nowrap">
+             ℹ️ Hakkında
+           </TabsTrigger>
+           <TabsTrigger value="roadmap" className="whitespace-nowrap">
+             🚀 Yol Haritası
+           </TabsTrigger>
+           <TabsTrigger value="changelog" className="whitespace-nowrap">
+             📜 Güncellemeler
+           </TabsTrigger>
+           <TabsTrigger value="support" className="whitespace-nowrap">
+             🆘 Destek
+           </TabsTrigger>
         </TabsList>
 
         {tab === 'arayuz' && (
@@ -303,7 +319,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           </div>
         )}
 
-        {tab === 'about' && <AboutPanel db={db} lsKB={lsKB} />}
+        {tab === 'about' && <About />}
+        {tab === 'roadmap' && <Roadmap />}
+        {tab === 'changelog' && <Changelog />}
+        {tab === 'support' && <Support />}
       </Tabs>
     </div>
   );

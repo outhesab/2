@@ -1,3 +1,46 @@
+/** localStorage limiti (5MB — çoğu tarayıcı) */
+export const STORAGE_LIMIT = 5 * 1024 * 1024; // 5MB
+
+/** Storage kullanım durumu */
+export interface StorageStatus {
+  used: number;
+  limit: number;
+  percent: number;
+  warning: boolean;
+  critical: boolean;
+  entries: number;
+}
+
+/**
+ * localStorage kullanımını ölçer.
+ * Tüm key'lerin toplam boyutunu hesaplar.
+ */
+export function getStorageUsage(): StorageStatus {
+  let used = 0;
+  let entries = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k) {
+        const v = localStorage.getItem(k);
+        used += k.length + (v ? v.length : 0);
+        entries++;
+      }
+    }
+  } catch {
+    /* silent fail — storage erişilemezse 0 döner */
+  }
+  const percent = STORAGE_LIMIT > 0 ? (used / STORAGE_LIMIT) * 100 : 0;
+  return {
+    used,
+    limit: STORAGE_LIMIT,
+    percent: Math.round(percent * 100) / 100,
+    warning: percent > 80,
+    critical: percent > 95,
+    entries,
+  };
+}
+
 function isQuotaError(e: unknown) {
   if (!e) return false;
   if (typeof DOMException !== 'undefined' && e instanceof DOMException) {
@@ -36,6 +79,21 @@ export function safeWriteJSON(
 ): boolean {
   const attempts = opts?.maxAttempts ?? 5;
   const minItems = opts?.minItems ?? 10;
+
+  // Proaktif kontrol: limit %80+ ise uyar
+  try {
+    const usage = getStorageUsage();
+    const valueSize = JSON.stringify(value).length;
+    const projectedPercent = ((usage.used + valueSize) / STORAGE_LIMIT) * 100;
+    if (projectedPercent > 80) {
+      console.warn(
+        `[safeIO] Storage uyarısı: %${projectedPercent.toFixed(0)} dolacak (${key})` +
+        (usage.warning ? ' — limit aşımı yakın!' : ''),
+      );
+    }
+  } catch {
+    /* ignore — proactive check failure */
+  }
 
   try {
     localStorage.setItem(key, JSON.stringify(value));

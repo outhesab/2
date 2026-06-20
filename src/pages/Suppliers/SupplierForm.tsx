@@ -1,6 +1,10 @@
+/**
+ * @file SupplierForm.tsx
+ * @description Tedarikçi ekleme/düzenleme formu.
+ */
+
 import { Modal } from '@/components/Modal';
-import { ModalActions, FormField, FormTextArea } from '@/pages/pageHelpers';
-import { lbl, inp } from '@/lib/formStyles';
+import { ModalActions } from '@/pages/pageHelpers';
 import type { Supplier } from '@/types';
 
 interface Props {
@@ -15,6 +19,10 @@ interface Props {
   onSave: () => void;
   onClose: () => void;
 }
+
+const inputClass =
+  'w-full px-3.5 py-2.5 bg-[rgba(15,23,42,0.6)] border border-slate-700 rounded-xl text-[var(--text-primary)] text-sm box-border focus:outline-none focus:border-blue-500';
+const labelClass = 'block mb-1.5 text-[var(--text-dim)] text-sm font-medium';
 
 export default function SupplierForm({
   open,
@@ -34,52 +42,39 @@ export default function SupplierForm({
       onClose={onClose}
       title={editId ? '✏ Tedarikçi Düzenle' : '➕ Yeni Tedarikçi'}
     >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Ad *</label>
+      <div className="grid grid-cols-2 gap-3.5">
+        <div className="col-span-full">
+          <label className={labelClass}>Ad *</label>
           <input
             value={form.name || ''}
             onChange={(e) => onNameChange(e.target.value)}
             onBlur={(e) => onNameBlur(e.target.value)}
-            style={inp}
+            className={inputClass}
           />
           {dupWarning.length > 0 && (
             <div
-              style={{
-                marginTop: 8,
-                background: forceSave ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
-                border: `1px solid ${forceSave ? 'rgba(245,158,11,0.4)' : 'rgba(239,68,68,0.4)'}`,
-                borderRadius: 8,
-                padding: '10px 12px',
-              }}
+              className={`mt-2 rounded-lg px-3 py-2.5 border ${
+                forceSave
+                  ? 'bg-amber-500/10 border-amber-500/40'
+                  : 'bg-red-500/10 border-red-500/40'
+              }`}
             >
               <p
-                style={{
-                  color: forceSave ? '#f59e0b' : '#ef4444',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
-                  marginBottom: 4,
-                }}
+                className={`text-xs font-bold mb-1 ${
+                  forceSave ? 'text-amber-500' : 'text-red-500'
+                }`}
               >
                 {forceSave
                   ? '⚠ Yine de kaydetmek için tekrar "Kaydet" e tıklayın'
-                  : '\uD83D\uDD34 Benzer tedarikçiler bulundu:'}
+                  : '🔴 Benzer tedarikçiler bulundu:'}
               </p>
               {dupWarning.map((d, i) => (
-                <p
-                  key={i}
-                  style={{
-                    color: 'var(--text-dim)',
-                    fontSize: '0.8rem',
-                    margin: '2px 0',
-                  }}
-                >
+                <p key={i} className="text-[var(--text-dim)] text-xs my-0.5">
                   • {d.name}{' '}
                   <span
-                    style={{
-                      color: d.score >= 90 ? '#ef4444' : '#f59e0b',
-                      fontWeight: 700,
-                    }}
+                    className={`font-bold ${
+                      d.score >= 90 ? 'text-red-500' : 'text-amber-500'
+                    }`}
                   >
                     (%{d.score} benzerlik)
                   </span>
@@ -88,51 +83,61 @@ export default function SupplierForm({
             </div>
           )}
         </div>
-        <FormField
-          label="Kategori"
-          value={form.category || ''}
-          onChange={(v) => onFieldChange('category', v)}
-        />
-        <FormField
-          label="Telefon"
-          value={form.phone || ''}
-          onChange={(v) => onFieldChange('phone', v)}
-        />
-        <FormField
-          label="E-posta"
-          value={form.email || ''}
-          onChange={(v) => onFieldChange('email', v)}
-          type="email"
-        />
         <div>
-          <label style={lbl}>Yetkili</label>
+          <label className={labelClass}>Kategori</label>
+          <input
+            value={form.category || ''}
+            onChange={(e) => onFieldChange('category', e.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Telefon</label>
+          <input
+            value={form.phone || ''}
+            onChange={(e) => onFieldChange('phone', e.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>E-posta</label>
+          <input
+            type="email"
+            value={form.email || ''}
+            onChange={(e) => onFieldChange('email', e.target.value)}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Yetkili</label>
           <input
             value={form.contact || ''}
             onChange={(e) => onFieldChange('contact', e.target.value)}
-            style={inp}
+            className={inputClass}
           />
         </div>
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Adres</label>
+        <div className="col-span-full">
+          <label className={labelClass}>Adres</label>
           <textarea
             value={form.address || ''}
             onChange={(e) => onFieldChange('address', e.target.value)}
-            style={{ ...inp, minHeight: 60 }}
+            className={`${inputClass} min-h-[60px]`}
           />
         </div>
-        <FormTextArea
-          label="Not"
-          value={form.note || ''}
-          onChange={(v) => onFieldChange('note', v)}
-          minHeight={60}
-          gridColumn="1/-1"
-        />
+        <div className="col-span-full">
+          <label className={labelClass}>Not</label>
+          <textarea
+            value={form.note || ''}
+            onChange={(e) => onFieldChange('note', e.target.value)}
+            className={`${inputClass} min-h-[60px]`}
+          />
+        </div>
       </div>
       <ModalActions
         onSave={onSave}
         onCancel={onClose}
         saveColor={forceSave ? '#f59e0b' : '#10b981'}
-        saveLabel={forceSave ? '⚠ Yine de Kaydet' : '\uD83D\uDCBE Kaydet'}
+        saveLabel={forceSave ? '⚠ Yine de Kaydet' : '💾 Kaydet'}
       />
     </Modal>
   );

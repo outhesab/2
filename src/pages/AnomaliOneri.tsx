@@ -3,15 +3,16 @@
  * Canlı DB verisi üzerinde anomali tespiti, AI analizi ve hızlı düzeltme.
  */
 import {
-  runAnomalyDetection,
+  runAnomalyDetectionAsync,
   type AnomalyCategory,
+  type AnomalyProgress,
   type AnomalyReport,
   type AnomalyResult,
   type AnomalySeverity,
 } from '@/lib/anomalyEngine';
 import type { DB } from '@/types';
 import { logger } from '@/lib/logger';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Props {
@@ -174,12 +175,41 @@ export default function AnomaliOneri({ db, save }: Props) {
   const [resolvedIds, setResolvedIds] = useState<Set<string>>(new Set());
   const [aiMessage, setAiMessage] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState<AnomalyProgress | null>(null);
+  const [report, setReport] = useState<AnomalyReport>(() => ({
+    anomalies: [],
+    healthScore: 100,
+    summary: { total: 0, critical: 0, warning: 0, info: 0, byCategory: {} as Record<AnomalyCategory, number> },
+    generatedAt: new Date().toISOString(),
+  }));
 
-  const report: AnomalyReport = useMemo(
-    () => runAnomalyDetection(db),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [db, refreshKey],
-  );
+  // Async anomali taraması — UI bloklamaz, progress gösterir
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setProgress(null);
+
+    runAnomalyDetectionAsync(db, (p) => {
+      if (!cancelled) setProgress({ ...p });
+    })
+      .then((result) => {
+        if (!cancelled) {
+          setReport(result);
+          setLoading(false);
+          setProgress(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          logger.error('anomali', 'Async tarama hatası', err);
+          setLoading(false);
+          setProgress(null);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [db, refreshKey]);
 
   const filtered = useMemo(() => {
     return report.anomalies.filter((a) => {
@@ -263,8 +293,18 @@ export default function AnomaliOneri({ db, save }: Props) {
               Anomali & Öneri
             </h2>
             <p className="text-slate-600 text-xs m-0 mt-0.5">
-              Canlı veri analizi — {report.anomalies.length} anomali tespit edildi
-              {report.partial && <span className="text-amber-500 ml-2">⚠️ Kısmi sonuç (timeout)</span>}
+              {loading ? (
+                <>
+                  <span className="inline-block animate-spin mr-1">⟳</span>
+                  Anomali taraması yapılıyor
+                  {progress && <span className="text-indigo-400 ml-1">({progress.current}/{progress.total} — {progress.label})</span>}
+                </>
+              ) : (
+                <>
+                  Canlı veri analizi — {report.anomalies.length} anomali tespit edildi
+                  {report.partial && <span className="text-amber-500 ml-2">⚠️ Kısmi sonuç (timeout)</span>}
+                </>
+              )}
             </p>
           </div>
           <button

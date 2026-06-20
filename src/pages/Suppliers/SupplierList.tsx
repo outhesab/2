@@ -1,3 +1,8 @@
+/**
+ * @file SupplierList.tsx
+ * @description Tedarikçi kart listesi, filtreleme ve arama.
+ */
+
 import { formatMoney } from '@/lib/utils-tr';
 import type { Order } from '@/types';
 import { ActionButtons } from '@/pages/pageHelpers';
@@ -5,6 +10,7 @@ import EmptyState from '@/components/EmptyState';
 import { Truck } from 'lucide-react';
 import type { SupplierWithCat, CatFilter } from './types';
 import { catColors, catLabels } from './types';
+import { calcScore } from './SupplierHelpers';
 
 interface Props {
   filteredSuppliers: SupplierWithCat[];
@@ -21,26 +27,11 @@ interface Props {
 }
 
 const CAT_BTNS: { value: CatFilter; label: string }[] = [
-  { value: 'hepsi', label: '\uD83D\uDD0D Hepsi' },
-  { value: 'genel', label: '\uD83C\uDFED Genel' },
-  { value: 'pelet', label: '\uD83C\uDF3E Pelet' },
-  { value: 'boru', label: '\uD83D\uDD27 Boru' },
+  { value: 'hepsi', label: '🔍 Hepsi' },
+  { value: 'genel', label: '🏭 Genel' },
+  { value: 'pelet', label: '🌾 Pelet' },
+  { value: 'boru', label: '🔧 Boru' },
 ];
-
-function calcScore(supplier: SupplierWithCat, orders: Order[]) {
-  const supplierOrders = orders.filter((o) => o.supplierId === supplier.id && o.status !== 'iptal');
-  const completedOnTime = supplierOrders.filter((o) => {
-    if (o.status !== 'tamamlandi') return false;
-    if (!o.deliveryDate || !o.createdAt) return true;
-    const diff = (new Date(o.deliveryDate).getTime() - new Date(o.createdAt).getTime()) / 86400000;
-    return diff <= 7;
-  });
-  const onTimeRate = supplierOrders.length > 0 ? (completedOnTime.length / supplierOrders.length) * 100 : 0;
-  const orderScore = Math.min(30, (supplier.totalOrders || 0) * 3);
-  const amountScore = Math.min(30, ((supplier.totalAmount || 0) / 10000) * 10);
-  const deliveryScore = onTimeRate * 0.4;
-  return Math.min(100, Math.round(orderScore + amountScore + deliveryScore));
-}
 
 export default function SupplierList({
   filteredSuppliers,
@@ -57,85 +48,44 @@ export default function SupplierList({
 }: Props) {
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          gap: 10,
-          marginBottom: 16,
-          flexWrap: 'wrap',
-        }}
-      >
+      <div className="flex flex-wrap gap-2.5 mb-4">
         <button
           onClick={onNewSupplier}
-          style={{
-            background: '#ff5722',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            padding: '10px 20px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
+          className="px-5 py-2.5 rounded-xl font-bold text-white bg-[#ff5722] hover:opacity-90 transition-opacity cursor-pointer"
         >
           + Yeni Tedarikçi
         </button>
         <button
           onClick={onNewOrder}
-          style={{
-            background: 'rgba(59,130,246,0.15)',
-            border: '1px solid rgba(59,130,246,0.3)',
-            borderRadius: 10,
-            color: '#60a5fa',
-            padding: '10px 18px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
+          className="px-4.5 py-2.5 rounded-xl font-bold cursor-pointer bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-colors"
         >
-          \uD83D\uDCE6 Sipariş Ver
+          📦 Sipariş Ver
         </button>
         <input
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="\uD83D\uDD0D Ara..."
-          style={{
-            flex: 1,
-            padding: '9px 13px',
-            background: '#1e293b',
-            border: '1px solid #334155',
-            borderRadius: 10,
-            color: 'var(--text-primary)',
-          }}
+          placeholder="🔍 Ara..."
+          className="flex-1 px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
         />
       </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div className="flex gap-2 mb-4">
         {CAT_BTNS.map(({ value, label }) => (
           <button
             key={value}
             onClick={() => onCatFilterChange(value)}
-            style={{
-              padding: '6px 14px',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.82rem',
-              background: catFilter === value ? '#ff5722' : '#273548',
-              color: catFilter === value ? '#fff' : '#94a3b8',
-            }}
+            className={`px-3.5 py-1.5 rounded-lg border-none font-semibold text-sm cursor-pointer transition-colors ${
+              catFilter === value
+                ? 'bg-[#ff5722] text-white'
+                : 'bg-slate-700 text-slate-400 hover:text-slate-200'
+            }`}
           >
             {label}
           </button>
         ))}
       </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: 14,
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3.5">
         {filteredSuppliers.length === 0 ? (
-          <div style={{ gridColumn: '1/-1' }}>
+          <div className="col-span-full">
             <EmptyState
               icon={Truck}
               title="Tedarikçi bulunamadı"
@@ -147,115 +97,63 @@ export default function SupplierList({
         ) : (
           filteredSuppliers.map((s) => {
             const totalScore = calcScore(s, orders);
-            const scoreColor = totalScore >= 70 ? '#10b981' : totalScore >= 40 ? '#f59e0b' : '#ef4444';
+            const scoreColor =
+              totalScore >= 70 ? '#10b981' : totalScore >= 40 ? '#f59e0b' : '#ef4444';
             return (
               <div
                 key={s.id}
-                style={{
-                  background: '#1e293b',
-                  borderRadius: 12,
-                  border: '1px solid #334155',
-                  padding: 18,
-                }}
+                className="bg-slate-800 rounded-xl border border-slate-700 p-4.5"
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: 4,
-                  }}
-                >
-                  <h4 style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{s.name}</h4>
+                <div className="flex justify-between items-start mb-1">
+                  <h4 className="font-bold text-[var(--text-primary)]">{s.name}</h4>
                   <span
+                    className="px-2 py-0.5 rounded-md text-xs font-bold"
                     style={{
-                      background: `${catColors[s._kat]}22`,
+                      backgroundColor: `${catColors[s._kat]}22`,
                       color: catColors[s._kat],
-                      borderRadius: 6,
-                      padding: '2px 8px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
                     }}
                   >
                     {catLabels[s._kat]}
                   </span>
                 </div>
-                <p
-                  style={{
-                    color: 'var(--text-muted)',
-                    fontSize: '0.82rem',
-                    marginBottom: 10,
-                  }}
-                >
+                <p className="text-[var(--text-muted)] text-sm mb-2.5">
                   {s.category || 'Genel'}
                 </p>
                 {s.phone && (
-                  <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: 4 }}>
-                    \uD83D\uDCDE {s.phone}
-                  </p>
+                  <p className="text-[var(--text-dim)] text-sm mb-1">📞 {s.phone}</p>
                 )}
                 {s.email && (
-                  <p style={{ color: 'var(--text-dim)', fontSize: '0.82rem', marginBottom: 4 }}>
-                    \uD83D\uDCE7 {s.email}
-                  </p>
+                  <p className="text-[var(--text-dim)] text-xs mb-1">✉️ {s.email}</p>
                 )}
-                <div
-                  style={{
-                    marginTop: 10,
-                    paddingTop: 10,
-                    borderTop: '1px solid #334155',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                <div className="mt-2.5 pt-2.5 border-t border-slate-700 flex justify-between">
+                  <span className="text-[var(--text-muted)] text-xs">
                     {s.totalOrders || 0} sipariş
                   </span>
-                  <span style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 700 }}>
+                  <span className="text-emerald-500 text-sm font-bold">
                     {formatMoney(s.totalAmount || 0)}
                   </span>
                 </div>
-                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ flex: 1, height: 6, background: '#273548', borderRadius: 3 }}>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                     <div
-                      style={{
-                        width: `${totalScore}%`,
-                        height: '100%',
-                        background: scoreColor,
-                        borderRadius: 3,
-                        transition: 'width 0.4s',
-                      }}
+                      className="h-full rounded-full transition-all duration-400"
+                      style={{ width: `${totalScore}%`, backgroundColor: scoreColor }}
                     />
                   </div>
                   <span
-                    style={{
-                      color: scoreColor,
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      minWidth: 32,
-                      textAlign: 'right',
-                    }}
+                    className="text-xs font-extrabold min-w-[32px] text-right"
+                    style={{ color: scoreColor }}
                   >
                     {totalScore}
                   </span>
                 </div>
                 {s._kat === 'genel' && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <div className="flex gap-2 mt-2.5">
                     <button
                       onClick={() => onShowOrders(s.id)}
-                      style={{
-                        flex: 1,
-                        background: 'rgba(59,130,246,0.1)',
-                        border: 'none',
-                        borderRadius: 8,
-                        color: '#60a5fa',
-                        padding: '7px 0',
-                        cursor: 'pointer',
-                        fontSize: '0.82rem',
-                        fontWeight: 600,
-                      }}
+                      className="flex-1 py-1.5 rounded-lg border-none text-sm font-semibold cursor-pointer bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
                     >
-                      \uD83D\uDCE6 Siparişler
+                      📦 Siparişler
                     </button>
                     <ActionButtons
                       onEdit={() => onEdit(s)}

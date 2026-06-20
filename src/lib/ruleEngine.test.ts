@@ -9,45 +9,7 @@ import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { validateTransaction, rules, TRANSACTION_LIMIT } from './ruleEngine';
 import type { DB, Product, KasaEntry, Sale, RuleViolation } from '@/types';
-
-// ─── Test Yardımcıları ────────────────────────────────────────────────────────
-
-function makeDB(overrides: Partial<DB> = {}): DB {
-  const now = new Date().toISOString();
-  return {
-    _version: 1,
-    products: [],
-    sales: [],
-    suppliers: [],
-    orders: [],
-    cari: [],
-    kasa: [],
-    kasalar: [{ id: 'nakit', name: 'Nakit', icon: '💵' }],
-    bankTransactions: [],
-    matchRules: [],
-    monitorRules: [],
-    monitorLog: [],
-    stockMovements: [],
-    peletSuppliers: [],
-    peletOrders: [],
-    boruSuppliers: [],
-    boruOrders: [],
-    invoices: [],
-    budgets: [],
-    returns: [],
-    _activityLog: [],
-    _auditLog: [],
-    company: { id: 'c1', createdAt: now },
-    settings: {},
-    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-    ortakEmanetler: [],
-    installments: [],
-    partners: [],
-    productCategories: [],
-    notes: [],
-    ...overrides,
-  };
-}
+import { makeDB } from '@/__tests__/testUtils';
 
 function makeProduct(overrides: Partial<Product> = {}): Product {
   const now = new Date().toISOString();

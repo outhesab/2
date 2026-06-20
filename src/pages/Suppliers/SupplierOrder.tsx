@@ -1,6 +1,10 @@
+/**
+ * @file SupplierOrder.tsx
+ * @description Sipariş oluşturma formu.
+ */
+
 import { Modal } from '@/components/Modal';
 import { ModalActions } from '@/pages/pageHelpers';
-import { lbl, inp } from '@/lib/formStyles';
 import { formatMoney } from '@/lib/utils-tr';
 import type { DB, OrderItem } from '@/types';
 
@@ -24,6 +28,10 @@ interface Props {
   onClose: () => void;
 }
 
+const inputClass =
+  'w-full px-3.5 py-2.5 bg-[rgba(15,23,42,0.6)] border border-slate-700 rounded-xl text-[var(--text-primary)] text-sm box-border focus:outline-none focus:border-blue-500';
+const labelClass = 'block mb-1.5 text-[var(--text-dim)] text-sm font-medium';
+
 export default function SupplierOrder({
   open,
   db,
@@ -44,19 +52,26 @@ export default function SupplierOrder({
   onClose,
 }: Props) {
   const itemTotal = orderItems.reduce((s, i) => s + i.lineTotal, 0);
-  const categories = [...new Set(db.products.filter((p) => !p.deleted).map((p) => p.category).filter(Boolean))];
+  const categories = [
+    ...new Set(
+      db.products
+        .filter((p) => !p.deleted)
+        .map((p) => p.category)
+        .filter(Boolean),
+    ),
+  ];
   const filteredProducts = db.products.filter(
     (p) => !p.deleted && (!orderProductCat || p.category === orderProductCat),
   );
 
   return (
-    <Modal open={open} onClose={onClose} title="\uD83D\uDCE6 Sipariş Ver" maxWidth={620}>
+    <Modal open={open} onClose={onClose} title="📦 Sipariş Ver" maxWidth={620}>
       <div>
-        <label style={lbl}>Tedarikçi *</label>
+        <label className={labelClass}>Tedarikçi *</label>
         <select
           value={orderSupplierId}
           onChange={(e) => setOrderSupplierId(e.target.value)}
-          style={{ ...inp, marginBottom: 12 }}
+          className={`${inputClass} mb-3 cursor-pointer`}
         >
           <option value="">-- Tedarikçi Seç --</option>
           {db.suppliers.map((s) => (
@@ -65,12 +80,13 @@ export default function SupplierOrder({
             </option>
           ))}
         </select>
-        <label style={lbl}>Ürün Ekle</label>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+
+        <label className={labelClass}>Ürün Ekle</label>
+        <div className="flex gap-2 mb-3">
           <select
             value={orderProductCat}
             onChange={(e) => setOrderProductCat(e.target.value)}
-            style={{ ...inp, flex: '0 0 120px' }}
+            className={`${inputClass} shrink-0 w-[120px] cursor-pointer`}
           >
             <option value="">Tüm Kat.</option>
             {categories.map((c) => (
@@ -86,7 +102,7 @@ export default function SupplierOrder({
                 e.target.value = '';
               }
             }}
-            style={{ ...inp, flex: 1 }}
+            className={`${inputClass} flex-1 cursor-pointer`}
           >
             <option value="">-- Ürün Seç --</option>
             {filteredProducts.map((p) => (
@@ -96,20 +112,13 @@ export default function SupplierOrder({
             ))}
           </select>
         </div>
+
         {orderItems.map((item) => (
           <div
             key={item.productId}
-            style={{
-              display: 'flex',
-              gap: 8,
-              alignItems: 'center',
-              marginBottom: 8,
-              background: '#0f172a',
-              borderRadius: 8,
-              padding: '8px 10px',
-            }}
+            className="flex gap-2 items-center mb-2 bg-slate-900 rounded-lg px-2.5 py-2"
           >
-            <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.88rem' }}>
+            <span className="flex-1 text-[var(--text-primary)] text-sm">
               {item.productName}
             </span>
             <input
@@ -121,19 +130,13 @@ export default function SupplierOrder({
                 const qty = parseInt(e.target.value) || 1;
                 setOrderItems((prev) =>
                   prev.map((i) =>
-                    i.productId === item.productId ? { ...i, qty, lineTotal: qty * i.unitCost } : i,
+                    i.productId === item.productId
+                      ? { ...i, qty, lineTotal: qty * i.unitCost }
+                      : i,
                   ),
                 );
               }}
-              style={{
-                width: 55,
-                background: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: 'var(--text-primary)',
-                padding: '4px 6px',
-                textAlign: 'center',
-              }}
+              className="w-14 bg-slate-800 border border-slate-700 rounded-md text-[var(--text-primary)] px-1.5 py-1 text-center text-sm"
             />
             <input
               type="number"
@@ -150,40 +153,33 @@ export default function SupplierOrder({
                   ),
                 );
               }}
-              style={{
-                width: 80,
-                background: '#1e293b',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: 'var(--text-primary)',
-                padding: '4px 6px',
-              }}
+              className="w-20 bg-slate-800 border border-slate-700 rounded-md text-[var(--text-primary)] px-1.5 py-1 text-sm"
             />
             <button
-              onClick={() => setOrderItems((prev) => prev.filter((i) => i.productId !== item.productId))}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#ef4444',
-                cursor: 'pointer',
-              }}
+              onClick={() =>
+                setOrderItems((prev) =>
+                  prev.filter((i) => i.productId !== item.productId),
+                )
+              }
+              className="bg-transparent border-none text-red-500 cursor-pointer hover:text-red-400 transition-colors"
             >
               ✕
             </button>
           </div>
         ))}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
+
+        <div className="grid grid-cols-2 gap-3 mt-3">
           <div>
-            <label style={lbl}>Teslim Tarihi</label>
+            <label className={labelClass}>Teslim Tarihi</label>
             <input
               type="date"
               value={deliveryDate}
               onChange={(e) => setDeliveryDate(e.target.value)}
-              style={inp}
+              className={inputClass}
             />
           </div>
           <div>
-            <label style={lbl}>Nakliye Maliyeti (₺)</label>
+            <label className={labelClass}>Nakliye Maliyeti (₺)</label>
             <input
               type="number"
               inputMode="decimal"
@@ -192,51 +188,39 @@ export default function SupplierOrder({
               step={0.01}
               placeholder="0,00"
               onChange={(e) => setNakliye(parseFloat(e.target.value) || 0)}
-              style={inp}
+              className={inputClass}
             />
           </div>
         </div>
-        <div style={{ marginTop: 12 }}>
-          <label style={lbl}>Not</label>
+
+        <div className="mt-3">
+          <label className={labelClass}>Not</label>
           <textarea
             value={orderNote}
             onChange={(e) => setOrderNote(e.target.value)}
-            style={{ ...inp, minHeight: 50 }}
+            className={`${inputClass} min-h-[50px]`}
           />
         </div>
+
         {orderItems.length > 0 && (
-          <div
-            style={{
-              background: '#0f172a',
-              borderRadius: 8,
-              padding: '12px 14px',
-              marginTop: 12,
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ color: 'var(--text-dim)' }}>Ürün Toplamı</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
+          <div className="bg-slate-900 rounded-lg px-3.5 py-3 mt-3">
+            <div className="flex justify-between mb-1">
+              <span className="text-[var(--text-dim)]">Ürün Toplamı</span>
+              <span className="text-[var(--text-primary)] font-bold">
                 {formatMoney(itemTotal)}
               </span>
             </div>
             {nakliye > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>+ Nakliye</span>
-                <span style={{ color: '#f59e0b', fontWeight: 600, fontSize: '0.85rem' }}>
+              <div className="flex justify-between mb-1">
+                <span className="text-[var(--text-dim)] text-sm">+ Nakliye</span>
+                <span className="text-amber-500 font-semibold text-sm">
                   {formatMoney(nakliye)}
                 </span>
               </div>
             )}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                borderTop: '1px solid #1e3a5f',
-                paddingTop: 8,
-              }}
-            >
-              <span style={{ color: 'var(--text-dim)' }}>Genel Toplam</span>
-              <span style={{ color: '#10b981', fontWeight: 800, fontSize: '1.1rem' }}>
+            <div className="flex justify-between border-t border-slate-800 pt-2">
+              <span className="text-[var(--text-dim)]">Genel Toplam</span>
+              <span className="text-emerald-500 font-extrabold text-lg">
                 {formatMoney(itemTotal + nakliye)}
               </span>
             </div>
@@ -246,7 +230,7 @@ export default function SupplierOrder({
       <ModalActions
         onSave={onSave}
         onCancel={onClose}
-        saveLabel="\uD83D\uDCE6 Sipariş Ver"
+        saveLabel="📦 Sipariş Ver"
         saveColor="#ff5722"
       />
     </Modal>

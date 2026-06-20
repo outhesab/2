@@ -6,48 +6,10 @@ import { StokAgent } from '@/agents/StokAgent';
 import type { AgentContext } from '@/agents/types';
 import type { DB } from '@/types';
 import { describe, expect, it, beforeEach } from 'vitest';
+import { makeDB } from '@/__tests__/testUtils';
 
 function now(): string {
   return new Date().toISOString();
-}
-
-function makeDB(overrides: Partial<DB> = {}): DB {
-  return {
-    _version: 1,
-    products: [],
-    sales: [],
-    suppliers: [],
-    orders: [],
-    cari: [],
-    kasa: [],
-    kasalar: [
-      { id: 'nakit', name: 'Nakit', icon: '\u{1F4B5}' },
-      { id: 'banka', name: 'Banka', icon: '\u{1F3E6}' },
-    ],
-    bankTransactions: [],
-    matchRules: [],
-    monitorRules: [],
-    monitorLog: [],
-    stockMovements: [],
-    peletSuppliers: [],
-    peletOrders: [],
-    boruSuppliers: [],
-    boruOrders: [],
-    invoices: [],
-    budgets: [],
-    returns: [],
-    _activityLog: [],
-    _auditLog: [],
-    company: { id: 'c1', createdAt: now() },
-    settings: {},
-    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-    ortakEmanetler: [],
-    installments: [],
-    partners: [],
-    productCategories: [],
-    notes: [],
-    ...overrides,
-  };
 }
 
 function makeContext(initialDB: DB): { ctx: AgentContext; getDB: () => DB } {

@@ -53,6 +53,7 @@ export type LogCategory =
   | 'voice'
   | 'VoiceAgent'
   | 'a11y'
+  | 'batchQueue'
   | 'coverage';
 
 export interface CrashReport {

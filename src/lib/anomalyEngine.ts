@@ -547,11 +547,33 @@ function calculateHealthScore(anomalies: AnomalyResult[]): number {
   );
 }
 
+// ── Yardımcı: main thread'e nefes aldır ───────────────────────────────────── 
+
+/** 
+ * Mikro-task bekle. 
+ * requestIdleCallback varsa onu kullan, yoksa setTimeout(0).
+ */
+function yieldToMain(): Promise<void> {
+  if (typeof requestIdleCallback === 'function') {
+    return new Promise((resolve) => requestIdleCallback(() => resolve(), { timeout: 50 }));
+  }
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
 // ── Ana fonksiyon ─────────────────────────────────────────────────────────────
 
-export function runAnomalyDetection(db: DB): AnomalyReport {
+export interface AnomalyProgress {
+  current: number;   // Tamamlanan dedektör
+  total: number;     // Toplam dedektör
+  label: string;     // Çalışan dedektör adı
+}
+
+export async function runAnomalyDetectionAsync(
+  db: DB,
+  onProgress?: (progress: AnomalyProgress) => void,
+): Promise<AnomalyReport> {
   const startTime = Date.now();
-  const TIMEOUT_MS = 500;
+  const TIMEOUT_MS = 2000; // Async olduğu için timeout'u 2sn'ye çıkar
   let partial = false;
   let allAnomalies: AnomalyResult[] = [];
 
@@ -562,6 +584,72 @@ export function runAnomalyDetection(db: DB): AnomalyReport {
     logger.warn('anomali', 'convertIntegrityToAnomalies hatası');
   }
 
+  // İlk progress
+  onProgress?.({ current: 0, total: 8, label: 'Integrity check tamam' });
+  await yieldToMain();
+
+  const detectors: Array<{ name: string; fn: (db: DB) => AnomalyResult[] }> = [
+    { name: 'Sıfır fiyatlı satış', fn: zeroPriceSalesDetector },
+    { name: 'Sıfır miktarlı satış', fn: zeroQuantitySalesDetector },
+    { name: 'Anormal tutar', fn: abnormalAmountDetector },
+    { name: 'Stok tutarlılık', fn: stockConsistencyDetector },
+    { name: 'Şüpheli kasa', fn: suspiciousKasaDetector },
+    { name: 'Cari bakiye', fn: cariBalanceAnomalyDetector },
+    { name: 'Negatif kâr', fn: negativeProfitDetector },
+    { name: 'Yetim kayıt', fn: orphanRecordDetector },
+  ];
+
+  for (let i = 0; i < detectors.length; i++) {
+    if (Date.now() - startTime > TIMEOUT_MS) {
+      partial = true;
+      logger.warn('anomali', `Zaman aşımı — ${detectors.length - i} dedektör atlandı`);
+      break;
+    }
+    const detector = detectors[i];
+    onProgress?.({ current: i + 1, total: detectors.length, label: detector.name });
+    try {
+      allAnomalies = [...allAnomalies, ...detector.fn(db)];
+    } catch {
+      logger.warn('anomali', `Dedektör hatası: ${detector.name}`);
+    }
+    // Her dedektör sonrası main thread'e nefes aldır
+    await yieldToMain();
+  }
+
+  // Sonuçları işle
+  const unique = deduplicateAnomalies(allAnomalies);
+  const sorted = unique.sort((a, b) => {
+    const order = { critical: 0, warning: 1, info: 2 };
+    return order[a.severity] - order[b.severity];
+  });
+
+  const byCategory = {} as Record<AnomalyCategory, number>;
+  sorted.forEach((a) => {
+    byCategory[a.category] = (byCategory[a.category] || 0) + 1;
+  });
+
+  onProgress?.({ current: detectors.length, total: detectors.length, label: 'Tamamlandı' });
+
+  return {
+    anomalies: sorted,
+    healthScore: calculateHealthScore(sorted),
+    summary: {
+      total: sorted.length,
+      critical: sorted.filter((a) => a.severity === 'critical').length,
+      warning: sorted.filter((a) => a.severity === 'warning').length,
+      info: sorted.filter((a) => a.severity === 'info').length,
+      byCategory,
+    },
+    generatedAt: new Date().toISOString(),
+    partial,
+  };
+}
+
+/**
+ * Senkron versiyon — geriye uyumluluk için.
+ * Async versiyon kullanılması önerilir.
+ */
+export function runAnomalyDetection(db: DB): AnomalyReport {
   const detectors = [
     zeroPriceSalesDetector,
     zeroQuantitySalesDetector,
@@ -572,6 +660,17 @@ export function runAnomalyDetection(db: DB): AnomalyReport {
     negativeProfitDetector,
     orphanRecordDetector,
   ];
+
+  const startTime = Date.now();
+  const TIMEOUT_MS = 500;
+  let partial = false;
+  let allAnomalies: AnomalyResult[] = [];
+
+  try {
+    allAnomalies = [...allAnomalies, ...convertIntegrityToAnomalies(db)];
+  } catch {
+    logger.warn('anomali', 'convertIntegrityToAnomalies hatası');
+  }
 
   for (const detector of detectors) {
     if (Date.now() - startTime > TIMEOUT_MS) {

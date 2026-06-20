@@ -15,6 +15,7 @@ import type {
 } from "@/types";
 import { describe, expect, it } from "vitest";
 import { validateTransaction } from "./ruleEngine";
+import { makeDB } from "@/__tests__/testUtils";
 
 // ─── Yardımcılar ──────────────────────────────────────────────────────────────
 
@@ -24,49 +25,8 @@ function genId(): string {
     Math.random().toString(36).slice(2, 10)
   );
 }
-
 function now(): string {
   return new Date().toISOString();
-}
-
-function makeDB(overrides: Partial<DB> = {}): DB {
-  return {
-    _version: 1,
-    products: [],
-    sales: [],
-    suppliers: [],
-    orders: [],
-    cari: [],
-    kasa: [],
-    kasalar: [
-      { id: "nakit", name: "Nakit", icon: "💵" },
-      { id: "banka", name: "Banka", icon: "🏦" },
-      { id: "pos", name: "POS", icon: "💳" },
-    ],
-    bankTransactions: [],
-    matchRules: [],
-    monitorRules: [],
-    monitorLog: [],
-    stockMovements: [],
-    peletSuppliers: [],
-    peletOrders: [],
-    boruSuppliers: [],
-    boruOrders: [],
-    invoices: [],
-    budgets: [],
-    returns: [],
-    _activityLog: [],
-    _auditLog: [],
-    company: { id: "c1", createdAt: now() },
-    settings: {},
-    pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-    ortakEmanetler: [],
-    installments: [],
-    partners: [],
-    productCategories: [],
-    notes: [],
-    ...overrides,
-  };
 }
 
 function makeProduct(
