@@ -15,7 +15,7 @@ import { formatMoney, genId } from '@/lib/utils-tr';
 import type { Cari as CariType, DB } from '@/types';
 import { useState } from 'react';
 import { useDebounce } from '@/pages/useDebounce';
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+// VoiceAssistantButton removed in favor of SobaNexus
 import { filterAndSortCari, getAgingBuckets, getTotals } from './CariHelpers';
 
 interface Props {
@@ -275,7 +275,7 @@ export default function Cari({ db, save }: Props) {
           />
         </Modal>
       )}
-      <VoiceAssistantButton />
+      // <VoiceAssistantButton /> removed
     </div>
   );
 }

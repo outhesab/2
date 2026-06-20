@@ -9,6 +9,37 @@ import { logger } from '@/lib/logger';
  */
 
 export async function parseVoiceIntent(text: string): Promise<AgentRequest | null> {
+  const input = text.toLowerCase().trim();
+
+  // --- FAST PATH: Regex-based intent detection (Offline & Instant) ---
+  // Pattern: "100 TL gider", "500 lira gider yaz"
+  const giderMatch = input.match(/(\d+)\s*(tl|lira)\s*gider/);
+  if (giderMatch) {
+    return {
+      action: 'kasa_gider',
+      payload: { amount: parseInt(giderMatch[1]), kasa: 'nakit', category: 'diger_gider', description: text },
+    };
+  }
+
+  // Pattern: "200 TL gelir", "1000 lira gelir kaydet"
+  const gelirMatch = input.match(/(\d+)\s*(tl|lira)\s*gelir/);
+  if (gelirMatch) {
+    return {
+      action: 'kasa_gelir',
+      payload: { amount: parseInt(gelirMatch[1]), kasa: 'nakit', category: 'diger_gelir', description: text },
+    };
+  }
+
+  // Pattern: "500 TL tahsilat", "Ahmet'ten 200 tl tahsilat"
+  const tahsilatMatch = input.match(/(\d+)\s*(tl|lira)\s*tahsilat/);
+  if (tahsilatMatch) {
+    return {
+      action: 'cari_tahsilat',
+      payload: { amount: parseInt(tahsilatMatch[1]), kasa: 'nakit', cariName: '' },
+    };
+  }
+
+  // --- SMART PATH: LLM-based intent detection ---
   const aiAgent = getAgent('deep_seek');
   const domainContext = getDomainContext();
   

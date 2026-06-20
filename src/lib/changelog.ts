@@ -20,6 +20,17 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.33.0',
+    date: '20 Haziran 2026',
+    title: 'v3.33.0 — Soba Nexus AI: Reasoning Filter & Fast-Path Intents',
+    summary: 'Soba Nexus AI yönlendirme mantığı geliştirildi. Muhakeme filtresi ile derin sorular bulut LLM\'e, net komutlar ise regex tabanlı hızlı yola yönlendirildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'NexusRouter.ts: Muhakeme belirteçleri (Sence, Neden, Nasıl vb.) eklenerek Smart Path yönlendirmesi optimize edildi.' },
+      { type: 'iyilestirme', text: 'voiceIntent.ts: Kasa gider, gelir ve tahsilat komutları için Regex tabanlı Fast Path eklendi.' },
+      { type: 'duzeltme', text: 'nexus-verification.test.ts: Action Path yönlendirme hatası giderildi.' },
+    ],
+  },
+  {
     version: '3.32.3',
     date: '20 Haziran 2026',
     title: 'v3.32.3 — Hızlı Satış (QuickSale) Kaldırma + Kod Kalitesi',

@@ -11,7 +11,7 @@ import { PackageSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+// VoiceAssistantButton removed in favor of SobaNexus
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
@@ -481,7 +481,7 @@ export default function Stock({ db, save }: Props) {
           <button onClick={() => setAdjustModal(false)} className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all">İptal</button>
         </div>
       </Modal>
-      <VoiceAssistantButton />
+      // <VoiceAssistantButton /> removed
     </div>
   );
 }

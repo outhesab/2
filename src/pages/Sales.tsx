@@ -17,7 +17,7 @@ import { paymentLabels } from './salesStyles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+// VoiceAssistantButton removed in favor of SobaNexus
 
 interface Props {
   db: DB;
@@ -439,7 +439,7 @@ export default function Sales({ db, save: _save }: Props) {
         paraUstu={-kalan}
       />
 
-      <VoiceAssistantButton />
+      // <VoiceAssistantButton /> removed
     </div>
   );
 }

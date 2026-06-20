@@ -105,4 +105,4 @@ Kalan ~45 madde taranıp çoğunun zaten çözüldüğü tespit edildi. v3.32.0 
 | 13.06.2026 | Dead Code Cleanup (6.8) | not-found.tsx silindi, utils-tr.ts/version.ts/appConfig.ts ölü exportlar temizlendi, ~116 satır kaldırıldı. v3.22.1. |
 | 13.06.2026 | 4 Sayfa Parallel Modülerizasyon | 4 general agent ile Suppliers/Monitor/BugHunter/Bank toplam 26 modüle bölündü. 3421 satır monolit silindi. v3.25.0. |
 | 18.06.2026 | MASTER_PLAN Kalan Maddeler | ~45 madde taranıp 30'unun zaten çözüldüğü tespit edildi. J2/H1/E8 fix'lendi, K4/K5/D2-D7/F5 zaten çözülmüş. v3.32.0. |
-| 18.06.2026 | WEEKLY_PLAN 5.12 + Aşama 3 Registry | Coverage exclude temizliği, pre-commit registry drift tespiti, agent drift + registry drift çift kontrol. 57/57 task tamam 🏁. |
+| 20.06.2026 | Soba Nexus AI Optimization | Reasoning Filter ve Fast-Path Intent'ler eklendi, Router ve VoiceIntent optimize edildi. v3.33.0. |

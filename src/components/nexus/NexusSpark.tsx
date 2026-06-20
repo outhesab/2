@@ -1,0 +1,59 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { BrainCircuit } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface NexusSparkProps {
+  isOpen: boolean;
+  onClick: () => void;
+  isListening: boolean;
+}
+
+export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen, onClick, isListening }) => {
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="fixed bottom-6 right-6 z-[150] flex items-center justify-center"
+    >
+      {/* Outer Glow/Pulse Effect */}
+      {isListening && (
+        <motion.div
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.5, 0.2, 0.5],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: \"easeInOut\",
+          }}
+          className=\"absolute inset-0 bg-indigo-500 rounded-full blur-xl\"
+        />
+      )}
+
+      {/* Main Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onClick}
+        className={cn(
+          \"relative w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300\",
+          \"bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900\",
+          \"border border-white/10 backdrop-blur-md\",
+          isListening ? \"ring-4 ring-indigo-500/30\" : \"ring-1 ring-white/20\"
+        )}
+      >
+        <BrainCircuit 
+          className={cn(
+            \"w-6 h-6 transition-colors duration-300\",
+            isListening ? \"text-indigo-400\" : \"text-indigo-200/70\"
+          )} 
+        />
+        
+        {/* Subtle Inner Shine */}
+        <div className=\"absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent pointer-events-none\" />
+      </motion.button>
+    </motion.div>
+  );
+};

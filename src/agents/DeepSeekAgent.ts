@@ -130,6 +130,10 @@ export class DeepSeekAgent extends BaseAgent {
       return this.analizEt(String(talep.payload.soru), talep.payload?.apiKey as string | undefined);
     }
 
+    if (talep.action === "analyze_intent" && talep.payload?.prompt) {
+      return this.analizEt(String(talep.payload.prompt), talep.payload?.apiKey as string | undefined);
+    }
+
     if (talep.action === "oner" && talep.payload?.veri) {
       return this.onerUret(talep.payload.veri as Record<string, unknown>, talep.payload?.apiKey as string | undefined);
     }

@@ -27,8 +27,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import FAB from '@/components/layout/FAB';
 import ReportButton from '@/components/layout/ReportButton';
-import AIDrawer from '@/components/layout/AIDrawer';
-import { QuantumLink } from '@/components/QuantumLink';
+import { SobaNexus } from '@/components/nexus/SobaNexus';
 import PageFallback from '@/components/layout/PageFallback';
 
 const AIEylemLog = lazy(() => import('@/pages/AIEylemLog'));
@@ -122,7 +121,6 @@ function AppContent({
     Analiz: false,
     Sistem: false,
   });
-  const [aiDrawerOpen, setAiDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
@@ -487,16 +485,16 @@ function AppContent({
       </div>
 
       {/* FAB */}
-      <FAB db={db} save={save} onOpenAI={() => setAiDrawerOpen(true)} uiPrefs={uiPrefs} />
+      <FAB db={db} save={save} onOpenAI={() => {}} uiPrefs={uiPrefs} />
 
       {/* Hata Bildirme Butonu */}
       <ReportButton visible={uiPrefs.showReportButton} />
 
       {/* AI Drawer */}
-      <AIDrawer open={aiDrawerOpen} onClose={() => setAiDrawerOpen(false)} db={db} save={save} />
+      {/* AI Drawer removed */}\n
 
       {/* QuantumLink */}
-      <QuantumLink db={db} />
+      <SobaNexus />
     </div>
   );
 }

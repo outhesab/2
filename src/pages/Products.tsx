@@ -42,7 +42,7 @@ const empty: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = {
   description: '',
 };
 
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+// VoiceAssistantButton removed in favor of SobaNexus
 
 export default function Products({ db, save }: Props) {
   const { showToast } = useToast();
@@ -615,7 +615,7 @@ export default function Products({ db, save }: Props) {
           </Button>
         </div>
       </Modal>
-      <VoiceAssistantButton />
+      // <VoiceAssistantButton /> removed
     </div>
   );
 }

@@ -31,7 +31,7 @@ import { TableFilterBar, TableWrapper } from '@/pages/pageHelpers.tsx';
 
 interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
 
-import { VoiceAssistantButton } from '@/components/VoiceAssistantButton';
+// VoiceAssistantButton removed in favor of SobaNexus
 
 export default function Kasa({ db, save }: Props) {
   const { showToast } = useToast();
@@ -472,7 +472,7 @@ export default function Kasa({ db, save }: Props) {
           <button onClick={() => setSayimModal(false)} className="px-5 bg-slate-800 hover:bg-slate-700 text-slate-400 py-2.5 rounded-xl text-sm transition-all">Kapat</button>
         </div>
       </Modal>
-      <VoiceAssistantButton />
+// <VoiceAssistantButton /> removed
     </div>
   );
 }
