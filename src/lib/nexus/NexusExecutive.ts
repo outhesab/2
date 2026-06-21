@@ -67,8 +67,8 @@ export class NexusExecutive {
         voiceSaleComposer.reset();
         this.composerMode = false;
       },
-      registerConfirmationPromise: (promise: Promise<ConfirmationResult>) => {
-        this.pendingConfirmationPromise = promise;
+      registerConfirmationPromise: (promise: Promise<unknown>) => {
+        this.pendingConfirmationPromise = promise as Promise<ConfirmationResult>;
       },
     };
 

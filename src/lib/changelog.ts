@@ -38,6 +38,7 @@ export const CHANGELOG: VersionEntry[] = [
     ],
   },
   {
+    version: '3.41.0',
     date: '21 Haziran 2026',
     title: 'v3.41.0 — Stabilite: Zod ile AI Action Chain Validasyonu',
     summary: 'NexusExecutive\'in God-Mode planlama motoruna Zod şema validasyonu eklendi. DeepSeek\'ten dönen aksiyon zincirleri artık çalıştırılmadan önce tip-güvenli şema ile doğrulanıyor. Geçersiz planlar kullanıcıya güvenli hata mesajıyla iade ediliyor. Ayrıca logger kategorileri "nexus", "sentinel", "voiceCore" olarak genişletildi, SobaNexus\'te listen hook argüman sayısı düzeltildi, NexusPanel JSX yapısı parçalanma düzeltildi.',

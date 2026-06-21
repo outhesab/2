@@ -1,22 +1,22 @@
 {
   "version": "3.42.0",
-  "generatedAt": "2026-06-21T09:27:54.982Z",
+  "generatedAt": "2026-06-21T09:31:30.943Z",
   "git": {
     "branch": "dev",
-    "commit": "a0671d0",
-    "commitFull": "a0671d0b9a7a34d32a543bbcc985e4d742b40988",
-    "commitMessage": "🐛 fix: Çoklu hata düzeltme ve Nexus AI iyileştirmeleri",
-    "commitDate": "2026-06-21 10:55:03 +0300"
+    "commit": "1e561cb",
+    "commitFull": "1e561cbb0cfafe650448bc1fe2d23615f487a3d6",
+    "commitMessage": "feat: NexusExecutive God-Object → Intent-Handler pattern (v3.42.0)",
+    "commitDate": "2026-06-21 12:28:01 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-21T09:27:54.982Z"
+    "checkedAt": "2026-06-21T09:31:30.944Z"
   },
   "codebase": {
     "tsFiles": 208,
     "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 70439,
+    "totalLOC": 70440,
     "dependencies": 40,
     "devDependencies": 41
   },
