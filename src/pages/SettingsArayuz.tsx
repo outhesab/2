@@ -302,12 +302,6 @@ export function ArayuzAyarlari({
               desc: 'Sol alttaki yapay zeka butonu',
             },
             {
-              key: 'showFABButton' as const,
-              icon: '➕',
-              label: 'Hızlı İşlem Butonu',
-              desc: 'Sağ alttaki hızlı satış/gelir/gider butonu',
-            },
-            {
               key: 'showReportButton' as const,
               icon: '📝',
               label: 'Hata Bildirme Butonu',

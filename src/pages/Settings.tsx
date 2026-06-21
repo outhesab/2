@@ -26,7 +26,6 @@ import { ArayuzAyarlari } from './SettingsArayuz';
 import { BaglantiAyarlari } from './SettingsBaglanti';
 import { Card } from './SettingsCard';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Roadmap from './settings/content/Roadmap';
 import About from './settings/content/About';
 import Changelog from './settings/content/Changelog';
@@ -61,6 +60,48 @@ type Tab =
   | 'changelog'
   | 'support';
 
+interface SettingsCategory {
+  id: string;
+  label: string;
+  icon: string;
+  tabs: { id: Tab; label: string; icon: string }[];
+}
+
+const CATEGORIES: SettingsCategory[] = [
+  { id: 'genel', label: 'Genel', icon: '🏠', tabs: [
+    { id: 'arayuz', label: 'Arayüz', icon: '🎨' },
+    { id: 'baglantilar', label: 'Bağlantılar', icon: '🔌' },
+    { id: 'company', label: 'Şirket', icon: '🏢' },
+  ]},
+  { id: 'veri', label: 'Veri & İçe Aktarma', icon: '📂', tabs: [
+    { id: 'categories', label: 'Kategoriler', icon: '🏷️' },
+    { id: 'excel', label: 'İçe Aktar', icon: '📥' },
+    { id: 'excel_export', label: 'Excel Dışa Aktar', icon: '📊' },
+    { id: 'data', label: 'Veri Yönetimi', icon: '📂' },
+  ]},
+  { id: 'yedek', label: 'Yedek & Onarım', icon: '💾', tabs: [
+    { id: 'backup', label: 'Yedek Al', icon: '💾' },
+    { id: 'repair', label: 'Onarım', icon: '🔧' },
+  ]},
+  { id: 'ai', label: 'AI & Otomasyon', icon: '🤖', tabs: [
+    { id: 'agent', label: 'Agentlar', icon: '🤖' },
+    { id: 'pellet', label: 'Pelet', icon: '🪵' },
+    { id: 'sound', label: 'Ses', icon: '🔊' },
+  ]},
+  { id: 'guvenlik', label: 'Güvenlik & Kısayollar', icon: '🔒', tabs: [
+    { id: 'security', label: 'Güvenlik', icon: '🔒' },
+    { id: 'shortcuts', label: 'Kısayollar', icon: '⌨' },
+    { id: 'activity', label: 'Aktivite', icon: '📋' },
+  ]},
+  { id: 'hakkinda', label: 'Sistem & Bilgi', icon: 'ℹ️', tabs: [
+    { id: 'sysmap', label: 'Harita', icon: '🗺️' },
+    { id: 'about', label: 'Hakkında', icon: 'ℹ️' },
+    { id: 'roadmap', label: 'Yol Haritası', icon: '🚀' },
+    { id: 'changelog', label: 'Güncellemeler', icon: '📜' },
+    { id: 'support', label: 'Destek', icon: '🆘' },
+  ]},
+];
+
 export default function Settings({ db, save, exportJSON, importJSON: _importJSON }: Props) {
   const { showToast: _showToast } = useToast();
   const showToast = _showToast as (m: string, t?: string) => void;
@@ -84,7 +125,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
         };
       }
     } catch {
-      logger.warn('settings', "Dashboard tercihleri localStorage'dan okunamadı"); /* ignore */
+      logger.warn('settings', "Dashboard tercihleri localStorage'dan okunamadı");
     }
     return { leftWidgets: ['chart', 'recentSales', 'tips', 'excelBar'], brightness: 100 };
   });
@@ -95,7 +136,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
     try {
       localStorage.setItem('dashboardPrefs', JSON.stringify(next));
     } catch {
-      logger.warn('settings', "Dashboard tercihleri localStorage'a yazılamadı"); /* ignore */
+      logger.warn('settings', "Dashboard tercihleri localStorage'a yazılamadı");
     }
   };
 
@@ -117,73 +158,12 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
 
   const totalRecords = dataStats.reduce((s, d) => s + d.count, 0);
 
-  return (
-    <div className="p-4 max-w-4xl mx-auto overflow-hidden">
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full">
-        <TabsList className="flex-nowrap overflow-x-auto justify-start h-auto gap-1 bg-transparent p-0 mb-4 no-scrollbar">
-          <TabsTrigger value="arayuz" className="whitespace-nowrap">
-            🎨 Arayüz
-          </TabsTrigger>
-          <TabsTrigger value="baglantilar" className="whitespace-nowrap">
-            🔌 Bağlantılar
-          </TabsTrigger>
-          <TabsTrigger value="company" className="whitespace-nowrap">
-            🏢 Şirket
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="whitespace-nowrap">
-            🏷️ Kategoriler
-          </TabsTrigger>
-          <TabsTrigger value="pellet" className="whitespace-nowrap">
-            🪵 Pelet
-          </TabsTrigger>
-          <TabsTrigger value="sound" className="whitespace-nowrap">
-            🔊 Ses
-          </TabsTrigger>
-          <TabsTrigger value="agent" className="whitespace-nowrap">
-            🤖 Agentlar
-          </TabsTrigger>
-          <TabsTrigger value="backup" className="whitespace-nowrap">
-            💾 Yedek
-          </TabsTrigger>
-          <TabsTrigger value="excel_export" className="whitespace-nowrap">
-            📊 Excel
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="whitespace-nowrap">
-            📋 Aktivite
-          </TabsTrigger>
-          <TabsTrigger value="shortcuts" className="whitespace-nowrap">
-            ⌨ Kısayollar
-          </TabsTrigger>
-          <TabsTrigger value="repair" className="whitespace-nowrap">
-            🔧 Onarım
-          </TabsTrigger>
-          <TabsTrigger value="excel" className="whitespace-nowrap">
-            📥 İçe Aktar
-          </TabsTrigger>
-          <TabsTrigger value="data" className="whitespace-nowrap">
-            📂 Veri
-          </TabsTrigger>
-          <TabsTrigger value="security" className="whitespace-nowrap">
-            🔒 Güvenlik
-          </TabsTrigger>
-          <TabsTrigger value="sysmap" className="whitespace-nowrap">
-            🗺️ Harita
-          </TabsTrigger>
-           <TabsTrigger value="about" className="whitespace-nowrap">
-             ℹ️ Hakkında
-           </TabsTrigger>
-           <TabsTrigger value="roadmap" className="whitespace-nowrap">
-             🚀 Yol Haritası
-           </TabsTrigger>
-           <TabsTrigger value="changelog" className="whitespace-nowrap">
-             📜 Güncellemeler
-           </TabsTrigger>
-           <TabsTrigger value="support" className="whitespace-nowrap">
-             🆘 Destek
-           </TabsTrigger>
-        </TabsList>
+  const activeCategory = CATEGORIES.find(cat => cat.tabs.some(t => t.id === tab))?.id || 'genel';
 
-        {tab === 'arayuz' && (
+  const renderContent = () => {
+    switch (tab) {
+      case 'arayuz':
+        return (
           <ArayuzAyarlari
             prefs={uiPrefs}
             onChange={(p) => {
@@ -195,9 +175,9 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
             dashboardPrefs={dashboardPrefs}
             saveDashboardPrefs={saveDashboardPrefs}
           />
-        )}
-
-        {tab === 'baglantilar' && (
+        );
+      case 'baglantilar':
+        return (
           <BaglantiAyarlari
             cfg={connCfg}
             onChange={(c) => {
@@ -206,46 +186,44 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
             }}
             showToast={showToast}
           />
-        )}
-
-        {tab === 'company' && <SettingsCompany db={db} save={save} showToast={showToast} />}
-
-        {tab === 'pellet' && (
+        );
+      case 'company':
+        return <SettingsCompany db={db} save={save} showToast={showToast} />;
+      case 'pellet':
+        return (
           <SettingsPeletPanel
             pellet={pellet}
             onChange={(key, value) => setPellet((p) => ({ ...p, [key]: value }))}
             onSave={savePellet}
           />
-        )}
-
-        {tab === 'sound' && <SoundSettingsPanel playSound={playSound} />}
-
-        {tab === 'agent' && <AgentSettingsPanel db={db} save={save} />}
-
-        {tab === 'backup' && (
+        );
+      case 'sound':
+        return <SoundSettingsPanel playSound={playSound} />;
+      case 'agent':
+        return <AgentSettingsPanel db={db} save={save} />;
+      case 'backup':
+        return (
           <div className="grid gap-4">
             <Card title="📤 Yedek Al">
               <p className="text-muted-foreground text-sm">
-                Tüm verilerinizi <strong className="text-orange-400 font-semibold">JSON formatında</strong> dışa
-                aktarın.
+                Tüm verilerinizi <strong className="text-orange-400 font-semibold">JSON formatında</strong> dışa aktarın.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {dataStats.slice(0, 4).map((d) => (
-                  <div key={d.label} className="bg-[var(--bg-card)] rounded-[10px] p-3 text-center">
+                  <div key={d.label} className="bg-card rounded-xl p-3 text-center border border-white/5">
                     <div className="text-lg mb-1">{d.icon}</div>
                     <div className="text-lg font-bold text-foreground">{d.count}</div>
-                    <div className="text-[var(--text-dim)] text-sm">{d.label}</div>
+                    <div className="text-muted-foreground text-xs">{d.label}</div>
                   </div>
                 ))}
               </div>
-              <div className="bg-green-500/10 border border-green-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
+              <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 text-sm text-muted-foreground mt-3">
                 Toplam {totalRecords} kayıt yedeklenecek
               </div>
-              <Button onClick={exportJSON} className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm">
+              <Button onClick={exportJSON} className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm mt-3">
                 Yedeği İndir (.json)
               </Button>
             </Card>
-
             <FullRestorePanel
               showToast={showToast}
               showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void}
@@ -265,74 +243,114 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
               showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void}
             />
           </div>
-        )}
-
-        {tab === 'excel_export' && <ExcelExportPanel db={db} />}
-
-        {tab === 'activity' && (
+        );
+      case 'excel_export':
+        return <ExcelExportPanel db={db} />;
+      case 'activity':
+        return (
           <ActivityPanel
             db={db}
             save={save}
             showToast={showToast}
             showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void}
           />
-        )}
-
-        {tab === 'shortcuts' && <ShortcutsPanel />}
-
-        {tab === 'repair' && (
+        );
+      case 'shortcuts':
+        return <ShortcutsPanel />;
+      case 'repair':
+        return (
           <VeriOnarim
             db={db}
             save={save}
             showToast={showToast}
             showConfirm={showConfirm as (title: string, msg: string, onOk: () => void, danger?: boolean) => void}
           />
-        )}
-
-        {tab === 'excel' && <ExcelImport db={db} save={save} />}
-
-        {tab === 'categories' && <KategoriYonetim db={db} save={save} />}
-
-        {tab === 'data' && (
+        );
+      case 'excel':
+        return <ExcelImport db={db} save={save} />;
+      case 'categories':
+        return <KategoriYonetim db={db} save={save} />;
+      case 'data':
+        return (
           <DataPanel
             db={db}
             save={save}
             showToast={showToast}
             showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void}
           />
-        )}
-
-        {tab === 'security' && <SecurityPanel showToast={showToast} />}
-
-        {tab === 'sysmap' && (
+        );
+      case 'security':
+        return <SecurityPanel showToast={showToast} />;
+      case 'sysmap':
+        return (
           <div className="grid gap-4">
-            <Card title="ğŸ—ºï¸ Sistem Haritası â€” Modüller Arası İliÅŸkiler">
+            <Card title="🗺️ Sistem Haritası — Modüller Arası İlişkiler">
               <p className="text-muted-foreground text-sm">
-                Her modülün diÄŸer modülleri nasıl etkilediÄŸini gösteren akıÅŸ diyagramı. Düz çizgi = doÄŸrudan veri
-                etkisi, kesik çizgi = veri saÄŸlar.
+                Her modülün diğer modülleri nasıl etkilediğini gösteren akış diyagramı.
               </p>
               <SystemMap />
             </Card>
           </div>
-        )}
+        );
+      case 'about':
+        return <About />;
+      case 'roadmap':
+        return <Roadmap />;
+      case 'changelog':
+        return <Changelog />;
+      case 'support':
+        return <Support />;
+      default:
+        return null;
+    }
+  };
 
-        {tab === 'about' && <About />}
-        {tab === 'roadmap' && <Roadmap />}
-        {tab === 'changelog' && <Changelog />}
-        {tab === 'support' && <Support />}
-      </Tabs>
+  return (
+    <div className="p-4 max-w-6xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-2xl">⚙️</span>
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Ayarlar</h1>
+          <p className="text-xs text-muted-foreground">Tüm uygulama ayarlarını buradan yönetin</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Sol Sidebar - Kategoriler */}
+        <div className="md:w-64 shrink-0 max-h-[calc(100vh-12rem)] overflow-y-auto">
+          <div className="space-y-2">
+            {CATEGORIES.map((cat) => (
+              <div key={cat.id} className="rounded-xl border border-white/5 overflow-hidden bg-card">
+                <div className={`px-3 py-2.5 text-sm font-semibold text-foreground flex items-center gap-2 ${activeCategory === cat.id ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : ''}`}>
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                </div>
+                <div className="px-2 pb-2 space-y-0.5">
+                  {cat.tabs.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-2 ${
+                        tab === t.id
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="text-xs">{t.icon}</span>
+                      <span>{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sağ İçerik */}
+        <div className="flex-1 min-w-0">
+          {renderContent()}
+        </div>
+      </div>
     </div>
   );
 }
-// Extracted sub-components:
-// ActivityPanel → settings/SettingsActivity.tsx
-// FullRestorePanel, SelectiveRestore, SmartImportManager → settings/SettingsBackup.tsx
-// VeriOnarim → settings/SettingsRepair.tsx
-// DangerAction, DataPanel → settings/SettingsData.tsx
-// SettingsPeletPanel → settings/SettingsPelet.tsx
-// ShortcutsPanel → settings/SettingsShortcuts.tsx
-// KategoriYonetim → settings/SettingsKategoriYonetim.tsx
-// AboutPanel → settings/SettingsAboutPanel.tsx
-// AgentSettingsPanel → settings/SettingsAgentPanel.tsx
-
-// (these functions are now imported from settings/ folder)

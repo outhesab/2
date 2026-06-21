@@ -25,7 +25,6 @@ import {
 } from '@/config/tabs';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import FAB from '@/components/layout/FAB';
 import ReportButton from '@/components/layout/ReportButton';
 import { SobaNexus } from '@/components/nexus/SobaNexus';
 import PageFallback from '@/components/layout/PageFallback';
@@ -63,6 +62,7 @@ const Reports = lazy(() => import('@/pages/Reports'));
 const Sales = lazy(() => import('@/pages/Sales'));
 const SaleDetail = lazy(() => import('@/pages/SaleDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
+const NexusSalesAdmin = lazy(() => import('@/pages/NexusSalesAdmin'));
 const Perf = lazy(() => import('@/pages/Perf'));
 const SpecDashboard = lazy(() => import('@/pages/SpecDashboard'));
 const Stock = lazy(() => import('@/pages/Stock'));
@@ -455,6 +455,9 @@ function AppContent({
               <Route path="/settings">
                 <Settings db={db} save={save} exportJSON={exportJSON} importJSON={importJSON} />
               </Route>
+              <Route path="/nexus-admin">
+                <NexusSalesAdmin db={db} save={save} />
+              </Route>
               <Route path="/bughunter">
                 <BugHunter />
               </Route>
@@ -484,14 +487,8 @@ function AppContent({
         </main>
       </div>
 
-      {/* FAB */}
-      <FAB db={db} save={save} onOpenAI={() => {}} uiPrefs={uiPrefs} />
-
       {/* Hata Bildirme Butonu */}
       <ReportButton visible={uiPrefs.showReportButton} />
-
-      {/* AI Drawer */}
-      {/* AI Drawer removed */}\n
 
       {/* QuantumLink */}
       <SobaNexus />

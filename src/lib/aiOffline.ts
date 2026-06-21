@@ -17,7 +17,7 @@ import {
 
 export function offlineReply(db: DB, query: string): string {
   const q = query.toLowerCase();
-  const { sales: monthSales, ciro, kar } = getMonthSales(db);
+  const { ciro, kar } = getMonthSales(db);
   const kasaToplam = computeKasaToplam(db);
   const nakit = computeKasaByType(db, 'nakit');
   const banka = computeKasaByType(db, 'banka');

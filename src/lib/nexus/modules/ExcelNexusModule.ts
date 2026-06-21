@@ -104,7 +104,7 @@ export class ExcelNexusModule {
    * Bridges a file-based insight to an internal agent action.
    * Example: "Dosyadaki toplam tutarı kasaya ekle"
    */
-  public async bridgeToAgent(insight: string, agentId: string, payload: unknown) {
+  public async bridgeToAgent(insight: string, agentId: 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek', payload: Record<string, unknown>) {
     const { getAgent } = await import('@/agents');
     const agent = getAgent(agentId);
     

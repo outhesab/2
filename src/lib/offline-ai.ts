@@ -1,5 +1,7 @@
 import type { ExcelFile, SheetData } from "./excel-merge";
 
+export type { ExcelFile, SheetData };
+
 export interface LearnedPattern {
   columnNamePatterns: Record<string, number>;
   keyColumnPreferences: Record<string, number>;

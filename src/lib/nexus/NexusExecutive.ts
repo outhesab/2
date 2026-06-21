@@ -1,12 +1,14 @@
 import { getAgent } from '@/agents';
-import { nexusRouter, RouteResult } from './NexusRouter';
+import { z } from 'zod';
+import { nexusRouter } from './NexusRouter';
 import { voiceConfirmationGateway, requiresConfirmation, type ConfirmationResult } from './VoiceConfirmationGateway';
 import { voiceSaleComposer } from './VoiceSaleComposer';
 import { resolveUndo } from './VoiceUndoEngine';
 import { weatherProactiveEngine } from './WeatherProactiveEngine';
 import { whatsAppBridge } from './WhatsAppBridge';
 import { logger } from '@/lib/logger';
-import type { DB, AgentRequest, AgentResponse } from '@/types';
+import type { DB } from '@/types';
+import type { AgentRequest, AgentResponse, AgentId } from '@/agents/types';
 
 export type ExecutiveResult = {
   type: 'fast' | 'smart' | 'action_chain' | 'pending_confirmation' | 'composer_active';
@@ -25,6 +27,17 @@ export type ExecutiveResult = {
   /** composer iptal ettiyse true */
   composerCancelled?: boolean;
 };
+
+/**
+ * Validation schemas for AI-generated action chains
+ */
+const AgentRequestSchema = z.object({
+  action: z.string().min(1),
+  payload: z.record(z.string(), z.any()).optional(),
+  meta: z.record(z.string(), z.any()).optional(),
+});
+
+const AgentRequestChainSchema = z.array(AgentRequestSchema);
 
 export class NexusExecutive {
   private static instance: NexusExecutive;
@@ -211,7 +224,8 @@ export class NexusExecutive {
 
     // 4. Handle Smart Path (Deep Reasoning & Potential Chaining)
     if (routeResult.type === 'smart') {
-      const responseText = routeResult.response as string;
+      const rawResponse = routeResult.response;
+      const responseText = typeof rawResponse === 'string' ? rawResponse : (rawResponse && typeof rawResponse === 'object' && 'data' in rawResponse ? String((rawResponse as AgentResponse).data ?? '') : String(rawResponse));
       
       // Check if the AI suggested a multi-step plan
       if (this.containsPlan(responseText)) {
@@ -462,9 +476,9 @@ export class NexusExecutive {
   private async executeSingleAction(request: AgentRequest): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       const agentId = this.mapActionToAgent(request.action);
-      const agent = getAgent(agentId);
+      const agent = getAgent(agentId) as { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> };
       
-      const result: AgentResponse<unknown> = await agent.islemYap(request);
+      const result = await agent.islemYap(request);
       
       if (result.ok) {
         return { success: true, message: `Agent ${agentId} işlemi tamamladı.`, data: result.data };
@@ -472,7 +486,7 @@ export class NexusExecutive {
         return { success: false, message: result.error || 'Agent işlemi reddetti.' };
       }
     } catch (e) {
-      logger.error('NexusExecutive', 'Action execution failed', { error: e });
+      logger.error('nexus', 'Action execution failed', { error: e });
       return { success: false, message: 'Sistem hatası oluştu.' };
     }
   }
@@ -501,9 +515,17 @@ export class NexusExecutive {
       try {
         const raw = typeof planResult.data === 'string' ? planResult.data : JSON.stringify(planResult.data);
         const jsonMatch = raw.match(/\\{.*\\}/s);
-        actions = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+        const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+        
+        // Validate with Zod schema
+        const validationResult = AgentRequestChainSchema.safeParse(parsed);
+        if (!validationResult.success) {
+          logger.error('nexus', 'Plan validation failed', { errors: validationResult.error.format() });
+          return { type: 'smart', response: 'AI planı şema doğrulaması geçemedi, lütfen tekrar deneyin.', executedActions: [] };
+        }
+        actions = validationResult.data;
       } catch (e) {
-        logger.error('NexusExecutive', 'Plan parsing failed', { error: e });
+        logger.error('nexus', 'Plan parsing failed', { error: e });
         return { type: 'smart', response: 'Plan oluşturuldu ama teknik bir hata nedeniyle uygulanamadı.', executedActions: [] };
       }
 
@@ -547,7 +569,7 @@ export class NexusExecutive {
     return keywords.some(kw => text.toLowerCase().includes(kw));
   }
 
-  private mapActionToAgent(action: string): string {
+  private mapActionToAgent(action: string): AgentId {
     if (action.includes('sale') || action.includes('satis')) return 'satis';
     if (action.includes('stock') || action.includes('stok')) return 'stok';
     if (action.includes('cari') || action.includes('customer')) return 'cari';

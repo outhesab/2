@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Sparkles, Send, Mic, Settings2 } from 'lucide-react';
+import { X, Sparkles, Send, Mic, Loader2, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 
@@ -11,6 +11,7 @@ interface NexusPanelProps {
   onSendMessage: (msg: string) => void;
   isListening: boolean;
   onToggleListen: () => void;
+  isProcessing?: boolean;
 }
 
 export const NexusPanel: React.FC<NexusPanelProps> = ({ 
@@ -19,16 +20,23 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
   messages, 
   onSendMessage, 
   isListening, 
-  onToggleListen 
+  onToggleListen,
+  isProcessing 
 }) => {
   const [inputValue, setInputValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSend = () => {
     if (inputValue.trim()) {
@@ -84,24 +92,37 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
             </div>
           </div>
         ) : (
-          messages.map((m, i) => (
-            <div 
-              key={i} 
-              className={cn(
-                "flex w-full", 
-                m.role === 'user' ? "justify-end" : "justify-start"
-              )}
-            >
-              <div className={cn(
-                "max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed",
-                m.role === 'user' 
-                  ? "bg-indigo-600 text-white rounded-tr-none" 
-                  : "bg-slate-800/50 text-slate-200 border border-white/10 rounded-tl-none backdrop-blur-sm"
-              )}>
-                {m.content}
+          <>
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex w-full",
+                  m.role === 'user' ? "justify-end" : "justify-start"
+                )}
+              >
+                <div className={cn(
+                  "max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed",
+                  m.role === 'user'
+                    ? "bg-indigo-600 text-white rounded-tr-none"
+                    : "bg-slate-800/50 text-slate-200 border border-white/10 rounded-tl-none backdrop-blur-sm"
+                )}>
+                  {m.content}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+            {isProcessing && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] p-4 rounded-2xl rounded-tl-none bg-slate-800/50 border border-white/10 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 text-slate-400 text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Düşünüyor...
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 

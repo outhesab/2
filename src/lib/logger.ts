@@ -54,7 +54,14 @@ export type LogCategory =
   | 'VoiceAgent'
   | 'a11y'
   | 'batchQueue'
-  | 'coverage';
+  | 'coverage'
+  | 'nexus'
+  | 'sentinel'
+  | 'voiceCore'
+  | 'NexusRouter'
+  | 'SobaSentinel'
+  | 'VoiceNexusCore'
+  | 'ExcelNexusModule'
 
 export interface CrashReport {
   id: string;

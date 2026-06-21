@@ -33,7 +33,7 @@ export class SobaSentinel {
   public start(dbProvider: () => DB) {
     if (this.checkInterval) return;
 
-    logger.info('SobaSentinel', 'Starting Sentinel monitoring...');
+    logger.info('sentinel', 'Starting Sentinel monitoring...');
     this.checkInterval = setInterval(() => {
       this.runAudit(dbProvider());
     }, 1000 * 60 * 5); // Audit every 5 minutes
@@ -43,12 +43,12 @@ export class SobaSentinel {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
-      logger.info('SobaSentinel', 'Sentinel stopped.');
+      logger.info('sentinel', 'Sentinel stopped.');
     }
   }
 
   private async runAudit(db: DB) {
-    logger.info('SobaSentinel', 'Running business health audit...');
+    logger.info('sentinel', 'Running business health audit...');
     const alerts: SentinelAlert[] = [];
 
     // 1. Kasa Kritik Seviye
@@ -99,9 +99,9 @@ export class SobaSentinel {
 
     const topAlert = alerts[0];
     
-    // Only alert if this specific alert hasn't been processed recently or is high priority
+      // Only alert if this specific alert hasn't been processed recently or is high priority
     if (topAlert.priority === 'high' || !this.processedAlerts.has(topAlert.id)) {
-      logger.warn('SobaSentinel', 'Triggering voice alert', { alert: topAlert });
+      logger.warn('sentinel', 'Triggering voice alert', { alert: topAlert });
       
       await voiceNexusCore.speak(`Soba Nexus Uyarı: ${topAlert.message}`);
       

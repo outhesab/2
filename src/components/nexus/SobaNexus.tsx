@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useNexusVoice } from '@/lib/nexus/useNexusVoice';
@@ -20,6 +20,23 @@ export const SobaNexus: React.FC = () => {
   const [isBubbleVisible, setIsBubbleVisible] = useState(false);
   const [bubbleMessage, setBubbleMessage] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [feedbackText, setFeedbackText] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showFeedback = (text: string) => {
+    setFeedbackText(text);
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = setTimeout(() => setFeedbackText(null), 3000);
+  };
+
+  const showBubble = (msg: string) => {
+    setBubbleMessage(msg);
+    setIsBubbleVisible(true);
+    if (bubbleTimer.current) clearTimeout(bubbleTimer.current);
+    bubbleTimer.current = setTimeout(() => setIsBubbleVisible(false), 10000);
+  };
 
   useEffect(() => {
     const prefs = loadUIPrefs();
@@ -34,69 +51,123 @@ export const SobaNexus: React.FC = () => {
   }, [db]);
 
   const handleVoiceInput = useCallback(async (text: string) => {
-    // 1. Add user message to history
+    if (!text.trim()) return;
+    showFeedback('🎤 Ses algılandı, işleniyor...');
+    setIsProcessing(true);
     setMessages(prev => [...prev, { role: 'user', content: text }]);
 
-    // 2. Route the request through Executive (God-Mode)
-    const result = await nexusExecutive.execute(text, db, {
-      isFileContext: false,
-    });
+    try {
+      const result = await nexusExecutive.execute(text, db, {
+        isFileContext: false,
+      });
 
-    // 3. Handle Navigation if requested
-    if (result.navigation) {
-      setLocation(result.navigation.path);
-    }
+      setIsProcessing(false);
 
-    // 4. Handle response
-    const responseText = result.response;
-    setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-    
-    // Decide whether to show in Bubble or Panel
-    if (responseText.length < 150 && !isPanelOpen) {
-      setBubbleMessage(responseText);
-      setIsBubbleVisible(true);
+      if (result.navigation) {
+        setLocation(result.navigation.path);
+      }
+
+      const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
+      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+
+      if (!isPanelOpen) {
+        showBubble(responseText);
+      }
+
+      await speak(responseText);
+      showFeedback('✅ Tamamlandı');
+    } catch (err) {
+      setIsProcessing(false);
+      const errMsg = '❌ Hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
+      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+      showFeedback(errMsg);
     }
-    
-    // Always speak the result
-    await speak(responseText);
   }, [db, speak, isPanelOpen, setLocation]);
 
 
   const toggleListening = useCallback(async () => {
     if (isListening) {
       stop();
+      showFeedback('⏹️ Dinleme durduruldu');
     } else {
-      await listen(
-        (text) => handleVoiceInput(text),
-        (error) => console.error('Nexus Voice Error:', error),
-        () => {}
-      );
+      showFeedback('🎤 Dinleniyor...');
+      try {
+        await listen(
+          (text) => handleVoiceInput(text),
+          (error) => {
+            console.error('Nexus Voice Error:', error);
+            showFeedback('❌ Ses hatası: ' + error);
+          }
+        );
+      } catch (err) {
+        showFeedback('❌ Mikrofon hatası');
+      }
     }
   }, [isListening, listen, stop, handleVoiceInput]);
 
   const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    showFeedback('🤖 İşleniyor...');
+    setIsProcessing(true);
     setMessages(prev => [...prev, { role: 'user', content: text }]);
-    const result = await nexusExecutive.execute(text, db, {
-      isFileContext: false,
-    });
     
-    if (result.navigation) {
-      setLocation(result.navigation.path);
-    }
+    try {
+      const result = await nexusExecutive.execute(text, db, {
+        isFileContext: false,
+      });
 
-    const responseText = result.response;
-    setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-    await speak(responseText);
-  }, [db, speak, setLocation]);
+      setIsProcessing(false);
+      
+      if (result.navigation) {
+        setLocation(result.navigation.path);
+      }
+
+      const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
+      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+      
+      if (!isPanelOpen) {
+        showBubble(responseText);
+      }
+      
+      await speak(responseText);
+      showFeedback('✅ Tamamlandı');
+    } catch (err) {
+      setIsProcessing(false);
+      const errMsg = '❌ Hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
+      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+      showFeedback(errMsg);
+    }
+  }, [db, speak, isPanelOpen, setLocation]);
 
   return (
     <>
+      {feedbackText && (
+        <div style={{
+          position: 'fixed',
+          bottom: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.85)',
+          color: '#fff',
+          padding: '8px 20px',
+          borderRadius: '20px',
+          fontSize: '14px',
+          zIndex: 10001,
+          pointerEvents: 'none',
+          transition: 'opacity 0.3s',
+          whiteSpace: 'nowrap',
+          fontWeight: 500,
+        }}>
+          {feedbackText}
+        </div>
+      )}
       {!showAI ? null : (
         <>
           <NexusSpark 
-            isOpen={isPanelOpen} 
-            onClick={toggleListening} 
-            isListening={isListening} 
+            isOpen={isPanelOpen}
+            isProcessing={isProcessing}
+            onClick={() => setIsPanelOpen(prev => !prev)}
+            isListening={isListening}
           />
           
           <NexusBubble 
@@ -118,6 +189,7 @@ export const SobaNexus: React.FC = () => {
                 onSendMessage={sendMessage}
                 isListening={isListening}
                 onToggleListen={toggleListening}
+                isProcessing={isProcessing}
               />
             )}
           </AnimatePresence>
@@ -126,4 +198,3 @@ export const SobaNexus: React.FC = () => {
     </>
   );
 };
-

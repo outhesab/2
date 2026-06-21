@@ -38,12 +38,12 @@ export class VoiceNexusCore {
   private initRecognition(): void {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      logger.warn('VoiceNexusCore', 'Tarayıcı SpeechRecognition desteklemiyor');
+      logger.warn('voiceCore', 'Tarayıcı SpeechRecognition desteklemiyor');
       return;
     }
 
     this.recognition = new SR();
-    this.recognition.lang = this.options.lang;
+    this.recognition.lang = this.options.lang ?? 'tr-TR';
     this.recognition.continuous = false;
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
@@ -55,7 +55,7 @@ export class VoiceNexusCore {
    */
   public async speak(text: string, overrideOptions?: Partial<VoiceOptions>): Promise<void> {
     if (!('speechSynthesis' in window)) {
-      logger.warn('VoiceNexusCore', 'SpeechSynthesis desteklenmiyor');
+      logger.warn('voiceCore', 'SpeechSynthesis desteklenmiyor');
       return;
     }
 
@@ -72,22 +72,45 @@ export class VoiceNexusCore {
     utterance.rate = opts.rate || 1.0;
     utterance.pitch = opts.pitch || 1.0;
 
-    // Voice Selection: Priority Google TR > Microsoft TR > Any TR
-    const voices = window.speechSynthesis.getVoices();
-    const trVoice = 
-      voices.find(v => v.lang === 'tr-TR' && v.name.includes('Google')) ||
-      voices.find(v => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
-      voices.find(v => v.lang === 'tr-TR') ||
-      voices.find(v => v.lang.startsWith('tr'));
+    // Voice Selection: Wait for voices to be loaded, then pick Turkish voice
+    const pickVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const trVoice = 
+        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Google')) ||
+        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
+        voices.find(v => v.lang === 'tr-TR') ||
+        voices.find(v => v.lang.startsWith('tr'));
+      if (trVoice) {
+        utterance.voice = trVoice;
+      }
+    };
 
-    if (trVoice) {
-      utterance.voice = trVoice;
+    // Try picking voice now (synchronous, may work in some browsers)
+    pickVoice();
+
+    // If no voice found yet, wait for voiceschanged event
+    if (!utterance.voice && window.speechSynthesis.onvoiceschanged !== undefined) {
+      await new Promise<void>((resolve) => {
+        const handler = () => {
+          pickVoice();
+          window.speechSynthesis.onvoiceschanged = null;
+          resolve();
+        };
+        window.speechSynthesis.onvoiceschanged = handler as ((this: SpeechSynthesis, ev: Event) => any);
+        // Also set a timeout to avoid hanging
+        setTimeout(() => {
+          window.speechSynthesis.onvoiceschanged = null;
+          resolve();
+        }, 2000);
+      });
     }
+
+    logger.info('voiceCore', 'TTS speaking', { text: cleanText.slice(0, 80) });
 
     return new Promise((resolve) => {
       utterance.onend = () => resolve();
       utterance.onerror = (e) => {
-        logger.error('VoiceNexusCore', 'TTS hatası', { error: e });
+        logger.error('voiceCore', 'TTS hatası', { error: e });
         resolve();
       };
       window.speechSynthesis.speak(utterance);

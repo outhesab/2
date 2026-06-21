@@ -16,7 +16,8 @@ import { parseVoiceIntent } from '@/lib/voiceIntent';
 import { logger } from '@/lib/logger';
 import { excelNexusModule } from '@/lib/nexus/modules/ExcelNexusModule';
 import { proposeDiscountTransfer, type DiscountTransferProposal } from '@/lib/nexus/modules/DiscountMemoryModule';
-import type { DB, AgentRequest, AgentResponse } from '@/types';
+import type { DB } from '@/types';
+import type { AgentRequest, AgentResponse } from '@/agents/types';
 
 export type RouteResult = {
   type: 'fast' | 'smart' | 'action' | 'data' | 'memory';
@@ -59,7 +60,7 @@ export class NexusRouter {
           confidence: 1.0,
         };
       } catch (e) {
-        logger.error('NexusRouter', 'Data path failure', { error: e });
+        logger.error('nexus', 'Data path failure', { error: e });
       }
     }
 
@@ -112,19 +113,19 @@ export class NexusRouter {
     try {
       const deepSeek = getAgent('deep_seek');
       const result = await deepSeek.islemYap({
-        action: 'analyze',
-        payload: { query, dbContext: 'summarized' }, // Context optimization will be added
+        action: 'analiz',
+        payload: { query, dbContext: 'summarized' },
       });
 
       if (result.ok) {
         return {
           type: 'smart',
-          response: result.data as string,
+          response: String(result.data ?? ''),
           confidence: 0.7,
         };
       }
     } catch (e) {
-      logger.error('NexusRouter', 'Smart path failure', { error: e });
+      logger.error('nexus', 'Smart path failure', { error: e });
     }
 
     // Ultimate Fallback
