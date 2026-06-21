@@ -65,12 +65,12 @@ export class ActionHandler implements IntentHandler {
     }
 
     // Smart Path - delegate to SmartHandler
-    // This will be handled by SmartHandler which has lower priority
-    // but we need to signal that this wasn't an action
+    // Return _skipNext so the registry continues to SmartHandler (priority 50)
     return {
       type: 'smart',
       response: routeResult.response as string,
       executedActions: [],
+      _skipNext: true,
     };
   }
 

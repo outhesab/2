@@ -46,7 +46,7 @@ export interface HandlerContext {
   /** Reset composer (call to clear draft) */
   resetComposer?: () => void;
   /** Register a pending confirmation promise so the Executive can resolve it */
-  registerConfirmationPromise?: (promise: Promise<any>) => void;
+  registerConfirmationPromise?: (promise: Promise<unknown>) => void;
 }
 
 /**
@@ -73,7 +73,12 @@ export class IntentHandlerRegistry {
   async execute(input: string, db: DB, context: HandlerContext): Promise<ExecutiveResult> {
     for (const handler of this.handlers) {
       if (handler.canHandle(input, context)) {
-        return handler.handle(input, db, context);
+        const result = await handler.handle(input, db, context);
+        // Support passthrough: handler can signal registry to try next handler
+        if (result._skipNext) {
+          continue;
+        }
+        return result;
       }
     }
     // No handler matched - return fallback

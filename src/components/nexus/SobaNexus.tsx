@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useNexusVoice } from '@/lib/nexus/useNexusVoice';
-import { nexusExecutive } from '@/lib/nexus/NexusExecutive';
+import { nexusExecutive, type ExecutiveResult } from '@/lib/nexus/NexusExecutive';
 import { sobaSentinel } from '@/lib/nexus/SobaSentinel';
 import { NexusSpark } from './NexusSpark';
 import { NexusBubble } from './NexusBubble';

@@ -27,11 +27,9 @@ export class SmartHandler implements IntentHandler {
   ];
 
   canHandle(input: string, context: HandlerContext): boolean {
+    // Skip if composer is active (ComposerHandler handles that)
     if (context.composerMode) return false;
-
-    // Check if input contains plan-like language
-    const query = input.toLowerCase();
-    return this.planKeywords.some(kw => query.includes(kw));
+    return true; // Fallback for all remaining inputs
   }
 
   async handle(input: string, db: DB, _context: HandlerContext): Promise<ExecutiveResult> {

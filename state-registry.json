@@ -1,22 +1,22 @@
 {
-  "version": "3.41.0",
-  "generatedAt": "2026-06-21T07:34:08.298Z",
+  "version": "3.42.0",
+  "generatedAt": "2026-06-21T09:27:54.982Z",
   "git": {
     "branch": "dev",
-    "commit": "d025942",
-    "commitFull": "d0259429ba4d57d7feb385befbf15cb291398513",
-    "commitMessage": "feat(settings): 4 yeni ayar grubu eklendi - vergi, bildirim, fatura, bakim",
-    "commitDate": "2026-06-21 09:52:40 +0300"
+    "commit": "a0671d0",
+    "commitFull": "a0671d0b9a7a34d32a543bbcc985e4d742b40988",
+    "commitMessage": "🐛 fix: Çoklu hata düzeltme ve Nexus AI iyileştirmeleri",
+    "commitDate": "2026-06-21 10:55:03 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-21T07:34:08.300Z"
+    "checkedAt": "2026-06-21T09:27:54.982Z"
   },
   "codebase": {
     "tsFiles": 208,
     "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 70784,
+    "totalLOC": 70439,
     "dependencies": 40,
     "devDependencies": 41
   },

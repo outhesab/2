@@ -20,7 +20,24 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
-    version: '3.41.0',
+    version: '3.42.0',
+    date: '21 Haziran 2026',
+    title: 'v3.42.0 — Intent-Handler Pattern: NexusExecutive God-Object Refactor',
+    summary: 'NexusExecutive\'teki tek parça God-Object execute() metodu, 7 adet uzman handler\'a bölünerek modüler Intent-Handler pattern\'ına taşındı. NavigationHandler, ComposerHandler, UndoHandler, WeatherHandler, WhatsAppHandler, ActionHandler (NexusRouter), SmartHandler (DeepSeek) olmak üzere her biri kendi priority\'sinde çalışır. IntentHandlerRegistry passthrough (_skipNext) mekanizması ile handler zinciri destekler. NexusExecutive 584→198 satıra düştü (%66 küçülme). Yeni handler eklemek artık tek dosya + auto-register.',
+    changes: [
+      { type: 'iyilestirme', text: 'NexusExecutive: execute() metodu IntentHandlerRegistry\'ye devredildi. Tüm inline routing (navigation, composer, undo, weather, whatsapp, router, plan) kaldırıldı.' },
+      { type: 'iyilestirme', text: 'IntentHandler.ts: Base interface + HandlerContext + IntentHandlerRegistry (priority-sorted, _skipNext passthrough).' },
+      { type: 'yeni', text: 'NavigationHandler.ts (priority 100): navigasyon komutları, composer reset.' },
+      { type: 'yeni', text: 'ComposerHandler.ts (priority 90): composer mode yönetimi + başlatma/finalize.' },
+      { type: 'yeni', text: 'UndoHandler.ts (priority 85): geri alma işlemleri + confirmation gateway.' },
+      { type: 'yeni', text: 'WeatherHandler.ts (priority 80): proaktif hava durumu analizi.' },
+      { type: 'yeni', text: 'WhatsAppHandler.ts (priority 75): WhatsApp simülasyon komutları.' },
+      { type: 'yeni', text: 'ActionHandler.ts (priority 70): NexusRouter üzerinden fast/memory/action routing.' },
+      { type: 'yeni', text: 'SmartHandler.ts (priority 50): DeepSeek deep reasoning + plan execution (fallback).' },
+      { type: 'iyilestirme', text: 'NexusExecutive: 584→198 satır; sadece execute(), submitConfirmation(), startComposer/stopComposer kaldı.' },
+    ],
+  },
+  {
     date: '21 Haziran 2026',
     title: 'v3.41.0 — Stabilite: Zod ile AI Action Chain Validasyonu',
     summary: 'NexusExecutive\'in God-Mode planlama motoruna Zod şema validasyonu eklendi. DeepSeek\'ten dönen aksiyon zincirleri artık çalıştırılmadan önce tip-güvenli şema ile doğrulanıyor. Geçersiz planlar kullanıcıya güvenli hata mesajıyla iade ediliyor. Ayrıca logger kategorileri "nexus", "sentinel", "voiceCore" olarak genişletildi, SobaNexus\'te listen hook argüman sayısı düzeltildi, NexusPanel JSX yapısı parçalanma düzeltildi.',
