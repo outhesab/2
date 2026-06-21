@@ -22,6 +22,10 @@ import { VeriOnarim } from './settings/SettingsRepair';
 import { ShortcutsPanel } from './settings/SettingsShortcuts';
 import { KategoriYonetim } from './settings/SettingsKategoriYonetim';
 import { AgentSettingsPanel } from './settings/SettingsAgentPanel';
+import { SettingsVergi } from './settings/SettingsVergi';
+import { SettingsNotifications } from './settings/SettingsNotifications';
+import { SettingsFatura } from './settings/SettingsFatura';
+import { SettingsBakim } from './settings/SettingsBakim';
 import { ArayuzAyarlari } from './SettingsArayuz';
 import { BaglantiAyarlari } from './SettingsBaglanti';
 import { Card } from './SettingsCard';
@@ -42,6 +46,8 @@ type Tab =
   | 'arayuz'
   | 'baglantilar'
   | 'company'
+  | 'vergi'
+  | 'bildirim'
   | 'categories'
   | 'pellet'
   | 'sound'
@@ -53,6 +59,8 @@ type Tab =
   | 'repair'
   | 'excel'
   | 'data'
+  | 'fatura'
+  | 'bakim'
   | 'security'
   | 'sysmap'
   | 'about'
@@ -72,6 +80,7 @@ const CATEGORIES: SettingsCategory[] = [
     { id: 'arayuz', label: 'Arayüz', icon: '🎨' },
     { id: 'baglantilar', label: 'Bağlantılar', icon: '🔌' },
     { id: 'company', label: 'Şirket', icon: '🏢' },
+    { id: 'vergi', label: 'Vergi', icon: '💰' },
   ]},
   { id: 'veri', label: 'Veri & İçe Aktarma', icon: '📂', tabs: [
     { id: 'categories', label: 'Kategoriler', icon: '🏷️' },
@@ -87,6 +96,7 @@ const CATEGORIES: SettingsCategory[] = [
     { id: 'agent', label: 'Agentlar', icon: '🤖' },
     { id: 'pellet', label: 'Pelet', icon: '🪵' },
     { id: 'sound', label: 'Ses', icon: '🔊' },
+    { id: 'bildirim', label: 'Bildirimler', icon: '🔔' },
   ]},
   { id: 'guvenlik', label: 'Güvenlik & Kısayollar', icon: '🔒', tabs: [
     { id: 'security', label: 'Güvenlik', icon: '🔒' },
@@ -94,6 +104,8 @@ const CATEGORIES: SettingsCategory[] = [
     { id: 'activity', label: 'Aktivite', icon: '📋' },
   ]},
   { id: 'hakkinda', label: 'Sistem & Bilgi', icon: 'ℹ️', tabs: [
+    { id: 'fatura', label: 'Fatura', icon: '🧾' },
+    { id: 'bakim', label: 'Bakım', icon: '⚡' },
     { id: 'sysmap', label: 'Harita', icon: '🗺️' },
     { id: 'about', label: 'Hakkında', icon: 'ℹ️' },
     { id: 'roadmap', label: 'Yol Haritası', icon: '🚀' },
@@ -189,6 +201,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
         );
       case 'company':
         return <SettingsCompany db={db} save={save} showToast={showToast} />;
+      case 'vergi':
+        return <SettingsVergi showToast={showToast} />;
+      case 'bildirim':
+        return <SettingsNotifications showToast={showToast} />;
       case 'pellet':
         return (
           <SettingsPeletPanel
@@ -281,6 +297,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
         );
       case 'security':
         return <SecurityPanel showToast={showToast} />;
+      case 'fatura':
+        return <SettingsFatura showToast={showToast} />;
+      case 'bakim':
+        return <SettingsBakim showToast={showToast} showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void} />;
       case 'sysmap':
         return (
           <div className="grid gap-4">
