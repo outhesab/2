@@ -92,7 +92,7 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
         ? result.data 
         : JSON.stringify(result.data);
       
-      const jsonMatch = rawResponse.match(/\\{.*\\}/s);
+      const jsonMatch = rawResponse.match(/\{.*?\}/s);
       const jsonString = jsonMatch ? jsonMatch[0] : rawResponse;
       
       return JSON.parse(jsonString) as AgentRequest;

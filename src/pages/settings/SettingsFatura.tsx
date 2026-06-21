@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Card } from '@/pages/SettingsCard';
-import { logger } from '@/lib/logger';
 
 interface FaturaAyarlari {
   seriOnEki: string;

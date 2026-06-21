@@ -1,5 +1,8 @@
-import type { DB, AgentRequest, AgentResponse } from '@/agents/types';
-import type { ExecutiveResult } from '../NexusExecutive';
+import type { DB } from '@/types';
+import type { ExecutiveResult } from '@/lib/nexus/NexusExecutive';
+
+// Re-export for other handlers
+export type { ExecutiveResult };
 
 /**
  * Base interface for all intent handlers.
@@ -42,6 +45,8 @@ export interface HandlerContext {
   setComposerMode?: (active: boolean) => void;
   /** Reset composer (call to clear draft) */
   resetComposer?: () => void;
+  /** Register a pending confirmation promise so the Executive can resolve it */
+  registerConfirmationPromise?: (promise: Promise<any>) => void;
 }
 
 /**

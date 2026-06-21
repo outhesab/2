@@ -87,7 +87,7 @@ export class NexusRouter {
     // Skip fast path if it's a reasoning query
     if (!isReasoning) {
       const fastResponse = offlineReply(db, query);
-      if (fastResponse && !fastResponse.includes('Cevrimdisi Mod')) {
+      if (fastResponse && !fastResponse.includes('Çevrimdışı Mod')) {
         return {
           type: 'fast',
           response: fastResponse,
@@ -112,10 +112,16 @@ export class NexusRouter {
     // Fallback to the most powerful agent for deep reasoning
     try {
       const deepSeek = getAgent('deep_seek');
-      const result = await deepSeek.islemYap({
-        action: 'analiz',
-        payload: { query, dbContext: 'summarized' },
-      });
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('DeepSeek API timeout')), 15000)
+      );
+      const result = await Promise.race([
+        deepSeek.islemYap({
+          action: 'analiz',
+          payload: { soru: query, dbContext: 'summarized' },
+        }),
+        timeoutPromise,
+      ]) as Awaited<ReturnType<typeof deepSeek.islemYap>>;
 
       if (result.ok) {
         return {

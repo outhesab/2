@@ -50,6 +50,16 @@ export const SobaNexus: React.FC = () => {
     };
   }, [db]);
 
+  const executeWithTimeout = async (text: string): Promise<ExecutiveResult> => {
+    const timeoutPromise = new Promise<ExecutiveResult>((_, reject) =>
+      setTimeout(() => reject(new Error('Nexus AI zaman aşımı (15sn)')), 15000)
+    );
+    return Promise.race([
+      nexusExecutive.execute(text, db, { isFileContext: false }),
+      timeoutPromise,
+    ]);
+  };
+
   const handleVoiceInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
     showFeedback('🎤 Ses algılandı, işleniyor...');
@@ -57,10 +67,7 @@ export const SobaNexus: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', content: text }]);
 
     try {
-      const result = await nexusExecutive.execute(text, db, {
-        isFileContext: false,
-      });
-
+      const result = await executeWithTimeout(text);
       setIsProcessing(false);
 
       if (result.navigation) {
@@ -78,12 +85,11 @@ export const SobaNexus: React.FC = () => {
       showFeedback('✅ Tamamlandı');
     } catch (err) {
       setIsProcessing(false);
-      const errMsg = '❌ Hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
+      const errMsg = '❌ ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       showFeedback(errMsg);
     }
   }, [db, speak, isPanelOpen, setLocation]);
-
 
   const toggleListening = useCallback(async () => {
     if (isListening) {
@@ -112,9 +118,7 @@ export const SobaNexus: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', content: text }]);
     
     try {
-      const result = await nexusExecutive.execute(text, db, {
-        isFileContext: false,
-      });
+      const result = await executeWithTimeout(text);
 
       setIsProcessing(false);
       
@@ -133,11 +137,11 @@ export const SobaNexus: React.FC = () => {
       showFeedback('✅ Tamamlandı');
     } catch (err) {
       setIsProcessing(false);
-      const errMsg = '❌ Hata oluştu: ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
+      const errMsg = '❌ ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
       setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
       showFeedback(errMsg);
     }
-  }, [db, speak, isPanelOpen, setLocation]);
+  }, [db, speak, isPanelOpen, setLocation, executeWithTimeout]);
 
   return (
     <>

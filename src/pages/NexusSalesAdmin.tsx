@@ -7,7 +7,6 @@ import { formatMoney, formatDate } from '@/lib/utils-tr';
 import type { DB } from '@/types';
 import { nexusExecutive } from '@/lib/nexus/NexusExecutive';
 import { getAgent } from '@/agents';
-import { logger } from '@/lib/logger';
 
 interface Props {
   db: DB;
@@ -398,7 +397,7 @@ export default function NexusSalesAdmin({ db, save }: Props) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {['satis', 'stok', 'kasa', 'cari', 'fatura', 'rapor', 'deep_seek'].map(agentId => {
                   try {
-                    const agent = getAgent(agentId as any);
+                    getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
                     return (
                       <div key={agentId} className="p-2 rounded-lg bg-white/5 border border-white/5 text-center">
                         <div className="text-xs font-medium text-foreground">{agentId}</div>

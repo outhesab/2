@@ -45,8 +45,8 @@ export default function UserMenu({ username, onLogout, isMobile, guestTimeLeft =
                 <div className="user-menu-status">Oturum açık</div>
               )}
             </div>
-            <button onClick={() => { setOpen(false); onLogout(); }} className="user-menu-action logout">{'🚪 Oturumu Kapat'}</button>
-            <button onClick={() => { setOpen(false); exitApp(); }} className="user-menu-action close">{'✕ Uygulamayı Kapat'}</button>
+            <button onClick={() => { setOpen(false); onLogout(); }} className="user-menu-action logout">🚪 Oturumu Kapat</button>
+            <button onClick={() => { setOpen(false); exitApp(); }} className="user-menu-action close">✕ Uygulamayı Kapat</button>
           </div>
         </>
       )}

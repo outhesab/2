@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Card } from '@/pages/SettingsCard';
 import { Button } from '@/components/ui/button';
-import { useConfirm } from '@/components/ConfirmDialog';
-import { logger } from '@/lib/logger';
 
 interface BakimAyarlari {
   otomatikYedek: boolean;
@@ -67,7 +65,7 @@ export function SettingsBakim({ showToast, showConfirm }: {
   };
 
   const exportSettings = () => {
-    const settings: Record<string, any> = {};
+    const settings: Record<string, unknown> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && (key.startsWith('soba_') || key.startsWith('nexus_'))) {

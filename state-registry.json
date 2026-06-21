@@ -1,22 +1,22 @@
 {
   "version": "3.41.0",
-  "generatedAt": "2026-06-21T06:49:00.449Z",
+  "generatedAt": "2026-06-21T07:34:08.298Z",
   "git": {
     "branch": "dev",
-    "commit": "8f19e68",
-    "commitFull": "8f19e68e155af768173ec54a039875b9d5c98dad",
-    "commitMessage": "fix: settings scroll fix + nexus feedback system + voice fixes",
-    "commitDate": "2026-06-21 09:28:03 +0300"
+    "commit": "d025942",
+    "commitFull": "d0259429ba4d57d7feb385befbf15cb291398513",
+    "commitMessage": "feat(settings): 4 yeni ayar grubu eklendi - vergi, bildirim, fatura, bakim",
+    "commitDate": "2026-06-21 09:52:40 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-21T06:49:00.450Z"
+    "checkedAt": "2026-06-21T07:34:08.300Z"
   },
   "codebase": {
-    "tsFiles": 197,
-    "tsxFiles": 178,
+    "tsFiles": 208,
+    "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 69266,
+    "totalLOC": 70784,
     "dependencies": 40,
     "devDependencies": 41
   },
@@ -148,7 +148,7 @@
       "label": "Ayarlar"
     },
     {
-      "id": "nexusadmin",
+      "id": "nexusAdmin",
       "label": "Nexus Admin"
     },
     {

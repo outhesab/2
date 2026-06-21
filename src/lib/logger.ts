@@ -62,6 +62,12 @@ export type LogCategory =
   | 'SobaSentinel'
   | 'VoiceNexusCore'
   | 'ExcelNexusModule'
+  | 'composer'
+  | 'undo'
+  | 'action'
+  | 'smart'
+  | 'weather'
+  | 'whatsapp'
 
 export interface CrashReport {
   id: string;

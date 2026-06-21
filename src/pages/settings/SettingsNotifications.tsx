@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Card } from '@/pages/SettingsCard';
-import { Button } from '@/components/ui/button';
-import { logger } from '@/lib/logger';
 
 interface BildirimAyarlari {
   bildirimSesi: boolean;

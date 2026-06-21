@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Volume2, MessageSquare, Settings, X } from 'lucide-react';
-
-type AgentState = 'idle' | 'listening' | 'thinking' | 'speaking';
+import type { VoiceAgentState } from '@/hooks/useVoiceAgent';
 
 interface VoiceAgentUIProps {
-  state: AgentState;
+  state: VoiceAgentState;
   onToggleMic: () => void;
   transcript?: string;
   response?: string;
@@ -35,7 +34,7 @@ export default function VoiceAgentUI({
       scale: [1, 1.2, 1],
       transition: { duration: 0.6, repeat: Infinity, ease: 'easeInOut' }
     },
-    thinking: {
+    processing: {
       color: 'from-blue-500 to-purple-600',
       glow: 'shadow-[0_0-60px_rgba(59,130,246,0.5)]',
       scale: [1, 1.1, 1],
@@ -46,6 +45,12 @@ export default function VoiceAgentUI({
       glow: 'shadow-[0_0_100px_rgba(251,191,36,0.6)]',
       scale: [1, 1.15, 1],
       transition: { duration: 0.4, repeat: Infinity, ease: 'easeInOut' }
+    },
+    error: {
+      color: 'from-red-600 to-red-800',
+      glow: 'shadow-[0_0_60px_rgba(220,38,38,0.5)]',
+      scale: [1, 0.9, 1],
+      transition: { duration: 0.3, repeat: Infinity, ease: 'easeInOut' }
     }
   };
 
@@ -126,7 +131,7 @@ export default function VoiceAgentUI({
                   />
                 ))}
                </div>}
-              {state === 'thinking' && (
+              {state === 'processing' && (
                 <motion.div 
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -161,7 +166,7 @@ export default function VoiceAgentUI({
                 {transcript || "Dinliyorum..."}
               </motion.div>
             )}
-            {state === 'thinking' && (
+            {state === 'processing' && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }} 

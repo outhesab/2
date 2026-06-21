@@ -181,7 +181,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     supported: micSupported,
     start: startListen,
     stop: stopListen,
-  } = useSpeechRecognition((text) => {
+  } = useSpeechRecognition((text: string) => {
     setInput(text);
     setTimeout(() => sendText(text), 100);
   });
@@ -383,7 +383,7 @@ export default function AIAsistan({ db, save, embedded = false }: Props) {
     transcript: voiceTranscript,
     response: voiceResponse,
     toggleListening: toggleVoiceListening,
-  } = useVoiceAgent(async (text) => {
+  } = useVoiceAgent(async (text: string) => {
     const keys = await getKeys();
     if (modelSource === 'deepseek' && keys.deepseek) {
       const systemMsg = { role: 'system' as const, content: `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\\n\\n${context}` };
