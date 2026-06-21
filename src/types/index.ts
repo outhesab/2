@@ -516,3 +516,5 @@ export interface DB {
   _auditLog: AuditEntry[];
   aiActionLog?: AIActionLogEntry[];
 }
+
+export type { ExcelFile, SheetData } from '@/lib/excel-merge-types';

@@ -16,7 +16,7 @@ import { parseVoiceIntent } from '@/lib/voiceIntent';
 import { logger } from '@/lib/logger';
 import { excelNexusModule } from '@/lib/nexus/modules/ExcelNexusModule';
 import { proposeDiscountTransfer, type DiscountTransferProposal } from '@/lib/nexus/modules/DiscountMemoryModule';
-import type { DB } from '@/types';
+import type { DB, ExcelFile } from '@/types';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 
 export type RouteResult = {
@@ -53,7 +53,7 @@ export class NexusRouter {
     // 1. DATA PATH (Excel / File context)
     if (context.isFileContext && context.currentFiles) {
       try {
-        const response = await excelNexusModule.queryCloudAI(input, context.currentFiles);
+        const response = await excelNexusModule.queryCloudAI(input, context.currentFiles as ExcelFile[]);
         return {
           type: 'data',
           response,

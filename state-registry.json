@@ -1,23 +1,23 @@
 {
-  "version": "3.40.0",
-  "generatedAt": "2026-06-20T21:15:26.355Z",
+  "version": "3.41.0",
+  "generatedAt": "2026-06-21T06:49:00.449Z",
   "git": {
     "branch": "dev",
-    "commit": "45f71e2",
-    "commitFull": "45f71e2aa1468e094073406cef14abed25cdb992",
-    "commitMessage": "feat(nexus): voice-only guvenli isletim vizyonu - 7 sutun (v3.34.0 -> v3.39.0)",
-    "commitDate": "2026-06-20 23:53:14 +0300"
+    "commit": "8f19e68",
+    "commitFull": "8f19e68e155af768173ec54a039875b9d5c98dad",
+    "commitMessage": "fix: settings scroll fix + nexus feedback system + voice fixes",
+    "commitDate": "2026-06-21 09:28:03 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-20T21:15:26.356Z"
+    "checkedAt": "2026-06-21T06:49:00.450Z"
   },
   "codebase": {
     "tsFiles": 197,
-    "tsxFiles": 181,
+    "tsxFiles": 178,
     "cssFiles": 31,
-    "totalLOC": 69090,
-    "dependencies": 39,
+    "totalLOC": 69266,
+    "dependencies": 40,
     "devDependencies": 41
   },
   "agents": [
@@ -146,6 +146,10 @@
     {
       "id": "settings",
       "label": "Ayarlar"
+    },
+    {
+      "id": "nexusadmin",
+      "label": "Nexus Admin"
     },
     {
       "id": "bughunter",

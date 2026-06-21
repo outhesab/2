@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.41.0',
+    date: '21 Haziran 2026',
+    title: 'v3.41.0 — Stabilite: Zod ile AI Action Chain Validasyonu',
+    summary: 'NexusExecutive\'in God-Mode planlama motoruna Zod şema validasyonu eklendi. DeepSeek\'ten dönen aksiyon zincirleri artık çalıştırılmadan önce tip-güvenli şema ile doğrulanıyor. Geçersiz planlar kullanıcıya güvenli hata mesajıyla iade ediliyor. Ayrıca logger kategorileri "nexus", "sentinel", "voiceCore" olarak genişletildi, SobaNexus\'te listen hook argüman sayısı düzeltildi, NexusPanel JSX yapısı parçalanma düzeltildi.',
+    changes: [
+      { type: 'iyilestirme', text: 'NexusExecutive: handleComplexPlan içinde AgentRequestChainSchema (Zod) ile AI plan validasyonu.' },
+      { type: 'iyilestirme', text: 'Logger kategorileri: nexus, sentinel, voiceCore eklendi — tip-güvenli loglama.' },
+      { type: 'duzeltme', text: 'SobaNexus: useNexusVoice.listen() hook argüman sayısı 3\'ten 2\'ye düzeltildi (onEnd callback hook içinde).' },
+      { type: 'duzeltme', text: 'NexusPanel: JSX else branch\'i Fragment (<>...</>) ile sarıldı — syntax hatası düzeltildi.' },
+      { type: 'iyilestirme', text: 'VoiceNexusCore: onvoiceschanged handler tip any→void düzeltildi (lint).' },
+    ],
+  },
+  {
     version: '3.40.0',
     date: '21 Haziran 2026',
     title: 'v3.40.0 — Code Cleanup: Dead Code & Orphan Deps Temizliği',

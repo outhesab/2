@@ -476,7 +476,8 @@ export class NexusExecutive {
   private async executeSingleAction(request: AgentRequest): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       const agentId = this.mapActionToAgent(request.action);
-      const agent = getAgent(agentId) as { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> };
+      // Cast to satisfy overload resolution
+      const agent = getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
       
       const result = await agent.islemYap(request);
       
@@ -491,9 +492,9 @@ export class NexusExecutive {
     }
   }
 
-  private async handleComplexPlan(input: string, planText: string, db: DB): Promise<ExecutiveResult> {
+  private async handleComplexPlan(input: string, planText: string, _db: DB): Promise<ExecutiveResult> {
     // Ask DeepSeek to convert the textual plan into a JSON array of AgentRequests
-    const plannerAgent = getAgent('deep_seek');
+    const plannerAgent = getAgent('deep_seek' as const);
     const planningPrompt = `
       Kullanıcı isteği: "${input}"
       Önerdiğin plan: "${planText}"

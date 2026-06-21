@@ -106,7 +106,8 @@ export class ExcelNexusModule {
    */
   public async bridgeToAgent(insight: string, agentId: 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek', payload: Record<string, unknown>) {
     const { getAgent } = await import('@/agents');
-    const agent = getAgent(agentId);
+    // Cast to specific literal to satisfy overload resolution
+    const agent = getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
     
     return agent.islemYap({
       action: 'nexus_bridge_action',

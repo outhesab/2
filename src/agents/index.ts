@@ -6,7 +6,7 @@ import { RaporAgent } from "@/agents/RaporAgent";
 import { SatisAgent } from "@/agents/SatisAgent";
 import { StokAgent } from "@/agents/StokAgent";
 import type { BaseAgent } from "@/agents/BaseAgent";
-import type { AgentId } from "@/agents/types";
+import type { AgentId, AgentRequest, AgentResponse } from "@/agents/types";
 
 export { BaseAgent } from "@/agents/BaseAgent";
 export { CariAgent } from "@/agents/CariAgent";
@@ -19,6 +19,9 @@ export { StokAgent } from "@/agents/StokAgent";
 
 const _agents = {} as Record<AgentId, BaseAgent>;
 
+// Type that all agents share (for union type resolution)
+type AnyAgent = BaseAgent & { islemYap: (req: AgentRequest) => Promise<AgentResponse> };
+
 export function getAgent(id: "satis"): SatisAgent;
 export function getAgent(id: "stok"): StokAgent;
 export function getAgent(id: "kasa"): KasaAgent;
@@ -26,7 +29,9 @@ export function getAgent(id: "cari"): CariAgent;
 export function getAgent(id: "fatura"): FaturaAgent;
 export function getAgent(id: "rapor"): RaporAgent;
 export function getAgent(id: "deep_seek"): DeepSeekAgent;
-export function getAgent(id: AgentId): BaseAgent {
+// Fallback for union types - returns common base with islemYap
+export function getAgent(id: AgentId): AnyAgent;
+export function getAgent(id: AgentId): AnyAgent {
   if (!_agents[id]) {
     switch (id) {
       case "stok": _agents[id] = new StokAgent(); break;

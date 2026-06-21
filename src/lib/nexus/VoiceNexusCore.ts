@@ -96,7 +96,7 @@ export class VoiceNexusCore {
           window.speechSynthesis.onvoiceschanged = null;
           resolve();
         };
-        window.speechSynthesis.onvoiceschanged = handler as ((this: SpeechSynthesis, ev: Event) => any);
+        window.speechSynthesis.onvoiceschanged = handler as ((this: SpeechSynthesis, ev: Event) => void);
         // Also set a timeout to avoid hanging
         setTimeout(() => {
           window.speechSynthesis.onvoiceschanged = null;
