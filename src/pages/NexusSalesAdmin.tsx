@@ -24,7 +24,7 @@ interface NexusSession {
   lastMessage?: string;
 }
 
-export default function NexusSalesAdmin({ db, save }: Props) {
+export default function NexusSalesAdmin({ db, save: _save }: Props) {
   const [, setLocation] = useLocation();
   const { showToast } = useToast();
   const { showConfirm } = useConfirm();

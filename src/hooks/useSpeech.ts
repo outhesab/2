@@ -52,7 +52,7 @@ export function useSpeechRecognition(
         recognitionRef[0].stop();
       }
     };
-  }, [onResult]);
+  }, [onResult, recognitionRef]);
 
   const start = useCallback(() => {
     if (recognitionRef[0] && !listening) {
@@ -64,14 +64,14 @@ export function useSpeechRecognition(
         console.warn('Speech recognition start failed:', e);
       }
     }
-  }, [listening]);
+  }, [listening, recognitionRef]);
 
   const stop = useCallback(() => {
     if (recognitionRef[0] && listening) {
       recognitionRef[0].stop();
       setListening(false);
     }
-  }, [listening]);
+  }, [listening, recognitionRef]);
 
   return { listening, supported, transcript, start, stop, onResult };
 }

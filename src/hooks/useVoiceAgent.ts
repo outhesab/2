@@ -59,7 +59,7 @@ export function useVoiceAgent(
       onError?.(errMsg);
       logger.error('VoiceAgent', 'Failed to start listening', { error: e });
     }
-  }, [state, transcript, onTranscript, onError]);
+  }, [state, transcript, onTranscript, onError, processTranscript]);
 
   const processTranscript = useCallback(async (text: string) => {
     if (isProcessingRef.current) return;

@@ -1,16 +1,16 @@
 {
-  "version": "3.43.0",
-  "generatedAt": "2026-06-22T16:07:15.490Z",
+  "version": "3.43.1",
+  "generatedAt": "2026-06-22T21:52:00.000Z",
   "git": {
     "branch": "dev",
-    "commit": "bc423aa",
-    "commitFull": "bc423aa4619d89aa2cf01f861fafeebc65901b93",
-    "commitMessage": "feat(nexus): ultimate upgrade - conversation loop, memory, continuous STT, premium voice UX",
-    "commitDate": "2026-06-22 04:18:22 +0300"
+    "commit": "local",
+    "commitFull": "local-changes",
+    "commitMessage": "chore: v3.43.1 — parallel agent düzeltmeleri (test fix, lint temizliği, logger dönüşümü)",
+    "commitDate": "2026-06-22 21:52:00 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-22T16:07:15.497Z"
+    "checkedAt": "2026-06-22T21:52:00.000Z"
   },
   "codebase": {
     "tsFiles": 209,

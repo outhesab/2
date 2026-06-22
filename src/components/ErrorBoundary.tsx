@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { logger } from '@/lib/logger';
 
 interface Props {
   children: ReactNode;
@@ -26,7 +27,7 @@ function logError(error: Error, errorInfo: string) {
     // Son 100 hata kaydı tut
     localStorage.setItem('sobaErrorLog', JSON.stringify(logs.slice(0, 100)));
   } catch {
-    console.warn('ErrorBoundary', 'localStorage hata logu yazılamadı');
+    logger.warn('crash', 'ErrorBoundary: localStorage hata logu yazılamadı');
   }
 }
 
@@ -34,7 +35,7 @@ export function getErrorLogs(): Array<{ id: string; message: string; stack?: str
   try {
     return JSON.parse(localStorage.getItem('sobaErrorLog') || '[]');
   } catch {
-    console.warn('ErrorBoundary', 'localStorage hata logu okunamadı');
+    logger.warn('crash', 'ErrorBoundary: localStorage hata logu okunamadı');
     return [];
   }
 }
@@ -57,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
     const info = errorInfo.componentStack || '';
     this.setState({ errorInfo: info });
     logError(error, info);
-    console.error('[ErrorBoundary]', error, info);
+    logger.error('crash', 'ErrorBoundary: bileşen hatası yakalandı', { error, info });
   }
 
   render() {

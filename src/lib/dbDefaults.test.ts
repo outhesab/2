@@ -4,8 +4,8 @@ import { makeDefaultDB } from './dbDefaults';
 describe('dbDefaults', () => {
   const db = makeDefaultDB();
 
-  it('should return a DB with _version 1', () => {
-    expect(db._version).toBe(1);
+  it('should return a DB with _version 0', () => {
+    expect(db._version).toBe(0);
   });
 
   it('should have empty arrays for all collections', () => {
@@ -22,10 +22,13 @@ describe('dbDefaults', () => {
     expect(db._auditLog).toEqual([]);
   });
 
-  it('should have default kasalar with nakit and banka', () => {
-    expect(db.kasalar).toHaveLength(2);
+  it('should have default kasalar with nakit, banka, and POS options', () => {
+    expect(db.kasalar).toHaveLength(5);
     expect(db.kasalar[0].id).toBe('nakit');
     expect(db.kasalar[1].id).toBe('banka');
+    expect(db.kasalar[2].id).toBe('pos_ziraat');
+    expect(db.kasalar[3].id).toBe('pos_is');
+    expect(db.kasalar[4].id).toBe('pos_yk');
   });
 
   it('should have default pelletSettings', () => {

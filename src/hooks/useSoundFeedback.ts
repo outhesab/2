@@ -175,7 +175,7 @@ if (typeof document !== 'undefined') {
   const unlock = () => {
     const ctx = getOrCreateAudioContext();
     if (ctx && ctx.state === 'suspended') {
-      ctx.resume().catch(() => console.warn('[sound] AudioContext resume başarısız'));
+      ctx.resume().catch(() => logger.warn('sound', 'AudioContext resume başarısız'));
     }
     document.removeEventListener('touchstart', unlock, true);
     document.removeEventListener('touchend', unlock, true);
@@ -203,7 +203,7 @@ export function useSoundFeedback() {
       }
     }
     if (ctxRef.current.state === 'suspended') {
-      ctxRef.current.resume().catch(() => console.warn('[sound] AudioContext resume başarısız'));
+      ctxRef.current.resume().catch(() => logger.warn('sound', 'AudioContext resume başarısız'));
     }
     return ctxRef.current;
   }, []);
@@ -251,7 +251,7 @@ export function useSoundFeedback() {
           else playNotificationStandart(ctx, vol);
           break;
       }
-    }).catch(() => console.warn('[sound] Ses oynatma başarısız'));
+    }).catch(() => logger.warn('sound', 'Ses oynatma başarısız'));
   }, [getCtx]);
 
   const speakMessage = useCallback((message: string) => {

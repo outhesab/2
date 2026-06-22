@@ -76,7 +76,7 @@ export const SobaNexus: React.FC = () => {
     };
   }, [db]);
 
-  const executeWithTimeout = async (text: string): Promise<ExecutiveResult> => {
+  const executeWithTimeout = useCallback(async (text: string): Promise<ExecutiveResult> => {
     const timeoutPromise = new Promise<ExecutiveResult>((_, reject) =>
       setTimeout(() => reject(new Error('Nexus AI zaman aşımı (15sn)')), 15000)
     );
@@ -84,7 +84,7 @@ export const SobaNexus: React.FC = () => {
       nexusExecutive.execute(text, db, { isFileContext: false }),
       timeoutPromise,
     ]);
-  };
+  }, [db]);
 
   const handleResult = useCallback(async (result: ExecutiveResult) => {
     setIsProcessing(false);
@@ -115,7 +115,7 @@ export const SobaNexus: React.FC = () => {
     } else {
       await speak(responseText);
     }
-  }, [db, speak, isPanelOpen, setLocation, isConversationMode, speakAndListen]);
+  }, [speak, isPanelOpen, setLocation, isConversationMode, speakAndListen, handleVoiceInput]);
 
   const handleVoiceInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -151,7 +151,7 @@ export const SobaNexus: React.FC = () => {
         }, 1000);
       }
     }
-  }, [db, speak, isPanelOpen, setLocation, handleResult, isConversationMode, listen]);
+  }, [speak, handleResult, isConversationMode, listen, executeWithTimeout]);
 
   const toggleListening = useCallback(async () => {
     if (isListening) {
@@ -163,11 +163,11 @@ export const SobaNexus: React.FC = () => {
         await listen(
           (text) => handleVoiceInput(text),
           (error) => {
-            console.error('Nexus Voice Error:', error);
+            logger.error('voice', 'Nexus Voice Error:', error);
             showFeedback('❌ Ses hatası: ' + error);
           }
         );
-      } catch (err) {
+      } catch {
         showFeedback('❌ Mikrofon hatası');
       }
     }
@@ -223,7 +223,7 @@ export const SobaNexus: React.FC = () => {
       showFeedback(errMsg);
       await speak(errMsg);
     }
-  }, [db, speak, isPanelOpen, setLocation, handleResult]);
+  }, [speak, handleResult, executeWithTimeout]);
 
   return (
     <>

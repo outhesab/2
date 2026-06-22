@@ -329,7 +329,7 @@ function findItemIndex(draft: ComposerDraft, productName: string): number {
   return draft.items.findIndex((i) => normalizeText(i.productName).includes(target) || target.includes(normalizeText(i.productName)));
 }
 
-export function applyCommandToDraft(draft: ComposerDraft, command: ComposerCommand, db: DB): ApplyResult {
+export function applyCommandToDraft(draft: ComposerDraft, command: ComposerCommand, _db: DB): ApplyResult {
   switch (command.kind) {
     case "add_item": {
       const d = command.data as { productId: string; productName: string; quantity: number; unitPrice: number; cost: number };

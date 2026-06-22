@@ -56,7 +56,7 @@ export async function sendLocalNotification(title: string, body: string, id = Da
       ],
     });
   } catch (e) {
-    console.warn('Bildirim gönderilemedi:', e);
+    logger.warn('permissions', 'Bildirim gönderilemedi:', e);
   }
 }
 
@@ -88,7 +88,7 @@ export async function saveFileToDevice(
     });
     return true;
   } catch (e) {
-    console.warn('Dosya kaydedilemedi:', e);
+    logger.warn('permissions', 'Dosya kaydedilemedi:', e);
     return false;
   }
 }
@@ -96,7 +96,7 @@ export async function saveFileToDevice(
 // ── Tüm İzinleri Başlangıçta İste ────────────────────────────────────────────
 export async function requestAllPermissions(): Promise<void> {
   // Bildirim izni
-  await requestNotificationPermission().catch(() => console.warn('[permissions] Bildirim izni alınamadı'));
+  await requestNotificationPermission().catch(() => logger.warn('permissions', 'Bildirim izni alınamadı'));
 
   if (!Capacitor.isNativePlatform()) return;
 

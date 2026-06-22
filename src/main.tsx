@@ -6,6 +6,7 @@ import "./design-tokens.css";
 import { requestAllPermissions } from "./lib/permissions";
 import { ThemeProvider } from "@/theme";
 import { createRecorder } from "@/lib/consoleRecorder";
+import { logger } from '@/lib/logger';
 import { Component } from "react";
 import type { ReactNode } from "react";
 
@@ -13,7 +14,7 @@ if (import.meta.env.DEV) {
   import("react-scan").then(({ scan }) => scan({ enabled: true }));
 }
 
-requestAllPermissions().catch(() => console.warn('[main] Izin istegi basarisiz'));
+requestAllPermissions().catch(() => logger.warn('app', 'main: Izin istegi basarisiz'));
 createRecorder();
 
 interface ErrorBoundaryProps { children: ReactNode }

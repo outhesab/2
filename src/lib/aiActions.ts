@@ -2,6 +2,7 @@ import { applyIntentResult } from '@/hooks/db/dbHelpers';
 import type { DB } from '@/types';
 import { processIntent } from '@/domain/intentEngine';
 import type { Intent } from '@/domain/types';
+import { logger } from '@/lib/logger';
 
 export type SaveFn = (updater: (prev: DB) => DB) => void;
  
@@ -28,7 +29,7 @@ export function parseActions(text: string): DBAction[] {
       const obj = JSON.parse(m[1]);
       if (obj.type && obj.label) actions.push(obj as DBAction);
     } catch {
-      console.warn('aiActions', 'parseActions: malformed action block ignored');
+      logger.warn('ai', 'parseActions: malformed action block ignored');
     }
   }
   return actions;

@@ -68,7 +68,7 @@ export class SmartHandler implements IntentHandler {
     return this.planKeywords.some(kw => lower.includes(kw));
   }
 
-  private async handleComplexPlan(input: string, planText: string, db: DB): Promise<ExecutiveResult> {
+  private async handleComplexPlan(input: string, planText: string, _db: DB): Promise<ExecutiveResult> {
     const plannerAgent = getAgent('deep_seek');
     const planningPrompt = `
       Kullanıcı isteği: "${input}"

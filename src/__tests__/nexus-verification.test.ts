@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { nexusRouter } from '@/lib/nexus/NexusRouter';
 import { voiceNexusCore } from '@/lib/nexus/VoiceNexusCore';
 import type { DB } from '@/types';

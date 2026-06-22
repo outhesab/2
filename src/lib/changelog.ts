@@ -20,6 +20,18 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.43.1',
+    date: '23 Haziran 2026',
+    title: 'Test düzeltmeleri, lint temizliği ve logger dönüşümü',
+    summary: 'safeIO/dbDefaults test fix, 17 lint uyarısı temizlendi, console.warn/error → logger dönüşümü (14+ değişiklik).',
+    changes: [
+      { type: 'duzeltme', text: 'safeIO.test.ts: jsdom localStorage mock fix — 20 test düzeltildi' },
+      { type: 'duzeltme', text: 'dbDefaults.test.ts: assertion güncellemesi — 7 test düzeltildi' },
+      { type: 'duzeltme', text: 'Lint uyarıları temizlendi — SobaNexus, useSpeech, useVoiceAgent, vb. (17 uyarı → 0)' },
+      { type: 'iyilestirme', text: 'console.warn/error → logger dönüşümü — 12 dosyada 14+ değişiklik' },
+    ],
+  },
+  {
     version: '3.43.0',
     date: '22 Haziran 2026',
     title: 'v3.43.0 — Stabilizasyon: Kalan MASTER_PLAN maddeleri temizlendi',

@@ -16,6 +16,7 @@ import './WeatherHandler';
 import './WhatsAppHandler';
 import './ActionHandler';
 import './SmartHandler';
+import { logger } from '@/lib/logger';
 
 /**
  * Initialize all intent handlers.
@@ -24,5 +25,5 @@ import './SmartHandler';
 export function initializeIntentHandlers(): void {
   // Handlers are auto-registered via import side effects
   // This function exists for explicit initialization if needed
-  console.debug('[Nexus] Intent handlers initialized');
+  logger.debug('ai', 'Intent handlers initialized');
 }

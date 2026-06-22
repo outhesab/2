@@ -12,6 +12,7 @@
  */
 import mitt, { type Emitter } from 'mitt';
 import type { DomainEvent } from '@/types';
+import { logger } from '@/lib/logger';
 
 type DomainEventBusEvents = {
   [type: string]: DomainEvent;
@@ -32,7 +33,7 @@ class DomainEventBus {
       try {
         handler(event);
       } catch (error) {
-        console.error('[domainEventBus] onAny handler hatası:', error);
+        logger.error('system', 'onAny handler hatası:', error);
       }
     });
   }

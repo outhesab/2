@@ -30,7 +30,7 @@ export default function Changelog() {
       </div>
 
       <div className="space-y-10">
-        {CHANGELOG.map((version, vIdx) => (
+        {CHANGELOG.map((version, _vIdx) => (
           <div key={version.version} className="relative pl-8 border-l-2 border-slate-200 ml-4 space-y-6">
             {/* Version Header */}
             <div className="absolute -left-[13px] top-0 w-6 h-6 bg-background border-2 border-primary rounded-full flex items-center justify-center z-10">

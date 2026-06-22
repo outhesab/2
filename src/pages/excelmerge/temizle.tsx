@@ -27,7 +27,7 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
   const [preview, setPreview] = useState(false);
 
   const selectedFile = useMemo(() => files.find((f) => f.id === selectedFileId), [files, selectedFileId]);
-  const sheets = selectedFile?.sheets ?? [];
+  const sheets = useMemo(() => selectedFile?.sheets ?? [], [selectedFile]);
 
   const currentSheet = useMemo(() => {
     return sheets.find((s) => s.name === selectedSheet) ?? sheets[0];

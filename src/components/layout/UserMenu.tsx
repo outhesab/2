@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 
 interface UserMenuProps {
   username?: string;
@@ -22,7 +23,7 @@ export default function UserMenu({ username, onLogout, isMobile, guestTimeLeft =
       const { App: CapApp } = await import('@capacitor/app');
       await CapApp.exitApp();
     } catch {
-      console.warn('UserMenu', 'exitApp hatası');
+      logger.warn('ui', 'UserMenu: exitApp hatası');
       window.close();
     }
   };

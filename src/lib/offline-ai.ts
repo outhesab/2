@@ -1,4 +1,5 @@
 import type { ExcelFile, SheetData } from "./excel-merge";
+import { logger } from '@/lib/logger';
 
 export type { ExcelFile, SheetData };
 
@@ -85,7 +86,7 @@ async function loadPatterns(): Promise<LearnedPattern> {
         });
     });
   } catch {
-    console.warn("offlineAI", "loadPatterns: IndexedDB yüklenemedi, varsayılan döndürülüyor");
+    logger.warn('excel-ai', 'loadPatterns: IndexedDB yüklenemedi, varsayılan döndürülüyor');
     return {
       columnNamePatterns: {},
       keyColumnPreferences: {},

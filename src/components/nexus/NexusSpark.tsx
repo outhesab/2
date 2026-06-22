@@ -4,13 +4,13 @@ import { BrainCircuit, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NexusSparkProps {
-  isOpen: boolean;
+  _open: boolean;
   onClick: () => void;
   isListening: boolean;
   isProcessing: boolean;
 }
 
-export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen, onClick, isListening, isProcessing }) => {
+export const NexusSpark: React.FC<NexusSparkProps> = ({ _open, onClick, isListening, isProcessing }) => {
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}

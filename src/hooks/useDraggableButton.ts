@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { logger } from '@/lib/logger';
 
 export function useDraggableButton(
   storageKey: string,
@@ -9,7 +10,7 @@ export function useDraggableButton(
       const raw = localStorage.getItem(storageKey);
       if (raw) return JSON.parse(raw);
     } catch {
-      console.warn('useDraggableButton', 'localStorage okuma hatası');
+      logger.warn('ui', 'useDraggableButton: localStorage okuma hatası');
     }
     return defaultPos;
   });
