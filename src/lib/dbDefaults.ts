@@ -1,11 +1,14 @@
-import type { DB } from "@/types";
+import type { DB, Kasa, ProductCategory } from "@/types";
+import { genId } from "@/lib/utils-tr";
 
 /**
  * Uygulama için boş/varsayılan veritabanı şablonu oluşturur.
+ * Bu dosya TEK kaynaktır — storage.ts ve backup.ts buradan import eder.
  */
 export function makeDefaultDB(): DB {
+  const nowIso = new Date().toISOString();
   return {
-    _version: 1,
+    _version: 0,
     products: [],
     sales: [],
     suppliers: [],
@@ -15,10 +18,54 @@ export function makeDefaultDB(): DB {
     kasalar: [
       { id: "nakit", name: "Nakit", icon: "💵" },
       { id: "banka", name: "Banka", icon: "🏦" },
-    ],
+      { id: "pos_ziraat", name: "POS Ziraat", icon: "🏧" },
+      { id: "pos_is", name: "POS İş", icon: "🏧" },
+      { id: "pos_yk", name: "POS YapıKredi", icon: "🏧" },
+    ] as Kasa[],
     bankTransactions: [],
     matchRules: [],
-    monitorRules: [],
+    monitorRules: [
+      {
+        id: genId(),
+        isDefault: true,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        name: "Stok Tükendi Uyarısı",
+        type: "stok_sifir",
+        level: "critical",
+        interval: 30,
+        popup: true,
+        active: true,
+        threshold: 0,
+      },
+      {
+        id: genId(),
+        isDefault: true,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        name: "Düşük Stok Uyarısı",
+        type: "stok_min",
+        level: "warning",
+        interval: 60,
+        popup: true,
+        active: true,
+        threshold: undefined,
+      },
+      {
+        id: genId(),
+        isDefault: true,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        name: "Düşük Kasa Bakiyesi",
+        type: "kasa_min",
+        level: "warning",
+        interval: 300,
+        popup: true,
+        active: true,
+        threshold: 1000,
+        kasa: "nakit",
+      },
+    ],
     monitorLog: [],
     stockMovements: [],
     peletSuppliers: [],
@@ -30,18 +77,70 @@ export function makeDefaultDB(): DB {
     returns: [],
     _activityLog: [],
     _auditLog: [],
-    company: {
-      id: crypto.randomUUID(),
-      name: "",
-      createdAt: new Date().toISOString()
-    },
+    company: { id: genId(), createdAt: nowIso },
     settings: {},
     pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
     ortakEmanetler: [],
     installments: [],
     partners: [],
-    productCategories: [],
-    notes: [],
-    aiActionLog: []
+    productCategories: [
+      { id: "soba", name: "Soba", icon: "🔥", createdAt: nowIso },
+      { id: "aksesuar", name: "Aksesuar", icon: "🔧", createdAt: nowIso },
+      { id: "yedek", name: "Yedek Parça", icon: "⚙️", createdAt: nowIso },
+      { id: "boru", name: "Boru", icon: "🔩", createdAt: nowIso },
+      { id: "pelet", name: "Pelet", icon: "🪵", createdAt: nowIso },
+    ] as ProductCategory[],
+    notes: [
+      {
+        id: genId(),
+        title: "🔑 Yerel API Anahtarları",
+        content: [
+          "LM Studio: http://127.0.0.1:1234",
+          "",
+          "cURL:",
+          "curl http://127.0.0.1:1234/v1/chat/completions",
+          '  -H "Content-Type: application/json"',
+          '  -H "Authorization: Bearer <key>"',
+        ].join("\n"),
+        color: "blue",
+        pinned: false,
+        tags: ["api", "yerel", "llm"],
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      },
+    ],
+    aiActionLog: [],
   };
 }
+
+/**
+ * DB şemasındaki tüm array alanlarının listesi.
+ * localStorage yükleme/fullRestore sırasında eksik array'leri tamamlamak için kullanılır.
+ */
+export const ARRAY_KEYS: (keyof DB)[] = [
+  "products",
+  "sales",
+  "suppliers",
+  "orders",
+  "cari",
+  "kasa",
+  "bankTransactions",
+  "matchRules",
+  "monitorRules",
+  "monitorLog",
+  "stockMovements",
+  "peletSuppliers",
+  "peletOrders",
+  "boruSuppliers",
+  "boruOrders",
+  "invoices",
+  "budgets",
+  "returns",
+  "_activityLog",
+  "ortakEmanetler",
+  "installments",
+  "partners",
+  "notes",
+  "_auditLog",
+  "aiActionLog",
+];

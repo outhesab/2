@@ -1,22 +1,22 @@
 {
-  "version": "3.42.0",
-  "generatedAt": "2026-06-21T09:31:30.943Z",
+  "version": "3.43.0",
+  "generatedAt": "2026-06-22T16:07:15.490Z",
   "git": {
     "branch": "dev",
-    "commit": "1e561cb",
-    "commitFull": "1e561cbb0cfafe650448bc1fe2d23615f487a3d6",
-    "commitMessage": "feat: NexusExecutive God-Object → Intent-Handler pattern (v3.42.0)",
-    "commitDate": "2026-06-21 12:28:01 +0300"
+    "commit": "bc423aa",
+    "commitFull": "bc423aa4619d89aa2cf01f861fafeebc65901b93",
+    "commitMessage": "feat(nexus): ultimate upgrade - conversation loop, memory, continuous STT, premium voice UX",
+    "commitDate": "2026-06-22 04:18:22 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-21T09:31:30.944Z"
+    "checkedAt": "2026-06-22T16:07:15.497Z"
   },
   "codebase": {
-    "tsFiles": 208,
+    "tsFiles": 209,
     "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 70440,
+    "totalLOC": 70776,
     "dependencies": 40,
     "devDependencies": 41
   },

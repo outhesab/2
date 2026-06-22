@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Send, Mic, Loader2, Trash2, Volume2 } from 'lucide-react';
+import { X, Sparkles, Send, Mic, Loader2, Trash2, Volume2, HardDrive } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useStorageMonitor } from '@/hooks/useStorageMonitor';
 
 interface NexusPanelProps {
   isOpen: boolean;
@@ -50,6 +51,8 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
     const now = new Date();
     return now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   };
+
+  const storageMonitor = useStorageMonitor();
 
   if (!isOpen) return null;
 
@@ -227,9 +230,23 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
           </button>
 
         </div>
-        <p className="text-[10px] text-center text-slate-500 mt-4 font-medium uppercase tracking-widest">
-          Soba Nexus AI • God-Mode Active
-        </p>
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <p className="text-[10px] text-center text-slate-500 font-medium uppercase tracking-widest">
+            Soba Nexus AI • God-Mode Active
+          </p>
+          <div 
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold"
+            style={{ 
+              background: storageMonitor.isCritical ? 'rgba(239,68,68,0.12)' : storageMonitor.isNearLimit ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.1)',
+              color: storageMonitor.isCritical ? '#ef4444' : storageMonitor.isNearLimit ? '#f59e0b' : '#10b981'
+            }}
+            title={`Depolama: ${storageMonitor.usagePercent}% kullanıldı`}
+            aria-label={`Depolama durumu: ${storageMonitor.usagePercent}% dolu`}
+          >
+            <HardDrive className="w-2.5 h-2.5" />
+            <span>{storageMonitor.usageMB} MB</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

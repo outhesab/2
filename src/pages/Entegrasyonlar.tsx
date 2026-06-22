@@ -14,8 +14,7 @@ const integrations = [
   { id: 'muhasebe', name: 'Muhasebeci Portalı', icon: '👨‍💼', desc: 'Muhasebecinize salt okunur erişim verin', status: 'planned', color: '#ec4899', features: ['Salt okunur erişim', 'Aylık rapor paylaşımı', 'Vergi dönemi özeti', 'Belge arşivi'] },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Entegrasyonlar({ db }: Props) {
+export default function Entegrasyonlar({ db: _db }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const sel = integrations.find(i => i.id === selected);
 

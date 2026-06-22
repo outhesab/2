@@ -270,8 +270,7 @@ function AppContent({
           return c;
         }, 0),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [db.products, db.orders, db.invoices, db.sales],
+    [db.products, db.orders, db.sales, db.bankTransactions, db.monitorRules],
   );
 
   const totalKasa = useMemo(

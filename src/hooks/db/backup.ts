@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logger';
 import { isFirebaseReady, readDoc, writeDoc, removeDoc, listDocs } from '@/lib/firebase';
+import { ARRAY_KEYS } from '@/lib/dbDefaults';
 import type { DB } from '@/types';
 
 // ── Firebase Yedekleme ──────────────────────────────────────────────────────
@@ -419,34 +420,7 @@ export function fullRestoreDB(incoming: DB, def: DB): { db: DB; report: RestoreR
 
   let data: DB = { ...def, ...incoming };
 
-  const arrayKeys: (keyof DB)[] = [
-    'products',
-    'sales',
-    'suppliers',
-    'orders',
-    'cari',
-    'kasa',
-    'bankTransactions',
-    'matchRules',
-    'monitorRules',
-    'monitorLog',
-    'stockMovements',
-    'peletSuppliers',
-    'peletOrders',
-    'boruSuppliers',
-    'boruOrders',
-    'invoices',
-    'budgets',
-    'returns',
-    '_activityLog',
-    'ortakEmanetler',
-    'installments',
-    'partners',
-    'notes',
-    '_auditLog',
-    'aiActionLog',
-  ];
-  for (const key of arrayKeys) {
+  for (const key of ARRAY_KEYS) {
     if (!Array.isArray(data[key])) (data as unknown as Record<string, unknown>)[key] = [];
   }
   if (!data.kasalar || data.kasalar.length === 0) data.kasalar = def.kasalar;

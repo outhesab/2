@@ -20,6 +20,21 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.43.0',
+    date: '22 Haziran 2026',
+    title: 'v3.43.0 — Stabilizasyon: Kalan MASTER_PLAN maddeleri temizlendi',
+    summary: 'Son 10 günde tespit edilen bekleyen MASTER_PLAN maddeleri (C5, D3, D5, E6, F6, J1) tamamlandı. makeDefaultDB tekilleştirildi (3 kopya → 1 kaynak), ARRAY_KEYS ortak export edildi. Levenshtein O(m×n) memory → O(n) 2-row DP ile optimize edildi. right-join çift çalışma bug\'ı fix. useStorageMonitor artık NexusPanel\'de canlı depolama göstergesi olarak görünüyor. safeIO.ts için 20 test eklendi. 7 eslint-disable kaldırıldı, Cizelge butonlarına aria-label eklendi.',
+    changes: [
+      { type: 'iyilestirme', text: 'D3: makeDefaultDB() tekilleştirildi — dbDefaults.ts tek kaynak, db/storage.ts ve backup.ts import ediyor. ARRAY_KEYS ortak export.' },
+      { type: 'iyilestirme', text: 'F6: Levenshtein O(m×n) full DP → O(n) 2-row DP (memory optimizasyonu).' },
+      { type: 'duzeltme', text: 'D5: mergeEngine.ts right-join çift çalışma bug\'ı fix — redundant kod bloğu kaldırıldı.' },
+      { type: 'yeni', text: 'C5: useStorageMonitor hook\'u NexusPanel\'e bağlandı — canlı depolama göstergesi (yeşil/sarı/kırmızı).' },
+      { type: 'yeni', text: 'C5: safeIO.ts için 20 test eklendi (getStorageUsage, safeReadJSON, safeWriteJSON, safeRemove).' },
+      { type: 'iyilestirme', text: 'E6: 4 eslint-disable kaldırıldı (temizle.tsx, Butce.tsx, Entegrasyonlar.tsx, App.tsx).' },
+      { type: 'iyilestirme', text: 'J1: Cizelge.tsx butonlarına aria-label eklendi (prevMonth, nextMonth, prevYear, nextYear, Bugün, viewMode, kapat).' },
+    ],
+  },
+  {
     version: '3.42.0',
     date: '21 Haziran 2026',
     title: 'v3.42.0 — Intent-Handler Pattern: NexusExecutive God-Object Refactor',

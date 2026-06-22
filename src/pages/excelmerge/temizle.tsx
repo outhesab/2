@@ -26,8 +26,7 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
   const [result, setResult] = useState<ReturnType<typeof cleanSheetData> | null>(null);
   const [preview, setPreview] = useState(false);
 
-  const selectedFile = files.find((f) => f.id === selectedFileId);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const selectedFile = useMemo(() => files.find((f) => f.id === selectedFileId), [files, selectedFileId]);
   const sheets = selectedFile?.sheets ?? [];
 
   const currentSheet = useMemo(() => {

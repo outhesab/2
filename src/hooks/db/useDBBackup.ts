@@ -8,7 +8,8 @@ import {
   fullRestoreDB,
   type RestoreReport,
 } from './backup';
-import { makeDefaultDB, saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';
+import { makeDefaultDB } from '@/lib/dbDefaults';
+import { saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';
 import { saveToFirebase } from './sync';
 import { getUserSession } from '@/lib/userManager';
 import { logger } from '@/lib/logger';

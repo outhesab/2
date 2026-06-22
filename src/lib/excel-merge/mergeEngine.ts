@@ -337,26 +337,6 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
     });
   }
 
-  if (joinType === "right") {
-    const newRows: typeof rows = [];
-    const newSourceInfo: typeof sourceInfo = {};
-    keyMapB.forEach((entryB) => {
-      const entryA = keyMapA.get(entryB.originalKey);
-      if (entryA) {
-        const merged = mergeRowsByStrategy(entryA.row, entryB.row, strategy);
-        const idx = newRows.length;
-        newRows.push(merged);
-        newSourceInfo[idx] = entryA.source;
-      } else {
-        const idx = newRows.length;
-        newRows.push({ ...entryB.row });
-        newSourceInfo[idx] = entryB.source;
-      }
-    });
-    const { rows: cleaned } = applyCleanAndReport(newRows, allHeaders, cleanOptions, report);
-    return { headers: allHeaders, rows: cleaned, sourceInfo: newSourceInfo, report };
-  }
-
   const { rows: cleaned } = applyCleanAndReport(rows, allHeaders, cleanOptions, report);
   return { headers: allHeaders, rows: cleaned, sourceInfo, report };
 }

@@ -205,6 +205,7 @@ export default function Cizelge({ db }: Props) {
             <button
               key={v}
               onClick={() => setViewMode(v)}
+              aria-label={v === "month" ? "Aylık görünüm" : "Yıllık görünüm"}
               style={{
                 padding: "7px 14px",
                 border: "none",
@@ -234,16 +235,18 @@ export default function Cizelge({ db }: Props) {
                 minWidth: 140,
                 textAlign: "center",
               }}
+              aria-live="polite"
+              aria-atomic="true"
             >
               {MONTHS[month]} {year}
             </span>
-            <button onClick={nextMonth} style={navBtn}>
+            <button onClick={nextMonth} style={navBtn} aria-label="Sonraki ay">
               ›
             </button>
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button onClick={() => setYear((y) => y - 1)} style={navBtn}>
+            <button onClick={() => setYear((y) => y - 1)} style={navBtn} aria-label="Önceki yıl">
               ‹
             </button>
             <span
@@ -254,10 +257,12 @@ export default function Cizelge({ db }: Props) {
                 minWidth: 60,
                 textAlign: "center",
               }}
+              aria-live="polite"
+              aria-atomic="true"
             >
               {year}
             </span>
-            <button onClick={() => setYear((y) => y + 1)} style={navBtn}>
+            <button onClick={() => setYear((y) => y + 1)} style={navBtn} aria-label="Sonraki yıl">
               ›
             </button>
           </div>
@@ -270,6 +275,7 @@ export default function Cizelge({ db }: Props) {
               setMonth(today.getMonth());
               setSelectedDay(null);
             }}
+            aria-label="Bugüne dön"
             style={{
               padding: "7px 14px",
               border: "1px solid rgba(255,87,34,0.3)",
@@ -653,6 +659,7 @@ export default function Cizelge({ db }: Props) {
               </span>
               <button
                 onClick={() => setSelectedDay(null)}
+                aria-label="Seçili gün detayını kapat"
                 style={{
                   background: "none",
                   border: "none",

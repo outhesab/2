@@ -8,19 +8,21 @@ export function cellToString(val: string | number | boolean | null): string {
 export function levenshtein(a: string, b: string): number {
   const m = a.length;
   const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
-    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
-  );
+  // 2-row DP: O(n) memory instead of O(m*n)
+  let prev: number[] = Array.from({ length: n + 1 }, (_, j) => j);
+  let curr: number[] = new Array(n + 1);
   for (let i = 1; i <= m; i++) {
+    curr[0] = i;
     for (let j = 1; j <= n; j++) {
       if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1];
+        curr[j] = prev[j - 1];
       } else {
-        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+        curr[j] = 1 + Math.min(prev[j], curr[j - 1], prev[j - 1]);
       }
     }
+    [prev, curr] = [curr, prev];
   }
-  return dp[m][n];
+  return prev[n];
 }
 
 export function fuzzyMatch(a: string, b: string, threshold: number): boolean {
