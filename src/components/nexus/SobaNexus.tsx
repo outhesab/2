@@ -9,11 +9,14 @@ import { NexusBubble } from './NexusBubble';
 import { NexusPanel } from './NexusPanel';
 import { useDB } from '@/hooks/useDB';
 import { loadUIPrefs } from '@/hooks/useUIPrefs';
+import { logger } from '@/lib/logger';
+
+const MEMORY_KEY = 'nexus_conversation_memory';
 
 export const SobaNexus: React.FC = () => {
   const { db } = useDB();
   const [, setLocation] = useLocation();
-  const { listen, stop, speak, isListening } = useNexusVoice();
+  const { listen, stop, speak, isListening, isConversationMode, speakAndListen } = useNexusVoice();
   
   const [showAI, setShowAI] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -22,8 +25,13 @@ export const SobaNexus: React.FC = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [feedbackText, setFeedbackText] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isListeningRef = useRef(false);
+  
+  // Sync ref with state for use in callbacks
+  useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
 
   const showFeedback = (text: string) => {
     setFeedbackText(text);
@@ -38,9 +46,27 @@ export const SobaNexus: React.FC = () => {
     bubbleTimer.current = setTimeout(() => setIsBubbleVisible(false), 10000);
   };
 
+  // Persist messages to localStorage
+  const persistMessages = (msgs: { role: 'user' | 'assistant'; content: string }[]) => {
+    try {
+      // Keep last 20 messages for memory efficiency
+      const recent = msgs.slice(-20);
+      localStorage.setItem(MEMORY_KEY, JSON.stringify(recent));
+    } catch { /* ignore quota errors */ }
+  };
+
+  // Load messages from localStorage on mount
   useEffect(() => {
     const prefs = loadUIPrefs();
     setShowAI(prefs.showAIButton);
+
+    try {
+      const saved = localStorage.getItem(MEMORY_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setMessages(parsed);
+      }
+    } catch { /* ignore corrupt data */ }
 
     // Initialize God-Mode Sentinel
     sobaSentinel.start(() => db);
@@ -60,36 +86,72 @@ export const SobaNexus: React.FC = () => {
     ]);
   };
 
+  const handleResult = useCallback(async (result: ExecutiveResult) => {
+    setIsProcessing(false);
+
+    if (result.navigation) {
+      setLocation(result.navigation.path);
+    }
+
+    const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
+    setMessages(prev => {
+      const updated = [...prev, { role: 'assistant' as const, content: responseText }];
+      persistMessages(updated);
+      return updated;
+    });
+
+    if (!isPanelOpen) {
+      showBubble(responseText);
+    }
+
+    showFeedback('✅ Tamamlandı');
+    
+    // Speak and then auto-restart listening (conversation loop)
+    if (isConversationMode) {
+      await speakAndListen(responseText, handleVoiceInput, (err) => {
+        logger.error('voice', 'Conversation loop error', { error: err });
+        showFeedback('❌ ' + err);
+      });
+    } else {
+      await speak(responseText);
+    }
+  }, [db, speak, isPanelOpen, setLocation, isConversationMode, speakAndListen]);
+
   const handleVoiceInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
     showFeedback('🎤 Ses algılandı, işleniyor...');
     setIsProcessing(true);
-    setMessages(prev => [...prev, { role: 'user', content: text }]);
+    setMessages(prev => {
+      const updated = [...prev, { role: 'user' as const, content: text }];
+      persistMessages(updated);
+      return updated;
+    });
 
     try {
       const result = await executeWithTimeout(text);
-      setIsProcessing(false);
-
-      if (result.navigation) {
-        setLocation(result.navigation.path);
-      }
-
-      const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
-      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-
-      if (!isPanelOpen) {
-        showBubble(responseText);
-      }
-
-      await speak(responseText);
-      showFeedback('✅ Tamamlandı');
+      await handleResult(result);
     } catch (err) {
       setIsProcessing(false);
       const errMsg = '❌ ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
-      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+      setMessages(prev => {
+        const updated = [...prev, { role: 'assistant' as const, content: errMsg }];
+        persistMessages(updated);
+        return updated;
+      });
       showFeedback(errMsg);
+      await speak(errMsg);
+      
+      // Auto-restart listening in conversation mode
+      if (isConversationMode) {
+        setTimeout(async () => {
+          await listen(
+            (text) => handleVoiceInput(text),
+            (err) => showFeedback('❌ ' + err)
+          );
+        }, 1000);
+      }
     }
-  }, [db, speak, isPanelOpen, setLocation]);
+  }, [db, speak, isPanelOpen, setLocation, handleResult, isConversationMode, listen]);
 
   const toggleListening = useCallback(async () => {
     if (isListening) {
@@ -111,37 +173,57 @@ export const SobaNexus: React.FC = () => {
     }
   }, [isListening, listen, stop, handleVoiceInput]);
 
+  const handleSparkClick = useCallback(async () => {
+    if (!isPanelOpen) {
+      setIsPanelOpen(true);
+      // Small delay for panel animation, then start conversation mode
+      setTimeout(async () => {
+        showFeedback('🎤 Sizi dinliyorum...');
+        try {
+          await listen(
+            (text) => handleVoiceInput(text),
+            (error) => showFeedback('❌ ' + error)
+          );
+        } catch {
+          showFeedback('❌ Mikrofon hatası');
+        }
+      }, 300);
+    } else {
+      await toggleListening();
+    }
+  }, [isPanelOpen, toggleListening, listen, handleVoiceInput]);
+
+  const clearMemory = useCallback(() => {
+    setMessages([]);
+    localStorage.removeItem(MEMORY_KEY);
+    showFeedback('🧠 Hafıza temizlendi');
+  }, []);
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
     showFeedback('🤖 İşleniyor...');
     setIsProcessing(true);
-    setMessages(prev => [...prev, { role: 'user', content: text }]);
+    setMessages(prev => {
+      const updated = [...prev, { role: 'user' as const, content: text }];
+      persistMessages(updated);
+      return updated;
+    });
     
     try {
       const result = await executeWithTimeout(text);
-
-      setIsProcessing(false);
-      
-      if (result.navigation) {
-        setLocation(result.navigation.path);
-      }
-
-      const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
-      setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-      
-      if (!isPanelOpen) {
-        showBubble(responseText);
-      }
-      
-      await speak(responseText);
-      showFeedback('✅ Tamamlandı');
+      await handleResult(result);
     } catch (err) {
       setIsProcessing(false);
       const errMsg = '❌ ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
-      setMessages(prev => [...prev, { role: 'assistant', content: errMsg }]);
+      setMessages(prev => {
+        const updated = [...prev, { role: 'assistant' as const, content: errMsg }];
+        persistMessages(updated);
+        return updated;
+      });
       showFeedback(errMsg);
+      await speak(errMsg);
     }
-  }, [db, speak, isPanelOpen, setLocation, executeWithTimeout]);
+  }, [db, speak, isPanelOpen, setLocation, handleResult]);
 
   return (
     <>
@@ -170,7 +252,7 @@ export const SobaNexus: React.FC = () => {
           <NexusSpark 
             isOpen={isPanelOpen}
             isProcessing={isProcessing}
-            onClick={() => setIsPanelOpen(prev => !prev)}
+            onClick={handleSparkClick}
             isListening={isListening}
           />
           
@@ -194,6 +276,7 @@ export const SobaNexus: React.FC = () => {
                 isListening={isListening}
                 onToggleListen={toggleListening}
                 isProcessing={isProcessing}
+                onClearMemory={clearMemory}
               />
             )}
           </AnimatePresence>

@@ -40,16 +40,17 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
   }
 
   // 3. Genel Yönetim Komutları (Offline Keywords)
-  if (input.includes('yeni satış') || input.includes('satış başlat') || input.includes('satış yap')) {
+  const saleKeywords = ['yeni satış', 'satış başlat', 'satış yap', 'soba sat', 'satış ekle', 'satış gir'];
+  if (saleKeywords.some(kw => input.includes(kw))) {
     return { action: 'sale', payload: { items: [], payment: 'nakit' } };
   }
-  if (input.includes('müşteri ekle') || input.includes('cari ekle')) {
+  if (input.includes('müşteri ekle') || input.includes('cari ekle') || input.includes('yeni cari')) {
     return { action: 'cari_ekle', payload: { name: '', type: 'musteri' } };
   }
-  if (input.includes('ürün ekle')) {
+  if (input.includes('ürün ekle') || input.includes('yeni ürün')) {
     return { action: 'urun_ekle', payload: { name: '', category: 'soba' } };
   }
-  if (input.includes('satışı iptal et') || input.includes('satış iptal')) {
+  if (input.includes('satışı iptal et') || input.includes('satış iptal') || input.includes('satışı sil')) {
     return { action: 'iptal', payload: { saleId: '' } };
   }
 

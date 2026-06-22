@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { X, Sparkles, Send, Mic, Loader2, Settings2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Sparkles, Send, Mic, Loader2, Trash2, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 
 interface NexusPanelProps {
   isOpen: boolean;
@@ -12,6 +11,7 @@ interface NexusPanelProps {
   isListening: boolean;
   onToggleListen: () => void;
   isProcessing?: boolean;
+  onClearMemory?: () => void;
 }
 
 export const NexusPanel: React.FC<NexusPanelProps> = ({ 
@@ -21,7 +21,8 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
   onSendMessage, 
   isListening, 
   onToggleListen,
-  isProcessing 
+  isProcessing,
+  onClearMemory
 }) => {
   const [inputValue, setInputValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -45,6 +46,11 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
     }
   };
 
+  const formatTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -63,12 +69,33 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
           </div>
           <div>
             <h2 className="text-lg font-bold text-white tracking-tight">Soba Nexus AI</h2>
-            <p className="text-xs text-slate-400 font-medium">Premium Analiz Merkezi</p>
+            <p className="text-xs text-slate-400 font-medium">
+              {isListening ? (
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  Dinliyor...
+                </span>
+              ) : isProcessing ? (
+                <span className="flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  İşleniyor...
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <Volume2 className="w-3 h-3" />
+                  Konuşmaya hazır
+                </span>
+              )}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="p-2 rounded-lg text-slate-400 hover:bg-white/5 transition-colors">
-            <Settings2 className="w-5 h-5" />
+          <button 
+            onClick={onClearMemory}
+            className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            title="Konuşma geçmişini temizle"
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
           <button 
             onClick={onClose}
@@ -87,8 +114,10 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
               <BrainCircuitIcon className="w-12 h-12 text-slate-400" />
             </div>
             <div>
-              <p className="text-slate-300 font-medium">Sizi dinliyorum...</p>
-              <p className="text-xs text-slate-500">Verileriniz üzerinden derin analizler yapabilirim.</p>
+              <p className="text-slate-300 font-medium">
+                {isListening ? 'Sizi dinliyorum...' : 'Nasıl yardımcı olabilirim?'}
+              </p>
+              <p className="text-xs text-slate-500">Sesinizle veya yazıyla sorun.</p>
             </div>
           </div>
         ) : (
@@ -102,25 +131,35 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
                 )}
               >
                 <div className={cn(
-                  "max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed",
+                  "max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed relative",
                   m.role === 'user'
-                    ? "bg-indigo-600 text-white rounded-tr-none"
+                    ? "bg-indigo-600 text-white rounded-tr-none" 
                     : "bg-slate-800/50 text-slate-200 border border-white/10 rounded-tl-none backdrop-blur-sm"
                 )}>
+                  <span className="text-[10px] opacity-50 block mb-1">
+                    {m.role === 'user' ? 'Siz' : 'Nexus'} · {formatTime()}
+                  </span>
                   {m.content}
                 </div>
               </div>
             ))}
-            {isProcessing && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] p-4 rounded-2xl rounded-tl-none bg-slate-800/50 border border-white/10 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-slate-400 text-sm">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Düşünüyor...
+            <AnimatePresence>
+              {isProcessing && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[80%] p-4 rounded-2xl rounded-tl-none bg-slate-800/50 border border-white/10 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Düşünüyor...
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div ref={messagesEndRef} />
           </>
         )}
@@ -133,7 +172,7 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
             <textarea 
               ref={textareaRef}
               className="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
-              placeholder="Bir şey sorun..."
+              placeholder={isListening ? 'Bir şey söyleyin...' : 'Bir şey yazın...'}
               rows={1}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -144,36 +183,52 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
                 }
               }}
             />
+            {isListening && (
+              <motion.div 
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs"
+              >
+                ●
+              </motion.div>
+            )}
           </div>
           
           <button 
             onClick={onToggleListen}
             className={cn(
-              "p-3 rounded-xl transition-all duration-300",
+              "p-3 rounded-xl transition-all duration-300 relative",
               isListening 
-                ? "bg-red-500 text-white ring-4 ring-red-500/20" 
+                ? "bg-red-500 text-white ring-4 ring-red-500/20 shadow-lg shadow-red-500/20" 
                 : "bg-slate-800 text-slate-400 hover:text-white border border-white/10"
             )}
           >
             <Mic className="w-5 h-5" />
+            {isListening && (
+              <motion.div 
+                animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0.1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute inset-0 bg-red-400 rounded-full"
+              />
+            )}
           </button>
 
-           <button 
-             onClick={handleSend}
-             disabled={!inputValue.trim()}
-             className={cn(
-               "p-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20",
-               inputValue.trim() 
-                 ? "bg-indigo-600 text-white hover:bg-indigo-500" 
-                 : "bg-slate-800 text-slate-600 cursor-not-allowed"
-             )}
-           >
-             <Send className="w-5 h-5" />
-           </button>
+          <button 
+            onClick={handleSend}
+            disabled={!inputValue.trim()}
+            className={cn(
+              "p-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20",
+              inputValue.trim() 
+                ? "bg-indigo-600 text-white hover:bg-indigo-500" 
+                : "bg-slate-800 text-slate-600 cursor-not-allowed"
+            )}
+          >
+            <Send className="w-5 h-5" />
+          </button>
 
         </div>
         <p className="text-[10px] text-center text-slate-500 mt-4 font-medium uppercase tracking-widest">
-          Soba Nexus AI • Powered by DeepSeek & Claude
+          Soba Nexus AI • God-Mode Active
         </p>
       </div>
     </motion.div>
