@@ -161,7 +161,9 @@ Hızlanma (%)
 ## Notlar
 
 - Firebase sync için `_firebasePromise` referansı `dbHelpers.ts` üzerinden yönetiliyor.
-- v3.43.1 sürümüne yükseltildi — tüm testler geçiyor (697/698).
+- v3.43.2 sürümüne yükseltildi — tüm testler geçiyor (697/698).
+- Circular dependency çözümü: `useRef` forward reference pattern kullanıldı (SobaNexus.tsx + useVoiceAgent.ts).
+- Tüm inline style'lar Tailwind'e dönüştürüldü (SobaNexus.tsx + NexusPanel.tsx).
 
 ---
 
@@ -179,3 +181,4 @@ Hızlanma (%)
 | 20.06.2026 | Soba Nexus AI Optimization | Reasoning Filter ve Fast-Path Intent'ler eklendi, Router ve VoiceIntent optimize edildi. v3.33.0. |
 | 20.06.2026 | GitHub pull + doküman güncelleme | 6 commit çekildi (v3.32.1→v3.33.0), MEMORY.md/AGENTS.md/WEEKLY_PLAN güncellendi, state-registry v3.33.0. |
 | 23.06.2026 | GitHub pull (v3.43.0) | 21 dosya değişti, 716 satır eklendi, 343 satır silindi. NexusPanel/SobaNexus/VoiceNexusCore güncellendi. |
+| 23.06.2026 | v3.43.2 — Circular ref fix + Tailwind | 7 TS hatası düzeltildi (useRef forward reference pattern), 2 lint warning temizlendi, 2 inline style Tailwind'e dönüştürüldü. Tüm CI yeşil. |

@@ -235,11 +235,10 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
             Soba Nexus AI • God-Mode Active
           </p>
           <div 
-            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold"
-            style={{ 
-              background: storageMonitor.isCritical ? 'rgba(239,68,68,0.12)' : storageMonitor.isNearLimit ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.1)',
-              color: storageMonitor.isCritical ? '#ef4444' : storageMonitor.isNearLimit ? '#f59e0b' : '#10b981'
-            }}
+            className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold",
+              storageMonitor.isCritical ? "bg-red-500/10 text-red-500" : storageMonitor.isNearLimit ? "bg-amber-500/10 text-amber-500" : "bg-emerald-500/10 text-emerald-500"
+            )}
             title={`Depolama: ${storageMonitor.usagePercent}% kullanıldı`}
             aria-label={`Depolama durumu: ${storageMonitor.usagePercent}% dolu`}
           >

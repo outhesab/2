@@ -76,6 +76,10 @@ export const SobaNexus: React.FC = () => {
     };
   }, [db]);
 
+  // ── Refs for circular-dependency-free function references ──
+  const handleVoiceInputRef = useRef<((text: string) => Promise<void>) | null>(null);
+  const handleResultRef = useRef<((result: ExecutiveResult) => Promise<void>) | null>(null);
+
   const executeWithTimeout = useCallback(async (text: string): Promise<ExecutiveResult> => {
     const timeoutPromise = new Promise<ExecutiveResult>((_, reject) =>
       setTimeout(() => reject(new Error('Nexus AI zaman aşımı (15sn)')), 15000)
@@ -86,38 +90,33 @@ export const SobaNexus: React.FC = () => {
     ]);
   }, [db]);
 
-  const handleResult = useCallback(async (result: ExecutiveResult) => {
+  // Assign implementations to refs every render (fresh closures, no circular deps)
+  handleResultRef.current = async (result: ExecutiveResult) => {
     setIsProcessing(false);
-
     if (result.navigation) {
       setLocation(result.navigation.path);
     }
-
     const responseText = result.response || '❌ Yanıt alınamadı, lütfen tekrar deneyin.';
     setMessages(prev => {
       const updated = [...prev, { role: 'assistant' as const, content: responseText }];
       persistMessages(updated);
       return updated;
     });
-
     if (!isPanelOpen) {
       showBubble(responseText);
     }
-
     showFeedback('✅ Tamamlandı');
-    
-    // Speak and then auto-restart listening (conversation loop)
     if (isConversationMode) {
-      await speakAndListen(responseText, handleVoiceInput, (err) => {
+      await speakAndListen(responseText, (text) => handleVoiceInputRef.current!(text), (err) => {
         logger.error('voice', 'Conversation loop error', { error: err });
         showFeedback('❌ ' + err);
       });
     } else {
       await speak(responseText);
     }
-  }, [speak, isPanelOpen, setLocation, isConversationMode, speakAndListen, handleVoiceInput]);
+  };
 
-  const handleVoiceInput = useCallback(async (text: string) => {
+  handleVoiceInputRef.current = async (text: string) => {
     if (!text.trim()) return;
     showFeedback('🎤 Ses algılandı, işleniyor...');
     setIsProcessing(true);
@@ -126,10 +125,9 @@ export const SobaNexus: React.FC = () => {
       persistMessages(updated);
       return updated;
     });
-
     try {
       const result = await executeWithTimeout(text);
-      await handleResult(result);
+      await handleResultRef.current!(result);
     } catch (err) {
       setIsProcessing(false);
       const errMsg = '❌ ' + (err instanceof Error ? err.message : 'Bilinmeyen hata');
@@ -140,18 +138,17 @@ export const SobaNexus: React.FC = () => {
       });
       showFeedback(errMsg);
       await speak(errMsg);
-      
-      // Auto-restart listening in conversation mode
       if (isConversationMode) {
         setTimeout(async () => {
-          await listen(
-            (text) => handleVoiceInput(text),
-            (err) => showFeedback('❌ ' + err)
-          );
+          await listen((text) => handleVoiceInputRef.current!(text), (err) => showFeedback('❌ ' + err));
         }, 1000);
       }
     }
-  }, [speak, handleResult, isConversationMode, listen, executeWithTimeout]);
+  };
+
+  // Stable public API (zero-dependency wrappers that delegate to refs)
+  const handleResult = useCallback((result: ExecutiveResult) => handleResultRef.current!(result), []);
+  const handleVoiceInput = useCallback((text: string) => handleVoiceInputRef.current!(text), []);
 
   const toggleListening = useCallback(async () => {
     if (isListening) {
@@ -228,22 +225,7 @@ export const SobaNexus: React.FC = () => {
   return (
     <>
       {feedbackText && (
-        <div style={{
-          position: 'fixed',
-          bottom: '80px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.85)',
-          color: '#fff',
-          padding: '8px 20px',
-          borderRadius: '20px',
-          fontSize: '14px',
-          zIndex: 10001,
-          pointerEvents: 'none',
-          transition: 'opacity 0.3s',
-          whiteSpace: 'nowrap',
-          fontWeight: 500,
-        }}>
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-black/85 text-white px-5 py-2 rounded-full text-sm z-[10001] pointer-events-none transition-opacity duration-300 whitespace-nowrap font-medium">
           {feedbackText}
         </div>
       )}

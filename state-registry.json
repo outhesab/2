@@ -1,22 +1,22 @@
 {
-  "version": "3.43.1",
-  "generatedAt": "2026-06-22T21:52:00.000Z",
+  "version": "3.43.2",
+  "generatedAt": "2026-06-23T07:57:49.434Z",
   "git": {
     "branch": "dev",
-    "commit": "local",
-    "commitFull": "local-changes",
+    "commit": "6f123b7",
+    "commitFull": "6f123b76c1d53f232589be5ff9f523fa29373e2d",
     "commitMessage": "chore: v3.43.1 — parallel agent düzeltmeleri (test fix, lint temizliği, logger dönüşümü)",
-    "commitDate": "2026-06-22 21:52:00 +0300"
+    "commitDate": "2026-06-23 01:29:53 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-22T21:52:00.000Z"
+    "checkedAt": "2026-06-23T07:57:49.435Z"
   },
   "codebase": {
     "tsFiles": 209,
     "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 70776,
+    "totalLOC": 70802,
     "dependencies": 40,
     "devDependencies": 41
   },

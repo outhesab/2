@@ -47,7 +47,7 @@ export function SettingsBakim({ showToast, showConfirm }: {
         keys.forEach(k => localStorage.removeItem(k));
         setCleanStatus(`✅ ${keys.length} önbellek temizlendi`);
         showToast(`${keys.length} önbellek temizlendi`, 'success');
-      } catch (_e) {
+      } catch {
         setCleanStatus('❌ Temizleme hatası');
         showToast('Önbellek temizlenemedi', 'error');
       }

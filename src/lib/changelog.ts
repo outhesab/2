@@ -20,6 +20,19 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.43.2',
+    date: '23 Haziran 2026',
+    title: 'TypeScript circular ref fix, lint cleanup, Tailwind geçişi',
+    summary: '7 TypeScript hatası düzeltildi (circular reference + props mismatch), 2 lint warning temizlendi, 2 inline style Tailwind\'e dönüştürüldü.',
+    changes: [
+      { type: 'duzeltme', text: 'SobaNexus.tsx: useRef forward reference ile circular dependency çözüldü (4 TS hatası)' },
+      { type: 'duzeltme', text: 'useVoiceAgent.ts: useRef forward reference ile circular dependency çözüldü (2 TS hatası)' },
+      { type: 'duzeltme', text: 'NexusSpark.tsx: _open → isOpen prop düzeltildi (1 TS hatası)' },
+      { type: 'duzeltme', text: 'VoiceNexusCore.ts + SettingsBakim.tsx: unused _e parametreleri temizlendi (2 lint warning)' },
+      { type: 'iyilestirme', text: 'SobaNexus.tsx + NexusPanel.tsx: inline style → Tailwind dönüşümü (2 adet)' },
+    ],
+  },
+  {
     version: '3.43.1',
     date: '23 Haziran 2026',
     title: 'Test düzeltmeleri, lint temizliği ve logger dönüşümü',

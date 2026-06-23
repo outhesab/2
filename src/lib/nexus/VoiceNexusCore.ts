@@ -177,7 +177,7 @@ export class VoiceNexusCore {
 
     try {
       this.recognition!.start();
-    } catch (_e) {
+    } catch {
       this.isListening = false;
       onError('Ses tanıma başlatılamadı');
     }

@@ -21,18 +21,38 @@ export function useVoiceAgent(
 
   const { onTranscript, onResponse, onError } = options;
 
+  // Refs for circular-dependency-free function references
+  const processTranscriptRef = useRef<((text: string) => Promise<void>) | null>(null);
+
+  processTranscriptRef.current = async (text: string) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    setState('processing');
+    try {
+      const result = await processVoiceInput(text);
+      setResponse(result);
+      onResponse?.(result);
+      setState('speaking');
+      await voiceNexusCore.speak(result);
+    } catch (e) {
+      const errMsg = e instanceof Error ? e.message : 'İşlem hatası';
+      onError?.(errMsg);
+      logger.error('VoiceAgent', 'Processing failed', { error: e });
+    } finally {
+      isProcessingRef.current = false;
+      setState('idle');
+    }
+  };
+
   const toggleListening = useCallback(async () => {
     if (state === 'listening') {
       voiceNexusCore.stopListening();
       return;
     }
-
     if (isProcessingRef.current) return;
-
     setState('listening');
     setTranscript('');
     setResponse('');
-
     try {
       await voiceNexusCore.listen(
         (text) => {
@@ -45,9 +65,8 @@ export function useVoiceAgent(
           logger.error('VoiceAgent', 'STT error', { error });
         },
         () => {
-          // onEnd - process the transcript
           if (transcript.trim()) {
-            processTranscript(transcript);
+            processTranscriptRef.current!(transcript);
           } else {
             setState('idle');
           }
@@ -59,30 +78,7 @@ export function useVoiceAgent(
       onError?.(errMsg);
       logger.error('VoiceAgent', 'Failed to start listening', { error: e });
     }
-  }, [state, transcript, onTranscript, onError, processTranscript]);
-
-  const processTranscript = useCallback(async (text: string) => {
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-    setState('processing');
-
-    try {
-      const result = await processVoiceInput(text);
-      setResponse(result);
-      onResponse?.(result);
-      
-      // Speak the response
-      setState('speaking');
-      await voiceNexusCore.speak(result);
-    } catch (e) {
-      const errMsg = e instanceof Error ? e.message : 'İşlem hatası';
-      onError?.(errMsg);
-      logger.error('VoiceAgent', 'Processing failed', { error: e });
-    } finally {
-      isProcessingRef.current = false;
-      setState('idle');
-    }
-  }, [processVoiceInput, onResponse, onError]);
+  }, [state, transcript, onTranscript, onError]);
 
   // Cleanup on unmount
   useEffect(() => {
