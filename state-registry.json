@@ -1,22 +1,22 @@
 {
-  "version": "3.43.3",
-  "generatedAt": "2026-06-23T09:08:01.929Z",
+  "version": "3.43.4",
+  "generatedAt": "2026-06-23T11:41:43.653Z",
   "git": {
     "branch": "dev",
-    "commit": "102b867",
-    "commitFull": "102b8670bb854f4c4220a2bcaa707e663cae8b2f",
-    "commitMessage": "fix: v3.43.2 — TS circular ref fix, lint cleanup, Tailwind geçişi",
-    "commitDate": "2026-06-23 10:58:18 +0300"
+    "commit": "0795cb9",
+    "commitFull": "0795cb9e47bd70dad2102cebbb91c028faa2ab71",
+    "commitMessage": "fix: v3.43.3 — Quality Gate fix (connConfig tests)",
+    "commitDate": "2026-06-23 12:09:49 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-23T09:08:01.930Z"
+    "checkedAt": "2026-06-23T11:41:43.655Z"
   },
   "codebase": {
-    "tsFiles": 209,
-    "tsxFiles": 182,
-    "cssFiles": 31,
-    "totalLOC": 70812,
+    "tsFiles": 206,
+    "tsxFiles": 172,
+    "cssFiles": 30,
+    "totalLOC": 68331,
     "dependencies": 40,
     "devDependencies": 41
   },

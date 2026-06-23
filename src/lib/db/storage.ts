@@ -19,7 +19,7 @@ export async function saveToIndexedSnapshot(db: DB): Promise<void> {
     t.end({ size: data.length });
   } catch (e) {
     t.end({ error: String(e) });
-    logger.warn('db', 'IndexedDB snapshot yazılamadı', { error: String(e) });
+    logger.error('db', 'IndexedDB snapshot yazılamadı', { error: String(e) });
   }
 }
 
@@ -92,7 +92,7 @@ export function loadFromStorage(): DB {
     loadT.end({ version: merged._version });
     return merged;
   } catch {
-    logger.warn('db', 'localStorage verisi ayrıştırılamadı, varsayılan DB kullanılıyor');
+    logger.error('db', 'localStorage verisi ayrıştırılamadı, varsayılan DB kullanılıyor — tüm veri kaybedildi');
     loadT.end({ error: 'parse' });
     return makeDefaultDB();
   }
@@ -114,7 +114,7 @@ function _flushPendingWrite(): void {
   try {
     localStorage.setItem(key, JSON.stringify(versioned));
   } catch (e) {
-    logger.warn('db', 'localStorage async yazma hatası', { error: String(e) });
+    logger.error('db', 'localStorage async yazma hatası — veri kalıcı olmayabilir', { error: String(e) });
   }
 }
 
@@ -174,6 +174,7 @@ export function saveToStorage(db: DB, forceSync = false): boolean {
     return true;
   } catch (e) {
     t.end({ error: String(e) });
+    logger.error('db', 'localStorage yazma hatası — veri kaybedildi', { error: String(e) });
     return false;
   } finally {
     _isSaving = false;

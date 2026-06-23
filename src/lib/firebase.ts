@@ -67,7 +67,7 @@ export async function readDoc<T = Record<string, unknown>>(
     const snap = await getDoc(ref);
     return snap.exists() ? (snap.data() as T) : null;
   } catch (e) {
-    logger.warn("firebase", `readDoc(${pathSegments.join("/")}) başarısız`, {
+    logger.error("firebase", `readDoc(${pathSegments.join("/")}) başarısız`, {
       error: String(e),
     });
     return null;
@@ -90,7 +90,7 @@ export async function writeDoc(
     }
     return true;
   } catch (e) {
-    logger.warn("firebase", `writeDoc(${pathSegments.join("/")}) başarısız`, {
+    logger.error("firebase", `writeDoc(${pathSegments.join("/")}) başarısız`, {
       error: String(e),
     });
     return false;
@@ -104,7 +104,7 @@ export async function removeDoc(pathSegments: string[]): Promise<boolean> {
     await deleteDoc(doc(_db, pathSegments[0], ...pathSegments.slice(1)));
     return true;
   } catch (e) {
-    logger.warn("firebase", `removeDoc(${pathSegments.join("/")}) başarısız`, {
+    logger.error("firebase", `removeDoc(${pathSegments.join("/")}) başarısız`, {
       error: String(e),
     });
     return false;
@@ -123,7 +123,7 @@ export async function listDocs<T = Record<string, unknown>>(
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, data: d.data() as T }));
   } catch (e) {
-    logger.warn("firebase", `listDocs(${pathSegments.join("/")}) başarısız`, {
+    logger.error("firebase", `listDocs(${pathSegments.join("/")}) başarısız`, {
       error: String(e),
     });
     return [];

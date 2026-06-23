@@ -15,7 +15,7 @@ export function emitSync(status: SyncStatus, detail?: string) {
     try {
       fn(status, detail);
     } catch {
-      logger.warn('sync', 'Senkron dinleyici hatası');
+      logger.error('sync', 'Senkron dinleyici hatası — uygulama içi event bozuldu');
     }
   });
 }
@@ -64,7 +64,7 @@ async function retryableRead<T>(path: string[]): Promise<T | null> {
       }
     }
   }
-  logger.warn("firebase", "sync okuma tamamen başarısız", { error: String(lastErr) });
+  logger.error("firebase", "sync okuma tamamen başarısız — tüm retry'ler tükendi", { error: String(lastErr) });
   return null;
 }
 
@@ -127,7 +127,7 @@ export async function loadFromFirebase(userId: string): Promise<DB | null> {
     return data;
   } catch (e) {
     t.end({ error: String(e) });
-    logger.warn("firebase", "Firebase yükleme başarısız", { userId, error: String(e) });
+    logger.error("firebase", "Firebase yükleme başarısız — cloud verisi alınamadı", { userId, error: String(e) });
     return null;
   }
 }

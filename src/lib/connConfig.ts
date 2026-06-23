@@ -84,7 +84,7 @@ export function loadConnConfig(): ConnConfig {
     const raw = localStorage.getItem(CONN_KEY);
     if (raw) return normalizeConnConfig(JSON.parse(raw));
   } catch {
-    logger.warn('connConfig', 'localStorage okuma hatası');
+    logger.error('connConfig', 'localStorage okuma hatası — bağlantı ayarları kaybedildi, varsayılana dönüldü');
   }
   return normalizeConnConfig({ ...DEFAULT_CONN });
 }
@@ -116,8 +116,8 @@ export async function loadConnConfigFromFirebase(): Promise<ConnConfig | null> {
   if (!data?.data) return null;
   try {
     return normalizeConnConfig(JSON.parse(data.data));
-  } catch {
-    logger.warn('connConfig', 'Firebase config parse hatası');
+  } catch (e) {
+    logger.error('connConfig', 'Firebase config parse hatası', { error: String(e) });
     return null;
   }
 }

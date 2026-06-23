@@ -18,11 +18,11 @@ async function pruneOldBackups(): Promise<void> {
     const sorted = [...backups].sort((a, b) => (b.data.version ?? 0) - (a.data.version ?? 0));
     const toDelete = sorted.slice(MAX_BACKUPS);
     for (const b of toDelete) {
-      await removeDoc(['backups', b.id]).catch(() => logger.warn('db', 'Eski yedek silinemedi'));
+      await removeDoc(['backups', b.id]).catch(() => logger.error('db', 'Eski yedek silinemedi — yedek birikacak'));
     }
     logger.info('db', `Eski yedekler temizlendi: ${toDelete.length} silindi`);
   } catch (e) {
-    logger.warn('db', 'Yedek temizleme başarısız', { error: String(e) });
+    logger.error('db', 'Yedek temizleme başarısız', { error: String(e) });
   }
 }
 
@@ -39,11 +39,11 @@ export async function saveBackupToFirebase(db: DB, label?: string): Promise<bool
     });
     logger.info('db', `Yedek kaydedildi: ${backupId}`, { ok });
     if (ok) {
-      pruneOldBackups().catch(() => logger.warn('db', 'Yedek temizleme başarısız'));
+      pruneOldBackups().catch(() => logger.error('db', 'Yedek temizleme başarısız — yedek birikacak'));
     }
     return ok;
   } catch (e) {
-    logger.warn('db', 'Yedek kaydedilemedi', { error: String(e) });
+    logger.error('db', 'Yedek kaydedilemedi — cloud yedeği yok', { error: String(e) });
     return false;
   }
 }
@@ -67,7 +67,7 @@ export async function listBackupsFromFirebase(): Promise<
       }))
       .sort((a, b) => b.version - a.version);
   } catch {
-    logger.warn('db', "Yedek listesi Firebase'den alınamadı");
+    logger.error('db', "Yedek listesi Firebase'den alınamadı — yedek geçmişi görünmüyor");
     return [];
   }
 }
@@ -79,7 +79,7 @@ export async function restoreBackupFromFirebase(backupId: string): Promise<DB | 
     if (!doc?.data) return null;
     return JSON.parse(doc.data) as DB;
   } catch {
-    logger.warn('db', "Yedek Firebase'den geri yüklenemedi");
+    logger.error('db', "Yedek Firebase'den geri yüklenemedi — geri yükleme başarısız");
     return null;
   }
 }

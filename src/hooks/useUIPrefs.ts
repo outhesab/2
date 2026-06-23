@@ -64,7 +64,7 @@ export async function loadUIPrefsFromFirebase(): Promise<UIPrefs | null> {
     if (!raw) return null;
     return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
   } catch {
-    logger.warn('ui', 'Firebase\'den UI tercihleri yüklenemedi');
+    logger.error('ui', "Firebase'den UI tercihleri yüklenemedi — cloud ayarları yok");
     return null;
   }
 }
@@ -83,7 +83,7 @@ async function saveUIPrefsToFirebase(prefs: UIPrefs): Promise<void> {
       signal: AbortSignal.timeout(8000),
     });
   } catch {
-    logger.warn('ui', 'UI tercihleri Firebase\'e kaydedilemedi');
+    logger.error('ui', "UI tercihleri Firebase'e kaydedilemedi — cloud senkron yok");
     /* sessizce geç */
   }
 }
@@ -93,7 +93,7 @@ export function loadUIPrefs(): UIPrefs {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...DEFAULT_PREFS, ...JSON.parse(raw) };
   } catch {
-    logger.warn('ui', 'LocalStorage\'dan UI tercihleri okunamadı');
+    logger.error('ui', "LocalStorage'dan UI tercihleri okunamadı — varsayılan ayarlar");
     /* localStorage okuma hatası */
   }
   return { ...DEFAULT_PREFS };

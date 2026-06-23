@@ -88,7 +88,7 @@ export async function saveFileToDevice(
     });
     return true;
   } catch (e) {
-    logger.warn('permissions', 'Dosya kaydedilemedi:', e);
+    logger.error('permissions', 'Dosya kaydedilemedi — veri export başarısız:', e);
     return false;
   }
 }

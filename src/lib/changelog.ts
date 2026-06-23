@@ -20,6 +20,25 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.43.4',
+    date: '23 Haziran 2026',
+    title: 'Moratoryum Gün 1-2: Ölü kod temizliği + sessiz hata düzeltmeleri',
+    summary: '15 ölü dosya silindi (-2564 satır), kritik Nexus handler import bugı fix edildi, 9 veri-path dosyasında 29 sessiz hata (logger.warn → logger.error) görünür hale getirildi.',
+    changes: [
+      { type: 'duzeltme', text: 'NexusExecutive.ts: import "./handlers" eksikti — 7 intent handler hiç register olmuyordu, Nexus AI her girdiye "çözemedi" döndürüyordu' },
+      { type: 'kaldirildi', text: '15 ölü dosya silindi: AIAsistan/, pages/ai/, ConsoleKayit, SalesHelpers, InfoRow, VoiceAgentUI, seedData, aiKeys, test-godmode (-2564 satır)' },
+      { type: 'iyilestirme', text: 'storage.ts: 4 sessiz hata fix — saveToIndexedSnapshot, loadFromStorage, _flushPendingWrite, saveToStorage catch artık logger.error' },
+      { type: 'iyilestirme', text: 'firebase.ts: 4 sessiz hata fix — readDoc, writeDoc, removeDoc, listDocs catch artık logger.error' },
+      { type: 'iyilestirme', text: 'sync.ts: 3 sessiz hata fix — emitSync dinleyici, retryableRead, loadFromFirebase catch artık logger.error' },
+      { type: 'iyilestirme', text: 'connConfig.ts: 2 sessiz hata fix — localStorage ve Firebase config parse hataları artık logger.error' },
+      { type: 'iyilestirme', text: 'backup.ts: 6 sessiz hata fix — yedek save/restore/list/cleanup hepsi artık logger.error' },
+      { type: 'iyilestirme', text: 'dbHelpers.ts: validateAndClassify RuleEngine hatası artık logger.error (save validation bypass riski)' },
+      { type: 'iyilestirme', text: 'useUIPrefs.ts: 3 sessiz hata fix — Firebase + localStorage UI pref hataları artık logger.error' },
+      { type: 'iyilestirme', text: 'userManager.ts: 5 sessiz hata fix — kullanıcı cache okuma/yazma, Firebase yükleme hataları artık logger.error' },
+      { type: 'iyilestirme', text: 'permissions.ts: saveFileToDevice export hatası artık logger.error' },
+    ],
+  },
+  {
     version: '3.43.3',
     date: '23 Haziran 2026',
     title: 'CI/CD Quality Gate düzeltmesi',

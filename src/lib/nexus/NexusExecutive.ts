@@ -6,6 +6,7 @@ import type { DB } from '@/types';
 import type { AgentRequest, AgentId } from '@/agents/types';
 import { intentHandlerRegistry } from './handlers/IntentHandler';
 import type { HandlerContext } from './handlers/IntentHandler';
+import './handlers'; // Side-effect: 7 handler'ı registry'ye auto-register eder
 
 export type ExecutiveResult = {
   type: 'fast' | 'smart' | 'action_chain' | 'pending_confirmation' | 'composer_active';

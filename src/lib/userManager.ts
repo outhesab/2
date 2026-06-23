@@ -35,7 +35,7 @@ async function loadUsersFromCache(): Promise<AppUser[]> {
       }
     }
   } catch {
-    logger.warn('userManager', 'IndexedDB kullanıcı önbelleği okunamadı, localStorage fallback');
+    logger.error('userManager', 'IndexedDB kullanıcı önbelleği okunamadı, localStorage fallback');
   }
 
   // 2) localStorage fallback (migration / eski veri)
@@ -54,7 +54,7 @@ async function loadUsersFromCache(): Promise<AppUser[]> {
       return Array.isArray(parsed) ? (parsed as AppUser[]) : [];
     }
   } catch {
-    logger.warn('userManager', 'Kullanıcı önbelleği okunamadı');
+    logger.error('userManager', 'Kullanıcı önbelleği okunamadı — tüm cache kaynakları başarısız');
   }
   return [];
 }
@@ -70,12 +70,12 @@ async function saveUsersToCache(users: AppUser[]): Promise<void> {
     // Migration sonrası eski localStorage cache'i temizle
     localStorage.removeItem(USERS_CACHE_KEY);
   } catch {
-    logger.warn('userManager', 'IndexedDB kullanıcı önbelleği yazılamadı, localStorage fallback kullanılıyor');
+    logger.error('userManager', 'IndexedDB kullanıcı önbelleği yazılamadı, localStorage fallback kullanılıyor');
     try {
       const encrypted = await encrypt(JSON.stringify(users));
       localStorage.setItem(USERS_CACHE_KEY, 'aes-gcm:' + encrypted);
     } catch {
-      logger.warn('userManager', 'Kullanıcı önbelleği yazılamadı');
+      logger.error('userManager', 'Kullanıcı önbelleği yazılamadı — kullanıcı verisi kalıcı değil');
     }
   }
 }
@@ -111,7 +111,7 @@ export async function loadUsers(): Promise<AppUser[]> {
         return users;
       }
     } catch {
-      logger.warn('userManager', 'Firebase kullanıcı yükleme hatası, önbellek kullanılıyor');
+      logger.error('userManager', 'Firebase kullanıcı yükleme hatası, önbellek kullanılıyor');
     }
   }
   return await loadUsersFromCache();

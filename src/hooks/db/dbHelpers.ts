@@ -47,7 +47,7 @@ export function validateAndClassify(
   try {
     violations = validateTransaction(prev, next);
   } catch (e) {
-    logger.warn('db', warnMsg, { error: String(e) });
+    logger.error('db', warnMsg, { error: String(e) });
   }
   const hasBlock = violations.some((v) => v.severity === 'block');
   const hasWarn = violations.some((v) => v.severity === 'warn');
