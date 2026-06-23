@@ -20,6 +20,16 @@ export interface VersionEntry {
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: '3.43.3',
+    date: '23 Haziran 2026',
+    title: 'CI/CD Quality Gate düzeltmesi',
+    summary: 'connConfig.test.ts fail sorunu giderildi, env var erişimi CI ortamına uyumlu hale getirildi.',
+    changes: [
+      { type: 'duzeltme', text: 'connConfig.ts: import.meta.env fallback process.env eklendi' },
+      { type: 'duzeltme', text: 'connConfig.test.ts: vi.stubEnv ile modern Vitest mock yapısına geçildi' },
+    ],
+  },
+  {
     version: '3.43.2',
     date: '23 Haziran 2026',
     title: 'TypeScript circular ref fix, lint cleanup, Tailwind geçişi',

@@ -1,22 +1,22 @@
 {
-  "version": "3.43.2",
-  "generatedAt": "2026-06-23T07:57:49.434Z",
+  "version": "3.43.3",
+  "generatedAt": "2026-06-23T09:08:01.929Z",
   "git": {
     "branch": "dev",
-    "commit": "6f123b7",
-    "commitFull": "6f123b76c1d53f232589be5ff9f523fa29373e2d",
-    "commitMessage": "chore: v3.43.1 — parallel agent düzeltmeleri (test fix, lint temizliği, logger dönüşümü)",
-    "commitDate": "2026-06-23 01:29:53 +0300"
+    "commit": "102b867",
+    "commitFull": "102b8670bb854f4c4220a2bcaa707e663cae8b2f",
+    "commitMessage": "fix: v3.43.2 — TS circular ref fix, lint cleanup, Tailwind geçişi",
+    "commitDate": "2026-06-23 10:58:18 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-23T07:57:49.435Z"
+    "checkedAt": "2026-06-23T09:08:01.930Z"
   },
   "codebase": {
     "tsFiles": 209,
     "tsxFiles": 182,
     "cssFiles": 31,
-    "totalLOC": 70802,
+    "totalLOC": 70812,
     "dependencies": 40,
     "devDependencies": 41
   },

@@ -1,19 +1,14 @@
-// Dosyadaki her şeyden, hatta importlardan bile önce değişkenleri doğrudan atıyoruz
-process.env.VITE_FIREBASE_PROJECT_ID = 'test-project';
-process.env.VITE_FIREBASE_API_KEY = 'test-api-key';
-
-// Eğer projenizde Vite'ın import.meta.env yapısı kullanılıyorsa garantiye almak için:
-if (typeof globalThis !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (globalThis as any).import = { meta: { env: { VITE_FIREBASE_PROJECT_ID: 'test-project', VITE_FIREBASE_API_KEY: 'test-api-key' } } };
-}
-
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { loadConnConfig, saveConnConfig, DEFAULT_CONN, type ConnConfig } from './connConfig';
+
+// Mock environment variables using Vitest's stubEnv
+vi.stubEnv('VITE_FIREBASE_PROJECT_ID', 'test-project');
+vi.stubEnv('VITE_FIREBASE_API_KEY', 'test-api-key');
 
 vi.mock('@/lib/logger', () => ({
   logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
+
 
 vi.mock('@/lib/firebase', () => ({
   readDoc: vi.fn(),

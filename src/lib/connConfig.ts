@@ -31,8 +31,13 @@ function isPlaceholder(val: string): boolean {
 }
 
 const CONN_KEY = 'sobaConnConfig';
-const ENV_FB_PROJECT_ID = (import.meta.env.VITE_FIREBASE_PROJECT_ID ?? '').trim();
-const ENV_FB_API_KEY = (import.meta.env.VITE_FIREBASE_API_KEY ?? '').trim();
+
+function getEnv(key: string): string {
+  return (import.meta.env[key] || (process.env && process.env[key]) || '').trim();
+}
+
+const ENV_FB_PROJECT_ID = getEnv('VITE_FIREBASE_PROJECT_ID');
+const ENV_FB_API_KEY = getEnv('VITE_FIREBASE_API_KEY');
 const HAS_FIREBASE_ENV = !isPlaceholder(ENV_FB_PROJECT_ID) && !isPlaceholder(ENV_FB_API_KEY);
 
 export const DEFAULT_CONN: ConnConfig = {
