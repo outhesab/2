@@ -7,20 +7,20 @@ export class CariAgent extends DomainAgent {
   readonly id = 'cari' as const;
   readonly yetkiler = ['cari.read', 'cari.write', 'rapor.read'] as const;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     const p = talep.payload ?? {};
 
     // Zod Validation
     if (talep.action === 'cari_tahsilat') {
       const v = CariTahsilatSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Cari Tahsilat Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success) return { ok: false, error: `Cari Tahsilat Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
     }
     if (talep.action === 'cari_ekle') {
       const v = CariEkleSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Cari Ekleme Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success) return { ok: false, error: `Cari Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
     }
 
-    const cariId = (p as any).cariId as string | undefined;
+    const cariId = (p as Record<string, unknown>).cariId as string | undefined;
     if (cariId) {
       const cari = this.db.cari.find((c) => c.id === cariId);
       if (!cari || cari.deleted) {
@@ -30,7 +30,7 @@ export class CariAgent extends DomainAgent {
     return super.islemYap(talep);
   }
 
-  protected mapRequestToIntent(talep: AgentRequest<any>): Intent | null {
+  protected mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null {
     const p = talep.payload || {};
     if (talep.action === 'cari_tahsilat') {
       const validation = CariTahsilatSchema.parse(p);

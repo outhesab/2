@@ -7,23 +7,23 @@ export class StokAgent extends DomainAgent {
   readonly id = 'stok' as const;
   readonly yetkiler = ['stok.read', 'stok.write', 'rapor.read'] as const;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     const p = talep.payload ?? {};
 
     // Zod Validation
     if (talep.action === 'stok_guncelle') {
       const v = StokGuncelleSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Stok Güncelleme Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success) return { ok: false, error: `Stok Güncelleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
     }
     if (talep.action === 'urun_ekle') {
       const v = ProductSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Ürün Ekleme Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success) return { ok: false, error: `Ürün Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
     }
 
     return super.islemYap(talep);
   }
 
-  protected mapRequestToIntent(talep: AgentRequest<any>): Intent | null {
+  protected mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null {
     const p = talep.payload || {};
     if (talep.action === 'stok_guncelle') {
       const validation = StokGuncelleSchema.parse(p);

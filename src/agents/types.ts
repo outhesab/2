@@ -17,13 +17,13 @@ export type AgentPermission =
   | 'deep_seek.read'
   | 'deep_seek.write';
 
-export interface AgentRequest<P = any> {
+export interface AgentRequest<P = unknown> {
   action: string;
   payload?: P;
   meta?: Record<string, unknown>;
 }
 
-export interface AgentResponse<T = any> {
+export interface AgentResponse<T = unknown> {
   ok: boolean;
   data?: T;
   error?: string;

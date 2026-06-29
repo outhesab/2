@@ -5,12 +5,12 @@ export class FaturaAgent extends BaseAgent {
   readonly id = 'fatura' as const;
   readonly yetkiler = ['fatura.read', 'fatura.write', 'rapor.read'] as const;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     this.yayinla('fatura.islem', { action: talep.action, payload: talep.payload });
     if (!this.ctx) return { ok: false, error: 'Agent bağlanmadı' } as AgentResponse<R>;
 
     try {
-      const payload = (talep.payload as any) || {};
+      const payload = (talep.payload as Record<string, unknown>) || {};
       if (talep.action === 'sale') {
         this.save((prev) => ({
           ...prev,
@@ -44,7 +44,7 @@ export class FaturaAgent extends BaseAgent {
           ],
         }));
       }
-      return { ok: true, data: { agent: this.id, action: talep.action, status: 'completed' } as unknown as R };
+      return { ok: true, data: { agent: this.id, action: talep.action, status: 'completed' } as R };
     } catch (error) {
       return { ok: false, error: `Fatura hatası: ${error}` } as AgentResponse<R>;
     }
