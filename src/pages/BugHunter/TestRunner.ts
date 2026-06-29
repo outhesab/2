@@ -70,8 +70,8 @@ export class TestRunner {
         'Her parseFloat/parseInt sonrasi isNaN() kontrolu ekleyin.',
       );
     }
-    // @ts-expect-error — BugHunter demo: bilinçli hatalı karşılaştırma
-    // eslint-disable-next-line no-constant-condition — Test harness kasıtlı: loose equality bug'ı gösteriliyor
+    // @ts-expect-error — BugHunter demo: bilinçli hatalı karşılaştırma (loose equality bug'ı gösteriliyor)
+    // eslint-disable-next-line no-constant-condition
     if (0 == '') {
       this.addResult(
         cat,
