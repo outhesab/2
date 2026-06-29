@@ -28,7 +28,10 @@ export abstract class DomainAgent extends BaseAgent {
       const result = processIntent(intent, db);
 
       if (!result.ok) {
-        domainEventBus.emitError(result.error || 'İşlem başarısız', 'INTENT_FAILED', { agent: this.id, action: talep.action });
+        domainEventBus.emitError(result.error || 'İşlem başarısız', 'INTENT_FAILED', {
+          agent: this.id,
+          action: talep.action,
+        });
         return { ok: false, error: result.error } as AgentResponse<R>;
       }
 

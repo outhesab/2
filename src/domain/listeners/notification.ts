@@ -49,15 +49,15 @@ const TOAST_RULES: Record<string, ToastRule> = {
     type: 'success',
   },
   'system.error': {
-    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'Bir sistem hatası oluştu',
+    message: (e) => ((e.payload as Record<string, unknown>)?.message as string) || 'Bir sistem hatası oluştu',
     type: 'error',
   },
   'system.warning': {
-    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'Uyarı',
+    message: (e) => ((e.payload as Record<string, unknown>)?.message as string) || 'Uyarı',
     type: 'warning',
   },
   'system.success': {
-    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'İşlem başarılı',
+    message: (e) => ((e.payload as Record<string, unknown>)?.message as string) || 'İşlem başarılı',
     type: 'success',
   },
 };

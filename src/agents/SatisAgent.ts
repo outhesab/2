@@ -45,7 +45,10 @@ export class SatisAgent extends DomainAgent {
 
     // Silinmiş kayıt kontrolü (Sertleştirme)
     if (talep.payload && Array.isArray((talep.payload as Record<string, unknown>).items)) {
-      for (const item of (talep.payload as Record<string, unknown>).items as Array<{ productId: string; productName?: string }>) {
+      for (const item of (talep.payload as Record<string, unknown>).items as Array<{
+        productId: string;
+        productName?: string;
+      }>) {
         const p = this.db.products.find((x) => x.id === item.productId);
         if (!p || p.deleted) {
           return {

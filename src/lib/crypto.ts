@@ -77,7 +77,7 @@ async function getSessionDerivedKey(): Promise<CryptoKey | null> {
     enc.encode(session.userId + session.username), // Simple derivation material
     'PBKDF2',
     false,
-    ['deriveKey']
+    ['deriveKey'],
   );
 
   return crypto.subtle.deriveKey(
@@ -90,7 +90,7 @@ async function getSessionDerivedKey(): Promise<CryptoKey | null> {
     keyMaterial,
     { name: ALGO, length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 }
 

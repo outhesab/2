@@ -44,7 +44,7 @@ export class TransactionManager {
           ok: false,
           db: prev,
           blocked: true,
-          violations
+          violations,
         };
       }
 
@@ -53,7 +53,7 @@ export class TransactionManager {
       return {
         ok: true,
         db: next,
-        violations
+        violations,
       };
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
@@ -64,7 +64,7 @@ export class TransactionManager {
       return {
         ok: false,
         db: prev,
-        error: error.message
+        error: error.message,
       };
     }
   }

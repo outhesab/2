@@ -13,7 +13,11 @@ export class KasaAgent extends DomainAgent {
     // Zod Validation
     if (talep.action === 'kasa_gelir' || talep.action === 'kasa_gider') {
       const v = KasaIslemSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Kasa İşlemi Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success)
+        return {
+          ok: false,
+          error: `Kasa İşlemi Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
+        } as AgentResponse<R>;
 
       // Validation sonrası kasaId zaten string — cast gereksiz
       const kasaId = v.data.kasa;
