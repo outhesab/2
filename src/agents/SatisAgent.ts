@@ -1,11 +1,7 @@
 import { DomainAgent } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
-import { SaleIntentSchema } from '@/lib/schemas';
-
-function asString(val: unknown): string | undefined {
-  return typeof val === 'string' ? val : undefined;
-}
+import { SaleIntentSchema, SaleIptalSchema, SaleIadeSchema, SaleFiyatDuzeltSchema } from '@/lib/schemas';
 
 function asNumber(val: unknown): number | undefined {
   return typeof val === 'number' && !Number.isNaN(val) ? val : undefined;
@@ -28,7 +24,7 @@ export class SatisAgent extends DomainAgent {
   readonly id = 'satis' as const;
   readonly yetkiler = ['satis.read', 'satis.write', 'kasa.read', 'stok.read', 'cari.read', 'rapor.read'] as const;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     if (!this.ctx) {
       return { ok: false, error: `${this.id} agent bağlanmadı - önce bagla() çağrın` } as AgentResponse<R>;
     }
@@ -42,14 +38,14 @@ export class SatisAgent extends DomainAgent {
       if (!validation.success) {
         return {
           ok: false,
-          error: `GEÇERSİZ SATIŞ VERİSİ: ${validation.error.errors.map((e) => e.message).join(', ')}`,
+          error: `GEÇERSİZ SATIŞ VERİSİ: ${validation.error.issues.map((e) => e.message).join(', ')}`,
         } as AgentResponse<R>;
       }
     }
 
     // Silinmiş kayıt kontrolü (Sertleştirme)
-    if (talep.payload && Array.isArray((talep.payload as any).items)) {
-      for (const item of (talep.payload as any).items) {
+    if (talep.payload && Array.isArray((talep.payload as Record<string, unknown>).items)) {
+      for (const item of (talep.payload as Record<string, unknown>).items as Array<{ productId: string; productName?: string }>) {
         const p = this.db.products.find((x) => x.id === item.productId);
         if (!p || p.deleted) {
           return {
@@ -63,7 +59,7 @@ export class SatisAgent extends DomainAgent {
     return super.islemYap(talep);
   }
 
-  protected mapRequestToIntent(talep: AgentRequest<any>): Intent | null {
+  protected mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null {
     const p = talep.payload || {};
     switch (talep.action) {
       case 'yeniSatis':
@@ -87,22 +83,22 @@ export class SatisAgent extends DomainAgent {
       }
       case 'iptalEt':
       case 'sale_iptal': {
-        const saleId = asString(p.saleId);
-        if (!saleId) return null;
-        return { type: 'sale_iptal', payload: { saleId } };
+        const v = SaleIptalSchema.safeParse(p);
+        if (!v.success) return null;
+        return { type: 'sale_iptal', payload: { saleId: v.data.saleId } };
       }
       case 'iadeYap':
       case 'sale_iade': {
-        const saleId = asString(p.saleId);
-        if (!saleId) return null;
-        return { type: 'sale_iade', payload: { saleId, qty: asNumberOrRecord(p.quantity) } };
+        const v = SaleIadeSchema.safeParse(p);
+        if (!v.success) return null;
+        return { type: 'sale_iade', payload: { saleId: v.data.saleId, qty: asNumberOrRecord(v.data.quantity) } };
       }
       case 'fiyatDuzelt':
       case 'sale_fiyat_duzelt': {
-        const saleId = asString(p.saleId);
-        if (!saleId) return null;
-        const yeniFiyat = asNumberOrRecord(p.yeniFiyat) ?? asNumberOrRecord(p.unitPrice) ?? 0;
-        return { type: 'sale_fiyat_duzelt', payload: { saleId, yeniFiyat } };
+        const v = SaleFiyatDuzeltSchema.safeParse(p);
+        if (!v.success) return null;
+        const yeniFiyat = asNumberOrRecord(v.data.yeniFiyat) ?? asNumberOrRecord(v.data.unitPrice) ?? 0;
+        return { type: 'sale_fiyat_duzelt', payload: { saleId: v.data.saleId, yeniFiyat } };
       }
       default:
         return null;

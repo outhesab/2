@@ -69,11 +69,29 @@ export const KasaIslemSchema = z.object({
   category: z.string().optional(),
 });
 
+export const SaleIptalSchema = z.object({
+  saleId: z.string().min(1, 'Satış ID gerekli'),
+});
+
+export const SaleIadeSchema = z.object({
+  saleId: z.string().min(1, 'Satış ID gerekli'),
+  quantity: z.union([z.number().positive(), z.record(z.string(), z.number())]).optional(),
+});
+
+export const SaleFiyatDuzeltSchema = z.object({
+  saleId: z.string().min(1, 'Satış ID gerekli'),
+  yeniFiyat: z.union([z.number().min(0), z.record(z.string(), z.number())]).optional(),
+  unitPrice: z.union([z.number().min(0), z.record(z.string(), z.number())]).optional(),
+});
+
 export type ProductInput = z.infer<typeof ProductSchema>;
 export type SaleIntentInput = z.infer<typeof SaleIntentSchema>;
 export type CariTahsilatInput = z.infer<typeof CariTahsilatSchema>;
 export type CariEkleInput = z.infer<typeof CariEkleSchema>;
 export type StokGuncelleInput = z.infer<typeof StokGuncelleSchema>;
 export type KasaIslemInput = z.infer<typeof KasaIslemSchema>;
+export type SaleIptalInput = z.infer<typeof SaleIptalSchema>;
+export type SaleIadeInput = z.infer<typeof SaleIadeSchema>;
+export type SaleFiyatDuzeltInput = z.infer<typeof SaleFiyatDuzeltSchema>;
 
 
