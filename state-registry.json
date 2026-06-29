@@ -1,22 +1,22 @@
 {
-  "version": "3.43.2",
-  "generatedAt": "2026-06-29T16:11:17.773Z",
+  "version": "3.43.4",
+  "generatedAt": "2026-06-29T18:45:22.302Z",
   "git": {
-    "branch": "dev",
-    "commit": "c11c28a",
-    "commitFull": "c11c28afe4b668c3d63c1b3b02bb10692ffe9a41",
-    "commitMessage": "fix: v3.43.4 — Moratoryum Gün 1-2 (ölü kod + sessiz hatalar)",
-    "commitDate": "2026-06-23 14:44:18 +0300"
+    "branch": "fix/version-sync-3.43.4",
+    "commit": "82b4dab",
+    "commitFull": "82b4dab24820e9ba4c6d77803c8792cc2609e6b5",
+    "commitMessage": "merge: PR-A Rules of Hooks fix",
+    "commitDate": "2026-06-29 21:42:13 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-29T16:11:17.775Z"
+    "checkedAt": "2026-06-29T18:45:22.304Z"
   },
   "codebase": {
     "tsFiles": 209,
     "tsxFiles": 172,
     "cssFiles": 30,
-    "totalLOC": 73144,
+    "totalLOC": 73157,
     "dependencies": 40,
     "devDependencies": 41
   },

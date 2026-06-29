@@ -6,6 +6,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 ---
 
+## [3.43.4] - 23-29 Haziran 2026
+
+### Moratoryum Gün 1-3: Versiyon senkronu + cast temizliği + Zod 4 migration
+
+#### Hata Düzeltmeleri
+- App.tsx: React Rules of Hooks ihlali düzeltildi (PR-A: `isDBReady` erken return kontrolü tüm useEffect çağrılarından sonraya taşındı, production StrictMode console.error riski giderildi)
+- Versiyon senkronu: package.json, src/lib/changelog.ts ve bu dosya 3.43.4'e senkronize edildi (PR-B1)
+- version-consistency.test.ts: Bypass kaldırıldı, gerçek invariant'lar korunuyor (PR-B2)
+
+#### İyileştirmeler
+- console.* → logger dönüşümü tamamlandı: App.tsx, useSpeech.ts, permissions.ts, agentConfig.ts (PR-B3, 6 yer)
+- ESLint-disable prod code temizliği: useDBSync.ts, KontrolHalkasi.tsx dbRef pattern (PR-B4)
+- Zod 3 → Zod 4 `error.errors → error.issues` migration tamamlandı (PR-B8)
+- Type cast temizliği: Zod schema + dbAccess helper kullanımı (PR-B7)
+
+#### Not
+3.31.0 ile 3.43.4 arasındaki Moratoryum Gün 1-3 değişiklikleri özetlendi. Detay için `src/lib/changelog.ts` (TypeScript changelog) ve `code-review-repo_2-2026-06-29.md` (review raporu) referans alınabilir.
+
+---
+
 ## [3.31.0] - 17 Haziran 2026
 
 ### Yeni
