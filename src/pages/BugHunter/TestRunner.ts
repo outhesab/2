@@ -71,7 +71,7 @@ export class TestRunner {
       );
     }
     // @ts-expect-error — BugHunter demo: bilinçli hatalı karşılaştırma
-    // eslint-disable-next-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition — Test harness kasıtlı: loose equality bug'ı gösteriliyor
     if (0 == '') {
       this.addResult(
         cat,
