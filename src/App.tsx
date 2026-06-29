@@ -1,19 +1,13 @@
 import { logger } from '@/lib/logger';
-import { BRAND_NAME } from '@/config/brand';
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { ConfirmProvider } from '@/components/ConfirmDialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import LoginScreen, { useAuth } from '@/components/LoginScreen';
-import { getAllAgents } from '@/agents';
 import { useBeforeUnloadGuard, useStorageSync, useSyncStatusListener, useKeyboardShortcuts } from '@/hooks/app/shellLifecycle';
-import type { AgentContext } from '@/agents/types';
-import { useToast } from '@/components/Toast';
+import { useAppBootstrap } from '@/hooks/app/useAppBootstrap';
 import { useDB, type SyncStatus } from '@/hooks/useDB';
-import { setupDomainListeners } from '@/domain';
 import { applyUIPrefs, loadUIPrefs, loadUIPrefsFromFirebase, saveUIPrefs } from '@/hooks/useUIPrefs';
 import { loadConnConfigFromFirebase, saveConnConfig } from '@/lib/connConfig';
-import { getAppVersion, getVersionTitle } from '@/lib/version';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { Router, Switch, Route, useLocation } from 'wouter';
 import {
   TABS,
@@ -96,7 +90,6 @@ function AppContent({
   guestTimeLeft: number;
 }) {
   const { db, save, exportJSON, importJSON, undo, isDBReady, dbError, clearError } = useDB();
-  const { showToast } = useToast();
 
   const [location, setLocation] = useLocation();
   const activeTab = getActiveTabFromLocation(location);
@@ -113,87 +106,25 @@ function AppContent({
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
   const [uiPrefs, setUiPrefs] = useState(loadUIPrefs);
-  const isOnline = useOnlineStatus();
-  const prevOnline = useRef(isOnline);
 
-  // Global DB hata izleme
-  useEffect(() => {
-    if (!isDBReady) return;
-    if (dbError) {
-      showToast(dbError.message, 'error');
-      clearError();
-    }
-  }, [isDBReady, dbError, showToast, clearError]);
+  // PR-D1: 9 useEffect bloğu tek useAppBootstrap hook'unda toplandı
+  const { isOnline } = useAppBootstrap({
+    db,
+    save,
+    isDBReady,
+    dbError,
+    clearError,
+    isMobile,
+    setIsMobile,
+    exportJSON,
+    activeTab,
+    setExpandedGroups,
+  });
 
-  // Logger üzerinden kritik hataları Toast'a yönlendir
-  useEffect(() => {
-    if (!isDBReady) return;
-    return logger.subscribe((entry) => {
-      if (entry.level === 'critical' || (entry.level === 'error' && entry.cat === 'db')) {
-        showToast(`Sistem Hatası [${entry.cat}]: ${entry.msg}`, 'error');
-      }
-    });
-  }, [isDBReady, showToast]);
-
-  useEffect(() => {
-    if (!isDBReady) return;
-    const ctx: AgentContext = { getDB: () => db, save };
-    getAllAgents().forEach((agent) => agent.bagla(ctx));
-  }, [isDBReady, db, save]);
-
-  // Domain Event Bus listener'larını kur
-  useEffect(() => {
-    if (!isDBReady) return;
-    const cleanup = setupDomainListeners({
-      save,
-      showToast: (msg, type) => showToast(msg, type),
-    });
-    return cleanup;
-  }, [isDBReady, save, showToast]);
-
-  // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
+  // Shell lifecycle hook'ları (D1a + D1b)
   useBeforeUnloadGuard();
-
-  // UIPrefs değişikliklerini dinle (Settings'ten güncelleme gelince yansısın)
   useStorageSync(setUiPrefs);
-
-  // Sync durum izleme
   useSyncStatusListener(setSyncStatus, setLastSyncTime);
-
-  // Son güncelleme toast'u — her versiyon için bir kez göster
-  useEffect(() => {
-    const appVersion = getAppVersion();
-    const seenVersion = localStorage.getItem('lastSeenVersion');
-    try {
-      if (seenVersion !== appVersion) {
-        setTimeout(() => {
-          showToast(`${BRAND_NAME} v${appVersion} — ${getVersionTitle()}`, 'info', {
-            duration: 7000,
-          });
-          localStorage.setItem('lastSeenVersion', appVersion);
-        }, 1500);
-      }
-    } catch {
-      logger.warn('app', 'localStorage okuma/yazma hatası');
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    if (prevOnline.current !== isOnline) {
-      if (isOnline) {
-        showToast('İnternet bağlantısı yeniden kuruldu', 'success');
-      } else {
-        showToast('Çevrimdışı çalışıyorsunuz — veriler korunuyor', 'info');
-      }
-      prevOnline.current = isOnline;
-    }
-  }, [isOnline, showToast]);
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   const navigate = useCallback(
     (tab: TabId) => {
@@ -202,6 +133,9 @@ function AppContent({
     },
     [setLocation],
   );
+
+  // PR-D1b: Keyboard shortcuts
+  useKeyboardShortcuts(navigate);
 
   const toggleGroup = useCallback((group: TabGroup) => {
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
@@ -224,22 +158,6 @@ function AppContent({
         .filter((tab): tab is (typeof TABS)[number] => Boolean(tab)),
     [favoriteTabs],
   );
-
-  useEffect(() => {
-    const activeGroup = TABS.find((tab) => tab.id === activeTab)?.group;
-    if (!activeGroup) return;
-    setExpandedGroups((prev) => (prev[activeGroup] ? prev : { ...prev, [activeGroup]: true }));
-  }, [activeTab]);
-
-  // Yedek event listener (Dashboard widget'ından tetiklenir)
-  useEffect(() => {
-    const handler = () => {
-      exportJSON();
-      localStorage.setItem('sobaYonetim_lastBackup', new Date().toISOString());
-    };
-    window.addEventListener('soba:exportJSON', handler);
-    return () => window.removeEventListener('soba:exportJSON', handler);
-  }, [exportJSON]);
 
   const badges = useMemo(
     () => ({
