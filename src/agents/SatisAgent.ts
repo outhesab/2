@@ -1,7 +1,9 @@
-import { DomainAgent } from '@/agents/DomainAgent';
+import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
 import { SaleIntentSchema, SaleIptalSchema, SaleIadeSchema, SaleFiyatDuzeltSchema } from '@/lib/schemas';
+import type { SaleIptalParams, SaleIadeParams, SaleFiyatDuzeltParams } from '@/agents/actionMap';
+import type { YeniSatisParams } from '@/agents/types';
 
 function asNumber(val: unknown): number | undefined {
   return typeof val === 'number' && !Number.isNaN(val) ? val : undefined;
@@ -23,6 +25,47 @@ function asNumberOrRecord(val: unknown): number | Record<string, number> | undef
 export class SatisAgent extends DomainAgent {
   readonly id = 'satis' as const;
   readonly yetkiler = ['satis.read', 'satis.write', 'kasa.read', 'stok.read', 'cari.read', 'rapor.read'] as const;
+
+  /**
+   * PR-D2: Typed action handler'lar — her action için payload tipi
+   * AgentActionMap'ten geliyor, cast ihtiyacı sıfır.
+   */
+  protected actionHandlers: ActionHandlerMap = {
+    yeniSatis: (payload: YeniSatisParams) => this.handleYeniSatis(payload),
+    satis: (payload: YeniSatisParams) => this.handleYeniSatis(payload),
+    sale_iptal: (payload: SaleIptalParams) => this.handleSaleIptal(payload),
+    iptalEt: (payload: SaleIptalParams) => this.handleSaleIptal(payload),
+    sale_iade: (payload: SaleIadeParams) => this.handleSaleIade(payload),
+    iadeYap: (payload: SaleIadeParams) => this.handleSaleIade(payload),
+    sale_fiyat_duzelt: (payload: SaleFiyatDuzeltParams) => this.handleSaleFiyatDuzelt(payload),
+    fiyatDuzelt: (payload: SaleFiyatDuzeltParams) => this.handleSaleFiyatDuzelt(payload),
+  };
+
+  /**
+   * Typed handler — payload zaten SaleIptalParams, cast yok.
+   */
+  private handleSaleIptal(payload: SaleIptalParams): AgentResponse<unknown> {
+    if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
+    return { ok: true, data: { saleId: payload.saleId } };
+  }
+
+  private handleSaleIade(payload: SaleIadeParams): AgentResponse<unknown> {
+    if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
+    return { ok: true, data: { saleId: payload.saleId, qty: asNumberOrRecord(payload.quantity) } };
+  }
+
+  private handleSaleFiyatDuzelt(payload: SaleFiyatDuzeltParams): AgentResponse<unknown> {
+    if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
+    const yeniFiyat = asNumberOrRecord(payload.yeniFiyat) ?? asNumberOrRecord(payload.unitPrice) ?? 0;
+    return { ok: true, data: { saleId: payload.saleId, yeniFiyat } };
+  }
+
+  private handleYeniSatis(payload: YeniSatisParams): AgentResponse<unknown> {
+    if (!payload.items || payload.items.length === 0) {
+      return { ok: false, error: 'En az bir ürün gerekli' };
+    }
+    return { ok: true, data: payload };
+  }
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     if (!this.ctx) {

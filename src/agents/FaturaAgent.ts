@@ -1,9 +1,11 @@
-import { BaseAgent } from '@/agents/BaseAgent';
+import { BaseAgent, type ActionHandlerMap } from '@/agents/BaseAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 
 export class FaturaAgent extends BaseAgent {
   readonly id = 'fatura' as const;
   readonly yetkiler = ['fatura.read', 'fatura.write', 'rapor.read'] as const;
+  // PR-D2: Typed action handlers (D2d follow-up'ta eklenecek)
+  protected actionHandlers: ActionHandlerMap = {};
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     this.yayinla('fatura.islem', { action: talep.action, payload: talep.payload });

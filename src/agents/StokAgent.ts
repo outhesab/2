@@ -1,4 +1,4 @@
-import { DomainAgent } from '@/agents/DomainAgent';
+import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
 import { StokGuncelleSchema, ProductSchema } from '@/lib/schemas';
@@ -6,6 +6,8 @@ import { StokGuncelleSchema, ProductSchema } from '@/lib/schemas';
 export class StokAgent extends DomainAgent {
   readonly id = 'stok' as const;
   readonly yetkiler = ['stok.read', 'stok.write', 'rapor.read'] as const;
+  // PR-D2: Typed action handlers (D2b follow-up'ta eklenecek)
+  protected actionHandlers: ActionHandlerMap = {};
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     const p = talep.payload ?? {};
