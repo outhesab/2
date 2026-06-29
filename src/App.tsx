@@ -343,7 +343,6 @@ function AppContent({
     return <PageFallback />;
   }
 
-
   return (
     <div className="app-shell">
       {/* Mobile overlay */}

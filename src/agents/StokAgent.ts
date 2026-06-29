@@ -13,11 +13,19 @@ export class StokAgent extends DomainAgent {
     // Zod Validation
     if (talep.action === 'stok_guncelle') {
       const v = StokGuncelleSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Stok Güncelleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success)
+        return {
+          ok: false,
+          error: `Stok Güncelleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
+        } as AgentResponse<R>;
     }
     if (talep.action === 'urun_ekle') {
       const v = ProductSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Ürün Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success)
+        return {
+          ok: false,
+          error: `Ürün Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
+        } as AgentResponse<R>;
     }
 
     return super.islemYap(talep);

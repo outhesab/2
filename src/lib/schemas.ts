@@ -93,5 +93,3 @@ export type KasaIslemInput = z.infer<typeof KasaIslemSchema>;
 export type SaleIptalInput = z.infer<typeof SaleIptalSchema>;
 export type SaleIadeInput = z.infer<typeof SaleIadeSchema>;
 export type SaleFiyatDuzeltInput = z.infer<typeof SaleFiyatDuzeltSchema>;
-
-

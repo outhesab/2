@@ -50,7 +50,7 @@ export function useDBActions(
           }
           return next;
         },
-        (p, n) => validateAndClassify(p, n, `${opts.action}: Rule Engine`)
+        (p, n) => validateAndClassify(p, n, `${opts.action}: Rule Engine`),
       );
 
       if (txResult.error) {
@@ -67,10 +67,10 @@ export function useDBActions(
       const { violations, hasBlock, hasWarn } = validateAndClassify(prev, txResult.db, `${opts.action}: Final Check`);
 
       if (hasBlock) {
-        const msg = violations.find(v => v.severity === 'block')?.message || opts.blockMsg;
+        const msg = violations.find((v) => v.severity === 'block')?.message || opts.blockMsg;
         domainEventBus.emitError(msg, 'BLOCK_VIOLATION');
       } else if (hasWarn) {
-        const msg = violations.find(v => v.severity === 'warn')?.message || 'İşlem sırasında uyarılar oluştu';
+        const msg = violations.find((v) => v.severity === 'warn')?.message || 'İşlem sırasında uyarılar oluştu';
         domainEventBus.emitWarning(msg, 'WARN_VIOLATION');
       }
 

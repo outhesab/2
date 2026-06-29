@@ -13,18 +13,29 @@ export class CariAgent extends DomainAgent {
     // Zod Validation
     if (talep.action === 'cari_tahsilat') {
       const v = CariTahsilatSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Cari Tahsilat Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success)
+        return {
+          ok: false,
+          error: `Cari Tahsilat Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
+        } as AgentResponse<R>;
     }
     if (talep.action === 'cari_ekle') {
       const v = CariEkleSchema.safeParse(p);
-      if (!v.success) return { ok: false, error: `Cari Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` } as AgentResponse<R>;
+      if (!v.success)
+        return {
+          ok: false,
+          error: `Cari Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
+        } as AgentResponse<R>;
     }
 
     const cariId = (p as Record<string, unknown>).cariId as string | undefined;
     if (cariId) {
       const cari = this.db.cari.find((c) => c.id === cariId);
       if (!cari || cari.deleted) {
-        return { ok: false, error: `CARI HATASI: ${cariId} ID'li cari hesap bulunamadı veya silinmiş.` } as AgentResponse<R>;
+        return {
+          ok: false,
+          error: `CARI HATASI: ${cariId} ID'li cari hesap bulunamadı veya silinmiş.`,
+        } as AgentResponse<R>;
       }
     }
     return super.islemYap(talep);

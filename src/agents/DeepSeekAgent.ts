@@ -143,7 +143,10 @@ export class DeepSeekAgent extends BaseAgent {
     }
 
     if (talep.action === 'oner' && p.veri) {
-      return this.onerUret(p.veri as Record<string, unknown>, p.apiKey as string | undefined) as unknown as AgentResponse<R>;
+      return this.onerUret(
+        p.veri as Record<string, unknown>,
+        p.apiKey as string | undefined,
+      ) as unknown as AgentResponse<R>;
     }
 
     return {
