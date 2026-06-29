@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { formatMoney } from '@/lib/utils-tr';
 import { quickHealthCheck, runHealthCheck, type HealthReport, type HealthStatus } from '@/lib/healthCheck';
 import type { DB } from '@/types';
@@ -96,15 +96,18 @@ export default function KontrolHalkasi({ db }: Props) {
     return { ...quick, duration: 0 };
   });
   const [fullChecking, setFullChecking] = useState(false);
+  const dbRef = useRef(db);
+  useEffect(() => {
+    dbRef.current = db;
+  }, [db]);
 
   // Sayfa açılınca tam sağlık kontrolü yap (Firebase dahil)
   useEffect(() => {
     setFullChecking(true);
-    runHealthCheck(db as unknown as Record<string, unknown>).then((r) => {
+    runHealthCheck(dbRef.current as unknown as Record<string, unknown>).then((r) => {
       setHealthReport(r);
       setFullChecking(false);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const recheck = useCallback(() => {

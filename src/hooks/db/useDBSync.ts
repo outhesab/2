@@ -6,6 +6,10 @@ import type { DB } from '@/types';
 
 export function useDBSync(db: DB, setDb: React.Dispatch<React.SetStateAction<DB>>) {
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dbRef = useRef(db);
+  useEffect(() => {
+    dbRef.current = db;
+  }, [db]);
 
   useEffect(() => {
     const timerToClear = syncTimer.current;
@@ -18,7 +22,7 @@ export function useDBSync(db: DB, setDb: React.Dispatch<React.SetStateAction<DB>
       }
 
       const cloudDb = await loadFromFirebase(session.userId);
-      if (cloudDb && (cloudDb._version || 0) > (db._version || 0)) {
+      if (cloudDb && (cloudDb._version || 0) > (dbRef.current._version || 0)) {
         saveToStorage(cloudDb);
         await saveToIndexedSnapshot(cloudDb);
         setDb(cloudDb);
@@ -37,8 +41,7 @@ export function useDBSync(db: DB, setDb: React.Dispatch<React.SetStateAction<DB>
         clearTimeout(timerToClear);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setDb]);
 
   return { syncTimer };
 }
