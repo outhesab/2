@@ -5,10 +5,10 @@ import { ConfirmProvider } from '@/components/ConfirmDialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import LoginScreen, { useAuth } from '@/components/LoginScreen';
 import { getAllAgents } from '@/agents';
-import { useBeforeUnloadGuard, useStorageSync } from '@/hooks/app/shellLifecycle';
+import { useBeforeUnloadGuard, useStorageSync, useSyncStatusListener, useKeyboardShortcuts } from '@/hooks/app/shellLifecycle';
 import type { AgentContext } from '@/agents/types';
 import { useToast } from '@/components/Toast';
-import { onSyncStatus, useDB, type SyncStatus } from '@/hooks/useDB';
+import { useDB, type SyncStatus } from '@/hooks/useDB';
 import { setupDomainListeners } from '@/domain';
 import { applyUIPrefs, loadUIPrefs, loadUIPrefsFromFirebase, saveUIPrefs } from '@/hooks/useUIPrefs';
 import { loadConnConfigFromFirebase, saveConnConfig } from '@/lib/connConfig';
@@ -158,20 +158,7 @@ function AppContent({
   useStorageSync(setUiPrefs);
 
   // Sync durum izleme
-  useEffect(() => {
-    const unsub = onSyncStatus((status, detail) => {
-      setSyncStatus(status);
-      if (status === 'saved')
-        setLastSyncTime(
-          new Date().toLocaleTimeString('tr-TR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-        );
-      if (status === 'error' && detail) logger.warn('sync', 'sync hatası', { detail });
-    });
-    return unsub;
-  }, []);
+  useSyncStatusListener(setSyncStatus, setLastSyncTime);
 
   // Son güncelleme toast'u — her versiyon için bir kez göster
   useEffect(() => {
@@ -301,25 +288,7 @@ function AppContent({
             : 'sistem'; // FIXED: Aktif grup rengi className ile yonetilir
 
   // Keyboard shortcuts
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        const map: Record<string, TabId> = {
-          '1': 'dashboard',
-          '2': 'products',
-          '3': 'sales',
-          '4': 'kasa',
-          '5': 'reports',
-        };
-        if (map[e.key]) {
-          e.preventDefault();
-          navigate(map[e.key]);
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [navigate]);
+  useKeyboardShortcuts(navigate);
 
   if (!isDBReady) {
     return <PageFallback />;
