@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import type { DB, RuleViolation, DBError } from '@/types';
 import { genId } from '@/lib/utils-tr';
-import { logger } from '@/lib/logger';
 import { isGuestSession, getUserSession } from '@/lib/userManager';
 import { safeClone } from '@/lib/safeClone';
 import { saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';

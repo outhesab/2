@@ -1,6 +1,5 @@
 import type { DB, RuleViolation } from '@/types';
 import { logger } from '@/lib/logger';
-import { safeClone } from '@/lib/safeClone';
 
 export interface TransactionResult {
   ok: boolean;

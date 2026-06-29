@@ -1,7 +1,7 @@
 import EmptyState from '@/components/EmptyState';
 import { SkeletonStatRow, SkeletonTable } from '@/components/SkeletonLoaders';
 import { PackageSearch } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDebounce } from '@/pages/useDebounce';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';

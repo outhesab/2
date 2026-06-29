@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { loadFromStorage } from '@/lib/db/storage';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { loadFromStorage, loadFromIndexedSnapshot } from '@/lib/db/storage';
 import type { DB } from '@/types';
 import { emitSync, type SyncStatus } from './sync';
 import { useDBQueries } from './useDBQueries';
@@ -26,14 +26,18 @@ export function useDB() {
 
   // Initial load from IndexedDB (higher priority than localStorage)
   useEffect(() => {
-    import('@/lib/db/storage').then(async (m) => {
-      const snap = await m.loadFromIndexedSnapshot();
+    let isMounted = true;
+    loadFromIndexedSnapshot().then((snap) => {
+      if (!isMounted) return;
       if (snap && snap._version > (db._version || 0)) {
         setDb(snap);
       }
       setIsDbReady(true);
     });
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [db._version]);
 
   const { syncTimer } = useDBSync(db, setDb);
 
