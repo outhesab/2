@@ -1,4 +1,4 @@
-import { BaseAgent } from '@/agents/BaseAgent';
+import { BaseAgent, type ActionHandlerMap } from '@/agents/BaseAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import { askDeepSeek } from '@/lib/deepseek';
 
@@ -52,6 +52,8 @@ function buildContext(db: unknown): string {
 export class DeepSeekAgent extends BaseAgent {
   readonly id = 'deep_seek' as const;
   readonly yetkiler = ['deep_seek.read', 'deep_seek.write'] as const;
+  // PR-D2: Typed action handlers (D2d follow-up'ta eklenecek)
+  protected actionHandlers: ActionHandlerMap = {};
 
   async analizEt(soru: string, apiKey?: string): Promise<AgentResponse<string>> {
     if (!this.yetkiKontrolu('deep_seek.read')) {

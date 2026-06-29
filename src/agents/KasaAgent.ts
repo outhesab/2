@@ -1,4 +1,4 @@
-import { DomainAgent } from '@/agents/DomainAgent';
+import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
 import { KasaIslemSchema } from '@/lib/schemas';
@@ -6,6 +6,8 @@ import { KasaIslemSchema } from '@/lib/schemas';
 export class KasaAgent extends DomainAgent {
   readonly id = 'kasa' as const;
   readonly yetkiler = ['kasa.read', 'kasa.write', 'rapor.read'] as const;
+  // PR-D2: Typed action handlers (D2b follow-up'ta eklenecek)
+  protected actionHandlers: ActionHandlerMap = {};
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     const p = talep.payload ?? {};

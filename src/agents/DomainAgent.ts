@@ -1,4 +1,4 @@
-import { BaseAgent } from './BaseAgent';
+import { BaseAgent, type ActionHandlerMap } from './BaseAgent';
 import { processIntent } from '@/domain/intentEngine';
 import { applyIntentResult } from '@/hooks/db/dbHelpers';
 import type { AgentRequest, AgentResponse } from './types';
@@ -16,7 +16,7 @@ export abstract class DomainAgent extends BaseAgent {
     try {
       this.yayinla(`${this.id}.islem`, { action: talep.action, payload: talep.payload });
 
-      const intent = this.mapRequestToIntent(talep);
+      const intent = this.mapRequestToIntent(talep as AgentRequest<unknown>);
 
       if (!intent) {
         const error = `Desteklenmeyen aksiyon: ${talep.action}`;
@@ -51,3 +51,6 @@ export abstract class DomainAgent extends BaseAgent {
     }
   }
 }
+
+// Re-export for convenience
+export type { ActionHandlerMap };
