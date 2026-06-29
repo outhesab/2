@@ -5,6 +5,7 @@ import { ConfirmProvider } from '@/components/ConfirmDialog';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import LoginScreen, { useAuth } from '@/components/LoginScreen';
 import { getAllAgents } from '@/agents';
+import { useBeforeUnloadGuard, useStorageSync } from '@/hooks/app/shellLifecycle';
 import type { AgentContext } from '@/agents/types';
 import { useToast } from '@/components/Toast';
 import { onSyncStatus, useDB, type SyncStatus } from '@/hooks/useDB';
@@ -151,29 +152,10 @@ function AppContent({
   }, [isDBReady, save, showToast]);
 
   // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue =
-        'PARSPEL: Devam eden işlemleriniz veya takip edilen loglarınız olabilir. Ayrılmak istediğinize emin misiniz?';
-      return e.returnValue;
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
+  useBeforeUnloadGuard();
 
   // UIPrefs değişikliklerini dinle (Settings'ten güncelleme gelince yansısın)
-  useEffect(() => {
-    const handler = () => setUiPrefs(loadUIPrefs());
-    window.addEventListener('storage', handler);
-    window.addEventListener('sobaUI:updated', handler);
-    return () => {
-      window.removeEventListener('storage', handler);
-      window.removeEventListener('sobaUI:updated', handler);
-    };
-  }, []);
+  useStorageSync(setUiPrefs);
 
   // Sync durum izleme
   useEffect(() => {
