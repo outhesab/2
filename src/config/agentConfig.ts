@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 export type AgentId = 'satis' | 'stok' | 'cari' | 'kasa' | 'fatura' | 'rapor';
 
 export type AgentSettings = Record<AgentId, boolean>;
@@ -29,8 +31,8 @@ export function loadAgentSettings(): AgentSettings {
       ...defaultAgentSettings,
       ...partial,
     };
-  } catch {
-    console.warn('AgentConfig', 'loadAgentSettings localStorage parse hatası');
+  } catch (e) {
+    logger.warn('config', 'loadAgentSettings localStorage parse hatası', { error: e });
     return { ...defaultAgentSettings };
   }
 }
