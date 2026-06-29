@@ -16,8 +16,8 @@ export class SmartHandler implements IntentHandler {
   // Zod schema for validating AI-generated action chains
   private readonly AgentRequestSchema = z.object({
     action: z.string().min(1),
-    payload: z.record(z.string(), z.any()).optional(),
-    meta: z.record(z.string(), z.any()).optional(),
+    payload: z.record(z.string(), z.unknown()).optional(),
+    meta: z.record(z.string(), z.unknown()).optional(),
   });
   private readonly AgentRequestChainSchema = z.array(this.AgentRequestSchema);
 
@@ -119,9 +119,9 @@ export class SmartHandler implements IntentHandler {
     let chainContext: Record<string, unknown> = {};
 
     for (const actionReq of actions) {
-      const augmentedRequest = {
+      const augmentedRequest: AgentRequest = {
         ...actionReq,
-        payload: { ...actionReq.payload, ...chainContext },
+        payload: { ...(actionReq.payload ?? {}), ...chainContext } as Record<string, unknown>,
       };
 
       const res = await this.executeSingleAction(augmentedRequest);

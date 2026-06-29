@@ -71,7 +71,7 @@ function money(n: number): string {
  * Bilinmeyen aksiyonlar için generic fallback döner.
  */
 export function generateReadBack(req: AgentRequest): string {
-  const p = req.payload || {};
+  const p = (req.payload as Record<string, unknown>) || {};
   const action = req.action;
 
   switch (action) {
