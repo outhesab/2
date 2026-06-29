@@ -5,13 +5,13 @@ export class RaporAgent extends BaseAgent {
   readonly id = 'rapor' as const;
   readonly yetkiler = ['stok.read', 'kasa.read', 'cari.read', 'satis.read', 'fatura.read', 'rapor.read'] as const;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     this.yayinla('rapor.islem', { action: talep.action, payload: talep.payload });
     if (!this.ctx) return { ok: false, error: 'Agent bağlanmadı' } as AgentResponse<R>;
 
     try {
       const db = this.db;
-      const payload = (talep.payload as any) || {};
+      const payload = (talep.payload as Record<string, unknown>) || {};
       const action = talep.action;
 
       // Rapor agent'ı işlem sonrası özet bilgi toplar ve loglar
@@ -61,7 +61,7 @@ export class RaporAgent extends BaseAgent {
           action,
           status: 'completed',
           report: reportData,
-        } as unknown as R,
+        } as R,
       };
     } catch (error) {
       return { ok: false, error: `Rapor hatası: ${error}` } as AgentResponse<R>;

@@ -125,25 +125,25 @@ export class DeepSeekAgent extends BaseAgent {
     }
   }
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     this.yayinla('deep_seek.islem', {
       action: talep.action,
       payload: talep.payload,
       meta: talep.meta,
     });
 
-    const p = (talep.payload as any) || {};
+    const p = (talep.payload as Record<string, unknown>) || {};
 
     if (talep.action === 'analiz' && p.soru) {
-      return this.analizEt(String(p.soru), p.apiKey as string | undefined) as any;
+      return this.analizEt(String(p.soru), p.apiKey as string | undefined) as unknown as AgentResponse<R>;
     }
 
     if (talep.action === 'analyze_intent' && p.prompt) {
-      return this.analizEt(String(p.prompt), p.apiKey as string | undefined) as any;
+      return this.analizEt(String(p.prompt), p.apiKey as string | undefined) as unknown as AgentResponse<R>;
     }
 
     if (talep.action === 'oner' && p.veri) {
-      return this.onerUret(p.veri as Record<string, unknown>, p.apiKey as string | undefined) as any;
+      return this.onerUret(p.veri as Record<string, unknown>, p.apiKey as string | undefined) as unknown as AgentResponse<R>;
     }
 
     return {
@@ -152,7 +152,7 @@ export class DeepSeekAgent extends BaseAgent {
         agent: this.id,
         action: talep.action,
         status: 'queued',
-      } as unknown as R,
+      } as R,
     };
   }
 }

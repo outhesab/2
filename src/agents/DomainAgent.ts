@@ -7,9 +7,9 @@ import { dbMutex } from '@/lib/mutex';
 import { domainEventBus } from '@/domain/eventBus';
 
 export abstract class DomainAgent extends BaseAgent {
-  protected abstract mapRequestToIntent(talep: AgentRequest<any>): Intent | null;
+  protected abstract mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null;
 
-  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     if (!this.ctx) return { ok: false, error: `${this.id} bağlanmadı` } as AgentResponse<R>;
 
     const unlock = await dbMutex.lock();
@@ -41,7 +41,7 @@ export abstract class DomainAgent extends BaseAgent {
           action: talep.action,
           status: 'completed',
           intentResult: result,
-        } as unknown as R,
+        } as R,
       };
     } finally {
       unlock();

@@ -34,5 +34,5 @@ export abstract class BaseAgent {
     return agentBus.onEvent(handler);
   }
 
-  abstract islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>>;
+  abstract islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>>;
 }
