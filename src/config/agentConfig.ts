@@ -32,7 +32,7 @@ export function loadAgentSettings(): AgentSettings {
       ...partial,
     };
   } catch (e) {
-    logger.warn('config', 'loadAgentSettings localStorage parse hatası', { error: e });
+    logger.warn('system', 'loadAgentSettings localStorage parse hatası', { error: e });
     return { ...defaultAgentSettings };
   }
 }
