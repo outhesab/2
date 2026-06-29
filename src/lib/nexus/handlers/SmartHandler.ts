@@ -22,9 +22,7 @@ export class SmartHandler implements IntentHandler {
   private readonly AgentRequestChainSchema = z.array(this.AgentRequestSchema);
 
   // Keywords that indicate a multi-step plan
-  private readonly planKeywords = [
-    'öncelikle', 'ardından', 'sonra', 'adım', 'plan', 'yapacağım', 'sırasıyla',
-  ];
+  private readonly planKeywords = ['öncelikle', 'ardından', 'sonra', 'adım', 'plan', 'yapacağım', 'sırasıyla'];
 
   canHandle(input: string, context: HandlerContext): boolean {
     // Skip if composer is active (ComposerHandler handles that)
@@ -65,7 +63,7 @@ export class SmartHandler implements IntentHandler {
 
   private containsPlan(text: string): boolean {
     const lower = text.toLowerCase();
-    return this.planKeywords.some(kw => lower.includes(kw));
+    return this.planKeywords.some((kw) => lower.includes(kw));
   }
 
   private async handleComplexPlan(input: string, planText: string, _db: DB): Promise<ExecutiveResult> {
@@ -100,12 +98,20 @@ export class SmartHandler implements IntentHandler {
       const validationResult = this.AgentRequestChainSchema.safeParse(parsed);
       if (!validationResult.success) {
         logger.error('smart', 'Plan validation failed', { errors: validationResult.error.format() });
-        return { type: 'smart', response: 'AI planı şema doğrulaması geçemedi, lütfen tekrar deneyin.', executedActions: [] };
+        return {
+          type: 'smart',
+          response: 'AI planı şema doğrulaması geçemedi, lütfen tekrar deneyin.',
+          executedActions: [],
+        };
       }
       actions = validationResult.data;
     } catch (e) {
       logger.error('smart', 'Plan parsing failed', { error: e });
-      return { type: 'smart', response: 'Plan oluşturuldu ama teknik bir hata nedeniyle uygulanamadı.', executedActions: [] };
+      return {
+        type: 'smart',
+        response: 'Plan oluşturuldu ama teknik bir hata nedeniyle uygulanamadı.',
+        executedActions: [],
+      };
     }
 
     // Execute action chain
@@ -132,7 +138,7 @@ export class SmartHandler implements IntentHandler {
 
     return {
       type: 'action_chain',
-      response: executed.every(a => a.status === 'success')
+      response: executed.every((a) => a.status === 'success')
         ? 'Tüm adımlar başarıyla uygulandı.'
         : 'Bazı adımlar sırasında hata oluştu.',
       executedActions: executed,
@@ -140,10 +146,14 @@ export class SmartHandler implements IntentHandler {
     };
   }
 
-  private async executeSingleAction(request: AgentRequest): Promise<{ success: boolean; message: string; data?: unknown }> {
+  private async executeSingleAction(
+    request: AgentRequest,
+  ): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       const agentId = this.mapActionToAgent(request.action);
-      const agent = (getAgent as (id: string) => { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> })(agentId);
+      const agent = (getAgent as (id: string) => { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> })(
+        agentId,
+      );
 
       const result = await agent.islemYap(request);
 

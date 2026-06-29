@@ -18,7 +18,10 @@ vi.mock('@/lib/logger', () => ({
   logger: { time: vi.fn(() => ({ end: vi.fn() })), warn: vi.fn(), info: vi.fn(), error: vi.fn() },
 }));
 vi.mock('@/lib/utils-tr', () => ({ genId: vi.fn(() => 'id-1') }));
-vi.mock('@/lib/userManager', () => ({ isGuestSession: vi.fn(() => false), getUserSession: vi.fn(() => ({ username: 'test', role: 'admin', isGuest: false })) }));
+vi.mock('@/lib/userManager', () => ({
+  isGuestSession: vi.fn(() => false),
+  getUserSession: vi.fn(() => ({ username: 'test', role: 'admin', isGuest: false })),
+}));
 vi.mock('@/lib/safeClone', () => ({ safeClone: vi.fn((x: unknown) => JSON.parse(JSON.stringify(x))) }));
 vi.mock('./sync', () => ({
   saveToFirebase: vi.fn(),

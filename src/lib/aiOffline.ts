@@ -25,23 +25,33 @@ export function offlineReply(db: DB, query: string): string {
 
   // --- 1. SATIŞ & PERFORMANS ANALİZİ ---
   if (
-    q.includes('satış') || q.includes('analiz') || q.includes('performans') || 
-    q.includes('bu ay') || q.includes('kâr') || q.includes('marj') || q.includes('ciro')
+    q.includes('satış') ||
+    q.includes('analiz') ||
+    q.includes('performans') ||
+    q.includes('bu ay') ||
+    q.includes('kâr') ||
+    q.includes('marj') ||
+    q.includes('ciro')
   ) {
     // Geçen ay karşılaştırması
     const today = new Date();
     const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
     const lastMonthCiro = db.sales
-      .filter(s => !s.deleted && s.status === 'tamamlandi' && new Date(s.createdAt) >= lastMonthStart && new Date(s.createdAt) <= lastMonthEnd)
+      .filter(
+        (s) =>
+          !s.deleted &&
+          s.status === 'tamamlandi' &&
+          new Date(s.createdAt) >= lastMonthStart &&
+          new Date(s.createdAt) <= lastMonthEnd,
+      )
       .reduce((sum, s) => sum + s.total, 0);
-    
+
     const buyume = lastMonthCiro > 0 ? (((ciro - lastMonthCiro) / lastMonthCiro) * 100).toFixed(1) : 'N/A';
 
     // En çok satan ürün
     const prodAgg = getProductSalesAgg(db);
-    const topProd = Object.entries(prodAgg)
-      .sort((a, b) => b[1].adet - a[1].adet)[0];
+    const topProd = Object.entries(prodAgg).sort((a, b) => b[1].adet - a[1].adet)[0];
 
     return `📊 **Satış Performans Analizi**\n- Bu Ay Ciro: ${formatMoney(ciro)}\n- Bu Ay Kâr: ${formatMoney(kar)} (%${marj} marj)\n- Geçen Aya Göre: ${buyume === 'N/A' ? 'Veri yok' : `%${buyume} büyüme`}\n- En Çok Satan: ${topProd ? `${topProd[0]} (${topProd[1].adet} adet)` : 'Veri yok'}\n\n⚠️ *Cevrimdisi mod - detaylar için internet gerekli*`;
   }
@@ -55,7 +65,13 @@ export function offlineReply(db: DB, query: string): string {
   }
 
   // --- 3. CARİ & ALACAK TAKİBİ ---
-  if (q.includes('alacak') || q.includes('borç') || q.includes('cari') || q.includes('müşteri') || q.includes('tahsilat')) {
+  if (
+    q.includes('alacak') ||
+    q.includes('borç') ||
+    q.includes('cari') ||
+    q.includes('müşteri') ||
+    q.includes('tahsilat')
+  ) {
     const alacak = computeAlacak(db);
     const topBorclu = getTopBorclu(db);
     const overdue = getOverdueMusteri(db);
@@ -77,17 +93,31 @@ export function offlineReply(db: DB, query: string): string {
     const totalUrun = db.products.filter((p) => !p.deleted).length;
     return `📦 **Stok Özeti**\n- Toplam Ürün: ${totalUrun} | Stok Değeri: ${formatMoney(stokDeger)}\n- Stok Biten: ${out.length}${
       out.length
-        ? '\n  ' + out.slice(0, 5).map((p) => `• ${p.name}`).join('\n  ')
+        ? '\n  ' +
+          out
+            .slice(0, 5)
+            .map((p) => `• ${p.name}`)
+            .join('\n  ')
         : ''
     }\n- Az Stoklu: ${low.length}${
       low.length
-        ? '\n  ' + low.slice(0, 5).map((p) => `• ${p.name} (${p.stock}/${p.minStock})`).join('\n  ')
+        ? '\n  ' +
+          low
+            .slice(0, 5)
+            .map((p) => `• ${p.name} (${p.stock}/${p.minStock})`)
+            .join('\n  ')
         : ''
     }\n\n⚠️ *Cevrimdisi mod*`;
   }
 
   // --- 5. RİSK & ÖNERİ ANALİZİ ---
-  if (q.includes('risk') || q.includes('kritik') || q.includes('öneri') || q.includes('ipucu') || q.includes('ne yapmalıyım')) {
+  if (
+    q.includes('risk') ||
+    q.includes('kritik') ||
+    q.includes('öneri') ||
+    q.includes('ipucu') ||
+    q.includes('ne yapmalıyım')
+  ) {
     const out = getOutOfStockProducts(db).length;
     const low = getLowStockProducts(db).length;
     const alacak = computeAlacak(db);
@@ -98,13 +128,12 @@ export function offlineReply(db: DB, query: string): string {
     if (alacak > 100000) riskler.push(`💳 Yüksek alacak riski: ${formatMoney(alacak)}`);
     if (db.orders.filter((o) => o.status === 'bekliyor').length > 5)
       riskler.push(`🚚 ${db.orders.filter((o) => o.status === 'bekliyor').length} bekleyen sipariş birikti`);
-    
+
     return `🔴 **İşletme Risk Analizi**\n${riskler.length > 0 ? riskler.map((r, i) => `${i + 1}. ${r}`).join('\n') : '✅ Şu an için kritik bir risk tespit edilmedi.'}\n\n💡 *Öneri: Stokları kontrol edip sipariş geçmeyi ve gecikmiş alacaklar için müşterilerle iletişime geçmeyi unutmayın.*`;
   }
 
   return `🔌 **Çevrimdışı Mod**\n\nİnternet bağlantısı olmadığı için detaylı AI analizi yapılamıyor. Ancak şunları sorabilirsiniz:\n- "Bu ay satışlar nasıl?"\n- "Kasada ne kadar para var?"\n- "Hangi ürünlerin stoğu bitti?"\n- "Kimlerin borcu var?"\n- "Kritik riskler neler?"`;
 }
-
 
 export function buildContext(
   db: DB,

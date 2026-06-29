@@ -58,7 +58,12 @@ function extractPushBranches(yaml: string): string[] {
     }
     //   - dev (liste elemanı)
     if (inBranches && /^\s+-\s+/.test(line)) {
-      result.push(line.replace(/^\s+-\s+/, '').replace(/["']/g, '').trim());
+      result.push(
+        line
+          .replace(/^\s+-\s+/, '')
+          .replace(/["']/g, '')
+          .trim(),
+      );
       continue;
     }
     // branches bloğu bitti

@@ -1,9 +1,5 @@
 import { voiceNexusCore } from '@/lib/nexus/VoiceNexusCore';
-import { 
-  computeKasaToplam, 
-  computeAlacak, 
-  getOutOfStockProducts 
-} from '@/lib/dbUtils';
+import { computeKasaToplam, computeAlacak, getOutOfStockProducts } from '@/lib/dbUtils';
 import type { DB } from '@/types';
 import { logger } from '@/lib/logger';
 
@@ -34,9 +30,12 @@ export class SobaSentinel {
     if (this.checkInterval) return;
 
     logger.info('sentinel', 'Starting Sentinel monitoring...');
-    this.checkInterval = setInterval(() => {
-      this.runAudit(dbProvider());
-    }, 1000 * 60 * 5); // Audit every 5 minutes
+    this.checkInterval = setInterval(
+      () => {
+        this.runAudit(dbProvider());
+      },
+      1000 * 60 * 5,
+    ); // Audit every 5 minutes
   }
 
   public stop() {
@@ -98,13 +97,13 @@ export class SobaSentinel {
     alerts.sort((a, b) => priorityMap[b.priority] - priorityMap[a.priority]);
 
     const topAlert = alerts[0];
-    
-      // Only alert if this specific alert hasn't been processed recently or is high priority
+
+    // Only alert if this specific alert hasn't been processed recently or is high priority
     if (topAlert.priority === 'high' || !this.processedAlerts.has(topAlert.id)) {
       logger.warn('sentinel', 'Triggering voice alert', { alert: topAlert });
-      
+
       await voiceNexusCore.speak(`Soba Nexus Uyarı: ${topAlert.message}`);
-      
+
       this.lastAlertTime = now;
       this.processedAlerts.add(topAlert.id);
     }

@@ -17,13 +17,13 @@
  * - Geri alma da confirmation gateway'den geçer (write aksiyon).
  */
 
-import type { DB, AIActionLogEntry } from "@/types";
-import type { Intent } from "@/domain/types";
-import { logger } from "@/lib/logger";
+import type { DB, AIActionLogEntry } from '@/types';
+import type { Intent } from '@/domain/types';
+import { logger } from '@/lib/logger';
 
 // ── Undo komut tipleri ───────────────────────────────────────────────────────
 
-export type UndoTargetType = "sale" | "kasa_gelir" | "kasa_gider" | "cari_tahsilat" | "any" | "unknown";
+export type UndoTargetType = 'sale' | 'kasa_gelir' | 'kasa_gider' | 'cari_tahsilat' | 'any' | 'unknown';
 
 export interface UndoCommand {
   target: UndoTargetType;
@@ -35,35 +35,44 @@ export interface UndoCommand {
  * "son satışı iptal et", "son gideri geri al", "son işlemi geri al" vb.
  */
 export function parseUndoCommand(text: string): UndoCommand | null {
-  const q = text.toLocaleLowerCase("tr-TR").trim();
+  const q = text.toLocaleLowerCase('tr-TR').trim();
 
   // "geri al" / "iptal et" / "geri alalım" / "iade et" içermeli
-  const undoVerbs = ["geri al", "geri alalım", "geri alalim", "iptal et", "iptal ettim", "iade et", "sil geri", "geri sil"];
+  const undoVerbs = [
+    'geri al',
+    'geri alalım',
+    'geri alalim',
+    'iptal et',
+    'iptal ettim',
+    'iade et',
+    'sil geri',
+    'geri sil',
+  ];
   const hasUndoVerb = undoVerbs.some((v) => q.includes(v));
   if (!hasUndoVerb) return null;
 
   // "son" kelimesi olmalı (geçmişteki belirli bir işlem)
-  if (!q.includes("son")) return null;
+  if (!q.includes('son')) return null;
 
   // Hangi hedef?
-  if (q.includes("satış") || q.includes("satis")) {
-    return { target: "sale", ack: "Son satışı iptal etmek için onaylayın." };
+  if (q.includes('satış') || q.includes('satis')) {
+    return { target: 'sale', ack: 'Son satışı iptal etmek için onaylayın.' };
   }
-  if (q.includes("gider")) {
-    return { target: "kasa_gider", ack: "Son gideri geri almak için onaylayın." };
+  if (q.includes('gider')) {
+    return { target: 'kasa_gider', ack: 'Son gideri geri almak için onaylayın.' };
   }
-  if (q.includes("gelir")) {
-    return { target: "kasa_gelir", ack: "Son geliri geri almak için onaylayın." };
+  if (q.includes('gelir')) {
+    return { target: 'kasa_gelir', ack: 'Son geliri geri almak için onaylayın.' };
   }
-  if (q.includes("tahsilat")) {
-    return { target: "cari_tahsilat", ack: "Son tahsilatı geri almak için onaylayın." };
+  if (q.includes('tahsilat')) {
+    return { target: 'cari_tahsilat', ack: 'Son tahsilatı geri almak için onaylayın.' };
   }
-  if (q.includes("işlem") || q.includes("islem") || q.includes("yaptığım")) {
-    return { target: "any", ack: "Son işlemi geri almak için onaylayın." };
+  if (q.includes('işlem') || q.includes('islem') || q.includes('yaptığım')) {
+    return { target: 'any', ack: 'Son işlemi geri almak için onaylayın.' };
   }
 
   // "son ... geri al" ama hedef belirsiz
-  return { target: "unknown", ack: "Hangi işlemi geri almak istiyorsunuz? Satış, gider, gelir veya tahsilat?" };
+  return { target: 'unknown', ack: 'Hangi işlemi geri almak istiyorsunuz? Satış, gider, gelir veya tahsilat?' };
 }
 
 // ── Son undoable işlemi bul ──────────────────────────────────────────────────
@@ -74,29 +83,31 @@ export function parseUndoCommand(text: string): UndoCommand | null {
  *
  * AIActionLog boşsa veya hiç applied undoable kayıt yoksa null döner.
  */
-export function findLastUndoableAction(
-  db: DB,
-  filter?: UndoTargetType,
-): AIActionLogEntry | null {
+export function findLastUndoableAction(db: DB, filter?: UndoTargetType): AIActionLogEntry | null {
   const log = db.aiActionLog || [];
 
   // Undo edilebilir actionType'lar (write, tersi mümkün)
   const undoableActionTypes: Record<string, UndoTargetType> = {
-    sale: "sale",
-    satis: "sale",
-    yeniSatis: "sale",
-    kasa_gelir: "kasa_gelir",
-    kasa_gider: "kasa_gider",
-    cari_tahsilat: "cari_tahsilat",
+    sale: 'sale',
+    satis: 'sale',
+    yeniSatis: 'sale',
+    kasa_gelir: 'kasa_gelir',
+    kasa_gider: 'kasa_gider',
+    cari_tahsilat: 'cari_tahsilat',
   };
 
   // Filter'a göre undoable set
-  const allowedTypes = filter && filter !== "any" && filter !== "unknown"
-    ? new Set(Object.entries(undoableActionTypes).filter(([, t]) => t === filter).map(([k]) => k))
-    : new Set(Object.keys(undoableActionTypes));
+  const allowedTypes =
+    filter && filter !== 'any' && filter !== 'unknown'
+      ? new Set(
+          Object.entries(undoableActionTypes)
+            .filter(([, t]) => t === filter)
+            .map(([k]) => k),
+        )
+      : new Set(Object.keys(undoableActionTypes));
 
   const applied = log
-    .filter((e) => e.status === "applied" && allowedTypes.has(e.actionType))
+    .filter((e) => e.status === 'applied' && allowedTypes.has(e.actionType))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return applied[0] ?? null;
@@ -128,7 +139,7 @@ export interface UndoIntentResult {
 export function buildUndoIntent(db: DB, logEntry: AIActionLogEntry): UndoIntentResult {
   const actionType = logEntry.actionType;
 
-  if (actionType === "sale" || actionType === "satis" || actionType === "yeniSatis") {
+  if (actionType === 'sale' || actionType === 'satis' || actionType === 'yeniSatis') {
     const saleId = logEntry.affectedIds?.[0];
     if (!saleId) {
       return { ok: false, error: "Geri alınacak satış ID'si log kaydında yok." };
@@ -138,17 +149,17 @@ export function buildUndoIntent(db: DB, logEntry: AIActionLogEntry): UndoIntentR
     if (!sale) {
       return { ok: false, error: `${saleId} numaralı satış bulunamadı (zaten silinmiş olabilir).` };
     }
-    if (sale.status === "iptal" || sale.status === "iade") {
-      return { ok: false, error: "Bu satış zaten iptal edilmiş veya iade edilmiş." };
+    if (sale.status === 'iptal' || sale.status === 'iade') {
+      return { ok: false, error: 'Bu satış zaten iptal edilmiş veya iade edilmiş.' };
     }
     return {
       ok: true,
-      intent: { type: "sale_iptal", payload: { saleId } },
-      targetDescription: `${sale.productName} — ${sale.total.toLocaleString("tr-TR")} TL (${new Date(sale.createdAt).toLocaleDateString("tr-TR")})`,
+      intent: { type: 'sale_iptal', payload: { saleId } },
+      targetDescription: `${sale.productName} — ${sale.total.toLocaleString('tr-TR')} TL (${new Date(sale.createdAt).toLocaleDateString('tr-TR')})`,
     };
   }
 
-  if (actionType === "kasa_gelir" || actionType === "kasa_gider") {
+  if (actionType === 'kasa_gelir' || actionType === 'kasa_gider') {
     // affectedIds[0] genelde kasa entry ID → DB'de bul, ters kayıt Intent üret
     const kasaId = logEntry.affectedIds?.[0];
     if (!kasaId) {
@@ -156,12 +167,12 @@ export function buildUndoIntent(db: DB, logEntry: AIActionLogEntry): UndoIntentR
     }
     const entry = db.kasa.find((k) => k.id === kasaId && !k.deleted);
     if (!entry) {
-      return { ok: false, error: "Kasa kaydı bulunamadı (zaten silinmiş olabilir)." };
+      return { ok: false, error: 'Kasa kaydı bulunamadı (zaten silinmiş olabilir).' };
     }
     // Ters kayıt: gelir→gider, gider→gelir
-    const tersType = entry.type === "gelir" ? "kasa_gider" : "kasa_gelir";
+    const tersType = entry.type === 'gelir' ? 'kasa_gider' : 'kasa_gelir';
     const intent: Intent = {
-      type: tersType as "kasa_gelir" | "kasa_gider",
+      type: tersType as 'kasa_gelir' | 'kasa_gider',
       payload: {
         amount: entry.amount,
         kasa: entry.kasa,
@@ -172,16 +183,16 @@ export function buildUndoIntent(db: DB, logEntry: AIActionLogEntry): UndoIntentR
     return {
       ok: true,
       intent,
-      targetDescription: `${entry.type === "gelir" ? "Gelir" : "Gider"}: ${entry.amount.toLocaleString("tr-TR")} TL — ${entry.description || ""}`,
+      targetDescription: `${entry.type === 'gelir' ? 'Gelir' : 'Gider'}: ${entry.amount.toLocaleString('tr-TR')} TL — ${entry.description || ''}`,
     };
   }
 
-  if (actionType === "cari_tahsilat") {
+  if (actionType === 'cari_tahsilat') {
     // Tahsilat → cari bakiyeyi geri artır + kasa gider (ters)
     // Mevcut domain servislerde cari_tahsilat_undo yok — not implemented
     return {
       ok: false,
-      error: "Cari tahsilat geri alma henüz desteklenmiyor. İleride eklenecek.",
+      error: 'Cari tahsilat geri alma henüz desteklenmiyor. İleride eklenecek.',
     };
   }
 
@@ -194,22 +205,25 @@ export function buildUndoIntent(db: DB, logEntry: AIActionLogEntry): UndoIntentR
  * Tam undo pipeline: parse + find + build.
  * Caller (NexusExecutive) sonucu confirmation gateway'e gönderir.
  */
-export function resolveUndo(text: string, db: DB): UndoIntentResult & {
+export function resolveUndo(
+  text: string,
+  db: DB,
+): UndoIntentResult & {
   command?: UndoCommand;
   logEntry?: AIActionLogEntry;
 } {
   const command = parseUndoCommand(text);
   if (!command) {
-    return { ok: false, error: "Geri alma komutu anlaşılamadı." };
+    return { ok: false, error: 'Geri alma komutu anlaşılamadı.' };
   }
 
-  if (command.target === "unknown") {
+  if (command.target === 'unknown') {
     return { ok: false, error: command.ack, command };
   }
 
   const logEntry = findLastUndoableAction(db, command.target);
   if (!logEntry) {
-    const targetLabel = command.target === "any" ? "işlem" : command.target;
+    const targetLabel = command.target === 'any' ? 'işlem' : command.target;
     return {
       ok: false,
       error: `Geri alınacak ${targetLabel} kaydı bulunamadı.`,
@@ -222,6 +236,6 @@ export function resolveUndo(text: string, db: DB): UndoIntentResult & {
     return { ...result, command, logEntry };
   }
 
-  logger.info("ai", "Undo resolved", { actionType: logEntry.actionType, target: command.target });
+  logger.info('ai', 'Undo resolved', { actionType: logEntry.actionType, target: command.target });
   return { ...result, command, logEntry };
 }

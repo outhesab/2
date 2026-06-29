@@ -67,7 +67,7 @@ export type LogCategory =
   | 'action'
   | 'smart'
   | 'weather'
-  | 'whatsapp'
+  | 'whatsapp';
 
 export interface CrashReport {
   id: string;

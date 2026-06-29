@@ -6,14 +6,11 @@ import { isGuestSession, getUserSession } from '@/lib/userManager';
 import { safeClone } from '@/lib/safeClone';
 import { saveToStorage, saveToIndexedSnapshot } from '@/lib/db/storage';
 import { createAuditEntry, trimAuditLog } from '@/lib/auditEngine';
-import {
-  validateAndClassify,
-  computeAuditStatus,
-  saveBlockedState,
-  saveAppliedState,
-} from './dbHelpers';
+import { validateAndClassify, computeAuditStatus, saveBlockedState, saveAppliedState } from './dbHelpers';
 import { saveToFirebase } from './sync';
 import { getFirebasePromise } from './dbHelpers';
+import { TransactionManager } from './TransactionManager';
+import { domainEventBus } from '@/domain/eventBus';
 
 export function useDBActions(
   db: DB,
@@ -39,55 +36,88 @@ export function useDBActions(
         guarded?: boolean;
       },
     ): DB => {
-      const t = logger.time('db', opts.action);
       if (isGuestSession()) {
-        t.end({ version: prev._version, guestBlocked: true });
         return prev;
       }
-      try {
-        let next = updater(prev);
-        (next as DB & { _lastSyncAt?: string })._lastSyncAt = new Date().toISOString();
-        if (next.stockMovements && next.stockMovements.length > 1000) {
-          next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
-        }
 
-        const { violations, hasBlock, hasWarn } = validateAndClassify(prev, next, `${opts.action}: Rule Engine`);
-        
-        const effectiveViolations = opts.guarded 
-          ? violations.filter(v => v.severity === 'block') 
-          : violations;
-        const effectiveHasBlock = hasBlock;
-        const effectiveHasWarn = opts.guarded ? false : hasWarn;
+      // Execute via TransactionManager for atomicity and fail-safe snapshot/rollback
+      const txResult = TransactionManager.run(
+        prev,
+        (p) => {
+          let next = updater(p);
+          (next as DB & { _lastSyncAt?: string })._lastSyncAt = new Date().toISOString();
+          if (next.stockMovements && next.stockMovements.length > 1000) {
+            next = { ...next, stockMovements: next.stockMovements.slice(0, 1000) };
+          }
+          return next;
+        },
+        (p, n) => validateAndClassify(p, n, `${opts.action}: Rule Engine`)
+      );
 
-        if ((effectiveHasBlock || effectiveHasWarn) && opts.onViolation) opts.onViolation(effectiveViolations);
-
-        const auditStatus = computeAuditStatus(effectiveHasBlock, effectiveHasWarn);
-        const entry = createAuditEntry({
-          action: opts.action,
-          entity: opts.entity,
-          entityId: opts.entityId,
-          prevDB: Object.freeze({ ...prev }),
-          nextDB: next,
-          status: auditStatus,
-          violations: effectiveViolations.length > 0 ? effectiveViolations : undefined,
-          detail: opts.detail,
+      if (txResult.error) {
+        domainEventBus.emitError(txResult.error, `${opts.action.toUpperCase()}_FAILED`);
+        setDbError({
+          message: txResult.error,
+          code: `${opts.action.toUpperCase()}_FAILED`,
+          timestamp: new Date().toISOString(),
+          recoverable: true,
         });
-
-        if (effectiveHasBlock) {
-          return saveBlockedState(prev, entry, effectiveViolations, saveToStorage, saveToIndexedSnapshot, (meta) => t.end(meta), opts.blockMsg);
-        }
-
-        if (opts.captureUndo) {
-          undoStackRef.current = [...undoStackRef.current.slice(-(MAX_UNDO - 1)), safeClone(prev)];
-        }
-
-        return saveAppliedState(next, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, (meta) => t.end(meta), { warned: effectiveHasWarn });
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        t.end({ error: error.message });
-        setDbError({ message: error.message, code: `${opts.action.toUpperCase()}_FAILED`, timestamp: new Date().toISOString(), recoverable: true });
-        return prev;
+        return prev; // Rollback already handled by returning prev
       }
+
+      const { violations, hasBlock, hasWarn } = validateAndClassify(prev, txResult.db, `${opts.action}: Final Check`);
+
+      if (hasBlock) {
+        const msg = violations.find(v => v.severity === 'block')?.message || opts.blockMsg;
+        domainEventBus.emitError(msg, 'BLOCK_VIOLATION');
+      } else if (hasWarn) {
+        const msg = violations.find(v => v.severity === 'warn')?.message || 'İşlem sırasında uyarılar oluştu';
+        domainEventBus.emitWarning(msg, 'WARN_VIOLATION');
+      }
+
+      const effectiveViolations = opts.guarded ? violations.filter((v) => v.severity === 'block') : violations;
+      const effectiveHasBlock = txResult.blocked;
+      const effectiveHasWarn = opts.guarded ? false : hasWarn;
+
+      if ((effectiveHasBlock || effectiveHasWarn) && opts.onViolation) opts.onViolation(effectiveViolations);
+
+      const auditStatus = computeAuditStatus(effectiveHasBlock || false, effectiveHasWarn);
+      const entry = createAuditEntry({
+        action: opts.action,
+        entity: opts.entity,
+        entityId: opts.entityId,
+        prevDB: Object.freeze({ ...prev }),
+        nextDB: txResult.db,
+        status: auditStatus,
+        violations: effectiveViolations.length > 0 ? effectiveViolations : undefined,
+        detail: opts.detail,
+      });
+
+      if (effectiveHasBlock) {
+        return saveBlockedState(
+          prev,
+          entry,
+          effectiveViolations,
+          saveToStorage,
+          saveToIndexedSnapshot,
+          () => {},
+          opts.blockMsg,
+        );
+      }
+
+      if (opts.captureUndo) {
+        undoStackRef.current = [...undoStackRef.current.slice(-(MAX_UNDO - 1)), safeClone(prev)];
+      }
+
+      // Manual backup before save (Phase 5 of Do's)
+      if (opts.action !== 'auto_backup') {
+        const snap = safeClone(txResult.db);
+        void saveToIndexedSnapshot(snap);
+      }
+
+      return saveAppliedState(txResult.db, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, () => {}, {
+        warned: effectiveHasWarn,
+      });
     },
     [setDbError, undoStackRef, syncTimer],
   );
@@ -95,20 +125,16 @@ export function useDBActions(
   const _save = useCallback(
     (updater: (prev: DB) => DB, guarded: boolean) => {
       const action = guarded ? 'save_guarded' : 'save';
-      setDb((prev) => processSave(prev, updater, { action, entity: 'DB', blockMsg: 'İşlem engellendi', captureUndo: true, guarded }));
+      setDb((prev) =>
+        processSave(prev, updater, { action, entity: 'DB', blockMsg: 'İşlem engellendi', captureUndo: true, guarded }),
+      );
     },
     [setDb, processSave],
   );
 
-  const save = useCallback(
-    (updater: (prev: DB) => DB) => _save(updater, false),
-    [_save],
-  );
+  const save = useCallback((updater: (prev: DB) => DB) => _save(updater, false), [_save]);
 
-  const saveGuarded = useCallback(
-    (updater: (prev: DB) => DB) => _save(updater, true),
-    [_save],
-  );
+  const saveGuarded = useCallback((updater: (prev: DB) => DB) => _save(updater, true), [_save]);
 
   const undo = useCallback((): boolean => {
     if (isGuestSession()) return false;
@@ -138,7 +164,9 @@ export function useDBActions(
     return true;
   }, [setDb, undoStackRef, syncTimer]);
 
-  const clearUndoStack = useCallback(() => { undoStackRef.current = []; }, [undoStackRef]);
+  const clearUndoStack = useCallback(() => {
+    undoStackRef.current = [];
+  }, [undoStackRef]);
 
   const logActivity = useCallback(
     (action: string, detail?: string) => {

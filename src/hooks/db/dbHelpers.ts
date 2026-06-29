@@ -15,8 +15,12 @@ export function getFirebasePromise() {
 
 // Global sync lock for the main useDB useEffect
 let _pendingFirebasePromise: Promise<void> | null = null;
-export function getPendingFirebasePromise(): Promise<void> | null { return _pendingFirebasePromise; }
-export function setPendingFirebasePromise(p: Promise<void> | null): void { _pendingFirebasePromise = p; }
+export function getPendingFirebasePromise(): Promise<void> | null {
+  return _pendingFirebasePromise;
+}
+export function setPendingFirebasePromise(p: Promise<void> | null): void {
+  _pendingFirebasePromise = p;
+}
 
 async function scheduleFirebaseSave(db: DB): Promise<void> {
   const session = getUserSession();
@@ -103,7 +107,7 @@ export function saveAppliedState(
   return withAudit;
 }
 
-export function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
+export function applyIntentResult(prev: DB, data: IntentResult['data']): DB {
   if (!data) return prev;
   const { dbUpdates, events } = data;
   const next: DB = { ...prev };
@@ -126,17 +130,26 @@ export function applyIntentResult(prev: DB, data: IntentResult["data"]): DB {
       if (evt.type === 'stock.deducted' || evt.type === 'stock.returned' || evt.type === 'stock.updated') {
         const sm = evt.payload as unknown as StockMovementV2;
         if (sm && sm.productId) {
-          next.stockMovements = [...(next.stockMovements || []), {
-            id: sm.id || evt.id,
-            productId: sm.productId,
-            productName: sm.productName || '',
-            type: (evt.type === 'stock.returned' ? 'iade' : sm.type === 'iade' ? 'giris' : sm.type === 'satis' ? 'satis' : 'duzeltme') as StockMovement['type'],
-            amount: sm.amount || 0,
-            before: sm.before || 0,
-            after: sm.after || 0,
-            note: '',
-            date: now,
-          }];
+          next.stockMovements = [
+            ...(next.stockMovements || []),
+            {
+              id: sm.id || evt.id,
+              productId: sm.productId,
+              productName: sm.productName || '',
+              type: (evt.type === 'stock.returned'
+                ? 'iade'
+                : sm.type === 'iade'
+                  ? 'giris'
+                  : sm.type === 'satis'
+                    ? 'satis'
+                    : 'duzeltme') as StockMovement['type'],
+              amount: sm.amount || 0,
+              before: sm.before || 0,
+              after: sm.after || 0,
+              note: '',
+              date: now,
+            },
+          ];
         }
       }
     }

@@ -11,17 +11,17 @@ export class NavigationHandler implements IntentHandler {
   readonly priority = 100; // Highest priority
 
   private navMap: Record<string, string> = {
-    'satışlar': '/sales',
+    satışlar: '/sales',
     'satış sayfası': '/sales',
-    'kasa': '/kasa',
-    'cari': '/cari',
+    kasa: '/kasa',
+    cari: '/cari',
     'müşteri listesi': '/cari',
-    'stok': '/stock',
-    'ürünler': '/stock',
-    'raporlar': '/reports',
-    'dashboard': '/dashboard',
+    stok: '/stock',
+    ürünler: '/stock',
+    raporlar: '/reports',
+    dashboard: '/dashboard',
     'ana sayfa': '/dashboard',
-    'ayarlar': '/settings',
+    ayarlar: '/settings',
   };
 
   canHandle(input: string, _context: HandlerContext): boolean {

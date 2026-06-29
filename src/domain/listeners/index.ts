@@ -1,6 +1,6 @@
 /**
  * Listeners — Domain event listener'ları.
- * 
+ *
  * Kullanım:
  *   import { setupDomainListeners } from '@/domain/listeners';
  *   const cleanup = setupDomainListeners({ save, showToast });

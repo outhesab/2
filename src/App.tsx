@@ -94,22 +94,9 @@ function AppContent({
   username?: string;
   guestTimeLeft: number;
 }) {
-  const { db, save, exportJSON, importJSON, undo } = useDB();
+  const { db, save, exportJSON, importJSON, undo, isDBReady, dbError, clearError } = useDB();
   const { showToast } = useToast();
 
-  useEffect(() => {
-    const ctx: AgentContext = { getDB: () => db, save };
-    getAllAgents().forEach((agent) => agent.bagla(ctx));
-  }, [db, save]);
-
-  // Domain Event Bus listener'larını kur
-  useEffect(() => {
-    const cleanup = setupDomainListeners({
-      save,
-      showToast: (msg, type) => showToast(msg, type),
-    });
-    return cleanup;
-  }, [save, showToast]);
   const [location, setLocation] = useLocation();
   const activeTab = getActiveTabFromLocation(location);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -127,6 +114,45 @@ function AppContent({
   const [uiPrefs, setUiPrefs] = useState(loadUIPrefs);
   const isOnline = useOnlineStatus();
   const prevOnline = useRef(isOnline);
+
+  // Global DB hata izleme
+  useEffect(() => {
+    if (!isDBReady) return;
+    if (dbError) {
+      showToast(dbError.message, 'error');
+      clearError();
+    }
+  }, [isDBReady, dbError, showToast, clearError]);
+
+  // Logger üzerinden kritik hataları Toast'a yönlendir
+  useEffect(() => {
+    if (!isDBReady) return;
+    return logger.subscribe((entry) => {
+      if (entry.level === 'critical' || (entry.level === 'error' && entry.cat === 'db')) {
+        showToast(`Sistem Hatası [${entry.cat}]: ${entry.msg}`, 'error');
+      }
+    });
+  }, [isDBReady, showToast]);
+
+  useEffect(() => {
+    if (!isDBReady) return;
+    const ctx: AgentContext = { getDB: () => db, save };
+    getAllAgents().forEach((agent) => agent.bagla(ctx));
+  }, [isDBReady, db, save]);
+
+  // Domain Event Bus listener'larını kur
+  useEffect(() => {
+    if (!isDBReady) return;
+    const cleanup = setupDomainListeners({
+      save,
+      showToast: (msg, type) => showToast(msg, type),
+    });
+    return cleanup;
+  }, [isDBReady, save, showToast]);
+
+  if (!isDBReady) {
+    return <PageFallback />;
+  }
 
   // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
   useEffect(() => {
@@ -184,7 +210,6 @@ function AppContent({
       }
     } catch {
       logger.warn('app', 'localStorage okuma/yazma hatası');
-      void 0;
     }
   }, [showToast]);
 

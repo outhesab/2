@@ -1,4 +1,4 @@
-export type SpecSeverity = "error" | "warn" | "info";
+export type SpecSeverity = 'error' | 'warn' | 'info';
 
 export interface SpecViolation {
   file: string;

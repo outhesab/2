@@ -146,18 +146,40 @@
   --color-primary-800: #0f2669;
   --color-primary-900: #051139;
   /* â”€â”€ Spacing Scale â”€â”€â”€ */
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --space-5: 20px; --space-6: 24px; --space-7: 28px; --space-8: 32px;
-  --space-9: 36px; --space-10: 40px; --space-12: 48px; --space-14: 56px;
-  --space-16: 64px; --space-20: 80px; --space-24: 96px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
   /* â”€â”€ Typography Scale â”€â”€â”€ */
-  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
-  --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem; --text-4xl: 2.25rem;
-  --leading-tight: 1.2; --leading-normal: 1.5; --leading-relaxed: 1.75;
-  --tracking-tight: -0.02em; --tracking-normal: 0em; --tracking-wide: 0.02em;
-  --font-weight-normal: 400; --font-weight-medium: 500;
-  --font-weight-semibold: 600; --font-weight-bold: 700;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.02em;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
 
 body.dark-mode {
@@ -256,4 +278,3 @@ body.dark-mode {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-

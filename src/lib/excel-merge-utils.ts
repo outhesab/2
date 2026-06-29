@@ -1,7 +1,7 @@
-import type { CleanOptions, CleanResult, SheetData } from "./excel-merge-types";
+import type { CleanOptions, CleanResult, SheetData } from './excel-merge-types';
 
 export function cellToString(val: string | number | boolean | null): string {
-  if (val == null) return "";
+  if (val == null) return '';
   return String(val).trim();
 }
 
@@ -39,8 +39,13 @@ export function fuzzyMatch(a: string, b: string, threshold: number): boolean {
 export function applyCleanOptions(
   rows: Record<string, string | number | boolean | null>[],
   headers: string[],
-  opts: CleanOptions
-): { rows: Record<string, string | number | boolean | null>[]; nullsFilled: number; trimmedCells: number; duplicatesRemoved: number } {
+  opts: CleanOptions,
+): {
+  rows: Record<string, string | number | boolean | null>[];
+  nullsFilled: number;
+  trimmedCells: number;
+  duplicatesRemoved: number;
+} {
   let nullsFilled = 0;
   let trimmedCells = 0;
   let duplicatesRemoved = 0;
@@ -51,20 +56,20 @@ export function applyCleanOptions(
       let val = row[h];
 
       if (opts.fillNullsWithEmpty && val == null) {
-        val = "";
+        val = '';
         nullsFilled++;
       }
 
-      if (typeof val === "string") {
+      if (typeof val === 'string') {
         if (opts.trimWhitespace) {
           const trimmed = val.trim();
           if (trimmed !== val) trimmedCells++;
           val = trimmed;
         }
-        if (opts.standardizeCase !== "none") {
-          if (opts.standardizeCase === "upper") val = val.toUpperCase();
-          else if (opts.standardizeCase === "lower") val = val.toLowerCase();
-          else if (opts.standardizeCase === "title") {
+        if (opts.standardizeCase !== 'none') {
+          if (opts.standardizeCase === 'upper') val = val.toUpperCase();
+          else if (opts.standardizeCase === 'lower') val = val.toLowerCase();
+          else if (opts.standardizeCase === 'title') {
             val = val.replace(/\w\S*/g, (t) => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
           }
         }
@@ -95,11 +100,7 @@ export function applyCleanOptions(
 
 export function cleanSheetData(sheet: SheetData, opts: CleanOptions): CleanResult {
   const originalCount = sheet.rows.length;
-  const { rows, nullsFilled, trimmedCells, duplicatesRemoved } = applyCleanOptions(
-    sheet.rows,
-    sheet.headers,
-    opts
-  );
+  const { rows, nullsFilled, trimmedCells, duplicatesRemoved } = applyCleanOptions(sheet.rows, sheet.headers, opts);
   return {
     headers: sheet.headers,
     rows,

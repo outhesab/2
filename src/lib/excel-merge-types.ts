@@ -12,12 +12,12 @@ export interface ExcelFile {
   uploadedAt: Date;
   sheets: SheetData[];
   isRecovery: boolean;
-  fileType: "excel" | "csv" | "json" | "xml";
+  fileType: 'excel' | 'csv' | 'json' | 'xml';
 }
 
 export interface DiffRow {
   rowIndex: number;
-  status: "added" | "removed" | "modified" | "unchanged";
+  status: 'added' | 'removed' | 'modified' | 'unchanged';
   oldValues?: Record<string, string | number | boolean | null>;
   newValues?: Record<string, string | number | boolean | null>;
   changedCells?: string[];
@@ -45,22 +45,22 @@ export interface SearchResult {
   rowIndex: number;
   colName: string;
   value: string | number | boolean | null;
-  matchType: "exact" | "contains" | "regex" | "wildcard";
+  matchType: 'exact' | 'contains' | 'regex' | 'wildcard';
 }
 
-export type JoinType = "inner" | "left" | "right" | "fullOuter" | "verticalUnion";
+export type JoinType = 'inner' | 'left' | 'right' | 'fullOuter' | 'verticalUnion';
 
 export interface CleanOptions {
   trimWhitespace: boolean;
   deduplicateRows: boolean;
   fillNullsWithEmpty: boolean;
-  standardizeCase: "none" | "upper" | "lower" | "title";
+  standardizeCase: 'none' | 'upper' | 'lower' | 'title';
   standardizeDates: boolean;
 }
 
 export interface MergeOptions {
   keyColumn: string;
-  strategy: "latest" | "first" | "union" | "intersection";
+  strategy: 'latest' | 'first' | 'union' | 'intersection';
   joinType: JoinType;
   sheets: string[];
   fuzzyMatch: boolean;

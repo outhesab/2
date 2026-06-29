@@ -1,5 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { requestNotificationPermission, sendLocalNotification, saveFileToDevice, requestAllPermissions } from './permissions';
+import {
+  requestNotificationPermission,
+  sendLocalNotification,
+  saveFileToDevice,
+  requestAllPermissions,
+} from './permissions';
 
 vi.mock('@/lib/logger', () => ({
   logger: { warn: vi.fn(), info: vi.fn() },

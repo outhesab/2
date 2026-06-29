@@ -11,7 +11,7 @@ function fmtDate(iso: string): string {
     const yyyy = d.getFullYear();
     return `${dd}.${mm}.${yyyy}`;
   } catch {
-    logger.warn("excelExport", "Tarih biçimlendirme hatası");
+    logger.warn('excelExport', 'Tarih biçimlendirme hatası');
     return iso;
   }
 }
@@ -39,79 +39,97 @@ export function exportToExcel(db: DB, options: ExportOptions = {}): void {
   }
 
   if (sheets.includes('stok')) {
-    const rows = db.products.filter(p => !p.deleted).map(p => ({
-      'Ürün Adı': p.name,
-      'Kategori': p.category,
-      'Marka': p.brand || '',
-      'Stok': p.stock,
-      'Min Stok': p.minStock,
-      'Alış Fiyatı': fmtMoney(p.cost),
-      'Satış Fiyatı': fmtMoney(p.price),
-      'Stok Değeri': fmtMoney(p.cost * p.stock),
-      'Durum': p.stock === 0 ? 'Bitti' : p.stock <= p.minStock ? 'Az Stok' : 'Normal',
-      'Eklenme Tarihi': fmtDate(p.createdAt),
-      'Güncelleme Tarihi': fmtDate(p.updatedAt),
-    }));
-    exportSheets.push({ name: 'Stok', rows: rows.length > 0 ? rows : [{}], widths: [30, 12, 15, 8, 10, 15, 15, 15, 10, 18, 18] });
+    const rows = db.products
+      .filter((p) => !p.deleted)
+      .map((p) => ({
+        'Ürün Adı': p.name,
+        Kategori: p.category,
+        Marka: p.brand || '',
+        Stok: p.stock,
+        'Min Stok': p.minStock,
+        'Alış Fiyatı': fmtMoney(p.cost),
+        'Satış Fiyatı': fmtMoney(p.price),
+        'Stok Değeri': fmtMoney(p.cost * p.stock),
+        Durum: p.stock === 0 ? 'Bitti' : p.stock <= p.minStock ? 'Az Stok' : 'Normal',
+        'Eklenme Tarihi': fmtDate(p.createdAt),
+        'Güncelleme Tarihi': fmtDate(p.updatedAt),
+      }));
+    exportSheets.push({
+      name: 'Stok',
+      rows: rows.length > 0 ? rows : [{}],
+      widths: [30, 12, 15, 8, 10, 15, 15, 15, 10, 18, 18],
+    });
   }
 
   if (sheets.includes('satislar')) {
-    const satislar = db.sales.filter(s => !s.deleted && inDateRange(s.createdAt));
-    const rows = satislar.map(s => ({
-      'Tarih': fmtDate(s.createdAt),
-      'Ürün': s.productName,
-      'Müşteri': db.cari.find(c => c.id === s.cariId)?.name || '',
-      'Adet': s.quantity,
+    const satislar = db.sales.filter((s) => !s.deleted && inDateRange(s.createdAt));
+    const rows = satislar.map((s) => ({
+      Tarih: fmtDate(s.createdAt),
+      Ürün: s.productName,
+      Müşteri: db.cari.find((c) => c.id === s.cariId)?.name || '',
+      Adet: s.quantity,
       'Birim Fiyat': fmtMoney(s.unitPrice),
       'Ara Toplam': fmtMoney(s.subtotal),
-      'İskonto': fmtMoney(s.discountAmount),
-      'Toplam': fmtMoney(s.total),
-      'Kâr': fmtMoney(s.profit),
-      'Ödeme': s.payment,
-      'Durum': s.status === 'tamamlandi' ? 'Tamamlandı' : s.status === 'iade' ? 'İade' : 'İptal',
+      İskonto: fmtMoney(s.discountAmount),
+      Toplam: fmtMoney(s.total),
+      Kâr: fmtMoney(s.profit),
+      Ödeme: s.payment,
+      Durum: s.status === 'tamamlandi' ? 'Tamamlandı' : s.status === 'iade' ? 'İade' : 'İptal',
     }));
-    exportSheets.push({ name: 'Satışlar', rows: rows.length > 0 ? rows : [{}], widths: [18, 30, 20, 8, 15, 15, 12, 15, 15, 10, 12] });
+    exportSheets.push({
+      name: 'Satışlar',
+      rows: rows.length > 0 ? rows : [{}],
+      widths: [18, 30, 20, 8, 15, 15, 12, 15, 15, 10, 12],
+    });
   }
 
   if (sheets.includes('cari')) {
-    const rows = db.cari.filter(c => !c.deleted).map(c => ({
-      'Ad': c.name,
-      'Tür': c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
-      'Vergi No': c.taxNo || '',
-      'Telefon': c.phone || '',
-      'E-posta': c.email || '',
-      'Adres': c.address || '',
-      'Bakiye': fmtMoney(c.balance),
-      'Son İşlem': fmtDate(c.lastTransaction || ''),
-      'Eklenme Tarihi': fmtDate(c.createdAt),
-    }));
-    exportSheets.push({ name: 'Cari Hesaplar', rows: rows.length > 0 ? rows : [{}], widths: [25, 12, 15, 14, 22, 30, 15, 18, 18] });
+    const rows = db.cari
+      .filter((c) => !c.deleted)
+      .map((c) => ({
+        Ad: c.name,
+        Tür: c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi',
+        'Vergi No': c.taxNo || '',
+        Telefon: c.phone || '',
+        'E-posta': c.email || '',
+        Adres: c.address || '',
+        Bakiye: fmtMoney(c.balance),
+        'Son İşlem': fmtDate(c.lastTransaction || ''),
+        'Eklenme Tarihi': fmtDate(c.createdAt),
+      }));
+    exportSheets.push({
+      name: 'Cari Hesaplar',
+      rows: rows.length > 0 ? rows : [{}],
+      widths: [25, 12, 15, 14, 22, 30, 15, 18, 18],
+    });
   }
 
   if (sheets.includes('kasa')) {
-    const kasaEntries = db.kasa.filter(k => !k.deleted && inDateRange(k.createdAt));
-    const rows = kasaEntries.map(k => ({
-      'Tarih': fmtDate(k.createdAt),
-      'Tür': k.type === 'gelir' ? 'Gelir' : 'Gider',
-      'Kasa': k.kasa,
-      'Kategori': k.category || '',
-      'Açıklama': k.description || '',
-      'Tutar': fmtMoney(k.amount),
-      'Cari': db.cari.find(c => c.id === k.cariId)?.name || '',
+    const kasaEntries = db.kasa.filter((k) => !k.deleted && inDateRange(k.createdAt));
+    const rows = kasaEntries.map((k) => ({
+      Tarih: fmtDate(k.createdAt),
+      Tür: k.type === 'gelir' ? 'Gelir' : 'Gider',
+      Kasa: k.kasa,
+      Kategori: k.category || '',
+      Açıklama: k.description || '',
+      Tutar: fmtMoney(k.amount),
+      Cari: db.cari.find((c) => c.id === k.cariId)?.name || '',
     }));
-    exportSheets.push({ name: 'Kasa İşlemleri', rows: rows.length > 0 ? rows : [{}], widths: [18, 10, 10, 15, 35, 15, 20] });
+    exportSheets.push({
+      name: 'Kasa İşlemleri',
+      rows: rows.length > 0 ? rows : [{}],
+      widths: [18, 10, 10, 15, 35, 15, 20],
+    });
   }
 
   const dateStr = new Date().toISOString().slice(0, 10);
   void downloadObjectSheetsAsXlsx(exportSheets, `soba-rapor-${dateStr}.xlsx`);
 }
 
-
 /** Düz nesne dizisini Excel olarak indir (Reports sayfası için) */
 export function exportArrayToExcel(data: Record<string, unknown>[], filename: string): void {
   const headers = data.length > 0 ? Object.keys(data[0]) : [];
-  const rows = headers.length > 0
-    ? [headers, ...data.map(item => headers.map(header => item[header] ?? ''))]
-    : [[]];
+  const rows =
+    headers.length > 0 ? [headers, ...data.map((item) => headers.map((header) => item[header] ?? ''))] : [[]];
   void downloadAoASheetsAsXlsx([{ name: 'Rapor', rows }], `${filename}-${new Date().toISOString().slice(0, 10)}.xlsx`);
 }

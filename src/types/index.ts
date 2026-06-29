@@ -18,16 +18,16 @@ export interface Partner {
 }
 
 export interface ProductCategory {
-  id: string;        // 'soba', 'aksesuar', vb.
-  name: string;      // 'Soba', 'Aksesuar', vb.
-  icon: string;      // '🔥', '🔧', vb.
+  id: string; // 'soba', 'aksesuar', vb.
+  name: string; // 'Soba', 'Aksesuar', vb.
+  icon: string; // '🔥', '🔧', vb.
   createdAt: string;
 }
 
 export interface Product {
   id: string;
   name: string;
-  category: string;  // dinamik — productCategories tablosundan gelir
+  category: string; // dinamik — productCategories tablosundan gelir
   supplierId?: string; // opsiyonel tedarikçi bağlantısı
   brand?: string;
   cost: number;
@@ -397,7 +397,7 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  color?: string;   // '#fbbf24', '#10b981', vb.
+  color?: string; // '#fbbf24', '#10b981', vb.
   pinned?: boolean;
   tags?: string[];
   linkedType?: 'cari' | 'product' | 'sale' | 'purchase' | 'transaction';
@@ -421,14 +421,14 @@ export interface AuditEntry {
   action: string;
   entity: string;
   entityId?: string;
-  prevValue?: unknown;   // computeDiff() sonucu — tüm DB değil
-  nextValue?: unknown;   // computeDiff() sonucu — tüm DB değil
+  prevValue?: unknown; // computeDiff() sonucu — tüm DB değil
+  nextValue?: unknown; // computeDiff() sonucu — tüm DB değil
   userId?: string;
-  sessionId: string;     // sessionStorage UUID
+  sessionId: string; // sessionStorage UUID
   status: 'applied' | 'blocked' | 'warned';
   violations?: RuleViolation[];
   detail?: string;
-  time: string;          // ISO string
+  time: string; // ISO string
 }
 
 export interface AuditAnomaly {
@@ -439,8 +439,8 @@ export interface AuditAnomaly {
 
 export interface AuditReport {
   anomalies: AuditAnomaly[];
-  balanceDrifts: string[];      // "kasaId: hesaplanan X, kayıtlı Y" formatı
-  riskFlags: string[];          // TRANSACTION_LIMIT aşımları, onaysız işlemler
+  balanceDrifts: string[]; // "kasaId: hesaplanan X, kayıtlı Y" formatı
+  riskFlags: string[]; // TRANSACTION_LIMIT aşımları, onaysız işlemler
   totalEntries: number;
   appliedCount: number;
   blockedCount: number;

@@ -1,6 +1,6 @@
 /**
  * Notification — Domain event'ler için toast bildirimleri.
- * 
+ *
  * Önemli domain event'lerde kullanıcıya bildirim gösterir.
  * showToast fonksiyonu dışarıdan enjekte edilir.
  */
@@ -46,6 +46,18 @@ const TOAST_RULES: Record<string, ToastRule> = {
       const name = (e.payload as Record<string, unknown>)?.name || 'Cari';
       return `👤 ${name} eklendi`;
     },
+    type: 'success',
+  },
+  'system.error': {
+    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'Bir sistem hatası oluştu',
+    type: 'error',
+  },
+  'system.warning': {
+    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'Uyarı',
+    type: 'warning',
+  },
+  'system.success': {
+    message: (e) => (e.payload as Record<string, unknown>)?.message as string || 'İşlem başarılı',
     type: 'success',
   },
 };

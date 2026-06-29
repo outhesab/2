@@ -1,13 +1,13 @@
-import { loadConnConfig } from "@/lib/connConfig";
-import { logger } from "@/lib/logger";
-import { writeDoc, readDoc, isFirebaseReady } from "@/lib/firebase";
-import type { DB } from "@/types";
+import { loadConnConfig } from '@/lib/connConfig';
+import { logger } from '@/lib/logger';
+import { writeDoc, readDoc, isFirebaseReady } from '@/lib/firebase';
+import type { DB } from '@/types';
 import { firebaseSyncQueue } from '@/lib/db/syncQueue';
 
-export type SyncStatus = "idle" | "saving" | "saved" | "error" | "loading";
+export type SyncStatus = 'idle' | 'saving' | 'saved' | 'error' | 'loading';
 type SyncListener = (status: SyncStatus, detail?: string) => void;
 const _syncListeners: SyncListener[] = [];
-let _currentSyncStatus: SyncStatus = "idle";
+let _currentSyncStatus: SyncStatus = 'idle';
 
 export function emitSync(status: SyncStatus, detail?: string) {
   _currentSyncStatus = status;
@@ -39,12 +39,14 @@ async function retryableWrite(path: string[], data: Record<string, unknown>): Pr
   let lastErr: unknown;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      return await writeDoc(path, data, "set");
+      return await writeDoc(path, data, 'set');
     } catch (e) {
       lastErr = e;
       if (attempt < MAX_RETRIES) {
         const delay = RETRY_DELAYS[attempt] ?? 8000;
-        logger.warn("firebase", `sync denemesi ${attempt + 1}/${MAX_RETRIES + 1} başarısız — ${delay}ms`, { error: String(e) });
+        logger.warn('firebase', `sync denemesi ${attempt + 1}/${MAX_RETRIES + 1} başarısız — ${delay}ms`, {
+          error: String(e),
+        });
         await new Promise((r) => setTimeout(r, delay));
       }
     }
@@ -64,7 +66,7 @@ async function retryableRead<T>(path: string[]): Promise<T | null> {
       }
     }
   }
-  logger.error("firebase", "sync okuma tamamen başarısız — tüm retry'ler tükendi", { error: String(lastErr) });
+  logger.error('firebase', "sync okuma tamamen başarısız — tüm retry'ler tükendi", { error: String(lastErr) });
   return null;
 }
 
@@ -72,16 +74,16 @@ export async function saveToFirebase(db: DB, userId: string): Promise<void> {
   // Kuyruğa ekle: Sıralı yazma garantisi
   return firebaseSyncQueue.enqueue(async () => {
     if (!isFirebaseReady()) {
-      emitSync("idle");
+      emitSync('idle');
       return;
     }
     const cfg = loadConnConfig();
     if (!cfg.firebase.enabled) {
-      emitSync("idle");
+      emitSync('idle');
       return;
     }
-    const t = logger.time("firebase", `Firebase kayıt v${db._version} [${userId}]`);
-    emitSync("saving");
+    const t = logger.time('firebase', `Firebase kayıt v${db._version} [${userId}]`);
+    emitSync('saving');
     try {
       const ok = await retryableWrite(['users', userId, 'db'], {
         data: JSON.stringify(db),
@@ -90,16 +92,16 @@ export async function saveToFirebase(db: DB, userId: string): Promise<void> {
       });
       const ms = t.end({ version: db._version, ok });
       if (ok) {
-        emitSync("saved", `v${db._version} · ${ms}ms`);
-        logger.info("sync", "Firebase'e kaydedildi", { userId, version: db._version, ms });
+        emitSync('saved', `v${db._version} · ${ms}ms`);
+        logger.info('sync', "Firebase'e kaydedildi", { userId, version: db._version, ms });
       } else {
-        emitSync("error", "Firestore yazma başarısız");
-        logger.error("firebase", "Firestore yazma hatası");
+        emitSync('error', 'Firestore yazma başarısız');
+        logger.error('firebase', 'Firestore yazma hatası');
       }
     } catch (e) {
       t.end({ error: String(e) });
-      emitSync("error", "Bağlantı hatası");
-      logger.error("firebase", "Firebase kayıt tamamen başarısız", { userId, error: String(e) });
+      emitSync('error', 'Bağlantı hatası');
+      logger.error('firebase', 'Firebase kayıt tamamen başarısız', { userId, error: String(e) });
     }
   });
 }
@@ -114,7 +116,7 @@ export async function loadFromFirebase(userId: string): Promise<DB | null> {
   if (!isFirebaseReady()) return null;
   const cfg = loadConnConfig();
   if (!cfg.firebase.enabled) return null;
-  const t = logger.time("firebase", `Firebase yükle [${userId}]`);
+  const t = logger.time('firebase', `Firebase yükle [${userId}]`);
   try {
     const doc = await retryableRead<SyncDoc>(['users', userId, 'db']);
     if (!doc?.data) {
@@ -123,11 +125,11 @@ export async function loadFromFirebase(userId: string): Promise<DB | null> {
     }
     const data = JSON.parse(doc.data) as DB;
     const ms = t.end({ version: data._version });
-    logger.info("firebase", "Firebase'den yüklendi", { userId, version: data._version, ms });
+    logger.info('firebase', "Firebase'den yüklendi", { userId, version: data._version, ms });
     return data;
   } catch (e) {
     t.end({ error: String(e) });
-    logger.error("firebase", "Firebase yükleme başarısız — cloud verisi alınamadı", { userId, error: String(e) });
+    logger.error('firebase', 'Firebase yükleme başarısız — cloud verisi alınamadı', { userId, error: String(e) });
     return null;
   }
 }

@@ -1,17 +1,17 @@
-import { genId } from "@/lib/utils-tr";
-import type { DB } from "@/types";
-import type { IntentResult } from "@/domain/types";
-import type { DomainEvent } from "@/types";
+import { genId } from '@/lib/utils-tr';
+import type { DB } from '@/types';
+import type { IntentResult } from '@/domain/types';
+import type { DomainEvent } from '@/types';
 
 export function processCashTransaction(
-  type: "gelir" | "gider",
+  type: 'gelir' | 'gider',
   payload: {
     amount: number;
     kasa: string;
     description: string;
     category?: string;
   },
-  _db: DB
+  _db: DB,
 ): IntentResult {
   const { amount, kasa, description, category } = payload;
 
@@ -25,10 +25,10 @@ export function processCashTransaction(
   const cashEntry = {
     id,
     type,
-    category: category || "diger",
+    category: category || 'diger',
     amount,
     kasa,
-    description: description || "",
+    description: description || '',
     relatedId: id,
     createdAt: nowIso,
     updatedAt: nowIso,
@@ -37,9 +37,9 @@ export function processCashTransaction(
   const events: DomainEvent[] = [
     {
       id: genId(),
-      type: "cash.recorded" as const,
+      type: 'cash.recorded' as const,
       aggregateId: id,
-      aggregateType: "cash" as const,
+      aggregateType: 'cash' as const,
       payload: cashEntry as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,

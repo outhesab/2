@@ -75,7 +75,7 @@ interface SpeechGrammar {
 
 declare const SpeechRecognition: {
   prototype: SpeechRecognition;
-  new(): SpeechRecognition;
+  new (): SpeechRecognition;
 };
 
 interface Window {

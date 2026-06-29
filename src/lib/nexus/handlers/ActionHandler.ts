@@ -43,19 +43,23 @@ export class ActionHandler implements IntentHandler {
         type: 'smart',
         response: routeResult.response as string,
         executedActions: [],
-        finalData: proposal.applicable ? {
-          kind: 'discount_transfer',
-          proposal,
-          suggestedAction: proposal.applicable ? {
-            action: 'satis',
-            payload: {
-              cariId: proposal.toCari?.id,
-              cariName: proposal.toCari?.name,
-              discount: proposal.recommendedDiscount?.percent,
-              discountAmount: proposal.recommendedDiscount?.amount,
-            },
-          } : undefined,
-        } : undefined,
+        finalData: proposal.applicable
+          ? {
+              kind: 'discount_transfer',
+              proposal,
+              suggestedAction: proposal.applicable
+                ? {
+                    action: 'satis',
+                    payload: {
+                      cariId: proposal.toCari?.id,
+                      cariName: proposal.toCari?.name,
+                      discount: proposal.recommendedDiscount?.percent,
+                      discountAmount: proposal.recommendedDiscount?.amount,
+                    },
+                  }
+                : undefined,
+            }
+          : undefined,
       };
     }
 
@@ -81,7 +85,6 @@ export class ActionHandler implements IntentHandler {
       context.registerConfirmationPromise?.(confirmationPromise);
       const readBack = voiceConfirmationGateway.getPendingReadBack();
 
-
       logger.info('action', 'Action awaiting confirmation', { action: action.action });
 
       return {
@@ -99,20 +102,26 @@ export class ActionHandler implements IntentHandler {
     return {
       type: 'action_chain',
       response: result.success ? `İşlem başarıyla tamamlandı: ${result.message}` : `Hata oluştu: ${result.message}`,
-      executedActions: [{
-        agent: this.mapActionToAgent(action.action),
-        action: action.action,
-        status: result.success ? 'success' : 'failed',
-      }],
+      executedActions: [
+        {
+          agent: this.mapActionToAgent(action.action),
+          action: action.action,
+          status: result.success ? 'success' : 'failed',
+        },
+      ],
       finalData: result.data,
     };
   }
 
-  private async executeSingleAction(request: AgentRequest): Promise<{ success: boolean; message: string; data?: unknown }> {
+  private async executeSingleAction(
+    request: AgentRequest,
+  ): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       const agentId = this.mapActionToAgent(request.action);
       // Use type assertion to bypass overload resolution
-      const agent = (getAgent as (id: string) => { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> })(agentId);
+      const agent = (getAgent as (id: string) => { islemYap: (req: AgentRequest) => Promise<AgentResponse<unknown>> })(
+        agentId,
+      );
 
       const result = await agent.islemYap(request);
 

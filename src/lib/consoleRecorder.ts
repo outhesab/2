@@ -1,4 +1,4 @@
-export type ConsoleLevel = "log" | "warn" | "error" | "info" | "debug";
+export type ConsoleLevel = 'log' | 'warn' | 'error' | 'info' | 'debug';
 
 export interface ConsoleRecord {
   id: string;
@@ -10,7 +10,7 @@ export interface ConsoleRecord {
   sessionId: string;
 }
 
-const STORAGE_KEY = "sobaConsoleRecords_v1";
+const STORAGE_KEY = 'sobaConsoleRecords_v1';
 const MAX_RECORDS = 2000;
 const SESSION_ID = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -23,7 +23,7 @@ function loadRecords(): ConsoleRecord[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
-    console.warn("consoleRecorder", "loadRecords: kayıtlar yüklenemedi");
+    console.warn('consoleRecorder', 'loadRecords: kayıtlar yüklenemedi');
     return [];
   }
 }
@@ -32,13 +32,13 @@ function saveRecords() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records.slice(0, MAX_RECORDS)));
   } catch {
-    console.warn("consoleRecorder", "saveRecords: kayıtlar kaydedilemedi");
+    console.warn('consoleRecorder', 'saveRecords: kayıtlar kaydedilemedi');
     try {
       const trimmed = records.slice(0, Math.floor(MAX_RECORDS / 2));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
       records = trimmed;
     } catch {
-      console.warn("consoleRecorder", "saveRecords: ikinci kayıt denemesi de başarısız");
+      console.warn('consoleRecorder', 'saveRecords: ikinci kayıt denemesi de başarısız');
     }
   }
 }
@@ -47,15 +47,15 @@ function stringifyArgs(args: unknown[]): string {
   return args
     .map((a) => {
       try {
-        if (typeof a === "string") return a;
-        if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack?.slice(0, 200) || ""}`;
+        if (typeof a === 'string') return a;
+        if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack?.slice(0, 200) || ''}`;
         return JSON.stringify(a, null, 1);
       } catch {
-        console.warn("consoleRecorder", "stringifyArgs: dönüştürme hatası");
+        console.warn('consoleRecorder', 'stringifyArgs: dönüştürme hatası');
         return String(a);
       }
     })
-    .join(" ");
+    .join(' ');
 }
 
 function capture(level: ConsoleLevel, args: unknown[]) {
@@ -68,9 +68,9 @@ function capture(level: ConsoleLevel, args: unknown[]) {
     sessionId: SESSION_ID,
   };
 
-  if (level === "error" || level === "warn") {
+  if (level === 'error' || level === 'warn') {
     const stack = new Error().stack;
-    record.stack = stack?.split("\n").slice(2, 6).join("\n").slice(0, 500);
+    record.stack = stack?.split('\n').slice(2, 6).join('\n').slice(0, 500);
   }
 
   records.unshift(record);
@@ -83,13 +83,13 @@ function capture(level: ConsoleLevel, args: unknown[]) {
     try {
       fn(record);
     } catch {
-      console.warn("consoleRecorder", "capture: listener hatası");
+      console.warn('consoleRecorder', 'capture: listener hatası');
     }
   });
 }
 
 export function createRecorder() {
-  const levels: ConsoleLevel[] = ["log", "warn", "error", "info", "debug"];
+  const levels: ConsoleLevel[] = ['log', 'warn', 'error', 'info', 'debug'];
 
   levels.forEach((level) => {
     originalMethods[level] = console[level].bind(console);
@@ -100,8 +100,8 @@ export function createRecorder() {
     };
   });
 
-  window.addEventListener("unhandledrejection", (e) => {
-    capture("error", [
+  window.addEventListener('unhandledrejection', (e) => {
+    capture('error', [
       e.reason instanceof Error
         ? `Unhandled Rejection: ${e.reason.message}`
         : `Unhandled Rejection: ${String(e.reason)}`,
@@ -139,11 +139,7 @@ export const consoleRecorder = {
 
     if (filter?.search) {
       const q = filter.search.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.args.toLowerCase().includes(q) ||
-          (r.stack && r.stack.toLowerCase().includes(q)),
-      );
+      result = result.filter((r) => r.args.toLowerCase().includes(q) || (r.stack && r.stack.toLowerCase().includes(q)));
     }
 
     if (filter?.offset) {
@@ -173,9 +169,7 @@ export const consoleRecorder = {
 
   getErrorFrequency(minutes: number = 5): number {
     const cutoff = Date.now() - minutes * 60 * 1000;
-    return records.filter(
-      (r) => r.level === "error" && new Date(r.ts).getTime() > cutoff,
-    ).length;
+    return records.filter((r) => r.level === 'error' && new Date(r.ts).getTime() > cutoff).length;
   },
 
   clear() {
@@ -183,16 +177,16 @@ export const consoleRecorder = {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
-      console.warn("consoleRecorder", "clear: localStorage temizleme hatası");
+      console.warn('consoleRecorder', 'clear: localStorage temizleme hatası');
     }
   },
 
   exportJSON() {
     const blob = new Blob([JSON.stringify(records, null, 2)], {
-      type: "application/json",
+      type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `console-kayitlari-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();

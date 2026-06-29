@@ -94,7 +94,9 @@ export async function askGemini(
   await readSSEStream(
     res,
     onChunk,
-    (d: unknown) => (d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates?.[0]?.content?.parts?.[0]?.text,
+    (d: unknown) =>
+      (d as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates?.[0]?.content
+        ?.parts?.[0]?.text,
     () => logger.warn('aiApi', 'Gemini stream parse hatası'),
   );
 }

@@ -12,7 +12,7 @@ export interface UseVoiceAgentOptions {
 
 export function useVoiceAgent(
   processVoiceInput: (text: string) => Promise<string>,
-  options: UseVoiceAgentOptions = {}
+  options: UseVoiceAgentOptions = {},
 ) {
   const [state, setState] = useState<VoiceAgentState>('idle');
   const [transcript, setTranscript] = useState('');
@@ -70,7 +70,7 @@ export function useVoiceAgent(
           } else {
             setState('idle');
           }
-        }
+        },
       );
     } catch (e) {
       setState('error');

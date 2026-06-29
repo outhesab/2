@@ -15,17 +15,14 @@ import { resolveVersionCode } from '../../scripts/version-utils';
  */
 
 describe('resolveVersionCode — Property 2', () => {
-  test('geçerli pozitif tam sayı string\'i doğru parse edilir', () => {
+  test("geçerli pozitif tam sayı string'i doğru parse edilir", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 1, max: 99999 }),
-        (n) => {
-          const result = resolveVersionCode(String(n));
-          const alternative = parseInt(String(n), 10);
-          return result === alternative && Number.isInteger(result) && result >= 1;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.integer({ min: 1, max: 99999 }), (n) => {
+        const result = resolveVersionCode(String(n));
+        const alternative = parseInt(String(n), 10);
+        return result === alternative && Number.isInteger(result) && result >= 1;
+      }),
+      { numRuns: 100 },
     );
   });
 
@@ -37,11 +34,11 @@ describe('resolveVersionCode — Property 2', () => {
           fc.constant(undefined),
           fc.constant(''),
           // Sayıya dönüştürülemeyen string'ler: en az bir harf içeren string'ler
-          fc.string({ minLength: 1 }).filter((s) => isNaN(Number(s)) || s.trim() === '')
+          fc.string({ minLength: 1 }).filter((s) => isNaN(Number(s)) || s.trim() === ''),
         ),
-        (invalidValue) => resolveVersionCode(invalidValue) === 1
+        (invalidValue) => resolveVersionCode(invalidValue) === 1,
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

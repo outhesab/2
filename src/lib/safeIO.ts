@@ -88,7 +88,7 @@ export function safeWriteJSON(
     if (projectedPercent > 80) {
       console.warn(
         `[safeIO] Storage uyarısı: %${projectedPercent.toFixed(0)} dolacak (${key})` +
-        (usage.warning ? ' — limit aşımı yakın!' : ''),
+          (usage.warning ? ' — limit aşımı yakın!' : ''),
       );
     }
   } catch {

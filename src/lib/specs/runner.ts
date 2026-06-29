@@ -1,12 +1,12 @@
-import type { SpecGroupResult, SpecRule } from "./types";
-import { componentRules } from "./component-rules";
-import { errorRules } from "./error-rules";
-import { navigationRules } from "./navigation-rules";
-import { dataRules } from "./data-rules";
-import { testRules } from "./test-rules";
-import { componentCoverageRules } from "./component-coverage-rules";
-import { accessibilityRules } from "./accessibility-rules";
-import { performanceBudgetRules } from "./performance-budget-rules";
+import type { SpecGroupResult, SpecRule } from './types';
+import { componentRules } from './component-rules';
+import { errorRules } from './error-rules';
+import { navigationRules } from './navigation-rules';
+import { dataRules } from './data-rules';
+import { testRules } from './test-rules';
+import { componentCoverageRules } from './component-coverage-rules';
+import { accessibilityRules } from './accessibility-rules';
+import { performanceBudgetRules } from './performance-budget-rules';
 
 const ALL_RULES: SpecRule[] = [
   ...componentRules,
@@ -50,7 +50,7 @@ export function runSpecs(): SpecGroupResult[] {
       return {
         id: rule.id,
         title: rule.title,
-        severity: rule.severity as "error" | "warn" | "info",
+        severity: rule.severity as 'error' | 'warn' | 'info',
         passed: result.passed,
         violations: result.violations,
       };

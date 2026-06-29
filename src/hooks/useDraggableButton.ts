@@ -1,10 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from 'react';
 import { logger } from '@/lib/logger';
 
-export function useDraggableButton(
-  storageKey: string,
-  defaultPos: { x: number; y: number },
-) {
+export function useDraggableButton(storageKey: string, defaultPos: { x: number; y: number }) {
   const [pos, setPos] = useState<{ x: number; y: number }>(() => {
     try {
       const raw = localStorage.getItem(storageKey);
@@ -36,14 +33,8 @@ export function useDraggableButton(
     if (!dragging.current) return;
     const dx = e.clientX - startRef.current.mx;
     const dy = e.clientY - startRef.current.my;
-    const newX = Math.max(
-      8,
-      Math.min(window.innerWidth - 64, startRef.current.bx + dx),
-    );
-    const newY = Math.max(
-      8,
-      Math.min(window.innerHeight - 64, startRef.current.by + dy),
-    );
+    const newX = Math.max(8, Math.min(window.innerWidth - 64, startRef.current.bx + dx));
+    const newY = Math.max(8, Math.min(window.innerHeight - 64, startRef.current.by + dy));
     setPos({ x: newX, y: newY });
   }, []);
 

@@ -70,9 +70,9 @@ describe('Özellik 4: Tarih Ayrıştırma Round-Trip', () => {
           const parsed = parseBankDate(formatted);
           expect(parsed).not.toBeNull();
           expect(parsed!.getTime()).toBe(date.getTime());
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -83,19 +83,19 @@ describe('Özellik 4: Tarih Ayrıştırma Round-Trip', () => {
  * Validates: Requirements 9.4
  */
 describe('Özellik 6: Markup ≥ Margin', () => {
-  it('price > cost > 0 için calcMarkup her zaman calcMargin\'e eşit veya büyük', () => {
+  it("price > cost > 0 için calcMarkup her zaman calcMargin'e eşit veya büyük", () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: 1, max: 10000 }).chain((cost) =>
-          fc.integer({ min: cost + 1, max: cost * 10 }).map((price) => ({ cost, price }))
-        ),
+        fc
+          .integer({ min: 1, max: 10000 })
+          .chain((cost) => fc.integer({ min: cost + 1, max: cost * 10 }).map((price) => ({ cost, price }))),
         ({ cost, price }) => {
           const markup = calcMarkup(price, cost);
           const margin = calcMargin(price, cost);
           expect(markup).toBeGreaterThanOrEqual(margin);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

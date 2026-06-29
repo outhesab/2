@@ -78,7 +78,7 @@ describe('detectAnomalies — TRANSACTION_LIMIT aşımı', () => {
       kasa: [makeKasaEntry({ amount: 150_000 })],
     });
     const issues = detectAnomalies(db);
-    expect(issues.some(i => i.severity === 'warning' && i.category === 'anomali')).toBe(true);
+    expect(issues.some((i) => i.severity === 'warning' && i.category === 'anomali')).toBe(true);
   });
 
   it('amount === 100_000 → ihlal üretmez (eşit, aşım değil)', () => {
@@ -86,7 +86,7 @@ describe('detectAnomalies — TRANSACTION_LIMIT aşımı', () => {
       kasa: [makeKasaEntry({ amount: 100_000 })],
     });
     const issues = detectAnomalies(db);
-    const limitIssues = issues.filter(i => i.title.includes('İşlem Limiti'));
+    const limitIssues = issues.filter((i) => i.title.includes('İşlem Limiti'));
     expect(limitIssues).toHaveLength(0);
   });
 
@@ -95,7 +95,7 @@ describe('detectAnomalies — TRANSACTION_LIMIT aşımı', () => {
       kasa: [makeKasaEntry({ amount: 50_000 })],
     });
     const issues = detectAnomalies(db);
-    const limitIssues = issues.filter(i => i.title.includes('İşlem Limiti'));
+    const limitIssues = issues.filter((i) => i.title.includes('İşlem Limiti'));
     expect(limitIssues).toHaveLength(0);
   });
 
@@ -104,7 +104,7 @@ describe('detectAnomalies — TRANSACTION_LIMIT aşımı', () => {
       kasa: [makeKasaEntry({ amount: 200_000, deleted: true })],
     });
     const issues = detectAnomalies(db);
-    const limitIssues = issues.filter(i => i.title.includes('İşlem Limiti'));
+    const limitIssues = issues.filter((i) => i.title.includes('İşlem Limiti'));
     expect(limitIssues).toHaveLength(0);
   });
 });
@@ -115,7 +115,7 @@ describe('detectAnomalies — uzun süreli alacak', () => {
       cari: [makeCari({ balance: 1000, lastTransaction: daysAgo(70), type: 'musteri' })],
     });
     const issues = detectAnomalies(db);
-    expect(issues.some(i => i.severity === 'info' && i.category === 'anomali')).toBe(true);
+    expect(issues.some((i) => i.severity === 'info' && i.category === 'anomali')).toBe(true);
   });
 
   it('balance > 0 ama lastTransaction < 60 gün → ihlal üretmez', () => {
@@ -123,7 +123,7 @@ describe('detectAnomalies — uzun süreli alacak', () => {
       cari: [makeCari({ balance: 1000, lastTransaction: daysAgo(30), type: 'musteri' })],
     });
     const issues = detectAnomalies(db);
-    const alacakIssues = issues.filter(i => i.title.includes('Uzun Süreli Alacak'));
+    const alacakIssues = issues.filter((i) => i.title.includes('Uzun Süreli Alacak'));
     expect(alacakIssues).toHaveLength(0);
   });
 
@@ -132,7 +132,7 @@ describe('detectAnomalies — uzun süreli alacak', () => {
       cari: [makeCari({ balance: 0, lastTransaction: daysAgo(90), type: 'musteri' })],
     });
     const issues = detectAnomalies(db);
-    const alacakIssues = issues.filter(i => i.title.includes('Uzun Süreli Alacak'));
+    const alacakIssues = issues.filter((i) => i.title.includes('Uzun Süreli Alacak'));
     expect(alacakIssues).toHaveLength(0);
   });
 
@@ -141,7 +141,7 @@ describe('detectAnomalies — uzun süreli alacak', () => {
       cari: [makeCari({ balance: 1000, lastTransaction: undefined, type: 'musteri' })],
     });
     const issues = detectAnomalies(db);
-    const alacakIssues = issues.filter(i => i.title.includes('Uzun Süreli Alacak'));
+    const alacakIssues = issues.filter((i) => i.title.includes('Uzun Süreli Alacak'));
     expect(alacakIssues).toHaveLength(0);
   });
 });
@@ -152,12 +152,12 @@ describe('detectAnomalies — kasa hareketi anomalisi', () => {
     // Ort: (300 + 50_000) / 30 ≈ 1677 ₺/gün
     // Dev işlem: 50_000 > 1677 × 10 = 16_770 → anomali
     const normalEntries = Array.from({ length: 3 }, (_, i) =>
-      makeKasaEntry({ id: `k_norm_${i}`, amount: 100, kasa: 'nakit', createdAt: daysAgo(i + 1) })
+      makeKasaEntry({ id: `k_norm_${i}`, amount: 100, kasa: 'nakit', createdAt: daysAgo(i + 1) }),
     );
     const bigEntry = makeKasaEntry({ id: 'k_big', amount: 50_000, kasa: 'nakit', createdAt: daysAgo(1) });
     const db = makeDB({ kasa: [...normalEntries, bigEntry] });
     const issues = detectAnomalies(db);
-    expect(issues.some(i => i.severity === 'warning' && i.title.includes('Kasa Hareketi Anomalisi'))).toBe(true);
+    expect(issues.some((i) => i.severity === 'warning' && i.title.includes('Kasa Hareketi Anomalisi'))).toBe(true);
   });
 
   it('son 30 günde < 3 işlem → istatistiksel anomali üretilmez', () => {
@@ -168,7 +168,7 @@ describe('detectAnomalies — kasa hareketi anomalisi', () => {
     ];
     const db = makeDB({ kasa: entries });
     const issues = detectAnomalies(db);
-    const kasaAnomalies = issues.filter(i => i.title.includes('Kasa Hareketi Anomalisi'));
+    const kasaAnomalies = issues.filter((i) => i.title.includes('Kasa Hareketi Anomalisi'));
     expect(kasaAnomalies).toHaveLength(0);
   });
 });
@@ -184,7 +184,7 @@ describe('detectAnomalies — günlük satış anomalisi', () => {
         cariId,
         total: 100,
         createdAt: daysAgo(i + 5), // farklı günler
-      })
+      }),
     );
 
     // Bugün dev satış (10_000 ₺) — ort 100/30 ≈ 3.3 ₺/gün, 5× = 16.7 ₺ → 10_000 >> eşik
@@ -196,7 +196,7 @@ describe('detectAnomalies — günlük satış anomalisi', () => {
 
     const db = makeDB({ sales: [...normalSales, bigSale] });
     const issues = detectAnomalies(db);
-    expect(issues.some(i => i.severity === 'warning' && i.title.includes('Günlük Satış Anomalisi'))).toBe(true);
+    expect(issues.some((i) => i.severity === 'warning' && i.title.includes('Günlük Satış Anomalisi'))).toBe(true);
   });
 
   it('son 30 günde < 3 işlem → istatistiksel anomali üretilmez', () => {
@@ -211,7 +211,7 @@ describe('detectAnomalies — günlük satış anomalisi', () => {
 
     const db = makeDB({ sales });
     const issues = detectAnomalies(db);
-    const salesAnomalies = issues.filter(i => i.title.includes('Günlük Satış Anomalisi'));
+    const salesAnomalies = issues.filter((i) => i.title.includes('Günlük Satış Anomalisi'));
     expect(salesAnomalies).toHaveLength(0);
   });
 });
@@ -223,7 +223,7 @@ describe('detectAnomalies — genel davranış', () => {
     expect(Array.isArray(issues)).toBe(true);
   });
 
-  it('tüm issue\'lar category: anomali içerir', () => {
+  it("tüm issue'lar category: anomali içerir", () => {
     const db = makeDB({
       kasa: [makeKasaEntry({ amount: 200_000 })],
       cari: [makeCari({ balance: 500, lastTransaction: daysAgo(90), type: 'musteri' })],
@@ -242,7 +242,7 @@ describe('detectAnomalies — genel davranış', () => {
 // ─── runFullAudit — bakiye tutarsızlığı ──────────────────────────────────────
 
 describe('runFullAudit — bakiye tutarsızlığı tespiti', () => {
-  it('hesaplanan bakiye ile Cari.balance farkı > 0.01 → balanceDrifts\'e eklenir', () => {
+  it("hesaplanan bakiye ile Cari.balance farkı > 0.01 → balanceDrifts'e eklenir", () => {
     const cariId = 'cari_drift';
     // Satış: 1000 ₺ → cari bakiyesi 1000 olmalı
     // Ama kayıtlı balance: 500 → fark 500 > 0.01
@@ -267,9 +267,12 @@ describe('runFullAudit — bakiye tutarsızlığı tespiti', () => {
 // ─── Property-Based Testler ───────────────────────────────────────────────────
 
 // Arbitrary: minimal DB
-const arbDB = () => fc.record({
-  _version: fc.integer({ min: 0, max: 10 }),
-}).map(partial => makeDB(partial as Partial<DB>));
+const arbDB = () =>
+  fc
+    .record({
+      _version: fc.integer({ min: 0, max: 10 }),
+    })
+    .map((partial) => makeDB(partial as Partial<DB>));
 
 // Property 10: detectAnomalies her zaman güvenli döner
 // Feature: rule-engine-audit, Property 10: detectAnomalies never throws and always returns IntegrityIssue[]
@@ -278,13 +281,15 @@ describe('Property 10: detectAnomalies never throws and always returns Integrity
     fc.assert(
       fc.property(arbDB(), (db) => {
         let issues: ReturnType<typeof detectAnomalies> = [];
-        expect(() => { issues = detectAnomalies(db); }).not.toThrow();
+        expect(() => {
+          issues = detectAnomalies(db);
+        }).not.toThrow();
         expect(Array.isArray(issues)).toBe(true);
         for (const issue of issues) {
           expect(issue.category).toBe('anomali');
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -295,14 +300,14 @@ describe('Property 11: Daily sales anomaly threshold check', () => {
   it('eşik aşımı + min 3 işlem → warning üretilir', () => {
     fc.assert(
       fc.property(
-        fc.float({ min: 100, max: 1000, noNaN: true }),  // normal satış tutarı
+        fc.float({ min: 100, max: 1000, noNaN: true }), // normal satış tutarı
         fc.float({ min: 50_000, max: 200_000, noNaN: true }), // dev satış tutarı
         (normalAmount, bigAmount) => {
           const cariId = 'cari_prop';
           const today = new Date().toISOString().slice(0, 10);
 
           const normalSales = Array.from({ length: 3 }, (_, i) =>
-            makeSale({ cariId, total: normalAmount, createdAt: daysAgo(i + 5) })
+            makeSale({ cariId, total: normalAmount, createdAt: daysAgo(i + 5) }),
           );
           const bigSale = makeSale({ cariId, total: bigAmount, createdAt: `${today}T10:00:00.000Z` });
 
@@ -314,12 +319,12 @@ describe('Property 11: Daily sales anomaly threshold check', () => {
           const threshold = dailyAvg * 5;
 
           if (bigAmount > threshold) {
-            return issues.some(i => i.severity === 'warning' && i.title.includes('Günlük Satış Anomalisi'));
+            return issues.some((i) => i.severity === 'warning' && i.title.includes('Günlük Satış Anomalisi'));
           }
           return true; // eşik aşılmadıysa test geçer
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });
@@ -330,21 +335,18 @@ describe('Property 12: No anomaly produced with insufficient data', () => {
   it('son 30 günde < 3 kasa işlemi → kasa hareketi anomalisi üretilmez', () => {
     fc.assert(
       fc.property(
-        fc.array(
-          fc.float({ min: 1, max: 10_000, noNaN: true }),
-          { minLength: 0, maxLength: 2 }
-        ),
+        fc.array(fc.float({ min: 1, max: 10_000, noNaN: true }), { minLength: 0, maxLength: 2 }),
         (amounts) => {
           const entries = amounts.map((amount, i) =>
-            makeKasaEntry({ id: `k_${i}`, amount, kasa: 'nakit', createdAt: daysAgo(i + 1) })
+            makeKasaEntry({ id: `k_${i}`, amount, kasa: 'nakit', createdAt: daysAgo(i + 1) }),
           );
           const db = makeDB({ kasa: entries });
           const issues = detectAnomalies(db);
-          const kasaAnomalies = issues.filter(i => i.title.includes('Kasa Hareketi Anomalisi'));
+          const kasaAnomalies = issues.filter((i) => i.title.includes('Kasa Hareketi Anomalisi'));
           return kasaAnomalies.length === 0;
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -354,17 +356,14 @@ describe('Property 12: No anomaly produced with insufficient data', () => {
 describe('Property 13: TRANSACTION_LIMIT breach produces risk flag', () => {
   it('KasaEntry.amount > 100_000 → en az bir warning issue üretir', () => {
     fc.assert(
-      fc.property(
-        fc.float({ min: TRANSACTION_LIMIT + 1, max: 10_000_000, noNaN: true }),
-        (amount) => {
-          const db = makeDB({
-            kasa: [makeKasaEntry({ amount })],
-          });
-          const issues = detectAnomalies(db);
-          return issues.some(i => i.severity === 'warning');
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.float({ min: TRANSACTION_LIMIT + 1, max: 10_000_000, noNaN: true }), (amount) => {
+        const db = makeDB({
+          kasa: [makeKasaEntry({ amount })],
+        });
+        const issues = detectAnomalies(db);
+        return issues.some((i) => i.severity === 'warning');
+      }),
+      { numRuns: 100 },
     );
   });
 });
@@ -375,8 +374,8 @@ describe('Property 14: runFullAudit detects balance drift', () => {
   it('hesaplanan bakiye ile Cari.balance farkı > 0.01 → balanceDrifts en az bir kayıt içerir', () => {
     fc.assert(
       fc.property(
-        fc.float({ min: 100, max: 10_000, noNaN: true }),  // satış tutarı
-        fc.float({ min: 0, max: 50, noNaN: true }),         // kayıtlı balance (düşük)
+        fc.float({ min: 100, max: 10_000, noNaN: true }), // satış tutarı
+        fc.float({ min: 0, max: 50, noNaN: true }), // kayıtlı balance (düşük)
         (saleTotal, recordedBalance) => {
           const cariId = 'cari_drift_prop';
           const db = makeDB({
@@ -391,9 +390,9 @@ describe('Property 14: runFullAudit detects balance drift', () => {
             return report.balanceDrifts.length > 0;
           }
           return true;
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

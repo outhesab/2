@@ -31,8 +31,8 @@ export interface HealthReport {
   ts: string;
   overall: HealthStatus;
   metrics: HealthMetric[];
-  score: number;        // 0–100
-  duration: number;     // toplam kontrol süresi (ms)
+  score: number; // 0–100
+  duration: number; // toplam kontrol süresi (ms)
   recommendations: string[];
 }
 
@@ -47,20 +47,25 @@ async function checkFirebase(): Promise<HealthMetric> {
 
   if (!isFirebaseReady() || !loadConnConfig().firebase.enabled) {
     return {
-      id: 'firebase', name: 'Firebase Bağlantısı',
-      status: 'degraded', value: 'Yapılandırılmamış',
+      id: 'firebase',
+      name: 'Firebase Bağlantısı',
+      status: 'degraded',
+      value: 'Yapılandırılmamış',
       detail: 'Firebase ayarları eksik — Ayarlar > Bağlantı bölümünden yapılandırın.',
       checkedAt,
     };
   }
 
   try {
-    await readDoc(["config", "health"]);
+    await readDoc(['config', 'health']);
     const ms = Math.round(performance.now() - start);
     const status: HealthStatus = ms < 800 ? 'healthy' : ms < 2500 ? 'degraded' : 'critical';
     return {
-      id: 'firebase', name: 'Firebase Bağlantısı',
-      status, value: ms, unit: 'ms',
+      id: 'firebase',
+      name: 'Firebase Bağlantısı',
+      status,
+      value: ms,
+      unit: 'ms',
       detail: `Yanıt: ${ms}ms — Proje: ${getFirebaseProject()}`,
       threshold: { warn: 800, crit: 2500 },
       checkedAt,
@@ -69,8 +74,11 @@ async function checkFirebase(): Promise<HealthMetric> {
     const ms = Math.round(performance.now() - start);
     const isTimeout = e instanceof Error && (e.name === 'AbortError' || e.name === 'TimeoutError');
     return {
-      id: 'firebase', name: 'Firebase Bağlantısı',
-      status: 'critical', value: ms, unit: 'ms',
+      id: 'firebase',
+      name: 'Firebase Bağlantısı',
+      status: 'critical',
+      value: ms,
+      unit: 'ms',
       detail: isTimeout ? `Zaman aşımı (${TIMEOUT_MS / 1000}s)` : 'Firestore erişim hatası',
       checkedAt,
     };
@@ -95,21 +103,38 @@ function checkLocalStorage(): HealthMetric {
       localStorage.setItem('__healthcheck__', '1');
       localStorage.removeItem('__healthcheck__');
     } catch {
-      logger.warn("healthCheck", "localStorage yazma testi başarısız");
-      return { id: 'localStorage', name: 'Yerel Depolama', status: 'critical', value: pct, unit: '%', detail: 'Yazma başarısız — depolama dolu!', checkedAt };
+      logger.warn('healthCheck', 'localStorage yazma testi başarısız');
+      return {
+        id: 'localStorage',
+        name: 'Yerel Depolama',
+        status: 'critical',
+        value: pct,
+        unit: '%',
+        detail: 'Yazma başarısız — depolama dolu!',
+        checkedAt,
+      };
     }
 
     return {
-      id: 'localStorage', name: 'Yerel Depolama',
-      value: pct, unit: '%',
+      id: 'localStorage',
+      name: 'Yerel Depolama',
+      value: pct,
+      unit: '%',
       detail: `${usedKB} KB / ${limitKB} KB · ${keys.length} anahtar`,
       status: pct > 90 ? 'critical' : pct > 70 ? 'degraded' : 'healthy',
       threshold: { warn: 70, crit: 90 },
       checkedAt,
     };
   } catch {
-    logger.warn("healthCheck", "localStorage okuma hatası");
-    return { id: 'localStorage', name: 'Yerel Depolama', status: 'critical', value: '?', detail: 'localStorage erişim hatası', checkedAt };
+    logger.warn('healthCheck', 'localStorage okuma hatası');
+    return {
+      id: 'localStorage',
+      name: 'Yerel Depolama',
+      status: 'critical',
+      value: '?',
+      detail: 'localStorage erişim hatası',
+      checkedAt,
+    };
   }
 }
 
@@ -125,8 +150,10 @@ function checkMemory(): HealthMetric {
     const limitMB = Math.round(mem.jsHeapSizeLimit / (1024 * 1024));
     const pct = Math.round((usedMB / limitMB) * 100);
     return {
-      id: 'memory', name: 'JS Heap Belleği',
-      value: pct, unit: '%',
+      id: 'memory',
+      name: 'JS Heap Belleği',
+      value: pct,
+      unit: '%',
       detail: `${usedMB} MB kullanımda / ${limitMB} MB limit`,
       status: pct > 85 ? 'critical' : pct > 65 ? 'degraded' : 'healthy',
       threshold: { warn: 65, crit: 85 },
@@ -137,7 +164,8 @@ function checkMemory(): HealthMetric {
   type NavWithDeviceMemory = Navigator & { deviceMemory?: number };
   const devMem = (navigator as NavWithDeviceMemory).deviceMemory;
   return {
-    id: 'memory', name: 'Cihaz Belleği',
+    id: 'memory',
+    name: 'Cihaz Belleği',
     value: devMem ? `${devMem} GB` : 'Bilinmiyor',
     status: 'healthy',
     detail: 'Heap API bu tarayıcıda desteklenmiyor',
@@ -154,7 +182,14 @@ function checkNetwork(): HealthMetric {
   const online = navigator.onLine;
 
   if (!online) {
-    return { id: 'network', name: 'Ağ Bağlantısı', status: 'critical', value: 'Çevrimdışı', detail: 'İnternet bağlantısı yok', checkedAt };
+    return {
+      id: 'network',
+      name: 'Ağ Bağlantısı',
+      status: 'critical',
+      value: 'Çevrimdışı',
+      detail: 'İnternet bağlantısı yok',
+      checkedAt,
+    };
   }
 
   if (conn) {
@@ -162,11 +197,12 @@ function checkNetwork(): HealthMetric {
     const isSlow = effectiveType === 'slow-2g' || effectiveType === '2g' || (rtt !== undefined && rtt > 600);
     const isDegraded = effectiveType === '3g' || (rtt !== undefined && rtt > 200);
     const parts: string[] = [`Tür: ${effectiveType}`];
-    if (rtt !== undefined)  parts.push(`RTT: ${rtt}ms`);
+    if (rtt !== undefined) parts.push(`RTT: ${rtt}ms`);
     if (downlink !== undefined) parts.push(`↓ ${downlink} Mbps`);
     if (saveData) parts.push('Veri tasarrufu aktif');
     return {
-      id: 'network', name: 'Ağ Kalitesi',
+      id: 'network',
+      name: 'Ağ Kalitesi',
       value: effectiveType,
       status: isSlow ? 'critical' : isDegraded ? 'degraded' : 'healthy',
       detail: parts.join(' · '),
@@ -174,7 +210,14 @@ function checkNetwork(): HealthMetric {
     };
   }
 
-  return { id: 'network', name: 'Ağ Bağlantısı', status: 'healthy', value: 'Çevrimiçi', detail: 'Bağlı (detay mevcut değil)', checkedAt };
+  return {
+    id: 'network',
+    name: 'Ağ Bağlantısı',
+    status: 'healthy',
+    value: 'Çevrimiçi',
+    detail: 'Bağlı (detay mevcut değil)',
+    checkedAt,
+  };
 }
 
 function checkDBIntegrity(db: Record<string, unknown>): HealthMetric {
@@ -194,16 +237,17 @@ function checkDBIntegrity(db: Record<string, unknown>): HealthMetric {
 
   const products = (db.products as Array<{ deleted?: boolean }>) ?? [];
   if (products.length > 0) {
-    const deletedPct = Math.round((products.filter(p => p.deleted).length / products.length) * 100);
+    const deletedPct = Math.round((products.filter((p) => p.deleted).length / products.length) * 100);
     if (deletedPct > 60) issues.push(`Ürünlerin %${deletedPct}'i soft-deleted`);
   }
 
   const sales = (db.sales as Array<{ total?: unknown }>) ?? [];
-  const invalidSales = sales.filter(s => typeof s.total !== 'number').length;
+  const invalidSales = sales.filter((s) => typeof s.total !== 'number').length;
   if (invalidSales > 0) issues.push(`${invalidSales} satışta geçersiz "total"`);
 
   return {
-    id: 'dbIntegrity', name: 'Veri Bütünlüğü',
+    id: 'dbIntegrity',
+    name: 'Veri Bütünlüğü',
     value: issues.length === 0 ? 'Temiz' : `${issues.length} sorun`,
     status: issues.length === 0 ? 'healthy' : issues.length <= 2 ? 'degraded' : 'critical',
     detail: issues.length ? issues.slice(0, 3).join('; ') : 'Tüm şema kontrolleri geçti',
@@ -216,14 +260,22 @@ function checkSyncLag(db: Record<string, unknown>): HealthMetric {
   const lastSync = (db as { _lastSyncAt?: string })._lastSyncAt;
 
   if (!lastSync) {
-    return { id: 'syncLag', name: 'Senkronizasyon', status: 'degraded', value: 'Bilinmiyor', detail: 'Henüz bulut senkronizasyonu yapılmamış', checkedAt };
+    return {
+      id: 'syncLag',
+      name: 'Senkronizasyon',
+      status: 'degraded',
+      value: 'Bilinmiyor',
+      detail: 'Henüz bulut senkronizasyonu yapılmamış',
+      checkedAt,
+    };
   }
 
   const lagMs = Date.now() - new Date(lastSync).getTime();
   const lagMin = Math.round(lagMs / 60000);
 
   return {
-    id: 'syncLag', name: 'Son Senkronizasyon',
+    id: 'syncLag',
+    name: 'Son Senkronizasyon',
     value: lagMin < 1 ? '< 1 dk' : `${lagMin} dk`,
     status: lagMs > 30 * 60 * 1000 ? 'critical' : lagMs > 10 * 60 * 1000 ? 'degraded' : 'healthy',
     detail: `Son sync: ${new Date(lastSync).toLocaleTimeString('tr-TR')}`,
@@ -237,13 +289,21 @@ function buildRecommendations(metrics: HealthMetric[]): string[] {
   const recs: string[] = [];
   for (const m of metrics) {
     if (m.status === 'healthy') continue;
-    if (m.id === 'firebase' && m.status === 'critical') recs.push('Firebase erişilemiyor — internet bağlantınızı kontrol edin veya Firebase proje ayarlarını gözden geçirin.');
-    if (m.id === 'localStorage' && m.status === 'critical') recs.push('Yerel depolama dolmak üzere — JSON yedek alıp eski verilerinizi temizleyin.');
-    if (m.id === 'localStorage' && m.status === 'degraded') recs.push('Yerel depolama %70\'in üzerinde — yakın zamanda bir yedek almanız önerilir.');
+    if (m.id === 'firebase' && m.status === 'critical')
+      recs.push(
+        'Firebase erişilemiyor — internet bağlantınızı kontrol edin veya Firebase proje ayarlarını gözden geçirin.',
+      );
+    if (m.id === 'localStorage' && m.status === 'critical')
+      recs.push('Yerel depolama dolmak üzere — JSON yedek alıp eski verilerinizi temizleyin.');
+    if (m.id === 'localStorage' && m.status === 'degraded')
+      recs.push("Yerel depolama %70'in üzerinde — yakın zamanda bir yedek almanız önerilir.");
     if (m.id === 'memory') recs.push('Bellek kullanımı yüksek — diğer tarayıcı sekmelerini kapatmayı deneyin.');
-    if (m.id === 'network' && m.status === 'critical') recs.push('İnternet bağlantısı yok — uygulama çevrimdışı modda çalışıyor, veriler yerel olarak korunuyor.');
-    if (m.id === 'dbIntegrity') recs.push('Veri bütünlüğünde sorun tespit edildi — Ayarlar > Veriyi Onar seçeneğini deneyin.');
-    if (m.id === 'syncLag' && m.status === 'critical') recs.push('Senkronizasyon 30 dakikadan uzun süredir yapılmamış — Firebase bağlantısını kontrol edin.');
+    if (m.id === 'network' && m.status === 'critical')
+      recs.push('İnternet bağlantısı yok — uygulama çevrimdışı modda çalışıyor, veriler yerel olarak korunuyor.');
+    if (m.id === 'dbIntegrity')
+      recs.push('Veri bütünlüğünde sorun tespit edildi — Ayarlar > Veriyi Onar seçeneğini deneyin.');
+    if (m.id === 'syncLag' && m.status === 'critical')
+      recs.push('Senkronizasyon 30 dakikadan uzun süredir yapılmamış — Firebase bağlantısını kontrol edin.');
   }
   return recs;
 }
@@ -257,18 +317,30 @@ export async function runHealthCheck(db?: Record<string, unknown>): Promise<Heal
     Promise.resolve(checkLocalStorage()),
     Promise.resolve(checkMemory()),
     Promise.resolve(checkNetwork()),
-    Promise.resolve(db ? checkDBIntegrity(db) : {
-      id: 'dbIntegrity', name: 'Veri Bütünlüğü',
-      value: 'DB mevcut değil', status: 'degraded' as HealthStatus,
-      detail: 'DB nesnesi sağlanmadı',
-      checkedAt: new Date().toISOString(),
-    }),
-    Promise.resolve(db ? checkSyncLag(db) : {
-      id: 'syncLag', name: 'Senkronizasyon',
-      value: '?', status: 'degraded' as HealthStatus,
-      detail: 'DB nesnesi sağlanmadı',
-      checkedAt: new Date().toISOString(),
-    }),
+    Promise.resolve(
+      db
+        ? checkDBIntegrity(db)
+        : {
+            id: 'dbIntegrity',
+            name: 'Veri Bütünlüğü',
+            value: 'DB mevcut değil',
+            status: 'degraded' as HealthStatus,
+            detail: 'DB nesnesi sağlanmadı',
+            checkedAt: new Date().toISOString(),
+          },
+    ),
+    Promise.resolve(
+      db
+        ? checkSyncLag(db)
+        : {
+            id: 'syncLag',
+            name: 'Senkronizasyon',
+            value: '?',
+            status: 'degraded' as HealthStatus,
+            detail: 'DB nesnesi sağlanmadı',
+            checkedAt: new Date().toISOString(),
+          },
+    ),
   ]);
 
   const metrics: HealthMetric[] = [firebaseMetric, lsMetric, memMetric, netMetric, dbMetric, syncMetric];
@@ -276,8 +348,8 @@ export async function runHealthCheck(db?: Record<string, unknown>): Promise<Heal
   const WEIGHT: Record<HealthStatus, number> = { healthy: 2, degraded: 1, critical: 0 };
   const score = Math.round((metrics.reduce((s, m) => s + WEIGHT[m.status], 0) / (metrics.length * 2)) * 100);
 
-  const hasCritical = metrics.some(m => m.status === 'critical');
-  const hasDegraded = metrics.some(m => m.status === 'degraded');
+  const hasCritical = metrics.some((m) => m.status === 'critical');
+  const hasDegraded = metrics.some((m) => m.status === 'degraded');
   const overall: HealthStatus = hasCritical ? 'critical' : hasDegraded ? 'degraded' : 'healthy';
 
   const recommendations = buildRecommendations(metrics);
@@ -289,8 +361,8 @@ export async function runHealthCheck(db?: Record<string, unknown>): Promise<Heal
     logger.info('health', `✅ Sağlık skoru: ${score}/100`, { duration });
   } else {
     logger.warn('health', `⚠️ Sağlık skoru: ${score}/100 — ${overall}`, {
-      criticals: metrics.filter(m => m.status === 'critical').map(m => m.id),
-      degraded: metrics.filter(m => m.status === 'degraded').map(m => m.id),
+      criticals: metrics.filter((m) => m.status === 'critical').map((m) => m.id),
+      degraded: metrics.filter((m) => m.status === 'degraded').map((m) => m.id),
     });
   }
 
@@ -308,8 +380,8 @@ export function quickHealthCheck(db?: Record<string, unknown>): Omit<HealthRepor
 
   const WEIGHT: Record<HealthStatus, number> = { healthy: 2, degraded: 1, critical: 0 };
   const score = Math.round((metrics.reduce((s, m) => s + WEIGHT[m.status], 0) / (metrics.length * 2)) * 100);
-  const hasCritical = metrics.some(m => m.status === 'critical');
-  const hasDegraded = metrics.some(m => m.status === 'degraded');
+  const hasCritical = metrics.some((m) => m.status === 'critical');
+  const hasDegraded = metrics.some((m) => m.status === 'degraded');
   const overall: HealthStatus = hasCritical ? 'critical' : hasDegraded ? 'degraded' : 'healthy';
 
   return { ts: new Date().toISOString(), overall, metrics, score, recommendations: buildRecommendations(metrics) };

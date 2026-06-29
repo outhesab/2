@@ -11,7 +11,9 @@ describe('aiActions', () => {
   });
 
   it('parseActions should parse valid action JSON', () => {
-    const result = parseActions('[{"type":"satis","payload":{"productId":"p1","qty":1,"price":100,"payment":"nakit"}}]');
+    const result = parseActions(
+      '[{"type":"satis","payload":{"productId":"p1","qty":1,"price":100,"payment":"nakit"}}]',
+    );
     expect(Array.isArray(result)).toBe(true);
   });
 

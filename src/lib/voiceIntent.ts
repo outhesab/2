@@ -12,7 +12,7 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
   const input = text.toLowerCase().trim();
 
   // --- FAST PATH: Regex-based intent detection (Offline & Instant) ---
-  
+
   // 1. Kasa İşlemleri (Gelir/Gider)
   const giderMatch = input.match(/(\d+)\s*(tl|lira)\s*gider/);
   if (giderMatch) {
@@ -41,7 +41,7 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
 
   // 3. Genel Yönetim Komutları (Offline Keywords)
   const saleKeywords = ['yeni satış', 'satış başlat', 'satış yap', 'soba sat', 'satış ekle', 'satış gir'];
-  if (saleKeywords.some(kw => input.includes(kw))) {
+  if (saleKeywords.some((kw) => input.includes(kw))) {
     return { action: 'sale', payload: { items: [], payment: 'nakit' } };
   }
   if (input.includes('müşteri ekle') || input.includes('cari ekle') || input.includes('yeni cari')) {
@@ -57,7 +57,7 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
   // --- SMART PATH: LLM-based intent detection ---
   const aiAgent = getAgent('deep_seek');
   const domainContext = getDomainContext();
-  
+
   const prompt = `
     Sen bir soba bayii satış asistanı niyet analizcisisin. 
     Sektöre özel terimleri içeren şu sözlüğü baz al:
@@ -89,13 +89,11 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
     });
 
     if (result.ok && result.data) {
-      const rawResponse = typeof result.data === 'string' 
-        ? result.data 
-        : JSON.stringify(result.data);
-      
+      const rawResponse = typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
+
       const jsonMatch = rawResponse.match(/\{.*?\}/s);
       const jsonString = jsonMatch ? jsonMatch[0] : rawResponse;
-      
+
       return JSON.parse(jsonString) as AgentRequest;
     }
   } catch (error) {
@@ -104,4 +102,3 @@ export async function parseVoiceIntent(text: string): Promise<AgentRequest | nul
 
   return null;
 }
-

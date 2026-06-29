@@ -51,11 +51,15 @@ export class NexusExecutive {
    *   → 70 ActionHandler (NexusRouter: fast/memory/action, passthrough for smart)
    *   → 50 SmartHandler (DeepSeek deep reasoning, fallback)
    */
-  public async execute(input: string, db: DB, context: {
-    isFileContext?: boolean,
-    currentFiles?: unknown[],
-    adminMode?: boolean,
-  }): Promise<ExecutiveResult> {
+  public async execute(
+    input: string,
+    db: DB,
+    context: {
+      isFileContext?: boolean;
+      currentFiles?: unknown[];
+      adminMode?: boolean;
+    },
+  ): Promise<ExecutiveResult> {
     logger.info('ai', 'Executing God-Mode request', { input, composerMode: this.composerMode });
 
     const handlerContext: HandlerContext = {
@@ -63,7 +67,9 @@ export class NexusExecutive {
       isFileContext: context.isFileContext,
       currentFiles: context.currentFiles,
       adminMode: context.adminMode,
-      setComposerMode: (active: boolean) => { this.composerMode = active; },
+      setComposerMode: (active: boolean) => {
+        this.composerMode = active;
+      },
       resetComposer: () => {
         voiceSaleComposer.reset();
         this.composerMode = false;
@@ -149,11 +155,13 @@ export class NexusExecutive {
       response: execResult.success
         ? `İşlem başarıyla tamamlandı: ${execResult.message}`
         : `Hata oluştu: ${execResult.message}`,
-      executedActions: [{
-        agent: this.mapActionToAgent(action.action),
-        action: action.action,
-        status: execResult.success ? 'success' : 'failed',
-      }],
+      executedActions: [
+        {
+          agent: this.mapActionToAgent(action.action),
+          action: action.action,
+          status: execResult.success ? 'success' : 'failed',
+        },
+      ],
       finalData: execResult.data,
     };
   }
@@ -166,14 +174,16 @@ export class NexusExecutive {
     this.pendingConfirmationPromise = null;
   }
 
-  private async executeSingleAction(request: AgentRequest): Promise<{ success: boolean; message: string; data?: unknown }> {
+  private async executeSingleAction(
+    request: AgentRequest,
+  ): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       const agentId = this.mapActionToAgent(request.action);
       // Cast to satisfy overload resolution
       const agent = getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
-      
+
       const result = await agent.islemYap(request);
-      
+
       if (result.ok) {
         return { success: true, message: `Agent ${agentId} işlemi tamamladı.`, data: result.data };
       } else {

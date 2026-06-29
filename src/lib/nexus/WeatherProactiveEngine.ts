@@ -20,8 +20,8 @@
  * - SobaSentinel ile entegre çalışabilir (alert'leri oraya emit eder).
  */
 
-import type { DB, Product } from "@/types";
-import { logger } from "@/lib/logger";
+import type { DB, Product } from '@/types';
+import { logger } from '@/lib/logger';
 
 // ── Tipler ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ export interface WeatherData {
   /** 10 günlük tahmin ortalaması (°C) */
   forecastAvgTemp: number;
   /** Trend: "cooling" | "warming" | "stable" */
-  trend: "cooling" | "warming" | "stable";
+  trend: 'cooling' | 'warming' | 'stable';
   /** Tahmin gün sayısı */
   forecastDays: number;
   /** Veri kaynağı (real API / manual / mock) */
@@ -42,12 +42,12 @@ export interface WeatherData {
 
 export interface ProactiveAlert {
   id: string;
-  priority: "low" | "medium" | "high";
-  category: "weather_demand" | "stock_low" | "restock_suggestion" | "opportunity";
+  priority: 'low' | 'medium' | 'high';
+  category: 'weather_demand' | 'stock_low' | 'restock_suggestion' | 'opportunity';
   message: string;
   /** Önerilen aksiyon (UI/voice için) */
   suggestedAction?: {
-    type: "restock" | "monitor" | "promote";
+    type: 'restock' | 'monitor' | 'promote';
     productName?: string;
     suggestedQty?: number;
   };
@@ -61,10 +61,10 @@ export interface ProactiveAlert {
  * Soba kategorisindeki ürünleri getirir.
  * Soba/boru/pelet gibi ısı ile ilgili kategoriler.
  */
-const HEAT_CATEGORIES = ["soba", "pelet", "boru", "ısıtıcı", "isitici", "ekran"];
+const HEAT_CATEGORIES = ['soba', 'pelet', 'boru', 'ısıtıcı', 'isitici', 'ekran'];
 
 function isHeatProduct(p: Product): boolean {
-  const cat = p.category?.toLocaleLowerCase("tr-TR") ?? "";
+  const cat = p.category?.toLocaleLowerCase('tr-TR') ?? '';
   return HEAT_CATEGORIES.some((c) => cat.includes(c));
 }
 
@@ -78,7 +78,7 @@ function isHeatProduct(p: Product): boolean {
  * Saf fonksiyon — test edilebilir.
  */
 export function estimateDemandMultiplier(weather: WeatherData): number {
-  if (weather.trend !== "cooling") return 1.0;
+  if (weather.trend !== 'cooling') return 1.0;
 
   const drop = weather.currentTemp - weather.forecastAvgTemp;
   if (drop >= 5) return 1.3; // +%30
@@ -99,7 +99,7 @@ export function estimateDailySales(db: DB, productId: string): number {
   const recentSales = db.sales.filter(
     (s) =>
       !s.deleted &&
-      s.status === "tamamlandi" &&
+      s.status === 'tamamlandi' &&
       new Date(s.createdAt) >= thirtyDaysAgo &&
       (s.items || []).some((i) => i.productId === productId),
   );
@@ -131,7 +131,7 @@ export function analyzeWeatherImpact(weather: WeatherData, db: DB): ProactiveAle
   const multiplier = estimateDemandMultiplier(weather);
 
   // Hava soğumuyorsa ve çarpan 1 ise — sadece durum raporu
-  if (multiplier === 1.0 && weather.trend !== "cooling") {
+  if (multiplier === 1.0 && weather.trend !== 'cooling') {
     return alerts;
   }
 
@@ -149,18 +149,16 @@ export function analyzeWeatherImpact(weather: WeatherData, db: DB): ProactiveAle
     // Stok, tahmini talebi karşılamıyor
     if (stockShortfall > 0) {
       const suggestedQty = Math.max(stockShortfall, product.minStock * 2);
-      const priority: ProactiveAlert["priority"] =
-        product.stock <= product.minStock ? "high" :
-        stockShortfall > product.minStock * 3 ? "high" :
-        "medium";
+      const priority: ProactiveAlert['priority'] =
+        product.stock <= product.minStock ? 'high' : stockShortfall > product.minStock * 3 ? 'high' : 'medium';
 
       alerts.push({
         id: `restock_${product.id}`,
         priority,
-        category: "restock_suggestion",
+        category: 'restock_suggestion',
         message: `${product.name}: Mevcut stok ${product.stock} adet, ${weather.forecastDays} günlük tahmini talep ${forecastDemand} adet (yüzde ${Math.round((multiplier - 1) * 100)} artış). ${suggestedQty} adet sipariş öneririm.`,
         suggestedAction: {
-          type: "restock",
+          type: 'restock',
           productName: product.name,
           suggestedQty,
         },
@@ -176,22 +174,22 @@ export function analyzeWeatherImpact(weather: WeatherData, db: DB): ProactiveAle
       // Stok yeterli ama talep artacak — fırsat
       alerts.push({
         id: `opportunity_${product.id}`,
-        priority: "low",
-        category: "opportunity",
+        priority: 'low',
+        category: 'opportunity',
         message: `${product.name}: Havalar soğuyor, talep yüzde ${Math.round((multiplier - 1) * 100)} artabilir. Stok yeterli (${product.stock} adet).`,
-        suggestedAction: { type: "promote", productName: product.name },
+        suggestedAction: { type: 'promote', productName: product.name },
         data: { productId: product.id, multiplier, dailySales },
       });
     }
   }
 
   // Genel hava durumu uyarısı (en az bir restock varsa)
-  if (alerts.some((a) => a.category === "restock_suggestion")) {
+  if (alerts.some((a) => a.category === 'restock_suggestion')) {
     const drop = Math.round(weather.currentTemp - weather.forecastAvgTemp);
     alerts.unshift({
-      id: "weather_demand_overview",
-      priority: "medium",
-      category: "weather_demand",
+      id: 'weather_demand_overview',
+      priority: 'medium',
+      category: 'weather_demand',
       message: `Hava durumu Analizi: Önümüzdeki ${weather.forecastDays} gün sıcaklık ${weather.currentTemp}°C'den ${weather.forecastAvgTemp}°C'ye düşebilir (${drop}°C düşüş). Soba talebinde artış bekleniyor.`,
       data: { drop, multiplier },
     });
@@ -208,15 +206,15 @@ export function analyzeWeatherImpact(weather: WeatherData, db: DB): ProactiveAle
  */
 export function generateProactiveMessage(alerts: ProactiveAlert[]): string {
   if (alerts.length === 0) {
-    return "Hava durumu analizi tamamlandı, şu an için stok riski yok.";
+    return 'Hava durumu analizi tamamlandı, şu an için stok riski yok.';
   }
 
   const priorityMap = { high: 3, medium: 2, low: 1 } as const;
   const sorted = [...alerts].sort((a, b) => priorityMap[b.priority] - priorityMap[a.priority]);
 
   const parts: string[] = [];
-  const highCount = sorted.filter((a) => a.priority === "high").length;
-  const mediumCount = sorted.filter((a) => a.priority === "medium").length;
+  const highCount = sorted.filter((a) => a.priority === 'high').length;
+  const mediumCount = sorted.filter((a) => a.priority === 'medium').length;
 
   if (highCount > 0) {
     parts.push(`Dikkat, ${highCount} kritik stok uyarısı var.`);
@@ -233,7 +231,7 @@ export function generateProactiveMessage(alerts: ProactiveAlert[]): string {
     parts.push(`Ve ${sorted.length - 3} uyarı daha.`);
   }
 
-  return parts.join(" ");
+  return parts.join(' ');
 }
 
 // ── Weather API (injectable) ─────────────────────────────────────────────────
@@ -251,10 +249,10 @@ export type WeatherFetcher = (location?: string) => Promise<WeatherData>;
 export const mockWeatherFetcher: WeatherFetcher = async (location) => ({
   currentTemp: 10,
   forecastAvgTemp: 4,
-  trend: "cooling",
+  trend: 'cooling',
   forecastDays: 10,
-  source: "mock",
-  location: location ?? "default",
+  source: 'mock',
+  location: location ?? 'default',
 });
 
 /**
@@ -264,17 +262,17 @@ export const mockWeatherFetcher: WeatherFetcher = async (location) => ({
 export function createOpenWeatherFetcher(apiKey: string): WeatherFetcher {
   return async (location) => {
     if (!apiKey) {
-      logger.warn("ai", "OpenWeather API key yok, mock kullanılıyor");
+      logger.warn('ai', 'OpenWeather API key yok, mock kullanılıyor');
       return mockWeatherFetcher(location);
     }
     try {
       // Gerçek implementasyon — burada placeholder.
       // Prodüksiyonda fetch() ile OpenWeatherMap API'sine çağrı yapılır.
       // Şimdilik mock döner (gerçek API entegrasyonu ayrı task).
-      logger.info("ai", "Weather fetch (mock fallback)", { location });
+      logger.info('ai', 'Weather fetch (mock fallback)', { location });
       return mockWeatherFetcher(location);
     } catch (e) {
-      logger.error("ai", "Weather fetch hatası, mock'a dönülüyor", { error: e });
+      logger.error('ai', "Weather fetch hatası, mock'a dönülüyor", { error: e });
       return mockWeatherFetcher(location);
     }
   };
@@ -317,11 +315,11 @@ export class WeatherProactiveEngine {
   public async check(db: DB, location?: string, force = false): Promise<ProactiveCheckResult> {
     const now = Date.now();
     if (!force && now - this.lastCheck < this.checkCooldown) {
-      logger.info("ai", "Weather check cooldown, atlanıyor");
+      logger.info('ai', 'Weather check cooldown, atlanıyor');
       return {
         alerts: this.lastAlerts,
         message: generateProactiveMessage(this.lastAlerts),
-        weather: { currentTemp: 0, forecastAvgTemp: 0, trend: "stable", forecastDays: 0 },
+        weather: { currentTemp: 0, forecastAvgTemp: 0, trend: 'stable', forecastDays: 0 },
       };
     }
 
@@ -332,7 +330,7 @@ export class WeatherProactiveEngine {
     this.lastCheck = now;
     this.lastAlerts = alerts;
 
-    logger.info("ai", "Weather proactive check tamamlandı", {
+    logger.info('ai', 'Weather proactive check tamamlandı', {
       alertCount: alerts.length,
       trend: weather.trend,
     });

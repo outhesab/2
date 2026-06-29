@@ -12,8 +12,8 @@
  * Bu modül save() yapmaz; sadece öneri (proposal) üretir. Uygulama caller'a aittir.
  */
 
-import type { DB, Sale } from "@/types";
-import { logger } from "@/lib/logger";
+import type { DB, Sale } from '@/types';
+import { logger } from '@/lib/logger';
 // ── Tipler ──────────────────────────────────────────────────────────────────
 
 export interface DiscountedSaleRef {
@@ -73,12 +73,12 @@ export interface DiscountTransferProposal {
  * "ali" → "Ali Bey", "Ali Yılmaz", "ALİ" hepsiyle eşleşir.
  * "bey"/"beyefendi"/"abla"/"abi" gibi hitapları normalize eder.
  */
-const HONORIFICS = ["bey", "beyefendi", "abla", "abi", "hoca", "usta"];
+const HONORIFICS = ['bey', 'beyefendi', 'abla', 'abi', 'hoca', 'usta'];
 
 function normalizeName(name: string): string {
-  const lower = name.toLocaleLowerCase("tr-TR").trim();
+  const lower = name.toLocaleLowerCase('tr-TR').trim();
   const tokens = lower.split(/\s+/).filter((t) => t.length > 0 && !HONORIFICS.includes(t));
-  return tokens.join(" ");
+  return tokens.join(' ');
 }
 
 /**
@@ -108,7 +108,7 @@ export function findCariByName(db: DB, name: string): { id: string; name: string
 // ── Çekirdek: İndirim geçmişini hatırla ──────────────────────────────────────
 
 function saleHasDiscount(sale: Sale): boolean {
-  return (sale.discount > 0 || sale.discountAmount > 0) && !sale.deleted && sale.status === "tamamlandi";
+  return (sale.discount > 0 || sale.discountAmount > 0) && !sale.deleted && sale.status === 'tamamlandi';
 }
 
 function toRef(sale: Sale): DiscountedSaleRef {
@@ -135,7 +135,7 @@ export function recallDiscountHistory(db: DB, cariIdOrName: string): DiscountRec
   if (!cari) {
     const found = findCariByName(db, cariIdOrName);
     if (!found) {
-      logger.info("ai", "Cari bulunamadı", { query: cariIdOrName });
+      logger.info('ai', 'Cari bulunamadı', { query: cariIdOrName });
       return null;
     }
     cari = db.cari.find((c) => c.id === found.id);
@@ -195,22 +195,22 @@ export function recallDiscountHistory(db: DB, cariIdOrName: string): DiscountRec
 export function extractDiscountPattern(recall: DiscountRecall): {
   percent: number;
   amount: number | null;
-  basis: "latest" | "average";
+  basis: 'latest' | 'average';
 } | null {
   if (!recall.hasMemory) return null;
 
   const latest = recall.latestDiscount;
   if (latest && latest.percent > 0) {
-    return { percent: latest.percent, amount: null, basis: "latest" };
+    return { percent: latest.percent, amount: null, basis: 'latest' };
   }
 
   if (recall.averagePercent > 0) {
-    return { percent: recall.averagePercent, amount: null, basis: "average" };
+    return { percent: recall.averagePercent, amount: null, basis: 'average' };
   }
 
   // Sadece sabit tutar indirimi varsa (yüzde yok)
   if (latest && latest.amount > 0) {
-    return { percent: 0, amount: latest.amount, basis: "latest" };
+    return { percent: 0, amount: latest.amount, basis: 'latest' };
   }
 
   return null;
@@ -225,11 +225,7 @@ export function extractDiscountPattern(recall: DiscountRecall): {
  * Bu fonksiyon DB'ye yazmaz; sadece yapısal bir öneri döner.
  * Uygulama, caller'ın intentEngine/save() üzerinden yapması gerekir.
  */
-export function proposeDiscountTransfer(
-  db: DB,
-  fromCariName: string,
-  toCariName: string,
-): DiscountTransferProposal {
+export function proposeDiscountTransfer(db: DB, fromCariName: string, toCariName: string): DiscountTransferProposal {
   const fromCari = findCariByName(db, fromCariName);
   const toCari = findCariByName(db, toCariName);
 
@@ -262,12 +258,12 @@ export function proposeDiscountTransfer(
   if (fromCari.id === toCari.id) {
     return {
       ok: false,
-      error: "Kaynak ve hedef cari aynı.",
+      error: 'Kaynak ve hedef cari aynı.',
       fromCari,
       toCari,
       sourceSale: null,
       recommendedDiscount: null,
-      reasoning: "İndirim aynı kişiye transfer edilemez.",
+      reasoning: 'İndirim aynı kişiye transfer edilemez.',
       applicable: false,
     };
   }
@@ -290,7 +286,7 @@ export function proposeDiscountTransfer(
   if (!pattern) {
     return {
       ok: false,
-      error: "İndirim kalıbı çıkarılamadı.",
+      error: 'İndirim kalıbı çıkarılamadı.',
       fromCari,
       toCari,
       sourceSale: null,
@@ -301,15 +297,13 @@ export function proposeDiscountTransfer(
   }
 
   const sourceSale = recall.salesWithDiscount[0];
-  const basisLabel = pattern.basis === "latest" ? "en son uygulanan" : "ortalama";
+  const basisLabel = pattern.basis === 'latest' ? 'en son uygulanan' : 'ortalama';
   const discountDesc =
-    pattern.amount !== null
-      ? `${pattern.amount.toLocaleString("tr-TR")} TL tutarında`
-      : `%${pattern.percent} oranında`;
+    pattern.amount !== null ? `${pattern.amount.toLocaleString('tr-TR')} TL tutarında` : `%${pattern.percent} oranında`;
 
   const reasoning =
     `${fromCari.name} için ${recall.frequency} adet indirimli satış bulundu. ` +
-    `Kaynak satış: ${sourceSale.productName} (${new Date(sourceSale.date).toLocaleDateString("tr-TR")}). ` +
+    `Kaynak satış: ${sourceSale.productName} (${new Date(sourceSale.date).toLocaleDateString('tr-TR')}). ` +
     `${basisLabel} indirim: ${discountDesc}. ` +
     `Bu indirim ${toCari.name} için yeni satışa uygulanabilir.`;
 

@@ -3,8 +3,8 @@
  * Uygulama adı, versiyon ve ikon sistemi buradan yönetilir.
  */
 
-import { logger } from "@/lib/logger";
-import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from "@/config/brand";
+import { logger } from '@/lib/logger';
+import { BRAND_NAME, BRAND_SUBTITLE, getBrandVersion } from '@/config/brand';
 
 export const APP_NAME = BRAND_NAME;
 export const APP_SUBTITLE = BRAND_SUBTITLE;
@@ -14,9 +14,9 @@ export const APP_STORAGE_KEY = 'parspelConfig';
 // ── Versiyon Yönetimi ──────────────────────────────────────────────────────
 
 export interface AppConfig {
-  version: string;       // örn: "2.1.0", "2.1.0-beta", "3.0.0-rc1"
-  appName: string;       // özelleştirilebilir uygulama adı
-  appIcon: string;       // emoji veya URL
+  version: string; // örn: "2.1.0", "2.1.0-beta", "3.0.0-rc1"
+  appName: string; // özelleştirilebilir uygulama adı
+  appIcon: string; // emoji veya URL
   updatedAt: string;
 }
 
@@ -25,8 +25,9 @@ export function loadAppConfig(): AppConfig {
     const raw = localStorage.getItem(APP_STORAGE_KEY);
     if (raw) return { ...defaultConfig(), ...JSON.parse(raw) };
   } catch {
-    logger.warn("appConfig", "Yapılandırma yüklenemedi");
-    /* ignore */ }
+    logger.warn('appConfig', 'Yapılandırma yüklenemedi');
+    /* ignore */
+  }
   return defaultConfig();
 }
 
@@ -49,27 +50,27 @@ function defaultConfig(): AppConfig {
 export const ICON_CATEGORIES: { label: string; icons: string[] }[] = [
   {
     label: 'İş & Finans',
-    icons: ['💰','💵','💳','🏦','📊','📈','📉','🧾','💼','🏢','🤝','📋','📌','📎','🔖'],
+    icons: ['💰', '💵', '💳', '🏦', '📊', '📈', '📉', '🧾', '💼', '🏢', '🤝', '📋', '📌', '📎', '🔖'],
   },
   {
     label: 'Ürün & Stok',
-    icons: ['📦','🛒','🏪','🏭','⚙️','🔧','🔩','🪛','🔨','🪚','🔥','🪵','🔩','🧱','🪜'],
+    icons: ['📦', '🛒', '🏪', '🏭', '⚙️', '🔧', '🔩', '🪛', '🔨', '🪚', '🔥', '🪵', '🔩', '🧱', '🪜'],
   },
   {
     label: 'Kişi & İletişim',
-    icons: ['👤','👥','🧑‍💼','📞','📱','✉️','📬','🔔','🔕','📢','📣','🗣️','👋','🤝','🫱'],
+    icons: ['👤', '👥', '🧑‍💼', '📞', '📱', '✉️', '📬', '🔔', '🔕', '📢', '📣', '🗣️', '👋', '🤝', '🫱'],
   },
   {
     label: 'Araç & Ulaşım',
-    icons: ['🚛','🚚','🚗','🏎️','🚐','🚌','✈️','🚢','🚂','🛵','🚲','⛽','🛣️','🗺️','📍'],
+    icons: ['🚛', '🚚', '🚗', '🏎️', '🚐', '🚌', '✈️', '🚢', '🚂', '🛵', '🚲', '⛽', '🛣️', '🗺️', '📍'],
   },
   {
     label: 'Doğa & Çevre',
-    icons: ['🌿','🌱','🌲','🌳','🍃','🌾','🌻','🌊','⛰️','🏔️','🌍','☀️','🌙','⭐','❄️'],
+    icons: ['🌿', '🌱', '🌲', '🌳', '🍃', '🌾', '🌻', '🌊', '⛰️', '🏔️', '🌍', '☀️', '🌙', '⭐', '❄️'],
   },
   {
     label: 'Sistem & Teknik',
-    icons: ['⚡','🔌','💡','🖥️','💻','📡','🛰️','🔐','🔑','🗝️','🛡️','⚠️','✅','❌','🔄'],
+    icons: ['⚡', '🔌', '💡', '🖥️', '💻', '📡', '🛰️', '🔐', '🔑', '🗝️', '🛡️', '⚠️', '✅', '❌', '🔄'],
   },
 ];
 

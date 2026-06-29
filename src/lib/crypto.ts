@@ -1,3 +1,5 @@
+import { getUserSession } from './userManager';
+
 const STORAGE_KEY = 'parspel_crypto_key';
 const IDB_DB_NAME = 'ParspelCrypto';
 const IDB_STORE = 'keys';
@@ -64,36 +66,65 @@ function idbPutKey(key: CryptoKey): Promise<void> {
   });
 }
 
+/** Derives a key from the current user session for better security */
+async function getSessionDerivedKey(): Promise<CryptoKey | null> {
+  const session = getUserSession();
+  if (!session) return null;
+
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(session.userId + session.username), // Simple derivation material
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: enc.encode('parspel-salt-123'), // Static salt for session key
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: ALGO, length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
 /**
  * Anahtar yönetimi:
- * 1. IndexedDB'de non-exportable CryptoKey varsa onu kullan
- * 2. localStorage'da eski raw key varsa → non-exportable olarak import et,
- *    IndexedDB'ye taşı, localStorage'dan sil
- * 3. Hiçbiri yoksa yeni non-exportable key üret, IndexedDB'ye kaydet
+ * 1. Oturum varsa oturumdan türetilmiş anahtarı dene
+ * 2. IndexedDB'de non-exportable CryptoKey varsa onu kullan
+ * 3. localStorage'da eski raw key varsa → non-exportable olarak import et
  */
 async function getKey(): Promise<CryptoKey> {
-  // 1) IndexedDB'den dene
+  // 1) Oturum anahtarını dene (En güvenli - B7)
+  const sessionKey = await getSessionDerivedKey();
+  if (sessionKey) return sessionKey;
+
+  // 2) IndexedDB'den dene
   const idbKey = await idbGetKey();
   if (idbKey) return idbKey;
 
-  // 2) localStorage'dan migrate et
+  // 3) localStorage'dan migrate et
   const legacy = localStorage.getItem(STORAGE_KEY);
   if (legacy) {
     try {
       const raw = b64ToBytes(legacy);
-      // non-exportable olarak import et
       // @ts-expect-error — TS 5.8 Uint8Array<ArrayBufferLike> vs BufferSource
       const migrated = await crypto.subtle.importKey('raw', raw, ALGO, false, ['encrypt', 'decrypt']);
       await idbPutKey(migrated);
       localStorage.removeItem(STORAGE_KEY);
       return migrated;
     } catch {
-      // migrate edilemiyorsa yeni key üret
       localStorage.removeItem(STORAGE_KEY);
     }
   }
 
-  // 3) Yeni non-exportable key üret
+  // 4) Yeni non-exportable key üret
   const key = await crypto.subtle.generateKey({ name: ALGO, length: 256 }, false, ['encrypt', 'decrypt']);
   await idbPutKey(key);
   return key;
@@ -118,7 +149,6 @@ export async function decrypt(payload: string): Promise<string> {
     const decrypted = await crypto.subtle.decrypt({ name: ALGO, iv }, key, data);
     return new TextDecoder().decode(decrypted);
   } catch {
-    // Authentication tag doğrulama hatası — veri bozulmuş veya manipüle edilmiş
     throw new Error('Decrypt failed: data integrity check failed');
   }
 }

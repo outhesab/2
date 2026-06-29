@@ -161,28 +161,20 @@ describe('Property 8: Benzerlik Skoru Aralık ve Simetri İnvariantları', () =>
 
   it('P8a — skor her zaman [0, 100] aralığında olmalı', () => {
     fc.assert(
-      fc.property(
-        fc.string({ maxLength: 50 }),
-        fc.string({ maxLength: 50 }),
-        (a, b) => {
-          const score = similarity(a, b);
-          return score >= 0 && score <= 100;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.string({ maxLength: 50 }), fc.string({ maxLength: 50 }), (a, b) => {
+        const score = similarity(a, b);
+        return score >= 0 && score <= 100;
+      }),
+      { numRuns: 100 },
     );
   });
 
   it('P8b — simetri: similarity(a, b) === similarity(b, a)', () => {
     fc.assert(
-      fc.property(
-        fc.string({ maxLength: 50 }),
-        fc.string({ maxLength: 50 }),
-        (a, b) => {
-          return similarity(a, b) === similarity(b, a);
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.string({ maxLength: 50 }), fc.string({ maxLength: 50 }), (a, b) => {
+        return similarity(a, b) === similarity(b, a);
+      }),
+      { numRuns: 100 },
     );
   });
 
@@ -191,13 +183,10 @@ describe('Property 8: Benzerlik Skoru Aralık ve Simetri İnvariantları', () =>
     // normalizeTR: Türkçe→ASCII, özel karakter→boşluk, trim, lowercase
     // Sadece harf veya rakam içeren stringler normalize sonrası boş olmaz.
     fc.assert(
-      fc.property(
-        fc.stringMatching(/[a-zA-Z0-9]/),
-        (s) => {
-          return similarity(s, s) === 100;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.stringMatching(/[a-zA-Z0-9]/), (s) => {
+        return similarity(s, s) === 100;
+      }),
+      { numRuns: 100 },
     );
   });
 });

@@ -58,12 +58,14 @@ export interface PremiumThemeDefinition {
   cssVars: PremiumCSSVars;
 }
 
-export type ThemeDefinition = PremiumThemeDefinition | {
-  id: string;
-  label: string;
-  desc: string;
-  category: 'builtin';
-  type: 'dark' | 'light';
-  accent: string;
-  bg: string;
-};
+export type ThemeDefinition =
+  | PremiumThemeDefinition
+  | {
+      id: string;
+      label: string;
+      desc: string;
+      category: 'builtin';
+      type: 'dark' | 'light';
+      accent: string;
+      bg: string;
+    };

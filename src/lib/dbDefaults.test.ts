@@ -51,7 +51,17 @@ describe('dbDefaults', () => {
   });
 
   it('should have all required fields', () => {
-    const requiredFields = ['products', 'sales', 'cari', 'kasa', 'kasalar', 'invoices', 'stockMovements', 'notes', 'aiActionLog'];
+    const requiredFields = [
+      'products',
+      'sales',
+      'cari',
+      'kasa',
+      'kasalar',
+      'invoices',
+      'stockMovements',
+      'notes',
+      'aiActionLog',
+    ];
     for (const field of requiredFields) {
       expect(db).toHaveProperty(field);
     }

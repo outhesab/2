@@ -14,8 +14,15 @@ export class ComposerHandler implements IntentHandler {
   readonly priority = 90; // High priority, below navigation
 
   private startCommands = [
-    'yeni satış', 'yeni satis', 'satış başlat', 'satis baslat',
-    'satış yap', 'satis yap', 'satış başlatın', 'sepet aç', 'sepet ac',
+    'yeni satış',
+    'yeni satis',
+    'satış başlat',
+    'satis baslat',
+    'satış yap',
+    'satis yap',
+    'satış başlatın',
+    'sepet aç',
+    'sepet ac',
   ];
 
   canHandle(input: string, context: HandlerContext): boolean {
@@ -25,7 +32,7 @@ export class ComposerHandler implements IntentHandler {
     if (context.composerMode) return true;
 
     // Check for composer start commands
-    return this.startCommands.some(cmd => query === cmd);
+    return this.startCommands.some((cmd) => query === cmd);
   }
 
   async handle(input: string, db: DB, context: HandlerContext): Promise<ExecutiveResult> {

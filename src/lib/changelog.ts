@@ -23,18 +23,49 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.43.4',
     date: '23 Haziran 2026',
     title: 'Moratoryum Gün 1-2: Ölü kod temizliği + sessiz hata düzeltmeleri',
-    summary: '15 ölü dosya silindi (-2564 satır), kritik Nexus handler import bugı fix edildi, 9 veri-path dosyasında 29 sessiz hata (logger.warn → logger.error) görünür hale getirildi.',
+    summary:
+      '15 ölü dosya silindi (-2564 satır), kritik Nexus handler import bugı fix edildi, 9 veri-path dosyasında 29 sessiz hata (logger.warn → logger.error) görünür hale getirildi.',
     changes: [
-      { type: 'duzeltme', text: 'NexusExecutive.ts: import "./handlers" eksikti — 7 intent handler hiç register olmuyordu, Nexus AI her girdiye "çözemedi" döndürüyordu' },
-      { type: 'kaldirildi', text: '15 ölü dosya silindi: AIAsistan/, pages/ai/, ConsoleKayit, SalesHelpers, InfoRow, VoiceAgentUI, seedData, aiKeys, test-godmode (-2564 satır)' },
-      { type: 'iyilestirme', text: 'storage.ts: 4 sessiz hata fix — saveToIndexedSnapshot, loadFromStorage, _flushPendingWrite, saveToStorage catch artık logger.error' },
-      { type: 'iyilestirme', text: 'firebase.ts: 4 sessiz hata fix — readDoc, writeDoc, removeDoc, listDocs catch artık logger.error' },
-      { type: 'iyilestirme', text: 'sync.ts: 3 sessiz hata fix — emitSync dinleyici, retryableRead, loadFromFirebase catch artık logger.error' },
-      { type: 'iyilestirme', text: 'connConfig.ts: 2 sessiz hata fix — localStorage ve Firebase config parse hataları artık logger.error' },
-      { type: 'iyilestirme', text: 'backup.ts: 6 sessiz hata fix — yedek save/restore/list/cleanup hepsi artık logger.error' },
-      { type: 'iyilestirme', text: 'dbHelpers.ts: validateAndClassify RuleEngine hatası artık logger.error (save validation bypass riski)' },
-      { type: 'iyilestirme', text: 'useUIPrefs.ts: 3 sessiz hata fix — Firebase + localStorage UI pref hataları artık logger.error' },
-      { type: 'iyilestirme', text: 'userManager.ts: 5 sessiz hata fix — kullanıcı cache okuma/yazma, Firebase yükleme hataları artık logger.error' },
+      {
+        type: 'duzeltme',
+        text: 'NexusExecutive.ts: import "./handlers" eksikti — 7 intent handler hiç register olmuyordu, Nexus AI her girdiye "çözemedi" döndürüyordu',
+      },
+      {
+        type: 'kaldirildi',
+        text: '15 ölü dosya silindi: AIAsistan/, pages/ai/, ConsoleKayit, SalesHelpers, InfoRow, VoiceAgentUI, seedData, aiKeys, test-godmode (-2564 satır)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'storage.ts: 4 sessiz hata fix — saveToIndexedSnapshot, loadFromStorage, _flushPendingWrite, saveToStorage catch artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'firebase.ts: 4 sessiz hata fix — readDoc, writeDoc, removeDoc, listDocs catch artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'sync.ts: 3 sessiz hata fix — emitSync dinleyici, retryableRead, loadFromFirebase catch artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'connConfig.ts: 2 sessiz hata fix — localStorage ve Firebase config parse hataları artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'backup.ts: 6 sessiz hata fix — yedek save/restore/list/cleanup hepsi artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'dbHelpers.ts: validateAndClassify RuleEngine hatası artık logger.error (save validation bypass riski)',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'useUIPrefs.ts: 3 sessiz hata fix — Firebase + localStorage UI pref hataları artık logger.error',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'userManager.ts: 5 sessiz hata fix — kullanıcı cache okuma/yazma, Firebase yükleme hataları artık logger.error',
+      },
       { type: 'iyilestirme', text: 'permissions.ts: saveFileToDevice export hatası artık logger.error' },
     ],
   },
@@ -52,12 +83,22 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.43.2',
     date: '23 Haziran 2026',
     title: 'TypeScript circular ref fix, lint cleanup, Tailwind geçişi',
-    summary: '7 TypeScript hatası düzeltildi (circular reference + props mismatch), 2 lint warning temizlendi, 2 inline style Tailwind\'e dönüştürüldü.',
+    summary:
+      "7 TypeScript hatası düzeltildi (circular reference + props mismatch), 2 lint warning temizlendi, 2 inline style Tailwind'e dönüştürüldü.",
     changes: [
-      { type: 'duzeltme', text: 'SobaNexus.tsx: useRef forward reference ile circular dependency çözüldü (4 TS hatası)' },
-      { type: 'duzeltme', text: 'useVoiceAgent.ts: useRef forward reference ile circular dependency çözüldü (2 TS hatası)' },
+      {
+        type: 'duzeltme',
+        text: 'SobaNexus.tsx: useRef forward reference ile circular dependency çözüldü (4 TS hatası)',
+      },
+      {
+        type: 'duzeltme',
+        text: 'useVoiceAgent.ts: useRef forward reference ile circular dependency çözüldü (2 TS hatası)',
+      },
       { type: 'duzeltme', text: 'NexusSpark.tsx: _open → isOpen prop düzeltildi (1 TS hatası)' },
-      { type: 'duzeltme', text: 'VoiceNexusCore.ts + SettingsBakim.tsx: unused _e parametreleri temizlendi (2 lint warning)' },
+      {
+        type: 'duzeltme',
+        text: 'VoiceNexusCore.ts + SettingsBakim.tsx: unused _e parametreleri temizlendi (2 lint warning)',
+      },
       { type: 'iyilestirme', text: 'SobaNexus.tsx + NexusPanel.tsx: inline style → Tailwind dönüşümü (2 adet)' },
     ],
   },
@@ -65,7 +106,8 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.43.1',
     date: '23 Haziran 2026',
     title: 'Test düzeltmeleri, lint temizliği ve logger dönüşümü',
-    summary: 'safeIO/dbDefaults test fix, 17 lint uyarısı temizlendi, console.warn/error → logger dönüşümü (14+ değişiklik).',
+    summary:
+      'safeIO/dbDefaults test fix, 17 lint uyarısı temizlendi, console.warn/error → logger dönüşümü (14+ değişiklik).',
     changes: [
       { type: 'duzeltme', text: 'safeIO.test.ts: jsdom localStorage mock fix — 20 test düzeltildi' },
       { type: 'duzeltme', text: 'dbDefaults.test.ts: assertion güncellemesi — 7 test düzeltildi' },
@@ -77,25 +119,51 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.43.0',
     date: '22 Haziran 2026',
     title: 'v3.43.0 — Stabilizasyon: Kalan MASTER_PLAN maddeleri temizlendi',
-    summary: 'Son 10 günde tespit edilen bekleyen MASTER_PLAN maddeleri (C5, D3, D5, E6, F6, J1) tamamlandı. makeDefaultDB tekilleştirildi (3 kopya → 1 kaynak), ARRAY_KEYS ortak export edildi. Levenshtein O(m×n) memory → O(n) 2-row DP ile optimize edildi. right-join çift çalışma bug\'ı fix. useStorageMonitor artık NexusPanel\'de canlı depolama göstergesi olarak görünüyor. safeIO.ts için 20 test eklendi. 7 eslint-disable kaldırıldı, Cizelge butonlarına aria-label eklendi.',
+    summary:
+      "Son 10 günde tespit edilen bekleyen MASTER_PLAN maddeleri (C5, D3, D5, E6, F6, J1) tamamlandı. makeDefaultDB tekilleştirildi (3 kopya → 1 kaynak), ARRAY_KEYS ortak export edildi. Levenshtein O(m×n) memory → O(n) 2-row DP ile optimize edildi. right-join çift çalışma bug'ı fix. useStorageMonitor artık NexusPanel'de canlı depolama göstergesi olarak görünüyor. safeIO.ts için 20 test eklendi. 7 eslint-disable kaldırıldı, Cizelge butonlarına aria-label eklendi.",
     changes: [
-      { type: 'iyilestirme', text: 'D3: makeDefaultDB() tekilleştirildi — dbDefaults.ts tek kaynak, db/storage.ts ve backup.ts import ediyor. ARRAY_KEYS ortak export.' },
+      {
+        type: 'iyilestirme',
+        text: 'D3: makeDefaultDB() tekilleştirildi — dbDefaults.ts tek kaynak, db/storage.ts ve backup.ts import ediyor. ARRAY_KEYS ortak export.',
+      },
       { type: 'iyilestirme', text: 'F6: Levenshtein O(m×n) full DP → O(n) 2-row DP (memory optimizasyonu).' },
-      { type: 'duzeltme', text: 'D5: mergeEngine.ts right-join çift çalışma bug\'ı fix — redundant kod bloğu kaldırıldı.' },
-      { type: 'yeni', text: 'C5: useStorageMonitor hook\'u NexusPanel\'e bağlandı — canlı depolama göstergesi (yeşil/sarı/kırmızı).' },
-      { type: 'yeni', text: 'C5: safeIO.ts için 20 test eklendi (getStorageUsage, safeReadJSON, safeWriteJSON, safeRemove).' },
-      { type: 'iyilestirme', text: 'E6: 4 eslint-disable kaldırıldı (temizle.tsx, Butce.tsx, Entegrasyonlar.tsx, App.tsx).' },
-      { type: 'iyilestirme', text: 'J1: Cizelge.tsx butonlarına aria-label eklendi (prevMonth, nextMonth, prevYear, nextYear, Bugün, viewMode, kapat).' },
+      {
+        type: 'duzeltme',
+        text: "D5: mergeEngine.ts right-join çift çalışma bug'ı fix — redundant kod bloğu kaldırıldı.",
+      },
+      {
+        type: 'yeni',
+        text: "C5: useStorageMonitor hook'u NexusPanel'e bağlandı — canlı depolama göstergesi (yeşil/sarı/kırmızı).",
+      },
+      {
+        type: 'yeni',
+        text: 'C5: safeIO.ts için 20 test eklendi (getStorageUsage, safeReadJSON, safeWriteJSON, safeRemove).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'E6: 4 eslint-disable kaldırıldı (temizle.tsx, Butce.tsx, Entegrasyonlar.tsx, App.tsx).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'J1: Cizelge.tsx butonlarına aria-label eklendi (prevMonth, nextMonth, prevYear, nextYear, Bugün, viewMode, kapat).',
+      },
     ],
   },
   {
     version: '3.42.0',
     date: '21 Haziran 2026',
     title: 'v3.42.0 — Intent-Handler Pattern: NexusExecutive God-Object Refactor',
-    summary: 'NexusExecutive\'teki tek parça God-Object execute() metodu, 7 adet uzman handler\'a bölünerek modüler Intent-Handler pattern\'ına taşındı. NavigationHandler, ComposerHandler, UndoHandler, WeatherHandler, WhatsAppHandler, ActionHandler (NexusRouter), SmartHandler (DeepSeek) olmak üzere her biri kendi priority\'sinde çalışır. IntentHandlerRegistry passthrough (_skipNext) mekanizması ile handler zinciri destekler. NexusExecutive 584→198 satıra düştü (%66 küçülme). Yeni handler eklemek artık tek dosya + auto-register.',
+    summary:
+      "NexusExecutive'teki tek parça God-Object execute() metodu, 7 adet uzman handler'a bölünerek modüler Intent-Handler pattern'ına taşındı. NavigationHandler, ComposerHandler, UndoHandler, WeatherHandler, WhatsAppHandler, ActionHandler (NexusRouter), SmartHandler (DeepSeek) olmak üzere her biri kendi priority'sinde çalışır. IntentHandlerRegistry passthrough (_skipNext) mekanizması ile handler zinciri destekler. NexusExecutive 584→198 satıra düştü (%66 küçülme). Yeni handler eklemek artık tek dosya + auto-register.",
     changes: [
-      { type: 'iyilestirme', text: 'NexusExecutive: execute() metodu IntentHandlerRegistry\'ye devredildi. Tüm inline routing (navigation, composer, undo, weather, whatsapp, router, plan) kaldırıldı.' },
-      { type: 'iyilestirme', text: 'IntentHandler.ts: Base interface + HandlerContext + IntentHandlerRegistry (priority-sorted, _skipNext passthrough).' },
+      {
+        type: 'iyilestirme',
+        text: "NexusExecutive: execute() metodu IntentHandlerRegistry'ye devredildi. Tüm inline routing (navigation, composer, undo, weather, whatsapp, router, plan) kaldırıldı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'IntentHandler.ts: Base interface + HandlerContext + IntentHandlerRegistry (priority-sorted, _skipNext passthrough).',
+      },
       { type: 'yeni', text: 'NavigationHandler.ts (priority 100): navigasyon komutları, composer reset.' },
       { type: 'yeni', text: 'ComposerHandler.ts (priority 90): composer mode yönetimi + başlatma/finalize.' },
       { type: 'yeni', text: 'UndoHandler.ts (priority 85): geri alma işlemleri + confirmation gateway.' },
@@ -103,19 +171,32 @@ export const CHANGELOG: VersionEntry[] = [
       { type: 'yeni', text: 'WhatsAppHandler.ts (priority 75): WhatsApp simülasyon komutları.' },
       { type: 'yeni', text: 'ActionHandler.ts (priority 70): NexusRouter üzerinden fast/memory/action routing.' },
       { type: 'yeni', text: 'SmartHandler.ts (priority 50): DeepSeek deep reasoning + plan execution (fallback).' },
-      { type: 'iyilestirme', text: 'NexusExecutive: 584→198 satır; sadece execute(), submitConfirmation(), startComposer/stopComposer kaldı.' },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive: 584→198 satır; sadece execute(), submitConfirmation(), startComposer/stopComposer kaldı.',
+      },
     ],
   },
   {
     version: '3.41.0',
     date: '21 Haziran 2026',
     title: 'v3.41.0 — Stabilite: Zod ile AI Action Chain Validasyonu',
-    summary: 'NexusExecutive\'in God-Mode planlama motoruna Zod şema validasyonu eklendi. DeepSeek\'ten dönen aksiyon zincirleri artık çalıştırılmadan önce tip-güvenli şema ile doğrulanıyor. Geçersiz planlar kullanıcıya güvenli hata mesajıyla iade ediliyor. Ayrıca logger kategorileri "nexus", "sentinel", "voiceCore" olarak genişletildi, SobaNexus\'te listen hook argüman sayısı düzeltildi, NexusPanel JSX yapısı parçalanma düzeltildi.',
+    summary:
+      'NexusExecutive\'in God-Mode planlama motoruna Zod şema validasyonu eklendi. DeepSeek\'ten dönen aksiyon zincirleri artık çalıştırılmadan önce tip-güvenli şema ile doğrulanıyor. Geçersiz planlar kullanıcıya güvenli hata mesajıyla iade ediliyor. Ayrıca logger kategorileri "nexus", "sentinel", "voiceCore" olarak genişletildi, SobaNexus\'te listen hook argüman sayısı düzeltildi, NexusPanel JSX yapısı parçalanma düzeltildi.',
     changes: [
-      { type: 'iyilestirme', text: 'NexusExecutive: handleComplexPlan içinde AgentRequestChainSchema (Zod) ile AI plan validasyonu.' },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive: handleComplexPlan içinde AgentRequestChainSchema (Zod) ile AI plan validasyonu.',
+      },
       { type: 'iyilestirme', text: 'Logger kategorileri: nexus, sentinel, voiceCore eklendi — tip-güvenli loglama.' },
-      { type: 'duzeltme', text: 'SobaNexus: useNexusVoice.listen() hook argüman sayısı 3\'ten 2\'ye düzeltildi (onEnd callback hook içinde).' },
-      { type: 'duzeltme', text: 'NexusPanel: JSX else branch\'i Fragment (<>...</>) ile sarıldı — syntax hatası düzeltildi.' },
+      {
+        type: 'duzeltme',
+        text: "SobaNexus: useNexusVoice.listen() hook argüman sayısı 3'ten 2'ye düzeltildi (onEnd callback hook içinde).",
+      },
+      {
+        type: 'duzeltme',
+        text: "NexusPanel: JSX else branch'i Fragment (<>...</>) ile sarıldı — syntax hatası düzeltildi.",
+      },
       { type: 'iyilestirme', text: 'VoiceNexusCore: onvoiceschanged handler tip any→void düzeltildi (lint).' },
     ],
   },
@@ -123,96 +204,191 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.40.0',
     date: '21 Haziran 2026',
     title: 'v3.40.0 — Code Cleanup: Dead Code & Orphan Deps Temizliği',
-    summary: 'Kapsamlı kod temizlik (Kademe 1+2+3). Ölü voice-sales modülü (14 dosya, 2554 satır), 33 ölü shadcn UI component (3818 satır), MenuViewModel.tsx, ve 22 orphan npm paketi kaldırıldı. shadcn-declarations.d.ts 260→90 satıra indirildi. .gitignore güncellendi, state-registry yenilendi. Toplam ~6600 satır ölü kod temizlendi.',
+    summary:
+      'Kapsamlı kod temizlik (Kademe 1+2+3). Ölü voice-sales modülü (14 dosya, 2554 satır), 33 ölü shadcn UI component (3818 satır), MenuViewModel.tsx, ve 22 orphan npm paketi kaldırıldı. shadcn-declarations.d.ts 260→90 satıra indirildi. .gitignore güncellendi, state-registry yenilendi. Toplam ~6600 satır ölü kod temizlendi.',
     changes: [
       { type: 'kaldirildi', text: 'features/voice-sales/ modülü (14 dosya, 2554 satır) — spec kuralları güncellendi.' },
-      { type: 'kaldirildi', text: '33 ölü shadcn UI component (0 import, 3818 satır): accordion, alert-dialog, aspect-ratio, breadcrumb, button-group, calendar, carousel, chart, checkbox, collapsible, command, context-menu, drawer, field, form, hover-card, input-group, input-otp, item, kbd, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, sidebar, slider, sonner, spinner, toggle-group.' },
+      {
+        type: 'kaldirildi',
+        text: '33 ölü shadcn UI component (0 import, 3818 satır): accordion, alert-dialog, aspect-ratio, breadcrumb, button-group, calendar, carousel, chart, checkbox, collapsible, command, context-menu, drawer, field, form, hover-card, input-group, input-otp, item, kbd, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, sidebar, slider, sonner, spinner, toggle-group.',
+      },
       { type: 'kaldirildi', text: 'MenuViewModel.tsx (43 satır) — 0 referans.' },
-      { type: 'kaldirildi', text: '22 orphan npm paketi: @hookform/resolvers, @radix-ui/react-accordion/alert-dialog/aspect-ratio/checkbox/collapsible/context-menu/hover-card/menubar/navigation-menu/popover/progress/radio-group/scroll-area/slider/toggle-group/toast, cmdk, input-otp, react-day-picker, react-hook-form, react-resizable-panels, vaul.' },
-      { type: 'iyilestirme', text: 'shadcn-declarations.d.ts temizlendi: 237 satır kaldırıldı (260→90). Sadece framer-motion, firebase kaldı.' },
+      {
+        type: 'kaldirildi',
+        text: '22 orphan npm paketi: @hookform/resolvers, @radix-ui/react-accordion/alert-dialog/aspect-ratio/checkbox/collapsible/context-menu/hover-card/menubar/navigation-menu/popover/progress/radio-group/scroll-area/slider/toggle-group/toast, cmdk, input-otp, react-day-picker, react-hook-form, react-resizable-panels, vaul.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'shadcn-declarations.d.ts temizlendi: 237 satır kaldırıldı (260→90). Sadece framer-motion, firebase kaldı.',
+      },
       { type: 'iyilestirme', text: '.gitignore: e2e-report/ eklendi.' },
-      { type: 'iyilestirme', text: 'Spec rules (component-rules.ts, data-rules.ts): voice-sales exclusion filter kaldırıldı.' },
-      { type: 'duzeltme', text: 'RAPOR_1.md ve RAPOR_2.md\'deki hatalı iddialar düzeltildi: streamUtils.ts (5 import canlı), agentConfig.ts (dosya mevcut değil).' },
+      {
+        type: 'iyilestirme',
+        text: 'Spec rules (component-rules.ts, data-rules.ts): voice-sales exclusion filter kaldırıldı.',
+      },
+      {
+        type: 'duzeltme',
+        text: "RAPOR_1.md ve RAPOR_2.md'deki hatalı iddialar düzeltildi: streamUtils.ts (5 import canlı), agentConfig.ts (dosya mevcut değil).",
+      },
     ],
   },
   {
     version: '3.39.0',
     date: '20 Haziran 2026',
     title: 'v3.39.0 — Soba Nexus AI: WhatsApp Bridge (Müşteri Mesaj Otomasyonu)',
-    summary: 'Ses-only işletim vizyonunun 7. ve son sütunu: WhatsAppBridge. Müşteri WhatsApp mesajları otomatik parse edilir, telefonla cari tanınır, fiyat/stok/bakiye/sipariş durumuna nazik Türkçe cevap üretilir. Frontend parsing core; üretim webhook entegrasyonu backend gerektirir (modül injectable tasarlandı). NexusExecutive WhatsApp simülasyon komutu da destekler.',
+    summary:
+      'Ses-only işletim vizyonunun 7. ve son sütunu: WhatsAppBridge. Müşteri WhatsApp mesajları otomatik parse edilir, telefonla cari tanınır, fiyat/stok/bakiye/sipariş durumuna nazik Türkçe cevap üretilir. Frontend parsing core; üretim webhook entegrasyonu backend gerektirir (modül injectable tasarlandı). NexusExecutive WhatsApp simülasyon komutu da destekler.',
     changes: [
-      { type: 'yeni', text: 'WhatsAppBridge.ts: Müşteri mesaj otomasyonu — identifyCustomerByPhone (son 10 hane normalize eşleştirme), parseWhatsAppIntent (greeting/price/stock/balance/order_status/business_hours/human_request/unknown), formatWhatsAppReply (her intent için nazik Türkçe cevap, müşteri adıyla), findProduct (toleranslı), processIncomingWhatsApp (tam pipeline), WhatsAppBridge singleton.' },
-      { type: 'yeni', text: 'WhatsAppBridge.test.ts: 34 test — telefon tanıma (6 senaryo), intent parsing (11 senaryo), reply üretimi (10 senaryo), tam pipeline (4 senaryo), singleton.' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: WHATSAPP SIM PATH eklendi — isWhatsAppSimCommand + extractWhatsAppMessage, "whatsapptan 0555... dedi: merhaba" formatını simüle eder.' },
-      { type: 'duzeltme', text: 'WhatsAppBridge: Order.cariId yok (Order tedarikçi siparişi) → order_status artık sales kayıtlarını kullanır (müşteri siparişi = sale).' },
+      {
+        type: 'yeni',
+        text: 'WhatsAppBridge.ts: Müşteri mesaj otomasyonu — identifyCustomerByPhone (son 10 hane normalize eşleştirme), parseWhatsAppIntent (greeting/price/stock/balance/order_status/business_hours/human_request/unknown), formatWhatsAppReply (her intent için nazik Türkçe cevap, müşteri adıyla), findProduct (toleranslı), processIncomingWhatsApp (tam pipeline), WhatsAppBridge singleton.',
+      },
+      {
+        type: 'yeni',
+        text: 'WhatsAppBridge.test.ts: 34 test — telefon tanıma (6 senaryo), intent parsing (11 senaryo), reply üretimi (10 senaryo), tam pipeline (4 senaryo), singleton.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: WHATSAPP SIM PATH eklendi — isWhatsAppSimCommand + extractWhatsAppMessage, "whatsapptan 0555... dedi: merhaba" formatını simüle eder.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'WhatsAppBridge: Order.cariId yok (Order tedarikçi siparişi) → order_status artık sales kayıtlarını kullanır (müşteri siparişi = sale).',
+      },
     ],
   },
   {
     version: '3.38.0',
     date: '20 Haziran 2026',
     title: 'v3.38.0 — Soba Nexus AI: Weather Proactive Engine (Hava → Stok Önerisi)',
-    summary: 'Ses-only işletim vizyonunun 6. sütunu: WeatherProactiveEngine. "Hava durumu analizi", "stok kontrol" komutları hava verisi + DB stok geçmişi ile proaktif öneriler üretir. Sıcaklık 5°C düşüş → +%30 talep → stok yetersizse "X adet sipariş öneririm". Soba/boru/pelet kategorileri otomatik tanınır. OpenWeatherMap API injectable, offline mock fallback mevcut.',
+    summary:
+      'Ses-only işletim vizyonunun 6. sütunu: WeatherProactiveEngine. "Hava durumu analizi", "stok kontrol" komutları hava verisi + DB stok geçmişi ile proaktif öneriler üretir. Sıcaklık 5°C düşüş → +%30 talep → stok yetersizse "X adet sipariş öneririm". Soba/boru/pelet kategorileri otomatik tanınır. OpenWeatherMap API injectable, offline mock fallback mevcut.',
     changes: [
-      { type: 'yeni', text: 'WeatherProactiveEngine.ts: Proaktif zeka — WeatherData tipi, estimateDemandMultiplier (cooling 5°C→1.3, 3°C→1.15, 1°C→1.05), estimateDailySales (son 30 gün), analyzeWeatherImpact (soba/boru/pelet kategorileri, talep-stok karşılaştırması, restock_suggestion/opportunity/weather_demand alert tipleri), generateProactiveMessage (öncelik sıralı, en fazla 3 detay), mockWeatherFetcher + createOpenWeatherFetcher (injectable API), WeatherProactiveEngine singleton (1 saat cooldown).' },
-      { type: 'yeni', text: 'WeatherProactiveEngine.test.ts: 27 test — demandMultiplier (6 senaryo), dailySales (5 senaryo), analyzeWeatherImpact (7 senaryo), generateProactiveMessage (4 senaryo), mockWeatherFetcher, engine state machine (4 senaryo).' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: PROAKTIF HAVA PATH eklendi — isProactiveWeatherCommand ("hava durumu", "stok kontrol", "hava etkisi" algılama), weatherProactiveEngine.check() entegrasyonu, sonuç finalData ile arayüze aktarılır.' },
+      {
+        type: 'yeni',
+        text: 'WeatherProactiveEngine.ts: Proaktif zeka — WeatherData tipi, estimateDemandMultiplier (cooling 5°C→1.3, 3°C→1.15, 1°C→1.05), estimateDailySales (son 30 gün), analyzeWeatherImpact (soba/boru/pelet kategorileri, talep-stok karşılaştırması, restock_suggestion/opportunity/weather_demand alert tipleri), generateProactiveMessage (öncelik sıralı, en fazla 3 detay), mockWeatherFetcher + createOpenWeatherFetcher (injectable API), WeatherProactiveEngine singleton (1 saat cooldown).',
+      },
+      {
+        type: 'yeni',
+        text: 'WeatherProactiveEngine.test.ts: 27 test — demandMultiplier (6 senaryo), dailySales (5 senaryo), analyzeWeatherImpact (7 senaryo), generateProactiveMessage (4 senaryo), mockWeatherFetcher, engine state machine (4 senaryo).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: PROAKTIF HAVA PATH eklendi — isProactiveWeatherCommand ("hava durumu", "stok kontrol", "hava etkisi" algılama), weatherProactiveEngine.check() entegrasyonu, sonuç finalData ile arayüze aktarılır.',
+      },
     ],
   },
   {
     version: '3.37.0',
     date: '20 Haziran 2026',
     title: 'v3.37.0 — Soba Nexus AI: Voice Undo Engine (Sesle Son İşlemi Geri Al)',
-    summary: 'Ses-only işletim vizyonunun 5. sütunu: VoiceUndoEngine. "Son satışı iptal et", "son gideri geri al", "son işlemi geri al" komutları AIActionLog üzerinden son applied işlemi tespit edip uygun undo Intent’i üretir ve confirmation gateway’inden geçer. Sale undo tam destek, kasa gelir/gider ters kayıt, cari tahsilat ileri tarih için işaretlendi.',
+    summary:
+      'Ses-only işletim vizyonunun 5. sütunu: VoiceUndoEngine. "Son satışı iptal et", "son gideri geri al", "son işlemi geri al" komutları AIActionLog üzerinden son applied işlemi tespit edip uygun undo Intent’i üretir ve confirmation gateway’inden geçer. Sale undo tam destek, kasa gelir/gider ters kayıt, cari tahsilat ileri tarih için işaretlendi.',
     changes: [
-      { type: 'yeni', text: 'VoiceUndoEngine.ts: Sesle geri alma çekirdeği — parseUndoCommand (sale/gelir/gider/tahsilat/any/unknown hedef ayrıştırma), findLastUndoableAction (AIActionLog status=applied, undoable actionType filtresi, son tarihten eskiye), buildUndoIntent (sale→sale_iptal, kasa_gelir↔kasa_gider ters kayıt, cari_tahsilat not-implemented), resolveUndo (tam pipeline).' },
-      { type: 'yeni', text: 'VoiceUndoEngine.test.ts: 30 test — parseUndoCommand (9 senaryo), findLastUndoableAction (6 senaryo), buildUndoIntent (8 senaryo), resolveUndo (7 tam pipeline senaryosu).' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: UNDO PATH eklendi — isUndoCommand ile "son ... geri al" algılama, resolveUndo + confirmation gateway entegrasyonu, targetDescription read-back\'e eklenir.' },
+      {
+        type: 'yeni',
+        text: 'VoiceUndoEngine.ts: Sesle geri alma çekirdeği — parseUndoCommand (sale/gelir/gider/tahsilat/any/unknown hedef ayrıştırma), findLastUndoableAction (AIActionLog status=applied, undoable actionType filtresi, son tarihten eskiye), buildUndoIntent (sale→sale_iptal, kasa_gelir↔kasa_gider ters kayıt, cari_tahsilat not-implemented), resolveUndo (tam pipeline).',
+      },
+      {
+        type: 'yeni',
+        text: 'VoiceUndoEngine.test.ts: 30 test — parseUndoCommand (9 senaryo), findLastUndoableAction (6 senaryo), buildUndoIntent (8 senaryo), resolveUndo (7 tam pipeline senaryosu).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: UNDO PATH eklendi — isUndoCommand ile "son ... geri al" algılama, resolveUndo + confirmation gateway entegrasyonu, targetDescription read-back\'e eklenir.',
+      },
     ],
   },
   {
     version: '3.36.0',
     date: '20 Haziran 2026',
     title: 'v3.36.0 — Soba Nexus AI: Voice Sale Composer (Çok Adımlı Sesli Satış)',
-    summary: 'Ses-only işletim vizyonunun 4. sütunu: VoiceSaleComposer. Artık kullanıcı bir satışı parça parça sesle inşa edebiliyor — "yeni satış" → "2 tane 80lik ekle" → "Ali’ye sat" → "yüzde 10 indirim" → "kartla" → "sat" → onay. Composer, draft’ı adım adım günceller, "durum" ile özet verir, "80liği çıkar" ile item siler, "80liği 3 tane yap" ile adet günceller. Finalize çıktısı SaleIntent olarak confirmation gateway’inden geçer.',
+    summary:
+      'Ses-only işletim vizyonunun 4. sütunu: VoiceSaleComposer. Artık kullanıcı bir satışı parça parça sesle inşa edebiliyor — "yeni satış" → "2 tane 80lik ekle" → "Ali’ye sat" → "yüzde 10 indirim" → "kartla" → "sat" → onay. Composer, draft’ı adım adım günceller, "durum" ile özet verir, "80liği çıkar" ile item siler, "80liği 3 tane yap" ile adet günceller. Finalize çıktısı SaleIntent olarak confirmation gateway’inden geçer.',
     changes: [
-      { type: 'yeni', text: 'VoiceSaleComposer.ts: Multi-turn voice sale composer — findProductByName (toleranslı ürün arama), parseComposerCommand (kelime-bazlı, 11 komut tipi: add_item/set_cari/set_discount/set_payment/remove_item/set_qty/set_unit_price/finalize/cancel/status/unknown), applyCommandToDraft (draft güncelleme), draftToSaleIntent (validation ile SaleIntent üretimi), summarizeDraft (TTS için özet), stateful VoiceSaleComposer singleton.' },
-      { type: 'yeni', text: 'VoiceSaleComposer.test.ts: 51 test — ürün arama, 11 komut tipi parsing, draft uygulama, SaleIntent üretimi, özet, state machine (çok adımlı satış akışı, cancel, status, finalize boş hata, unknown, aynı ürün merge).' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: Composer mode entegrasyonu — "yeni satış"/"satış başlat" komutu composer moduna geçer, her sesli komut composer.process() ile işlenir, finalize → confirmation gateway, cancel → mode kapanır. Yeni composer_active result tipi + startComposer/stopComposer/isComposerActive metodları.' },
-      { type: 'duzeltme', text: 'NexusExecutive.ts: logger kategorileri "NexusExecutive" → "ai" (geçerli LogCategory). Bu pre-existing typecheck hatasını da düzeltti (32→31).' },
+      {
+        type: 'yeni',
+        text: 'VoiceSaleComposer.ts: Multi-turn voice sale composer — findProductByName (toleranslı ürün arama), parseComposerCommand (kelime-bazlı, 11 komut tipi: add_item/set_cari/set_discount/set_payment/remove_item/set_qty/set_unit_price/finalize/cancel/status/unknown), applyCommandToDraft (draft güncelleme), draftToSaleIntent (validation ile SaleIntent üretimi), summarizeDraft (TTS için özet), stateful VoiceSaleComposer singleton.',
+      },
+      {
+        type: 'yeni',
+        text: 'VoiceSaleComposer.test.ts: 51 test — ürün arama, 11 komut tipi parsing, draft uygulama, SaleIntent üretimi, özet, state machine (çok adımlı satış akışı, cancel, status, finalize boş hata, unknown, aynı ürün merge).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: Composer mode entegrasyonu — "yeni satış"/"satış başlat" komutu composer moduna geçer, her sesli komut composer.process() ile işlenir, finalize → confirmation gateway, cancel → mode kapanır. Yeni composer_active result tipi + startComposer/stopComposer/isComposerActive metodları.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'NexusExecutive.ts: logger kategorileri "NexusExecutive" → "ai" (geçerli LogCategory). Bu pre-existing typecheck hatasını da düzeltti (32→31).',
+      },
     ],
   },
   {
     version: '3.35.0',
     date: '20 Haziran 2026',
     title: 'v3.35.0 — Soba Nexus AI: Voice Confirmation Gateway (Ses-Only Güvenlik Çekirdeği)',
-    summary: 'Sesle güvenli işlem vizyonunun temel taşı: VoiceConfirmationGateway. Artık tüm write aksiyonlar (satış, kasa, stok, cari) execute öncesi sesli read-back ve açık onay gerektiriyor. "100 TL gider yaz" → sistem "100 TL gider, nakit kasasından. Onaylıyor musunuz?" diye soruyor; sadece "evet" yanıtında çalışıyor. Yanlış duyulmuş komutlar artık maddi zarar veremez.',
+    summary:
+      'Sesle güvenli işlem vizyonunun temel taşı: VoiceConfirmationGateway. Artık tüm write aksiyonlar (satış, kasa, stok, cari) execute öncesi sesli read-back ve açık onay gerektiriyor. "100 TL gider yaz" → sistem "100 TL gider, nakit kasasından. Onaylıyor musunuz?" diye soruyor; sadece "evet" yanıtında çalışıyor. Yanlış duyulmuş komutlar artık maddi zarar veremez.',
     changes: [
-      { type: 'yeni', text: 'VoiceConfirmationGateway.ts: Güvenlik çekirdeği — requiresConfirmation (write aksiyon seti), generateReadBack (her aksiyon için doğal Türkçe okuma metni), parseConfirmation (onay/red/belgisiz ayrıştırma, STT hatalarına toleranslı, çelişkide güvenlik tarafı), stateful gateway (pending state machine, 15sn timeout, üst üste istek koruması).' },
-      { type: 'yeni', text: 'VoiceConfirmationGateway.test.ts: 27 test — requiresConfirmation matrisi, 9 aksiyon tipi için read-back üretimi, onay/red/belgisiz parsing, state machine (idle/pending/confirm/reject/cancel/timeout/üst üste istek).' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: ACTION PATH artık write aksiyonları gateway üzerinden geçiriyor. Yeni pending_confirmation result tipi + submitConfirmation(text) metodu (UI sesli onay akışı için) + cancelPendingConfirmation.' },
+      {
+        type: 'yeni',
+        text: 'VoiceConfirmationGateway.ts: Güvenlik çekirdeği — requiresConfirmation (write aksiyon seti), generateReadBack (her aksiyon için doğal Türkçe okuma metni), parseConfirmation (onay/red/belgisiz ayrıştırma, STT hatalarına toleranslı, çelişkide güvenlik tarafı), stateful gateway (pending state machine, 15sn timeout, üst üste istek koruması).',
+      },
+      {
+        type: 'yeni',
+        text: 'VoiceConfirmationGateway.test.ts: 27 test — requiresConfirmation matrisi, 9 aksiyon tipi için read-back üretimi, onay/red/belgisiz parsing, state machine (idle/pending/confirm/reject/cancel/timeout/üst üste istek).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: ACTION PATH artık write aksiyonları gateway üzerinden geçiriyor. Yeni pending_confirmation result tipi + submitConfirmation(text) metodu (UI sesli onay akışı için) + cancelPendingConfirmation.',
+      },
     ],
   },
   {
     version: '3.34.0',
     date: '20 Haziran 2026',
     title: 'v3.34.0 — Soba Nexus AI: Cross-Entity Discount Memory (MEMORY PATH)',
-    summary: 'Nexus AI’a 5. yönlendirme yolu eklendi: MEMORY PATH. "Ali’nin indirimini Ahmet’e de uygula" kalıbı algılanıp, geçmiş satışlardan indirim kalıbı çıkarılarak hedef cariye transfer önerisi üretiliyor. Çekirdek saf fonksiyonlar (pure) ile deterministik ve offline-first; LLM yalnızca belirsiz durumlarda devreye girer.',
+    summary:
+      'Nexus AI’a 5. yönlendirme yolu eklendi: MEMORY PATH. "Ali’nin indirimini Ahmet’e de uygula" kalıbı algılanıp, geçmiş satışlardan indirim kalıbı çıkarılarak hedef cariye transfer önerisi üretiliyor. Çekirdek saf fonksiyonlar (pure) ile deterministik ve offline-first; LLM yalnızca belirsiz durumlarda devreye girer.',
     changes: [
-      { type: 'yeni', text: 'DiscountMemoryModule.ts: Cross-entity discount memory engine — findCariByName (toleranslı isim eşleştirme), recallDiscountHistory (indirimli satış geçmişi), extractDiscountPattern (yüzde/tutar kalıbı çıkarımı), proposeDiscountTransfer (transfer önerisi), applyDiscountProposalToPayload (sale payload enjeksiyonu).' },
-      { type: 'yeni', text: 'DiscountMemoryModule.test.ts: 24 co-located test — isim eşleştirme, geçmiş hatırlama, kalıp çıkarımı, transfer önerisi, payload enjeksiyonu senaryoları.' },
-      { type: 'yeni', text: 'NexusRouter.ts: MEMORY PATH (5. yol) eklendi. detectDiscountTransfer — token-tabanlı "indirim ... uygula" kalıbı algılama, Türkçe ek/apostrof varyasyonlarına dayanıklı.' },
-      { type: 'iyilestirme', text: 'NexusExecutive.ts: MEMORY PATH sonuçlarını yöneten dal eklendi; applicable öneriler için suggestedAction (SatisAgent’a gönderilecek payload) üretiliyor.' },
-      { type: 'iyilestirme', text: 'nexus-verification.test.ts: MEMORY PATH için yeni test eklendi (Ali→Ahmet indirim transferi senaryosu).' },
+      {
+        type: 'yeni',
+        text: 'DiscountMemoryModule.ts: Cross-entity discount memory engine — findCariByName (toleranslı isim eşleştirme), recallDiscountHistory (indirimli satış geçmişi), extractDiscountPattern (yüzde/tutar kalıbı çıkarımı), proposeDiscountTransfer (transfer önerisi), applyDiscountProposalToPayload (sale payload enjeksiyonu).',
+      },
+      {
+        type: 'yeni',
+        text: 'DiscountMemoryModule.test.ts: 24 co-located test — isim eşleştirme, geçmiş hatırlama, kalıp çıkarımı, transfer önerisi, payload enjeksiyonu senaryoları.',
+      },
+      {
+        type: 'yeni',
+        text: 'NexusRouter.ts: MEMORY PATH (5. yol) eklendi. detectDiscountTransfer — token-tabanlı "indirim ... uygula" kalıbı algılama, Türkçe ek/apostrof varyasyonlarına dayanıklı.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'NexusExecutive.ts: MEMORY PATH sonuçlarını yöneten dal eklendi; applicable öneriler için suggestedAction (SatisAgent’a gönderilecek payload) üretiliyor.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'nexus-verification.test.ts: MEMORY PATH için yeni test eklendi (Ali→Ahmet indirim transferi senaryosu).',
+      },
     ],
   },
   {
     version: '3.33.0',
     date: '20 Haziran 2026',
     title: 'v3.33.0 — Soba Nexus AI: Reasoning Filter & Fast-Path Intents',
-    summary: 'Soba Nexus AI yönlendirme mantığı geliştirildi. Muhakeme filtresi ile derin sorular bulut LLM\'e, net komutlar ise regex tabanlı hızlı yola yönlendirildi.',
+    summary:
+      "Soba Nexus AI yönlendirme mantığı geliştirildi. Muhakeme filtresi ile derin sorular bulut LLM'e, net komutlar ise regex tabanlı hızlı yola yönlendirildi.",
     changes: [
-      { type: 'iyilestirme', text: 'NexusRouter.ts: Muhakeme belirteçleri (Sence, Neden, Nasıl vb.) eklenerek Smart Path yönlendirmesi optimize edildi.' },
-      { type: 'iyilestirme', text: 'voiceIntent.ts: Kasa gider, gelir ve tahsilat komutları için Regex tabanlı Fast Path eklendi.' },
+      {
+        type: 'iyilestirme',
+        text: 'NexusRouter.ts: Muhakeme belirteçleri (Sence, Neden, Nasıl vb.) eklenerek Smart Path yönlendirmesi optimize edildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'voiceIntent.ts: Kasa gider, gelir ve tahsilat komutları için Regex tabanlı Fast Path eklendi.',
+      },
       { type: 'duzeltme', text: 'nexus-verification.test.ts: Action Path yönlendirme hatası giderildi.' },
     ],
   },
@@ -220,12 +396,19 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.32.3',
     date: '20 Haziran 2026',
     title: 'v3.32.3 — Hızlı Satış (QuickSale) Kaldırma + Kod Kalitesi',
-    summary: 'Hızlı Satış özelliği ve FAB butonu kaldırıldı. Content sayfaları (About, Roadmap, Changelog, Support) düzeltildi. voice-sales-simulation.test.ts: rawText eklendi, banka→kart düzeltildi.',
+    summary:
+      'Hızlı Satış özelliği ve FAB butonu kaldırıldı. Content sayfaları (About, Roadmap, Changelog, Support) düzeltildi. voice-sales-simulation.test.ts: rawText eklendi, banka→kart düzeltildi.',
     changes: [
       { type: 'kaldirildi', text: 'QuickSaleModal.tsx: Hızlı Satış modalı silindi.' },
       { type: 'kaldirildi', text: 'FAB.tsx: Hızlı Satış butonu ve sale action kaldırıldı.' },
-      { type: 'duzeltme', text: 'Content sayfaları (About, Roadmap, Changelog, Support): encoding düzeltildi, gereksiz importlar temizlendi.' },
-      { type: 'duzeltme', text: 'voice-sales-simulation.test.ts: rawText property eklendi, payment banka→kart düzeltildi.' },
+      {
+        type: 'duzeltme',
+        text: 'Content sayfaları (About, Roadmap, Changelog, Support): encoding düzeltildi, gereksiz importlar temizlendi.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'voice-sales-simulation.test.ts: rawText property eklendi, payment banka→kart düzeltildi.',
+      },
       { type: 'duzeltme', text: 'Settings.tsx: AboutPanel import ve lsKB değişkeni kaldırıldı (kullanılmıyordu).' },
     ],
   },
@@ -233,18 +416,43 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.32.2',
     date: '20 Haziran 2026',
     title: 'v3.32.2 — Tüm Kalan Maddeler: BatchQueue, Sayfa Refactor, Test Kalitesi, Performans',
-    summary: 'A1: BatchQueue<T> generic class (9 test). A2: Anomali async. A3: Storage monitor. A4+A5: excel-merge split. B1: Suppliers refactor (1298→~1030 satır, 6 modül). B6: Cari refactor (801→6 modül, 1.143 satır). C5: makeDB() shared utility (8 test dosyası güncellendi). 582/583 test pass, 48 test dosyası.',
+    summary:
+      'A1: BatchQueue<T> generic class (9 test). A2: Anomali async. A3: Storage monitor. A4+A5: excel-merge split. B1: Suppliers refactor (1298→~1030 satır, 6 modül). B6: Cari refactor (801→6 modül, 1.143 satır). C5: makeDB() shared utility (8 test dosyası güncellendi). 582/583 test pass, 48 test dosyası.',
     changes: [
-      { type: 'yeni', text: 'A1 — batchQueue.ts: Generic BatchQueue<T> async batch utility (flushInterval, coalescing, maxQueueDepth, dispose).' },
+      {
+        type: 'yeni',
+        text: 'A1 — batchQueue.ts: Generic BatchQueue<T> async batch utility (flushInterval, coalescing, maxQueueDepth, dispose).',
+      },
       { type: 'yeni', text: 'A1 — batchQueue.test.ts: 9 test (flush, coalescing, flushNow, dispose, error handling).' },
-      { type: 'yeni', text: 'A3 — useStorageMonitor.ts: React hook ile localStorage boyut monitörü + UI uyarı bileşeni.' },
-      { type: 'iyilestirme', text: 'A3 — safeIO.ts: STORAGE_LIMIT (5MB), StorageStatus, getStorageUsage(), doluluk >%80 uyarısı.' },
-      { type: 'iyilestirme', text: 'A2 — anomalyEngine.ts: runAnomalyDetectionAsync() + yieldToMain() (ana thread blokajsız).' },
+      {
+        type: 'yeni',
+        text: 'A3 — useStorageMonitor.ts: React hook ile localStorage boyut monitörü + UI uyarı bileşeni.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'A3 — safeIO.ts: STORAGE_LIMIT (5MB), StorageStatus, getStorageUsage(), doluluk >%80 uyarısı.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'A2 — anomalyEngine.ts: runAnomalyDetectionAsync() + yieldToMain() (ana thread blokajsız).',
+      },
       { type: 'iyilestirme', text: 'A2 — AnomaliOneri.tsx: async deteksiyon + loading spinner + progress label.' },
-      { type: 'iyilestirme', text: 'A4+A5 — excel-merge.ts → src/lib/excel-merge/: parser.ts, mergeEngine.ts, index.ts.' },
-      { type: 'iyilestirme', text: 'B1 — Suppliers.tsx refactor: index.tsx (~220), SupplierList (~180), SupplierForm (~120), SupplierDetail (~130), SupplierOrder (~190), SupplierHelpers (~70).' },
-      { type: 'iyilestirme', text: 'B6 — Cari.tsx refactor (801→6 modül): index (~261), CariList (~337), CariForm (~93), CariIslemModal (~85), CariDetail (~266), CariHelpers (~101).' },
-      { type: 'iyilestirme', text: 'C5 — testUtils.ts: makeDB() shared utility (8 test dosyası güncellendi: ruleEngine, auditEngine, dataIntegrityChecker, StokAgent, SatisAgent, uygulama-gercek, gercekci-senaryolar, soba-satis-senaryosu, kapsamli-senaryo).' },
+      {
+        type: 'iyilestirme',
+        text: 'A4+A5 — excel-merge.ts → src/lib/excel-merge/: parser.ts, mergeEngine.ts, index.ts.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'B1 — Suppliers.tsx refactor: index.tsx (~220), SupplierList (~180), SupplierForm (~120), SupplierDetail (~130), SupplierOrder (~190), SupplierHelpers (~70).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'B6 — Cari.tsx refactor (801→6 modül): index (~261), CariList (~337), CariForm (~93), CariIslemModal (~85), CariDetail (~266), CariHelpers (~101).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'C5 — testUtils.ts: makeDB() shared utility (8 test dosyası güncellendi: ruleEngine, auditEngine, dataIntegrityChecker, StokAgent, SatisAgent, uygulama-gercek, gercekci-senaryolar, soba-satis-senaryosu, kapsamli-senaryo).',
+      },
       { type: 'iyilestirme', text: 'C5 — Toplam 48 test dosyası, 582 test pass (572→582, +10 BatchQueue test).' },
     ],
   },
@@ -252,15 +460,37 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.32.1',
     date: '18 Haziran 2026',
     title: 'voice-sales localStorage Fix + Kod Kalitesi (any→unknown, Tailwind, Test, TTS)',
-    summary: 'voiceSaleExecutor.ts: localStorage direkt yazma → save() pipeline (AGENTS.md §0). pageHelpers.ts: 7 any → unknown + DB tip güvenliği. voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts). VoiceSaleButton.tsx: inline style → Tailwind. voiceIntentBuilder: buildSaleIntentPartial partial success fix. 17 yeni test (572 total). TTS sesli geribildirim (useVoiceSale + audio.ts speak). Fallow dead-code audit — kritik yok.',
+    summary:
+      'voiceSaleExecutor.ts: localStorage direkt yazma → save() pipeline (AGENTS.md §0). pageHelpers.ts: 7 any → unknown + DB tip güvenliği. voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts). VoiceSaleButton.tsx: inline style → Tailwind. voiceIntentBuilder: buildSaleIntentPartial partial success fix. 17 yeni test (572 total). TTS sesli geribildirim (useVoiceSale + audio.ts speak). Fallow dead-code audit — kritik yok.',
     changes: [
-      { type: 'duzeltme', text: 'voiceSaleExecutor.ts: localStorage.setItem bypass → saveToStorage() + saveToIndexedSnapshot() + AuditEntry (AGENTS.md §0).' },
-      { type: 'iyilestirme', text: 'pageHelpers.ts: 7 adet any → unknown + DB tipi + reusable asArray/asDB helper (eslint-disable kaldırıldı).' },
-      { type: 'iyilestirme', text: 'voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts custom type, DOM lib uyumlu).' },
-      { type: 'iyilestirme', text: 'VoiceSaleButton.tsx: tüm inline styles → Tailwind utility classları (1 inline style kaldı: fontFamily:inherit).' },
-      { type: 'iyilestirme', text: 'voiceIntentBuilder.ts: buildSaleIntentPartial yeniden yazıldı — unmatched item olsa bile matched items ile intent oluşturur.' },
-      { type: 'yeni', text: 'voiceIntentBuilder.test.ts: 17 test (success, error, warning, options, partial success).' },
-      { type: 'yeni', text: 'useVoiceSale.ts: TTS entegrasyonu — satış başarılı/hata/onay durumlarında speechSynthesis geribildirim.' },
+      {
+        type: 'duzeltme',
+        text: 'voiceSaleExecutor.ts: localStorage.setItem bypass → saveToStorage() + saveToIndexedSnapshot() + AuditEntry (AGENTS.md §0).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'pageHelpers.ts: 7 adet any → unknown + DB tipi + reusable asArray/asDB helper (eslint-disable kaldırıldı).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'voiceEngine.ts: recognition: any → SpeechRecognition (global.d.ts custom type, DOM lib uyumlu).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'VoiceSaleButton.tsx: tüm inline styles → Tailwind utility classları (1 inline style kaldı: fontFamily:inherit).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'voiceIntentBuilder.ts: buildSaleIntentPartial yeniden yazıldı — unmatched item olsa bile matched items ile intent oluşturur.',
+      },
+      {
+        type: 'yeni',
+        text: 'voiceIntentBuilder.test.ts: 17 test (success, error, warning, options, partial success).',
+      },
+      {
+        type: 'yeni',
+        text: 'useVoiceSale.ts: TTS entegrasyonu — satış başarılı/hata/onay durumlarında speechSynthesis geribildirim.',
+      },
       { type: 'iyilestirme', text: 'Fallow dead-code audit: kritik bulgu yok, tüm basamaklar yeşil.' },
       { type: 'iyilestirme', text: 'Toplam test: 555→572 (+17), 46/47 dosya pass, 1 skip (ci-config).' },
     ],
@@ -269,101 +499,223 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.32.0',
     date: '18 Haziran 2026',
     title: 'Son Kalan Kod Kalitesi Maddeleri — J2, H1, E8 + Tespit Güncellemesi',
-    summary: 'Kalan ~15 madde taranıp 7\'sinin zaten çözüldüğü tespit edildi. Kalan 6 madde (J2, K4, K5, H1, E8) fix\'lendi. J2: dangerouslySetInnerHTML React-based MarkdownText ile değiştirildi (AIAHelpers.tsx + ai-asistan.tsx). H1: P1 tautoloji test gerçek property-based test ile değiştirildi. E8: \'utf8\' as never → Encoding.UTF8 (Capacitor enum).',
+    summary:
+      "Kalan ~15 madde taranıp 7'sinin zaten çözüldüğü tespit edildi. Kalan 6 madde (J2, K4, K5, H1, E8) fix'lendi. J2: dangerouslySetInnerHTML React-based MarkdownText ile değiştirildi (AIAHelpers.tsx + ai-asistan.tsx). H1: P1 tautoloji test gerçek property-based test ile değiştirildi. E8: 'utf8' as never → Encoding.UTF8 (Capacitor enum).",
     changes: [
-      { type: 'iyilestirme', text: 'J2 — AIAHelpers.tsx: dangerouslySetInnerHTML kaldırıldı, React-based MarkdownText component (a11y).' },
-      { type: 'iyilestirme', text: 'J2 — ai-asistan.tsx: dangerouslySetInnerHTML kaldırıldı, renderBoldLines React renderer (a11y).' },
-      { type: 'iyilestirme', text: 'H1 — kapsamli-senaryo.test.ts: P1 tautoloji matematik testi, real property-based test ile değiştirildi.' },
-      { type: 'duzeltme', text: 'E8 — useDBBackup.ts + permissions.ts: \'utf8\' as never cast → Encoding.UTF8 (Capacitor enum tipi).' },
-      { type: 'iyilestirme', text: 'MASTER_PLAN.md güncel tarama: 45 maddeden ~30\'u zaten çözülmüş, 15\'i kalmış, 6\'sı fix\'lendi.' },
-      { type: 'iyilestirme', text: 'docs/agents/proje-analizi.md: Tüm uygulama mimarisi, teknoloji yığını ve risk analizi raporu eklendi.' },
-      { type: 'iyilestirme', text: 'state-registry.json: Proven facts güncellendi ve proje analizi referansı eklendi.' },
+      {
+        type: 'iyilestirme',
+        text: 'J2 — AIAHelpers.tsx: dangerouslySetInnerHTML kaldırıldı, React-based MarkdownText component (a11y).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'J2 — ai-asistan.tsx: dangerouslySetInnerHTML kaldırıldı, renderBoldLines React renderer (a11y).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'H1 — kapsamli-senaryo.test.ts: P1 tautoloji matematik testi, real property-based test ile değiştirildi.',
+      },
+      {
+        type: 'duzeltme',
+        text: "E8 — useDBBackup.ts + permissions.ts: 'utf8' as never cast → Encoding.UTF8 (Capacitor enum tipi).",
+      },
+      {
+        type: 'iyilestirme',
+        text: "MASTER_PLAN.md güncel tarama: 45 maddeden ~30'u zaten çözülmüş, 15'i kalmış, 6'sı fix'lendi.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'docs/agents/proje-analizi.md: Tüm uygulama mimarisi, teknoloji yığını ve risk analizi raporu eklendi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'state-registry.json: Proven facts güncellendi ve proje analizi referansı eklendi.',
+      },
     ],
   },
   {
     version: '3.31.3',
     date: '18 Haziran 2026',
     title: 'Unicode Encoding Düzeltmesi (Suppliers + Fatura)',
-    summary: 'Suppliers modulundeki 5 dosyada (ve Fatura.tsx) Unicode escape sequence lari gercek Turk karakterleri ile degistirildi.',
+    summary:
+      'Suppliers modulundeki 5 dosyada (ve Fatura.tsx) Unicode escape sequence lari gercek Turk karakterleri ile degistirildi.',
     changes: [
-      { type: 'duzeltme', text: 'Suppliers/index.tsx: 74 adet Unicode escape sequence gercek karakterlerle degistirildi.' },
+      {
+        type: 'duzeltme',
+        text: 'Suppliers/index.tsx: 74 adet Unicode escape sequence gercek karakterlerle degistirildi.',
+      },
       { type: 'duzeltme', text: 'Suppliers/types.ts: statusLabels ve catLabels escape leri duzeltildi.' },
-      { type: 'duzeltme', text: 'Suppliers/SupplierOrder.tsx, SupplierList.tsx, SupplierForm.tsx: buton metinleri, label lar, empty state mesajlari duzeltildi.' },
+      {
+        type: 'duzeltme',
+        text: 'Suppliers/SupplierOrder.tsx, SupplierList.tsx, SupplierForm.tsx: buton metinleri, label lar, empty state mesajlari duzeltildi.',
+      },
       { type: 'duzeltme', text: 'Fatura.tsx: Mojibake sorunu duzeltildi.' },
-      { type: 'iyilestirme', text: 'Toplam 105 adet Unicode escape in gercek karakterlere donusturulmesiyle canli site metinleri dogru gorunuyor.' },
+      {
+        type: 'iyilestirme',
+        text: 'Toplam 105 adet Unicode escape in gercek karakterlere donusturulmesiyle canli site metinleri dogru gorunuyor.',
+      },
     ],
   },
   {
     version: '3.31.2',
     date: '18 Haziran 2026',
     title: 'AGENTS.md Sadeleştirme + Symlink Stratejisi (Aşama 1 & 2)',
-    summary: 'AGENTS.md 810 satırdan 111 satıra indirildi (-%86). Detaylı kurallar docs/agents/ altına modüler hale getirildi (10 dosya). CLAUDE.md (Claude Code) ve .cursor/rules/rules.mdc (Cursor IDE) shim dosyaları otomatik üretiliyor — tek canonical kaynak (AGENTS.md) üzerinden multi-tool uyumluluk. Pre-commit hook drift tespit ederek commit\'i engelliyor. 50+ kaynak üzerinde yapılan context vortex araştırması temel alınarak tasarlandı.',
+    summary:
+      "AGENTS.md 810 satırdan 111 satıra indirildi (-%86). Detaylı kurallar docs/agents/ altına modüler hale getirildi (10 dosya). CLAUDE.md (Claude Code) ve .cursor/rules/rules.mdc (Cursor IDE) shim dosyaları otomatik üretiliyor — tek canonical kaynak (AGENTS.md) üzerinden multi-tool uyumluluk. Pre-commit hook drift tespit ederek commit'i engelliyor. 50+ kaynak üzerinde yapılan context vortex araştırması temel alınarak tasarlandı.",
     changes: [
       // Aşama 1: AGENTS.md sadeleştirme
-      { type: 'iyilestirme', text: 'AGENTS.md 810→111 satır: sadece kritik kurallar, referans linkleri (sıfır-tolerans, değişiklik protokolü, mimari, standartlar).' },
+      {
+        type: 'iyilestirme',
+        text: 'AGENTS.md 810→111 satır: sadece kritik kurallar, referans linkleri (sıfır-tolerans, değişiklik protokolü, mimari, standartlar).',
+      },
       { type: 'yeni', text: 'docs/agents/sifir-tolerans.md: korunan sistemler ve yasak davranışlar detaylı liste.' },
-      { type: 'yeni', text: 'docs/agents/degisiklik-protokolu.md: 6 adımlı değişiklik protokolü, 3-dosya versiyon senkron kuralı.' },
+      {
+        type: 'yeni',
+        text: 'docs/agents/degisiklik-protokolu.md: 6 adımlı değişiklik protokolü, 3-dosya versiyon senkron kuralı.',
+      },
       { type: 'yeni', text: 'docs/agents/komutlar-ve-ci.md: tüm pnpm komutları, CI pipeline sırası.' },
       { type: 'yeni', text: 'docs/agents/mimari-detay.md: veri katmanı, agent sistemi, multi-domain mimari.' },
       { type: 'yeni', text: 'docs/agents/standartlar.md: TypeScript, React, Tailwind, testing standartları.' },
-      { type: 'yeni', text: 'docs/agents/versiyonlama.md: semantic versioning, 3-dosya senkron kuralı, changelog formatı.' },
-      { type: 'yeni', text: 'docs/agents/tuzaklar.md: 15+ yaygın tuzak ve çözümleri (pre-commit blok, RuleEngine timeout, saveGuarded).' },
+      {
+        type: 'yeni',
+        text: 'docs/agents/versiyonlama.md: semantic versioning, 3-dosya senkron kuralı, changelog formatı.',
+      },
+      {
+        type: 'yeni',
+        text: 'docs/agents/tuzaklar.md: 15+ yaygın tuzak ve çözümleri (pre-commit blok, RuleEngine timeout, saveGuarded).',
+      },
       { type: 'yeni', text: 'docs/agents/performans.md: chunk limitleri, lazy loading, code splitting stratejisi.' },
-      { type: 'yeni', text: 'docs/agents/deploy.md: branch modeli, pre-commit/push hook\'lar, rollback, env yönetimi.' },
-      { type: 'yeni', text: 'docs/agents/opencode-mcp.md: agent listesi, MCP sırası, skill sistemi, context management.' },
-      { type: 'iyilestirme', text: 'AGENTS.md §11 (Semantic Versiyonlama): 3-dosya senkron kuralı ve güncelleme zorunluluğu eklendi.' },
-      { type: 'iyilestirme', text: 'AGENTS.md §8 (Yaygın Tuzaklar): "Version inconsistency" tuzağı ve çözümü tabloya eklendi.' },
+      { type: 'yeni', text: "docs/agents/deploy.md: branch modeli, pre-commit/push hook'lar, rollback, env yönetimi." },
+      {
+        type: 'yeni',
+        text: 'docs/agents/opencode-mcp.md: agent listesi, MCP sırası, skill sistemi, context management.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'AGENTS.md §11 (Semantic Versiyonlama): 3-dosya senkron kuralı ve güncelleme zorunluluğu eklendi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'AGENTS.md §8 (Yaygın Tuzaklar): "Version inconsistency" tuzağı ve çözümü tabloya eklendi.',
+      },
       // Aşama 2: Symlink (shim) stratejisi
-      { type: 'yeni', text: 'scripts/sync-agent-files.mjs: AGENTS.md\'den CLAUDE.md ve .cursor/rules/rules.mdc üretir. --check modu drift tespit eder.' },
-      { type: 'yeni', text: 'scripts/check-agents-drift.mjs: pre-commit hook wrapper, net hata mesajı + çözüm önerisi.' },
+      {
+        type: 'yeni',
+        text: "scripts/sync-agent-files.mjs: AGENTS.md'den CLAUDE.md ve .cursor/rules/rules.mdc üretir. --check modu drift tespit eder.",
+      },
+      {
+        type: 'yeni',
+        text: 'scripts/check-agents-drift.mjs: pre-commit hook wrapper, net hata mesajı + çözüm önerisi.',
+      },
       { type: 'yeni', text: 'CLAUDE.md: Claude Code için otomatik üretilen shim dosyası (canonical: AGENTS.md).' },
-      { type: 'yeni', text: '.cursor/rules/rules.mdc: Cursor IDE için YAML frontmatter\'lı shim (alwaysApply: true, globs: **/*.{ts,tsx,js,jsx,json,md}).' },
+      {
+        type: 'yeni',
+        text: ".cursor/rules/rules.mdc: Cursor IDE için YAML frontmatter'lı shim (alwaysApply: true, globs: **/*.{ts,tsx,js,jsx,json,md}).",
+      },
       { type: 'yeni', text: 'package.json scripts: "sync:agents" (generate) ve "check:agents" (drift check) eklendi.' },
-      { type: 'yeni', text: 'package.json simple-git-hooks: pre-commit → check-agents-drift.mjs (drift varsa commit engellenir).' },
-      { type: 'yeni', text: 'docs/agents/symlink-stratejisi.md: strateji dokümanı, neden symlink değil, workflow örnekleri.' },
+      {
+        type: 'yeni',
+        text: 'package.json simple-git-hooks: pre-commit → check-agents-drift.mjs (drift varsa commit engellenir).',
+      },
+      {
+        type: 'yeni',
+        text: 'docs/agents/symlink-stratejisi.md: strateji dokümanı, neden symlink değil, workflow örnekleri.',
+      },
       // Versiyon
-      { type: 'duzeltme', text: 'package.json: 3.31.0 → 3.31.1 → 3.31.2 (version consistency test başarısızlığı düzeltildi, Aşama 2 ile birlikte).' },
-      { type: 'iyilestirme', text: 'MEMORY.md: "Context Vortex Çözümü" bölümü eklendi — araştırma bulguları ve 3 aşamalı yol haritası, Aşama 2 tamamlandı.' },
+      {
+        type: 'duzeltme',
+        text: 'package.json: 3.31.0 → 3.31.1 → 3.31.2 (version consistency test başarısızlığı düzeltildi, Aşama 2 ile birlikte).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'MEMORY.md: "Context Vortex Çözümü" bölümü eklendi — araştırma bulguları ve 3 aşamalı yol haritası, Aşama 2 tamamlandı.',
+      },
     ],
   },
   {
     version: '3.31.1',
     date: '18 Haziran 2026',
     title: 'voice-sales Entegrasyonu — TS/Lint Düzeltmeleri, Kök Temizlik',
-    summary: 'voice-sales/ src/features/voice-sales/ altına taşındı. TypeScript ve lint hataları düzeltildi (27 any-type error). jsdom localStorage mock eklendi. spec-compliance voice-sales exlude edildi. Kök .md dosyaları docs/ altına kategorize edildi.',
+    summary:
+      'voice-sales/ src/features/voice-sales/ altına taşındı. TypeScript ve lint hataları düzeltildi (27 any-type error). jsdom localStorage mock eklendi. spec-compliance voice-sales exlude edildi. Kök .md dosyaları docs/ altına kategorize edildi.',
     changes: [
       { type: 'duzeltme', text: 'voice-sales/ → src/features/voice-sales/ taşındı (tsconfig kapsamına girdi).' },
-      { type: 'duzeltme', text: 'speechRecognizer.ts: (window as any) → getWindowSpeech() helper ile type-safe erişim.' },
-      { type: 'duzeltme', text: 'speechRecognizer.ts: VoiceSpeechRecognition global type augmentation lib.dom.d.ts çakışması çözüldü.' },
-      { type: 'duzeltme', text: 'speechRecognizer.test.ts: globalThis/localStorage mock eklendi (vi.stubGlobal pattern).' },
+      {
+        type: 'duzeltme',
+        text: 'speechRecognizer.ts: (window as any) → getWindowSpeech() helper ile type-safe erişim.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'speechRecognizer.ts: VoiceSpeechRecognition global type augmentation lib.dom.d.ts çakışması çözüldü.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'speechRecognizer.test.ts: globalThis/localStorage mock eklendi (vi.stubGlobal pattern).',
+      },
       { type: 'duzeltme', text: 'voiceSaleExecutor.test.ts: localStorage mock düzeltildi (vi.stubGlobal ile).' },
-      { type: 'duzeltme', text: 'spec-compliance: voice-sales dizini exclude edildi (NO_RELATIVE_IMPORT, NO_DIRECT_DB_WRITE).' },
+      {
+        type: 'duzeltme',
+        text: 'spec-compliance: voice-sales dizini exclude edildi (NO_RELATIVE_IMPORT, NO_DIRECT_DB_WRITE).',
+      },
       { type: 'duzeltme', text: 'useVoiceSale.ts: React hooks exhaustive-deps uyarıları ref pattern ile çözüldü.' },
-      { type: 'iyilestirme', text: 'Kök .md dosyaları docs/ altına kategorize: docs/technical/, docs/management/, docs/logs/, docs/archive/.' },
-      { type: 'kaldirildi', text: 'scripts/archive/: hash-audit.mjs, setup-hooks.sh, version-utils.ts arşive taşındı.' },
+      {
+        type: 'iyilestirme',
+        text: 'Kök .md dosyaları docs/ altına kategorize: docs/technical/, docs/management/, docs/logs/, docs/archive/.',
+      },
+      {
+        type: 'kaldirildi',
+        text: 'scripts/archive/: hash-audit.mjs, setup-hooks.sh, version-utils.ts arşive taşındı.',
+      },
     ],
   },
   {
     version: '3.31.0',
     date: '17 Haziran 2026',
     title: 'DomainEventBus + Listeners — C2 Tamamlandı, 5 Sayfa Refactor',
-    summary: 'C2: domainEventBus mitt-based pub/sub ile yeniden yazıldı (AgentBus+domain event bridge). 3 listener eklendi: agentBridge (DomainEvent→AgentBus köprüsü), auditLogger (activity log), notification (toast bildirimleri). intentEngine emit loop geri getirildi. 5 sayfada inline style→Tailwind dönüşümü tamamlandı. CariAgent.test.ts timeout fix (dynamic→static import).',
+    summary:
+      'C2: domainEventBus mitt-based pub/sub ile yeniden yazıldı (AgentBus+domain event bridge). 3 listener eklendi: agentBridge (DomainEvent→AgentBus köprüsü), auditLogger (activity log), notification (toast bildirimleri). intentEngine emit loop geri getirildi. 5 sayfada inline style→Tailwind dönüşümü tamamlandı. CariAgent.test.ts timeout fix (dynamic→static import).',
     changes: [
-      { type: 'yeni', text: 'C2 - domainEventBus.ts: mitt-based typed pub/sub singleton (emit, on, onAny, off, clear, handlerCount).' },
+      {
+        type: 'yeni',
+        text: 'C2 - domainEventBus.ts: mitt-based typed pub/sub singleton (emit, on, onAny, off, clear, handlerCount).',
+      },
       { type: 'yeni', text: 'C2 - domain/listeners/agentBridge.ts: DomainEvent→AgentBus köprüsü (11 event route).' },
-      { type: 'yeni', text: 'C2 - domain/listeners/auditLogger.ts: Domain event\'leri activity log\'a kaydeder (save enjekte).' },
-      { type: 'yeni', text: 'C2 - domain/listeners/notification.ts: Domain event\'ler için toast bildirimleri (showToast enjekte).' },
-      { type: 'yeni', text: 'C2 - domain/listeners/index.ts: setupDomainListeners() — tüm listener\'ları tek çağrıda kurar.' },
+      {
+        type: 'yeni',
+        text: "C2 - domain/listeners/auditLogger.ts: Domain event'leri activity log'a kaydeder (save enjekte).",
+      },
+      {
+        type: 'yeni',
+        text: "C2 - domain/listeners/notification.ts: Domain event'ler için toast bildirimleri (showToast enjekte).",
+      },
+      {
+        type: 'yeni',
+        text: "C2 - domain/listeners/index.ts: setupDomainListeners() — tüm listener'ları tek çağrıda kurar.",
+      },
       { type: 'yeni', text: 'C2 - domain/index.ts: domainEventBus, setupDomainListeners export edildi.' },
-      { type: 'iyilestirme', text: 'C2 - intentEngine.ts: processIntent sonrası emitEvents() ile domain event yayını eklendi.' },
+      {
+        type: 'iyilestirme',
+        text: 'C2 - intentEngine.ts: processIntent sonrası emitEvents() ile domain event yayını eklendi.',
+      },
       { type: 'iyilestirme', text: 'C2 - App.tsx: setupDomainListeners useEffect ile entegre edildi.' },
       { type: 'iyilestirme', text: 'AnomaliOneri.tsx: inline style→Tailwind dönüşümü (−474 satır).' },
       { type: 'iyilestirme', text: 'Kasa.tsx: inline style→Tailwind dönüşümü + Badge kullanımı.' },
-      { type: 'iyilestirme', text: 'SaleFormModal.tsx: inline style→Tailwind dönüşümü (−496 satır), salesStyles/SalesHelpers bağımlılığı kaldırıldı.' },
-      { type: 'iyilestirme', text: 'Sales.tsx: inline style→Tailwind dönüşümü, StatCard/sinp bağımlılığı kaldırıldı, Button/Input/Badge kullanımı.' },
-      { type: 'iyilestirme', text: 'Stock.tsx: inline style→Tailwind dönüşümü, Button/Badge/VoiceAssistantButton kullanımı.' },
+      {
+        type: 'iyilestirme',
+        text: 'SaleFormModal.tsx: inline style→Tailwind dönüşümü (−496 satır), salesStyles/SalesHelpers bağımlılığı kaldırıldı.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Sales.tsx: inline style→Tailwind dönüşümü, StatCard/sinp bağımlılığı kaldırıldı, Button/Input/Badge kullanımı.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Stock.tsx: inline style→Tailwind dönüşümü, Button/Badge/VoiceAssistantButton kullanımı.',
+      },
       { type: 'duzeltme', text: 'CariAgent.test.ts: dynamic import (await import) → static import, test timeout fix.' },
-      { type: 'duzeltme', text: 'uygulama-gercek.test.ts: negative_kasa test timing issue (indirect fix, artık tutarlı pass).' },
+      {
+        type: 'duzeltme',
+        text: 'uygulama-gercek.test.ts: negative_kasa test timing issue (indirect fix, artık tutarlı pass).',
+      },
       { type: 'iyilestirme', text: 'connConfig.test.ts: eslint-disable eklendi (globalThis as any).' },
     ],
   },
@@ -371,35 +723,63 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.31.0',
     date: '16 Haziran 2026',
     title: 'Tüm Kalan Görevler Tamamlandı — C2 Event Bus + D+E+F + H + I+J+K',
-    summary: 'C2: domainEventBus kaldırıldı (dead code, hiçbir dinleyicisi yoktu), intentEngine event emit loop temizlendi. H grubu (Test Kalitesi): 9 test fix (tautoloji, assertion, private prop, shared state, hardcoded tarih, platform bağımlı, discount/banka/pos testleri, min_stock testleri). D+E+F (Kod Kalitesi): F7 calcSubtotal double call fix, E1 toPayload helper ile cast temizliği, E7 window as any fix, E6 per-line eslint-disable. J+I+K (UI+Spec+Doküman): J1 aria-label, J3 StrictMode, J4 ErrorBoundary, J5 loading spinner, I1-I6 spec iyileştirmeleri, K1-K3 doküman güncelleme.',
+    summary:
+      'C2: domainEventBus kaldırıldı (dead code, hiçbir dinleyicisi yoktu), intentEngine event emit loop temizlendi. H grubu (Test Kalitesi): 9 test fix (tautoloji, assertion, private prop, shared state, hardcoded tarih, platform bağımlı, discount/banka/pos testleri, min_stock testleri). D+E+F (Kod Kalitesi): F7 calcSubtotal double call fix, E1 toPayload helper ile cast temizliği, E7 window as any fix, E6 per-line eslint-disable. J+I+K (UI+Spec+Doküman): J1 aria-label, J3 StrictMode, J4 ErrorBoundary, J5 loading spinner, I1-I6 spec iyileştirmeleri, K1-K3 doküman güncelleme.',
     changes: [
       { type: 'kaldirildi', text: 'C2 - domainEventBus.ts kaldırıldı (hiçbir dinleyicisi yoktu, dead emit).' },
       { type: 'kaldirildi', text: 'C2 - intentEngine.ts: event emit loop (domainEventBus.emit) kaldırıldı.' },
       { type: 'kaldirildi', text: 'C2 - domain/index.ts: domainEventBus export kaldırıldı.' },
-      { type: 'iyilestirme', text: 'J1 - Icon button\'lara (upload, ai-asistan, VoiceAgentUI, VoiceAssistantButton, ScrollableCards, Dashboard, Cizelge) aria-label eklendi.' },
+      {
+        type: 'iyilestirme',
+        text: "J1 - Icon button'lara (upload, ai-asistan, VoiceAgentUI, VoiceAssistantButton, ScrollableCards, Dashboard, Cizelge) aria-label eklendi.",
+      },
       { type: 'iyilestirme', text: 'J3 - main.tsx: <App /> <StrictMode> ile sarıldı.' },
-      { type: 'iyilestirme', text: 'J4 - main.tsx: ErrorBoundary component\'i eklendi (fallback UI + retry butonu).' },
+      { type: 'iyilestirme', text: "J4 - main.tsx: ErrorBoundary component'i eklendi (fallback UI + retry butonu)." },
       { type: 'iyilestirme', text: 'J5 - index.html: loading spinner eklendi (JS yüklenirken gösterilir).' },
-      { type: 'duzeltme', text: 'I1 - component-rules.ts: relative import regex\'i require/dynamic import\'ı da yakalayacak şekilde genişletildi.' },
+      {
+        type: 'duzeltme',
+        text: "I1 - component-rules.ts: relative import regex'i require/dynamic import'ı da yakalayacak şekilde genişletildi.",
+      },
       { type: 'duzeltme', text: 'I2 - SHADCN_UNTOUCHED eşiği 200→100 satır, 8000→4000 byte düşürüldü.' },
-      { type: 'duzeltme', text: 'I3 - NO_STATIC_INLINE_STYLE exclusion listesi genişletildi (background, transform, animation, opacity).' },
-      { type: 'yeni', text: 'I4 - component-coverage-rules.ts eklendi (sayfa/component satır limiti, loading state kontrolü).' },
-      { type: 'yeni', text: 'I5 - accessibility-rules.ts eklendi (StrictMode, ErrorBoundary, aria-label kontrolleri).' },
+      {
+        type: 'duzeltme',
+        text: 'I3 - NO_STATIC_INLINE_STYLE exclusion listesi genişletildi (background, transform, animation, opacity).',
+      },
+      {
+        type: 'yeni',
+        text: 'I4 - component-coverage-rules.ts eklendi (sayfa/component satır limiti, loading state kontrolü).',
+      },
+      {
+        type: 'yeni',
+        text: 'I5 - accessibility-rules.ts eklendi (StrictMode, ErrorBoundary, aria-label kontrolleri).',
+      },
       { type: 'yeni', text: 'I6 - performance-budget-rules.ts eklendi (spinner, lazy count, console.log kontrolü).' },
       { type: 'duzeltme', text: 'K1 - DEVELOPMENT.md: PWA asset 53→72 güncellendi (doğru değer).' },
       { type: 'duzeltme', text: 'K2 - DEVELOPMENT.md: design-tokens.css notu eklendi.' },
       { type: 'duzeltme', text: 'K3 - DEVELOPMENT.md: build size 2.9MB→3.25MB güncellendi.' },
       { type: 'duzeltme', text: 'H2 - version-utils.test.ts: PBT tautoloji düzeltildi (farklı hesaplama yöntemi).' },
-      { type: 'iyilestirme', text: 'H3 - spec-compliance.test.ts: info severity test\'lerine assertion eklendi.' },
-      { type: 'duzeltme', text: 'H4 - navigation-rules.ts: TAB_ROUTE_MATCH artık gerçek route\'ları test ediyor.' },
-      { type: 'duzeltme', text: 'H5 - baseAgent.test.ts: private prop (agent["db"]) public islemYap ile değiştirildi.' },
+      { type: 'iyilestirme', text: "H3 - spec-compliance.test.ts: info severity test'lerine assertion eklendi." },
+      { type: 'duzeltme', text: "H4 - navigation-rules.ts: TAB_ROUTE_MATCH artık gerçek route'ları test ediyor." },
+      {
+        type: 'duzeltme',
+        text: 'H5 - baseAgent.test.ts: private prop (agent["db"]) public islemYap ile değiştirildi.',
+      },
       { type: 'duzeltme', text: 'H6 - uygulama-gercek.test.ts: shared mutable state → her test için fresh fixture.' },
       { type: 'duzeltme', text: 'H7 - kapsamli-senaryo.test.ts: sabit tarih "2020-01-01" → dinamik Date hesaplama.' },
       { type: 'duzeltme', text: 'H8 - dataIntegrity.test.ts: platform-bağımlı chunkSize → dinamik hesaplama.' },
-      { type: 'yeni', text: 'H9 - SatisAgent.test.ts: 4 yeni test (yüzde/sabit iskonto, havale/kart payment routing).' },
+      {
+        type: 'yeni',
+        text: 'H9 - SatisAgent.test.ts: 4 yeni test (yüzde/sabit iskonto, havale/kart payment routing).',
+      },
       { type: 'yeni', text: 'H10 - ruleEngine.test.ts: 3 yeni min_stock testi.' },
-      { type: 'iyilestirme', text: 'F7 - saleCompletion.ts: calcSubtotal tek çağrıya indirildi (calcDiscountAmount\'a parametre olarak geçildi).' },
-      { type: 'iyilestirme', text: 'E1 - saleCompletion.ts: toPayload helper eklendi, tüm as unknown as Record dönüşümleri bu helper\'a çekildi.' },
+      {
+        type: 'iyilestirme',
+        text: "F7 - saleCompletion.ts: calcSubtotal tek çağrıya indirildi (calcDiscountAmount'a parametre olarak geçildi).",
+      },
+      {
+        type: 'iyilestirme',
+        text: "E1 - saleCompletion.ts: toPayload helper eklendi, tüm as unknown as Record dönüşümleri bu helper'a çekildi.",
+      },
       { type: 'iyilestirme', text: 'E7 - useVoiceAgent.ts: window as any → typed SpeechRecognitionCtor.' },
       { type: 'iyilestirme', text: 'E6 - pageHelpers.ts: file-level eslint-disable → per-line disables.' },
     ],
@@ -408,174 +788,359 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.29.1',
     date: '16 Haziran 2026',
     title: 'CI Quality Gate Fix — Sale.dueDate + Audit Engine Correction',
-    summary: 'CI typecheck hatası düzeltildi: Sale tipine dueDate eklendi (uncommitted değişiklikdi). AuditEngine\'de yalnızca payment === "cari" satışları cari bakiyeye dahil edecek şekilde düzeltildi. dbUtils\'e calculateCariBalance yardımcısı eklendi.',
+    summary:
+      'CI typecheck hatası düzeltildi: Sale tipine dueDate eklendi (uncommitted değişiklikdi). AuditEngine\'de yalnızca payment === "cari" satışları cari bakiyeye dahil edecek şekilde düzeltildi. dbUtils\'e calculateCariBalance yardımcısı eklendi.',
     changes: [
-      { type: 'duzeltme', text: 'Sale.dueDate eklendi — CI typecheck hatası giderildi (uncommitted değişiklikdi, receivableService kullanıyor).' },
-      { type: 'duzeltme', text: 'auditEngine: Satışlardan cari bakiye hesaplarken payment !== "cari" filtresi eklendi — yanlış cari bakiye sapması düzeltildi.' },
-      { type: 'iyilestirme', text: 'dbUtils: calculateCariBalance() domain yardımcısı eklendi — sadece payment === "cari" satışları dikkate alır.' },
-      { type: 'duzeltme', text: 'lint: FullSystemStressTest.test.ts untracked dosyası kaldırıldı (bloklayan lint hataları içeriyordu).' },
-      { type: 'duzeltme', text: 'saleCompletion: completeSale/cancelSale/returnSale cari bakiye güncellemesi eklendi — SatisAgent.test düzeldi.' },
-      { type: 'duzeltme', text: 'SatisAgent: ctx kontrolü eklendi (deleted product check öncesi) — bagla hatası düzeldi.' },
+      {
+        type: 'duzeltme',
+        text: 'Sale.dueDate eklendi — CI typecheck hatası giderildi (uncommitted değişiklikdi, receivableService kullanıyor).',
+      },
+      {
+        type: 'duzeltme',
+        text: 'auditEngine: Satışlardan cari bakiye hesaplarken payment !== "cari" filtresi eklendi — yanlış cari bakiye sapması düzeltildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'dbUtils: calculateCariBalance() domain yardımcısı eklendi — sadece payment === "cari" satışları dikkate alır.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'lint: FullSystemStressTest.test.ts untracked dosyası kaldırıldı (bloklayan lint hataları içeriyordu).',
+      },
+      {
+        type: 'duzeltme',
+        text: 'saleCompletion: completeSale/cancelSale/returnSale cari bakiye güncellemesi eklendi — SatisAgent.test düzeldi.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'SatisAgent: ctx kontrolü eklendi (deleted product check öncesi) — bagla hatası düzeldi.',
+      },
       { type: 'duzeltme', text: 'package.json: 3.28.0 → 3.29.1 (version-consistency testi için).' },
-      { type: 'duzeltme', text: 'connConfig.test: vi.stubEnv ile Firebase env var\'ları mocklandı — CI\'da bağımsız çalışır.' },
-      { type: 'iyilestirme', text: 'saleCompletion.test: 13 yeni test eklendi (cari balance, dueDate, çoklu ürün, kısmi iade vb.) — 16→29 test.' },
-      { type: 'iyilestirme', text: 'C7: excel-merge.ts 742 satır → 3 modüle bölündü (excel-merge-types.ts, excel-merge-utils.ts, excel-merge.ts).' },
+      {
+        type: 'duzeltme',
+        text: "connConfig.test: vi.stubEnv ile Firebase env var'ları mocklandı — CI'da bağımsız çalışır.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'saleCompletion.test: 13 yeni test eklendi (cari balance, dueDate, çoklu ürün, kısmi iade vb.) — 16→29 test.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'C7: excel-merge.ts 742 satır → 3 modüle bölündü (excel-merge-types.ts, excel-merge-utils.ts, excel-merge.ts).',
+      },
     ],
   },
   {
     version: '3.29.0',
     date: '16 Haziran 2026',
     title: 'Alacak Takip Sayfası + Pre-existing Bug Fix',
-    summary: 'Yeni Receivables (Alacak Takip) sayfası eklendi — gecikmiş cari alacakları listeler, detaylı döküm sunar. saleCompletion.ts\'deki C1 refactor artıkları temizlendi (productUpdates, cariUpdate, kalan). CariAgent/KasaAgent AgentResponse tip hatası düzeltildi. ruleEngine.ts prevProductIds ve cariService.ts CariUpdate temizlendi.',
+    summary:
+      "Yeni Receivables (Alacak Takip) sayfası eklendi — gecikmiş cari alacakları listeler, detaylı döküm sunar. saleCompletion.ts'deki C1 refactor artıkları temizlendi (productUpdates, cariUpdate, kalan). CariAgent/KasaAgent AgentResponse tip hatası düzeltildi. ruleEngine.ts prevProductIds ve cariService.ts CariUpdate temizlendi.",
     changes: [
-      { type: 'yeni', text: 'Receivables (Alacak Takip) sayfası — gecikmiş cari borçları listeler, arama/ filtreleme ve expandable satır detayı.' },
-      { type: 'yeni', text: 'receivableService.getOverdueReceivables — domain servisi, vadesi geçmiş cari satışları hesaplar.' },
+      {
+        type: 'yeni',
+        text: 'Receivables (Alacak Takip) sayfası — gecikmiş cari borçları listeler, arama/ filtreleme ve expandable satır detayı.',
+      },
+      {
+        type: 'yeni',
+        text: 'receivableService.getOverdueReceivables — domain servisi, vadesi geçmiş cari satışları hesaplar.',
+      },
       { type: 'yeni', text: 'SaleIntent.dueDays desteği — satışa özel vade günü belirleme.' },
-      { type: 'iyilestirme', text: 'Alacak Takip — 4 istatistik kartı (gecikmiş alacak, ortalama gün, müşteri sayısı, cari bakiye).' },
+      {
+        type: 'iyilestirme',
+        text: 'Alacak Takip — 4 istatistik kartı (gecikmiş alacak, ortalama gün, müşteri sayısı, cari bakiye).',
+      },
       { type: 'duzeltme', text: 'completeSale: yanlış "status: iade" + missing productUpdates fix\'lendi.' },
-      { type: 'duzeltme', text: 'CariAgent / KasaAgent: AgentResponse tipi kaldırıldı (DomainAgent base\'den inherit).' },
+      {
+        type: 'duzeltme',
+        text: "CariAgent / KasaAgent: AgentResponse tipi kaldırıldı (DomainAgent base'den inherit).",
+      },
       { type: 'duzeltme', text: 'ruleEngine: kullanılmayan prevProductIds temizlendi.' },
       { type: 'duzeltme', text: 'saleCompletion: dead code (cariUpdate, kalan) temizlendi.' },
-      { type: 'duzeltme', text: 'cariService: kullanılmayan CariUpdate import\'ı temizlendi.' },
+      { type: 'duzeltme', text: "cariService: kullanılmayan CariUpdate import'ı temizlendi." },
       { type: 'duzeltme', text: 'receivableService: any tip + @ts-ignore temizlendi, totalCariBalance eklendi.' },
       { type: 'duzeltme', text: 'changelog v3.28.0: duplicate summary property birleştirildi.' },
-      { type: 'duzeltme', text: 'Login sayfası renkleri: @theme bloğu eklendi — Tailwind v4 utility class\'ları CSS değişkenlerine bağlandı.' },
-      { type: 'duzeltme', text: 'CI quality gate fix: src/__tests__ typecheck exclude eklendi — FullSystemStressTest.test.ts hataları CI\'ı kırmasın.' },
+      {
+        type: 'duzeltme',
+        text: "Login sayfası renkleri: @theme bloğu eklendi — Tailwind v4 utility class'ları CSS değişkenlerine bağlandı.",
+      },
+      {
+        type: 'duzeltme',
+        text: "CI quality gate fix: src/__tests__ typecheck exclude eklendi — FullSystemStressTest.test.ts hataları CI'ı kırmasın.",
+      },
     ],
   },
   {
     version: '3.28.0',
     date: '15 Haziran 2026',
     title: 'P2 SettingsBackup Modularizasyonu — Tüm Kalan Görevler Tamam',
-    summary: 'P2 SettingsBackup Modularizasyonu — 1191→5 modüle bölündü. D1: save/saveGuarded ortak _save helper. E1: saleCompletion.ts cast temizliği. E2: SatisAgent validasyon. F1/F2: SettingsBackup useCallback + className.',
+    summary:
+      'P2 SettingsBackup Modularizasyonu — 1191→5 modüle bölündü. D1: save/saveGuarded ortak _save helper. E1: saleCompletion.ts cast temizliği. E2: SatisAgent validasyon. F1/F2: SettingsBackup useCallback + className.',
     changes: [
-      { type: 'iyilestirme', text: 'D1: save/saveGuarded ortak _save helper\'ına çıkarıldı (useDBActions.ts).' },
-      { type: 'duzeltme', text: 'E1: saleCompletion.ts\'deki as unknown as Record<string, unknown> cast\'leri temizlendi, sadece zorunlu olanlarda bırakıldı.' },
-      { type: 'iyilestirme', text: 'E2: SatisAgent payload doğrulaması — asString/asNumber/asPaymentType/asSaleItem validasyon fonksiyonları eklendi.' },
-      { type: 'iyilestirme', text: 'F1: SettingsBackup event handler\'ları (handleFile, doRestore, reset, toggleSection, selectAll/None) useCallback\'e sarıldı.' },
-      { type: 'iyilestirme', text: 'F2: SettingsBackup statik inline style\'lar className\'e taşındı (section list, checkbox, label).' },
+      { type: 'iyilestirme', text: "D1: save/saveGuarded ortak _save helper'ına çıkarıldı (useDBActions.ts)." },
+      {
+        type: 'duzeltme',
+        text: "E1: saleCompletion.ts'deki as unknown as Record<string, unknown> cast'leri temizlendi, sadece zorunlu olanlarda bırakıldı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'E2: SatisAgent payload doğrulaması — asString/asNumber/asPaymentType/asSaleItem validasyon fonksiyonları eklendi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: "F1: SettingsBackup event handler'ları (handleFile, doRestore, reset, toggleSection, selectAll/None) useCallback'e sarıldı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: "F2: SettingsBackup statik inline style'lar className'e taşındı (section list, checkbox, label).",
+      },
     ],
   },
   {
     version: '3.27.0',
     date: '15 Haziran 2026',
     title: 'C4 Agent sadeleştirme — DomainAgent base class',
-    summary: '4 domain agent\'ı (Satis, Stok, Kasa, Cari) aynı islemYap pipeline\'ını paylaşan DomainAgent base class\'ı altında birleştirildi. KasaAgent ve CariAgent\'daki save bug\'ı (processIntent çağrılıp sonucun kaydedilmemesi) fix\'lendi.',
+    summary:
+      "4 domain agent'ı (Satis, Stok, Kasa, Cari) aynı islemYap pipeline'ını paylaşan DomainAgent base class'ı altında birleştirildi. KasaAgent ve CariAgent'daki save bug'ı (processIntent çağrılıp sonucun kaydedilmemesi) fix'lendi.",
     changes: [
-      { type: 'iyilestirme', text: 'DomainAgent.ts eklendi: 4 agent ortak islemYap pipeline\'ı tek base class\'ta toplandı.' },
-      { type: 'iyilestirme', text: 'SatisAgent.ts: 68→33 satır, islemYap pipeline\'ı DomainAgent\'a taşındı, sadece yetki kontrolü kaldı.' },
+      {
+        type: 'iyilestirme',
+        text: "DomainAgent.ts eklendi: 4 agent ortak islemYap pipeline'ı tek base class'ta toplandı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: "SatisAgent.ts: 68→33 satır, islemYap pipeline'ı DomainAgent'a taşındı, sadece yetki kontrolü kaldı.",
+      },
       { type: 'iyilestirme', text: 'StokAgent.ts: 61→32 satır, islemYap tamamen kaldırıldı.' },
-      { type: 'iyilestirme', text: 'KasaAgent.ts: 42→30 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
-      { type: 'iyilestirme', text: 'CariAgent.ts: 53→43 satır, islemYap kaldırıldı, save bug\'ı fix\'lendi.' },
-      { type: 'iyilestirme', text: 'DomainAgent.ts: 40 satır — yeni abstract base class (Stok/Kasa/Cari hiç islemYap, Satis sadece yetki kontrolü).' },
-      { type: 'iyilestirme', text: 'StokAgent.test.ts: 2 test güncellendi (DomainAgent null intent → error davranışına).' },
+      { type: 'iyilestirme', text: "KasaAgent.ts: 42→30 satır, islemYap kaldırıldı, save bug'ı fix'lendi." },
+      { type: 'iyilestirme', text: "CariAgent.ts: 53→43 satır, islemYap kaldırıldı, save bug'ı fix'lendi." },
+      {
+        type: 'iyilestirme',
+        text: 'DomainAgent.ts: 40 satır — yeni abstract base class (Stok/Kasa/Cari hiç islemYap, Satis sadece yetki kontrolü).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'StokAgent.test.ts: 2 test güncellendi (DomainAgent null intent → error davranışına).',
+      },
     ],
   },
   {
     version: '3.26.1',
     date: '15 Haziran 2026',
     title: 'Dashboard.tsx küçültme (863→398 satır)',
-    summary: 'Dashboard.tsx 863 satırdan 398 satıra indirildi. renderWidget fonksiyonu (tüm widget kasları + chartData/categoryRevenue/recentSales/recentActivity memoları) WidgetRenderer.tsx\'e taşındı. statCards useMemo\'su useStatCards hook\'una çıkarıldı.',
+    summary:
+      "Dashboard.tsx 863 satırdan 398 satıra indirildi. renderWidget fonksiyonu (tüm widget kasları + chartData/categoryRevenue/recentSales/recentActivity memoları) WidgetRenderer.tsx'e taşındı. statCards useMemo'su useStatCards hook'una çıkarıldı.",
     changes: [
-      { type: 'iyilestirme', text: 'Dashboard.tsx: renderWidget (328 satır) + 4 veri memo\'su WidgetRenderer.tsx\'e taşındı.' },
-      { type: 'iyilestirme', text: 'Dashboard.tsx: statCards useMemo (72 satır) useStatCards hook\'una çıkarıldı (useStatCards.tsx).' },
-      { type: 'kaldirildi', text: 'Dashboard.tsx: recharts, lucide-react, formatDate, Avatar, getCategorySales, WidgetCard, Oneriler import\'ları temizlendi (WidgetRenderer\'a taşındı).' },
+      {
+        type: 'iyilestirme',
+        text: "Dashboard.tsx: renderWidget (328 satır) + 4 veri memo'su WidgetRenderer.tsx'e taşındı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: "Dashboard.tsx: statCards useMemo (72 satır) useStatCards hook'una çıkarıldı (useStatCards.tsx).",
+      },
+      {
+        type: 'kaldirildi',
+        text: "Dashboard.tsx: recharts, lucide-react, formatDate, Avatar, getCategorySales, WidgetCard, Oneriler import'ları temizlendi (WidgetRenderer'a taşındı).",
+      },
     ],
   },
   {
     version: '3.26.0',
     date: '15 Haziran 2026',
     title: 'Test coverage — H10 min_stock, domain service tests, DB coverage',
-    summary: 'min_stock kuralı eklendi (severity: warn). completeSale/cancelSale/returnSale/correctSalePrice için 16 domain servis testi. DB katmanı core/backup/sync için coverage artırıldı. Toplam 27 yeni test.',
+    summary:
+      'min_stock kuralı eklendi (severity: warn). completeSale/cancelSale/returnSale/correctSalePrice için 16 domain servis testi. DB katmanı core/backup/sync için coverage artırıldı. Toplam 27 yeni test.',
     changes: [
-      { type: 'yeni', text: 'Rule Engine: min_stock kuralı eklendi — stok minStock altına düştüğünde warn ihlali üretir.' },
-      { type: 'iyilestirme', text: 'Domain servis testleri: completeSale, cancelSale, returnSale, correctSalePrice için 16 test yazıldı (saleCompletion.test.ts).' },
-      { type: 'iyilestirme', text: 'DB coverage: core.test.ts (4 yeni test: save loading, error callback, manualBackup shape, undo empty), backup.test.ts (2 yeni test: fullRestoreDB empty/version), sync.test.ts (3 yeni test: malformed JSON, retry exhaust, conflict).' },
+      {
+        type: 'yeni',
+        text: 'Rule Engine: min_stock kuralı eklendi — stok minStock altına düştüğünde warn ihlali üretir.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Domain servis testleri: completeSale, cancelSale, returnSale, correctSalePrice için 16 test yazıldı (saleCompletion.test.ts).',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'DB coverage: core.test.ts (4 yeni test: save loading, error callback, manualBackup shape, undo empty), backup.test.ts (2 yeni test: fullRestoreDB empty/version), sync.test.ts (3 yeni test: malformed JSON, retry exhaust, conflict).',
+      },
     ],
   },
   {
     version: '3.25.2',
     date: '14 Haziran 2026',
     title: 'CI Cleanup — 10 lint warning, 17 test failure, typecheck fixes',
-    summary: 'Tüm lint warningleri, typecheck hataları ve 17 adet test hatası temizlendi. Voice NLP parser\'da action detection word-boundary regex\'e geçirildi, discount detection normalize edildi. Product matcher quantity stripping yeniden yazıldı. Version consistency testleri düzeltildi. Domain servislerde unused parameter prefix\'i eklendi. ReportsCommon.tsx static property pattern\'ine taşındı.',
+    summary:
+      "Tüm lint warningleri, typecheck hataları ve 17 adet test hatası temizlendi. Voice NLP parser'da action detection word-boundary regex'e geçirildi, discount detection normalize edildi. Product matcher quantity stripping yeniden yazıldı. Version consistency testleri düzeltildi. Domain servislerde unused parameter prefix'i eklendi. ReportsCommon.tsx static property pattern'ine taşındı.",
     changes: [
-      { type: 'duzeltme', text: '10 adet lint warning temizlendi: domain servis unused `db` parameter prefix, Dashboard/Reports useMemo dep, ReportsCommon constant static property pattern.' },
-      { type: 'duzeltme', text: 'Voice NLP parser action detection: `text.includes()` -> word-boundary regex (`\bkeyword\b`) ile değiştirildi. "satis" keyword kümesinden "yap" kaldırıldı (çok geneldi).' },
-      { type: 'duzeltme', text: 'Voice NLP parser discount detection regex normalize edilmiş text\'e uygun hale getirildi (yüzde -> yuzde).' },
-      { type: 'duzeltme', text: 'Product matcher `stripQuantityWords`: baştaki sayı+apostrof koruması eklendi ("2 tane 80\'lik soba" -> "80\'lik soba"), birim sözcük eşleştirmesi string başında da çalışıyor ("iki tane klima" -> "klima").' },
-      { type: 'duzeltme', text: 'Voice sale executor `executeConfirmedSale` tek argümanlı imzaya geçirildi (test uyumu).' },
-      { type: 'duzeltme', text: 'Version consistency testleri: package.json 3.25.1\'e güncellendi, APP_DEFAULT_VERSION eklendi.' },
-      { type: 'duzeltme', text: 'Typecheck: cariService/stockService body içinde `db` -> `_db` referans düzeltmesi, ReportsCommon KpiCard CARD -> CARD_OBJ.' },
+      {
+        type: 'duzeltme',
+        text: '10 adet lint warning temizlendi: domain servis unused `db` parameter prefix, Dashboard/Reports useMemo dep, ReportsCommon constant static property pattern.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'Voice NLP parser action detection: `text.includes()` -> word-boundary regex (`\bkeyword\b`) ile değiştirildi. "satis" keyword kümesinden "yap" kaldırıldı (çok geneldi).',
+      },
+      {
+        type: 'duzeltme',
+        text: "Voice NLP parser discount detection regex normalize edilmiş text'e uygun hale getirildi (yüzde -> yuzde).",
+      },
+      {
+        type: 'duzeltme',
+        text: 'Product matcher `stripQuantityWords`: baştaki sayı+apostrof koruması eklendi ("2 tane 80\'lik soba" -> "80\'lik soba"), birim sözcük eşleştirmesi string başında da çalışıyor ("iki tane klima" -> "klima").',
+      },
+      {
+        type: 'duzeltme',
+        text: 'Voice sale executor `executeConfirmedSale` tek argümanlı imzaya geçirildi (test uyumu).',
+      },
+      {
+        type: 'duzeltme',
+        text: "Version consistency testleri: package.json 3.25.1'e güncellendi, APP_DEFAULT_VERSION eklendi.",
+      },
+      {
+        type: 'duzeltme',
+        text: 'Typecheck: cariService/stockService body içinde `db` -> `_db` referans düzeltmesi, ReportsCommon KpiCard CARD -> CARD_OBJ.',
+      },
     ],
   },
   {
     version: '3.25.1',
     date: '14 Haziran 2026',
     title: 'E2E Audit & Kritik Hata Düzeltmeleri — Vite HMR, Dashboard Key, Sidebar Navigasyon',
-    summary: '3 kritik hata bulundu ve düzeltildi: (1) Vite HMR WebSocket port çakışması (Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı anda çözüldü), (2) Dashboard React key prop uyarısı (2 motion.div\'e key eklendi), (3) Sidebar navigasyon helper\'ı getByRole+getByText ikili yaklaşımına yükseltildi. E2E helper app.ts iyileştirildi — ensureGroupOpen accessible name tabanlı oldu, openModule 3 yöntemli fallback kazanıyor. 3005 modül build başarılı.',
+    summary:
+      "3 kritik hata bulundu ve düzeltildi: (1) Vite HMR WebSocket port çakışması (Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı anda çözüldü), (2) Dashboard React key prop uyarısı (2 motion.div'e key eklendi), (3) Sidebar navigasyon helper'ı getByRole+getByText ikili yaklaşımına yükseltildi. E2E helper app.ts iyileştirildi — ensureGroupOpen accessible name tabanlı oldu, openModule 3 yöntemli fallback kazanıyor. 3005 modül build başarılı.",
     changes: [
-      { type: 'duzeltme', text: 'Vite HMR WebSocket port çakışması — hmr.port:3001 kaldırıldı. Kök neden: hmr.server wss://127.0.0.1:3001 200 hatası. Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı commit\'te çözüldü.' },
-      { type: 'duzeltme', text: 'Dashboard React key prop uyarısı — 2 motion.div\'e key={...} eklendi. warning: Each child in a list should have a unique key prop.' },
-      { type: 'iyilestirme', text: 'Sidebar navigasyon helper\'ı (e2e/helpers/app.ts): ensureGroupOpen textContent() yerine accessible name kullanıyor (getByRole + aria-label). openModule getByRole/getByText/etkileşimli element 3 yöntemli fallback.' },
-      { type: 'iyilestirme', text: 'MODULE_GROUP eksik modüller eklendi: Pelet, OrtakEmanet, Stok, Notlar, AIEylemLog, Entegrasyon, Performans, Monitör, BugHunter, Anomali, Kontrol.' },
-      { type: 'yeni', text: 'E2E comprehensive audit suite (e2e/comprehensive-audit.spec.ts) — 10 kategori, 30+ test. full-audit.cjs Node.js canlı test koşucusu.' },
-      { type: 'yeni', text: 'Nihai audit raporu: e2e-report/PARSPEL-FULL-AUDIT-RAPORU.md (kök neden analizi + 15 screenshot).' },
+      {
+        type: 'duzeltme',
+        text: "Vite HMR WebSocket port çakışması — hmr.port:3001 kaldırıldı. Kök neden: hmr.server wss://127.0.0.1:3001 200 hatası. Bank.tsx lazy import + 20s DOM Complete + responsive crash aynı commit'te çözüldü.",
+      },
+      {
+        type: 'duzeltme',
+        text: "Dashboard React key prop uyarısı — 2 motion.div'e key={...} eklendi. warning: Each child in a list should have a unique key prop.",
+      },
+      {
+        type: 'iyilestirme',
+        text: "Sidebar navigasyon helper'ı (e2e/helpers/app.ts): ensureGroupOpen textContent() yerine accessible name kullanıyor (getByRole + aria-label). openModule getByRole/getByText/etkileşimli element 3 yöntemli fallback.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'MODULE_GROUP eksik modüller eklendi: Pelet, OrtakEmanet, Stok, Notlar, AIEylemLog, Entegrasyon, Performans, Monitör, BugHunter, Anomali, Kontrol.',
+      },
+      {
+        type: 'yeni',
+        text: 'E2E comprehensive audit suite (e2e/comprehensive-audit.spec.ts) — 10 kategori, 30+ test. full-audit.cjs Node.js canlı test koşucusu.',
+      },
+      {
+        type: 'yeni',
+        text: 'Nihai audit raporu: e2e-report/PARSPEL-FULL-AUDIT-RAPORU.md (kök neden analizi + 15 screenshot).',
+      },
     ],
   },
   {
     version: '3.25.0',
     date: '13 Haziran 2026',
     title: '4 Büyük Sayfa Modülerizasyonu — Parallel Agent ile Toplu Refactor',
-    summary: '4 paralel agent ile aynı anda 4 büyük sayfa "Orchestrator + Modules" pattern\'ına taşındı: Suppliers.tsx (1265→5 modül), Monitor.tsx (1147→6 modül), BugHunter.tsx (1092→7 modül), Bank.tsx (1031→8 modül). Toplam 3421 satır monolitik kod temizlendi. Tüm eski dosyalar silindi, lazy import path\'leri bozulmadan çalışıyor.',
+    summary:
+      '4 paralel agent ile aynı anda 4 büyük sayfa "Orchestrator + Modules" pattern\'ına taşındı: Suppliers.tsx (1265→5 modül), Monitor.tsx (1147→6 modül), BugHunter.tsx (1092→7 modül), Bank.tsx (1031→8 modül). Toplam 3421 satır monolitik kod temizlendi. Tüm eski dosyalar silindi, lazy import path\'leri bozulmadan çalışıyor.',
     changes: [
-      { type: 'iyilestirme', text: 'Suppliers → Suppliers/: 5 modül (index.tsx orkestratör, SupplierList, SupplierForm, SupplierOrder, types). Kategori filtreleme, tedarikçi skoru, sipariş yönetimi.' },
-      { type: 'iyilestirme', text: 'Monitor → Monitor/: 6 modül (index.tsx orkestratör, MonitorOverview, MonitorIssues, MonitorRules, MonitorAuditLog, types). Health score, kural yönetimi, denetim log.' },
-      { type: 'iyilestirme', text: 'BugHunter → BugHunter/: 7 modül (index.tsx, types, TestRunner, BugStats, BugToolbar, BugResults, BugEmptyState/Result). 8 test kategorisi, 35+ test.' },
-      { type: 'iyilestirme', text: 'Bank → Bank/: 8 modül (index.tsx, types, StatCard, BankStats, BankActions, BankFilters, BankTable, BankForm). Havale/EFT yönetimi, cari eşleme.' },
-      { type: 'iyilestirme', text: 'Monitor relative import fix: ../pageHelpers → @/pages/pageHelpers (spec-compliance fix).' },
-      { type: 'kaldirildi', text: 'Suppliers.tsx (1265 satır), Monitor.tsx (1147 satır), BugHunter.tsx (1092 satır), Bank.tsx (1031 satır) — 4 eski monolitik dosya silindi.' },
+      {
+        type: 'iyilestirme',
+        text: 'Suppliers → Suppliers/: 5 modül (index.tsx orkestratör, SupplierList, SupplierForm, SupplierOrder, types). Kategori filtreleme, tedarikçi skoru, sipariş yönetimi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Monitor → Monitor/: 6 modül (index.tsx orkestratör, MonitorOverview, MonitorIssues, MonitorRules, MonitorAuditLog, types). Health score, kural yönetimi, denetim log.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'BugHunter → BugHunter/: 7 modül (index.tsx, types, TestRunner, BugStats, BugToolbar, BugResults, BugEmptyState/Result). 8 test kategorisi, 35+ test.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Bank → Bank/: 8 modül (index.tsx, types, StatCard, BankStats, BankActions, BankFilters, BankTable, BankForm). Havale/EFT yönetimi, cari eşleme.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Monitor relative import fix: ../pageHelpers → @/pages/pageHelpers (spec-compliance fix).',
+      },
+      {
+        type: 'kaldirildi',
+        text: 'Suppliers.tsx (1265 satır), Monitor.tsx (1147 satır), BugHunter.tsx (1092 satır), Bank.tsx (1031 satır) — 4 eski monolitik dosya silindi.',
+      },
     ],
   },
   {
     version: '3.23.5',
     date: '13 Haziran 2026',
     title: 'UI Modernizasyonu Tamamlama — Cari & Products Inline Style Cleanup',
-    summary: '3.23.4\'te yarım kalan inline style → Tailwind migrasyonu tamamlandı. Products.tsx modal formları (Ekle/Düzenle + Toplu Fiyat) tamamen Tailwind + shadcn/ui\'ye dönüştürüldü. Cari.tsx\'teki son inline style noktaları (debtColor, bucket renkleri, segment badge) class-based yapıldı.',
+    summary:
+      "3.23.4'te yarım kalan inline style → Tailwind migrasyonu tamamlandı. Products.tsx modal formları (Ekle/Düzenle + Toplu Fiyat) tamamen Tailwind + shadcn/ui'ye dönüştürüldü. Cari.tsx'teki son inline style noktaları (debtColor, bucket renkleri, segment badge) class-based yapıldı.",
     changes: [
-      { type: 'iyilestirme', text: 'Products.tsx: Ürün Ekleme/Düzenleme modalı — lbl/inp style sabitleri kaldırıldı, Label/Input/Button shadcn/ui bileşenlerine geçildi.' },
-      { type: 'iyilestirme', text: 'Products.tsx: Toplu Fiyat Güncelleme modalı — inline style\'dan Tailwind class\'larına taşındı, Button bileşeni kullanıldı.' },
-      { type: 'iyilestirme', text: 'Products.tsx: İstatistik kartları renkleri hex → Tailwind class (text-emerald-500 vb.).' },
+      {
+        type: 'iyilestirme',
+        text: 'Products.tsx: Ürün Ekleme/Düzenleme modalı — lbl/inp style sabitleri kaldırıldı, Label/Input/Button shadcn/ui bileşenlerine geçildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: "Products.tsx: Toplu Fiyat Güncelleme modalı — inline style'dan Tailwind class'larına taşındı, Button bileşeni kullanıldı.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Products.tsx: İstatistik kartları renkleri hex → Tailwind class (text-emerald-500 vb.).',
+      },
       { type: 'iyilestirme', text: 'Products.tsx: Kullanılmayan Chip component kaldırıldı.' },
       { type: 'iyilestirme', text: 'Cari.tsx: debtColor() fonksiyonu hex renk yerine Tailwind class döndürüyor.' },
-      { type: 'iyilestirme', text: 'Cari.tsx: Alacak yaşlandırma bucket renkleri ve segment badge (VIP/Normal/Riskli) class-based yapıldı.' },
+      {
+        type: 'iyilestirme',
+        text: 'Cari.tsx: Alacak yaşlandırma bucket renkleri ve segment badge (VIP/Normal/Riskli) class-based yapıldı.',
+      },
     ],
   },
   {
     version: '3.23.4',
     date: '13 Haziran 2026',
     title: 'UI Modernizasyonu — Cari & Ürün Sayfaları',
-    summary: 'Cari ve Ürün sayfaları Base-Nova standartlarına göre modernize edildi. Tüm inline stiller kaldırılıp Tailwind CSS ve shadcn/ui primitiflerine geçildi. Radius ve renk paleti güncellendi.',
+    summary:
+      'Cari ve Ürün sayfaları Base-Nova standartlarına göre modernize edildi. Tüm inline stiller kaldırılıp Tailwind CSS ve shadcn/ui primitiflerine geçildi. Radius ve renk paleti güncellendi.',
     changes: [
-      { type: 'iyilestirme', text: 'Cari.tsx: Base-Nova standartlarına geçiş, alacak yaşlandırma bandı ve cari tablosu modernize edildi.' },
-      { type: 'iyilestirme', text: 'Products.tsx: Ürün kartları, kategori filtreleri ve stok uyarıları modernize edildi.' },
-      { type: 'iyilestirme', text: 'Tüm inline style\'lar kaldırıldı, Tailwind CSS ve shadcn/ui (Card, Button, Input, Badge, Label) bileşenleri entegre edildi.' },
+      {
+        type: 'iyilestirme',
+        text: 'Cari.tsx: Base-Nova standartlarına geçiş, alacak yaşlandırma bandı ve cari tablosu modernize edildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Products.tsx: Ürün kartları, kategori filtreleri ve stok uyarıları modernize edildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: "Tüm inline style'lar kaldırıldı, Tailwind CSS ve shadcn/ui (Card, Button, Input, Badge, Label) bileşenleri entegre edildi.",
+      },
     ],
   },
   {
     version: '3.23.3',
     date: '13 Haziran 2026',
     title: 'Domain Service Entegrasyonu — Agent islemYap Fix',
-    summary: 'Agent islemYap metotları domain service\'lere yönlendirildi. Testler 40/40 pass ediyor.',
+    summary: "Agent islemYap metotları domain service'lere yönlendirildi. Testler 40/40 pass ediyor.",
     changes: [
       { type: 'duzeltme', text: 'SatisAgent/fiyatDuzelt: applyIntentResult üzerinden kaydediyor, direkt DB yazmıyor.' },
       { type: 'duzeltme', text: 'SatisAgent/iptalEt: cari bakiyesi düzeltiliyor, kasa gider kaydı ekleniyor.' },
-      { type: 'duzeltme', text: 'StokAgent/stok_guncelle: processStockUpdate domain service\'ine yönlendirildi.' },
+      { type: 'duzeltme', text: "StokAgent/stok_guncelle: processStockUpdate domain service'ine yönlendirildi." },
       { type: 'duzeltme', text: 'saleCompletion.ts: iptal ve iade işlemlerine returnedAt alanı eklendi.' },
       { type: 'duzeltme', text: 'applyIntentResult: CashTransaction → KasaEntry dönüşümü (id, createdAt, updatedAt).' },
-      { type: 'duzeltme', text: 'domain/types.ts: DBUpdates.cashTransaction tipi CashTransaction[] olarak düzeltildi.' },
-      { type: 'duzeltme', text: 'dbHelpers.ts: stock.updated event handler StockMovementV2.type\'yi koruyor.' },
-      { type: 'iyilestirme', text: 'SatisAgent.test.ts ve StokAgent.test.ts yeni domain mimarisine güncellendi — 411 test pass.' },
-      { type: 'duzeltme', text: 'DEVELOPMENT.md: orchestrator referansı kaldırıldı, PWA asset sayısı 74 olarak düzeltildi.' },
+      {
+        type: 'duzeltme',
+        text: 'domain/types.ts: DBUpdates.cashTransaction tipi CashTransaction[] olarak düzeltildi.',
+      },
+      { type: 'duzeltme', text: "dbHelpers.ts: stock.updated event handler StockMovementV2.type'yi koruyor." },
+      {
+        type: 'iyilestirme',
+        text: 'SatisAgent.test.ts ve StokAgent.test.ts yeni domain mimarisine güncellendi — 411 test pass.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'DEVELOPMENT.md: orchestrator referansı kaldırıldı, PWA asset sayısı 74 olarak düzeltildi.',
+      },
       { type: 'duzeltme', text: 'CHANGELOG.md: eksik sürümler (v3.8→v3.23) eklendi.' },
       { type: 'duzeltme', text: 'README.md: chunk boyutları ve test dizin bilgisi güncellendi.' },
       { type: 'duzeltme', text: 'MASTER_PLAN.md: versiyon v3.23.3 olarak güncellendi.' },
@@ -584,61 +1149,111 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: '3.23.2',
     date: '13 Haziran 2026',
-    title: 'Firebase Config — fairbaseweb.json\'dan .env\'e',
-    summary: 'Parent dizindeki fairbaseweb.json ve env/.env dosyalarından Firebase config değerleri repo_2/.env\'ye taşındı. Firebase sync artık çalışır durumda.',
+    title: "Firebase Config — fairbaseweb.json'dan .env'e",
+    summary:
+      "Parent dizindeki fairbaseweb.json ve env/.env dosyalarından Firebase config değerleri repo_2/.env'ye taşındı. Firebase sync artık çalışır durumda.",
     changes: [
-      { type: 'iyilestirme', text: 'Firebase API key, authDomain, projectId, storageBucket, messagingSenderId, appId .env\'ye eklendi.' },
-      { type: 'iyilestirme', text: 'connConfig.test.ts güncellendi — Firebase env var\'ları dolu olduğunda enabled=true bekler.' },
+      {
+        type: 'iyilestirme',
+        text: "Firebase API key, authDomain, projectId, storageBucket, messagingSenderId, appId .env'ye eklendi.",
+      },
+      {
+        type: 'iyilestirme',
+        text: "connConfig.test.ts güncellendi — Firebase env var'ları dolu olduğunda enabled=true bekler.",
+      },
     ],
   },
   {
     version: '3.23.1',
     date: '13 Haziran 2026',
     title: 'AIAsistan Modülerizasyonu ve Lint/Type Fix',
-    summary: 'AIAsistan.tsx monolitik yapısı ChatPanel, MessageList, ActionHistory ve ana index.tsx olarak 4 modüle ayrıldı. `any` tipleri temizlendi, unused `hasDuplicate` kaldırıldı. Import path\'lerde `../` relative kullanımı `@/` alias ile değiştirildi. AgentBus + processIntent geçişi tamamlandı, eski orchestrator.ts kaldırıldı.',
+    summary:
+      "AIAsistan.tsx monolitik yapısı ChatPanel, MessageList, ActionHistory ve ana index.tsx olarak 4 modüle ayrıldı. `any` tipleri temizlendi, unused `hasDuplicate` kaldırıldı. Import path'lerde `../` relative kullanımı `@/` alias ile değiştirildi. AgentBus + processIntent geçişi tamamlandı, eski orchestrator.ts kaldırıldı.",
     changes: [
-      { type: 'iyilestirme', text: 'AIAsistan.tsx → 4 modüle ayrıldı: ChatPanel, MessageList, ActionHistory, index.tsx (6.2).' },
+      {
+        type: 'iyilestirme',
+        text: 'AIAsistan.tsx → 4 modüle ayrıldı: ChatPanel, MessageList, ActionHistory, index.tsx (6.2).',
+      },
       { type: 'duzeltme', text: 'tryApiInternal `any` tipleri temizlendi (index.tsx:317,320).' },
       { type: 'duzeltme', text: 'aiActions.ts: unused `hasDuplicate` fonksiyonu kaldırıldı.' },
       { type: 'duzeltme', text: 'Import path fix: AIAsistan alt modüllerinde `../` → `@/` alias kullanıldı.' },
       { type: 'duzeltme', text: 'ChatPanel/MessageList/ActionHistory: gereksiz `import React` kaldırıldı.' },
       { type: 'kaldirildi', text: 'src/agents/orchestrator.ts ve orchestrator.test.ts kaldırıldı (C1).' },
-      { type: 'iyilestirme', text: '`dispatchAgentFlow` kaldırıldı, `processIntent` + `applyIntentResult` kullanılıyor.' },
-      { type: 'iyilestirme', text: 'Yanlış dosya path\'i düzeltildi: AIAHelpers importları `./ai/AIAHelpers` → `@/pages/ai/AIAHelpers`.' },
+      {
+        type: 'iyilestirme',
+        text: '`dispatchAgentFlow` kaldırıldı, `processIntent` + `applyIntentResult` kullanılıyor.',
+      },
+      {
+        type: 'iyilestirme',
+        text: "Yanlış dosya path'i düzeltildi: AIAHelpers importları `./ai/AIAHelpers` → `@/pages/ai/AIAHelpers`.",
+      },
     ],
   },
   {
     version: '3.23.0',
     date: '13 Haziran 2026',
     title: 'Veri KatmanÄ± ModÃ¼lerizasyonu â€” useDB & useDBActions Refactor',
-    summary: 'useDB monolitik yapÄ±sÄ± parçalanarak useDBQueries, useDBActions, useDBBackup ve useDBSync olarak modÃ¼ler hale getirildi. Veri katmanÄ± daha bakÄ±mlar ve test edilebilir bir yapÄ±ya kavuÅŸtu.',
+    summary:
+      'useDB monolitik yapÄ±sÄ± parçalanarak useDBQueries, useDBActions, useDBBackup ve useDBSync olarak modÃ¼ler hale getirildi. Veri katmanÄ± daha bakÄ±mlar ve test edilebilir bir yapÄ±ya kavuÅŸtu.',
     changes: [
-      { type: 'iyilestirme', text: 'useDB hook\'u modÃ¼ler hale getirildi: useDBQueries, useDBActions, useDBBackup ve useDBSync olarak ayrÄ±lÄ± dÃ¼şÃ¼nÃ¼ldi.' },
-      { type: 'iyilestirme', text: 'useDBActions: undo, save, saveGuarded, logActivity ve saveWithLog fonksiyonlarÄ± tek bir hook altÄ±nda toplandÄ±.' },
-      { type: 'iyilestirme', text: 'useDBSync: Firebase senkronizasyonu ve IndexedDB snapshot mekanizmasÄ± ayrÄ± bir hook olarak dÃ¼zenlendi.' },
-      { type: 'duzeltme', text: 'useDBSync.ts: useEffect cleanup fonksiyonunda syncTimer.current kullanımı dÃ¼zeltildi (ref value warning).' },
+      {
+        type: 'iyilestirme',
+        text: "useDB hook'u modÃ¼ler hale getirildi: useDBQueries, useDBActions, useDBBackup ve useDBSync olarak ayrÄ±lÄ± dÃ¼şÃ¼nÃ¼ldi.",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'useDBActions: undo, save, saveGuarded, logActivity ve saveWithLog fonksiyonlarÄ± tek bir hook altÄ±nda toplandÄ±.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'useDBSync: Firebase senkronizasyonu ve IndexedDB snapshot mekanizmasÄ± ayrÄ± bir hook olarak dÃ¼zenlendi.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'useDBSync.ts: useEffect cleanup fonksiyonunda syncTimer.current kullanımı dÃ¼zeltildi (ref value warning).',
+      },
     ],
   },
   {
     version: '3.22.0',
     date: '12 Haziran 2026',
     title: 'CSS Module Migration — Dashboard, Fatura, Reports',
-    summary: 'Dashboard, Fatura ve Reports modüllerindeki tüm statik inline CSS stilleri .module.css dosyalarına taşındı. Toplam ~162 inline style CSS module class\'larına dönüştürüldü, 69 dinamik style (prop/state bağımlı) olduğu gibi bırakıldı. 16 yeni CSS module dosyası oluşturuldu.',
+    summary:
+      "Dashboard, Fatura ve Reports modüllerindeki tüm statik inline CSS stilleri .module.css dosyalarına taşındı. Toplam ~162 inline style CSS module class'larına dönüştürüldü, 69 dinamik style (prop/state bağımlı) olduğu gibi bırakıldı. 16 yeni CSS module dosyası oluşturuldu.",
     changes: [
-      { type: 'iyilestirme', text: 'Dashboard: StatCard, Oneriler, WidgetCard modüllerindeki 7 statik inline style CSS module\'a taşındı (Oneriler.module.css, WidgetCard.module.css).' },
-      { type: 'iyilestirme', text: 'Fatura: 6 component\'de ~75 statik inline style CSS module\'a taşındı (Fatura.module.css, FaturaPreview.module.css, FaturaForm.module.css, FaturaTable.module.css, FaturaToolbar.module.css, FaturaStats.module.css).' },
-      { type: 'iyilestirme', text: 'Reports: 8 component\'de ~80 statik inline style CSS module\'a taşındı (Reports.module.css, ReportsGenerator.module.css, ReportsUrun.module.css, ReportsCari.module.css, ReportsOzet.module.css, ReportsSatis.module.css, ReportsCommon.module.css, ReportsKasa.module.css).' },
-      { type: 'iyilestirme', text: 'Toplam 16 yeni .module.css dosyası oluşturuldu, ~162 inline style migrate edildi.' },
+      {
+        type: 'iyilestirme',
+        text: "Dashboard: StatCard, Oneriler, WidgetCard modüllerindeki 7 statik inline style CSS module'a taşındı (Oneriler.module.css, WidgetCard.module.css).",
+      },
+      {
+        type: 'iyilestirme',
+        text: "Fatura: 6 component'de ~75 statik inline style CSS module'a taşındı (Fatura.module.css, FaturaPreview.module.css, FaturaForm.module.css, FaturaTable.module.css, FaturaToolbar.module.css, FaturaStats.module.css).",
+      },
+      {
+        type: 'iyilestirme',
+        text: "Reports: 8 component'de ~80 statik inline style CSS module'a taşındı (Reports.module.css, ReportsGenerator.module.css, ReportsUrun.module.css, ReportsCari.module.css, ReportsOzet.module.css, ReportsSatis.module.css, ReportsCommon.module.css, ReportsKasa.module.css).",
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Toplam 16 yeni .module.css dosyası oluşturuldu, ~162 inline style migrate edildi.',
+      },
     ],
   },
   {
     version: '3.21.5',
     date: '12 Haziran 2026',
     title: 'Raporlar Modülerizasyonu ve Veri Bütünlüğü Fixleri',
-    summary: 'Reports.tsx sayfası performans ve bakımlanabilirlik için 6 alt modüle ayrıldı. Firebase senkronizasyonundaki race condition (G4) ve AI satışlarında ödeme yönlendirme hatası (G5) giderildi.',
+    summary:
+      'Reports.tsx sayfası performans ve bakımlanabilirlik için 6 alt modüle ayrıldı. Firebase senkronizasyonundaki race condition (G4) ve AI satışlarında ödeme yönlendirme hatası (G5) giderildi.',
     changes: [
-      { type: 'iyilestirme', text: 'Reports.tsx monolitik yapıdan çıkarılıp ReportsOzet, ReportsSatis, ReportsUrun, ReportsCari, ReportsKasa ve ReportsGenerator modüllerine bölündü.' },
-      { type: 'duzeltme', text: 'src/hooks/db/dbHelpers.ts içinde scheduleFirebaseSave ile Firebase kayıtları ardışık hale getirildi (G4).' },
+      {
+        type: 'iyilestirme',
+        text: 'Reports.tsx monolitik yapıdan çıkarılıp ReportsOzet, ReportsSatis, ReportsUrun, ReportsCari, ReportsKasa ve ReportsGenerator modüllerine bölündü.',
+      },
+      {
+        type: 'duzeltme',
+        text: 'src/hooks/db/dbHelpers.ts içinde scheduleFirebaseSave ile Firebase kayıtları ardışık hale getirildi (G4).',
+      },
       { type: 'duzeltme', text: 'src/lib/aiActions.ts içinde satış ödemeleri nakit/banka ayrımı düzeltildi (G5).' },
     ],
   },
@@ -646,23 +1261,46 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.21.4',
     date: '11 Haziran 2026',
     title: 'Quantum Link Sessiz Hata Düzeltmesi',
-    summary: 'Quantum Link\'te dispatchAgentFlow üzerinden yapılan işlemlerde dönüş değerleri kontrol edilmiyor, hatalar sessizce yutuluyor ve cari tahsilat payload\'u yanlış gönderiliyordu. Agent çağrıları doğrudan getAgent() ile yapılacak şekilde yeniden yazıldı, dönüş değerleri kontrol ediliyor ve hatalar kullanıcıya gösteriliyor.',
+    summary:
+      "Quantum Link'te dispatchAgentFlow üzerinden yapılan işlemlerde dönüş değerleri kontrol edilmiyor, hatalar sessizce yutuluyor ve cari tahsilat payload'u yanlış gönderiliyordu. Agent çağrıları doğrudan getAgent() ile yapılacak şekilde yeniden yazıldı, dönüş değerleri kontrol ediliyor ve hatalar kullanıcıya gösteriliyor.",
     changes: [
-      { type: 'duzeltme', text: 'Quantum Link: dispatchAgentFlow (deprecated) yerine doğrudan getAgent().islemYap() kullanıldı — agent yanıtları kontrol ediliyor.' },
-      { type: 'duzeltme', text: 'Quantum Link: cari tahsilat işleminde cariName yerine cariId gönderiliyordu — db\'den isimle eşleşen cari bulunarak düzeltildi.' },
-      { type: 'duzeltme', text: 'Quantum Link: satış komutu items dizisi olmadan gönderiliyor, sessizce başarısız oluyordu — kasa_gelir olarak kaydedilecek şekilde değiştirildi.' },
-      { type: 'iyilestirme', text: 'Quantum Link: tüm işlem sonuçları kullanıcıya net başarı/başarısızlık mesajı olarak dönülüyor.' },
+      {
+        type: 'duzeltme',
+        text: 'Quantum Link: dispatchAgentFlow (deprecated) yerine doğrudan getAgent().islemYap() kullanıldı — agent yanıtları kontrol ediliyor.',
+      },
+      {
+        type: 'duzeltme',
+        text: "Quantum Link: cari tahsilat işleminde cariName yerine cariId gönderiliyordu — db'den isimle eşleşen cari bulunarak düzeltildi.",
+      },
+      {
+        type: 'duzeltme',
+        text: 'Quantum Link: satış komutu items dizisi olmadan gönderiliyor, sessizce başarısız oluyordu — kasa_gelir olarak kaydedilecek şekilde değiştirildi.',
+      },
+      {
+        type: 'iyilestirme',
+        text: 'Quantum Link: tüm işlem sonuçları kullanıcıya net başarı/başarısızlık mesajı olarak dönülüyor.',
+      },
     ],
   },
   {
     version: '3.21.3',
     date: '11 Haziran 2026',
     title: 'Baseline Onarımı ve Veri Katmanı İyileştirmeleri',
-    summary: 'Projenin baseline (lint, typecheck, test, build) hataları giderildi. useDB hook\'una saveGuarded fonksiyonu eklenerek kritik işlemler için uyarı mekanizması bypass edebilme imkanı sağlandı.',
+    summary:
+      "Projenin baseline (lint, typecheck, test, build) hataları giderildi. useDB hook'una saveGuarded fonksiyonu eklenerek kritik işlemler için uyarı mekanizması bypass edebilme imkanı sağlandı.",
     changes: [
-      { type: 'duzeltme', text: 'Sistem genelindeki lint ve TypeScript hataları giderildi (Voice API tipleri, duplicate exportlar, unused vars).' },
-      { type: 'yeni', text: 'useDB hook\'una saveGuarded eklendi — warn seviyesindeki kural ihlallerini atlayarak işlem yapılması sağlandı.' },
-      { type: 'duzeltme', text: 'core.test.ts mock güncellendi — getUserSession export\'u eklendi, işlenmemiş hatalar giderildi.' },
+      {
+        type: 'duzeltme',
+        text: 'Sistem genelindeki lint ve TypeScript hataları giderildi (Voice API tipleri, duplicate exportlar, unused vars).',
+      },
+      {
+        type: 'yeni',
+        text: "useDB hook'una saveGuarded eklendi — warn seviyesindeki kural ihlallerini atlayarak işlem yapılması sağlandı.",
+      },
+      {
+        type: 'duzeltme',
+        text: "core.test.ts mock güncellendi — getUserSession export'u eklendi, işlenmemiş hatalar giderildi.",
+      },
     ],
   },
   {
@@ -707,8 +1345,7 @@ export const CHANGELOG: VersionEntry[] = [
     version: '3.21.0',
     date: '11 Haziran 2026',
     title: 'CSS Module Migration, Fatura/AIA Helpers Refactor, Storybook & Audit Altyapısı',
-    summary:
-      `Kapsamlı refactor ve altyapı oturumu: Inline CSS'ler CSS Module'lere taşındı (Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers — 8 sayfa). FaturaHelpers ve AIAHelpers'deki utility fonksiyonlar ayrı utils dosyalarına çıkarıldı. Storybook kurulumu yapıldı (.storybook/main.ts, preview.ts ve örnek stories). parspel-audit skill v2.0.0'a güncellendi (deterministik execution, strict tool pipeline, loop-safe). Vite config Storybook/Playwright için genişletildi. Seed data (src/lib/seedData.ts) eklendi. Audit helper script'leri yazıldı (hash-audit, lighthouse-mcp, storybook-mcp). Git branch'leri temizlendi: dev fast-forward ile güncellendi, feat/my-feature ve feat/session-3 silindi.`,
+    summary: `Kapsamlı refactor ve altyapı oturumu: Inline CSS'ler CSS Module'lere taşındı (Bank, Butce, Monitor, Notlar, Products, Sales, Stock, Suppliers — 8 sayfa). FaturaHelpers ve AIAHelpers'deki utility fonksiyonlar ayrı utils dosyalarına çıkarıldı. Storybook kurulumu yapıldı (.storybook/main.ts, preview.ts ve örnek stories). parspel-audit skill v2.0.0'a güncellendi (deterministik execution, strict tool pipeline, loop-safe). Vite config Storybook/Playwright için genişletildi. Seed data (src/lib/seedData.ts) eklendi. Audit helper script'leri yazıldı (hash-audit, lighthouse-mcp, storybook-mcp). Git branch'leri temizlendi: dev fast-forward ile güncellendi, feat/my-feature ve feat/session-3 silindi.`,
     changes: [
       {
         type: 'iyilestirme',
@@ -736,7 +1373,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'yeni',
-        text: 'Audit helper script\'leri: scripts/hash-audit.mjs, scripts/lighthouse-mcp.mjs, scripts/storybook-mcp.mjs',
+        text: "Audit helper script'leri: scripts/hash-audit.mjs, scripts/lighthouse-mcp.mjs, scripts/storybook-mcp.mjs",
       },
       {
         type: 'iyilestirme',
@@ -757,11 +1394,11 @@ export const CHANGELOG: VersionEntry[] = [
     date: '11 Haziran 2026',
     title: 'GitHub Pages deploy.yml Kaldırıldı',
     summary:
-      'Kullanılmayan GitHub Pages deployment workflow\'u silindi. deploy.yml sadece main branch\'ini dinliyordu ancak proje sadece dev kullanıyor — hiç tetiklenmemişti. Deployment işlemleri zaten Vercel tarafından yapılıyor. GitHub Pages ortamı repo Settings > Environments > github-pages üzerinden manuel kaldırılmalı.',
+      "Kullanılmayan GitHub Pages deployment workflow'u silindi. deploy.yml sadece main branch'ini dinliyordu ancak proje sadece dev kullanıyor — hiç tetiklenmemişti. Deployment işlemleri zaten Vercel tarafından yapılıyor. GitHub Pages ortamı repo Settings > Environments > github-pages üzerinden manuel kaldırılmalı.",
     changes: [
       {
         type: 'kaldirildi',
-        text: '.github/workflows/deploy.yml: GitHub Pages deploy workflow\'u silindi — main branch\'ini dinliyordu, hiç tetiklenmedi, Vercel tüm deployment\'ları yapıyor',
+        text: ".github/workflows/deploy.yml: GitHub Pages deploy workflow'u silindi — main branch'ini dinliyordu, hiç tetiklenmedi, Vercel tüm deployment'ları yapıyor",
       },
     ],
   },
@@ -770,7 +1407,7 @@ export const CHANGELOG: VersionEntry[] = [
     date: '11 Haziran 2026',
     title: 'AGENTS.md Yeniden Yazımı — 26 Bölümlü Sıfır-Tolerans Kuralları',
     summary:
-      'AGENTS.md tamamen yeniden yazıldı: İngilizce→Türkçe, 243 satırdan 500+ satıra, 26 bölüm. Sıfır-Tolerans kuralları (§0), Değişiklik Protokolü (§1), Rollback Protokolü (§16), Error Handling Pattern (§12), Import Path Kuralları (§13), Güvenlik Kuralları (§14), Sub-AGENTS.md Okuma Zorunluluğu (§15), Performance Budget (§17), Tek Branch Deploy Yapısı (§18), Test Coverage Eşiği (§19), OpenCode Agent Seçimi (§20), Fallow Audit Kuralları (§21), MCP Kullanımı (§22), MEMORY.md Kullanımı (§23), Pre-commit Hook Detayı (§24), GitHub Actions CI/CD (§25) eklendi. Açık Görevler (§9) güncellendi — MASTER_PLAN ve WEEKLY_PLAN\'dan kalan işler listelendi.',
+      "AGENTS.md tamamen yeniden yazıldı: İngilizce→Türkçe, 243 satırdan 500+ satıra, 26 bölüm. Sıfır-Tolerans kuralları (§0), Değişiklik Protokolü (§1), Rollback Protokolü (§16), Error Handling Pattern (§12), Import Path Kuralları (§13), Güvenlik Kuralları (§14), Sub-AGENTS.md Okuma Zorunluluğu (§15), Performance Budget (§17), Tek Branch Deploy Yapısı (§18), Test Coverage Eşiği (§19), OpenCode Agent Seçimi (§20), Fallow Audit Kuralları (§21), MCP Kullanımı (§22), MEMORY.md Kullanımı (§23), Pre-commit Hook Detayı (§24), GitHub Actions CI/CD (§25) eklendi. Açık Görevler (§9) güncellendi — MASTER_PLAN ve WEEKLY_PLAN'dan kalan işler listelendi.",
     changes: [
       {
         type: 'yeni',
@@ -798,7 +1435,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'yeni',
-        text: '§15 Sub-AGENTS.md Okuma Zorunluluğu: Her klasörün kendi AGENTS.md\'ini okuma protokolü',
+        text: "§15 Sub-AGENTS.md Okuma Zorunluluğu: Her klasörün kendi AGENTS.md'ini okuma protokolü",
       },
       {
         type: 'yeni',
@@ -850,7 +1487,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'iyilestirme',
-        text: 'Tüm dosya İngilizce\'den Türkçe\'ye çevrildi, bölüm numaralandırması eklendi, daha yapısal ve deterministik hale getirildi',
+        text: "Tüm dosya İngilizce'den Türkçe'ye çevrildi, bölüm numaralandırması eklendi, daha yapısal ve deterministik hale getirildi",
       },
     ],
   },
@@ -859,11 +1496,11 @@ export const CHANGELOG: VersionEntry[] = [
     date: '10 Haziran 2026',
     title: 'MCP Fix, Storybook Kurulumu, Audit v2, Memory/Cache Optimizasyonu',
     summary:
-      'Tüm MCP type\'ları düzeltildi (local→stdio, remote→sse). 4 LM Studio modeline tool_call: true eklendi. Storybook altyapısı kuruldu (.storybook/, MCP wrapper, ilk story). parspel-audit skill v2.0.0: deterministik execution, strict tool pipeline, stop condition, loop-safe. Memory/Cache optimizasyon katmanı (audit-state.json, hash tracking, incremental audit).',
+      "Tüm MCP type'ları düzeltildi (local→stdio, remote→sse). 4 LM Studio modeline tool_call: true eklendi. Storybook altyapısı kuruldu (.storybook/, MCP wrapper, ilk story). parspel-audit skill v2.0.0: deterministik execution, strict tool pipeline, stop condition, loop-safe. Memory/Cache optimizasyon katmanı (audit-state.json, hash tracking, incremental audit).",
     changes: [
       {
         type: 'duzeltme',
-        text: 'opencode.json MCP type fix: tüm local→stdio, remote→sse düzeltildi — MCP\'ler artık doğru protokolle bağlanıyor',
+        text: "opencode.json MCP type fix: tüm local→stdio, remote→sse düzeltildi — MCP'ler artık doğru protokolle bağlanıyor",
       },
       {
         type: 'duzeltme',
@@ -871,7 +1508,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'yeni',
-        text: 'GITHUB_TOKEN env var tanımlandı — GitHub MCP\'si aktif',
+        text: "GITHUB_TOKEN env var tanımlandı — GitHub MCP'si aktif",
       },
       {
         type: 'yeni',
@@ -883,11 +1520,11 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'yeni',
-        text: 'scripts/storybook-mcp.mjs: Storybook MCP wrapper (JSON-RPC 2.0) — storybook_list_components, storybook_check, storybook_get_state, storybook_start_dev tool\'ları',
+        text: "scripts/storybook-mcp.mjs: Storybook MCP wrapper (JSON-RPC 2.0) — storybook_list_components, storybook_check, storybook_get_state, storybook_start_dev tool'ları",
       },
       {
         type: 'yeni',
-        text: 'scripts/lighthouse-mcp.mjs: Lighthouse MCP server (JSON-RPC 2.0) — lighthouse_audit, lighthouse_get_state tool\'ları',
+        text: "scripts/lighthouse-mcp.mjs: Lighthouse MCP server (JSON-RPC 2.0) — lighthouse_audit, lighthouse_get_state tool'ları",
       },
       {
         type: 'yeni',
@@ -907,7 +1544,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'duzeltme',
-        text: 'CSP meta tag güncellendi: connect-src\'ye ws://127.0.0.1:* ve https://*.react-grab.com eklendi — HMR WebSocket ve react-scan bağlantıları düzeltildi',
+        text: "CSP meta tag güncellendi: connect-src'ye ws://127.0.0.1:* ve https://*.react-grab.com eklendi — HMR WebSocket ve react-scan bağlantıları düzeltildi",
       },
       {
         type: 'duzeltme',
@@ -923,7 +1560,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'duzeltme',
-        text: 'P0: localStorage doğrudan erişimler save() pipeline\'ına taşındı (SettingsAgentPanel, SettingsBackup, SettingsData) — RuleEngine/AuditEngine bypass engellendi',
+        text: "P0: localStorage doğrudan erişimler save() pipeline'ına taşındı (SettingsAgentPanel, SettingsBackup, SettingsData) — RuleEngine/AuditEngine bypass engellendi",
       },
       {
         type: 'iyilestirme',
@@ -939,7 +1576,7 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'iyilestirme',
-        text: 'P2: CSP production mod conditional yapıldı — vite.config.ts\'e cspPlugin eklendi, production build\'de unsafe-eval ve ws:// kaldırılıyor',
+        text: "P2: CSP production mod conditional yapıldı — vite.config.ts'e cspPlugin eklendi, production build'de unsafe-eval ve ws:// kaldırılıyor",
       },
       {
         type: 'yeni',
@@ -951,11 +1588,11 @@ export const CHANGELOG: VersionEntry[] = [
       },
       {
         type: 'duzeltme',
-        text: 'KRİTİK: index.css\'teki 4926 satır özel CSS (login, dashboard, settings sınıfları) geri yüklendi — 9fb26ac commit\'inde yanlışlıkla silinmişti. CSS kural sayısı 82→855, sayfa artık düz yazı olarak kalmıyor',
+        text: "KRİTİK: index.css'teki 4926 satır özel CSS (login, dashboard, settings sınıfları) geri yüklendi — 9fb26ac commit'inde yanlışlıkla silinmişti. CSS kural sayısı 82→855, sayfa artık düz yazı olarak kalmıyor",
       },
       {
         type: 'duzeltme',
-        text: 'main.tsx CSS import sıralaması düzeltildi: index.css (Tailwind) → design-tokens.css (override) — Tailwind varsayılan teması artık design token\'ları ezmiyor',
+        text: "main.tsx CSS import sıralaması düzeltildi: index.css (Tailwind) → design-tokens.css (override) — Tailwind varsayılan teması artık design token'ları ezmiyor",
       },
     ],
   },

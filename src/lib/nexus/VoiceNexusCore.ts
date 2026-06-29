@@ -1,7 +1,7 @@
 /**
  * SOBA NEXUS AI — VoiceNexusCore (Ultimate Edition)
  * Unified Speech-to-Text (STT) and Text-to-Speech (TTS) Service.
- * 
+ *
  * Features:
  * - Continuous listening loop (speak → listen → process → speak → listen)
  * - Auto-restart after TTS completes (walkie-talkie conversation mode)
@@ -74,7 +74,7 @@ export class VoiceNexusCore {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const opts = { ...this.options, ...overrideOptions };
-    
+
     utterance.lang = opts.lang || 'tr-TR';
     utterance.rate = opts.rate || 1.0;
     utterance.pitch = opts.pitch || 1.0;
@@ -82,11 +82,11 @@ export class VoiceNexusCore {
     // Voice Selection: Turkish voices with preference order
     const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      const trVoice = 
-        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Google')) ||
-        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
-        voices.find(v => v.lang === 'tr-TR') ||
-        voices.find(v => v.lang.startsWith('tr'));
+      const trVoice =
+        voices.find((v) => v.lang === 'tr-TR' && v.name.includes('Google')) ||
+        voices.find((v) => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
+        voices.find((v) => v.lang === 'tr-TR') ||
+        voices.find((v) => v.lang.startsWith('tr'));
       if (trVoice) {
         utterance.voice = trVoice;
       }
@@ -103,7 +103,7 @@ export class VoiceNexusCore {
           window.speechSynthesis.onvoiceschanged = null;
           resolve();
         };
-        window.speechSynthesis.onvoiceschanged = handler as ((this: SpeechSynthesis, ev: Event) => void);
+        window.speechSynthesis.onvoiceschanged = handler as (this: SpeechSynthesis, ev: Event) => void;
         setTimeout(() => {
           window.speechSynthesis.onvoiceschanged = null;
           resolve();
@@ -129,7 +129,7 @@ export class VoiceNexusCore {
   public async listen(
     onResult: (text: string) => void,
     onError: (error: string) => void,
-    onEnd: () => void
+    onEnd: () => void,
   ): Promise<void> {
     if (!this.recognition) {
       onError('Ses tanıma desteklenmiyor');
@@ -200,12 +200,16 @@ export class VoiceNexusCore {
   /**
    * Speak and then automatically restart listening (walkie-talkie flow)
    */
-  public async speakAndListen(text: string, onResult: (text: string) => void, onError: (error: string) => void): Promise<void> {
+  public async speakAndListen(
+    text: string,
+    onResult: (text: string) => void,
+    onError: (error: string) => void,
+  ): Promise<void> {
     await this.speak(text);
-    
+
     if (this.isConversationMode) {
       // Small delay before listening again (avoids echo/feedback)
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       this.listen(onResult, onError, () => {});
     }
   }
@@ -215,15 +219,15 @@ export class VoiceNexusCore {
    */
   private async restartListen(): Promise<void> {
     if (!this.isConversationMode || !this.currentOnResult) return;
-    
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
     if (this.isListening) this.stopListening();
-    
+
     this.listen(
       this.currentOnResult,
       this.currentOnError || ((err: string) => logger.warn('voiceCore', `STT restart error: ${err}`)),
-      () => {}
+      () => {},
     );
   }
 
@@ -233,7 +237,11 @@ export class VoiceNexusCore {
     this.currentOnResult = null;
     this.currentOnError = null;
     if (this.recognition) {
-      try { this.recognition.stop(); } catch { /* ignore */ }
+      try {
+        this.recognition.stop();
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -247,20 +255,20 @@ export class VoiceNexusCore {
   private prepareTextForSpeech(text: string): string {
     return text
       .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
-      .replace(/\*(.*?)\*/g, '$1')      // Italic
-      .replace(/#{1,6}\s/g, '')         // Headers
+      .replace(/\*(.*?)\*/g, '$1') // Italic
+      .replace(/#{1,6}\s/g, '') // Headers
       .replace(/`{1,3}[^`]*`{1,3}/g, '') // Code blocks
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links
-      .replace(/[-•]\s/g, '')           // List markers
-      .replace(/₺(\d+)/g, '$1 lira')    // Currency: ₺100 → 100 lira
-      .replace(/(\d+)%/g, 'yüzde $1')   // Percentage: 50% → yüzde 50
-      .replace(/\s+/g, ' ')             // Collapse whitespace
-      .replace(/❌/g, 'hata:')          // Emoji cleanup
-      .replace(/✅/g, 'tamam')          // Emoji cleanup
-      .replace(/🎤/g, '')               
+      .replace(/[-•]\s/g, '') // List markers
+      .replace(/₺(\d+)/g, '$1 lira') // Currency: ₺100 → 100 lira
+      .replace(/(\d+)%/g, 'yüzde $1') // Percentage: 50% → yüzde 50
+      .replace(/\s+/g, ' ') // Collapse whitespace
+      .replace(/❌/g, 'hata:') // Emoji cleanup
+      .replace(/✅/g, 'tamam') // Emoji cleanup
+      .replace(/🎤/g, '')
       .replace(/🤖/g, '')
       .replace(/⏹️/g, '')
-      .slice(0, 1000);                  // Safety limit
+      .slice(0, 1000); // Safety limit
   }
 }
 

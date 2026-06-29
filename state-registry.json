@@ -1,22 +1,22 @@
 {
-  "version": "3.43.4",
-  "generatedAt": "2026-06-23T11:41:43.653Z",
+  "version": "3.43.2",
+  "generatedAt": "2026-06-29T16:11:17.773Z",
   "git": {
     "branch": "dev",
-    "commit": "0795cb9",
-    "commitFull": "0795cb9e47bd70dad2102cebbb91c028faa2ab71",
-    "commitMessage": "fix: v3.43.3 — Quality Gate fix (connConfig tests)",
-    "commitDate": "2026-06-23 12:09:49 +0300"
+    "commit": "c11c28a",
+    "commitFull": "c11c28afe4b668c3d63c1b3b02bb10692ffe9a41",
+    "commitMessage": "fix: v3.43.4 — Moratoryum Gün 1-2 (ölü kod + sessiz hatalar)",
+    "commitDate": "2026-06-23 14:44:18 +0300"
   },
   "ci": {
     "status": "pass",
-    "checkedAt": "2026-06-23T11:41:43.655Z"
+    "checkedAt": "2026-06-29T16:11:17.775Z"
   },
   "codebase": {
-    "tsFiles": 206,
+    "tsFiles": 209,
     "tsxFiles": 172,
     "cssFiles": 30,
-    "totalLOC": 68331,
+    "totalLOC": 73144,
     "dependencies": 40,
     "devDependencies": 41
   },
@@ -50,124 +50,7 @@
       "file": "src/agents/StokAgent.ts"
     }
   ],
-  "pages": [
-    {
-      "id": "dashboard",
-      "label": "Özet"
-    },
-    {
-      "id": "products",
-      "label": "Ürünler"
-    },
-    {
-      "id": "sales",
-      "label": "Satış"
-    },
-    {
-      "id": "fatura",
-      "label": "Fatura"
-    },
-    {
-      "id": "suppliers",
-      "label": "Tedarikçi"
-    },
-    {
-      "id": "pelet",
-      "label": "Pelet"
-    },
-    {
-      "id": "boruTed",
-      "label": "Boru Tedarik"
-    },
-    {
-      "id": "ortakEmanet",
-      "label": "Ortak Emanet"
-    },
-    {
-      "id": "cari",
-      "label": "Cari"
-    },
-    {
-      "id": "receivables",
-      "label": "Alacak Takip"
-    },
-    {
-      "id": "kasa",
-      "label": "Kasa"
-    },
-    {
-      "id": "butce",
-      "label": "Bütçe"
-    },
-    {
-      "id": "bank",
-      "label": "Banka"
-    },
-    {
-      "id": "reports",
-      "label": "Raporlar"
-    },
-    {
-      "id": "cizelge",
-      "label": "Çizelge"
-    },
-    {
-      "id": "stock",
-      "label": "Stok"
-    },
-    {
-      "id": "monitor",
-      "label": "İzleme"
-    },
-    {
-      "id": "kontrol",
-      "label": "Kontrol"
-    },
-    {
-      "id": "anomali",
-      "label": "Anomali"
-    },
-    {
-      "id": "entegrasyon",
-      "label": "Entegrasyon"
-    },
-    {
-      "id": "excelmerge",
-      "label": "Veri Birleştir"
-    },
-    {
-      "id": "notlar",
-      "label": "Not Defteri"
-    },
-    {
-      "id": "partners",
-      "label": "Ortaklar"
-    },
-    {
-      "id": "settings",
-      "label": "Ayarlar"
-    },
-    {
-      "id": "nexusAdmin",
-      "label": "Nexus Admin"
-    },
-    {
-      "id": "bughunter",
-      "label": "Bug Hunter"
-    },
-    {
-      "id": "excelimport",
-      "label": "Excel İçe Aktar"
-    },
-    {
-      "id": "aiEylemLog",
-      "label": "AI Eylem Log"
-    },
-    {
-      "id": "specdashboard",
-      "label": "Spec"
-    }
-  ],
+  "pages": [],
   "protectedFiles": [
     "src/lib/ruleEngine.ts",
     "src/hooks/db/core.ts",

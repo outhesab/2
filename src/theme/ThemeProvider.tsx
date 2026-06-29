@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { loadUIPrefs, saveUIPrefs, applyUIPrefs, type UIPrefs } from '@/hooks/useUIPrefs';
 import { getPremiumTheme, isPremiumTheme } from './themes';
 import type { PremiumCSSVars } from './types';
@@ -52,42 +44,48 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyUIPrefs(prefs);
   }, []);
 
-  const updateUIPrefs = useCallback((patch: Partial<UIPrefs>) => {
-    setUIPrefs((prev) => {
-      const next = { ...prev, ...patch };
-      saveUIPrefs(next);
-      applyTheme(next);
-      return next;
-    });
-  }, [applyTheme]);
+  const updateUIPrefs = useCallback(
+    (patch: Partial<UIPrefs>) => {
+      setUIPrefs((prev) => {
+        const next = { ...prev, ...patch };
+        saveUIPrefs(next);
+        applyTheme(next);
+        return next;
+      });
+    },
+    [applyTheme],
+  );
 
-  const setThemeId = useCallback((id: string) => {
-    if (isPremiumTheme(id)) {
-      const premium = getPremiumTheme(id);
-      if (premium) {
+  const setThemeId = useCallback(
+    (id: string) => {
+      if (isPremiumTheme(id)) {
+        const premium = getPremiumTheme(id);
+        if (premium) {
+          updateUIPrefs({
+            themeId: id,
+            accent: premium.accent,
+            bgBase: premium.bg as `#${string}`,
+            lightMode: premium.type === 'light',
+          });
+        }
+        return;
+      }
+
+      const builtin = BUILTIN_THEME_MAP[id as keyof typeof BUILTIN_THEME_MAP];
+      if (builtin) {
         updateUIPrefs({
           themeId: id,
-          accent: premium.accent,
-          bgBase: premium.bg as `#${string}`,
-          lightMode: premium.type === 'light',
+          accent: builtin.accent,
+          bgBase: builtin.bg,
+          lightMode: builtin.light,
         });
+        return;
       }
-      return;
-    }
 
-    const builtin = BUILTIN_THEME_MAP[id as keyof typeof BUILTIN_THEME_MAP];
-    if (builtin) {
-      updateUIPrefs({
-        themeId: id,
-        accent: builtin.accent,
-        bgBase: builtin.bg,
-        lightMode: builtin.light,
-      });
-      return;
-    }
-
-    updateUIPrefs({ themeId: id });
-  }, [updateUIPrefs]);
+      updateUIPrefs({ themeId: id });
+    },
+    [updateUIPrefs],
+  );
 
   useEffect(() => {
     applyTheme(uiPrefs);
@@ -106,20 +104,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const isPremium = isPremiumRef.current;
   const premiumTheme = isPremium ? getPremiumTheme(uiPrefs.themeId) : null;
 
-  const value = useMemo<ThemeContextValue>(() => ({
-    currentThemeId: uiPrefs.themeId || 'corporate',
-    setThemeId,
-    uiPrefs,
-    updateUIPrefs,
-    isPremium,
-    premiumCSSVars: premiumTheme?.cssVars ?? null,
-  }), [uiPrefs, setThemeId, updateUIPrefs, isPremium, premiumTheme]);
-
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      currentThemeId: uiPrefs.themeId || 'corporate',
+      setThemeId,
+      uiPrefs,
+      updateUIPrefs,
+      isPremium,
+      premiumCSSVars: premiumTheme?.cssVars ?? null,
+    }),
+    [uiPrefs, setThemeId, updateUIPrefs, isPremium, premiumTheme],
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 const BUILTIN_THEME_MAP = {

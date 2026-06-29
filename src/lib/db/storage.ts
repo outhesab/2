@@ -138,7 +138,9 @@ if (typeof window !== 'undefined') {
     if (_pendingWrite) {
       try {
         localStorage.setItem(_pendingWrite.key, JSON.stringify(_pendingWrite.versioned));
-      } catch { /* ignore — sayfa kapanıyor */ }
+      } catch {
+        /* ignore — sayfa kapanıyor */
+      }
     }
   });
 }
@@ -162,13 +164,13 @@ export function saveToStorage(db: DB, forceSync = false): boolean {
       toSave = _saveQueue.shift()!;
     }
     const versioned = { ...toSave, _version: (toSave._version || 0) + 1 };
-    
+
     if (forceSync) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(versioned));
     } else {
       _scheduleFlush(STORAGE_KEY, versioned);
     }
-    
+
     toSave._version = versioned._version;
     t.end({ version: versioned._version });
     return true;

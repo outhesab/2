@@ -8,16 +8,24 @@ import { getStorageUsage, safeReadJSON, safeWriteJSON, safeRemove, STORAGE_LIMIT
 const store: Record<string, string> = {};
 const mockStorage: Storage = {
   getItem: (key: string) => store[key] ?? null,
-  setItem: (key: string, value: string) => { store[key] = String(value); },
-  removeItem: (key: string) => { delete store[key]; },
-  clear: () => { Object.keys(store).forEach(k => delete store[k]); },
-  get length() { return Object.keys(store).length; },
+  setItem: (key: string, value: string) => {
+    store[key] = String(value);
+  },
+  removeItem: (key: string) => {
+    delete store[key];
+  },
+  clear: () => {
+    Object.keys(store).forEach((k) => delete store[k]);
+  },
+  get length() {
+    return Object.keys(store).length;
+  },
   key: (index: number) => Object.keys(store)[index] ?? null,
 };
 
 beforeEach(() => {
   Object.assign(store, {});
-  Object.keys(store).forEach(k => delete store[k]);
+  Object.keys(store).forEach((k) => delete store[k]);
   Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable: true, configurable: true });
 });
 

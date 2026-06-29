@@ -1,14 +1,6 @@
 /**
  * DomainEventBus — typed pub/sub for domain events.
  * Powered by mitt, consistent with AgentBus.
- * 
- * Usage:
- *   domainEventBus.emit(event)
- *   domainEventBus.on('sale.completed', handler)
- *   domainEventBus.onAny(handler)
- *   const unsub = domainEventBus.on('stock.low', handler)
- *   unsub() // unsubscribe
- *   domainEventBus.clear()
  */
 import mitt, { type Emitter } from 'mitt';
 import type { DomainEvent } from '@/types';
@@ -71,6 +63,45 @@ class DomainEventBus {
       typed: this.emitter.all.size,
       any: this.anyHandlers.size,
     };
+  }
+
+  /** Shorthand to emit an error event */
+  emitError(message: string, code?: string, context?: Record<string, unknown>): void {
+    this.emit({
+      id: crypto.randomUUID(),
+      type: 'system.error',
+      aggregateId: 'system',
+      aggregateType: 'error',
+      payload: { message, code, ...context },
+      timestamp: new Date().toISOString(),
+      version: 1,
+    });
+  }
+
+  /** Shorthand to emit a warning event */
+  emitWarning(message: string, code?: string, context?: Record<string, unknown>): void {
+    this.emit({
+      id: crypto.randomUUID(),
+      type: 'system.warning',
+      aggregateId: 'system',
+      aggregateType: 'warning',
+      payload: { message, code, ...context },
+      timestamp: new Date().toISOString(),
+      version: 1,
+    });
+  }
+
+  /** Shorthand to emit a success event */
+  emitSuccess(message: string, context?: Record<string, unknown>): void {
+    this.emit({
+      id: crypto.randomUUID(),
+      type: 'system.success',
+      aggregateId: 'system',
+      aggregateType: 'success',
+      payload: { message, ...context },
+      timestamp: new Date().toISOString(),
+      version: 1,
+    });
   }
 }
 

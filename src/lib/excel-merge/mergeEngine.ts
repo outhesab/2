@@ -2,12 +2,19 @@
  * excel-merge/mergeEngine.ts — Birleştirme, fark ve arama motoru
  */
 import type {
-  SheetData, ExcelFile, DiffRow, SheetDiff, SearchResult,
-  MergeOptions, MergeReport, MergeResult, CleanOptions,
-} from "@/lib/excel-merge-types";
-import { cellToString, applyCleanOptions, fuzzyMatch } from "@/lib/excel-merge-utils";
-import { downloadAoASheetsAsXlsx } from "@/lib/safeXlsx";
-import { logger } from "@/lib/logger";
+  SheetData,
+  ExcelFile,
+  DiffRow,
+  SheetDiff,
+  SearchResult,
+  MergeOptions,
+  MergeReport,
+  MergeResult,
+  CleanOptions,
+} from '@/lib/excel-merge-types';
+import { cellToString, applyCleanOptions, fuzzyMatch } from '@/lib/excel-merge-utils';
+import { downloadAoASheetsAsXlsx } from '@/lib/safeXlsx';
+import { logger } from '@/lib/logger';
 
 // ── Birleştirme Stratejileri ─────────────────────────────────────────────────
 
@@ -16,12 +23,12 @@ function mergeRowsByStrategy(
   rowB: Record<string, string | number | boolean | null>,
   strategy: MergeOptions['strategy'],
 ): Record<string, string | number | boolean | null> {
-  if (strategy === "latest") return { ...rowA, ...rowB };
-  if (strategy === "first") return { ...rowB, ...rowA };
-  if (strategy === "union") {
+  if (strategy === 'latest') return { ...rowA, ...rowB };
+  if (strategy === 'first') return { ...rowB, ...rowA };
+  if (strategy === 'union') {
     const merged = { ...rowA };
     Object.entries(rowB).forEach(([k, v]) => {
-      if (merged[k] == null || merged[k] === "") merged[k] = v;
+      if (merged[k] == null || merged[k] === '') merged[k] = v;
     });
     return merged;
   }
@@ -30,9 +37,7 @@ function mergeRowsByStrategy(
 
 // ── Row/Source Builder ───────────────────────────────────────────────────────
 
-export function buildRowsAndSource(
-  allSheets: { sheet: SheetData; file: ExcelFile }[],
-): {
+export function buildRowsAndSource(allSheets: { sheet: SheetData; file: ExcelFile }[]): {
   rows: Record<string, string | number | boolean | null>[];
   sourceInfo: Record<number, { fileId: string; fileName: string; sheetName: string }>;
 } {
@@ -65,11 +70,7 @@ function applyCleanAndReport(
 
 // ── Fark Bulma ───────────────────────────────────────────────────────────────
 
-export function diffSheets(
-  sheetA: SheetData,
-  sheetB: SheetData,
-  keyColumn?: string
-): SheetDiff {
+export function diffSheets(sheetA: SheetData, sheetB: SheetData, keyColumn?: string): SheetDiff {
   const headers = Array.from(new Set([...sheetA.headers, ...sheetB.headers]));
   const result: DiffRow[] = [];
   let addedCount = 0;
@@ -97,10 +98,10 @@ export function diffSheets(
       const rowB = mapB.get(key);
 
       if (rowA && !rowB) {
-        result.push({ rowIndex: rowIndex++, status: "removed", oldValues: rowA });
+        result.push({ rowIndex: rowIndex++, status: 'removed', oldValues: rowA });
         removedCount++;
       } else if (!rowA && rowB) {
-        result.push({ rowIndex: rowIndex++, status: "added", newValues: rowB });
+        result.push({ rowIndex: rowIndex++, status: 'added', newValues: rowB });
         addedCount++;
       } else if (rowA && rowB) {
         const changedCells: string[] = [];
@@ -108,10 +109,10 @@ export function diffSheets(
           if (cellToString(rowA[h]) !== cellToString(rowB[h])) changedCells.push(h);
         });
         if (changedCells.length > 0) {
-          result.push({ rowIndex: rowIndex++, status: "modified", oldValues: rowA, newValues: rowB, changedCells });
+          result.push({ rowIndex: rowIndex++, status: 'modified', oldValues: rowA, newValues: rowB, changedCells });
           modifiedCount++;
         } else {
-          result.push({ rowIndex: rowIndex++, status: "unchanged", oldValues: rowA, newValues: rowB });
+          result.push({ rowIndex: rowIndex++, status: 'unchanged', oldValues: rowA, newValues: rowB });
           unchangedCount++;
         }
       }
@@ -122,10 +123,10 @@ export function diffSheets(
       const rowA = sheetA.rows[i];
       const rowB = sheetB.rows[i];
       if (rowA && !rowB) {
-        result.push({ rowIndex: i, status: "removed", oldValues: rowA });
+        result.push({ rowIndex: i, status: 'removed', oldValues: rowA });
         removedCount++;
       } else if (!rowA && rowB) {
-        result.push({ rowIndex: i, status: "added", newValues: rowB });
+        result.push({ rowIndex: i, status: 'added', newValues: rowB });
         addedCount++;
       } else if (rowA && rowB) {
         const changedCells: string[] = [];
@@ -133,10 +134,10 @@ export function diffSheets(
           if (cellToString(rowA[h]) !== cellToString(rowB[h])) changedCells.push(h);
         });
         if (changedCells.length > 0) {
-          result.push({ rowIndex: i, status: "modified", oldValues: rowA, newValues: rowB, changedCells });
+          result.push({ rowIndex: i, status: 'modified', oldValues: rowA, newValues: rowB, changedCells });
           modifiedCount++;
         } else {
-          result.push({ rowIndex: i, status: "unchanged", oldValues: rowA, newValues: rowB });
+          result.push({ rowIndex: i, status: 'unchanged', oldValues: rowA, newValues: rowB });
           unchangedCount++;
         }
       }
@@ -151,28 +152,39 @@ export function diffSheets(
 export function searchAcrossFiles(
   files: ExcelFile[],
   query: string,
-  matchType: "exact" | "contains" | "regex" | "wildcard",
-  sheetsFilter?: string[]
+  matchType: 'exact' | 'contains' | 'regex' | 'wildcard',
+  sheetsFilter?: string[],
 ): SearchResult[] {
   const results: SearchResult[] = [];
   if (!query.trim()) return results;
 
   let regex: RegExp | null = null;
-  if (matchType === "regex") {
-    try { regex = new RegExp(query, "i"); } catch { logger.warn("excelMerge", "Geçersiz regex deseni"); return results; }
-  } else if (matchType === "wildcard") {
-    const escaped = query.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
-    regex = new RegExp(`^${escaped}$`, "i");
+  if (matchType === 'regex') {
+    try {
+      regex = new RegExp(query, 'i');
+    } catch {
+      logger.warn('excelMerge', 'Geçersiz regex deseni');
+      return results;
+    }
+  } else if (matchType === 'wildcard') {
+    const escaped = query
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\?/g, '.');
+    regex = new RegExp(`^${escaped}$`, 'i');
   }
 
   const matchValue = (val: string | number | boolean | null): boolean => {
     const str = cellToString(val);
     if (!str) return false;
     switch (matchType) {
-      case "exact": return str.toLowerCase() === query.toLowerCase();
-      case "contains": return str.toLowerCase().includes(query.toLowerCase());
-      case "regex":
-      case "wildcard": return regex?.test(str) ?? false;
+      case 'exact':
+        return str.toLowerCase() === query.toLowerCase();
+      case 'contains':
+        return str.toLowerCase().includes(query.toLowerCase());
+      case 'regex':
+      case 'wildcard':
+        return regex?.test(str) ?? false;
     }
   };
 
@@ -182,7 +194,15 @@ export function searchAcrossFiles(
       sheet.rows.forEach((row, rowIndex) => {
         sheet.headers.forEach((col) => {
           if (matchValue(row[col])) {
-            results.push({ fileId: file.id, fileName: file.name, sheetName: sheet.name, rowIndex, colName: col, value: row[col], matchType });
+            results.push({
+              fileId: file.id,
+              fileName: file.name,
+              sheetName: sheet.name,
+              rowIndex,
+              colName: col,
+              value: row[col],
+              matchType,
+            });
           }
         });
       });
@@ -195,15 +215,7 @@ export function searchAcrossFiles(
 // ── Birleştirme ──────────────────────────────────────────────────────────────
 
 export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResult {
-  const {
-    keyColumn,
-    strategy,
-    joinType,
-    sheets,
-    fuzzyMatch: useFuzzy,
-    fuzzyThreshold,
-    cleanOptions,
-  } = options;
+  const { keyColumn, strategy, joinType, sheets, fuzzyMatch: useFuzzy, fuzzyThreshold, cleanOptions } = options;
 
   const report: MergeReport = {
     totalInputRows: 0,
@@ -235,7 +247,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
 
   const allHeaders = Array.from(new Set(allSheets.flatMap(({ sheet }) => sheet.headers)));
 
-  if (joinType === "verticalUnion") {
+  if (joinType === 'verticalUnion') {
     const { rows, sourceInfo } = buildRowsAndSource(allSheets);
     const { rows: cleaned } = applyCleanAndReport(rows, allHeaders, cleanOptions, report);
     return { headers: allHeaders, rows: cleaned, sourceInfo, report };
@@ -314,7 +326,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
       rows.push(merged);
       sourceInfo[idx] = entryA.source;
     } else {
-      if (joinType === "left" || joinType === "fullOuter") {
+      if (joinType === 'left' || joinType === 'fullOuter') {
         report.unmatchedFromA++;
         const idx = rows.length;
         rows.push({ ...entryA.row });
@@ -325,7 +337,7 @@ export function mergeFiles(files: ExcelFile[], options: MergeOptions): MergeResu
     }
   });
 
-  if (joinType === "right" || joinType === "fullOuter") {
+  if (joinType === 'right' || joinType === 'fullOuter') {
     keyMapB.forEach((entryB, bKey) => {
       if (!matchedBKeys.has(bKey)) {
         report.unmatchedFromB++;
@@ -347,24 +359,24 @@ export function exportToExcel(
   headers: string[],
   rows: Record<string, string | number | boolean | null>[],
   fileName: string,
-  sheetName = "Birleştirilmiş Veri"
+  sheetName = 'Birleştirilmiş Veri',
 ): void {
-  const data = [headers, ...rows.map((row) => headers.map((h) => row[h] ?? ""))];
+  const data = [headers, ...rows.map((row) => headers.map((h) => row[h] ?? ''))];
   void downloadAoASheetsAsXlsx([{ name: sheetName, rows: data }], fileName);
 }
 
 export function exportReportToExcel(report: MergeReport, fileName: string): void {
   const rows = [
-    ["Metrik", "Deger"],
-    ["Toplam Girdi Satir", report.totalInputRows],
-    ["Eslesen Satir", report.matchedRows],
-    ["A Dosyasinda Eslesmeyen", report.unmatchedFromA],
-    ["B Dosyasinda Eslesmeyen", report.unmatchedFromB],
-    ["Toplam Cikti Satir", report.totalOutputRows],
-    ["Kaldirilan Tekrar", report.duplicatesRemoved],
-    ["Doldurulan Bos Hucre", report.nullsFilled],
-    ["Bulank Eslestirme Sayisi", report.fuzzyMatchCount],
-    ["Atlanan Satir", report.skippedRows],
+    ['Metrik', 'Deger'],
+    ['Toplam Girdi Satir', report.totalInputRows],
+    ['Eslesen Satir', report.matchedRows],
+    ['A Dosyasinda Eslesmeyen', report.unmatchedFromA],
+    ['B Dosyasinda Eslesmeyen', report.unmatchedFromB],
+    ['Toplam Cikti Satir', report.totalOutputRows],
+    ['Kaldirilan Tekrar', report.duplicatesRemoved],
+    ['Doldurulan Bos Hucre', report.nullsFilled],
+    ['Bulank Eslestirme Sayisi', report.fuzzyMatchCount],
+    ['Atlanan Satir', report.skippedRows],
   ];
-  void downloadAoASheetsAsXlsx([{ name: "Birlestirme Raporu", rows }], fileName);
+  void downloadAoASheetsAsXlsx([{ name: 'Birlestirme Raporu', rows }], fileName);
 }

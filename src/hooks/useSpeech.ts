@@ -9,16 +9,16 @@ export interface SpeechRecognitionHook {
   onResult: (text: string) => void;
 }
 
-export function useSpeechRecognition(
-  onResult: (text: string) => void
-): SpeechRecognitionHook {
+export function useSpeechRecognition(onResult: (text: string) => void): SpeechRecognitionHook {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useState<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    const SR = window.SpeechRecognition || (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SR =
+      window.SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition;
     if (SR) {
       setSupported(true);
       const recognition = new SR();
@@ -92,10 +92,10 @@ export function useSpeechSynthesis() {
 
       const voices = window.speechSynthesis.getVoices();
       const trVoice =
-        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Google')) ||
-        voices.find(v => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
-        voices.find(v => v.lang === 'tr-TR') ||
-        voices.find(v => v.lang.startsWith('tr'));
+        voices.find((v) => v.lang === 'tr-TR' && v.name.includes('Google')) ||
+        voices.find((v) => v.lang === 'tr-TR' && v.name.includes('Microsoft')) ||
+        voices.find((v) => v.lang === 'tr-TR') ||
+        voices.find((v) => v.lang.startsWith('tr'));
 
       if (trVoice) {
         utterance.voice = trVoice;

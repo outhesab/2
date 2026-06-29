@@ -1,26 +1,26 @@
-import { genId } from "@/lib/utils-tr";
-import type { DB } from "@/types";
-import type { StockMovementV2, IntentResult } from "@/domain/types";
-import type { DomainEvent } from "@/types";
+import { genId } from '@/lib/utils-tr';
+import type { DB } from '@/types';
+import type { StockMovementV2, IntentResult } from '@/domain/types';
+import type { DomainEvent } from '@/types';
 
 export function processStockUpdate(
-  payload: { productId: string; amount: number; type: "giris" | "cikis"; description?: string },
-  _db: DB
+  payload: { productId: string; amount: number; type: 'giris' | 'cikis'; description?: string },
+  _db: DB,
 ): IntentResult {
   const { productId, amount, type } = payload;
 
   const product = _db.products.find((p) => p.id === productId);
   if (!product) {
-    return { ok: false, error: "Ürün bulunamadı" };
+    return { ok: false, error: 'Ürün bulunamadı' };
   }
 
   const absAmount = Math.abs(amount);
-  const delta = type === "giris" ? absAmount : -absAmount;
+  const delta = type === 'giris' ? absAmount : -absAmount;
   const before = product.stock ?? 0;
   const after = Math.max(0, before + delta);
 
-  if (type === "cikis" && after < 0) {
-    return { ok: false, error: "Yetersiz stok" };
+  if (type === 'cikis' && after < 0) {
+    return { ok: false, error: 'Yetersiz stok' };
   }
 
   const nowIso = new Date().toISOString();
@@ -30,7 +30,7 @@ export function processStockUpdate(
     id: movementId,
     productId,
     productName: product.name,
-    type: type === "giris" ? "iade" : "satis",
+    type: type === 'giris' ? 'iade' : 'satis',
     amount: delta,
     before,
     after,
@@ -39,9 +39,9 @@ export function processStockUpdate(
   const events: DomainEvent[] = [
     {
       id: genId(),
-      type: "stock.updated" as const,
+      type: 'stock.updated' as const,
       aggregateId: productId,
-      aggregateType: "stock" as const,
+      aggregateType: 'stock' as const,
       payload: movement as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,
@@ -53,7 +53,7 @@ export function processStockUpdate(
     data: {
       dbUpdates: {
         products: [{ id: productId, newStock: after }],
-        // Note: stockMovements are handled as events or as separate data. 
+        // Note: stockMovements are handled as events or as separate data.
         // For now, I'll put them in the events, and useDBActions will apply them to the array.
       },
       events,
@@ -63,7 +63,7 @@ export function processStockUpdate(
 
 export function processProductAdd(
   payload: { productName: string; category?: string; initialStock?: number; unitPrice?: number },
-  _db: DB
+  _db: DB,
 ): IntentResult {
   const id = genId();
   const nowIso = new Date().toISOString();
@@ -71,7 +71,7 @@ export function processProductAdd(
   const newProduct = {
     id,
     name: payload.productName,
-    category: payload.category || "Genel",
+    category: payload.category || 'Genel',
     stock: payload.initialStock ?? 0,
     price: payload.unitPrice ?? 0,
     cost: payload.unitPrice ?? 0,
@@ -83,9 +83,9 @@ export function processProductAdd(
   const events: DomainEvent[] = [
     {
       id: genId(),
-      type: "product.created" as const,
+      type: 'product.created' as const,
       aggregateId: id,
-      aggregateType: "product" as const,
+      aggregateType: 'product' as const,
       payload: newProduct as unknown as Record<string, unknown>,
       timestamp: nowIso,
       version: 1,

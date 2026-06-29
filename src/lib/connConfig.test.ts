@@ -9,7 +9,6 @@ vi.mock('@/lib/logger', () => ({
   logger: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-
 vi.mock('@/lib/firebase', () => ({
   readDoc: vi.fn(),
   writeDoc: vi.fn(),

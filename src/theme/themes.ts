@@ -26,7 +26,8 @@ export const PREMIUM_THEMES: PremiumThemeDefinition[] = [
       '--glass-border-bright': 'oklch(1 0 0 / 0.12)',
       '--glass-blur': 'blur(12px)',
       '--glass-blur-heavy': 'blur(24px)',
-      '--glass-reflection': 'linear-gradient(135deg, oklch(1 0 0 / 0.15) 0%, transparent 40%, transparent 60%, oklch(1 0 0 / 0.05) 100%)',
+      '--glass-reflection':
+        'linear-gradient(135deg, oklch(1 0 0 / 0.15) 0%, transparent 40%, transparent 60%, oklch(1 0 0 / 0.05) 100%)',
       '--gradient-primary': 'linear-gradient(135deg, #2563eb, #1d4ed8)',
       '--gradient-card': 'linear-gradient(135deg, oklch(1 0 0), oklch(0.98 0.005 265))',
       '--gradient-glass': 'linear-gradient(135deg, oklch(1 0 0 / 0.9), oklch(0.98 0.005 265 / 0.9))',

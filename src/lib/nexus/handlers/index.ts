@@ -1,6 +1,6 @@
 /**
  * Nexus Intent Handlers - Modular intent handling system
- * 
+ *
  * Handlers are auto-registered on import via IntentHandlerRegistry.
  * Import this file to ensure all handlers are registered.
  */

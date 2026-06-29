@@ -156,5 +156,7 @@ export function scheduleIdleFlush(fn: () => void): () => void {
     }
   };
   schedule();
-  return () => { scheduled = false; };
+  return () => {
+    scheduled = false;
+  };
 }

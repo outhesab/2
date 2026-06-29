@@ -23,8 +23,8 @@ export class SyncQueue {
   }
 
   /**
-  * Mevcut kuyruğun tamamlanmasını bekler.
-  */
+   * Mevcut kuyruğun tamamlanmasını bekler.
+   */
   async flush(): Promise<void> {
     await this.queue;
   }

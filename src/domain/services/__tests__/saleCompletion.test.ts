@@ -15,7 +15,18 @@ function makeSaleIntent(overrides: Partial<SaleIntent> = {}): SaleIntent {
 function makeDBWithProduct(overrides: Partial<DB> = {}): DB {
   const db = makeDefaultDB();
   db.products = [
-    { id: 'urun1', name: 'Test Ürün', category: 'soba', cost: 60, price: 100, stock: 10, minStock: 2, deleted: false, createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+    {
+      id: 'urun1',
+      name: 'Test Ürün',
+      category: 'soba',
+      cost: 60,
+      price: 100,
+      stock: 10,
+      minStock: 2,
+      deleted: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
+    },
   ];
   db.cari = [
     { id: 'cari1', name: 'Müşteri A', type: 'musteri', balance: 0, createdAt: '2026-01-01', updatedAt: '2026-01-01' },
@@ -31,7 +42,7 @@ describe('completeSale', () => {
     expect(result.data!.dbUpdates.sale).toBeDefined();
     expect(result.data!.dbUpdates.sale!.status).toBe('tamamlandi');
     expect(result.data!.dbUpdates.cashTransaction).toHaveLength(1);
-    expect(result.data!.events.some(e => e.type === 'sale.completed')).toBe(true);
+    expect(result.data!.events.some((e) => e.type === 'sale.completed')).toBe(true);
   });
 
   it('cari satış yapar', () => {
@@ -43,17 +54,23 @@ describe('completeSale', () => {
 
   it('geçersiz ürün ID için stok 0 kabul edilir ve satış tamamlanır', () => {
     const prevDB = makeDBWithProduct();
-    const result = completeSale(makeSaleIntent({
-      items: [{ productId: 'olmayan', productName: 'Yok', quantity: 1, unitPrice: 50, cost: 30 }],
-    }), prevDB);
+    const result = completeSale(
+      makeSaleIntent({
+        items: [{ productId: 'olmayan', productName: 'Yok', quantity: 1, unitPrice: 50, cost: 30 }],
+      }),
+      prevDB,
+    );
     expect(result.ok).toBe(true);
   });
 
   it('yetersiz stok için hata döndürür', () => {
     const prevDB = makeDBWithProduct();
-    const result = completeSale(makeSaleIntent({
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 20, unitPrice: 100, cost: 60 }],
-    }), prevDB);
+    const result = completeSale(
+      makeSaleIntent({
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 20, unitPrice: 100, cost: 60 }],
+      }),
+      prevDB,
+    );
     expect(result.ok).toBe(false);
     expect(result.error).toContain('Yetersiz stok');
   });
@@ -110,16 +127,27 @@ describe('completeSale', () => {
   it('çoklu ürün satışı yapar', () => {
     const prevDB = makeDBWithProduct();
     prevDB.products.push({
-      id: 'urun2', name: 'Test Ürün 2', category: 'aksesuar', cost: 30, price: 80,
-      stock: 20, minStock: 5, deleted: false, createdAt: '2026-01-01', updatedAt: '2026-01-01',
+      id: 'urun2',
+      name: 'Test Ürün 2',
+      category: 'aksesuar',
+      cost: 30,
+      price: 80,
+      stock: 20,
+      minStock: 5,
+      deleted: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
     });
-    const result = completeSale(makeSaleIntent({
-      items: [
-        { productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60 },
-        { productId: 'urun2', productName: 'Test Ürün 2', quantity: 3, unitPrice: 80, cost: 30 },
-      ],
-      tahsilat: 440,
-    }), prevDB);
+    const result = completeSale(
+      makeSaleIntent({
+        items: [
+          { productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60 },
+          { productId: 'urun2', productName: 'Test Ürün 2', quantity: 3, unitPrice: 80, cost: 30 },
+        ],
+        tahsilat: 440,
+      }),
+      prevDB,
+    );
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.total).toBe(440);
     expect(result.data!.dbUpdates.products).toHaveLength(2);
@@ -145,7 +173,7 @@ describe('cancelSale', () => {
     const result = cancelSale(saleId, prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.status).toBe('iptal');
-    expect(result.data!.events.some(e => e.type === 'sale.cancelled')).toBe(true);
+    expect(result.data!.events.some((e) => e.type === 'sale.cancelled')).toBe(true);
   });
 
   it('olmayan satış için hata döndürür', () => {
@@ -157,12 +185,25 @@ describe('cancelSale', () => {
 
   it('zaten iptal edilmiş satışı tekrar iptal etmez', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test', quantity: 1, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 100, total: 100, profit: 40,
-      payment: 'nakit', status: 'iptal' as const, items: [],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test',
+        quantity: 1,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 100,
+        total: 100,
+        profit: 40,
+        payment: 'nakit',
+        status: 'iptal' as const,
+        items: [],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = cancelSale('s1', prevDB);
     expect(result.ok).toBe(false);
     expect(result.error).toContain('zaten iptal');
@@ -178,17 +219,30 @@ describe('cancelSale', () => {
     const result = cancelSale(sale.id, prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.cari).toBeDefined();
-    expect(result.data!.dbUpdates.cari![0].balanceChange).toBe(-(sale.total));
+    expect(result.data!.dbUpdates.cari![0].balanceChange).toBe(-sale.total);
   });
 
   it('iade edilmiş satış iptal edilemez', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test', quantity: 1, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 100, total: 100, profit: 40,
-      payment: 'nakit', status: 'iade' as const, items: [],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test',
+        quantity: 1,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 100,
+        total: 100,
+        profit: 40,
+        payment: 'nakit',
+        status: 'iade' as const,
+        items: [],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = cancelSale('s1', prevDB);
     expect(result.ok).toBe(false);
     expect(result.error).toContain('zaten iptal');
@@ -210,27 +264,52 @@ describe('cancelSale', () => {
 describe('returnSale', () => {
   it('başarılı iade yapar', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = returnSale('s1', prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.status).toBe('iade');
-    expect(result.data!.events.some(e => e.type === 'sale.returned')).toBe(true);
+    expect(result.data!.events.some((e) => e.type === 'sale.returned')).toBe(true);
   });
 
   it('iptal edilmiş satış iade edilemez', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test', quantity: 1, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 100, total: 100, profit: 40,
-      payment: 'nakit', status: 'iptal' as const, items: [],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test',
+        quantity: 1,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 100,
+        total: 100,
+        profit: 40,
+        payment: 'nakit',
+        status: 'iptal' as const,
+        items: [],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = returnSale('s1', prevDB);
     expect(result.ok).toBe(false);
     expect(result.error).toContain('İptal edilmiş satış iade edilemez');
@@ -245,13 +324,25 @@ describe('returnSale', () => {
 
   it('kısmi iade sadece belirtilen miktar kadar stok döndürür', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = returnSale('s1', prevDB, 1);
     expect(result.ok).toBe(true);
     const productUpdate = result.data!.dbUpdates.products![0];
@@ -260,14 +351,26 @@ describe('returnSale', () => {
 
   it('cari ödemeli satış iadesinde bakiye düşer', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'cari', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      cariId: 'cari1',
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'cari',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        cariId: 'cari1',
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = returnSale('s1', prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.cari).toBeDefined();
@@ -276,13 +379,25 @@ describe('returnSale', () => {
 
   it('stok geri yükleme kontrolü', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = returnSale('s1', prevDB);
     expect(result.ok).toBe(true);
     const productUpdate = result.data!.dbUpdates.products![0];
@@ -293,17 +408,29 @@ describe('returnSale', () => {
 describe('correctSalePrice', () => {
   it('başarılı fiyat düzeltme yapar', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = correctSalePrice('s1', 120, prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.total).toBe(240);
-    expect(result.data!.events.some(e => e.type === 'sale.price_corrected')).toBe(true);
+    expect(result.data!.events.some((e) => e.type === 'sale.price_corrected')).toBe(true);
   });
 
   it('olmayan satış için hata döndürür', () => {
@@ -315,16 +442,28 @@ describe('correctSalePrice', () => {
 
   it('ürün bazında fiyat düzeltme yapar', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [
-        { productId: 'urun1', productName: 'Test Ürün', quantity: 1, unitPrice: 100, cost: 60, total: 100 },
-        { productId: 'urun2', productName: 'Test Ürün 2', quantity: 1, unitPrice: 100, cost: 60, total: 100 },
-      ],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [
+          { productId: 'urun1', productName: 'Test Ürün', quantity: 1, unitPrice: 100, cost: 60, total: 100 },
+          { productId: 'urun2', productName: 'Test Ürün 2', quantity: 1, unitPrice: 100, cost: 60, total: 100 },
+        ],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = correctSalePrice('s1', { urun1: 150, urun2: 200 }, prevDB);
     expect(result.ok).toBe(true);
     const updatedItems = result.data!.dbUpdates.sale!.items;
@@ -334,13 +473,25 @@ describe('correctSalePrice', () => {
 
   it('fiyat düzeltme discount korur', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 20, subtotal: 200, total: 180, profit: 60,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 20,
+        subtotal: 200,
+        total: 180,
+        profit: 60,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = correctSalePrice('s1', 120, prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.total).toBe(220);
@@ -349,13 +500,25 @@ describe('correctSalePrice', () => {
 
   it('sıfır fiyat düzeltme hatasız çalışır', () => {
     const prevDB = makeDBWithProduct();
-    prevDB.sales = [{
-      id: 's1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60,
-      discount: 0, discountAmount: 0, subtotal: 200, total: 200, profit: 80,
-      payment: 'nakit', status: 'tamamlandi' as const,
-      items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
-      createdAt: '2026-01-01', updatedAt: '2026-01-01',
-    }];
+    prevDB.sales = [
+      {
+        id: 's1',
+        productName: 'Test Ürün',
+        quantity: 2,
+        unitPrice: 100,
+        cost: 60,
+        discount: 0,
+        discountAmount: 0,
+        subtotal: 200,
+        total: 200,
+        profit: 80,
+        payment: 'nakit',
+        status: 'tamamlandi' as const,
+        items: [{ productId: 'urun1', productName: 'Test Ürün', quantity: 2, unitPrice: 100, cost: 60, total: 200 }],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      },
+    ];
     const result = correctSalePrice('s1', 0, prevDB);
     expect(result.ok).toBe(true);
     expect(result.data!.dbUpdates.sale!.total).toBe(0);

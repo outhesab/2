@@ -17,33 +17,33 @@ import { manualChunks } from '@/lib/vite-manual-chunks';
  */
 
 describe('manualChunks — Property 1', () => {
-  test('framer-motion yolları animations chunk\'ına atanır', () => {
+  test("framer-motion yolları animations chunk'ına atanır", () => {
     fc.assert(
       fc.property(
         fc.string().map((s) => `node_modules/framer-motion/${s}`),
-        (path) => manualChunks(path) === 'animations'
+        (path) => manualChunks(path) === 'animations',
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
-  test('lucide-react yolları icons chunk\'ına atanır', () => {
+  test("lucide-react yolları icons chunk'ına atanır", () => {
     fc.assert(
       fc.property(
         fc.string().map((s) => `node_modules/lucide-react/${s}`),
-        (path) => manualChunks(path) === 'icons'
+        (path) => manualChunks(path) === 'icons',
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
-  test('xlsx yolları excel chunk\'ına atanır', () => {
+  test("xlsx yolları excel chunk'ına atanır", () => {
     fc.assert(
       fc.property(
         fc.string().map((s) => `node_modules/xlsx/${s}`),
-        (path) => manualChunks(path) === 'excel'
+        (path) => manualChunks(path) === 'excel',
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -51,9 +51,9 @@ describe('manualChunks — Property 1', () => {
     fc.assert(
       fc.property(
         fc.string().map((s) => `node_modules/${s}`),
-        (path) => manualChunks(path) === manualChunks(path)
+        (path) => manualChunks(path) === manualChunks(path),
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

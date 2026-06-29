@@ -25,13 +25,7 @@ function now(): string {
   return new Date().toISOString();
 }
 
-function makeProduct(
-  id: string,
-  name: string,
-  stock: number,
-  price: number,
-  cost: number
-): Product {
+function makeProduct(id: string, name: string, stock: number, price: number, cost: number): Product {
   return {
     id,
     name,
@@ -67,9 +61,9 @@ function satisYap(
   productId: string,
   adet: number,
   odeme: 'nakit' | 'banka',
-  iskonto?: { tip: 'yuzde' | 'tutar'; deger: number }
+  iskonto?: { tip: 'yuzde' | 'tutar'; deger: number },
 ): { nextDB: DB; violations: ReturnType<typeof validateTransaction>; saleId: string } {
-  const product = prevDB.products.find(p => p.id === productId)!;
+  const product = prevDB.products.find((p) => p.id === productId)!;
   const saleId = genId();
   const nowIso = now();
 
@@ -78,12 +72,10 @@ function satisYap(
   let discountNum = 0;
   if (iskonto) {
     discountNum = iskonto.deger;
-    discountAmount =
-      iskonto.tip === 'yuzde' ? subtotal * (iskonto.deger / 100) : iskonto.deger;
+    discountAmount = iskonto.tip === 'yuzde' ? subtotal * (iskonto.deger / 100) : iskonto.deger;
   }
   const total = Math.max(0, subtotal - discountAmount);
-  const profit =
-    (product.price - product.cost) * adet - discountAmount;
+  const profit = (product.price - product.cost) * adet - discountAmount;
 
   const sale: Sale = {
     id: saleId,
@@ -100,14 +92,16 @@ function satisYap(
     profit,
     payment: odeme,
     status: 'tamamlandi',
-    items: [{
-      productId: product.id,
-      productName: product.name,
-      quantity: adet,
-      unitPrice: product.price,
-      cost: product.cost,
-      total: product.price * adet,
-    }],
+    items: [
+      {
+        productId: product.id,
+        productName: product.name,
+        quantity: adet,
+        unitPrice: product.price,
+        cost: product.cost,
+        total: product.price * adet,
+      },
+    ],
     createdAt: nowIso,
     updatedAt: nowIso,
   };
@@ -139,9 +133,7 @@ function satisYap(
   const nextDB: DB = {
     ...prevDB,
     sales: [...prevDB.sales, sale],
-    products: prevDB.products.map(p =>
-      p.id === productId ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p
-    ),
+    products: prevDB.products.map((p) => (p.id === productId ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p)),
     kasa: [...prevDB.kasa, kasaEntry],
     stockMovements: [...prevDB.stockMovements, stokHareket],
   };
@@ -155,9 +147,9 @@ function cariSatisYap(
   prevDB: DB,
   productId: string,
   adet: number,
-  cariId: string
+  cariId: string,
 ): { nextDB: DB; violations: ReturnType<typeof validateTransaction>; saleId: string } {
-  const product = prevDB.products.find(p => p.id === productId)!;
+  const product = prevDB.products.find((p) => p.id === productId)!;
   const saleId = genId();
   const nowIso = now();
   const total = product.price * adet;
@@ -169,7 +161,7 @@ function cariSatisYap(
     productName: product.name,
     productCategory: product.category,
     cariId,
-    cariName: prevDB.cari.find(c => c.id === cariId)?.name,
+    cariName: prevDB.cari.find((c) => c.id === cariId)?.name,
     quantity: adet,
     unitPrice: product.price,
     cost: product.cost,
@@ -180,14 +172,16 @@ function cariSatisYap(
     profit,
     payment: 'cari',
     status: 'tamamlandi',
-    items: [{
-      productId: product.id,
-      productName: product.name,
-      quantity: adet,
-      unitPrice: product.price,
-      cost: product.cost,
-      total,
-    }],
+    items: [
+      {
+        productId: product.id,
+        productName: product.name,
+        quantity: adet,
+        unitPrice: product.price,
+        cost: product.cost,
+        total,
+      },
+    ],
     createdAt: nowIso,
     updatedAt: nowIso,
   };
@@ -207,15 +201,11 @@ function cariSatisYap(
   const nextDB: DB = {
     ...prevDB,
     sales: [...prevDB.sales, sale],
-    products: prevDB.products.map(p =>
-      p.id === productId ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p
-    ),
+    products: prevDB.products.map((p) => (p.id === productId ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p)),
     kasa: prevDB.kasa,
     stockMovements: [...prevDB.stockMovements, stokHareket],
-    cari: prevDB.cari.map(c =>
-      c.id === cariId
-        ? { ...c, balance: (c.balance || 0) + total, lastTransaction: nowIso, updatedAt: nowIso }
-        : c
+    cari: prevDB.cari.map((c) =>
+      c.id === cariId ? { ...c, balance: (c.balance || 0) + total, lastTransaction: nowIso, updatedAt: nowIso } : c,
     ),
   };
 
@@ -224,13 +214,9 @@ function cariSatisYap(
 }
 
 /** Stok girişi (mal alımı) */
-function stokGiris(
-  prevDB: DB,
-  productId: string,
-  adet: number
-): { nextDB: DB } {
+function stokGiris(prevDB: DB, productId: string, adet: number): { nextDB: DB } {
   const nowIso = now();
-  const product = prevDB.products.find(p => p.id === productId)!;
+  const product = prevDB.products.find((p) => p.id === productId)!;
 
   const stokHareket: StockMovement = {
     id: genId(),
@@ -246,9 +232,7 @@ function stokGiris(
 
   const nextDB: DB = {
     ...prevDB,
-    products: prevDB.products.map(p =>
-      p.id === productId ? { ...p, stock: p.stock + adet, updatedAt: nowIso } : p
-    ),
+    products: prevDB.products.map((p) => (p.id === productId ? { ...p, stock: p.stock + adet, updatedAt: nowIso } : p)),
     stockMovements: [...prevDB.stockMovements, stokHareket],
   };
   return { nextDB };
@@ -259,7 +243,7 @@ function tahsilatYap(
   prevDB: DB,
   cariId: string,
   amount: number,
-  kasa: 'nakit' | 'banka'
+  kasa: 'nakit' | 'banka',
 ): { nextDB: DB; violations: ReturnType<typeof validateTransaction> } {
   const nowIso = now();
   const kasaEntry: KasaEntry = {
@@ -268,7 +252,7 @@ function tahsilatYap(
     category: 'tahsilat',
     amount,
     kasa,
-    description: `Tahsilat: ${prevDB.cari.find(c => c.id === cariId)?.name || cariId}`,
+    description: `Tahsilat: ${prevDB.cari.find((c) => c.id === cariId)?.name || cariId}`,
     cariId,
     createdAt: nowIso,
     updatedAt: nowIso,
@@ -276,10 +260,8 @@ function tahsilatYap(
   const nextDB: DB = {
     ...prevDB,
     kasa: [...prevDB.kasa, kasaEntry],
-    cari: prevDB.cari.map(c =>
-      c.id === cariId
-        ? { ...c, balance: (c.balance || 0) - amount, lastTransaction: nowIso, updatedAt: nowIso }
-        : c
+    cari: prevDB.cari.map((c) =>
+      c.id === cariId ? { ...c, balance: (c.balance || 0) - amount, lastTransaction: nowIso, updatedAt: nowIso } : c,
     ),
   };
   const violations = validateTransaction(prevDB, nextDB);
@@ -288,14 +270,13 @@ function tahsilatYap(
 
 function kasaBakiyesi(db: DB, kasaId: string): number {
   return db.kasa
-    .filter(k => !k.deleted && k.kasa === kasaId)
+    .filter((k) => !k.deleted && k.kasa === kasaId)
     .reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
 }
 
 // ─── TESTLER ──────────────────────────────────────────────────────────────────
 
 describe('🔍 Gerçekçi Senaryo Testleri', () => {
-
   // ══════════════════════════════════════════════════════════════════════════
   // Senaryo 1: Çok müşterili gün sonu özeti
   // ══════════════════════════════════════════════════════════════════════════
@@ -315,27 +296,33 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
 
     // Ahmet: 2 nakit
     const s1 = satisYap(db, 'soba-001', 2, 'nakit');
-    allViolations.push(...s1.violations); db = s1.nextDB;
+    allViolations.push(...s1.violations);
+    db = s1.nextDB;
 
     // Fatma: 3 banka
     const s2 = satisYap(db, 'soba-001', 3, 'banka');
-    allViolations.push(...s2.violations); db = s2.nextDB;
+    allViolations.push(...s2.violations);
+    db = s2.nextDB;
 
     // Mehmet: 5 veresiye
     const s3 = cariSatisYap(db, 'soba-001', 5, 'cari-mehmet');
-    allViolations.push(...s3.violations); db = s3.nextDB;
+    allViolations.push(...s3.violations);
+    db = s3.nextDB;
 
     // Ahmet tekrar: 1 nakit
     const s4 = satisYap(db, 'soba-001', 1, 'nakit');
-    allViolations.push(...s4.violations); db = s4.nextDB;
+    allViolations.push(...s4.violations);
+    db = s4.nextDB;
 
     // Fatma tekrar: 2 banka
     const s5 = satisYap(db, 'soba-001', 2, 'banka');
-    allViolations.push(...s5.violations); db = s5.nextDB;
+    allViolations.push(...s5.violations);
+    db = s5.nextDB;
 
     // Mehmet tahsilat: 3000
     const t1 = tahsilatYap(db, 'cari-mehmet', 3_000, 'nakit');
-    allViolations.push(...t1.violations); db = t1.nextDB;
+    allViolations.push(...t1.violations);
+    db = t1.nextDB;
 
     it('gün boyunca kural ihlali olmamalı', () => {
       expect(allViolations).toHaveLength(0);
@@ -347,7 +334,7 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('stok 50 → 37 olmalı', () => {
-      expect(db.products.find(p => p.id === 'soba-001')!.stock).toBe(37);
+      expect(db.products.find((p) => p.id === 'soba-001')!.stock).toBe(37);
     });
 
     it('nakit kasa: (2+1)×1200 + 3000 (tahsilat) = 6600 ₺', () => {
@@ -359,7 +346,7 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('Mehmet bakiyesi: 5×1200 - 3000 = 3000 ₺', () => {
-      const cari = db.cari.find(c => c.id === 'cari-mehmet')!;
+      const cari = db.cari.find((c) => c.id === 'cari-mehmet')!;
       expect(cari.balance).toBe(3_000);
     });
   });
@@ -373,26 +360,32 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     const db0 = makeDB({ products: [soba] });
 
     // %10 iskonto
-    const { nextDB: db1, violations: v1, saleId: saleId1 } =
-      satisYap(db0, 'soba-001', 2, 'nakit', { tip: 'yuzde', deger: 10 });
+    const {
+      nextDB: db1,
+      violations: v1,
+      saleId: saleId1,
+    } = satisYap(db0, 'soba-001', 2, 'nakit', { tip: 'yuzde', deger: 10 });
 
     // 150 ₺ tutar iskontosu
-    const { nextDB: db2, violations: v2, saleId: saleId2 } =
-      satisYap(db1, 'soba-001', 2, 'nakit', { tip: 'tutar', deger: 150 });
+    const {
+      nextDB: db2,
+      violations: v2,
+      saleId: saleId2,
+    } = satisYap(db1, 'soba-001', 2, 'nakit', { tip: 'tutar', deger: 150 });
 
     it('%10 iskontolu satış — kural ihlali olmamalı', () => {
       expect(v1).toHaveLength(0);
     });
 
     it('%10 iskonto: subtotal=2000, discountAmount=200, total=1800', () => {
-      const sale = db1.sales.find(s => s.id === saleId1)!;
+      const sale = db1.sales.find((s) => s.id === saleId1)!;
       expect(sale.subtotal).toBe(2_000);
       expect(sale.discountAmount).toBe(200);
       expect(sale.total).toBe(1_800);
     });
 
     it('%10 iskontolu kâr: (1000-600)×2 - 200 = 600 ₺', () => {
-      const sale = db1.sales.find(s => s.id === saleId1)!;
+      const sale = db1.sales.find((s) => s.id === saleId1)!;
       expect(sale.profit).toBe(600);
     });
 
@@ -401,14 +394,14 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('150 ₺ tutar iskontosu: subtotal=2000, discountAmount=150, total=1850', () => {
-      const sale = db2.sales.find(s => s.id === saleId2)!;
+      const sale = db2.sales.find((s) => s.id === saleId2)!;
       expect(sale.subtotal).toBe(2_000);
       expect(sale.discountAmount).toBe(150);
       expect(sale.total).toBe(1_850);
     });
 
     it('150 ₺ iskontolu kâr: (1000-600)×2 - 150 = 650 ₺', () => {
-      const sale = db2.sales.find(s => s.id === saleId2)!;
+      const sale = db2.sales.find((s) => s.id === saleId2)!;
       expect(sale.profit).toBe(650);
     });
   });
@@ -441,11 +434,11 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('stok tükendikten sonra satış negative_stock üretmeli', () => {
-      expect(s2.violations.some(v => v.ruleId === 'negative_stock')).toBe(true);
+      expect(s2.violations.some((v) => v.ruleId === 'negative_stock')).toBe(true);
     });
 
     it('mal alımı sonrası stok 0 + 10 = 10 olmalı', () => {
-      expect(db3.products.find(p => p.id === 'soba-001')!.stock).toBe(10);
+      expect(db3.products.find((p) => p.id === 'soba-001')!.stock).toBe(10);
     });
 
     it('mal alımı sonrası satış kural ihlalsiz tamamlanmalı', () => {
@@ -453,7 +446,7 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('son stok 10 - 5 = 5 olmalı', () => {
-      expect(db.products.find(p => p.id === 'soba-001')!.stock).toBe(5);
+      expect(db.products.find((p) => p.id === 'soba-001')!.stock).toBe(5);
     });
   });
 
@@ -497,7 +490,7 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
     });
 
     it('stok 100 - 15 = 85 olmalı', () => {
-      expect(db.products.find(p => p.id === 'u001')!.stock).toBe(85);
+      expect(db.products.find((p) => p.id === 'u001')!.stock).toBe(85);
     });
 
     it('toplam kâr: 15 × 200 = 3000 ₺', () => {
@@ -515,5 +508,4 @@ describe('🔍 Gerçekçi Senaryo Testleri', () => {
       expect(TRANSACTION_LIMIT).toBe(100_000);
     });
   });
-
 });

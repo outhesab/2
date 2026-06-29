@@ -4,17 +4,36 @@ import type { DB } from '@/types';
 
 const EMPTY_DB: DB = {
   _version: 1,
-  products: [], sales: [], suppliers: [], orders: [], cari: [], kasa: [],
+  products: [],
+  sales: [],
+  suppliers: [],
+  orders: [],
+  cari: [],
+  kasa: [],
   kasalar: [{ id: 'nakit', name: 'Nakit', icon: '💵' }],
-  bankTransactions: [], matchRules: [], monitorRules: [], monitorLog: [],
-  stockMovements: [], peletSuppliers: [], peletOrders: [], boruSuppliers: [],
-  boruOrders: [], invoices: [], budgets: [], returns: [],
-  _activityLog: [], _auditLog: [],
+  bankTransactions: [],
+  matchRules: [],
+  monitorRules: [],
+  monitorLog: [],
+  stockMovements: [],
+  peletSuppliers: [],
+  peletOrders: [],
+  boruSuppliers: [],
+  boruOrders: [],
+  invoices: [],
+  budgets: [],
+  returns: [],
+  _activityLog: [],
+  _auditLog: [],
   company: { id: 'c1', name: '', createdAt: new Date().toISOString() },
   settings: {},
   pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-  ortakEmanetler: [], installments: [], partners: [],
-  productCategories: [], notes: [], aiActionLog: [],
+  ortakEmanetler: [],
+  installments: [],
+  partners: [],
+  productCategories: [],
+  notes: [],
+  aiActionLog: [],
 };
 
 describe('notificationEngine', () => {
@@ -35,15 +54,39 @@ describe('notificationEngine', () => {
 
   it('getUnreadCount should return 0 for empty dismissed set', () => {
     const notifs: AppNotification[] = [
-      { id: 'n1', severity: 'warning', category: 'stok', icon: '⚠', title: 'Test', detail: '', generatedAt: new Date().toISOString() },
+      {
+        id: 'n1',
+        severity: 'warning',
+        category: 'stok',
+        icon: '⚠',
+        title: 'Test',
+        detail: '',
+        generatedAt: new Date().toISOString(),
+      },
     ];
     expect(getUnreadCount(notifs, new Set())).toBe(1);
   });
 
   it('getUnreadCount should exclude dismissed', () => {
     const notifs: AppNotification[] = [
-      { id: 'n1', severity: 'warning', category: 'stok', icon: '⚠', title: 'Test', detail: '', generatedAt: new Date().toISOString() },
-      { id: 'n2', severity: 'info', category: 'sistem', icon: 'ℹ', title: 'Test2', detail: '', generatedAt: new Date().toISOString() },
+      {
+        id: 'n1',
+        severity: 'warning',
+        category: 'stok',
+        icon: '⚠',
+        title: 'Test',
+        detail: '',
+        generatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'n2',
+        severity: 'info',
+        category: 'sistem',
+        icon: 'ℹ',
+        title: 'Test2',
+        detail: '',
+        generatedAt: new Date().toISOString(),
+      },
     ];
     expect(getUnreadCount(notifs, new Set(['n1']))).toBe(1);
   });

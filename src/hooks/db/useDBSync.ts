@@ -4,10 +4,7 @@ import { getUserSession } from '@/lib/userManager';
 import { loadFromFirebase, emitSync } from './sync';
 import type { DB } from '@/types';
 
-export function useDBSync(
-  db: DB,
-  setDb: React.Dispatch<React.SetStateAction<DB>>,
-) {
+export function useDBSync(db: DB, setDb: React.Dispatch<React.SetStateAction<DB>>) {
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -42,7 +39,6 @@ export function useDBSync(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   return { syncTimer };
 }

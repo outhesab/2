@@ -1,13 +1,5 @@
-import type {
-  ActivityLog,
-  Cari,
-  Invoice,
-  KasaEntry,
-  Product,
-  Sale,
-  StockMovement,
-} from "@/types";
-import Dexie, { type Table } from "dexie";
+import type { ActivityLog, Cari, Invoice, KasaEntry, Product, Sale, StockMovement } from '@/types';
+import Dexie, { type Table } from 'dexie';
 
 interface AgentAuditRecord {
   id: string;
@@ -36,19 +28,19 @@ class ParspelDB extends Dexie {
   guestSessions!: Table<{ id: string; start: number; hash: string }, string>;
 
   constructor() {
-    super("ParspelDB");
+    super('ParspelDB');
 
     this.version(2).stores({
-      guestSessions: "id",
-      urunler: "id, name, category, stock, updatedAt",
-      satislar: "id, createdAt, total, payment, cariId, productId",
-      stokHareketleri: "id, productId, type, date",
-      kasaHareketleri: "id, kasa, type, amount, createdAt",
-      cariler: "id, name, type, balance, updatedAt",
-      faturalar: "id, invoiceNo, cariId, total, status, createdAt",
-      activityLog: "id, action, time",
-      auditLog: "id, agent, islem, timestamp",
-      snapshots: "id, updatedAt",
+      guestSessions: 'id',
+      urunler: 'id, name, category, stock, updatedAt',
+      satislar: 'id, createdAt, total, payment, cariId, productId',
+      stokHareketleri: 'id, productId, type, date',
+      kasaHareketleri: 'id, kasa, type, amount, createdAt',
+      cariler: 'id, name, type, balance, updatedAt',
+      faturalar: 'id, invoiceNo, cariId, total, status, createdAt',
+      activityLog: 'id, action, time',
+      auditLog: 'id, agent, islem, timestamp',
+      snapshots: 'id, updatedAt',
     });
   }
 }

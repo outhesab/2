@@ -24,7 +24,10 @@ function fail(message: string): never {
   throw new Error(message);
 }
 
-export function assertSafeSpreadsheetFile(file: File, allowedExtensions: readonly string[] = DEFAULT_ALLOWED_EXTENSIONS): void {
+export function assertSafeSpreadsheetFile(
+  file: File,
+  allowedExtensions: readonly string[] = DEFAULT_ALLOWED_EXTENSIONS,
+): void {
   const ext = fileExt(file.name);
   if (!allowedExtensions.includes(ext)) {
     fail(`Desteklenmeyen dosya tipi: ${ext || 'bilinmiyor'}`);
@@ -41,14 +44,21 @@ function validateSheetRange(ws: XLSX.WorkSheet, sheetName: string, sourceName?: 
   const rowCount = range.e.r + 1;
   const colCount = range.e.c + 1;
   if (rowCount > SAFE_XLSX_LIMITS.maxRows) {
-    fail(`${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok buyuk. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
+    fail(
+      `${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok buyuk. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`,
+    );
   }
   if (colCount > SAFE_XLSX_LIMITS.maxCols) {
-    fail(`${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok genis. En fazla ${SAFE_XLSX_LIMITS.maxCols} sutun desteklenir.`);
+    fail(
+      `${sourceName || 'Dosya'} icindeki ${sheetName} sayfasi cok genis. En fazla ${SAFE_XLSX_LIMITS.maxCols} sutun desteklenir.`,
+    );
   }
 }
 
-export async function readSafeWorkbook(input: ArrayBuffer, options: { sourceName?: string }): Promise<SafeWorkbookData> {
+export async function readSafeWorkbook(
+  input: ArrayBuffer,
+  options: { sourceName?: string },
+): Promise<SafeWorkbookData> {
   const workbook = XLSX.read(input, { type: 'array' });
 
   if (workbook.SheetNames.length === 0) {
@@ -58,7 +68,7 @@ export async function readSafeWorkbook(input: ArrayBuffer, options: { sourceName
     fail(`Cok fazla sayfa var. En fazla ${SAFE_XLSX_LIMITS.maxSheets} sayfa desteklenir.`);
   }
 
-  workbook.SheetNames.forEach(name => validateSheetRange(workbook.Sheets[name], name, options.sourceName));
+  workbook.SheetNames.forEach((name) => validateSheetRange(workbook.Sheets[name], name, options.sourceName));
 
   return {
     sheetNames: workbook.SheetNames,
@@ -77,7 +87,7 @@ export async function readSafeWorkbook(input: ArrayBuffer, options: { sourceName
       }
 
       if (!rowOptions.blankrows) {
-        return rows.filter(row => row.some(cell => cell != null && String(cell).trim() !== ''));
+        return rows.filter((row) => row.some((cell) => cell != null && String(cell).trim() !== ''));
       }
 
       return rows;
@@ -99,7 +109,7 @@ export function makeSafeHeaders(headerRow: Array<string | number | boolean | nul
 }
 
 function detectDelimiter(text: string): string {
-  const sample = text.split(/\r?\n/).find(line => line.trim().length > 0) || '';
+  const sample = text.split(/\r?\n/).find((line) => line.trim().length > 0) || '';
   const candidates = [',', ';', '\t'];
   return candidates.sort((left, right) => sample.split(right).length - sample.split(left).length)[0] || ',';
 }
@@ -137,8 +147,8 @@ export function parseCsvText(text: string): unknown[][] {
   const delimiter = detectDelimiter(text);
   const rows = text
     .split(/\r?\n/)
-    .filter(line => line.trim().length > 0)
-    .map(line => parseDelimitedLine(line, delimiter));
+    .filter((line) => line.trim().length > 0)
+    .map((line) => parseDelimitedLine(line, delimiter));
 
   if (rows.length > SAFE_XLSX_LIMITS.maxRows) {
     fail(`CSV veri limiti asildi. En fazla ${SAFE_XLSX_LIMITS.maxRows} satir desteklenir.`);
@@ -155,7 +165,7 @@ export function parseCsvText(text: string): unknown[][] {
 
 function applyColumnWidths(worksheet: XLSX.WorkSheet, widths?: number[]) {
   if (widths && widths.length > 0) {
-    worksheet['!cols'] = widths.map(w => ({ wch: Math.max(w, 0) }));
+    worksheet['!cols'] = widths.map((w) => ({ wch: Math.max(w, 0) }));
   }
 }
 

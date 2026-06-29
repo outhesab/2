@@ -73,28 +73,28 @@ describe('negative_stock kuralı', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: -1 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'negative_stock' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'negative_stock' && v.severity === 'block')).toBe(true);
   });
 
   it('sıfır stok → ihlal üretmez', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 0 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'negative_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'negative_stock')).toHaveLength(0);
   });
 
   it('pozitif stok → ihlal üretmez', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 5 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'negative_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'negative_stock')).toHaveLength(0);
   });
 
   it('deleted ürün negatif stok → ihlal üretmez', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: -5, deleted: true })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'negative_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'negative_stock')).toHaveLength(0);
   });
 });
 
@@ -106,7 +106,7 @@ describe('negative_kasa kuralı', () => {
       kasa: [makeKasaEntry({ id: 'k1', type: 'gider', amount: 1000, kasa: 'nakit' })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'negative_kasa' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'negative_kasa' && v.severity === 'block')).toBe(true);
   });
 
   it('gelir > gider → ihlal üretmez', () => {
@@ -118,7 +118,7 @@ describe('negative_kasa kuralı', () => {
       ],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'negative_kasa')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'negative_kasa')).toHaveLength(0);
   });
 
   it('deleted kasa kaydı bakiye hesabına dahil edilmez', () => {
@@ -127,7 +127,7 @@ describe('negative_kasa kuralı', () => {
       kasa: [makeKasaEntry({ id: 'k1', type: 'gider', amount: 9999, kasa: 'nakit', deleted: true })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'negative_kasa')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'negative_kasa')).toHaveLength(0);
   });
 });
 
@@ -155,7 +155,7 @@ describe('duplicate_transaction kuralı', () => {
     const next = makeDB({ kasa: [existingEntry, newEntry] });
 
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'duplicate_transaction' && v.severity === 'warn')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'duplicate_transaction' && v.severity === 'warn')).toBe(true);
   });
 
   it('60 saniye içinde çok küçük amount farkı varsa warn ihlali üretmez (precision/rounding güvenliği)', () => {
@@ -165,7 +165,7 @@ describe('duplicate_transaction kuralı', () => {
     const existingEntry = makeKasaEntry({
       id: 'k_existing',
       cariId: 'cari1',
-      amount: 500.00,
+      amount: 500.0,
       kasa: 'nakit',
       createdAt: recentTime,
     });
@@ -184,7 +184,7 @@ describe('duplicate_transaction kuralı', () => {
     const next = makeDB({ kasa: [existingEntry, newEntry] });
 
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'duplicate_transaction')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'duplicate_transaction')).toHaveLength(0);
   });
 
   it('60 saniyeden eski kayıt → ihlal üretmez', () => {
@@ -210,7 +210,7 @@ describe('duplicate_transaction kuralı', () => {
     const next = makeDB({ kasa: [existingEntry, newEntry] });
 
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'duplicate_transaction')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'duplicate_transaction')).toHaveLength(0);
   });
 
   it('warn ihlali işlemi engellemez (severity: warn)', () => {
@@ -236,10 +236,10 @@ describe('duplicate_transaction kuralı', () => {
     const next = makeDB({ kasa: [existingEntry, newEntry] });
 
     const violations = validateTransaction(prev, next);
-    const dupViolations = violations.filter(v => v.ruleId === 'duplicate_transaction');
-    expect(dupViolations.every(v => v.severity === 'warn')).toBe(true);
+    const dupViolations = violations.filter((v) => v.ruleId === 'duplicate_transaction');
+    expect(dupViolations.every((v) => v.severity === 'warn')).toBe(true);
     // Block ihlali yok → işlem devam eder
-    expect(violations.some(v => v.severity === 'block')).toBe(false);
+    expect(violations.some((v) => v.severity === 'block')).toBe(false);
   });
 });
 
@@ -250,7 +250,7 @@ describe('zero_amount kuralı', () => {
       kasa: [makeKasaEntry({ id: 'k_new', amount: 0 })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
   });
 
   it('KasaEntry.amount < 0 → block ihlali üretir', () => {
@@ -259,7 +259,7 @@ describe('zero_amount kuralı', () => {
       kasa: [makeKasaEntry({ id: 'k_new', amount: -100 })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
   });
 
   it('Sale.total === 0 → block ihlali üretir', () => {
@@ -268,7 +268,7 @@ describe('zero_amount kuralı', () => {
       sales: [makeSale({ id: 's_new', total: 0 })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
   });
 
   it('Sale.total < 0 → block ihlali üretir', () => {
@@ -277,15 +277,15 @@ describe('zero_amount kuralı', () => {
       sales: [makeSale({ id: 's_new', total: -50 })],
     });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'zero_amount' && v.severity === 'block')).toBe(true);
   });
 
-  it('mevcut kayıt (prevDB\'de var) → ihlal üretmez', () => {
+  it("mevcut kayıt (prevDB'de var) → ihlal üretmez", () => {
     const existingEntry = makeKasaEntry({ id: 'k_existing', amount: 0 });
     const prev = makeDB({ kasa: [existingEntry] });
     const next = makeDB({ kasa: [existingEntry] }); // değişiklik yok
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'zero_amount')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'zero_amount')).toHaveLength(0);
   });
 });
 
@@ -302,7 +302,9 @@ describe('validateTransaction — genel davranış', () => {
       id: 'faulty_rule',
       name: 'Hatalı Kural',
       severity: 'block' as const,
-      evaluate: () => { throw new Error('Kural hatası!'); },
+      evaluate: () => {
+        throw new Error('Kural hatası!');
+      },
     };
     rules.push(faultyRule);
 
@@ -313,10 +315,10 @@ describe('validateTransaction — genel davranış', () => {
       const violations = validateTransaction(prev, next);
       expect(Array.isArray(violations)).toBe(true);
       // negative_stock kuralı hâlâ çalışmalı
-      expect(violations.some(v => v.ruleId === 'negative_stock')).toBe(true);
+      expect(violations.some((v) => v.ruleId === 'negative_stock')).toBe(true);
     } finally {
       // Temizle
-      const idx = rules.findIndex(r => r.id === 'faulty_rule');
+      const idx = rules.findIndex((r) => r.id === 'faulty_rule');
       if (idx >= 0) rules.splice(idx, 1);
     }
   });
@@ -330,79 +332,88 @@ describe('validateTransaction — genel davranış', () => {
 // ─── Property-Based Testler ───────────────────────────────────────────────────
 
 // Arbitrary: minimal geçerli DB
-const arbDB = () => fc.record({
-  _version: fc.integer({ min: 0, max: 100 }),
-  products: fc.array(
-    fc.record({
-      id: fc.uuid(),
-      name: fc.string({ minLength: 1, maxLength: 20 }),
-      category: fc.constant('soba'),
-      cost: fc.float({ min: 0, max: 10000, noNaN: true }),
-      price: fc.float({ min: 0, max: 20000, noNaN: true }),
-      stock: fc.integer({ min: -5, max: 100 }),
-      minStock: fc.integer({ min: 0, max: 10 }),
-      deleted: fc.boolean(),
-      createdAt: fc.constant(new Date().toISOString()),
-      updatedAt: fc.constant(new Date().toISOString()),
-    }),
-    { maxLength: 5 }
-  ),
-  sales: fc.array(
-    fc.record({
-      id: fc.uuid(),
-      productName: fc.string({ minLength: 1, maxLength: 20 }),
-      quantity: fc.integer({ min: 1, max: 10 }),
-      unitPrice: fc.float({ min: 0, max: 5000, noNaN: true }),
-      cost: fc.float({ min: 0, max: 5000, noNaN: true }),
-      discount: fc.constant(0),
-      discountAmount: fc.constant(0),
-      subtotal: fc.float({ min: -100, max: 5000, noNaN: true }),
-      total: fc.float({ min: -100, max: 5000, noNaN: true }),
-      profit: fc.float({ min: -100, max: 5000, noNaN: true }),
-      payment: fc.constant('nakit'),
-      status: fc.constant('tamamlandi' as const),
-      items: fc.constant([]),
-      deleted: fc.boolean(),
-      createdAt: fc.constant(new Date().toISOString()),
-      updatedAt: fc.constant(new Date().toISOString()),
-    }),
-    { maxLength: 5 }
-  ),
-  kasa: fc.array(
-    fc.record({
-      id: fc.uuid(),
-      type: fc.oneof(fc.constant('gelir' as const), fc.constant('gider' as const)),
-      category: fc.constant('satis'),
-      amount: fc.float({ min: -100, max: 10000, noNaN: true }),
-      kasa: fc.constant('nakit'),
-      deleted: fc.boolean(),
-      createdAt: fc.constant(new Date().toISOString()),
-      updatedAt: fc.constant(new Date().toISOString()),
-    }),
-    { maxLength: 5 }
-  ),
-}).map(partial => makeDB(partial as unknown as Partial<DB>));
+const arbDB = () =>
+  fc
+    .record({
+      _version: fc.integer({ min: 0, max: 100 }),
+      products: fc.array(
+        fc.record({
+          id: fc.uuid(),
+          name: fc.string({ minLength: 1, maxLength: 20 }),
+          category: fc.constant('soba'),
+          cost: fc.float({ min: 0, max: 10000, noNaN: true }),
+          price: fc.float({ min: 0, max: 20000, noNaN: true }),
+          stock: fc.integer({ min: -5, max: 100 }),
+          minStock: fc.integer({ min: 0, max: 10 }),
+          deleted: fc.boolean(),
+          createdAt: fc.constant(new Date().toISOString()),
+          updatedAt: fc.constant(new Date().toISOString()),
+        }),
+        { maxLength: 5 },
+      ),
+      sales: fc.array(
+        fc.record({
+          id: fc.uuid(),
+          productName: fc.string({ minLength: 1, maxLength: 20 }),
+          quantity: fc.integer({ min: 1, max: 10 }),
+          unitPrice: fc.float({ min: 0, max: 5000, noNaN: true }),
+          cost: fc.float({ min: 0, max: 5000, noNaN: true }),
+          discount: fc.constant(0),
+          discountAmount: fc.constant(0),
+          subtotal: fc.float({ min: -100, max: 5000, noNaN: true }),
+          total: fc.float({ min: -100, max: 5000, noNaN: true }),
+          profit: fc.float({ min: -100, max: 5000, noNaN: true }),
+          payment: fc.constant('nakit'),
+          status: fc.constant('tamamlandi' as const),
+          items: fc.constant([]),
+          deleted: fc.boolean(),
+          createdAt: fc.constant(new Date().toISOString()),
+          updatedAt: fc.constant(new Date().toISOString()),
+        }),
+        { maxLength: 5 },
+      ),
+      kasa: fc.array(
+        fc.record({
+          id: fc.uuid(),
+          type: fc.oneof(fc.constant('gelir' as const), fc.constant('gider' as const)),
+          category: fc.constant('satis'),
+          amount: fc.float({ min: -100, max: 10000, noNaN: true }),
+          kasa: fc.constant('nakit'),
+          deleted: fc.boolean(),
+          createdAt: fc.constant(new Date().toISOString()),
+          updatedAt: fc.constant(new Date().toISOString()),
+        }),
+        { maxLength: 5 },
+      ),
+    })
+    .map((partial) => makeDB(partial as unknown as Partial<DB>));
 
 // Arbitrary: en az bir negatif stoklu ürün içeren DB
-const arbDBWithNegativeStock = () => fc.record({
-  negativeProduct: fc.record({
-    id: fc.uuid(),
-    stock: fc.integer({ min: -100, max: -1 }),
-  }),
-}).map(({ negativeProduct }) =>
-  makeDB({
-    products: [makeProduct({ ...negativeProduct, deleted: false })],
-  })
-);
+const arbDBWithNegativeStock = () =>
+  fc
+    .record({
+      negativeProduct: fc.record({
+        id: fc.uuid(),
+        stock: fc.integer({ min: -100, max: -1 }),
+      }),
+    })
+    .map(({ negativeProduct }) =>
+      makeDB({
+        products: [makeProduct({ ...negativeProduct, deleted: false })],
+      }),
+    );
 
 // Arbitrary: negatif bakiyeye düşecek kasa içeren DB
-const arbDBWithNegativeKasa = () => fc.record({
-  amount: fc.float({ min: 1, max: 10000, noNaN: true }),
-}).map(({ amount }) =>
-  makeDB({
-    kasa: [makeKasaEntry({ id: 'k_neg', type: 'gider', amount, kasa: 'nakit', deleted: false })],
-  })
-);
+const arbDBWithNegativeKasa = () =>
+  fc
+    .record({
+      amount: fc.float({ min: 1, max: 10000, noNaN: true }),
+    })
+    .map(({ amount }) =>
+      makeDB({
+        kasa: [makeKasaEntry({ id: 'k_neg', type: 'gider', amount, kasa: 'nakit', deleted: false })],
+      }),
+    );
 
 // Property 1: validateTransaction her zaman geçerli RuleViolation[] döndürür
 // Feature: rule-engine-audit, Property 1: validateTransaction never throws and always returns valid RuleViolation[]
@@ -411,7 +422,9 @@ describe('Property 1: validateTransaction never throws and always returns valid 
     fc.assert(
       fc.property(arbDB(), arbDB(), (prevDB, nextDB) => {
         let result: RuleViolation[] = [];
-        expect(() => { result = validateTransaction(prevDB, nextDB); }).not.toThrow();
+        expect(() => {
+          result = validateTransaction(prevDB, nextDB);
+        }).not.toThrow();
         expect(Array.isArray(result)).toBe(true);
         for (const v of result) {
           expect(typeof v.ruleId).toBe('string');
@@ -420,7 +433,7 @@ describe('Property 1: validateTransaction never throws and always returns valid 
           expect(['block', 'warn']).toContain(v.severity);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -433,9 +446,9 @@ describe('Property 2: Negative stock always produces a block violation', () => {
       fc.property(arbDBWithNegativeStock(), (nextDB) => {
         const prevDB = makeDB();
         const violations = validateTransaction(prevDB, nextDB);
-        return violations.some(v => v.severity === 'block' && v.ruleId === 'negative_stock');
+        return violations.some((v) => v.severity === 'block' && v.ruleId === 'negative_stock');
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -448,9 +461,9 @@ describe('Property 3: Negative kasa balance always produces a block violation', 
       fc.property(arbDBWithNegativeKasa(), (nextDB) => {
         const prevDB = makeDB();
         const violations = validateTransaction(prevDB, nextDB);
-        return violations.some(v => v.severity === 'block' && v.ruleId === 'negative_kasa');
+        return violations.some((v) => v.severity === 'block' && v.ruleId === 'negative_kasa');
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -466,9 +479,9 @@ describe('Property 4: Zero or negative amount always produces a block violation'
           kasa: [makeKasaEntry({ id: 'k_new', amount })],
         });
         const violations = validateTransaction(prev, next);
-        return violations.some(v => v.severity === 'block' && v.ruleId === 'zero_amount');
+        return violations.some((v) => v.severity === 'block' && v.ruleId === 'zero_amount');
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -480,9 +493,9 @@ describe('Property 4: Zero or negative amount always produces a block violation'
           sales: [makeSale({ id: 's_new', total })],
         });
         const violations = validateTransaction(prev, next);
-        return violations.some(v => v.severity === 'block' && v.ruleId === 'zero_amount');
+        return violations.some((v) => v.severity === 'block' && v.ruleId === 'zero_amount');
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
@@ -493,28 +506,28 @@ describe('min_stock kuralı', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 1, minStock: 2 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.some(v => v.ruleId === 'min_stock' && v.severity === 'warn')).toBe(true);
+    expect(violations.some((v) => v.ruleId === 'min_stock' && v.severity === 'warn')).toBe(true);
   });
 
   it('stok minStock üstündeyse sorun çıkarmaz', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 5, minStock: 2 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'min_stock')).toHaveLength(0);
   });
 
   it('minStock 0 ise ihlal üretmez', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 0, minStock: 0 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'min_stock')).toHaveLength(0);
   });
 
   it('silinmiş ürün min_stock altında olsa da ihlal üretmez', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 1, minStock: 5, deleted: true })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'min_stock')).toHaveLength(0);
   });
 });
 
@@ -523,14 +536,14 @@ describe('min_stock kuralı — ek testler (H10)', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 3, minStock: 2 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'min_stock')).toHaveLength(0);
   });
 
   it('stok 0 ve minStock > 0 ise ihlal üretmez (stok > 0 koşulu)', () => {
     const prev = makeDB();
     const next = makeDB({ products: [makeProduct({ stock: 0, minStock: 3 })] });
     const violations = validateTransaction(prev, next);
-    expect(violations.filter(v => v.ruleId === 'min_stock')).toHaveLength(0);
+    expect(violations.filter((v) => v.ruleId === 'min_stock')).toHaveLength(0);
   });
 
   it('birden çok ürün min_stock altındayken her biri için ayrı ihlal üretilmeli', () => {
@@ -543,9 +556,9 @@ describe('min_stock kuralı — ek testler (H10)', () => {
       ],
     });
     const violations = validateTransaction(prev, next);
-    const minStockViolations = violations.filter(v => v.ruleId === 'min_stock');
+    const minStockViolations = violations.filter((v) => v.ruleId === 'min_stock');
     expect(minStockViolations).toHaveLength(2);
-    expect(minStockViolations.every(v => v.severity === 'warn')).toBe(true);
+    expect(minStockViolations.every((v) => v.severity === 'warn')).toBe(true);
   });
 });
 

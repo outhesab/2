@@ -18,13 +18,13 @@ function parseYamlStages(content: string): string[] {
     // Try inline array: stages: [a, b, c]
     const inlineMatch = content.match(/^stages\s*:\s*\[([^\]]+)\]/m);
     if (inlineMatch) {
-      return inlineMatch[1].split(',').map(s => s.trim().replace(/['"]/g, ''));
+      return inlineMatch[1].split(',').map((s) => s.trim().replace(/['"]/g, ''));
     }
     return [];
   }
   return stagesMatch[1]
     .split('\n')
-    .map(line => line.replace(/^\s+-\s+/, '').trim())
+    .map((line) => line.replace(/^\s+-\s+/, '').trim())
     .filter(Boolean);
 }
 

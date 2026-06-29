@@ -1,5 +1,5 @@
-import { getBrandVersion } from "@/config/brand";
-import { CHANGELOG } from "./changelog";
+import { getBrandVersion } from '@/config/brand';
+import { CHANGELOG } from './changelog';
 
 export const VERSION = getBrandVersion();
 
@@ -8,5 +8,5 @@ export function getAppVersion(): string {
 }
 
 export function getVersionTitle(): string {
-  return CHANGELOG[0]?.title || "";
+  return CHANGELOG[0]?.title || '';
 }

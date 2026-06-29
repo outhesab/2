@@ -22,7 +22,7 @@ export class UndoHandler implements IntentHandler {
     const query = input.toLowerCase().trim();
     if (!query.includes('son')) return false;
 
-    return this.undoVerbs.some(v => query.includes(v));
+    return this.undoVerbs.some((v) => query.includes(v));
   }
 
   async handle(input: string, db: DB, _context: HandlerContext): Promise<ExecutiveResult> {

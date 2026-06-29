@@ -1,15 +1,10 @@
 /**
  * SOBA NEXUS AI — ExcelNexusModule
- * Handles external file analysis, offline data quality checks, 
+ * Handles external file analysis, offline data quality checks,
  * and bridging file data to internal domain agents.
  */
 
-import { 
-  analyzeOffline, 
-  buildFileContext, 
-  type OfflineAnalysis, 
-  type ExcelFile 
-} from '@/lib/offline-ai';
+import { analyzeOffline, buildFileContext, type OfflineAnalysis, type ExcelFile } from '@/lib/offline-ai';
 import { logger } from '@/lib/logger';
 
 export class ExcelNexusModule {
@@ -44,11 +39,7 @@ export class ExcelNexusModule {
   /**
    * Sends a query to the Excel AI API.
    */
-  public async queryCloudAI(
-    query: string, 
-    files: ExcelFile[], 
-    messages: unknown[] = []
-  ): Promise<string> {
+  public async queryCloudAI(query: string, files: ExcelFile[], messages: unknown[] = []): Promise<string> {
     const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
     const fileContext = this.prepareContext(files);
 
@@ -64,7 +55,7 @@ export class ExcelNexusModule {
 
       if (!resp.ok) throw new Error(`API Error: ${resp.status}`);
 
-      // Since we want a final string for the Nexus Bubble/Panel, 
+      // Since we want a final string for the Nexus Bubble/Panel,
       // we accumulate the stream here.
       const reader = resp.body?.getReader();
       if (!reader) throw new Error('Response body is null');
@@ -104,18 +95,22 @@ export class ExcelNexusModule {
    * Bridges a file-based insight to an internal agent action.
    * Example: "Dosyadaki toplam tutarı kasaya ekle"
    */
-  public async bridgeToAgent(insight: string, agentId: 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek', payload: Record<string, unknown>) {
+  public async bridgeToAgent(
+    insight: string,
+    agentId: 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek',
+    payload: Record<string, unknown>,
+  ) {
     const { getAgent } = await import('@/agents');
     // Cast to specific literal to satisfy overload resolution
     const agent = getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
-    
+
     return agent.islemYap({
       action: 'nexus_bridge_action',
       payload: {
         source: 'ExcelNexusModule',
         insight,
-        ...payload
-      }
+        ...payload,
+      },
     });
   }
 }

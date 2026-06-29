@@ -5,21 +5,21 @@ import type { Intent } from '@/domain/types';
 import { logger } from '@/lib/logger';
 
 export type SaveFn = (updater: (prev: DB) => DB) => void;
- 
+
 // ---------------------------------------------------------------------------
 // DB İşlem Tipleri
 // ---------------------------------------------------------------------------
- 
+
 export interface DBAction {
   type: 'sale' | 'kasa_gelir' | 'kasa_gider' | 'stok_guncelle' | 'cari_tahsilat' | 'urun_ekle' | 'cari_ekle';
   label: string; // kullanıcıya gösterilecek özet
   payload: Record<string, unknown>;
 }
- 
+
 // ---------------------------------------------------------------------------
 // AI yanıtından ACTION bloğunu parse et
 // ---------------------------------------------------------------------------
- 
+
 export function parseActions(text: string): DBAction[] {
   const actions: DBAction[] = [];
   const regex = /```action\n([\s\S]*?)```/g;
@@ -34,20 +34,25 @@ export function parseActions(text: string): DBAction[] {
   }
   return actions;
 }
- 
+
 // ---------------------------------------------------------------------------
 // AI yanıtından ACTION bloklarını temizle (chat'te gösterme)
 // ---------------------------------------------------------------------------
- 
+
 export function stripActions(text: string): string {
   return text.replace(/```action\n[\s\S]*?```/g, '').trim();
 }
- 
+
 // ---------------------------------------------------------------------------
 // Lookup helpers
 // ---------------------------------------------------------------------------
- 
-function findBySimpleRef<T extends { id: string; name: string; deleted?: boolean }>(items: T[], idKey: string, nameKey: string, payload: Record<string, unknown>): T | null {
+
+function findBySimpleRef<T extends { id: string; name: string; deleted?: boolean }>(
+  items: T[],
+  idKey: string,
+  nameKey: string,
+  payload: Record<string, unknown>,
+): T | null {
   const idRef = String(payload[idKey] || '').trim();
   const nameRef = String(payload[nameKey] || '').trim();
   if (idRef) {
@@ -63,29 +68,29 @@ function findBySimpleRef<T extends { id: string; name: string; deleted?: boolean
   }
   return null;
 }
- 
+
 export function findProductByRef(db: DB, payload: Record<string, unknown>) {
   return findBySimpleRef(db.products, 'productId', 'productName', payload);
 }
- 
+
 export function findCariByRef(db: DB, payload: Record<string, unknown>) {
   return findBySimpleRef(db.cari, 'cariId', 'cariName', payload);
 }
- 
+
 // ---------------------------------------------------------------------------
 // Validasyon — işlemin DB'ye uygulanabilir olup olmadığını kontrol eder
 // ---------------------------------------------------------------------------
- 
+
 export function validateAction(prev: DB, action: DBAction): string | null {
   const intent = mapActionToIntent(action);
   if (!intent) return `Desteklenmeyen aksiyon tipi: ${action.type}`;
-  
+
   const result = processIntent(intent, prev);
   if (!result.ok) return result.error || 'İşlem doğrulanamadı';
-  
+
   return null;
 }
- 
+
 function mapActionToIntent(action: DBAction): Intent | null {
   const p = action.payload;
   switch (action.type) {
@@ -93,15 +98,23 @@ function mapActionToIntent(action: DBAction): Intent | null {
       return {
         type: 'sale',
         payload: {
-          items: (p.items as Array<{ productId: string; productName: string; quantity: number; unitPrice: number; cost: number; total: number }>) || [],
-          payment: (p.payment as "nakit" | "kart" | "havale" | "cari") || 'nakit',
+          items:
+            (p.items as Array<{
+              productId: string;
+              productName: string;
+              quantity: number;
+              unitPrice: number;
+              cost: number;
+              total: number;
+            }>) || [],
+          payment: (p.payment as 'nakit' | 'kart' | 'havale' | 'cari') || 'nakit',
           cariId: (p.cariId as string) || undefined,
           customerName: (p.customerName as string) || undefined,
           discount: (p.discount as number) || 0,
           discountAmount: (p.discountAmount as number) || 0,
           tahsilat: (p.tahsilat as number) || 0,
           saleDate: (p.saleDate as string) || undefined,
-        }
+        },
       };
     case 'kasa_gelir':
     case 'kasa_gider':
@@ -112,7 +125,7 @@ function mapActionToIntent(action: DBAction): Intent | null {
           kasa: (p.kasa as string) || 'nakit',
           description: (p.description as string) || '',
           category: (p.category as string) || 'diger',
-        }
+        },
       };
     case 'stok_guncelle':
       return {
@@ -122,7 +135,7 @@ function mapActionToIntent(action: DBAction): Intent | null {
           amount: (p.amount as number) || 0,
           type: (p.type as 'giris' | 'cikis') || 'cikis',
           description: (p.label as string) || '',
-        }
+        },
       };
     case 'urun_ekle':
       return {
@@ -132,7 +145,7 @@ function mapActionToIntent(action: DBAction): Intent | null {
           category: (p.category as string) || 'Genel',
           initialStock: (p.stock as number) || 0,
           unitPrice: (p.price as number) || 0,
-        }
+        },
       };
     case 'cari_tahsilat':
       return {
@@ -141,7 +154,7 @@ function mapActionToIntent(action: DBAction): Intent | null {
           cariId: (p.cariId as string) || '',
           amount: (p.amount as number) || 0,
           kasa: (p.kasa as string) || 'nakit',
-        }
+        },
       };
     case 'cari_ekle':
       return {
@@ -152,27 +165,27 @@ function mapActionToIntent(action: DBAction): Intent | null {
           email: (p.email as string) || '',
           phone: (p.phone as string) || '',
           address: (p.address as string) || '',
-        }
+        },
       };
     default:
       return null;
   }
 }
- 
+
 // ---------------------------------------------------------------------------
 // Fallback — validasyon hatası durumunda alternatif aksiyonlar üret
 // ---------------------------------------------------------------------------
- 
+
 export function buildFallbackActions(prev: DB, action: DBAction, reason: string): DBAction[] {
   const p = action.payload;
   const candidates: DBAction[] = [];
- 
+
   if (action.type === 'sale') {
     const product = findProductByRef(prev, p);
     if (!product) return [];
     const qty = Number(p.quantity);
     const unitPrice = Number(p.unitPrice);
- 
+
     if (String(p.productId || '').trim() !== product.id) {
       candidates.push({
         ...action,
@@ -180,7 +193,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
         payload: { ...p, productId: product.id, productName: product.name },
       });
     }
- 
+
     if ((reason.includes('yetersiz stok') || (Number.isFinite(qty) && qty > product.stock)) && product.stock > 0) {
       candidates.push({
         ...action,
@@ -193,7 +206,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
         },
       });
     }
- 
+
     if (!Number.isFinite(qty) || qty <= 0) {
       candidates.push({
         ...action,
@@ -206,7 +219,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
         },
       });
     }
- 
+
     if (!Number.isFinite(unitPrice) || unitPrice < 0) {
       candidates.push({
         ...action,
@@ -220,7 +233,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
       });
     }
   }
- 
+
   if (action.type === 'stok_guncelle') {
     const product = findProductByRef(prev, p);
     if (!product) return [];
@@ -236,7 +249,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
       },
     });
   }
- 
+
   if (action.type === 'cari_tahsilat') {
     const cari = findCariByRef(prev, p);
     if (!cari) return [];
@@ -255,7 +268,7 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
       },
     });
   }
- 
+
   if (action.type === 'kasa_gelir' || action.type === 'kasa_gider') {
     const amount = Number(p.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -266,30 +279,30 @@ export function buildFallbackActions(prev: DB, action: DBAction, reason: string)
       });
     }
   }
- 
+
   return candidates;
 }
- 
+
 // ---------------------------------------------------------------------------
 // ActionAttemptResult — uygulama sonucu
 // ---------------------------------------------------------------------------
- 
+
 export type ActionAttemptResult = {
   next: DB;
   applied: boolean;
   appliedAction?: DBAction;
   notes: string[];
 };
- 
+
 // ---------------------------------------------------------------------------
 // applyActionWithFallback — validasyon + fallback döngüsü ile işlem uygula
 // ---------------------------------------------------------------------------
- 
+
 export function applyActionWithFallback(prev: DB, action: DBAction): ActionAttemptResult {
   const queue: DBAction[] = [action];
   const seen = new Set<string>();
   const notes: string[] = [];
- 
+
   while (queue.length > 0 && seen.size < 12) {
     const candidate = queue.shift()!;
     const key = JSON.stringify({
@@ -298,7 +311,7 @@ export function applyActionWithFallback(prev: DB, action: DBAction): ActionAttem
     });
     if (seen.has(key)) continue;
     seen.add(key);
- 
+
     const violation = validateAction(prev, candidate);
     if (violation) {
       notes.push(`${candidate.label}: ${violation}`);
@@ -306,7 +319,7 @@ export function applyActionWithFallback(prev: DB, action: DBAction): ActionAttem
       for (const alt of fallbacks) queue.push(alt);
       continue;
     }
- 
+
     try {
       const next = applyAction(prev, candidate);
       if (candidate !== action) {
@@ -320,20 +333,20 @@ export function applyActionWithFallback(prev: DB, action: DBAction): ActionAttem
       for (const alt of fallbacks) queue.push(alt);
     }
   }
- 
+
   return { next: prev, applied: false, notes };
 }
- 
+
 // ---------------------------------------------------------------------------
 // applyAction — DB'ye işlemi uygula (atomic transition)
 // ---------------------------------------------------------------------------
- 
+
 export function applyAction(prev: DB, action: DBAction): DB {
   const intent = mapActionToIntent(action);
   if (!intent) throw new Error(`Desteklenmeyen aksiyon tipi: ${action.type}`);
-  
+
   const result = processIntent(intent, prev);
   if (!result.ok) throw new Error(result.error || 'İşlem başarısız oldu');
-  
+
   return applyIntentResult(prev, result.data!);
 }

@@ -39,7 +39,10 @@ export function addOrder(prev: DB, dbKey: string, order: Record<string, unknown>
   const db = asDB(prev);
   return fromDB(prev, {
     ...db,
-    [dbKey]: [...asArray<Record<string, unknown>>(db[dbKey]), { id: genId(), createdAt: nowIso, updatedAt: nowIso, ...order }],
+    [dbKey]: [
+      ...asArray<Record<string, unknown>>(db[dbKey]),
+      { id: genId(), createdAt: nowIso, updatedAt: nowIso, ...order },
+    ],
   });
 }
 

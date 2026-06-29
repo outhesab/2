@@ -288,7 +288,13 @@ function makeDBWithSizeMB(targetMB: number): DB {
   if (needed > 0) {
     // Dinamik boyut hesaplama: her note'un kapladığı gerçek boyutu ölç
     const sampleContent = 'A'.repeat(1000);
-    const sampleNote = { id: 'n0', title: 'x', content: sampleContent, createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' };
+    const sampleNote = {
+      id: 'n0',
+      title: 'x',
+      content: sampleContent,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
     const bytesPerNote = JSON.stringify(sampleNote).length;
     const count = Math.max(1, Math.ceil(needed / bytesPerNote));
     const contentLength = Math.floor(1000 * (needed / count / bytesPerNote));

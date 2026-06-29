@@ -14,10 +14,7 @@ import { saveToFirebase } from './sync';
 import { getUserSession } from '@/lib/userManager';
 import { logger } from '@/lib/logger';
 
-export function useDBBackup(
-  db: DB,
-  setDb: React.Dispatch<React.SetStateAction<DB>>,
-) {
+export function useDBBackup(db: DB, setDb: React.Dispatch<React.SetStateAction<DB>>) {
   const exportJSON = useCallback(async () => {
     const data = JSON.stringify(db, null, 2);
     const filename = `soba-yedek-${new Date().toISOString().slice(0, 10)}.json`;
@@ -80,58 +77,61 @@ export function useDBBackup(
       if (session) {
         await saveToFirebase(data, session.userId);
       } else {
-        logger.warn('db', 'Oturum bulunamadı, yedek Firebase\'e yazılamadı');
+        logger.warn('db', "Oturum bulunamadı, yedek Firebase'e yazılamadı");
       }
       return { ok: true, report };
     },
     [db, setDb],
   );
 
-  const importJSON = useCallback((file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const raw = JSON.parse(e.target?.result as string);
-          if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-            resolve(false);
-            return;
-          }
-          if ('__proto__' in raw || 'constructor' in raw || 'prototype' in raw) {
-            resolve(false);
-            return;
-          }
-          const jsonStr = JSON.stringify(raw);
-          if (jsonStr.length > 10 * 1024 * 1024) {
-            resolve(false);
-            return;
-          }
-          const arrayKeys = ['products', 'sales', 'suppliers', 'kasa', 'cari', 'invoices'];
-          for (const key of arrayKeys) {
-            if (key in raw && !Array.isArray(raw[key])) {
+  const importJSON = useCallback(
+    (file: File): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const raw = JSON.parse(e.target?.result as string);
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
               resolve(false);
               return;
             }
+            if ('__proto__' in raw || 'constructor' in raw || 'prototype' in raw) {
+              resolve(false);
+              return;
+            }
+            const jsonStr = JSON.stringify(raw);
+            if (jsonStr.length > 10 * 1024 * 1024) {
+              resolve(false);
+              return;
+            }
+            const arrayKeys = ['products', 'sales', 'suppliers', 'kasa', 'cari', 'invoices'];
+            for (const key of arrayKeys) {
+              if (key in raw && !Array.isArray(raw[key])) {
+                resolve(false);
+                return;
+              }
+            }
+            const def = makeDefaultDB();
+            const { db: data } = fullRestoreDB(raw as DB, def);
+            setDb(data);
+            saveToStorage(data);
+            void saveToIndexedSnapshot(data);
+            const session = getUserSession();
+            if (session) {
+              saveToFirebase(data, session.userId);
+            } else {
+              logger.warn('db', "Oturum bulunamadı, içe aktarılan veri Firebase'e yazılamadı");
+            }
+            resolve(true);
+          } catch {
+            resolve(false);
           }
-          const def = makeDefaultDB();
-          const { db: data } = fullRestoreDB(raw as DB, def);
-          setDb(data);
-          saveToStorage(data);
-          void saveToIndexedSnapshot(data);
-          const session = getUserSession();
-          if (session) {
-            saveToFirebase(data, session.userId);
-          } else {
-            logger.warn('db', 'Oturum bulunamadı, içe aktarılan veri Firebase\'e yazılamadı');
-          }
-          resolve(true);
-        } catch {
-          resolve(false);
-        }
-      };
-      reader.readAsText(file);
-    });
-  }, [setDb]);
+        };
+        reader.readAsText(file);
+      });
+    },
+    [setDb],
+  );
 
   return {
     exportJSON,

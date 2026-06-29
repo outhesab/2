@@ -35,7 +35,7 @@ function playTone(
   volume: number,
   type: OscillatorType = 'sine',
   startTime: number = 0,
-  fadeOut: boolean = true
+  fadeOut: boolean = true,
 ) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -141,7 +141,7 @@ function speak(text: string, volume: number) {
   utter.pitch = 1.0;
   utter.volume = Math.min(1, volume * 1.5);
   const voices = window.speechSynthesis.getVoices();
-  const trVoice = voices.find(v => v.lang.startsWith('tr'));
+  const trVoice = voices.find((v) => v.lang.startsWith('tr'));
   if (trVoice) utter.voice = trVoice;
   window.speechSynthesis.speak(utter);
 }
@@ -152,7 +152,10 @@ function loadSpeechEnabled(): boolean {
     if (!raw) return true;
     const parsed = JSON.parse(raw);
     return parsed.soundSettings?.speechEnabled !== false;
-  } catch { logger.warn('sound', 'Konuşma ayarı okunamadı'); return true; }
+  } catch {
+    logger.warn('sound', 'Konuşma ayarı okunamadı');
+    return true;
+  }
 }
 
 // Android WebView'da AudioContext'i kullanıcı etkileşimiyle başlat
@@ -208,51 +211,56 @@ export function useSoundFeedback() {
     return ctxRef.current;
   }, []);
 
-  const playSound = useCallback((type: SoundType) => {
-    const settings = loadSoundSettings();
-    if (!settings.enabled) return;
+  const playSound = useCallback(
+    (type: SoundType) => {
+      const settings = loadSoundSettings();
+      if (!settings.enabled) return;
 
-    const ctx = getCtx();
-    if (!ctx) return;
+      const ctx = getCtx();
+      if (!ctx) return;
 
-    const vol = Math.max(0.1, settings.volume); // minimum ses seviyesi garantisi
-    const theme = settings.theme;
+      const vol = Math.max(0.1, settings.volume); // minimum ses seviyesi garantisi
+      const theme = settings.theme;
 
-    const resume = () => {
-      if (ctx.state === 'suspended') return ctx.resume();
-      return Promise.resolve();
-    };
+      const resume = () => {
+        if (ctx.state === 'suspended') return ctx.resume();
+        return Promise.resolve();
+      };
 
-    resume().then(() => {
-      switch (type) {
-        case 'success':
-          if (theme === 'minimal') playSuccessMinimal(ctx, vol);
-          else if (theme === 'yogun') playSuccessYogun(ctx, vol);
-          else playSuccessStandart(ctx, vol);
-          break;
-        case 'error':
-          if (theme === 'minimal') playErrorMinimal(ctx, vol);
-          else if (theme === 'yogun') playErrorYogun(ctx, vol);
-          else playErrorStandart(ctx, vol);
-          break;
-        case 'warning':
-          if (theme === 'minimal') playWarningMinimal(ctx, vol);
-          else if (theme === 'yogun') playWarningYogun(ctx, vol);
-          else playWarningStandart(ctx, vol);
-          break;
-        case 'sale':
-          if (theme === 'minimal') playSaleMinimal(ctx, vol);
-          else if (theme === 'yogun') playSaleYogun(ctx, vol);
-          else playSaleStandart(ctx, vol);
-          break;
-        case 'notification':
-          if (theme === 'minimal') playNotificationMinimal(ctx, vol);
-          else if (theme === 'yogun') playNotificationYogun(ctx, vol);
-          else playNotificationStandart(ctx, vol);
-          break;
-      }
-    }).catch(() => logger.warn('sound', 'Ses oynatma başarısız'));
-  }, [getCtx]);
+      resume()
+        .then(() => {
+          switch (type) {
+            case 'success':
+              if (theme === 'minimal') playSuccessMinimal(ctx, vol);
+              else if (theme === 'yogun') playSuccessYogun(ctx, vol);
+              else playSuccessStandart(ctx, vol);
+              break;
+            case 'error':
+              if (theme === 'minimal') playErrorMinimal(ctx, vol);
+              else if (theme === 'yogun') playErrorYogun(ctx, vol);
+              else playErrorStandart(ctx, vol);
+              break;
+            case 'warning':
+              if (theme === 'minimal') playWarningMinimal(ctx, vol);
+              else if (theme === 'yogun') playWarningYogun(ctx, vol);
+              else playWarningStandart(ctx, vol);
+              break;
+            case 'sale':
+              if (theme === 'minimal') playSaleMinimal(ctx, vol);
+              else if (theme === 'yogun') playSaleYogun(ctx, vol);
+              else playSaleStandart(ctx, vol);
+              break;
+            case 'notification':
+              if (theme === 'minimal') playNotificationMinimal(ctx, vol);
+              else if (theme === 'yogun') playNotificationYogun(ctx, vol);
+              else playNotificationStandart(ctx, vol);
+              break;
+          }
+        })
+        .catch(() => logger.warn('sound', 'Ses oynatma başarısız'));
+    },
+    [getCtx],
+  );
 
   const speakMessage = useCallback((message: string) => {
     const settings = loadSoundSettings();
@@ -261,12 +269,15 @@ export function useSoundFeedback() {
     speak(message, settings.volume);
   }, []);
 
-  const playSoundWithSpeech = useCallback((type: SoundType, message?: string) => {
-    playSound(type);
-    if (message) {
-      setTimeout(() => speakMessage(message), 300);
-    }
-  }, [playSound, speakMessage]);
+  const playSoundWithSpeech = useCallback(
+    (type: SoundType, message?: string) => {
+      playSound(type);
+      if (message) {
+        setTimeout(() => speakMessage(message), 300);
+      }
+    },
+    [playSound, speakMessage],
+  );
 
   useEffect(() => {
     return () => {

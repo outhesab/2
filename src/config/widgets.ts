@@ -11,4 +11,4 @@ export const WIDGET_OPTIONS = [
   { id: 'yedekHatirlatma', icon: '💾', label: 'Yedek Hatırlatma' },
 ] as const;
 
-export type WidgetId = typeof WIDGET_OPTIONS[number]['id'];
+export type WidgetId = (typeof WIDGET_OPTIONS)[number]['id'];

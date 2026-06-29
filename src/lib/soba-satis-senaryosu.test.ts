@@ -34,8 +34,8 @@ function makeSoba(stock: number): Product {
     id: 'soba-001',
     name: 'Standart Soba',
     category: 'soba',
-    cost: 800,      // alış fiyatı
-    price: 1200,    // satış fiyatı
+    cost: 800, // alış fiyatı
+    price: 1200, // satış fiyatı
     stock,
     minStock: 5,
     deleted: false,
@@ -52,9 +52,9 @@ function satisYap(
   prevDB: DB,
   adet: number,
   odeme: 'nakit' | 'kart' | 'havale' | 'cari' = 'nakit',
-  cariId?: string
+  cariId?: string,
 ): { nextDB: DB; violations: ReturnType<typeof validateTransaction>; saleId: string } {
-  const product = prevDB.products.find(p => p.id === 'soba-001')!;
+  const product = prevDB.products.find((p) => p.id === 'soba-001')!;
   const saleId = genId();
   const nowIso = now();
 
@@ -78,24 +78,34 @@ function satisYap(
     profit,
     payment: odeme,
     status: 'tamamlandi',
-    items: [{ productId: product.id, productName: product.name, quantity: adet, unitPrice: product.price, cost: product.cost, total }],
+    items: [
+      {
+        productId: product.id,
+        productName: product.name,
+        quantity: adet,
+        unitPrice: product.price,
+        cost: product.cost,
+        total,
+      },
+    ],
     createdAt: nowIso,
     updatedAt: nowIso,
   };
 
-  const kasaEntry: KasaEntry | null = odeme !== 'cari'
-    ? {
-        id: genId(),
-        type: 'gelir',
-        category: 'satis',
-        amount: total,
-        kasa: odeme === 'nakit' ? 'nakit' : 'banka',
-        description: `Satış: ${product.name} x${adet}`,
-        relatedId: saleId,
-        createdAt: nowIso,
-        updatedAt: nowIso,
-      }
-    : null;
+  const kasaEntry: KasaEntry | null =
+    odeme !== 'cari'
+      ? {
+          id: genId(),
+          type: 'gelir',
+          category: 'satis',
+          amount: total,
+          kasa: odeme === 'nakit' ? 'nakit' : 'banka',
+          description: `Satış: ${product.name} x${adet}`,
+          relatedId: saleId,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        }
+      : null;
 
   const stockMovement: StockMovement = {
     id: genId(),
@@ -112,18 +122,16 @@ function satisYap(
   // Cari bakiyesi güncelle
   let cari = prevDB.cari;
   if (odeme === 'cari' && cariId) {
-    cari = cari.map(c =>
-      c.id === cariId
-        ? { ...c, balance: (c.balance || 0) + total, lastTransaction: nowIso, updatedAt: nowIso }
-        : c
+    cari = cari.map((c) =>
+      c.id === cariId ? { ...c, balance: (c.balance || 0) + total, lastTransaction: nowIso, updatedAt: nowIso } : c,
     );
   }
 
   const nextDB: DB = {
     ...prevDB,
     sales: [...prevDB.sales, sale],
-    products: prevDB.products.map(p =>
-      p.id === 'soba-001' ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p
+    products: prevDB.products.map((p) =>
+      p.id === 'soba-001' ? { ...p, stock: p.stock - adet, updatedAt: nowIso } : p,
     ),
     kasa: kasaEntry ? [...prevDB.kasa, kasaEntry] : prevDB.kasa,
     stockMovements: [...prevDB.stockMovements, stockMovement],
@@ -137,7 +145,6 @@ function satisYap(
 // ─── TESTLER ──────────────────────────────────────────────────────────────────
 
 describe('🔥 Soba Satış Senaryosu', () => {
-
   // ── 1. Normal Satış ────────────────────────────────────────────────────────
   describe('1. Normal satış — 100 adet, stok 120', () => {
     const prevDB = makeDB({ products: [makeSoba(120)] });
@@ -148,13 +155,13 @@ describe('🔥 Soba Satış Senaryosu', () => {
     });
 
     it('stok 120 → 20 olmalı', () => {
-      const soba = nextDB.products.find(p => p.id === 'soba-001')!;
+      const soba = nextDB.products.find((p) => p.id === 'soba-001')!;
       expect(soba.stock).toBe(20);
     });
 
     it('kasa geliri 120.000 ₺ olmalı (100 × 1.200 ₺)', () => {
       const kasaToplam = nextDB.kasa
-        .filter(k => k.type === 'gelir' && !k.deleted)
+        .filter((k) => k.type === 'gelir' && !k.deleted)
         .reduce((sum, k) => sum + k.amount, 0);
       expect(kasaToplam).toBe(120_000);
     });
@@ -184,14 +191,12 @@ describe('🔥 Soba Satış Senaryosu', () => {
     });
 
     it('stok 0 olmalı', () => {
-      const soba = nextDB.products.find(p => p.id === 'soba-001')!;
+      const soba = nextDB.products.find((p) => p.id === 'soba-001')!;
       expect(soba.stock).toBe(0);
     });
 
     it('kasa geliri 144.000 ₺ olmalı (120 × 1.200 ₺)', () => {
-      const kasaToplam = nextDB.kasa
-        .filter(k => k.type === 'gelir')
-        .reduce((sum, k) => sum + k.amount, 0);
+      const kasaToplam = nextDB.kasa.filter((k) => k.type === 'gelir').reduce((sum, k) => sum + k.amount, 0);
       expect(kasaToplam).toBe(144_000);
     });
   });
@@ -202,16 +207,16 @@ describe('🔥 Soba Satış Senaryosu', () => {
     const { violations } = satisYap(prevDB, 121);
 
     it('negative_stock ihlali üretmeli', () => {
-      expect(violations.some(v => v.ruleId === 'negative_stock')).toBe(true);
+      expect(violations.some((v) => v.ruleId === 'negative_stock')).toBe(true);
     });
 
     it('ihlal severity: block olmalı — işlem engellenir', () => {
-      const v = violations.find(v => v.ruleId === 'negative_stock')!;
+      const v = violations.find((v) => v.ruleId === 'negative_stock')!;
       expect(v.severity).toBe('block');
     });
 
     it('hata mesajı stok değerini içermeli', () => {
-      const v = violations.find(v => v.ruleId === 'negative_stock')!;
+      const v = violations.find((v) => v.ruleId === 'negative_stock')!;
       expect(v.message).toContain('-1');
     });
   });
@@ -242,12 +247,12 @@ describe('🔥 Soba Satış Senaryosu', () => {
     });
 
     it('müşteri bakiyesi 120.000 ₺ artmalı', () => {
-      const cari = nextDB.cari.find(c => c.id === 'cari-001')!;
+      const cari = nextDB.cari.find((c) => c.id === 'cari-001')!;
       expect(cari.balance).toBe(120_000);
     });
 
     it('stok yine 20 olmalı', () => {
-      const soba = nextDB.products.find(p => p.id === 'soba-001')!;
+      const soba = nextDB.products.find((p) => p.id === 'soba-001')!;
       expect(soba.stock).toBe(20);
     });
   });
@@ -274,7 +279,7 @@ describe('🔥 Soba Satış Senaryosu', () => {
     });
 
     it('son stok: 120 - 100 = 20 olmalı', () => {
-      const soba = db.products.find(p => p.id === 'soba-001')!;
+      const soba = db.products.find((p) => p.id === 'soba-001')!;
       expect(soba.stock).toBe(20);
     });
 
@@ -283,9 +288,7 @@ describe('🔥 Soba Satış Senaryosu', () => {
     });
 
     it('toplam kasa geliri 120.000 ₺ olmalı (100 × 1.200 ₺)', () => {
-      const toplam = db.kasa
-        .filter(k => k.type === 'gelir' && !k.deleted)
-        .reduce((sum, k) => sum + k.amount, 0);
+      const toplam = db.kasa.filter((k) => k.type === 'gelir' && !k.deleted).reduce((sum, k) => sum + k.amount, 0);
       expect(toplam).toBe(120_000);
     });
 
@@ -310,22 +313,22 @@ describe('🔥 Soba Satış Senaryosu', () => {
     }
 
     it('120 satış sonrası stok 0 olmalı', () => {
-      const soba = db.products.find(p => p.id === 'soba-001')!;
+      const soba = db.products.find((p) => p.id === 'soba-001')!;
       expect(soba.stock).toBe(0);
     });
 
     it('121. satış girişimi engellenmelidir', () => {
       const { violations } = satisYap(db, 1);
-      expect(violations.some(v => v.ruleId === 'negative_stock' && v.severity === 'block')).toBe(true);
+      expect(violations.some((v) => v.ruleId === 'negative_stock' && v.severity === 'block')).toBe(true);
     });
 
-    it('engellenen satış DB\'yi değiştirmemeli (prevDB korunur)', () => {
+    it("engellenen satış DB'yi değiştirmemeli (prevDB korunur)", () => {
       const { violations, nextDB } = satisYap(db, 1);
       // Uygulama violations varsa nextDB'yi kaydetmez — stok hâlâ 0
       // Bu test, rule engine'in doğru ihlal ürettiğini doğrular
       expect(violations.length).toBeGreaterThan(0);
       // nextDB'de stok -1 olur ama uygulama bunu kaydetmez
-      const sobaNext = nextDB.products.find(p => p.id === 'soba-001')!;
+      const sobaNext = nextDB.products.find((p) => p.id === 'soba-001')!;
       expect(sobaNext.stock).toBe(-1); // nextDB hesaplandı ama kaydedilmedi
     });
   });
@@ -347,17 +350,16 @@ describe('🔥 Soba Satış Senaryosu', () => {
         db = nextDB;
       }
 
-      expect(ihlaller.filter(v => v.ruleId === 'zero_amount')).toHaveLength(0);
+      expect(ihlaller.filter((v) => v.ruleId === 'zero_amount')).toHaveLength(0);
       // Her kasaEntry 1.200 ₺ — ruleEngine'de TRANSACTION_LIMIT kasa kaydı için değil
       // auditEngine/dataIntegrityChecker'da kontrol edilir
     });
 
-    it('tek seferde 100 adet satış → kasaEntry 120.000 ₺ — ruleEngine ihlali yok (limit auditEngine\'de)', () => {
+    it("tek seferde 100 adet satış → kasaEntry 120.000 ₺ — ruleEngine ihlali yok (limit auditEngine'de)", () => {
       const prevDB = makeDB({ products: [makeSoba(120)] });
       const { violations } = satisYap(prevDB, 100);
       // ruleEngine TRANSACTION_LIMIT kontrolü yapmaz — bu auditEngine'in görevi
-      expect(violations.filter(v => v.ruleId === 'transaction_limit')).toHaveLength(0);
+      expect(violations.filter((v) => v.ruleId === 'transaction_limit')).toHaveLength(0);
     });
   });
-
 });

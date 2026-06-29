@@ -308,9 +308,8 @@ function suspiciousKasaDetector(db: DB): AnomalyResult[] {
       (k) => k.kasa === kasaId && k.type === 'gider' && new Date(k.createdAt).getTime() >= thirtyDaysAgo,
     );
     const totalGider = giderler.reduce((s, k) => s + k.amount, 0);
-    const earliestDate = giderler.length > 0
-      ? Math.min(...giderler.map(k => new Date(k.createdAt).getTime()))
-      : Date.now();
+    const earliestDate =
+      giderler.length > 0 ? Math.min(...giderler.map((k) => new Date(k.createdAt).getTime())) : Date.now();
     const daysWithData = Math.max(1, Math.ceil((Date.now() - earliestDate) / 86400000));
     kasaAvgGider[kasaId] = totalGider / daysWithData;
   });
@@ -547,10 +546,10 @@ function calculateHealthScore(anomalies: AnomalyResult[]): number {
   );
 }
 
-// ── Yardımcı: main thread'e nefes aldır ───────────────────────────────────── 
+// ── Yardımcı: main thread'e nefes aldır ─────────────────────────────────────
 
-/** 
- * Mikro-task bekle. 
+/**
+ * Mikro-task bekle.
  * requestIdleCallback varsa onu kullan, yoksa setTimeout(0).
  */
 function yieldToMain(): Promise<void> {
@@ -563,9 +562,9 @@ function yieldToMain(): Promise<void> {
 // ── Ana fonksiyon ─────────────────────────────────────────────────────────────
 
 export interface AnomalyProgress {
-  current: number;   // Tamamlanan dedektör
-  total: number;     // Toplam dedektör
-  label: string;     // Çalışan dedektör adı
+  current: number; // Tamamlanan dedektör
+  total: number; // Toplam dedektör
+  label: string; // Çalışan dedektör adı
 }
 
 export async function runAnomalyDetectionAsync(

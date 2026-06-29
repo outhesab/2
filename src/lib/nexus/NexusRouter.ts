@@ -1,7 +1,7 @@
 /**
  * SOBA NEXUS AI — NexusRouter
  * The central decision-making engine for all AI interactions.
- * 
+ *
  * Routes requests based on:
  * 1. Fast Path (Deterministic / Regex)
  * 2. Smart Path (Cloud LLM / Reasoning)
@@ -43,11 +43,15 @@ export class NexusRouter {
    * Primary routing function.
    * Determines the best path for a given input.
    */
-  public async route(input: string, db: DB, context: {
-    isFileContext?: boolean,
-    currentFiles?: unknown[],
-    adminMode?: boolean,
-  }): Promise<RouteResult> {
+  public async route(
+    input: string,
+    db: DB,
+    context: {
+      isFileContext?: boolean;
+      currentFiles?: unknown[];
+      adminMode?: boolean;
+    },
+  ): Promise<RouteResult> {
     const query = input.toLowerCase().trim();
 
     // 1. DATA PATH (Excel / File context)
@@ -66,15 +70,16 @@ export class NexusRouter {
 
     // Reasoning Check: If the user asks "Why", "How", "Predict", "Compare", skip Fast Path
     const reasoningKeywords = ['sence', 'neden', 'nasıl', 'karşılaştır', 'tahmin', 'gelecek', 'beklenti', 'analiz et'];
-    const isReasoning = reasoningKeywords.some(kw => query.includes(kw));
+    const isReasoning = reasoningKeywords.some((kw) => query.includes(kw));
 
     // 1b. MEMORY PATH (Cross-Entity Discount Transfer)
     // "Ali'nin indirimini Ahmet'e de uygula" kalıbını yakalar.
     const memoryProposal = this.detectDiscountTransfer(input, db);
     if (memoryProposal) {
-      const text = memoryProposal.ok && memoryProposal.applicable
-        ? `🧠 Hafıza: ${memoryProposal.reasoning}`
-        : `🧠 Hafıza: ${memoryProposal.error ?? memoryProposal.reasoning}`;
+      const text =
+        memoryProposal.ok && memoryProposal.applicable
+          ? `🧠 Hafıza: ${memoryProposal.reasoning}`
+          : `🧠 Hafıza: ${memoryProposal.error ?? memoryProposal.reasoning}`;
       return {
         type: 'memory',
         response: text,
@@ -113,15 +118,15 @@ export class NexusRouter {
     try {
       const deepSeek = getAgent('deep_seek');
       const timeoutPromise = new Promise<null>((_, reject) =>
-        setTimeout(() => reject(new Error('DeepSeek API timeout')), 15000)
+        setTimeout(() => reject(new Error('DeepSeek API timeout')), 15000),
       );
-      const result = await Promise.race([
+      const result = (await Promise.race([
         deepSeek.islemYap({
           action: 'analiz',
           payload: { soru: query, dbContext: 'summarized' },
         }),
         timeoutPromise,
-      ]) as Awaited<ReturnType<typeof deepSeek.islemYap>>;
+      ])) as Awaited<ReturnType<typeof deepSeek.islemYap>>;
 
       if (result.ok) {
         return {
@@ -154,8 +159,8 @@ export class NexusRouter {
     const q = input.toLowerCase().trim();
 
     // "indirim" ve bir transfer fiili içermeli
-    if (!q.includes("indirim")) return null;
-    const transferVerbs = ["uygula", "yap", "geçerli olsun", "geç", "uygulansın", "uygula yine", "tekrap uygula"];
+    if (!q.includes('indirim')) return null;
+    const transferVerbs = ['uygula', 'yap', 'geçerli olsun', 'geç', 'uygulansın', 'uygula yine', 'tekrap uygula'];
     if (!transferVerbs.some((v) => q.includes(v))) return null;
 
     // "indirim" kelimesini ekleriyle birlikte tüket (indirimini, indirimi, indirim, ...)
@@ -170,8 +175,34 @@ export class NexusRouter {
     const afterTokens = after.match(/[a-zçğıöşü]+/g) || [];
 
     // Filler/eylem kelimeleri — isim adayı değiller
-    const FILLERS = ["nin", "nın", "beye", "beyin", "yaptığım", "uyguladığım", "de", "ye", "ya", "bir", "icin", "ile", "ve", "ama", "fakat", "bu", "su", "o", "benim", "senin", "bizim", "gibi", "kadar", "da", "ki"];
-    const VERBS = ["uygula", "yap", "geç", "geçerli", "olsun", "uygulansın", "tekrar", "yine"];
+    const FILLERS = [
+      'nin',
+      'nın',
+      'beye',
+      'beyin',
+      'yaptığım',
+      'uyguladığım',
+      'de',
+      'ye',
+      'ya',
+      'bir',
+      'icin',
+      'ile',
+      've',
+      'ama',
+      'fakat',
+      'bu',
+      'su',
+      'o',
+      'benim',
+      'senin',
+      'bizim',
+      'gibi',
+      'kadar',
+      'da',
+      'ki',
+    ];
+    const VERBS = ['uygula', 'yap', 'geç', 'geçerli', 'olsun', 'uygulansın', 'tekrar', 'yine'];
 
     // Kaynak isim: "indirim"den önceki son filler-olmayan token
     const fromCandidates = beforeTokens.filter((t) => !FILLERS.includes(t) && t.length >= 2);
@@ -183,7 +214,7 @@ export class NexusRouter {
     if (!fromName || !toName) return null;
     if (fromName === toName) return null;
 
-    logger.info("ai", "Discount transfer detected", { from: fromName, to: toName });
+    logger.info('ai', 'Discount transfer detected', { from: fromName, to: toName });
     return proposeDiscountTransfer(db, fromName, toName);
   }
 }

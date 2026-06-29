@@ -58,7 +58,12 @@ export const navigationRules: SpecRule[] = [
         for (const id of tabIds) {
           const kebabId = camelToKebab(id);
           const idLower = id.toLowerCase();
-          if (!routePaths.has(id) && !routePaths.has(kebabId) && !routePaths.has(id.replace(/-/g, '')) && !lazyImports.has(idLower)) {
+          if (
+            !routePaths.has(id) &&
+            !routePaths.has(kebabId) &&
+            !routePaths.has(id.replace(/-/g, '')) &&
+            !lazyImports.has(idLower)
+          ) {
             violations.push({ file: 'src/App.tsx', message: `"${id}" tab'i için eşleşen Route path'i bulunamadı` });
           }
         }

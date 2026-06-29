@@ -1,4 +1,4 @@
-import type { DB } from "@/types";
+import type { DB } from '@/types';
 
 export interface OverdueCustomer {
   cariId: string;
@@ -16,15 +16,18 @@ export interface OverdueCustomer {
 
 export function getOverdueReceivables(db: DB): OverdueCustomer[] {
   const now = new Date();
-  const overdueMap = new Map<string, {
-    total: number,
-    oldestDate: string,
-    sales: OverdueCustomer['overdueSales']
-  }>();
+  const overdueMap = new Map<
+    string,
+    {
+      total: number;
+      oldestDate: string;
+      sales: OverdueCustomer['overdueSales'];
+    }
+  >();
 
   db.sales
-    .filter(s => !s.deleted && s.status === 'tamamlandi' && s.payment === 'cari' && s.cariId)
-    .forEach(sale => {
+    .filter((s) => !s.deleted && s.status === 'tamamlandi' && s.payment === 'cari' && s.cariId)
+    .forEach((sale) => {
       const dueDate = new Date(sale.dueDate || sale.createdAt);
       if (dueDate >= now) return;
       const diffDays = Math.ceil((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -33,7 +36,7 @@ export function getOverdueReceivables(db: DB): OverdueCustomer[] {
       const current = overdueMap.get(cid) || { total: 0, oldestDate: sale.createdAt, sales: [] };
 
       const payments = db.kasa
-        .filter(k => !k.deleted && k.relatedId === sale.id && k.type === 'gelir')
+        .filter((k) => !k.deleted && k.relatedId === sale.id && k.type === 'gelir')
         .reduce((sum, k) => sum + k.amount, 0);
 
       const remaining = sale.total - payments;
@@ -53,7 +56,7 @@ export function getOverdueReceivables(db: DB): OverdueCustomer[] {
 
   const result: OverdueCustomer[] = [];
   overdueMap.forEach((data, cariId) => {
-    const cari = db.cari.find(c => c.id === cariId);
+    const cari = db.cari.find((c) => c.id === cariId);
     if (cari) {
       result.push({
         cariId,

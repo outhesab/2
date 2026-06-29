@@ -1,6 +1,6 @@
 /**
  * AuditLogger — Domain event'leri activity log'a kaydeder.
- * 
+ *
  * Her domain event için _activityLog'a bir giriş ekler.
  * save fonksiyonu dışarıdan enjekte edilir (context).
  */
@@ -10,17 +10,17 @@ import type { DomainBusSaveFn } from '@/domain/eventBus';
 
 /** Event type → okunabilir etiket */
 const EVENT_LABELS: Record<string, string> = {
-  'sale.completed':       'Satış tamamlandı',
-  'sale.cancelled':       'Satış iptal edildi',
-  'sale.returned':        'Satış iade edildi',
+  'sale.completed': 'Satış tamamlandı',
+  'sale.cancelled': 'Satış iptal edildi',
+  'sale.returned': 'Satış iade edildi',
   'sale.price_corrected': 'Satış fiyatı düzeltildi',
-  'stock.deducted':       'Stok düşüldü',
-  'stock.returned':       'Stok iade alındı',
-  'stock.adjusted':       'Stok ayarlandı',
-  'stock.product_added':  'Ürün eklendi',
-  'cash.recorded':        'Kasa işlemi kaydedildi',
-  'cari.updated':         'Cari bakiye güncellendi',
-  'cari.added':           'Cari eklendi',
+  'stock.deducted': 'Stok düşüldü',
+  'stock.returned': 'Stok iade alındı',
+  'stock.adjusted': 'Stok ayarlandı',
+  'stock.product_added': 'Ürün eklendi',
+  'cash.recorded': 'Kasa işlemi kaydedildi',
+  'cari.updated': 'Cari bakiye güncellendi',
+  'cari.added': 'Cari eklendi',
 };
 
 function eventLabel(type: string): string {
