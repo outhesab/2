@@ -1,7 +1,7 @@
-import { type LucideIcon } from "lucide-react";
-import { BRAND_NAME } from "@/config/brand";
-import { TABS, type TabGroup, type TabId } from "@/config/tabs";
-import { formatMoney } from "@/lib/utils-tr";
+import { type LucideIcon } from 'lucide-react';
+import { BRAND_NAME } from '@/config/brand';
+import { TABS, type TabGroup, type TabId } from '@/config/tabs';
+import { formatMoney } from '@/lib/utils-tr';
 import { ParspelLogo } from '@/components/logo/ParspelLogo';
 
 interface SidebarProps {
@@ -64,7 +64,11 @@ export default function Sidebar({
             <p className="font-heading text-sm font-bold text-sidebar-foreground">{BRAND_NAME}</p>
             <p className="text-[11px] text-muted-foreground">Yönetim Paneli</p>
           </div>
-          {isMobile && <button onClick={() => setSidebarOpen(false)} className="app-sidebar-close-btn">✕</button>}
+          {isMobile && (
+            <button onClick={() => setSidebarOpen(false)} className="app-sidebar-close-btn">
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -86,7 +90,9 @@ export default function Sidebar({
                   aria-label={`${tab.label} hızlı erişim`}
                   className={`app-priority-tab ${gClass} ${isActive ? 'active' : 'inactive'}`}
                 >
-                  <span className={`app-priority-tab-icon ${isActive ? 'active' : 'inactive'}`}><Icon className="size-4" /></span>
+                  <span className={`app-priority-tab-icon ${isActive ? 'active' : 'inactive'}`}>
+                    <Icon className="size-4" />
+                  </span>
                   <span className="app-priority-tab-label">{tab.label}</span>
                 </button>
               );
@@ -110,35 +116,44 @@ export default function Sidebar({
                 <div className={`app-nav-group-line ${gClass}`} />
                 <span className="app-nav-group-count">{groupTabs.length}</span>
               </button>
-              {isExpanded && groupTabs.map((tab) => {
-                const badge = badges[tab.id];
-                const isActive = activeTab === tab.id;
-                const isFavorite = favoriteTabs.includes(tab.id);
-                const tClass = groupClass(tab.group);
-                const Icon = tab.icon;
-                return (
-                  <div key={tab.id} className="app-nav-tab-row">
-                    <button
-                      onClick={() => navigate(tab.id)}
-                      className={`app-nav-tab-btn ${tClass} ${isActive ? 'active' : 'inactive'}`}
-                    >
-                      <span className={`app-nav-tab-icon ${isActive ? 'active' : 'inactive'}`}><Icon className="size-4" /></span>
-                      <span className="app-nav-tab-label">{tab.label}</span>
-                      {badge ? <span className={`app-nav-badge ${tab.id === 'products' || tab.id === 'monitor' ? 'danger' : 'warn'}`}>{badge > 99 ? '99+' : badge}</span> : null}
-                      {isActive && <span className={`app-nav-tab-active-line ${tClass}`} />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleFavoriteTab(tab.id)}
-                      aria-label={`${tab.label} favorilere ${isFavorite ? 'ekli, kaldır' : 'ekle'}`}
-                      title={isFavorite ? 'Favorilerden kaldır' : 'Favorilere ekle'}
-                      className={`app-favorite-btn ${isFavorite ? 'active' : 'inactive'}`}
-                    >
-                      {isFavorite ? '★' : '☆'}
-                    </button>
-                  </div>
-                );
-              })}
+              {isExpanded &&
+                groupTabs.map((tab) => {
+                  const badge = badges[tab.id];
+                  const isActive = activeTab === tab.id;
+                  const isFavorite = favoriteTabs.includes(tab.id);
+                  const tClass = groupClass(tab.group);
+                  const Icon = tab.icon;
+                  return (
+                    <div key={tab.id} className="app-nav-tab-row">
+                      <button
+                        onClick={() => navigate(tab.id)}
+                        className={`app-nav-tab-btn ${tClass} ${isActive ? 'active' : 'inactive'}`}
+                      >
+                        <span className={`app-nav-tab-icon ${isActive ? 'active' : 'inactive'}`}>
+                          <Icon className="size-4" />
+                        </span>
+                        <span className="app-nav-tab-label">{tab.label}</span>
+                        {badge ? (
+                          <span
+                            className={`app-nav-badge ${tab.id === 'products' || tab.id === 'monitor' ? 'danger' : 'warn'}`}
+                          >
+                            {badge > 99 ? '99+' : badge}
+                          </span>
+                        ) : null}
+                        {isActive && <span className={`app-nav-tab-active-line ${tClass}`} />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFavoriteTab(tab.id)}
+                        aria-label={`${tab.label} favorilere ${isFavorite ? 'ekli, kaldır' : 'ekle'}`}
+                        title={isFavorite ? 'Favorilerden kaldır' : 'Favorilere ekle'}
+                        className={`app-favorite-btn ${isFavorite ? 'active' : 'inactive'}`}
+                      >
+                        {isFavorite ? '★' : '☆'}
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
           );
         })}
@@ -185,7 +200,15 @@ export default function Sidebar({
             {isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}
           </span>
           <span className={`app-sync-mini ${syncStatus}`} title={lastSyncTime}>
-            {syncStatus === 'saving' ? '⟳ Senkronize…' : syncStatus === 'saved' ? `✓ ${lastSyncTime}` : syncStatus === 'error' ? '✗ Hata' : syncStatus === 'loading' ? '↓ Yüklüyor' : ''}
+            {syncStatus === 'saving'
+              ? '⟳ Senkronize…'
+              : syncStatus === 'saved'
+                ? `✓ ${lastSyncTime}`
+                : syncStatus === 'error'
+                  ? '✗ Hata'
+                  : syncStatus === 'loading'
+                    ? '↓ Yüklüyor'
+                    : ''}
           </span>
         </div>
         <div className="app-status-foot">PARSPEL · Firebase & localStorage · Güvenli</div>

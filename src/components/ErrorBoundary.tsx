@@ -31,7 +31,14 @@ function logError(error: Error, errorInfo: string) {
   }
 }
 
-export function getErrorLogs(): Array<{ id: string; message: string; stack?: string; component: string; time: string; url: string }> {
+export function getErrorLogs(): Array<{
+  id: string;
+  message: string;
+  stack?: string;
+  component: string;
+  time: string;
+  url: string;
+}> {
   try {
     return JSON.parse(localStorage.getItem('sobaErrorLog') || '[]');
   } catch {
@@ -65,22 +72,68 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-primary)', background: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div
+          style={{
+            padding: 40,
+            textAlign: 'center',
+            color: 'var(--text-primary)',
+            background: '#0f172a',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <div style={{ fontSize: '4rem', marginBottom: 16 }}>⚠️</div>
           <h2 style={{ color: '#ef4444', marginBottom: 12, fontWeight: 800 }}>Bir Hata Oluştu</h2>
           <p style={{ color: '#94a3b8', marginBottom: 20, maxWidth: 480, lineHeight: 1.6 }}>
             Beklenmeyen bir hata oluştu. Verileriniz güvende — localStorage'da kayıtlı.
           </p>
-          <div style={{ background: '#1e293b', borderRadius: 12, padding: '14px 20px', marginBottom: 20, maxWidth: 500, width: '100%', textAlign: 'left' }}>
+          <div
+            style={{
+              background: '#1e293b',
+              borderRadius: 12,
+              padding: '14px 20px',
+              marginBottom: 20,
+              maxWidth: 500,
+              width: '100%',
+              textAlign: 'left',
+            }}
+          >
             <p style={{ color: '#ef4444', fontSize: '0.85rem', fontFamily: 'monospace', wordBreak: 'break-all' }}>
               {this.state.error?.message}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => window.location.reload()} style={{ background: '#3b82f6', border: 'none', borderRadius: 10, color: '#fff', padding: '12px 28px', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                background: '#3b82f6',
+                border: 'none',
+                borderRadius: 10,
+                color: '#fff',
+                padding: '12px 28px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+              }}
+            >
               Sayfayı Yenile
             </button>
-            <button onClick={() => this.setState({ hasError: false, error: null, errorInfo: '' })} style={{ background: '#273548', border: '1px solid #334155', borderRadius: 10, color: '#94a3b8', padding: '12px 28px', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+            <button
+              onClick={() => this.setState({ hasError: false, error: null, errorInfo: '' })}
+              style={{
+                background: '#273548',
+                border: '1px solid #334155',
+                borderRadius: 10,
+                color: '#94a3b8',
+                padding: '12px 28px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+              }}
+            >
               Devam Et
             </button>
           </div>

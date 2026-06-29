@@ -1,10 +1,10 @@
-import { type Dispatch, type SetStateAction } from "react";
-import { formatDateLong } from "@/lib/format";
-import { TABS, type TabId } from "@/config/tabs";
-import type { DB } from "@/types";
-import GlobalSearch from "./GlobalSearch";
-import UserMenu from "./UserMenu";
-import NotificationCenter from "@/components/NotificationCenter";
+import { type Dispatch, type SetStateAction } from 'react';
+import { formatDateLong } from '@/lib/format';
+import { TABS, type TabId } from '@/config/tabs';
+import type { DB } from '@/types';
+import GlobalSearch from './GlobalSearch';
+import UserMenu from './UserMenu';
+import NotificationCenter from '@/components/NotificationCenter';
 
 interface HeaderProps {
   isMobile: boolean;
@@ -42,7 +42,11 @@ export default function Header({
   const ActiveIcon = TABS.find((t) => t.id === activeTab)?.icon;
   return (
     <header className={`app-header ${isMobile ? 'mobile' : 'desktop'}`}>
-      {isMobile && <button onClick={() => setSidebarOpen((o) => !o)} className="app-header-menu-btn">☰</button>}
+      {isMobile && (
+        <button onClick={() => setSidebarOpen((o) => !o)} className="app-header-menu-btn">
+          ☰
+        </button>
+      )}
       <div className={`app-header-title-wrap ${isMobile ? 'mobile' : 'desktop'}`}>
         <h1 className={`app-header-title font-heading ${isMobile ? 'mobile' : 'desktop'}`}>
           <span className={`app-header-title-icon ${activeGroupClass}`}>
@@ -74,20 +78,32 @@ export default function Header({
         )}
         <NotificationCenter db={db} onNavigate={(tab) => navigate(tab as Parameters<typeof navigate>[0])} />
         {badges.monitor > 0 && (
-          <button onClick={() => navigate('monitor')} className="app-alert-btn">🔔 {badges.monitor}</button>
+          <button onClick={() => navigate('monitor')} className="app-alert-btn">
+            🔔 {badges.monitor}
+          </button>
         )}
         {!isMobile && badges.products > 0 && (
-          <button onClick={() => navigate('products')} className="app-products-alert-btn">📦 {badges.products}</button>
+          <button onClick={() => navigate('products')} className="app-products-alert-btn">
+            📦 {badges.products}
+          </button>
         )}
         {!isMobile && (
           <div className={`app-sync-badge ${syncStatus}`}>
             <span className={`app-sync-dot ${syncStatus}`} />
             <span className={`app-sync-text ${syncStatus}`}>
-              {syncStatus === 'saving' ? 'Kaydediliyor' : syncStatus === 'saved' ? `Senkron ${lastSyncTime}` : syncStatus === 'error' ? 'Sync Hatası' : syncStatus === 'loading' ? 'Yükleniyor' : 'Firebase'}
+              {syncStatus === 'saving'
+                ? 'Kaydediliyor'
+                : syncStatus === 'saved'
+                  ? `Senkron ${lastSyncTime}`
+                  : syncStatus === 'error'
+                    ? 'Sync Hatası'
+                    : syncStatus === 'loading'
+                      ? 'Yükleniyor'
+                      : 'Firebase'}
             </span>
           </div>
         )}
-          <button onClick={exportJSON} title="Hızlı Yedek Al" className="app-backup-btn">
+        <button onClick={exportJSON} title="Hızlı Yedek Al" className="app-backup-btn">
           {isMobile ? 'Yedek' : 'Yedek'}
         </button>
         {!isMobile && <div className="app-header-date">{formatDateLong(new Date())}</div>}

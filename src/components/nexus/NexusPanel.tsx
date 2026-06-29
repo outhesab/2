@@ -15,15 +15,15 @@ interface NexusPanelProps {
   onClearMemory?: () => void;
 }
 
-export const NexusPanel: React.FC<NexusPanelProps> = ({ 
-  isOpen, 
-  onClose, 
-  messages, 
-  onSendMessage, 
-  isListening, 
+export const NexusPanel: React.FC<NexusPanelProps> = ({
+  isOpen,
+  onClose,
+  messages,
+  onSendMessage,
+  isListening,
   onToggleListen,
   isProcessing,
-  onClearMemory
+  onClearMemory,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -57,7 +57,7 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ x: '100%' }}
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
@@ -93,17 +93,14 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={onClearMemory}
             className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
             title="Konuşma geçmişini temizle"
           >
             <Trash2 className="w-4 h-4" />
           </button>
-          <button 
-            onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:bg-white/5 transition-colors"
-          >
+          <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:bg-white/5 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -126,19 +123,15 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
         ) : (
           <>
             {messages.map((m, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex w-full",
-                  m.role === 'user' ? "justify-end" : "justify-start"
-                )}
-              >
-                <div className={cn(
-                  "max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed relative",
-                  m.role === 'user'
-                    ? "bg-indigo-600 text-white rounded-tr-none" 
-                    : "bg-slate-800/50 text-slate-200 border border-white/10 rounded-tl-none backdrop-blur-sm"
-                )}>
+              <div key={i} className={cn('flex w-full', m.role === 'user' ? 'justify-end' : 'justify-start')}>
+                <div
+                  className={cn(
+                    'max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed relative',
+                    m.role === 'user'
+                      ? 'bg-indigo-600 text-white rounded-tr-none'
+                      : 'bg-slate-800/50 text-slate-200 border border-white/10 rounded-tl-none backdrop-blur-sm',
+                  )}
+                >
                   <span className="text-[10px] opacity-50 block mb-1">
                     {m.role === 'user' ? 'Siz' : 'Nexus'} · {formatTime()}
                   </span>
@@ -148,7 +141,7 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
             ))}
             <AnimatePresence>
               {isProcessing && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
@@ -172,7 +165,7 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
       <div className="p-6 border-t border-white/10 bg-slate-900/50 backdrop-blur-md">
         <div className="flex items-center gap-3 max-w-3xl mx-auto relative">
           <div className="relative flex-1">
-            <textarea 
+            <textarea
               ref={textareaRef}
               className="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
               placeholder={isListening ? 'Bir şey söyleyin...' : 'Bir şey yazın...'}
@@ -187,7 +180,7 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
               }}
             />
             {isListening && (
-              <motion.div 
+              <motion.div
                 animate={{ opacity: [0, 1, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs"
@@ -196,19 +189,19 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
               </motion.div>
             )}
           </div>
-          
-          <button 
+
+          <button
             onClick={onToggleListen}
             className={cn(
-              "p-3 rounded-xl transition-all duration-300 relative",
-              isListening 
-                ? "bg-red-500 text-white ring-4 ring-red-500/20 shadow-lg shadow-red-500/20" 
-                : "bg-slate-800 text-slate-400 hover:text-white border border-white/10"
+              'p-3 rounded-xl transition-all duration-300 relative',
+              isListening
+                ? 'bg-red-500 text-white ring-4 ring-red-500/20 shadow-lg shadow-red-500/20'
+                : 'bg-slate-800 text-slate-400 hover:text-white border border-white/10',
             )}
           >
             <Mic className="w-5 h-5" />
             {isListening && (
-              <motion.div 
+              <motion.div
                 animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0.1, 0.4] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 className="absolute inset-0 bg-red-400 rounded-full"
@@ -216,28 +209,31 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
             )}
           </button>
 
-          <button 
+          <button
             onClick={handleSend}
             disabled={!inputValue.trim()}
             className={cn(
-              "p-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20",
-              inputValue.trim() 
-                ? "bg-indigo-600 text-white hover:bg-indigo-500" 
-                : "bg-slate-800 text-slate-600 cursor-not-allowed"
+              'p-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20',
+              inputValue.trim()
+                ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                : 'bg-slate-800 text-slate-600 cursor-not-allowed',
             )}
           >
             <Send className="w-5 h-5" />
           </button>
-
         </div>
         <div className="flex items-center justify-center gap-3 mt-4">
           <p className="text-[10px] text-center text-slate-500 font-medium uppercase tracking-widest">
             Soba Nexus AI • God-Mode Active
           </p>
-          <div 
+          <div
             className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold",
-              storageMonitor.isCritical ? "bg-red-500/10 text-red-500" : storageMonitor.isNearLimit ? "bg-amber-500/10 text-amber-500" : "bg-emerald-500/10 text-emerald-500"
+              'flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold',
+              storageMonitor.isCritical
+                ? 'bg-red-500/10 text-red-500'
+                : storageMonitor.isNearLimit
+                  ? 'bg-amber-500/10 text-amber-500'
+                  : 'bg-emerald-500/10 text-emerald-500',
             )}
             title={`Depolama: ${storageMonitor.usagePercent}% kullanıldı`}
             aria-label={`Depolama durumu: ${storageMonitor.usagePercent}% dolu`}
@@ -253,16 +249,27 @@ export const NexusPanel: React.FC<NexusPanelProps> = ({
 
 function BrainCircuitIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
-      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
-      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/>
-      <path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/>
-      <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
-      <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
-      <path d="M19.938 10.5a4 4 0 0 1 .585.396"/>
-      <path d="M6 18a4 4 0 0 1-1.967-.516"/>
-      <path d="M19.967 17.484A4 4 0 0 1 18 18"/>
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
+      <path d="M17.599 6.5a3 3 0 0 0 .399-1.375" />
+      <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" />
+      <path d="M3.477 10.896a4 4 0 0 1 .585-.396" />
+      <path d="M19.938 10.5a4 4 0 0 1 .585.396" />
+      <path d="M6 18a4 4 0 0 1-1.967-.516" />
+      <path d="M19.967 17.484A4 4 0 0 1 18 18" />
     </svg>
   );
 }

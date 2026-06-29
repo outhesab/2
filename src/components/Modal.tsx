@@ -16,12 +16,16 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }: ModalP
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [open, onClose]);
@@ -32,7 +36,9 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }: ModalP
     // Mobilde bottom sheet
     return (
       <div
-        onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
         className="modal-overlay"
       >
         <div className="modal-sheet">
@@ -43,14 +49,12 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }: ModalP
           {/* Header */}
           <div className="modal-header">
             <h3 className="modal-title">{title}</h3>
-            <button
-              onClick={onClose}
-              className="modal-close-btn"
-            >×</button>
+            <button onClick={onClose} className="modal-close-btn">
+              ×
+            </button>
           </div>
           <div className="modal-body">{children}</div>
         </div>
-
       </div>
     );
   }
@@ -58,23 +62,20 @@ export function Modal({ open, onClose, title, children, maxWidth = 560 }: ModalP
   // Desktop — ortalanmış modal
   return (
     <div
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="modal-desktop-overlay"
     >
-      <div
-        className="modal-desktop-content"
-        style={{ maxWidth }}
-      >
+      <div className="modal-desktop-content" style={{ maxWidth }}>
         <div className="modal-desktop-header">
           <h3 className="modal-desktop-title">{title}</h3>
-          <button
-            onClick={onClose}
-            className="modal-desktop-close-btn"
-          >×</button>
+          <button onClick={onClose} className="modal-desktop-close-btn">
+            ×
+          </button>
         </div>
         <div className="modal-desktop-body">{children}</div>
       </div>
-
     </div>
   );
 }

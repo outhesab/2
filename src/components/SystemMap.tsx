@@ -22,33 +22,105 @@ interface MapEdge {
 }
 
 const NODES: MapNode[] = [
-  { id: 'satis',    label: 'Satış',       icon: '🛒', color: 'var(--color-success)', x: 340, y: 60,  desc: 'Satış kaydı oluşturur' },
-  { id: 'urun',     label: 'Ürünler',     icon: '📦', color: 'var(--color-info)', x: 100, y: 60,  desc: 'Stok takibi' },
-  { id: 'kasa',     label: 'Kasa',        icon: '💰', color: 'var(--color-warning)', x: 580, y: 60,  desc: 'Nakit/banka hareketleri' },
-  { id: 'cari',     label: 'Cari',        icon: '👤', color: 'var(--color-accent)', x: 340, y: 220, desc: 'Müşteri/tedarikçi bakiyeleri' },
-  { id: 'fatura',   label: 'Fatura',      icon: '🧾', color: 'var(--color-danger)', x: 580, y: 220, desc: 'Fatura & taksit yönetimi' },
-  { id: 'stok',     label: 'Stok Hareketleri', icon: '🔢', color: 'var(--color-info)', x: 100, y: 220, desc: 'Her stok değişimi kaydedilir' },
-  { id: 'tedarik',  label: 'Tedarikçi',   icon: '🏭', color: 'var(--text-muted)', x: 100, y: 380, desc: 'Sipariş & tedarik zinciri' },
-  { id: 'banka',    label: 'Banka',       icon: '🏦', color: 'var(--color-accent)', x: 580, y: 380, desc: 'Ekstre & banka işlemleri' },
-  { id: 'rapor',    label: 'Raporlar',    icon: '📊', color: 'var(--color-danger)', x: 340, y: 380, desc: 'Satış, kâr, stok analizleri' },
-  { id: 'yedek',    label: 'Yedekleme',   icon: '☁️', color: 'var(--text-secondary)', x: 340, y: 520, desc: 'Firebase + JSON yedek' },
+  {
+    id: 'satis',
+    label: 'Satış',
+    icon: '🛒',
+    color: 'var(--color-success)',
+    x: 340,
+    y: 60,
+    desc: 'Satış kaydı oluşturur',
+  },
+  { id: 'urun', label: 'Ürünler', icon: '📦', color: 'var(--color-info)', x: 100, y: 60, desc: 'Stok takibi' },
+  {
+    id: 'kasa',
+    label: 'Kasa',
+    icon: '💰',
+    color: 'var(--color-warning)',
+    x: 580,
+    y: 60,
+    desc: 'Nakit/banka hareketleri',
+  },
+  {
+    id: 'cari',
+    label: 'Cari',
+    icon: '👤',
+    color: 'var(--color-accent)',
+    x: 340,
+    y: 220,
+    desc: 'Müşteri/tedarikçi bakiyeleri',
+  },
+  {
+    id: 'fatura',
+    label: 'Fatura',
+    icon: '🧾',
+    color: 'var(--color-danger)',
+    x: 580,
+    y: 220,
+    desc: 'Fatura & taksit yönetimi',
+  },
+  {
+    id: 'stok',
+    label: 'Stok Hareketleri',
+    icon: '🔢',
+    color: 'var(--color-info)',
+    x: 100,
+    y: 220,
+    desc: 'Her stok değişimi kaydedilir',
+  },
+  {
+    id: 'tedarik',
+    label: 'Tedarikçi',
+    icon: '🏭',
+    color: 'var(--text-muted)',
+    x: 100,
+    y: 380,
+    desc: 'Sipariş & tedarik zinciri',
+  },
+  {
+    id: 'banka',
+    label: 'Banka',
+    icon: '🏦',
+    color: 'var(--color-accent)',
+    x: 580,
+    y: 380,
+    desc: 'Ekstre & banka işlemleri',
+  },
+  {
+    id: 'rapor',
+    label: 'Raporlar',
+    icon: '📊',
+    color: 'var(--color-danger)',
+    x: 340,
+    y: 380,
+    desc: 'Satış, kâr, stok analizleri',
+  },
+  {
+    id: 'yedek',
+    label: 'Yedekleme',
+    icon: '☁️',
+    color: 'var(--text-secondary)',
+    x: 340,
+    y: 520,
+    desc: 'Firebase + JSON yedek',
+  },
 ];
 
 const EDGES: MapEdge[] = [
-  { from: 'satis',   to: 'urun',    label: 'stok düşer',      color: 'var(--color-info)' },
-  { from: 'satis',   to: 'kasa',    label: 'ödeme kaydı',     color: 'var(--color-warning)' },
-  { from: 'satis',   to: 'cari',    label: 'bakiye artar',    color: 'var(--color-accent)' },
-  { from: 'satis',   to: 'stok',    label: 'hareket kaydı',   color: 'var(--color-info)' },
-  { from: 'fatura',  to: 'cari',    label: 'cari günceller',  color: 'var(--color-accent)' },
-  { from: 'fatura',  to: 'kasa',    label: 'ödeme kaydı',     color: 'var(--color-warning)' },
-  { from: 'tedarik', to: 'urun',    label: 'stok artar',      color: 'var(--color-info)' },
-  { from: 'tedarik', to: 'kasa',    label: 'ödeme çıkar',     color: 'var(--color-warning)' },
-  { from: 'banka',   to: 'kasa',    label: 'onayda aktarılır',color: 'var(--color-warning)' },
-  { from: 'banka',   to: 'cari',    label: 'bakiye etkiler',  color: 'var(--color-accent)' },
-  { from: 'satis',   to: 'rapor',   label: 'veri sağlar',     color: 'var(--color-danger)', dashed: true },
-  { from: 'kasa',    to: 'rapor',   label: 'veri sağlar',     color: 'var(--color-danger)', dashed: true },
-  { from: 'cari',    to: 'rapor',   label: 'veri sağlar',     color: 'var(--color-danger)', dashed: true },
-  { from: 'rapor',   to: 'yedek',   label: 'tüm DB',          color: 'var(--text-secondary)', dashed: true },
+  { from: 'satis', to: 'urun', label: 'stok düşer', color: 'var(--color-info)' },
+  { from: 'satis', to: 'kasa', label: 'ödeme kaydı', color: 'var(--color-warning)' },
+  { from: 'satis', to: 'cari', label: 'bakiye artar', color: 'var(--color-accent)' },
+  { from: 'satis', to: 'stok', label: 'hareket kaydı', color: 'var(--color-info)' },
+  { from: 'fatura', to: 'cari', label: 'cari günceller', color: 'var(--color-accent)' },
+  { from: 'fatura', to: 'kasa', label: 'ödeme kaydı', color: 'var(--color-warning)' },
+  { from: 'tedarik', to: 'urun', label: 'stok artar', color: 'var(--color-info)' },
+  { from: 'tedarik', to: 'kasa', label: 'ödeme çıkar', color: 'var(--color-warning)' },
+  { from: 'banka', to: 'kasa', label: 'onayda aktarılır', color: 'var(--color-warning)' },
+  { from: 'banka', to: 'cari', label: 'bakiye etkiler', color: 'var(--color-accent)' },
+  { from: 'satis', to: 'rapor', label: 'veri sağlar', color: 'var(--color-danger)', dashed: true },
+  { from: 'kasa', to: 'rapor', label: 'veri sağlar', color: 'var(--color-danger)', dashed: true },
+  { from: 'cari', to: 'rapor', label: 'veri sağlar', color: 'var(--color-danger)', dashed: true },
+  { from: 'rapor', to: 'yedek', label: 'tüm DB', color: 'var(--text-secondary)', dashed: true },
 ];
 
 function getCenter(node: MapNode) {
@@ -56,13 +128,14 @@ function getCenter(node: MapNode) {
 }
 
 export function SystemMap() {
-  const W = 740, H = 580;
+  const W = 740,
+    H = 580;
 
   return (
     <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', minWidth: W }}>
         <defs>
-          {NODES.map(n => (
+          {NODES.map((n) => (
             <marker key={n.id} id={`arrow-${n.id}`} markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
               <path d="M0,0 L0,6 L8,3 z" fill={n.color} opacity="0.7" />
             </marker>
@@ -74,8 +147,8 @@ export function SystemMap() {
 
         {/* Kenarlar */}
         {EDGES.map((edge, i) => {
-          const from = NODES.find(n => n.id === edge.from);
-          const to = NODES.find(n => n.id === edge.to);
+          const from = NODES.find((n) => n.id === edge.from);
+          const to = NODES.find((n) => n.id === edge.to);
           if (!from || !to) return null;
           const fc = getCenter(from);
           const tc = getCenter(to);
@@ -86,8 +159,12 @@ export function SystemMap() {
           return (
             <g key={i}>
               <line
-                x1={fc.x} y1={fc.y} x2={tc.x} y2={tc.y}
-                stroke={color} strokeWidth={edge.dashed ? 1.5 : 2}
+                x1={fc.x}
+                y1={fc.y}
+                x2={tc.x}
+                y2={tc.y}
+                stroke={color}
+                strokeWidth={edge.dashed ? 1.5 : 2}
                 strokeDasharray={edge.dashed ? '5,4' : undefined}
                 strokeOpacity={0.5}
                 markerEnd={`url(#${markerId})`}
@@ -100,29 +177,52 @@ export function SystemMap() {
         })}
 
         {/* Düğümler */}
-        {NODES.map(node => (
+        {NODES.map((node) => (
           <g key={node.id} transform={`translate(${node.x}, ${node.y})`}>
-            <rect width="120" height="60" rx="12"
+            <rect
+              width="120"
+              height="60"
+              rx="12"
               fill={`${node.color}18`}
               stroke={node.color}
               strokeWidth="1.5"
               strokeOpacity="0.6"
             />
-            <text x="60" y="22" textAnchor="middle" fontSize="18">{node.icon}</text>
-            <text x="60" y="40" textAnchor="middle" fill="var(--text-primary)" fontSize="11" fontWeight="700">{node.label}</text>
-            <text x="60" y="54" textAnchor="middle" fill="var(--text-dim)" fontSize="8">{node.desc}</text>
+            <text x="60" y="22" textAnchor="middle" fontSize="18">
+              {node.icon}
+            </text>
+            <text x="60" y="40" textAnchor="middle" fill="var(--text-primary)" fontSize="11" fontWeight="700">
+              {node.label}
+            </text>
+            <text x="60" y="54" textAnchor="middle" fill="var(--text-dim)" fontSize="8">
+              {node.desc}
+            </text>
           </g>
         ))}
       </svg>
 
       {/* Açıklama */}
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 14, padding: '10px 14px', background: 'var(--bg-card)', borderRadius: 10 }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 16,
+          flexWrap: 'wrap',
+          marginTop: 14,
+          padding: '10px 14px',
+          background: 'var(--bg-card)',
+          borderRadius: 10,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <svg width="24" height="8"><line x1="0" y1="4" x2="24" y2="4" stroke="var(--text-dim)" strokeWidth="2" /></svg>
+          <svg width="24" height="8">
+            <line x1="0" y1="4" x2="24" y2="4" stroke="var(--text-dim)" strokeWidth="2" />
+          </svg>
           Doğrudan etki
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <svg width="24" height="8"><line x1="0" y1="4" x2="24" y2="4" stroke="var(--text-dim)" strokeWidth="1.5" strokeDasharray="4,3" /></svg>
+          <svg width="24" height="8">
+            <line x1="0" y1="4" x2="24" y2="4" stroke="var(--text-dim)" strokeWidth="1.5" strokeDasharray="4,3" />
+          </svg>
           Veri sağlar
         </div>
       </div>

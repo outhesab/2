@@ -1,13 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import type { LucideIcon } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import type { LucideIcon } from 'lucide-react';
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -17,13 +10,7 @@ interface EmptyStateProps {
   onAction?: () => void;
 }
 
-export default function EmptyState({
-  icon: Icon,
-  title,
-  description,
-  actionLabel,
-  onAction,
-}: EmptyStateProps) {
+export default function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: EmptyStateProps) {
   return (
     <Empty className="border border-dashed border-[var(--border)] bg-[var(--bg-card)]/70 py-10">
       <EmptyHeader>

@@ -41,7 +41,12 @@ function getVariant(danger?: boolean, title?: string): 'danger' | 'warning' | 'i
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConfirmState>({
-    open: false, title: '', message: '', onConfirm: () => {}, danger: true, variant: 'danger',
+    open: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    danger: true,
+    variant: 'danger',
   });
 
   const showConfirm = useCallback((title: string, message: string, onConfirm: () => void, danger = true) => {
@@ -51,9 +56,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 
   const handleConfirm = () => {
     state.onConfirm();
-    setState(s => ({ ...s, open: false }));
+    setState((s) => ({ ...s, open: false }));
   };
-  const handleCancel = () => setState(s => ({ ...s, open: false }));
+  const handleCancel = () => setState((s) => ({ ...s, open: false }));
 
   const icon = VARIANT_ICONS[state.variant || 'danger'];
   const variantClass = VARIANT_CLASSES[state.variant || 'danger'];
@@ -79,19 +84,14 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350, mass: 0.8 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="confirm-panel"
             >
-              <div className={`confirm-icon-wrap ${variantClass}`}>
-                {icon}
-              </div>
+              <div className={`confirm-icon-wrap ${variantClass}`}>{icon}</div>
               <h3 className="confirm-title">{state.title}</h3>
               <p className="confirm-message">{state.message}</p>
               <div className="confirm-actions">
-                <button
-                  onClick={handleCancel}
-                  className="confirm-btn confirm-btn-cancel"
-                >
+                <button onClick={handleCancel} className="confirm-btn confirm-btn-cancel">
                   İptal
                 </button>
                 <button

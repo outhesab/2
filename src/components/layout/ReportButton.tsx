@@ -6,8 +6,10 @@ interface ReportButtonProps {
 }
 
 export default function ReportButton({ visible }: ReportButtonProps) {
-  const { pos, onPointerDown, onPointerMove, onPointerUp, isDragging } =
-    useDraggableButton('reportBtnPos', { x: 90, y: 28 });
+  const { pos, onPointerDown, onPointerMove, onPointerUp, isDragging } = useDraggableButton('reportBtnPos', {
+    x: 90,
+    y: 28,
+  });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ type: 'hata', note: '', contact: '' });
   const [sent, setSent] = useState(false);
@@ -57,7 +59,9 @@ export default function ReportButton({ visible }: ReportButtonProps) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onClick={() => { if (!isDragging.current) setOpen((o) => !o); }}
+        onClick={() => {
+          if (!isDragging.current) setOpen((o) => !o);
+        }}
         aria-label="Hata bildir veya not al"
         title="Hata Bildir / Not Al"
         className="report-btn"

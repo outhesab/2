@@ -22,9 +22,9 @@ function cleanForSpeech(msg: string): string {
   // Emoji ve özel karakterleri temizle (variation selector içerenler ayrı)
   return msg
     .replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // genel emoji aralığı
-    .replace(/[\u{2600}-\u{26FF}]/gu, '')    // çeşitli semboller
-    .replace(/[\u{2700}-\u{27BF}]/gu, '')    // dingbats
-    .replace(/\uFE0F/g, '')                  // variation selector-16
+    .replace(/[\u{2600}-\u{26FF}]/gu, '') // çeşitli semboller
+    .replace(/[\u{2700}-\u{27BF}]/gu, '') // dingbats
+    .replace(/\uFE0F/g, '') // variation selector-16
     .trim();
 }
 

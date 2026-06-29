@@ -27,7 +27,7 @@ export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen: _open, onClick, 
         transition={{
           duration: isProcessing ? 2 : 8,
           repeat: Infinity,
-          ease: "linear",
+          ease: 'linear',
         }}
         className="absolute inset-[-20px] bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-full blur-2xl opacity-40"
       />
@@ -42,7 +42,7 @@ export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen: _open, onClick, 
           transition={{
             duration: 1,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
           className="absolute inset-0 bg-amber-400 rounded-full blur-xl"
         />
@@ -58,7 +58,7 @@ export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen: _open, onClick, 
           transition={{
             duration: 1.5,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
           className="absolute inset-0 bg-indigo-400 rounded-full blur-xl"
         />
@@ -70,23 +70,27 @@ export const NexusSpark: React.FC<NexusSparkProps> = ({ isOpen: _open, onClick, 
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
         className={cn(
-          "relative w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300",
-          "bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900",
-          "border border-white/10 backdrop-blur-md",
-          isListening ? "ring-4 ring-indigo-500/30" : isProcessing ? "ring-4 ring-amber-500/30" : "ring-1 ring-white/20"
+          'relative w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300',
+          'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900',
+          'border border-white/10 backdrop-blur-md',
+          isListening
+            ? 'ring-4 ring-indigo-500/30'
+            : isProcessing
+              ? 'ring-4 ring-amber-500/30'
+              : 'ring-1 ring-white/20',
         )}
       >
         {isProcessing ? (
           <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
         ) : (
-          <BrainCircuit 
+          <BrainCircuit
             className={cn(
-              "w-6 h-6 transition-colors duration-300",
-              isListening ? "text-indigo-400" : "text-indigo-200/70"
-            )} 
+              'w-6 h-6 transition-colors duration-300',
+              isListening ? 'text-indigo-400' : 'text-indigo-200/70',
+            )}
           />
         )}
-        
+
         {/* Subtle Inner Shine */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
       </motion.button>

@@ -3,14 +3,32 @@
  * Veri Katmanı: Firebase + localStorage (userManager.ts)
  */
 import { useState, useEffect, useRef } from 'react';
-import { BRAND_NAME } from "@/config/brand";
+import { BRAND_NAME } from '@/config/brand';
 import { logger } from '@/lib/logger';
 import {
-  loginUser, getUserSession, setUserSession, clearUserSession,
-  loadUsers, createUser, isGuestSession,
-  getGuestSessionRemaining, type AppUser,
+  loginUser,
+  getUserSession,
+  setUserSession,
+  clearUserSession,
+  loadUsers,
+  createUser,
+  isGuestSession,
+  getGuestSessionRemaining,
+  type AppUser,
 } from '@/lib/userManager';
-import { User, Lock, KeyRound, Eye, EyeOff, LogIn, UserPlus, RefreshCw, AlertTriangle, Sparkles, ShieldCheck } from 'lucide-react';
+import {
+  User,
+  Lock,
+  KeyRound,
+  Eye,
+  EyeOff,
+  LogIn,
+  UserPlus,
+  RefreshCw,
+  AlertTriangle,
+  Sparkles,
+  ShieldCheck,
+} from 'lucide-react';
 import { ParspelLogo } from '@/components/logo/ParspelLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,9 +40,7 @@ export { hashPassword as hashPass } from '@/lib/userManager';
 export function useAuth() {
   const [authed, setAuthed] = useState(() => !!getUserSession());
   const [currentUser, setCurrentUser] = useState(() => getUserSession());
-  const [guestTimeLeft, setGuestTimeLeft] = useState(() =>
-    isGuestSession() ? getGuestSessionRemaining() : 0,
-  );
+  const [guestTimeLeft, setGuestTimeLeft] = useState(() => (isGuestSession() ? getGuestSessionRemaining() : 0));
 
   useEffect(() => {
     if (!isGuestSession()) {
@@ -88,12 +104,12 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
   useEffect(() => {
     const checkUsers = async () => {
       setFbStatus('connecting');
-      setStatusMsg('Firebase\'e bağlanılıyor…');
+      setStatusMsg("Firebase'e bağlanılıyor…");
       try {
         const users = await loadUsers();
         if (!navigator.onLine && users.length > 0) {
           setFbStatus('ready');
-          setStatusMsg(`Çevrimdışı giriş modu — ${users.filter(u => u.active).length} yerel kullanıcı hazır`);
+          setStatusMsg(`Çevrimdışı giriş modu — ${users.filter((u) => u.active).length} yerel kullanıcı hazır`);
         } else if (!navigator.onLine && users.length === 0) {
           setFbStatus('error');
           setStatusMsg('İnternet kapalı ve yerel kullanıcı bulunamadı');
@@ -103,7 +119,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
           setRegisterMode(true);
         } else {
           setFbStatus('ready');
-          setStatusMsg(`${users.filter(u => u.active).length} kullanıcı hazır`);
+          setStatusMsg(`${users.filter((u) => u.active).length} kullanıcı hazır`);
         }
       } catch {
         logger.warn('auth', 'Firebase bağlantısı kurulamadı');
@@ -115,17 +131,36 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
     checkUsers();
   }, []);
 
-  const doShake = () => { setShake(true); setTimeout(() => setShake(false), 600); };
+  const doShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 600);
+  };
 
   const handleLogin = async (userOverride?: string, passOverride?: string) => {
     const u = userOverride ?? username;
     const p = passOverride ?? pass;
-    if (!u.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
-    if (!p.trim()) { setError('Şifre gerekli'); doShake(); return; }
-    setLoading(true); setError('');
+    if (!u.trim()) {
+      setError('Kullanıcı adı gerekli');
+      doShake();
+      return;
+    }
+    if (!p.trim()) {
+      setError('Şifre gerekli');
+      doShake();
+      return;
+    }
+    setLoading(true);
+    setError('');
 
     if (u.trim() === 'demo29605' && p.trim() === 'demo1234') {
-      const demoUser: AppUser = { id: 'demo_id', username: 'Demo Kullanıcı', passwordHash: 'demo1234', role: 'admin', active: true, createdAt: new Date().toISOString() };
+      const demoUser: AppUser = {
+        id: 'demo_id',
+        username: 'Demo Kullanıcı',
+        passwordHash: 'demo1234',
+        role: 'admin',
+        active: true,
+        createdAt: new Date().toISOString(),
+      };
       setSuccess(true);
       setTimeout(() => onLogin(demoUser, remember), 900);
       setLoading(false);
@@ -145,21 +180,40 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
       setTimeout(() => onLogin(user, remember), 900);
     } else {
       setError('Kullanıcı adı veya şifre hatalı');
-      doShake(); setPass('');
+      doShake();
+      setPass('');
     }
     setLoading(false);
   };
 
   const handleRegister = async () => {
-    if (!username.trim()) { setError('Kullanıcı adı gerekli'); doShake(); return; }
-    if (pass.length < 4) { setError('Şifre en az 4 karakter olmalı'); doShake(); return; }
-    if (pass !== pass2) { setError('Şifreler eşleşmiyor'); doShake(); return; }
-    setLoading(true); setError('');
+    if (!username.trim()) {
+      setError('Kullanıcı adı gerekli');
+      doShake();
+      return;
+    }
+    if (pass.length < 4) {
+      setError('Şifre en az 4 karakter olmalı');
+      doShake();
+      return;
+    }
+    if (pass !== pass2) {
+      setError('Şifreler eşleşmiyor');
+      doShake();
+      return;
+    }
+    setLoading(true);
+    setError('');
     const result = await createUser(username.trim(), pass, 'user');
     if (result.ok) {
       const user = await loginUser(username.trim(), pass);
-      if (user) { setSuccess(true); setTimeout(() => onLogin(user, remember), 900); }
-      else { setError('Hesap oluşturuldu ama giriş yapılamadı. Lütfen giriş yapmayı deneyin.'); setRegisterMode(false); }
+      if (user) {
+        setSuccess(true);
+        setTimeout(() => onLogin(user, remember), 900);
+      } else {
+        setError('Hesap oluşturuldu ama giriş yapılamadı. Lütfen giriş yapmayı deneyin.');
+        setRegisterMode(false);
+      }
     } else {
       setError(result.msg);
     }
@@ -176,8 +230,9 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background px-4 py-10">
-      <div className={`grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all ${shake ? 'animate-shake' : ''} lg:grid-cols-[1.05fr_1fr]`}>
-        
+      <div
+        className={`grid w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all ${shake ? 'animate-shake' : ''} lg:grid-cols-[1.05fr_1fr]`}
+      >
         {/* SOL PANEL: Marka Kimliği */}
         <aside className="relative hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
           <div className="flex items-center gap-3">
@@ -198,11 +253,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
           </div>
 
           <ul className="space-y-3 text-sm">
-            {[
-              "Anlık servis ve bakım takibi", 
-              "Şifrelenmiş müşteri kayıtları", 
-              "Çok kullanıcılı erişim"
-            ].map((item) => (
+            {['Anlık servis ve bakım takibi', 'Şifrelenmiş müşteri kayıtları', 'Çok kullanıcılı erişim'].map((item) => (
               <li key={item} className="flex items-center gap-3 text-primary-foreground/85">
                 <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
                 {item}
@@ -221,12 +272,12 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
           <div className="mb-6">
             <h2 className="font-heading text-2xl font-bold text-foreground">
-              {registerMode ? "Yeni müşteri kaydı" : "Hoş geldiniz"}
+              {registerMode ? 'Yeni müşteri kaydı' : 'Hoş geldiniz'}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {registerMode 
-                ? "Sisteme erişim için hesap bilgilerinizi oluşturun." 
-                : "Sisteme erişim için hesap bilgilerinizi girin."}
+              {registerMode
+                ? 'Sisteme erişim için hesap bilgilerinizi oluşturun.'
+                : 'Sisteme erişim için hesap bilgilerinizi girin.'}
             </p>
           </div>
 
@@ -235,13 +286,13 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               <Label htmlFor="username">Kullanıcı adı</Label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input 
-                  id="username" 
-                  placeholder="Kullanıcı adı" 
-                  className="h-11 pl-10" 
-                  autoComplete="username" 
+                <Input
+                  id="username"
+                  placeholder="Kullanıcı adı"
+                  className="h-11 pl-10"
+                  autoComplete="username"
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>
@@ -250,18 +301,18 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               <Label htmlFor="password">Şifre</Label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input 
-                  id="password" 
-                  type={showPass ? "text" : "password"} 
-                  placeholder="En az 4 karakter" 
-                  className="h-11 pl-10 pr-10" 
+                <Input
+                  id="password"
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="En az 4 karakter"
+                  className="h-11 pl-10 pr-10"
                   autoComplete="current-password"
                   value={pass}
-                  onChange={e => setPass(e.target.value)}
+                  onChange={(e) => setPass(e.target.value)}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPass(v => !v)}
+                  onClick={() => setShowPass((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -274,14 +325,14 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                 <Label htmlFor="password-confirm">Şifre tekrar</Label>
                 <div className="relative">
                   <KeyRound className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input 
-                    id="password-confirm" 
-                    type="password" 
-                    placeholder="Şifreyi tekrar girin" 
-                    className="h-11 pl-10" 
+                  <Input
+                    id="password-confirm"
+                    type="password"
+                    placeholder="Şifreyi tekrar girin"
+                    className="h-11 pl-10"
                     autoComplete="new-password"
                     value={pass2}
-                    onChange={e => setPass2(e.target.value)}
+                    onChange={(e) => setPass2(e.target.value)}
                   />
                 </div>
               </div>
@@ -301,21 +352,23 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
 
             {!registerMode && (
               <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="rounded border-border bg-background" 
-                  checked={remember} 
-                  onChange={e => setRemember(e.target.checked)} 
+                <input
+                  type="checkbox"
+                  className="rounded border-border bg-background"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
                 />
-                <span>Beni hatırla <span className="text-xs opacity-70">(30 gün)</span></span>
+                <span>
+                  Beni hatırla <span className="text-xs opacity-70">(30 gün)</span>
+                </span>
               </label>
             )}
 
             {!registerMode && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full h-11 gap-2 text-sm font-semibold" 
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 gap-2 text-sm font-semibold"
                 onClick={() => handleLogin('demo29605', 'demo1234')}
                 disabled={loading}
               >
@@ -323,27 +376,34 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               </Button>
             )}
 
-            <Button 
-              type="submit" 
-              className="h-11 w-full gap-2 text-sm font-semibold"
-              disabled={loading}
-            >
-              {loading 
-                ? <span className="flex items-center justify-center gap-2">
-                    <RefreshCw className="size-4 animate-spin" /> 
-                    {registerMode ? 'Kaydediliyor…' : 'Doğrulanıyor…'}
-                  </span> 
-                : registerMode ? <><UserPlus className="size-4" /> Kayıt Ol</> : <><LogIn className="size-4" /> Giriş Yap</>}
+            <Button type="submit" className="h-11 w-full gap-2 text-sm font-semibold" disabled={loading}>
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <RefreshCw className="size-4 animate-spin" />
+                  {registerMode ? 'Kaydediliyor…' : 'Doğrulanıyor…'}
+                </span>
+              ) : registerMode ? (
+                <>
+                  <UserPlus className="size-4" /> Kayıt Ol
+                </>
+              ) : (
+                <>
+                  <LogIn className="size-4" /> Giriş Yap
+                </>
+              )}
             </Button>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              {registerMode 
-                ? "Zaten hesabın var mı? " 
-                : "Hesabın yok mu? "}
-              <button 
-                type="button" 
+              {registerMode ? 'Zaten hesabın var mı? ' : 'Hesabın yok mu? '}
+              <button
+                type="button"
                 className="font-semibold text-primary hover:underline"
-                onClick={() => { setRegisterMode(!registerMode); setError(''); setPass(''); setPass2(''); }}
+                onClick={() => {
+                  setRegisterMode(!registerMode);
+                  setError('');
+                  setPass('');
+                  setPass2('');
+                }}
               >
                 {registerMode ? 'Giriş Yap' : 'Kayıt Ol'}
               </button>
@@ -358,10 +418,10 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
               <p className="text-xs text-muted-foreground mb-4">
                 Firebase'e erişilemiyor. Yerel kullanıcı yoksa internete bağlanıp bir kez giriş yapın.
               </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1.5" 
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
                 onClick={() => {
                   // checkUsers is defined inside useEffect, but for accessibility we can just call it or reload
                   window.location.reload();
