@@ -1,29 +1,29 @@
-import type { DB } from "@/types";
+import type { DB } from '@/types';
 
-export type AgentId = "stok" | "kasa" | "cari" | "satis" | "fatura" | "rapor" | "deep_seek";
+export type AgentId = 'stok' | 'kasa' | 'cari' | 'satis' | 'fatura' | 'rapor' | 'deep_seek';
 
 export type AgentPermission =
-  | "stok.read"
-  | "stok.write"
-  | "kasa.read"
-  | "kasa.write"
-  | "cari.read"
-  | "cari.write"
-  | "satis.read"
-  | "satis.write"
-  | "fatura.read"
-  | "fatura.write"
-  | "rapor.read"
-  | "deep_seek.read"
-  | "deep_seek.write";
+  | 'stok.read'
+  | 'stok.write'
+  | 'kasa.read'
+  | 'kasa.write'
+  | 'cari.read'
+  | 'cari.write'
+  | 'satis.read'
+  | 'satis.write'
+  | 'fatura.read'
+  | 'fatura.write'
+  | 'rapor.read'
+  | 'deep_seek.read'
+  | 'deep_seek.write';
 
-export interface AgentRequest {
+export interface AgentRequest<P = any> {
   action: string;
-  payload?: Record<string, unknown>;
+  payload?: P;
   meta?: Record<string, unknown>;
 }
 
-export interface AgentResponse<T = unknown> {
+export interface AgentResponse<T = any> {
   ok: boolean;
   data?: T;
   error?: string;
@@ -44,7 +44,7 @@ export interface YeniSatisParams {
     total: number;
   }>;
   cariId: string;
-  payment: "nakit" | "kart" | "havale" | "cari";
+  payment: 'nakit' | 'kart' | 'havale' | 'cari';
   discount?: number;
   discountAmount?: number;
   tahsilat?: number;

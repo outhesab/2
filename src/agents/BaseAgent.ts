@@ -1,6 +1,6 @@
-import { agentBus } from "@/agents/AgentBus";
-import type { AgentContext, AgentEvent, AgentId, AgentPermission, AgentRequest, AgentResponse } from "@/agents/types";
-import type { DB } from "@/types";
+import { agentBus } from '@/agents/AgentBus';
+import type { AgentContext, AgentEvent, AgentId, AgentPermission, AgentRequest, AgentResponse } from '@/agents/types';
+import type { DB } from '@/types';
 
 export abstract class BaseAgent {
   abstract readonly id: AgentId;
@@ -34,5 +34,5 @@ export abstract class BaseAgent {
     return agentBus.onEvent(handler);
   }
 
-  abstract islemYap(talep: AgentRequest): Promise<AgentResponse>;
+  abstract islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>>;
 }

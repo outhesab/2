@@ -1,6 +1,6 @@
-import { BaseAgent } from "@/agents/BaseAgent";
-import type { AgentRequest, AgentResponse } from "@/agents/types";
-import { askDeepSeek } from "@/lib/deepseek";
+import { BaseAgent } from '@/agents/BaseAgent';
+import type { AgentRequest, AgentResponse } from '@/agents/types';
+import { askDeepSeek } from '@/lib/deepseek';
 
 function buildContext(db: unknown): string {
   const d = db as {
@@ -23,7 +23,7 @@ function buildContext(db: unknown): string {
     );
   }
 
-  const satislar = (d.sales || []).filter((s) => !s.deleted && s.status === "tamamlandi");
+  const satislar = (d.sales || []).filter((s) => !s.deleted && s.status === 'tamamlandi');
   if (satislar.length > 0) {
     const bugun = new Date().toISOString().slice(0, 10);
     const bugunSatis = satislar.filter((s) => s.createdAt.slice(0, 10) === bugun);
@@ -34,108 +34,116 @@ function buildContext(db: unknown): string {
 
   const cariler = (d.cari || []).filter((c) => !c.deleted);
   if (cariler.length > 0) {
-    const toplamAlacak = cariler.filter((c) => c.type === "musteri").reduce((s, c) => s + Math.max(0, c.balance), 0);
-    const toplamBorç = cariler.filter((c) => c.type === "tedarikci").reduce((s, c) => s + Math.max(0, c.balance), 0);
-    sections.push(`Cari: ${cariler.length} hesap, alacak ${Math.round(toplamAlacak)}₺, borç ${Math.round(toplamBorç)}₺`);
+    const toplamAlacak = cariler.filter((c) => c.type === 'musteri').reduce((s, c) => s + Math.max(0, c.balance), 0);
+    const toplamBorç = cariler.filter((c) => c.type === 'tedarikci').reduce((s, c) => s + Math.max(0, c.balance), 0);
+    sections.push(
+      `Cari: ${cariler.length} hesap, alacak ${Math.round(toplamAlacak)}₺, borç ${Math.round(toplamBorç)}₺`,
+    );
   }
 
-  const kasaDurum = (d.kasa || []).filter((k) => !k.deleted).reduce(
-    (s, k) => s + (k.type === "gelir" ? k.amount : -k.amount), 0,
-  );
+  const kasaDurum = (d.kasa || [])
+    .filter((k) => !k.deleted)
+    .reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0);
   sections.push(`Kasa: ${Math.round(kasaDurum)}₺`);
 
-  return sections.join("\n");
+  return sections.join('\n');
 }
 
 export class DeepSeekAgent extends BaseAgent {
-  readonly id = "deep_seek" as const;
-  readonly yetkiler = ["deep_seek.read", "deep_seek.write"] as const;
+  readonly id = 'deep_seek' as const;
+  readonly yetkiler = ['deep_seek.read', 'deep_seek.write'] as const;
 
   async analizEt(soru: string, apiKey?: string): Promise<AgentResponse<string>> {
-    if (!this.yetkiKontrolu("deep_seek.read")) {
-      return { ok: false, error: "deep_seek.read yetkisi yok" };
+    if (!this.yetkiKontrolu('deep_seek.read')) {
+      return { ok: false, error: 'deep_seek.read yetkisi yok' };
     }
     if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı — önce bagla() çağırın" };
+      return { ok: false, error: 'Agent bağlanmadı — önce bagla() çağırın' };
     }
 
     const dbContext = buildContext(this.db);
     const systemMsg = `Sen Soba işletmesi için AI analistsin. Kısa, net, Türkçe yanıt ver.\n\nGüncel durum:\n${dbContext}`;
-    const apiKeyToUse = apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || "";
+    const apiKeyToUse = apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || '';
 
     if (!apiKeyToUse) {
-      return { ok: false, error: "DeepSeek API anahtarı bulunamadı — Entegrasyonlar sayfasından ekleyin" };
+      return { ok: false, error: 'DeepSeek API anahtarı bulunamadı — Entegrasyonlar sayfasından ekleyin' };
     }
 
     try {
-      let fullResponse = "";
+      let fullResponse = '';
       const result = await askDeepSeek(
         [
-          { role: "system", content: systemMsg },
-          { role: "user", content: soru },
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: soru },
         ],
         apiKeyToUse,
-        (chunk) => { fullResponse += chunk; },
+        (chunk) => {
+          fullResponse += chunk;
+        },
         { maxTokens: 2048 },
       );
       return { ok: true, data: result || fullResponse };
     } catch (err) {
-      const message = err instanceof Error ? err.message : "DeepSeek API hatası";
+      const message = err instanceof Error ? err.message : 'DeepSeek API hatası';
       return { ok: false, error: message };
     }
   }
 
   async onerUret(veri: Record<string, unknown>, apiKey?: string): Promise<AgentResponse<string>> {
-    if (!this.yetkiKontrolu("deep_seek.write")) {
-      return { ok: false, error: "deep_seek.write yetkisi yok" };
+    if (!this.yetkiKontrolu('deep_seek.write')) {
+      return { ok: false, error: 'deep_seek.write yetkisi yok' };
     }
     if (!this.ctx) {
-      return { ok: false, error: "Agent bağlanmadı — önce bagla() çağırın" };
+      return { ok: false, error: 'Agent bağlanmadı — önce bagla() çağırın' };
     }
 
     const dbContext = buildContext(this.db);
     const prompt = `Sen Soba işletmesi danışmanısın.\n\nGüncel durum:\n${dbContext}\n\nVerilen veri:\n${JSON.stringify(veri, null, 2)}\n\nBu veriye dayanarak somut öneriler üret. Türkçe, kısa ve net yanıt ver.`;
-    const apiKeyToUse = apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || "";
+    const apiKeyToUse = apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || '';
 
     if (!apiKeyToUse) {
-      return { ok: false, error: "DeepSeek API anahtarı bulunamadı" };
+      return { ok: false, error: 'DeepSeek API anahtarı bulunamadı' };
     }
 
     try {
-      let fullResponse = "";
+      let fullResponse = '';
       const result = await askDeepSeek(
         [
-          { role: "system", content: "Sen bir işletme danışmanısın." },
-          { role: "user", content: prompt },
+          { role: 'system', content: 'Sen bir işletme danışmanısın.' },
+          { role: 'user', content: prompt },
         ],
         apiKeyToUse,
-        (chunk) => { fullResponse += chunk; },
+        (chunk) => {
+          fullResponse += chunk;
+        },
         { maxTokens: 2048 },
       );
       return { ok: true, data: result || fullResponse };
     } catch (err) {
-      const message = err instanceof Error ? err.message : "DeepSeek API hatası";
+      const message = err instanceof Error ? err.message : 'DeepSeek API hatası';
       return { ok: false, error: message };
     }
   }
 
-  async islemYap(talep: AgentRequest): Promise<AgentResponse> {
-    this.yayinla("deep_seek.islem", {
+  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+    this.yayinla('deep_seek.islem', {
       action: talep.action,
       payload: talep.payload,
       meta: talep.meta,
     });
 
-    if (talep.action === "analiz" && talep.payload?.soru) {
-      return this.analizEt(String(talep.payload.soru), talep.payload?.apiKey as string | undefined);
+    const p = (talep.payload as any) || {};
+
+    if (talep.action === 'analiz' && p.soru) {
+      return this.analizEt(String(p.soru), p.apiKey as string | undefined) as any;
     }
 
-    if (talep.action === "analyze_intent" && talep.payload?.prompt) {
-      return this.analizEt(String(talep.payload.prompt), talep.payload?.apiKey as string | undefined);
+    if (talep.action === 'analyze_intent' && p.prompt) {
+      return this.analizEt(String(p.prompt), p.apiKey as string | undefined) as any;
     }
 
-    if (talep.action === "oner" && talep.payload?.veri) {
-      return this.onerUret(talep.payload.veri as Record<string, unknown>, talep.payload?.apiKey as string | undefined);
+    if (talep.action === 'oner' && p.veri) {
+      return this.onerUret(p.veri as Record<string, unknown>, p.apiKey as string | undefined) as any;
     }
 
     return {
@@ -143,8 +151,8 @@ export class DeepSeekAgent extends BaseAgent {
       data: {
         agent: this.id,
         action: talep.action,
-        status: "queued",
-      },
+        status: 'queued',
+      } as unknown as R,
     };
   }
 }

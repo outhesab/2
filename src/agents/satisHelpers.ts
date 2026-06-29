@@ -1,5 +1,5 @@
-import type { KasaEntry, Cari } from "@/types";
-import { genId } from "@/lib/utils-tr";
+import type { KasaEntry, Cari } from '@/types';
+import { genId } from '@/lib/utils-tr';
 
 function checkSatisWritePermission(
   yetkiVar: boolean,
@@ -7,10 +7,10 @@ function checkSatisWritePermission(
   ctxMsg?: string,
 ): { ok: false; error: string } | null {
   if (!yetkiVar) {
-    return { ok: false, error: "satis.write yetkisi yok" };
+    return { ok: false, error: 'satis.write yetkisi yok' };
   }
   if (!ctx) {
-    return { ok: false, error: ctxMsg ?? "Agent bağlanmadı" };
+    return { ok: false, error: ctxMsg ?? 'Agent bağlanmadı' };
   }
   return null;
 }
@@ -21,25 +21,23 @@ function buildRefundKasaEntries(
   productName: string,
   payment: string,
   nowIso: string,
-  category: "iptal" | "iade",
+  category: 'iptal' | 'iade',
 ): { updatedKasa: KasaEntry[]; tahsilEdilen: number } {
-  const relatedKasaEntries = kasa.filter(
-    (k) => !k.deleted && k.relatedId === saleId && k.type === "gelir",
-  );
+  const relatedKasaEntries = kasa.filter((k) => !k.deleted && k.relatedId === saleId && k.type === 'gelir');
   const tahsilEdilen = relatedKasaEntries.reduce((s, k) => s + k.amount, 0);
 
   let updatedKasa = kasa;
   if (tahsilEdilen > 0) {
-    const kasaId = payment === "cari" ? "nakit" : payment;
+    const kasaId = payment === 'cari' ? 'nakit' : payment;
     updatedKasa = [
       ...updatedKasa,
       {
         id: genId(),
-        type: "gider" as const,
+        type: 'gider' as const,
         category,
         amount: tahsilEdilen,
         kasa: kasaId,
-        description: `${category === "iptal" ? "İptal" : "İade"}: ${productName}`,
+        description: `${category === 'iptal' ? 'İptal' : 'İade'}: ${productName}`,
         relatedId: saleId,
         createdAt: nowIso,
         updatedAt: nowIso,
@@ -76,7 +74,7 @@ export function requireSatisWrite(
   ctx: unknown,
   ctxMsg?: string,
 ): { ok: false; error: string } | null {
-  return checkSatisWritePermission(yetkiKontrolu("satis.write"), ctx, ctxMsg);
+  return checkSatisWritePermission(yetkiKontrolu('satis.write'), ctx, ctxMsg);
 }
 
 export function applyRefundToDB(
@@ -84,10 +82,15 @@ export function applyRefundToDB(
   cari: Cari[],
   sale: { id: string; productName: string; payment: string; cariId?: string; total: number },
   nowIso: string,
-  type: "iptal" | "iade",
+  type: 'iptal' | 'iade',
 ): { kasa: KasaEntry[]; cari: Cari[] } {
   const { updatedKasa, tahsilEdilen } = buildRefundKasaEntries(
-    kasa, sale.id, sale.productName, sale.payment, nowIso, type,
+    kasa,
+    sale.id,
+    sale.productName,
+    sale.payment,
+    nowIso,
+    type,
   );
   return {
     kasa: updatedKasa,

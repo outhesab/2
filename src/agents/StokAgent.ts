@@ -1,34 +1,52 @@
-import { DomainAgent } from "@/agents/DomainAgent";
-import type { AgentRequest } from "@/agents/types";
-import type { Intent } from "@/domain/types";
+import { DomainAgent } from '@/agents/DomainAgent';
+import type { AgentRequest, AgentResponse } from '@/agents/types';
+import type { Intent } from '@/domain/types';
+import { StokGuncelleSchema, ProductSchema } from '@/lib/schemas';
 
 export class StokAgent extends DomainAgent {
-  readonly id = "stok" as const;
-  readonly yetkiler = ["stok.read", "stok.write", "rapor.read"] as const;
+  readonly id = 'stok' as const;
+  readonly yetkiler = ['stok.read', 'stok.write', 'rapor.read'] as const;
 
-  protected mapRequestToIntent(talep: AgentRequest): Intent | null {
+  async islemYap<P = any, R = any>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
+    const p = talep.payload ?? {};
+
+    // Zod Validation
+    if (talep.action === 'stok_guncelle') {
+      const v = StokGuncelleSchema.safeParse(p);
+      if (!v.success) return { ok: false, error: `Stok Güncelleme Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+    }
+    if (talep.action === 'urun_ekle') {
+      const v = ProductSchema.safeParse(p);
+      if (!v.success) return { ok: false, error: `Ürün Ekleme Hatası: ${v.error.errors.map(e => e.message).join(', ')}` } as AgentResponse<R>;
+    }
+
+    return super.islemYap(talep);
+  }
+
+  protected mapRequestToIntent(talep: AgentRequest<any>): Intent | null {
     const p = talep.payload || {};
-    if (talep.action === "stok_guncelle") {
-      if (!p.productId) return null;
+    if (talep.action === 'stok_guncelle') {
+      const validation = StokGuncelleSchema.parse(p);
       return {
-        type: "stok_guncelle",
+        type: 'stok_guncelle',
         payload: {
-          productId: p.productId as string,
-          amount: p.quantity as number,
-          type: (p.type as "giris" | "cikis") || "cikis",
-          description: p.label as string,
-        }
+          productId: validation.productId,
+          amount: validation.quantity,
+          type: validation.type,
+          description: validation.label,
+        },
       };
     }
-    if (talep.action === "urun_ekle") {
+    if (talep.action === 'urun_ekle') {
+      const validation = ProductSchema.parse(p);
       return {
-        type: "urun_ekle",
+        type: 'urun_ekle',
         payload: {
-          productName: p.productName as string,
-          category: p.category as string,
-          initialStock: p.initialStock as number,
-          unitPrice: p.unitPrice as number,
-        }
+          productName: validation.name,
+          category: validation.category,
+          initialStock: validation.stock,
+          unitPrice: validation.price,
+        },
       };
     }
     return null;

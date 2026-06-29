@@ -4,12 +4,11 @@
  * Agent context mock ile test edilir, gerçek save() çağrılmaz.
  */
 
-import { SatisAgent } from "@/agents/SatisAgent";
-import type { AgentContext, YeniSatisParams } from "@/agents/types";
-import type { DB } from "@/types";
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { makeDB } from "@/__tests__/testUtils";
-
+import { SatisAgent } from '@/agents/SatisAgent';
+import type { AgentContext, YeniSatisParams } from '@/agents/types';
+import type { DB } from '@/types';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { makeDB } from '@/__tests__/testUtils';
 
 function now(): string {
   return new Date().toISOString();
@@ -31,9 +30,9 @@ function makeContext(initialDB: DB): { ctx: AgentContext; getDB: () => DB } {
 
 // ─── Örnek Ürün ────────────────────────────────────────────────────────────
 const SOBA_PROD = {
-  id: "p1",
-  name: "Test Soba",
-  category: "soba",
+  id: 'p1',
+  name: 'Test Soba',
+  category: 'soba',
   cost: 5000,
   price: 10000,
   stock: 10,
@@ -43,9 +42,9 @@ const SOBA_PROD = {
 };
 
 const AKSESUAR_PROD = {
-  id: "p2",
-  name: "Test Aksesuar",
-  category: "aksesuar",
+  id: 'p2',
+  name: 'Test Aksesuar',
+  category: 'aksesuar',
   cost: 200,
   price: 500,
   stock: 50,
@@ -56,9 +55,9 @@ const AKSESUAR_PROD = {
 
 // ─── Örnek Cari ────────────────────────────────────────────────────────────
 const MUSTERI = {
-  id: "cari1",
-  name: "Test Müşteri",
-  type: "musteri" as const,
+  id: 'cari1',
+  name: 'Test Müşteri',
+  type: 'musteri' as const,
   balance: 0,
   createdAt: now(),
   updatedAt: now(),
@@ -77,13 +76,13 @@ const validParams: YeniSatisParams = {
     },
   ],
   cariId: MUSTERI.id,
-  payment: "nakit",
+  payment: 'nakit',
   discount: 0,
   discountAmount: 0,
   tahsilat: SOBA_PROD.price * 2,
 };
 
-describe("SatisAgent", () => {
+describe('SatisAgent', () => {
   let agent: SatisAgent;
 
   beforeEach(() => {
@@ -95,12 +94,16 @@ describe("SatisAgent", () => {
   }
 
   function getSaleData(result: { ok: boolean; data?: unknown }) {
-    return (result.data as { intentResult: { data: { dbUpdates: { sale: { id: string; total: number; unitPrice?: number } } } } }).intentResult.data.dbUpdates.sale;
+    return (
+      result.data as {
+        intentResult: { data: { dbUpdates: { sale: { id: string; total: number; unitPrice?: number } } } };
+      }
+    ).intentResult.data.dbUpdates.sale;
   }
 
   // ── yeniSatis (via islemYap) ─────────────────────────────────────────────
 
-  it("yeniSatis: başarılı satış kaydı", async () => {
+  it('yeniSatis: başarılı satış kaydı', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
@@ -116,26 +119,24 @@ describe("SatisAgent", () => {
     const urun = nextDB.products.find((p: { id: string }) => p.id === SOBA_PROD.id);
     expect(urun!.stock).toBe(SOBA_PROD.stock - 2);
     expect(nextDB.sales).toHaveLength(1);
-    expect(nextDB.sales[0].status).toBe("tamamlandi");
+    expect(nextDB.sales[0].status).toBe('tamamlandi');
     expect(nextDB.sales[0].total).toBe(SOBA_PROD.price * 2);
     const kasaKaydi = nextDB.kasa.find((k) => k.relatedId === saleData.id);
     expect(kasaKaydi).toBeDefined();
-    expect(kasaKaydi!.type).toBe("gelir");
+    expect(kasaKaydi!.type).toBe('gelir');
     expect(kasaKaydi!.amount).toBe(SOBA_PROD.price * 2);
-    const hareket = nextDB.stockMovements.find(
-      (m: { productId: string }) => m.productId === SOBA_PROD.id,
-    );
+    const hareket = nextDB.stockMovements.find((m: { productId: string }) => m.productId === SOBA_PROD.id);
     expect(hareket).toBeDefined();
-    expect(hareket!.type).toBe("satis");
+    expect(hareket!.type).toBe('satis');
     expect(hareket!.amount).toBe(-2);
   });
 
-  it("yeniSatis: cari ödemede bakiye güncellenmeli", async () => {
+  it('yeniSatis: cari ödemede bakiye güncellenmeli', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
 
-    const params = { ...validParams, payment: "cari", tahsilat: 0 };
+    const params = { ...validParams, payment: 'cari', tahsilat: 0 };
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(true);
 
@@ -144,44 +145,46 @@ describe("SatisAgent", () => {
     expect(cari!.balance).toBe(SOBA_PROD.price * 2);
   });
 
-  it("yeniSatis: boş ürün listesi hata döndürmeli", async () => {
+  it('yeniSatis: boş ürün listesi hata döndürmeli', async () => {
     const { ctx } = makeContext(makeDB());
     agent.bagla(ctx);
 
-    const sonuc = await agent.islemYap(islemYapParams('yeniSatis', { ...validParams, items: [] } as unknown as Record<string, unknown>));
+    const sonuc = await agent.islemYap(
+      islemYapParams('yeniSatis', { ...validParams, items: [] } as unknown as Record<string, unknown>),
+    );
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("ürün");
+    expect(sonuc.error).toContain('ürün');
   });
 
-  it("yeniSatis: yetersiz stok hata döndürmeli", async () => {
+  it('yeniSatis: yetersiz stok hata döndürmeli', async () => {
     const db = makeDB({ products: [{ ...SOBA_PROD, stock: 1 }], cari: [MUSTERI] });
     const { ctx } = makeContext(db);
     agent.bagla(ctx);
 
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', validParams as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("stok");
+    expect(sonuc.error).toContain('stok');
   });
 
-  it("yeniSatis: bagla() çağrılmamışsa hata döndürmeli", async () => {
+  it('yeniSatis: bagla() çağrılmamışsa hata döndürmeli', async () => {
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', validParams as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("bağlanmadı");
+    expect(sonuc.error).toContain('bağlanmadı');
   });
 
-  it("yeniSatis: yetki yoksa hata döndürmeli", async () => {
-    vi.spyOn(agent, "yetkiKontrolu").mockReturnValue(false);
+  it('yeniSatis: yetki yoksa hata döndürmeli', async () => {
+    vi.spyOn(agent, 'yetkiKontrolu').mockReturnValue(false);
     const { ctx } = makeContext(makeDB({ products: [SOBA_PROD] }));
     agent.bagla(ctx);
 
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', validParams as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("yetkisi");
+    expect(sonuc.error).toContain('yetkisi');
   });
 
   // ── iptalEt (via islemYap) ────────────────────────────────────────────────
 
-  it("iptalEt: satış iptal edilmeli ve stok geri yüklenmeli", async () => {
+  it('iptalEt: satış iptal edilmeli ve stok geri yüklenmeli', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
@@ -194,25 +197,23 @@ describe("SatisAgent", () => {
 
     const nextDB = getDB();
     const satisKaydi = nextDB.sales.find((s: { id: string }) => s.id === saleId);
-    expect(satisKaydi!.status).toBe("iptal");
+    expect(satisKaydi!.status).toBe('iptal');
 
     const urun = nextDB.products.find((p: { id: string }) => p.id === SOBA_PROD.id);
     expect(urun!.stock).toBe(SOBA_PROD.stock);
 
-    const iptalKasa = nextDB.kasa.filter(
-      (k) => k.relatedId === saleId && k.type === "gider",
-    );
+    const iptalKasa = nextDB.kasa.filter((k) => k.relatedId === saleId && k.type === 'gider');
     expect(iptalKasa.length).toBeGreaterThanOrEqual(1);
     const toplamIptal = iptalKasa.reduce((s: number, k: { amount: number }) => s + k.amount, 0);
     expect(toplamIptal).toBe(SOBA_PROD.price * 2);
   });
 
-  it("iptalEt: cari ödemede bakiye düzeltilmeli", async () => {
+  it('iptalEt: cari ödemede bakiye düzeltilmeli', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [{ ...MUSTERI, balance: 0 }] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
 
-    const params = { ...validParams, payment: "cari", tahsilat: 0 };
+    const params = { ...validParams, payment: 'cari', tahsilat: 0 };
     const satis = await agent.islemYap(islemYapParams('yeniSatis', params));
     expect(satis.ok).toBe(true);
     const saleId = getSaleData(satis).id;
@@ -230,15 +231,15 @@ describe("SatisAgent", () => {
     expect(cariKaydi!.balance).toBe(0);
   });
 
-  it("iptalEt: bagla() çağrılmamışsa hata döndürmeli", async () => {
-    const sonuc = await agent.islemYap({ action: 'iptalEt', payload: { saleId: "fake-id" } });
+  it('iptalEt: bagla() çağrılmamışsa hata döndürmeli', async () => {
+    const sonuc = await agent.islemYap({ action: 'iptalEt', payload: { saleId: 'fake-id' } });
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("bağlanmadı");
+    expect(sonuc.error).toContain('bağlanmadı');
   });
 
   // ── iadeYap (via islemYap) ────────────────────────────────────────────────
 
-  it("iadeYap: tam iade stok geri yüklenmeli ve durum güncellenmeli", async () => {
+  it('iadeYap: tam iade stok geri yüklenmeli ve durum güncellenmeli', async () => {
     const db = makeDB({ products: [SOBA_PROD, AKSESUAR_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
@@ -273,7 +274,7 @@ describe("SatisAgent", () => {
 
     const nextDB = getDB();
     const satisKaydi = nextDB.sales.find((s: { id: string }) => s.id === saleId);
-    expect(satisKaydi!.status).toBe("iade");
+    expect(satisKaydi!.status).toBe('iade');
     expect(satisKaydi!.returnedAt).toBeDefined();
 
     const soba = nextDB.products.find((p: { id: string }) => p.id === SOBA_PROD.id);
@@ -282,7 +283,7 @@ describe("SatisAgent", () => {
     expect(aksesuar!.stock).toBe(AKSESUAR_PROD.stock);
   });
 
-  it("iadeYap: kısmi iade sadece belirtilen miktar kadar stok döndürmeli", async () => {
+  it('iadeYap: kısmi iade sadece belirtilen miktar kadar stok döndürmeli', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
@@ -320,26 +321,26 @@ describe("SatisAgent", () => {
     expect(duzelt.ok).toBe(true);
   });
 
-  it("fiyatDuzelt: bagla() çağrılmamışsa hata döndürmeli", async () => {
-    const sonuc = await agent.islemYap({ action: 'fiyatDuzelt', payload: { saleId: "fake-id", unitPrice: 9999 } });
+  it('fiyatDuzelt: bagla() çağrılmamışsa hata döndürmeli', async () => {
+    const sonuc = await agent.islemYap({ action: 'fiyatDuzelt', payload: { saleId: 'fake-id', unitPrice: 9999 } });
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("bağlanmadı");
+    expect(sonuc.error).toContain('bağlanmadı');
   });
 
   // ── islemYap (base) ──────────────────────────────────────────────────────
 
-  it("islemYap: bilinmeyen aksiyon hata döndürmeli", async () => {
+  it('islemYap: bilinmeyen aksiyon hata döndürmeli', async () => {
     const { ctx } = makeContext(makeDB());
     agent.bagla(ctx);
 
-    const sonuc = await agent.islemYap({ action: "test" });
+    const sonuc = await agent.islemYap({ action: 'test' });
     expect(sonuc.ok).toBe(false);
-    expect(sonuc.error).toContain("Desteklenmeyen");
+    expect(sonuc.error).toContain('Desteklenmeyen');
   });
 
   // ── H9: Discount calculation ────────────────────────────────────────────
 
-  it("yeniSatis: yüzde iskonto total ve profit hesaplarını etkilemeli", async () => {
+  it('yeniSatis: yüzde iskonto total ve profit hesaplarını etkilemeli', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
@@ -385,12 +386,12 @@ describe("SatisAgent", () => {
 
   // ── H9: Banka (havale) payment routing ──────────────────────────────────
 
-  it("yeniSatis: havale ödemede kasa kaydı havale kasasına gider", async () => {
+  it('yeniSatis: havale ödemede kasa kaydı havale kasasına gider', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
 
-    const params = { ...validParams, payment: "havale" as const };
+    const params = { ...validParams, payment: 'havale' as const };
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(true);
 
@@ -398,18 +399,18 @@ describe("SatisAgent", () => {
     const saleId = getSaleData(sonuc).id;
     const kasaKaydi = nextDB.kasa.find((k) => k.relatedId === saleId);
     expect(kasaKaydi).toBeDefined();
-    expect(kasaKaydi!.kasa).toBe("havale");
+    expect(kasaKaydi!.kasa).toBe('havale');
     expect(kasaKaydi!.amount).toBe(SOBA_PROD.price * 2);
   });
 
   // ── H9: POS (kart) payment routing ──────────────────────────────────────
 
-  it("yeniSatis: kart ödemede kasa kaydı kart kasasına gider", async () => {
+  it('yeniSatis: kart ödemede kasa kaydı kart kasasına gider', async () => {
     const db = makeDB({ products: [SOBA_PROD], cari: [MUSTERI] });
     const { ctx, getDB } = makeContext(db);
     agent.bagla(ctx);
 
-    const params = { ...validParams, payment: "kart" as const };
+    const params = { ...validParams, payment: 'kart' as const };
     const sonuc = await agent.islemYap(islemYapParams('yeniSatis', params as unknown as Record<string, unknown>));
     expect(sonuc.ok).toBe(true);
 
@@ -417,7 +418,7 @@ describe("SatisAgent", () => {
     const saleId = getSaleData(sonuc).id;
     const kasaKaydi = nextDB.kasa.find((k) => k.relatedId === saleId);
     expect(kasaKaydi).toBeDefined();
-    expect(kasaKaydi!.kasa).toBe("kart");
+    expect(kasaKaydi!.kasa).toBe('kart');
     expect(kasaKaydi!.amount).toBe(SOBA_PROD.price * 2);
   });
 });
