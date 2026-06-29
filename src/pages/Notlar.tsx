@@ -5,48 +5,73 @@ import type { DB, Note } from '@/types';
 import EmptyState from '@/components/EmptyState';
 import { StickyNote } from 'lucide-react';
 
-interface Props { db: DB; save: (fn: (prev: DB) => DB) => void; }
+interface Props {
+  db: DB;
+  save: (fn: (prev: DB) => DB) => void;
+}
 
 const NOTE_COLORS = [
   { id: 'default', bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)', label: '⬜' },
-  { id: 'yellow',  bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',   label: '🟡' },
-  { id: 'green',   bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.3)',   label: '🟢' },
-  { id: 'red',     bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',    label: '🔴' },
-  { id: 'blue',    bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.3)',   label: '🔵' },
-  { id: 'purple',  bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.3)',   label: '🟣' },
+  { id: 'yellow', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.3)', label: '🟡' },
+  { id: 'green', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', label: '🟢' },
+  { id: 'red', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)', label: '🔴' },
+  { id: 'blue', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.3)', label: '🔵' },
+  { id: 'purple', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.3)', label: '🟣' },
 ];
 
 function getColor(id?: string) {
-  return NOTE_COLORS.find(c => c.id === id) || NOTE_COLORS[0];
+  return NOTE_COLORS.find((c) => c.id === id) || NOTE_COLORS[0];
 }
 
 export default function Notlar({ db, save }: Props) {
-  const notes = useMemo(() =>
-    [...(db.notes || [])].filter(n => !n.deleted).sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    }), [db.notes]);
+  const notes = useMemo(
+    () =>
+      [...(db.notes || [])]
+        .filter((n) => !n.deleted)
+        .sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        }),
+    [db.notes],
+  );
 
   const [search, setSearch] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: '', content: '', color: 'default', tags: '', linkedType: '', linkedId: '', linkedLabel: '' });
+  const [form, setForm] = useState({
+    title: '',
+    content: '',
+    color: 'default',
+    tags: '',
+    linkedType: '',
+    linkedId: '',
+    linkedLabel: '',
+  });
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   const filtered = search
-    ? notes.filter(n =>
-        n.title.toLowerCase().includes(search.toLowerCase()) ||
-        n.content.toLowerCase().includes(search.toLowerCase()) ||
-        (n.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()))
+    ? notes.filter(
+        (n) =>
+          n.title.toLowerCase().includes(search.toLowerCase()) ||
+          n.content.toLowerCase().includes(search.toLowerCase()) ||
+          (n.tags || []).some((t) => t.toLowerCase().includes(search.toLowerCase())),
       )
     : notes;
 
   const linkOptions = useMemo(() => {
     const options: { type: string; label: string; id: string; name: string }[] = [];
-    db.cari.filter(c => !c.deleted).forEach(c => options.push({ type: 'cari', label: '👤 Cari', id: c.id, name: c.name }));
-    db.products.filter(p => !p.deleted).forEach(p => options.push({ type: 'product', label: '📦 Ürün', id: p.id, name: p.name }));
-    db.sales.filter(s => !s.deleted).forEach(s => options.push({ type: 'sale', label: '🛒 Satış', id: s.id, name: `#${s.invoiceNo || s.id.slice(0, 6)}` }));
+    db.cari
+      .filter((c) => !c.deleted)
+      .forEach((c) => options.push({ type: 'cari', label: '👤 Cari', id: c.id, name: c.name }));
+    db.products
+      .filter((p) => !p.deleted)
+      .forEach((p) => options.push({ type: 'product', label: '📦 Ürün', id: p.id, name: p.name }));
+    db.sales
+      .filter((s) => !s.deleted)
+      .forEach((s) =>
+        options.push({ type: 'sale', label: '🛒 Satış', id: s.id, name: `#${s.invoiceNo || s.id.slice(0, 6)}` }),
+      );
     return options;
   }, [db]);
 
@@ -57,24 +82,58 @@ export default function Notlar({ db, save }: Props) {
   };
 
   const openEdit = (n: Note) => {
-    setForm({ title: n.title, content: n.content, color: n.color || 'default', tags: (n.tags || []).join(', '), linkedType: n.linkedType || '', linkedId: n.linkedId || '', linkedLabel: n.linkedLabel || '' });
+    setForm({
+      title: n.title,
+      content: n.content,
+      color: n.color || 'default',
+      tags: (n.tags || []).join(', '),
+      linkedType: n.linkedType || '',
+      linkedId: n.linkedId || '',
+      linkedLabel: n.linkedLabel || '',
+    });
     setEditId(n.id);
   };
 
   const handleSave = () => {
     if (!form.content.trim() && !form.title.trim()) return;
     const nowIso = new Date().toISOString();
-    const tags = form.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const tags = form.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
     const linkedType = (form.linkedType || undefined) as Note['linkedType'];
     const linkedId = form.linkedId || undefined;
     const linkedLabel = form.linkedLabel || undefined;
-    save(prev => {
+    save((prev) => {
       const notes = [...(prev.notes || [])];
       if (editId === 'new') {
-        notes.unshift({ id: genId(), title: form.title, content: form.content, color: form.color, tags, linkedType, linkedId, linkedLabel, pinned: false, createdAt: nowIso, updatedAt: nowIso });
+        notes.unshift({
+          id: genId(),
+          title: form.title,
+          content: form.content,
+          color: form.color,
+          tags,
+          linkedType,
+          linkedId,
+          linkedLabel,
+          pinned: false,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        });
       } else {
-        const i = notes.findIndex(n => n.id === editId);
-        if (i >= 0) notes[i] = { ...notes[i], title: form.title, content: form.content, color: form.color, tags, linkedType, linkedId, linkedLabel, updatedAt: nowIso };
+        const i = notes.findIndex((n) => n.id === editId);
+        if (i >= 0)
+          notes[i] = {
+            ...notes[i],
+            title: form.title,
+            content: form.content,
+            color: form.color,
+            tags,
+            linkedType,
+            linkedId,
+            linkedLabel,
+            updatedAt: nowIso,
+          };
       }
       return { ...prev, notes };
     });
@@ -82,35 +141,79 @@ export default function Notlar({ db, save }: Props) {
   };
 
   const togglePin = (id: string) => {
-    save(prev => ({ ...prev, notes: (prev.notes || []).map(n => n.id === id ? { ...n, pinned: !n.pinned, updatedAt: new Date().toISOString() } : n) }));
+    save((prev) => ({
+      ...prev,
+      notes: (prev.notes || []).map((n) =>
+        n.id === id ? { ...n, pinned: !n.pinned, updatedAt: new Date().toISOString() } : n,
+      ),
+    }));
   };
 
   const deleteNote = (id: string) => {
-    save(prev => ({ ...prev, notes: (prev.notes || []).map(n => n.id === id ? { ...n, deleted: true, updatedAt: new Date().toISOString() } : n) }));
+    save((prev) => ({
+      ...prev,
+      notes: (prev.notes || []).map((n) =>
+        n.id === id ? { ...n, deleted: true, updatedAt: new Date().toISOString() } : n,
+      ),
+    }));
   };
 
   const copyNote = (n: Note) => {
-    navigator.clipboard.writeText(`${n.title ? n.title + '\n\n' : ''}${n.content}`).catch(() => logger.warn('ui', 'Panoya yazılamadı'));
+    navigator.clipboard
+      .writeText(`${n.title ? n.title + '\n\n' : ''}${n.content}`)
+      .catch(() => logger.warn('ui', 'Panoya yazılamadı'));
   };
 
-  const pinnedCount = notes.filter(n => n.pinned).length;
+  const pinnedCount = notes.filter((n) => n.pinned).length;
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
       {/* Header */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={openNew} style={{ background: 'linear-gradient(135deg, #ff5722, #ff7043)', border: 'none', borderRadius: 10, color: '#fff', padding: '10px 20px', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+        <button
+          onClick={openNew}
+          style={{
+            background: 'linear-gradient(135deg, #ff5722, #ff7043)',
+            border: 'none',
+            borderRadius: 10,
+            color: '#fff',
+            padding: '10px 20px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+          }}
+        >
           + Yeni Not
         </button>
         <input
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="🔍 Not ara..."
-          style={{ flex: 1, padding: '9px 13px', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, color: 'var(--text-primary)', fontSize: '0.9rem' }}
+          style={{
+            flex: 1,
+            padding: '9px 13px',
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: 10,
+            color: 'var(--text-primary)',
+            fontSize: '0.9rem',
+          }}
         />
         <div style={{ display: 'flex', gap: 4 }}>
-          {(['grid', 'list'] as const).map(v => (
-            <button key={v} onClick={() => setView(v)} style={{ padding: '8px 12px', border: 'none', borderRadius: 8, cursor: 'pointer', background: view === v ? '#ff5722' : '#273548', color: view === v ? '#fff' : '#64748b', fontSize: '1rem' }}>
+          {(['grid', 'list'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              style={{
+                padding: '8px 12px',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                background: view === v ? '#ff5722' : '#273548',
+                color: view === v ? '#fff' : '#64748b',
+                fontSize: '1rem',
+              }}
+            >
               {v === 'grid' ? '⊞' : '☰'}
             </button>
           ))}
@@ -122,62 +225,160 @@ export default function Notlar({ db, save }: Props) {
 
       {/* Edit / New Form */}
       {editId && (
-        <div style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))', border: '1px solid rgba(255,87,34,0.3)', borderRadius: 16, padding: 18, marginBottom: 20 }}>
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
+            border: '1px solid rgba(255,87,34,0.3)',
+            borderRadius: 16,
+            padding: 18,
+            marginBottom: 20,
+          }}
+        >
           <input
             value={form.title}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
             placeholder="Başlık (opsiyonel)..."
-            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700, marginBottom: 10, boxSizing: 'border-box' }}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8,
+              color: 'var(--text-primary)',
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              marginBottom: 10,
+              boxSizing: 'border-box',
+            }}
           />
           <textarea
             ref={textRef}
             value={form.content}
-            onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+            onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
             placeholder="Notunuzu buraya yazın..."
             rows={6}
-            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'var(--text-primary)', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6, fontFamily: 'inherit' }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 8,
+              color: 'var(--text-primary)',
+              fontSize: '0.9rem',
+              resize: 'vertical',
+              boxSizing: 'border-box',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+            }}
           />
           <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             {/* Renk seçici */}
             <div style={{ display: 'flex', gap: 5 }}>
-              {NOTE_COLORS.map(c => (
-                <button key={c.id} onClick={() => setForm(f => ({ ...f, color: c.id }))}
-                  style={{ width: 26, height: 26, borderRadius: '50%', border: form.color === c.id ? '2px solid #fff' : '2px solid transparent', background: c.bg, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {NOTE_COLORS.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setForm((f) => ({ ...f, color: c.id }))}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    border: form.color === c.id ? '2px solid #fff' : '2px solid transparent',
+                    background: c.bg,
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                   {c.label}
                 </button>
               ))}
             </div>
             <input
               value={form.tags}
-              onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
+              onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
               placeholder="Etiketler (virgülle ayır)..."
-              style={{ flex: 1, minWidth: 120, padding: '6px 10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#94a3b8', fontSize: '0.8rem' }}
+              style={{
+                flex: 1,
+                minWidth: 120,
+                padding: '6px 10px',
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 7,
+                color: '#94a3b8',
+                fontSize: '0.8rem',
+              }}
             />
             <select
               value={form.linkedId ? `${form.linkedType}::${form.linkedId}` : ''}
-              onChange={e => {
+              onChange={(e) => {
                 const val = e.target.value;
-                if (!val) { setForm(f => ({ ...f, linkedType: '', linkedId: '', linkedLabel: '' })); return; }
+                if (!val) {
+                  setForm((f) => ({ ...f, linkedType: '', linkedId: '', linkedLabel: '' }));
+                  return;
+                }
                 const [t, id] = val.split('::');
-                const opt = linkOptions.find(o => o.type === t && o.id === id);
-                setForm(f => ({ ...f, linkedType: t, linkedId: id, linkedLabel: opt?.name || '' }));
+                const opt = linkOptions.find((o) => o.type === t && o.id === id);
+                setForm((f) => ({ ...f, linkedType: t, linkedId: id, linkedLabel: opt?.name || '' }));
               }}
-              style={{ minWidth: 140, padding: '6px 10px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, color: '#94a3b8', fontSize: '0.8rem' }}
+              style={{
+                minWidth: 140,
+                padding: '6px 10px',
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 7,
+                color: '#94a3b8',
+                fontSize: '0.8rem',
+              }}
             >
               <option value="">🔗 Bağlantı Yok</option>
-              {['cari', 'product', 'sale'].map(grp => {
-                const items = linkOptions.filter(o => o.type === grp);
+              {['cari', 'product', 'sale'].map((grp) => {
+                const items = linkOptions.filter((o) => o.type === grp);
                 if (items.length === 0) return null;
                 return (
-                  <optgroup key={grp} label={grp === 'cari' ? '👤 Cariler' : grp === 'product' ? '📦 Ürünler' : '🛒 Satışlar'}>
-                    {items.map(o => <option key={o.id} value={`${o.type}::${o.id}`}>{o.name}</option>)}
+                  <optgroup
+                    key={grp}
+                    label={grp === 'cari' ? '👤 Cariler' : grp === 'product' ? '📦 Ürünler' : '🛒 Satışlar'}
+                  >
+                    {items.map((o) => (
+                      <option key={o.id} value={`${o.type}::${o.id}`}>
+                        {o.name}
+                      </option>
+                    ))}
                   </optgroup>
                 );
               })}
             </select>
             <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-              <button onClick={() => setEditId(null)} style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#64748b', cursor: 'pointer', fontWeight: 600 }}>İptal</button>
-              <button onClick={handleSave} style={{ padding: '8px 20px', background: 'linear-gradient(135deg, #ff5722, #ff7043)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontWeight: 700 }}>💾 Kaydet</button>
+              <button
+                onClick={() => setEditId(null)}
+                style={{
+                  padding: '8px 16px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 8,
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleSave}
+                style={{
+                  padding: '8px 20px',
+                  background: 'linear-gradient(135deg, #ff5722, #ff7043)',
+                  border: 'none',
+                  borderRadius: 8,
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                💾 Kaydet
+              </button>
             </div>
           </div>
         </div>
@@ -188,32 +389,80 @@ export default function Notlar({ db, save }: Props) {
         <EmptyState
           icon={StickyNote}
           title={search ? 'Not bulunamadı' : 'Henüz not yok'}
-          description={search ? 'Aramanızla eşleşen not bulunamadı.' : 'Yukarıdaki formu kullanarak ilk notunuzu ekleyin.'}
+          description={
+            search ? 'Aramanızla eşleşen not bulunamadı.' : 'Yukarıdaki formu kullanarak ilk notunuzu ekleyin.'
+          }
           actionLabel={search ? 'Aramayı temizle' : undefined}
           onAction={search ? () => setSearch('') : undefined}
         />
       ) : (
-        <div style={view === 'grid'
-          ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }
-          : { display: 'flex', flexDirection: 'column', gap: 8 }
-        }>
-          {filtered.map(n => {
+        <div
+          style={
+            view === 'grid'
+              ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }
+              : { display: 'flex', flexDirection: 'column', gap: 8 }
+          }
+        >
+          {filtered.map((n) => {
             const c = getColor(n.color);
             return (
-              <div key={n.id} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: 14, padding: '14px 16px', position: 'relative', cursor: 'pointer', transition: 'all 0.2s' }}
+              <div
+                key={n.id}
+                style={{
+                  background: c.bg,
+                  border: `1px solid ${c.border}`,
+                  borderRadius: 14,
+                  padding: '14px 16px',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
                 onClick={() => openEdit(n)}
-                onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.transform = ''}
+                onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)')}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.transform = '')}
               >
                 {n.pinned && <div style={{ position: 'absolute', top: 10, right: 10, fontSize: '0.8rem' }}>📌</div>}
-                {n.title && <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: 6, paddingRight: 20 }}>{n.title}</div>}
-                <div style={{ color: '#94a3b8', fontSize: '0.83rem', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: view === 'grid' ? 120 : 'none', overflow: 'hidden' }}>
+                {n.title && (
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      fontSize: '0.9rem',
+                      marginBottom: 6,
+                      paddingRight: 20,
+                    }}
+                  >
+                    {n.title}
+                  </div>
+                )}
+                <div
+                  style={{
+                    color: '#94a3b8',
+                    fontSize: '0.83rem',
+                    lineHeight: 1.5,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    maxHeight: view === 'grid' ? 120 : 'none',
+                    overflow: 'hidden',
+                  }}
+                >
                   {n.content}
                 </div>
                 {(n.tags || []).length > 0 && (
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
-                    {(n.tags || []).map(t => (
-                      <span key={t} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 5, padding: '1px 7px', fontSize: '0.7rem', color: '#64748b' }}>#{t}</span>
+                    {(n.tags || []).map((t) => (
+                      <span
+                        key={t}
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          borderRadius: 5,
+                          padding: '1px 7px',
+                          fontSize: '0.7rem',
+                          color: '#64748b',
+                        }}
+                      >
+                        #{t}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -224,13 +473,50 @@ export default function Notlar({ db, save }: Props) {
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
                   <span style={{ color: '#334155', fontSize: '0.7rem' }}>{formatDate(n.updatedAt)}</span>
-                  <div style={{ display: 'flex', gap: 4 }} onClick={e => e.stopPropagation()}>
-                    <button onClick={() => togglePin(n.id)} title={n.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', opacity: n.pinned ? 1 : 0.4, padding: '2px 4px' }}>📌</button>
-                    <button onClick={() => copyNote(n)} title="Kopyala"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', opacity: 0.6, padding: '2px 4px' }}>📋</button>
-                    <button onClick={() => deleteNote(n.id)} title="Sil"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', color: '#ef4444', opacity: 0.6, padding: '2px 4px' }}>🗑️</button>
+                  <div style={{ display: 'flex', gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => togglePin(n.id)}
+                      title={n.pinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        opacity: n.pinned ? 1 : 0.4,
+                        padding: '2px 4px',
+                      }}
+                    >
+                      📌
+                    </button>
+                    <button
+                      onClick={() => copyNote(n)}
+                      title="Kopyala"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        opacity: 0.6,
+                        padding: '2px 4px',
+                      }}
+                    >
+                      📋
+                    </button>
+                    <button
+                      onClick={() => deleteNote(n.id)}
+                      title="Sil"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        color: '#ef4444',
+                        opacity: 0.6,
+                        padding: '2px 4px',
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
               </div>

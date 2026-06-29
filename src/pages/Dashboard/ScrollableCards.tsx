@@ -54,7 +54,11 @@ export function ScrollableCards({ cards, onTabChange }: ScrollableCardsProps) {
 
   return (
     <div className="dash-scroll-wrap">
-      <button className={`dash-nav-btn dash-nav-btn-left ${canLeft ? 'visible' : 'hidden'}`} onClick={() => scroll(-1)} aria-label="Geri kaydır">
+      <button
+        className={`dash-nav-btn dash-nav-btn-left ${canLeft ? 'visible' : 'hidden'}`}
+        onClick={() => scroll(-1)}
+        aria-label="Geri kaydır"
+      >
         ‹
       </button>
       <button

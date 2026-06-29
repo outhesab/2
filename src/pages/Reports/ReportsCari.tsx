@@ -173,52 +173,46 @@ export function ReportsCari({ db }: ReportProps) {
                 {f === 'all' ? 'Tümü' : f === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
               </button>
             ))}
-            <button onClick={handleExport} className={styles.btnGreen}>📥</button>
+            <button onClick={handleExport} className={styles.btnGreen}>
+              📥
+            </button>
           </div>
         }
       >
-          <div className={styles.overflowAuto}>
-            <table className={styles.tableBase}>
-              <thead>
-                <tr className={styles.trBold}>
-                  {['Ad', 'Tip', 'Bakiye', 'Telefon'].map((h) => (
-                    <th
-                      key={h}
-                      className={cStyles.cariTh}
-                      style={{ textAlign: h === 'Bakiye' ? 'right' : 'left' }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cariList.slice(0, 50).map((c, i) => (
-                  <tr key={i}>
-                    <td className={cStyles.cariTdName}>{c.name}</td>
-                    <td className={cStyles.cariTd}>
-                      <span
-                        className={
-                          c.type === 'musteri' ? styles.pillBlue : styles.pillYellow
-                        }
-                      >
-                        {c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
-                      </span>
-                    </td>
-                    <td
-                      className={cStyles.cariTdBalance}
-                      style={{
-                        color: c.balance > 0 ? '#ef4444' : c.balance < 0 ? '#10b981' : '#64748b',
-                      }}
-                    >
-                      {formatMoney(Math.abs(c.balance))} {c.balance > 0 ? '▲' : c.balance < 0 ? '▼' : ''}
-                    </td>
-                    <td className={cStyles.cariTdPhone}>{c.phone || '—'}</td>
-                  </tr>
+        <div className={styles.overflowAuto}>
+          <table className={styles.tableBase}>
+            <thead>
+              <tr className={styles.trBold}>
+                {['Ad', 'Tip', 'Bakiye', 'Telefon'].map((h) => (
+                  <th key={h} className={cStyles.cariTh} style={{ textAlign: h === 'Bakiye' ? 'right' : 'left' }}>
+                    {h}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {cariList.slice(0, 50).map((c, i) => (
+                <tr key={i}>
+                  <td className={cStyles.cariTdName}>{c.name}</td>
+                  <td className={cStyles.cariTd}>
+                    <span className={c.type === 'musteri' ? styles.pillBlue : styles.pillYellow}>
+                      {c.type === 'musteri' ? 'Müşteri' : 'Tedarikçi'}
+                    </span>
+                  </td>
+                  <td
+                    className={cStyles.cariTdBalance}
+                    style={{
+                      color: c.balance > 0 ? '#ef4444' : c.balance < 0 ? '#10b981' : '#64748b',
+                    }}
+                  >
+                    {formatMoney(Math.abs(c.balance))} {c.balance > 0 ? '▲' : c.balance < 0 ? '▼' : ''}
+                  </td>
+                  <td className={cStyles.cariTdPhone}>{c.phone || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </SectionBox>
     </div>
   );

@@ -93,9 +93,7 @@ export default function BugHunter() {
             onClick={runTests}
             disabled={running}
             style={{
-              background: running
-                ? 'rgba(100,116,139,0.2)'
-                : 'linear-gradient(135deg,#dc2626,#ef4444)',
+              background: running ? 'rgba(100,116,139,0.2)' : 'linear-gradient(135deg,#dc2626,#ef4444)',
               border: 'none',
               borderRadius: 10,
               color: '#fff',
@@ -117,12 +115,7 @@ export default function BugHunter() {
 
       {report && (
         <>
-          <BugToolbar
-            search={search}
-            filter={filter}
-            onSearchChange={setSearch}
-            onFilterChange={setFilter}
-          />
+          <BugToolbar search={search} filter={filter} onSearchChange={setSearch} onFilterChange={setFilter} />
           <BugResults results={filteredResults} />
         </>
       )}

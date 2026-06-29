@@ -79,11 +79,29 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
       save((prev) => {
         const merged = { ...prev, ...restored };
         const arrayKeys = [
-          'products', 'sales', 'suppliers', 'orders', 'cari', 'kasa',
-          'bankTransactions', 'matchRules', 'monitorRules', 'monitorLog',
-          'stockMovements', 'peletSuppliers', 'peletOrders', 'boruSuppliers',
-          'boruOrders', 'invoices', 'budgets', 'returns', '_activityLog',
-          'ortakEmanetler', 'installments', 'partners', 'notes',
+          'products',
+          'sales',
+          'suppliers',
+          'orders',
+          'cari',
+          'kasa',
+          'bankTransactions',
+          'matchRules',
+          'monitorRules',
+          'monitorLog',
+          'stockMovements',
+          'peletSuppliers',
+          'peletOrders',
+          'boruSuppliers',
+          'boruOrders',
+          'invoices',
+          'budgets',
+          'returns',
+          '_activityLog',
+          'ortakEmanetler',
+          'installments',
+          'partners',
+          'notes',
         ] as const;
         for (const key of arrayKeys) {
           if (!Array.isArray(merged[key])) (merged as Record<string, unknown>)[key] = prev[key] ?? [];
@@ -138,17 +156,28 @@ export default function Dashboard({ db, onTabChange, save }: DashboardProps) {
     const stokDeger = computeStokDeger(db);
 
     return {
-      todayRevenue, todayProfit, todaySalesCount: todaySales.length,
-      monthRevenue, monthProfit, outOfStock, lowStock,
-      totalKasa, nakit, banka, pendingOrders, totalReceivable, totalPayable, netSermaye, stokDeger, revTrend,
+      todayRevenue,
+      todayProfit,
+      todaySalesCount: todaySales.length,
+      monthRevenue,
+      monthProfit,
+      outOfStock,
+      lowStock,
+      totalKasa,
+      nakit,
+      banka,
+      pendingOrders,
+      totalReceivable,
+      totalPayable,
+      netSermaye,
+      stokDeger,
+      revTrend,
     };
   }, [db]);
 
   const statCards = useStatCards(stats, db.products.filter((p) => !p.deleted).length);
 
-  const renderWidget = (id: WidgetId) => (
-    <WidgetRenderer id={id} stats={stats} db={db} onTabChange={onTabChange} />
-  );
+  const renderWidget = (id: WidgetId) => <WidgetRenderer id={id} stats={stats} db={db} onTabChange={onTabChange} />;
 
   const [contentWidth, setContentWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1400);
   useEffect(() => {

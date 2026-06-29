@@ -23,39 +23,42 @@ export function SelectiveRestore({ showToast, showConfirm, save, db }: Selective
   >([]);
   const [lastReport, setLastReport] = useState<RestoreReport | null>(null);
 
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target?.result as string);
-        if (typeof data !== 'object' || Array.isArray(data)) {
-          showToast('Geçersiz JSON formatı!', 'error');
-          return;
-        }
-        setFileData(data);
-        const avail: typeof available = [];
-        RESTORE_SECTIONS.forEach((s) => {
-          if (s.key === 'company' || s.key === 'pelletSettings') {
-            if (data[s.key] && typeof data[s.key] === 'object' && !Array.isArray(data[s.key])) {
-              avail.push({ key: s.key, label: s.label, icon: s.icon, count: 1, isObject: true });
-            }
-          } else if (Array.isArray(data[s.key]) && data[s.key].length > 0) {
-            avail.push({ key: s.key, label: s.label, icon: s.icon, count: data[s.key].length });
+  const handleFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target?.result as string);
+          if (typeof data !== 'object' || Array.isArray(data)) {
+            showToast('Geçersiz JSON formatı!', 'error');
+            return;
           }
-        });
-        setAvailable(avail);
-        setSelected(new Set(avail.map((a) => a.key)));
-      } catch {
-        logger.warn('settings', 'JSON ayrıştırılamadı');
-        showToast('JSON ayrıştırılamadı!', 'error');
-      }
-    };
-    reader.readAsText(file);
-    if (fileRef.current) fileRef.current.value = '';
-  }, [showToast]);
+          setFileData(data);
+          const avail: typeof available = [];
+          RESTORE_SECTIONS.forEach((s) => {
+            if (s.key === 'company' || s.key === 'pelletSettings') {
+              if (data[s.key] && typeof data[s.key] === 'object' && !Array.isArray(data[s.key])) {
+                avail.push({ key: s.key, label: s.label, icon: s.icon, count: 1, isObject: true });
+              }
+            } else if (Array.isArray(data[s.key]) && data[s.key].length > 0) {
+              avail.push({ key: s.key, label: s.label, icon: s.icon, count: data[s.key].length });
+            }
+          });
+          setAvailable(avail);
+          setSelected(new Set(avail.map((a) => a.key)));
+        } catch {
+          logger.warn('settings', 'JSON ayrıştırılamadı');
+          showToast('JSON ayrıştırılamadı!', 'error');
+        }
+      };
+      reader.readAsText(file);
+      if (fileRef.current) fileRef.current.value = '';
+    },
+    [showToast],
+  );
 
   const toggleSection = useCallback((key: string) => {
     setSelected((prev) => {
@@ -144,8 +147,12 @@ export function SelectiveRestore({ showToast, showConfirm, save, db }: Selective
 
           <div className="flex items-center gap-2">
             <span className="text-foreground text-sm font-semibold">Geri Yüklenecek Bölümler:</span>
-            <Button onClick={selectAll} className="px-3 py-1.5 rounded-lg font-bold text-xs">Tümünü Seç</Button>
-            <Button onClick={selectNone} className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs">Hiçbirini Seçme</Button>
+            <Button onClick={selectAll} className="px-3 py-1.5 rounded-lg font-bold text-xs">
+              Tümünü Seç
+            </Button>
+            <Button onClick={selectNone} className="btn-danger-sm px-3 py-1.5 rounded-lg font-bold text-xs">
+              Hiçbirini Seçme
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -192,14 +199,16 @@ export function SelectiveRestore({ showToast, showConfirm, save, db }: Selective
 
           {selected.size > 0 && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
-              Mevcut ID'ler korunur. Geçersiz adlar (boş, tek haneli, sadece sayı) ve zorunlu alanı eksik kayıtlar atlanır.
+              Mevcut ID'ler korunur. Geçersiz adlar (boş, tek haneli, sadece sayı) ve zorunlu alanı eksik kayıtlar
+              atlanır.
             </div>
           )}
 
           {lastReport && lastReport.warnings.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3 text-sm text-muted-foreground">
               <div className="text-red-400 font-bold text-sm">
-                ⚠️ Atlanan Kayıtlar ({lastReport.skippedDuplicate + lastReport.skippedInvalidName + lastReport.skippedMissingField})
+                ⚠️ Atlanan Kayıtlar (
+                {lastReport.skippedDuplicate + lastReport.skippedInvalidName + lastReport.skippedMissingField})
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {lastReport.skippedDuplicate > 0 && (
@@ -220,7 +229,9 @@ export function SelectiveRestore({ showToast, showConfirm, save, db }: Selective
               </div>
               <div className="max-h-[200px] overflow-y-auto">
                 {lastReport.warnings.map((w, i) => (
-                  <div key={i} className="text-muted-foreground text-sm">• {w}</div>
+                  <div key={i} className="text-muted-foreground text-sm">
+                    • {w}
+                  </div>
                 ))}
               </div>
             </div>

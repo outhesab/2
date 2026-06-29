@@ -114,13 +114,8 @@ export default function SupplierOrder({
         </div>
 
         {orderItems.map((item) => (
-          <div
-            key={item.productId}
-            className="flex gap-2 items-center mb-2 bg-slate-900 rounded-lg px-2.5 py-2"
-          >
-            <span className="flex-1 text-[var(--text-primary)] text-sm">
-              {item.productName}
-            </span>
+          <div key={item.productId} className="flex gap-2 items-center mb-2 bg-slate-900 rounded-lg px-2.5 py-2">
+            <span className="flex-1 text-[var(--text-primary)] text-sm">{item.productName}</span>
             <input
               type="number"
               inputMode="decimal"
@@ -129,11 +124,7 @@ export default function SupplierOrder({
               onChange={(e) => {
                 const qty = parseInt(e.target.value) || 1;
                 setOrderItems((prev) =>
-                  prev.map((i) =>
-                    i.productId === item.productId
-                      ? { ...i, qty, lineTotal: qty * i.unitCost }
-                      : i,
-                  ),
+                  prev.map((i) => (i.productId === item.productId ? { ...i, qty, lineTotal: qty * i.unitCost } : i)),
                 );
               }}
               className="w-14 bg-slate-800 border border-slate-700 rounded-md text-[var(--text-primary)] px-1.5 py-1 text-center text-sm"
@@ -147,20 +138,14 @@ export default function SupplierOrder({
                 const cost = parseFloat(e.target.value) || 0;
                 setOrderItems((prev) =>
                   prev.map((i) =>
-                    i.productId === item.productId
-                      ? { ...i, unitCost: cost, lineTotal: i.qty * cost }
-                      : i,
+                    i.productId === item.productId ? { ...i, unitCost: cost, lineTotal: i.qty * cost } : i,
                   ),
                 );
               }}
               className="w-20 bg-slate-800 border border-slate-700 rounded-md text-[var(--text-primary)] px-1.5 py-1 text-sm"
             />
             <button
-              onClick={() =>
-                setOrderItems((prev) =>
-                  prev.filter((i) => i.productId !== item.productId),
-                )
-              }
+              onClick={() => setOrderItems((prev) => prev.filter((i) => i.productId !== item.productId))}
               className="bg-transparent border-none text-red-500 cursor-pointer hover:text-red-400 transition-colors"
             >
               ✕
@@ -206,33 +191,22 @@ export default function SupplierOrder({
           <div className="bg-slate-900 rounded-lg px-3.5 py-3 mt-3">
             <div className="flex justify-between mb-1">
               <span className="text-[var(--text-dim)]">Ürün Toplamı</span>
-              <span className="text-[var(--text-primary)] font-bold">
-                {formatMoney(itemTotal)}
-              </span>
+              <span className="text-[var(--text-primary)] font-bold">{formatMoney(itemTotal)}</span>
             </div>
             {nakliye > 0 && (
               <div className="flex justify-between mb-1">
                 <span className="text-[var(--text-dim)] text-sm">+ Nakliye</span>
-                <span className="text-amber-500 font-semibold text-sm">
-                  {formatMoney(nakliye)}
-                </span>
+                <span className="text-amber-500 font-semibold text-sm">{formatMoney(nakliye)}</span>
               </div>
             )}
             <div className="flex justify-between border-t border-slate-800 pt-2">
               <span className="text-[var(--text-dim)]">Genel Toplam</span>
-              <span className="text-emerald-500 font-extrabold text-lg">
-                {formatMoney(itemTotal + nakliye)}
-              </span>
+              <span className="text-emerald-500 font-extrabold text-lg">{formatMoney(itemTotal + nakliye)}</span>
             </div>
           </div>
         )}
       </div>
-      <ModalActions
-        onSave={onSave}
-        onCancel={onClose}
-        saveLabel="📦 Sipariş Ver"
-        saveColor="#ff5722"
-      />
+      <ModalActions onSave={onSave} onCancel={onClose} saveLabel="📦 Sipariş Ver" saveColor="#ff5722" />
     </Modal>
   );
 }

@@ -112,7 +112,9 @@ export function ReportsUrun({ db, start, end }: ReportProps) {
                 {s === 'ciro' ? 'Ciro' : s === 'kar' ? 'Kâr' : s === 'adet' ? 'Adet' : 'Marj'}
               </button>
             ))}
-            <button onClick={handleExport} className={uStyles.btnSort}>📥</button>
+            <button onClick={handleExport} className={uStyles.btnSort}>
+              📥
+            </button>
           </div>
         }
       >

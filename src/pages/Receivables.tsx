@@ -17,21 +17,24 @@ export default function Receivables() {
     const data = getOverdueReceivables(db);
     if (!search.trim()) return data;
     const q = search.toLowerCase();
-    return data.filter(c => c.name.toLowerCase().includes(q));
+    return data.filter((c) => c.name.toLowerCase().includes(q));
   }, [db, search]);
 
   const totalOverdue = overdueData.reduce((sum, c) => sum + c.totalOverdue, 0);
   const customerCount = overdueData.length;
-  const avgDays = overdueData.length > 0
-    ? Math.round(overdueData.reduce((s, c) => {
-        const days = Math.ceil((Date.now() - new Date(c.oldestDebtDate).getTime()) / (1000 * 60 * 60 * 24));
-        return s + days;
-      }, 0) / overdueData.length)
-    : 0;
+  const avgDays =
+    overdueData.length > 0
+      ? Math.round(
+          overdueData.reduce((s, c) => {
+            const days = Math.ceil((Date.now() - new Date(c.oldestDebtDate).getTime()) / (1000 * 60 * 60 * 24));
+            return s + days;
+          }, 0) / overdueData.length,
+        )
+      : 0;
   const totalCariBalance = overdueData.reduce((sum, c) => sum + c.totalCariBalance, 0);
 
   const toggleRow = (cariId: string) => {
-    setExpandedRows(prev => {
+    setExpandedRows((prev) => {
       const next = new Set(prev);
       if (next.has(cariId)) next.delete(cariId);
       else next.add(cariId);
@@ -44,9 +47,7 @@ export default function Receivables() {
       <div className="p-6">
         <Empty>
           <EmptyTitle>Gecikmiş Alacak Yok</EmptyTitle>
-          <EmptyDescription>
-            Tüm cari hesaplar güncel. Harika bir tahsilat performansı!
-          </EmptyDescription>
+          <EmptyDescription>Tüm cari hesaplar güncel. Harika bir tahsilat performansı!</EmptyDescription>
         </Empty>
       </div>
     );
@@ -117,7 +118,7 @@ export default function Receivables() {
           <Input
             placeholder="Müşteri ara..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-8"
           />
         </div>
@@ -142,18 +143,14 @@ export default function Receivables() {
             <TableBody>
               {overdueData.map((customer) => {
                 const isExpanded = expandedRows.has(customer.cariId);
-                const oldestDays = Math.ceil((Date.now() - new Date(customer.oldestDebtDate).getTime()) / (1000 * 60 * 60 * 24));
+                const oldestDays = Math.ceil(
+                  (Date.now() - new Date(customer.oldestDebtDate).getTime()) / (1000 * 60 * 60 * 24),
+                );
                 return (
                   <React.Fragment key={customer.cariId}>
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => toggleRow(customer.cariId)}
-                    >
+                    <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRow(customer.cariId)}>
                       <TableCell>
-                        {isExpanded
-                          ? <ChevronDown className="h-4 w-4" />
-                          : <ChevronRight className="h-4 w-4" />
-                        }
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -176,25 +173,28 @@ export default function Receivables() {
                         </Badge>
                       </TableCell>
                     </TableRow>
-                    {isExpanded && customer.overdueSales.map(sale => (
-                      <TableRow key={sale.saleId} className="bg-muted/20">
-                        <TableCell />
-                        <TableCell className="pl-12 text-sm text-muted-foreground" colSpan={1}>
-                          #{sale.saleId.slice(-6)}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {sale.amount.toLocaleString()} ₺
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          Vade: {new Date(sale.dueDate).toLocaleDateString('tr-TR')}
-                        </TableCell>
-                        <TableCell className="text-right text-sm">
-                          <Badge variant={sale.daysOverdue > 90 ? 'destructive' : sale.daysOverdue > 30 ? 'secondary' : 'outline'}>
-                            {sale.daysOverdue} gün
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {isExpanded &&
+                      customer.overdueSales.map((sale) => (
+                        <TableRow key={sale.saleId} className="bg-muted/20">
+                          <TableCell />
+                          <TableCell className="pl-12 text-sm text-muted-foreground" colSpan={1}>
+                            #{sale.saleId.slice(-6)}
+                          </TableCell>
+                          <TableCell className="text-sm">{sale.amount.toLocaleString()} ₺</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            Vade: {new Date(sale.dueDate).toLocaleDateString('tr-TR')}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            <Badge
+                              variant={
+                                sale.daysOverdue > 90 ? 'destructive' : sale.daysOverdue > 30 ? 'secondary' : 'outline'
+                              }
+                            >
+                              {sale.daysOverdue} gün
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </React.Fragment>
                 );
               })}

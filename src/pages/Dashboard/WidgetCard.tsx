@@ -9,12 +9,7 @@ interface WidgetCardProps {
   extra?: ReactNode;
 }
 
-export function WidgetCard({
-  title,
-  subtitle,
-  children,
-  extra,
-}: WidgetCardProps) {
+export function WidgetCard({ title, subtitle, children, extra }: WidgetCardProps) {
   return (
     <motion.div
       whileHover={{

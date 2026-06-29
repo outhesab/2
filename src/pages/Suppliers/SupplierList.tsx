@@ -74,9 +74,7 @@ export default function SupplierList({
             key={value}
             onClick={() => onCatFilterChange(value)}
             className={`px-3.5 py-1.5 rounded-lg border-none font-semibold text-sm cursor-pointer transition-colors ${
-              catFilter === value
-                ? 'bg-[#ff5722] text-white'
-                : 'bg-slate-700 text-slate-400 hover:text-slate-200'
+              catFilter === value ? 'bg-[#ff5722] text-white' : 'bg-slate-700 text-slate-400 hover:text-slate-200'
             }`}
           >
             {label}
@@ -97,13 +95,9 @@ export default function SupplierList({
         ) : (
           filteredSuppliers.map((s) => {
             const totalScore = calcScore(s, orders);
-            const scoreColor =
-              totalScore >= 70 ? '#10b981' : totalScore >= 40 ? '#f59e0b' : '#ef4444';
+            const scoreColor = totalScore >= 70 ? '#10b981' : totalScore >= 40 ? '#f59e0b' : '#ef4444';
             return (
-              <div
-                key={s.id}
-                className="bg-slate-800 rounded-xl border border-slate-700 p-4.5"
-              >
+              <div key={s.id} className="bg-slate-800 rounded-xl border border-slate-700 p-4.5">
                 <div className="flex justify-between items-start mb-1">
                   <h4 className="font-bold text-[var(--text-primary)]">{s.name}</h4>
                   <span
@@ -116,22 +110,12 @@ export default function SupplierList({
                     {catLabels[s._kat]}
                   </span>
                 </div>
-                <p className="text-[var(--text-muted)] text-sm mb-2.5">
-                  {s.category || 'Genel'}
-                </p>
-                {s.phone && (
-                  <p className="text-[var(--text-dim)] text-sm mb-1">📞 {s.phone}</p>
-                )}
-                {s.email && (
-                  <p className="text-[var(--text-dim)] text-xs mb-1">✉️ {s.email}</p>
-                )}
+                <p className="text-[var(--text-muted)] text-sm mb-2.5">{s.category || 'Genel'}</p>
+                {s.phone && <p className="text-[var(--text-dim)] text-sm mb-1">📞 {s.phone}</p>}
+                {s.email && <p className="text-[var(--text-dim)] text-xs mb-1">✉️ {s.email}</p>}
                 <div className="mt-2.5 pt-2.5 border-t border-slate-700 flex justify-between">
-                  <span className="text-[var(--text-muted)] text-xs">
-                    {s.totalOrders || 0} sipariş
-                  </span>
-                  <span className="text-emerald-500 text-sm font-bold">
-                    {formatMoney(s.totalAmount || 0)}
-                  </span>
+                  <span className="text-[var(--text-muted)] text-xs">{s.totalOrders || 0} sipariş</span>
+                  <span className="text-emerald-500 text-sm font-bold">{formatMoney(s.totalAmount || 0)}</span>
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
@@ -140,10 +124,7 @@ export default function SupplierList({
                       style={{ width: `${totalScore}%`, backgroundColor: scoreColor }}
                     />
                   </div>
-                  <span
-                    className="text-xs font-extrabold min-w-[32px] text-right"
-                    style={{ color: scoreColor }}
-                  >
+                  <span className="text-xs font-extrabold min-w-[32px] text-right" style={{ color: scoreColor }}>
                     {totalScore}
                   </span>
                 </div>
@@ -155,10 +136,7 @@ export default function SupplierList({
                     >
                       📦 Siparişler
                     </button>
-                    <ActionButtons
-                      onEdit={() => onEdit(s)}
-                      onDelete={() => onDelete(s.id)}
-                    />
+                    <ActionButtons onEdit={() => onEdit(s)} onDelete={() => onDelete(s.id)} />
                   </div>
                 )}
               </div>

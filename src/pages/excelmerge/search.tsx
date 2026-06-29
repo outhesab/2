@@ -1,28 +1,28 @@
-import { useState, useMemo } from "react";
-import { Search, FileSpreadsheet, Info } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type ExcelFile, searchAcrossFiles, type SearchResult } from "@/lib/excel-merge";
+import { useState, useMemo } from 'react';
+import { Search, FileSpreadsheet, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type ExcelFile, searchAcrossFiles, type SearchResult } from '@/lib/excel-merge';
 
 interface SearchPageProps {
   files: ExcelFile[];
 }
 
-type MatchType = "contains" | "exact" | "wildcard" | "regex";
+type MatchType = 'contains' | 'exact' | 'wildcard' | 'regex';
 
 const matchTypeLabels: Record<MatchType, { label: string; hint: string }> = {
-  contains: { label: "Icerir", hint: "Aramak istediginiz kelimeyi girin" },
-  exact: { label: "Tam Eslesme", hint: "Hucrede tam olarak bu deger olmali" },
-  wildcard: { label: "Joker Karakter (*?)", hint: 'ornek: "Ahmet*" veya "1234?"' },
-  regex: { label: "Regex (Ileri)", hint: 'ornek: "^1[0-9]{3}" veya "ahmet|mehmet"' },
+  contains: { label: 'Icerir', hint: 'Aramak istediginiz kelimeyi girin' },
+  exact: { label: 'Tam Eslesme', hint: 'Hucrede tam olarak bu deger olmali' },
+  wildcard: { label: 'Joker Karakter (*?)', hint: 'ornek: "Ahmet*" veya "1234?"' },
+  regex: { label: 'Regex (Ileri)', hint: 'ornek: "^1[0-9]{3}" veya "ahmet|mehmet"' },
 };
 
 export default function SearchPage({ files }: SearchPageProps) {
-  const [query, setQuery] = useState("");
-  const [matchType, setMatchType] = useState<MatchType>("contains");
+  const [query, setQuery] = useState('');
+  const [matchType, setMatchType] = useState<MatchType>('contains');
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -30,9 +30,7 @@ export default function SearchPage({ files }: SearchPageProps) {
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    const filesToSearch = selectedFiles.length > 0
-      ? files.filter((f) => selectedFiles.includes(f.id))
-      : files;
+    const filesToSearch = selectedFiles.length > 0 ? files.filter((f) => selectedFiles.includes(f.id)) : files;
     const r = searchAcrossFiles(filesToSearch, query, matchType);
     setResults(r);
     setHasSearched(true);
@@ -87,7 +85,7 @@ export default function SearchPage({ files }: SearchPageProps) {
                 placeholder={matchTypeLabels[matchType].hint}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 data-testid="input-search"
                 className="h-10"
               />
@@ -98,7 +96,9 @@ export default function SearchPage({ files }: SearchPageProps) {
               </SelectTrigger>
               <SelectContent>
                 {(Object.entries(matchTypeLabels) as [MatchType, { label: string; hint: string }][]).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  <SelectItem key={k} value={k}>
+                    {v.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -117,13 +117,13 @@ export default function SearchPage({ files }: SearchPageProps) {
                   data-testid={`button-file-filter-${f.id}`}
                   onClick={() => {
                     setSelectedFiles((prev) =>
-                      prev.includes(f.id) ? prev.filter((id) => id !== f.id) : [...prev, f.id]
+                      prev.includes(f.id) ? prev.filter((id) => id !== f.id) : [...prev, f.id],
                     );
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     selectedFiles.includes(f.id)
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground border-border hover:border-primary/50"
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card text-foreground border-border hover:border-primary/50'
                   }`}
                 >
                   <FileSpreadsheet className="w-3 h-3 inline mr-1" />
@@ -133,22 +133,22 @@ export default function SearchPage({ files }: SearchPageProps) {
             </div>
           </div>
 
-          {matchType === "wildcard" && (
+          {matchType === 'wildcard' && (
             <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
               <Info className="w-4 h-4 shrink-0 mt-0.5" />
               <div>
                 <span className="font-medium">Joker karakterler: </span>
-                <code className="bg-muted px-1 rounded">*</code> = sifir veya daha fazla karakter,{" "}
+                <code className="bg-muted px-1 rounded">*</code> = sifir veya daha fazla karakter,{' '}
                 <code className="bg-muted px-1 rounded">?</code> = tam olarak 1 karakter
               </div>
             </div>
           )}
-          {matchType === "regex" && (
+          {matchType === 'regex' && (
             <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
               <Info className="w-4 h-4 shrink-0 mt-0.5" />
               <div>
                 <span className="font-medium">Regex ornek: </span>
-                <code className="bg-muted px-1 rounded">{"^TC[0-9]{1}"}</code> ile TC kimlik numaralarini bulun.
+                <code className="bg-muted px-1 rounded">{'^TC[0-9]{1}'}</code> ile TC kimlik numaralarini bulun.
                 Buyuk/kucuk harf duyarsizdir.
               </div>
             </div>
@@ -160,12 +160,10 @@ export default function SearchPage({ files }: SearchPageProps) {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">
-              {results.length === 0 ? "Sonuc bulunamadi" : `${results.length.toLocaleString("tr-TR")} sonuc bulundu`}
+              {results.length === 0 ? 'Sonuc bulunamadi' : `${results.length.toLocaleString('tr-TR')} sonuc bulundu`}
             </h2>
             {results.length > 0 && (
-              <span className="text-sm text-muted-foreground">
-                {Object.keys(groupedResults).length} dosyada
-              </span>
+              <span className="text-sm text-muted-foreground">{Object.keys(groupedResults).length} dosyada</span>
             )}
           </div>
 
@@ -188,7 +186,9 @@ export default function SearchPage({ files }: SearchPageProps) {
                       <FileSpreadsheet className="w-4 h-4 text-primary" />
                       <span className="font-semibold text-foreground">{file.name}</span>
                       {file.isRecovery && (
-                        <Badge variant="outline" className="text-yellow-600 border-yellow-400 text-xs">Kurtarma</Badge>
+                        <Badge variant="outline" className="text-yellow-600 border-yellow-400 text-xs">
+                          Kurtarma
+                        </Badge>
                       )}
                       <Badge variant="secondary" className="ml-auto">
                         {Object.values(sheets).flat().length} eslesme
@@ -222,10 +222,10 @@ export default function SearchPage({ files }: SearchPageProps) {
                                   </span>
                                   <span className="text-xs text-muted-foreground shrink-0">{r.colName}:</span>
                                   <span className="text-sm font-medium text-foreground truncate">
-                                    {String(r.value ?? "")}
+                                    {String(r.value ?? '')}
                                   </span>
                                   <span className="ml-auto text-muted-foreground text-xs">
-                                    {isExpanded ? "▲" : "▼"}
+                                    {isExpanded ? '▲' : '▼'}
                                   </span>
                                 </button>
 
@@ -233,10 +233,15 @@ export default function SearchPage({ files }: SearchPageProps) {
                                   <div className="px-3 pb-3 pt-1 bg-muted/20 border-t border-border">
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                       {Object.entries(rowData).map(([col, val]) => (
-                                        <div key={col} className={`p-2 rounded bg-card border ${col === r.colName ? "border-primary/50 bg-accent/30" : "border-border"}`}>
+                                        <div
+                                          key={col}
+                                          className={`p-2 rounded bg-card border ${col === r.colName ? 'border-primary/50 bg-accent/30' : 'border-border'}`}
+                                        >
                                           <p className="text-xs text-muted-foreground truncate">{col}</p>
-                                          <p className={`text-sm font-medium truncate ${col === r.colName ? "text-primary" : "text-foreground"}`}>
-                                            {String(val ?? "—")}
+                                          <p
+                                            className={`text-sm font-medium truncate ${col === r.colName ? 'text-primary' : 'text-foreground'}`}
+                                          >
+                                            {String(val ?? '—')}
                                           </p>
                                         </div>
                                       ))}
@@ -259,4 +264,3 @@ export default function SearchPage({ files }: SearchPageProps) {
     </div>
   );
 }
-

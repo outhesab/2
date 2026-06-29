@@ -18,14 +18,7 @@ interface Props {
   onNewOrder: () => void;
 }
 
-export default function SupplierDetail({
-  db,
-  selectedSup,
-  onSelectSup,
-  onUpdateStatus,
-  onRevert,
-  onNewOrder,
-}: Props) {
+export default function SupplierDetail({ db, selectedSup, onSelectSup, onUpdateStatus, onRevert, onNewOrder }: Props) {
   const orders = [...db.orders]
     .filter((o) => (selectedSup ? o.supplierId === selectedSup : true))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -57,10 +50,7 @@ export default function SupplierDetail({
           <thead>
             <tr className="bg-[rgba(15,23,42,0.6)]">
               {['Tarih', 'Tedarikçi', 'Ürünler', 'Tutar', 'Durum', ''].map((h) => (
-                <th
-                  key={h}
-                  className="px-4 py-3 text-left text-[var(--text-muted)] text-xs font-semibold uppercase"
-                >
+                <th key={h} className="px-4 py-3 text-left text-[var(--text-muted)] text-xs font-semibold uppercase">
                   {h}
                 </th>
               ))}
@@ -80,18 +70,14 @@ export default function SupplierDetail({
             ) : (
               orders.map((o) => (
                 <tr key={o.id} className="border-b border-white/[0.04]">
-                  <td className="px-4 py-3 text-[var(--text-muted)] text-sm">
-                    {formatDate(o.createdAt)}
-                  </td>
+                  <td className="px-4 py-3 text-[var(--text-muted)] text-sm">{formatDate(o.createdAt)}</td>
                   <td className="px-4 py-3 text-[var(--text-primary)] font-semibold">
                     {db.suppliers.find((s) => s.id === o.supplierId)?.name || '-'}
                   </td>
                   <td className="px-4 py-3 text-[var(--text-dim)] text-sm max-w-[200px] overflow-hidden text-ellipsis">
                     {o.items.map((i) => `${i.productName}×${i.qty}`).join(', ')}
                   </td>
-                  <td className="px-4 py-3 text-emerald-500 font-bold">
-                    {formatMoney(o.amount)}
-                  </td>
+                  <td className="px-4 py-3 text-emerald-500 font-bold">{formatMoney(o.amount)}</td>
                   <td className="px-4 py-3">
                     <span
                       className="px-2 py-0.5 rounded-md text-xs font-semibold"

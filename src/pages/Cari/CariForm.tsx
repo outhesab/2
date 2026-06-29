@@ -51,25 +51,15 @@ export default function CariForm({ open, onClose, onSave, initial, editId }: Pro
           <Label>Tur</Label>
           <select
             value={form.type || 'musteri'}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, type: e.target.value as 'musteri' | 'tedarikci' }))
-            }
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as 'musteri' | 'tedarikci' }))}
             className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
           >
             <option value="musteri">👥 Musteri</option>
             <option value="tedarikci">🏭 Tedarikci</option>
           </select>
         </div>
-        <FormField
-          label="Telefon"
-          value={form.phone || ''}
-          onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
-        />
-        <FormField
-          label="Vergi No"
-          value={form.taxNo || ''}
-          onChange={(v) => setForm((f) => ({ ...f, taxNo: v }))}
-        />
+        <FormField label="Telefon" value={form.phone || ''} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+        <FormField label="Vergi No" value={form.taxNo || ''} onChange={(v) => setForm((f) => ({ ...f, taxNo: v }))} />
         <FormField
           label="E-posta"
           value={form.email || ''}

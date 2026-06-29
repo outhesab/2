@@ -64,7 +64,7 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
           Ürün: s.productName,
           Adet: s.quantity,
           Toplam: s.total,
-          'Kâr': s.profit,
+          Kâr: s.profit,
           Ödeme: s.payment,
           Müşteri: s.cariName || '-',
         }));
@@ -83,9 +83,7 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
   return (
     <div className={styles.flexCol20}>
       <div className={gStyles.card}>
-        <h3 className={gStyles.cardTitle}>
-          Custom Report Generator
-        </h3>
+        <h3 className={gStyles.cardTitle}>Custom Report Generator</h3>
         <div className={gStyles.checkboxGroup}>
           {Object.entries(modules).map(([key, val]) => (
             <label
@@ -141,7 +139,9 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
                   <thead>
                     <tr style={{ borderBottom: '1px solid #1e3a5f' }}>
                       {Object.keys(rep.data[0] || {}).map((h) => (
-                        <th key={h} className={gStyles.reportTh}>{h}</th>
+                        <th key={h} className={gStyles.reportTh}>
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -149,16 +149,16 @@ export function ReportsGenerator({ db, start, end }: ReportProps) {
                     {rep.data.slice(0, 10).map((row, i) => (
                       <tr key={i} className={gStyles.reportTrBody}>
                         {Object.values(row).map((v, j) => (
-                          <td key={j} className={gStyles.reportTd}>{v}</td>
+                          <td key={j} className={gStyles.reportTd}>
+                            {v}
+                          </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {rep.data.length > 10 && (
-                  <div className={gStyles.showingRow}>
-                    Showing first 10 rows. Export for full data.
-                  </div>
+                  <div className={gStyles.showingRow}>Showing first 10 rows. Export for full data.</div>
                 )}
               </div>
             </div>

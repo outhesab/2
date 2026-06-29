@@ -1,53 +1,50 @@
-import { formatMoney } from "@/lib/utils-tr";
-import type { DB } from "@/types";
-import { useMemo, useState } from "react";
+import { formatMoney } from '@/lib/utils-tr';
+import type { DB } from '@/types';
+import { useMemo, useState } from 'react';
 
 interface Props {
   db: DB;
 }
 
 const MONTHS = [
-  "Ocak",
-  "Şubat",
-  "Mart",
-  "Nisan",
-  "Mayıs",
-  "Haziran",
-  "Temmuz",
-  "Ağustos",
-  "Eylül",
-  "Ekim",
-  "Kasım",
-  "Aralık",
+  'Ocak',
+  'Şubat',
+  'Mart',
+  'Nisan',
+  'Mayıs',
+  'Haziran',
+  'Temmuz',
+  'Ağustos',
+  'Eylül',
+  'Ekim',
+  'Kasım',
+  'Aralık',
 ];
-const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
 // Soba kategorisindeki ürünleri filtrele
-const SOBA_CATS = ["soba"];
+const SOBA_CATS = ['soba'];
 
 export default function Cizelge({ db }: Props) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth()); // 0-indexed
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"month" | "year">("month");
+  const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
 
   // Soba satışlarını filtrele
   const sobaSales = useMemo(() => {
     return db.sales.filter((s) => {
-      if (s.deleted || s.status === "iptal") return false;
-      const cat = s.productCategory || "";
-      const name = (s.productName || "").toLowerCase();
-      return SOBA_CATS.includes(cat) || name.includes("soba");
+      if (s.deleted || s.status === 'iptal') return false;
+      const cat = s.productCategory || '';
+      const name = (s.productName || '').toLowerCase();
+      return SOBA_CATS.includes(cat) || name.includes('soba');
     });
   }, [db.sales]);
 
   // Gün bazlı satış özeti
   const dayMap = useMemo(() => {
-    const map: Record<
-      string,
-      { count: number; total: number; profit: number; sales: typeof sobaSales }
-    > = {};
+    const map: Record<string, { count: number; total: number; profit: number; sales: typeof sobaSales }> = {};
     sobaSales.forEach((s) => {
       const d = s.createdAt.slice(0, 10);
       if (!map[d]) map[d] = { count: 0, total: 0, profit: 0, sales: [] };
@@ -61,10 +58,7 @@ export default function Cizelge({ db }: Props) {
 
   // Ay bazlı özet (yıl görünümü için)
   const monthMap = useMemo(() => {
-    const map: Record<
-      number,
-      { count: number; total: number; profit: number }
-    > = {};
+    const map: Record<number, { count: number; total: number; profit: number }> = {};
     for (let m = 0; m < 12; m++) map[m] = { count: 0, total: 0, profit: 0 };
     sobaSales.forEach((s) => {
       const d = new Date(s.createdAt);
@@ -94,18 +88,15 @@ export default function Cizelge({ db }: Props) {
   const selectedSales = selectedDay ? dayMap[selectedDay]?.sales || [] : [];
 
   // Renk yoğunluğu
-  const maxDayTotal = useMemo(
-    () => Math.max(...Object.values(dayMap).map((d) => d.total), 1),
-    [dayMap],
-  );
+  const maxDayTotal = useMemo(() => Math.max(...Object.values(dayMap).map((d) => d.total), 1), [dayMap]);
 
   function dayColor(total: number): string {
-    if (total === 0) return "transparent";
+    if (total === 0) return 'transparent';
     const pct = total / maxDayTotal;
-    if (pct > 0.75) return "rgba(255,87,34,0.85)";
-    if (pct > 0.5) return "rgba(255,87,34,0.55)";
-    if (pct > 0.25) return "rgba(255,87,34,0.3)";
-    return "rgba(255,87,34,0.15)";
+    if (pct > 0.75) return 'rgba(255,87,34,0.85)';
+    if (pct > 0.5) return 'rgba(255,87,34,0.55)';
+    if (pct > 0.25) return 'rgba(255,87,34,0.3)';
+    return 'rgba(255,87,34,0.15)';
   }
 
   const prevMonth = () => {
@@ -129,33 +120,59 @@ export default function Cizelge({ db }: Props) {
     today.setHours(0, 0, 0, 0);
     const weekLater = new Date(today);
     weekLater.setDate(weekLater.getDate() + 7);
-    const events: { date: string; label: string; type: 'siparis' | 'tahsilat' | 'vade' | 'teslimat'; amount?: number; relatedName?: string }[] = [];
+    const events: {
+      date: string;
+      label: string;
+      type: 'siparis' | 'tahsilat' | 'vade' | 'teslimat';
+      amount?: number;
+      relatedName?: string;
+    }[] = [];
     const dateKey = (d: string) => d.slice(0, 10);
-    db.invoices?.forEach(inv => {
+    db.invoices?.forEach((inv) => {
       if (inv.deleted || !inv.dueDate) return;
       const d = dateKey(inv.dueDate);
       if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
-        events.push({ date: d, label: `Fatura #${inv.invoiceNo}`, type: 'vade', amount: inv.total, relatedName: inv.cariName });
+        events.push({
+          date: d,
+          label: `Fatura #${inv.invoiceNo}`,
+          type: 'vade',
+          amount: inv.total,
+          relatedName: inv.cariName,
+        });
       }
     });
-    db.orders?.forEach(o => {
+    db.orders?.forEach((o) => {
       if (o.deleted || !o.deliveryDate) return;
       const d = dateKey(o.deliveryDate);
       if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
-        events.push({ date: d, label: `Sipariş #${o.id.slice(0, 6)}`, type: 'teslimat', amount: o.amount, relatedName: o.supplierId });
+        events.push({
+          date: d,
+          label: `Sipariş #${o.id.slice(0, 6)}`,
+          type: 'teslimat',
+          amount: o.amount,
+          relatedName: o.supplierId,
+        });
       }
     });
-    db.cari?.filter(c => !c.deleted && c.type === 'musteri' && c.balance > 0).forEach(c => {
-      if (c.lastTransaction) {
-        const t = new Date(c.lastTransaction);
-        const vade = new Date(t);
-        vade.setDate(vade.getDate() + 30);
-        const d = dateKey(vade.toISOString());
-        if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
-          events.push({ date: d, label: `${c.name} alacak`, type: 'tahsilat', amount: c.balance, relatedName: c.name });
+    db.cari
+      ?.filter((c) => !c.deleted && c.type === 'musteri' && c.balance > 0)
+      .forEach((c) => {
+        if (c.lastTransaction) {
+          const t = new Date(c.lastTransaction);
+          const vade = new Date(t);
+          vade.setDate(vade.getDate() + 30);
+          const d = dateKey(vade.toISOString());
+          if (d >= today.toISOString().slice(0, 10) && d <= weekLater.toISOString().slice(0, 10)) {
+            events.push({
+              date: d,
+              label: `${c.name} alacak`,
+              type: 'tahsilat',
+              amount: c.balance,
+              relatedName: c.name,
+            });
+          }
         }
-      }
-    });
+      });
     return events.sort((a, b) => a.date.localeCompare(b.date));
   }, [db.invoices, db.orders, db.cari]);
 
@@ -166,17 +183,7 @@ export default function Cizelge({ db }: Props) {
     teslimat: { bg: 'rgba(245,158,11,0.1)', color: '#fbbf24', border: 'rgba(245,158,11,0.25)', icon: '🚚' },
   };
 
-  // Ay toplamları
-  Object.values(dayMap)
-    .filter((_, i) => {
-      const keys = Object.keys(dayMap);
-      return keys[i]?.startsWith(
-        `${year}-${String(month + 1).padStart(2, "0")}`,
-      );
-    })
-    .reduce((s, d) => s + d.total, 0);
-
-  const curMonthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const curMonthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
   const curMonthData = Object.entries(dayMap)
     .filter(([k]) => k.startsWith(curMonthKey))
     .reduce(
@@ -189,51 +196,51 @@ export default function Cizelge({ db }: Props) {
     );
 
   return (
-    <div style={{ animation: "fadeIn 0.3s ease" }}>
+    <div style={{ animation: 'fadeIn 0.3s ease' }}>
       {/* Başlık & Kontroller */}
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 12,
           marginBottom: 16,
-          flexWrap: "wrap",
+          flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: "flex", gap: 6 }}>
-          {(["month", "year"] as const).map((v) => (
+        <div style={{ display: 'flex', gap: 6 }}>
+          {(['month', 'year'] as const).map((v) => (
             <button
               key={v}
               onClick={() => setViewMode(v)}
-              aria-label={v === "month" ? "Aylık görünüm" : "Yıllık görünüm"}
+              aria-label={v === 'month' ? 'Aylık görünüm' : 'Yıllık görünüm'}
               style={{
-                padding: "7px 14px",
-                border: "none",
+                padding: '7px 14px',
+                border: 'none',
                 borderRadius: 8,
-                cursor: "pointer",
+                cursor: 'pointer',
                 fontWeight: 700,
-                fontSize: "0.82rem",
-                background: viewMode === v ? "#ff5722" : "#273548",
-                color: viewMode === v ? "#fff" : "#64748b",
+                fontSize: '0.82rem',
+                background: viewMode === v ? '#ff5722' : '#273548',
+                color: viewMode === v ? '#fff' : '#64748b',
               }}
             >
-              {v === "month" ? "📅 Aylık" : "📆 Yıllık"}
+              {v === 'month' ? '📅 Aylık' : '📆 Yıllık'}
             </button>
           ))}
         </div>
 
-        {viewMode === "month" ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {viewMode === 'month' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button onClick={prevMonth} style={navBtn} aria-label="Önceki ay">
               ‹
             </button>
             <span
               style={{
-                color: "#f1f5f9",
+                color: '#f1f5f9',
                 fontWeight: 800,
-                fontSize: "1rem",
+                fontSize: '1rem',
                 minWidth: 140,
-                textAlign: "center",
+                textAlign: 'center',
               }}
               aria-live="polite"
               aria-atomic="true"
@@ -245,17 +252,17 @@ export default function Cizelge({ db }: Props) {
             </button>
           </div>
         ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button onClick={() => setYear((y) => y - 1)} style={navBtn} aria-label="Önceki yıl">
               ‹
             </button>
             <span
               style={{
-                color: "#f1f5f9",
+                color: '#f1f5f9',
                 fontWeight: 800,
-                fontSize: "1rem",
+                fontSize: '1rem',
                 minWidth: 60,
-                textAlign: "center",
+                textAlign: 'center',
               }}
               aria-live="polite"
               aria-atomic="true"
@@ -268,7 +275,7 @@ export default function Cizelge({ db }: Props) {
           </div>
         )}
 
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           <button
             onClick={() => {
               setYear(today.getFullYear());
@@ -277,14 +284,14 @@ export default function Cizelge({ db }: Props) {
             }}
             aria-label="Bugüne dön"
             style={{
-              padding: "7px 14px",
-              border: "1px solid rgba(255,87,34,0.3)",
+              padding: '7px 14px',
+              border: '1px solid rgba(255,87,34,0.3)',
               borderRadius: 8,
-              background: "rgba(255,87,34,0.08)",
-              color: "#ff7043",
-              cursor: "pointer",
+              background: 'rgba(255,87,34,0.08)',
+              color: '#ff7043',
+              cursor: 'pointer',
               fontWeight: 600,
-              fontSize: "0.82rem",
+              fontSize: '0.82rem',
             }}
           >
             Bugün
@@ -294,7 +301,20 @@ export default function Cizelge({ db }: Props) {
 
       {/* Yaklaşan 7 Gün Paneli */}
       {upcomingEvents.length > 0 && (
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 18px', marginBottom: 14, position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+        <div
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 14,
+            padding: '14px 18px',
+            marginBottom: 14,
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: '1.1rem' }}>📅</span>
             <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.88rem' }}>Yaklaşan 7 Gün</span>
@@ -304,15 +324,32 @@ export default function Cizelge({ db }: Props) {
             {upcomingEvents.map((ev, i) => {
               const s = eventTypeStyle[ev.type];
               return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: s.bg, border: `1px solid ${s.border}` }}>
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    background: s.bg,
+                    border: `1px solid ${s.border}`,
+                  }}
+                >
                   <span style={{ fontSize: '1rem' }}>{s.icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600 }}>{ev.label}</div>
-                    {ev.relatedName && <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{ev.relatedName}</div>}
+                    {ev.relatedName && (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{ev.relatedName}</div>
+                    )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ color: s.color, fontWeight: 700, fontSize: '0.85rem' }}>{ev.amount ? `₺${ev.amount.toLocaleString('tr-TR')}` : '-'}</div>
-                    <div style={{ color: '#475569', fontSize: '0.68rem' }}>{new Date(ev.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</div>
+                    <div style={{ color: s.color, fontWeight: 700, fontSize: '0.85rem' }}>
+                      {ev.amount ? `₺${ev.amount.toLocaleString('tr-TR')}` : '-'}
+                    </div>
+                    <div style={{ color: '#475569', fontSize: '0.68rem' }}>
+                      {new Date(ev.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                    </div>
                   </div>
                 </div>
               );
@@ -322,42 +359,39 @@ export default function Cizelge({ db }: Props) {
       )}
 
       {/* Ay özet kartları */}
-      {viewMode === "month" && (
+      {viewMode === 'month' && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
             gap: 10,
             marginBottom: 16,
           }}
         >
           {[
             {
-              label: "Satış Adedi",
+              label: 'Satış Adedi',
               value: String(curMonthData.count),
-              color: "#3b82f6",
-              icon: "🛒",
+              color: '#3b82f6',
+              icon: '🛒',
             },
             {
-              label: "Ciro",
+              label: 'Ciro',
               value: formatMoney(curMonthData.total),
-              color: "#10b981",
-              icon: "💰",
+              color: '#10b981',
+              icon: '💰',
             },
             {
-              label: "Kâr",
+              label: 'Kâr',
               value: formatMoney(curMonthData.profit),
-              color: "#f59e0b",
-              icon: "📈",
+              color: '#f59e0b',
+              icon: '📈',
             },
             {
-              label: "Ort. Satış",
-              value:
-                curMonthData.count > 0
-                  ? formatMoney(curMonthData.total / curMonthData.count)
-                  : "—",
-              color: "#8b5cf6",
-              icon: "⚡",
+              label: 'Ort. Satış',
+              value: curMonthData.count > 0 ? formatMoney(curMonthData.total / curMonthData.count) : '—',
+              color: '#8b5cf6',
+              icon: '⚡',
             },
           ].map((s) => (
             <div
@@ -366,22 +400,18 @@ export default function Cizelge({ db }: Props) {
                 background: `${s.color}12`,
                 border: `1px solid ${s.color}25`,
                 borderRadius: 12,
-                padding: "12px 14px",
+                padding: '12px 14px',
               }}
             >
-              <div style={{ fontSize: "1rem", marginBottom: 4 }}>{s.icon}</div>
-              <div
-                style={{ fontSize: "1.1rem", fontWeight: 900, color: s.color }}
-              >
-                {s.value}
-              </div>
+              <div style={{ fontSize: '1rem', marginBottom: 4 }}>{s.icon}</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 900, color: s.color }}>{s.value}</div>
               <div
                 style={{
-                  color: "#475569",
-                  fontSize: "0.7rem",
+                  color: '#475569',
+                  fontSize: '0.7rem',
                   marginTop: 2,
                   fontWeight: 600,
-                  textTransform: "uppercase",
+                  textTransform: 'uppercase',
                 }}
               >
                 {s.label}
@@ -392,34 +422,34 @@ export default function Cizelge({ db }: Props) {
       )}
 
       {/* AYLIK TAKVİM */}
-      {viewMode === "month" && (
+      {viewMode === 'month' && (
         <div
           style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 16,
-            overflow: "hidden",
+            overflow: 'hidden',
           }}
         >
           {/* Gün başlıkları */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
-              background: "rgba(0,0,0,0.3)",
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              background: 'rgba(0,0,0,0.3)',
             }}
           >
             {DAYS.map((d) => (
               <div
                 key={d}
                 style={{
-                  padding: "10px 0",
-                  textAlign: "center",
-                  color: "#475569",
-                  fontSize: "0.75rem",
+                  padding: '10px 0',
+                  textAlign: 'center',
+                  color: '#475569',
+                  fontSize: '0.75rem',
                   fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                 }}
               >
                 {d}
@@ -427,9 +457,7 @@ export default function Cizelge({ db }: Props) {
             ))}
           </div>
           {/* Günler */}
-          <div
-            style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
             {calDays.map((day, i) => {
               if (day === null)
                 return (
@@ -437,12 +465,12 @@ export default function Cizelge({ db }: Props) {
                     key={`e${i}`}
                     style={{
                       minHeight: 72,
-                      borderBottom: "1px solid rgba(255,255,255,0.04)",
-                      borderRight: "1px solid rgba(255,255,255,0.04)",
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      borderRight: '1px solid rgba(255,255,255,0.04)',
                     }}
                   />
                 );
-              const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               const data = dayMap[key];
               const isToday = key === today.toISOString().slice(0, 10);
               const isSelected = key === selectedDay;
@@ -453,44 +481,31 @@ export default function Cizelge({ db }: Props) {
                   onClick={() => setSelectedDay(isSelected ? null : key)}
                   style={{
                     minHeight: 72,
-                    padding: "8px 10px",
-                    cursor: "pointer",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    borderRight: "1px solid rgba(255,255,255,0.04)",
-                    background: isSelected
-                      ? "rgba(255,87,34,0.15)"
-                      : data
-                        ? dayColor(data.total)
-                        : "transparent",
-                    outline: isToday
-                      ? "2px solid #ff5722"
-                      : isSelected
-                        ? "2px solid rgba(255,87,34,0.6)"
-                        : "none",
+                    padding: '8px 10px',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    borderRight: '1px solid rgba(255,255,255,0.04)',
+                    background: isSelected ? 'rgba(255,87,34,0.15)' : data ? dayColor(data.total) : 'transparent',
+                    outline: isToday ? '2px solid #ff5722' : isSelected ? '2px solid rgba(255,87,34,0.6)' : 'none',
                     outlineOffset: -2,
-                    transition: "all 0.15s",
-                    position: "relative",
+                    transition: 'all 0.15s',
+                    position: 'relative',
                   }}
                   onMouseEnter={(e) => {
-                    if (!isSelected)
-                      (e.currentTarget as HTMLDivElement).style.background =
-                        "rgba(255,87,34,0.1)";
+                    if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,87,34,0.1)';
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected)
-                      (e.currentTarget as HTMLDivElement).style.background =
-                        data ? dayColor(data.total) : "transparent";
+                      (e.currentTarget as HTMLDivElement).style.background = data
+                        ? dayColor(data.total)
+                        : 'transparent';
                   }}
                 >
                   <div
                     style={{
                       fontWeight: isToday ? 900 : 600,
-                      color: isToday
-                        ? "#ff5722"
-                        : dow >= 5
-                          ? "#64748b"
-                          : "#f1f5f9",
-                      fontSize: "0.88rem",
+                      color: isToday ? '#ff5722' : dow >= 5 ? '#64748b' : '#f1f5f9',
+                      fontSize: '0.88rem',
                     }}
                   >
                     {day}
@@ -499,8 +514,8 @@ export default function Cizelge({ db }: Props) {
                     <>
                       <div
                         style={{
-                          color: "#10b981",
-                          fontSize: "0.72rem",
+                          color: '#10b981',
+                          fontSize: '0.72rem',
                           fontWeight: 700,
                           marginTop: 4,
                         }}
@@ -509,8 +524,8 @@ export default function Cizelge({ db }: Props) {
                       </div>
                       <div
                         style={{
-                          color: "#f1f5f9",
-                          fontSize: "0.7rem",
+                          color: '#f1f5f9',
+                          fontSize: '0.7rem',
                           fontWeight: 600,
                         }}
                       >
@@ -526,52 +541,43 @@ export default function Cizelge({ db }: Props) {
       )}
 
       {/* YILLIK GÖRÜNÜM */}
-      {viewMode === "year" && (
+      {viewMode === 'year' && (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
             gap: 12,
           }}
         >
           {MONTHS.map((name, m) => {
             const d = monthMap[m];
-            const isCurrentMonth =
-              m === today.getMonth() && year === today.getFullYear();
+            const isCurrentMonth = m === today.getMonth() && year === today.getFullYear();
             return (
               <div
                 key={m}
                 onClick={() => {
                   setMonth(m);
-                  setViewMode("month");
+                  setViewMode('month');
                   setSelectedDay(null);
                 }}
                 style={{
-                  background:
-                    d.total > 0
-                      ? "rgba(255,87,34,0.1)"
-                      : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${isCurrentMonth ? "rgba(255,87,34,0.5)" : "rgba(255,255,255,0.07)"}`,
+                  background: d.total > 0 ? 'rgba(255,87,34,0.1)' : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${isCurrentMonth ? 'rgba(255,87,34,0.5)' : 'rgba(255,255,255,0.07)'}`,
                   borderRadius: 12,
-                  padding: "14px 16px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
+                  padding: '14px 16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLDivElement).style.background =
-                    "rgba(255,87,34,0.15)")
-                }
+                onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.background = 'rgba(255,87,34,0.15)')}
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLDivElement).style.background =
-                    d.total > 0
-                      ? "rgba(255,87,34,0.1)"
-                      : "rgba(255,255,255,0.02)")
+                    d.total > 0 ? 'rgba(255,87,34,0.1)' : 'rgba(255,255,255,0.02)')
                 }
               >
                 <div
                   style={{
                     fontWeight: 700,
-                    color: isCurrentMonth ? "#ff7043" : "#f1f5f9",
+                    color: isCurrentMonth ? '#ff7043' : '#f1f5f9',
                     marginBottom: 8,
                   }}
                 >
@@ -581,17 +587,17 @@ export default function Cizelge({ db }: Props) {
                   <>
                     <div
                       style={{
-                        color: "#10b981",
+                        color: '#10b981',
                         fontWeight: 800,
-                        fontSize: "1.1rem",
+                        fontSize: '1.1rem',
                       }}
                     >
                       {formatMoney(d.total)}
                     </div>
                     <div
                       style={{
-                        color: "#64748b",
-                        fontSize: "0.78rem",
+                        color: '#64748b',
+                        fontSize: '0.78rem',
                         marginTop: 4,
                       }}
                     >
@@ -599,9 +605,7 @@ export default function Cizelge({ db }: Props) {
                     </div>
                   </>
                 ) : (
-                  <div style={{ color: "#334155", fontSize: "0.82rem" }}>
-                    Satış yok
-                  </div>
+                  <div style={{ color: '#334155', fontSize: '0.82rem' }}>Satış yok</div>
                 )}
               </div>
             );
@@ -614,45 +618,43 @@ export default function Cizelge({ db }: Props) {
         <div
           style={{
             marginTop: 16,
-            background: "rgba(255,87,34,0.06)",
-            border: "1px solid rgba(255,87,34,0.2)",
+            background: 'rgba(255,87,34,0.06)',
+            border: '1px solid rgba(255,87,34,0.2)',
             borderRadius: 14,
             padding: 16,
           }}
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               marginBottom: 12,
             }}
           >
-            <span
-              style={{ fontWeight: 800, color: "#ff7043", fontSize: "0.95rem" }}
-            >
-              📅{" "}
-              {new Date(selectedDay).toLocaleDateString("tr-TR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
+            <span style={{ fontWeight: 800, color: '#ff7043', fontSize: '0.95rem' }}>
+              📅{' '}
+              {new Date(selectedDay).toLocaleDateString('tr-TR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
               })}
             </span>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12 }}>
               <span
                 style={{
-                  color: "#10b981",
+                  color: '#10b981',
                   fontWeight: 700,
-                  fontSize: "0.85rem",
+                  fontSize: '0.85rem',
                 }}
               >
                 {selectedSales.length} satış
               </span>
               <span
                 style={{
-                  color: "#f1f5f9",
+                  color: '#f1f5f9',
                   fontWeight: 700,
-                  fontSize: "0.85rem",
+                  fontSize: '0.85rem',
                 }}
               >
                 {formatMoney(dayMap[selectedDay]?.total || 0)}
@@ -661,36 +663,36 @@ export default function Cizelge({ db }: Props) {
                 onClick={() => setSelectedDay(null)}
                 aria-label="Seçili gün detayını kapat"
                 style={{
-                  background: "none",
-                  border: "none",
-                  color: "#64748b",
-                  cursor: "pointer",
-                  fontSize: "1rem",
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
                 }}
               >
                 ✕
               </button>
             </div>
           </div>
-          <div style={{ display: "grid", gap: 6 }}>
+          <div style={{ display: 'grid', gap: 6 }}>
             {selectedSales.map((s) => (
               <div
                 key={s.id}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 12,
-                  padding: "10px 14px",
-                  background: "rgba(0,0,0,0.2)",
+                  padding: '10px 14px',
+                  background: 'rgba(0,0,0,0.2)',
                   borderRadius: 10,
                 }}
               >
                 <div style={{ flex: 1 }}>
                   <div
                     style={{
-                      color: "#f1f5f9",
+                      color: '#f1f5f9',
                       fontWeight: 600,
-                      fontSize: "0.88rem",
+                      fontSize: '0.88rem',
                     }}
                   >
                     {s.productName}
@@ -698,8 +700,8 @@ export default function Cizelge({ db }: Props) {
                   {s.cariName && (
                     <div
                       style={{
-                        color: "#64748b",
-                        fontSize: "0.75rem",
+                        color: '#64748b',
+                        fontSize: '0.75rem',
                         marginTop: 2,
                       }}
                     >
@@ -707,19 +709,17 @@ export default function Cizelge({ db }: Props) {
                     </div>
                   )}
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ color: "#10b981", fontWeight: 700 }}>
-                    {formatMoney(s.total)}
-                  </div>
-                  <div style={{ color: "#475569", fontSize: "0.72rem" }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: '#10b981', fontWeight: 700 }}>{formatMoney(s.total)}</div>
+                  <div style={{ color: '#475569', fontSize: '0.72rem' }}>
                     {s.quantity} adet · {s.payment}
                   </div>
                 </div>
-                <div style={{ textAlign: "right", minWidth: 70 }}>
+                <div style={{ textAlign: 'right', minWidth: 70 }}>
                   <div
                     style={{
-                      color: s.profit >= 0 ? "#f59e0b" : "#ef4444",
-                      fontSize: "0.78rem",
+                      color: s.profit >= 0 ? '#f59e0b' : '#ef4444',
+                      fontSize: '0.78rem',
                       fontWeight: 600,
                     }}
                   >
@@ -727,19 +727,16 @@ export default function Cizelge({ db }: Props) {
                   </div>
                   <div
                     style={{
-                      background:
-                        s.status === "tamamlandi"
-                          ? "rgba(16,185,129,0.15)"
-                          : "rgba(239,68,68,0.15)",
-                      color: s.status === "tamamlandi" ? "#10b981" : "#ef4444",
+                      background: s.status === 'tamamlandi' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                      color: s.status === 'tamamlandi' ? '#10b981' : '#ef4444',
                       borderRadius: 5,
-                      padding: "1px 6px",
-                      fontSize: "0.68rem",
+                      padding: '1px 6px',
+                      fontSize: '0.68rem',
                       fontWeight: 700,
                       marginTop: 2,
                     }}
                   >
-                    {s.status === "tamamlandi" ? "✓" : s.status}
+                    {s.status === 'tamamlandi' ? '✓' : s.status}
                   </div>
                 </div>
               </div>
@@ -751,23 +748,16 @@ export default function Cizelge({ db }: Props) {
       {/* Renk açıklaması */}
       <div
         style={{
-          display: "flex",
+          display: 'flex',
           gap: 8,
-          alignItems: "center",
+          alignItems: 'center',
           marginTop: 14,
-          flexWrap: "wrap",
+          flexWrap: 'wrap',
         }}
       >
-        <span
-          style={{ color: "#334155", fontSize: "0.72rem", fontWeight: 600 }}
-        >
-          Yoğunluk:
-        </span>
+        <span style={{ color: '#334155', fontSize: '0.72rem', fontWeight: 600 }}>Yoğunluk:</span>
         {[0.15, 0.3, 0.55, 0.85].map((o, i) => (
-          <div
-            key={i}
-            style={{ display: "flex", alignItems: "center", gap: 4 }}
-          >
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <div
               style={{
                 width: 14,
@@ -776,9 +766,7 @@ export default function Cizelge({ db }: Props) {
                 background: `rgba(255,87,34,${o})`,
               }}
             />
-            <span style={{ color: "#334155", fontSize: "0.7rem" }}>
-              {["Az", "Orta", "İyi", "Yüksek"][i]}
-            </span>
+            <span style={{ color: '#334155', fontSize: '0.7rem' }}>{['Az', 'Orta', 'İyi', 'Yüksek'][i]}</span>
           </div>
         ))}
       </div>
@@ -790,13 +778,13 @@ const navBtn: React.CSSProperties = {
   width: 32,
   height: 32,
   borderRadius: 8,
-  border: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#94a3b8",
-  cursor: "pointer",
-  fontSize: "1.1rem",
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(255,255,255,0.05)',
+  color: '#94a3b8',
+  cursor: 'pointer',
+  fontSize: '1.1rem',
   fontWeight: 900,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };

@@ -19,12 +19,7 @@ interface Props {
   totalPurchased: number;
   histTab: 'kasa' | 'satis' | 'fatura';
   setHistTab: (t: 'kasa' | 'satis' | 'fatura') => void;
-  onQuickAction: (
-    cariId: string,
-    cariName: string,
-    type: 'musteri' | 'tedarikci',
-    balance: number,
-  ) => void;
+  onQuickAction: (cariId: string, cariName: string, type: 'musteri' | 'tedarikci', balance: number) => void;
   showToast: (msg: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
@@ -44,8 +39,7 @@ export default function CariDetail({
     {
       label: 'Bakiye',
       value: formatMoney(Math.abs(detail.balance)),
-      color:
-        detail.balance > 0 ? 'text-emerald-500' : detail.balance < 0 ? 'text-red-500' : 'text-slate-500',
+      color: detail.balance > 0 ? 'text-emerald-500' : detail.balance < 0 ? 'text-red-500' : 'text-slate-500',
       icon: detail.balance > 0 ? '↑' : '↓',
     },
     { label: 'Toplam Alisveris', value: formatMoney(totalPurchased), color: 'text-blue-500', icon: '🛒' },
@@ -97,17 +91,12 @@ export default function CariDetail({
         </button>
       )}
 
-      <div
-        className="grid gap-2.5 mb-4"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}
-      >
+      <div className="grid gap-2.5 mb-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}>
         {stats.map((s) => (
           <div key={s.label} className="bg-black/25 rounded-lg py-2.5 px-3 text-center border border-white/5">
             <div className="text-sm mb-0.5">{s.icon}</div>
             <div className={`text-base font-extrabold ${s.color}`}>{s.value}</div>
-            <div className="text-slate-500 text-[0.68rem] mt-0.5 font-semibold uppercase tracking-wider">
-              {s.label}
-            </div>
+            <div className="text-slate-500 text-[0.68rem] mt-0.5 font-semibold uppercase tracking-wider">{s.label}</div>
           </div>
         ))}
       </div>
@@ -211,9 +200,7 @@ export default function CariDetail({
                 {detailSales.map((s) => (
                   <tr key={s.id} className="border-b border-white/5">
                     <td className="py-2 px-2.5 text-slate-500">{formatDate(s.createdAt)}</td>
-                    <td className="py-2 px-2.5 text-foreground">
-                      {s.productName || s.items?.[0]?.productName || '-'}
-                    </td>
+                    <td className="py-2 px-2.5 text-foreground">{s.productName || s.items?.[0]?.productName || '-'}</td>
                     <td className="py-2 px-2.5 text-slate-400">
                       {s.quantity || s.items?.reduce((a: number, i: { quantity: number }) => a + i.quantity, 0) || '-'}
                     </td>
@@ -249,9 +236,7 @@ export default function CariDetail({
                 {detailInvoices.map((inv) => (
                   <tr key={inv.id} className="border-b border-white/5">
                     <td className="py-2 px-2.5 text-[#ff7043] font-mono font-bold">{inv.invoiceNo}</td>
-                    <td className="py-2 px-2.5 text-slate-400">
-                      {inv.type === 'satis' ? '📤 Satis' : '📥 Alis'}
-                    </td>
+                    <td className="py-2 px-2.5 text-slate-400">{inv.type === 'satis' ? '📤 Satis' : '📥 Alis'}</td>
                     <td className="py-2 px-2.5 text-slate-500">{formatDate(inv.createdAt)}</td>
                     <td className="py-2 px-2.5 text-emerald-500 font-bold">{formatMoney(inv.total)}</td>
                     <td className="py-2 px-2.5">

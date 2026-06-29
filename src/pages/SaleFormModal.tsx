@@ -93,7 +93,7 @@ export default function SaleFormModal({
                 </option>
               ))}
           </select>
-          
+
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
             {items.map((item, idx) => (
               <div
@@ -110,8 +110,14 @@ export default function SaleFormModal({
                     tabIndex={10 + idx * 2}
                     onChange={(e) => updateQty(item.productId, parseInt(e.target.value) || 0)}
                     onKeyDown={(e) => {
-                      if (e.key === 'ArrowUp') { e.preventDefault(); updateQty(item.productId, item.quantity + 1); }
-                      if (e.key === 'ArrowDown') { e.preventDefault(); updateQty(item.productId, item.quantity - 1); }
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        updateQty(item.productId, item.quantity + 1);
+                      }
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        updateQty(item.productId, item.quantity - 1);
+                      }
                     }}
                     className="w-14 bg-slate-950 border border-border rounded-lg py-1 text-center text-sm font-bold text-foreground outline-none focus:ring-1 ring-blue-500/50"
                   />
@@ -124,8 +130,14 @@ export default function SaleFormModal({
                     tabIndex={11 + idx * 2}
                     onChange={(e) => updatePrice(item.productId, parseFloat(e.target.value) || 0)}
                     onKeyDown={(e) => {
-                      if (e.key === 'ArrowUp') { e.preventDefault(); updatePrice(item.productId, item.unitPrice + 1); }
-                      if (e.key === 'ArrowDown') { e.preventDefault(); updatePrice(item.productId, Math.max(0, item.unitPrice - 1)); }
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        updatePrice(item.productId, item.unitPrice + 1);
+                      }
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        updatePrice(item.productId, Math.max(0, item.unitPrice - 1));
+                      }
                     }}
                     className="w-20 bg-slate-950 border border-border rounded-lg py-1 px-2 text-right text-sm font-bold text-foreground outline-none focus:ring-1 ring-blue-500/50"
                   />
@@ -181,9 +193,7 @@ export default function SaleFormModal({
               className="w-full p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
             />
             {saleDate.slice(0, 10) !== new Date().toISOString().slice(0, 10) && (
-              <div className="text-[0.65rem] text-amber-500 mt-1">
-                ⚠️ Geçmiş tarihli kayıt
-              </div>
+              <div className="text-[0.65rem] text-amber-500 mt-1">⚠️ Geçmiş tarihli kayıt</div>
             )}
           </div>
 
@@ -202,9 +212,9 @@ export default function SaleFormModal({
                   tabIndex={3 + i}
                   onClick={() => setPayment(k.id)}
                   className={`flex-1 py-2 px-1 rounded-lg text-xs font-bold transition-all ${
-                    payment === k.id 
-                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' 
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    payment === k.id
+                      ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                   }`}
                 >
                   {k.icon} {k.name}
@@ -224,8 +234,14 @@ export default function SaleFormModal({
                 min={0}
                 onChange={(e) => setDiscount(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'ArrowUp') { e.preventDefault(); setDiscount((d) => String((parseFloat(d) || 0) + 1)); }
-                  if (e.key === 'ArrowDown') { e.preventDefault(); setDiscount((d) => String(Math.max(0, (parseFloat(d) || 0) - 1))); }
+                  if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setDiscount((d) => String((parseFloat(d) || 0) + 1));
+                  }
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setDiscount((d) => String(Math.max(0, (parseFloat(d) || 0) - 1)));
+                  }
                 }}
                 className="flex-1 p-2.5 bg-slate-900/60 border border-border rounded-xl text-foreground text-sm outline-none focus:ring-2 ring-blue-500/20 transition-all"
               />
@@ -245,14 +261,10 @@ export default function SaleFormModal({
             <label className="block mb-1.5 text-slate-400 text-xs font-medium uppercase flex justify-between items-center">
               Tahsil Edilen
               {kalan > 0 && tahsilat !== '' && (
-                <span className="text-amber-500 text-[0.65rem] font-bold">
-                  Kalan: {formatMoney(kalan)} → Cariye
-                </span>
+                <span className="text-amber-500 text-[0.65rem] font-bold">Kalan: {formatMoney(kalan)} → Cariye</span>
               )}
               {kalan < 0 && tahsilat !== '' && (
-                <span className="text-emerald-500 text-[0.65rem] font-bold">
-                  Para üstü: {formatMoney(-kalan)}
-                </span>
+                <span className="text-emerald-500 text-[0.65rem] font-bold">Para üstü: {formatMoney(-kalan)}</span>
               )}
             </label>
             <input
@@ -265,8 +277,14 @@ export default function SaleFormModal({
               step={0.01}
               onChange={(e) => setTahsilat(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'ArrowUp') { e.preventDefault(); setTahsilat(String((tahsilatNum || total) + 1)); }
-                if (e.key === 'ArrowDown') { e.preventDefault(); setTahsilat(String(Math.max(0, (tahsilatNum || total) - 1))); }
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  setTahsilat(String((tahsilatNum || total) + 1));
+                }
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  setTahsilat(String(Math.max(0, (tahsilatNum || total) - 1)));
+                }
               }}
               className={`w-full p-3 rounded-xl text-foreground text-lg font-black outline-none transition-all border-2 ${
                 kalan > 0 && tahsilat !== ''
@@ -301,9 +319,7 @@ export default function SaleFormModal({
             )}
             <div className="flex justify-between text-xs pt-1 text-slate-500">
               <span>Tahmini Kâr</span>
-              <span className={profit >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                {formatMoney(profit)}
-              </span>
+              <span className={profit >= 0 ? 'text-emerald-500' : 'text-red-500'}>{formatMoney(profit)}</span>
             </div>
           </div>
         </div>

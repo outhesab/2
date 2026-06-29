@@ -1,7 +1,7 @@
 .tableContainer {
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .headerRow {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .headerCell {
@@ -32,7 +32,7 @@
 }
 
 .dataRow {
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   cursor: pointer;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .saleBadge {
-  background: rgba(139,92,246,0.15);
+  background: rgba(139, 92, 246, 0.15);
   color: #a78bfa;
   border-radius: 5px;
   padding: 1px 6px;

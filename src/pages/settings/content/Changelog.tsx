@@ -41,7 +41,9 @@ export default function Changelog() {
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <h2 className="text-2xl font-bold">v{version.version}</h2>
-                  <Badge variant="outline" className="font-mono">{version.date}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {version.date}
+                  </Badge>
                 </div>
                 <p className="text-muted-foreground font-medium">{version.title}</p>
               </div>
@@ -62,9 +64,7 @@ export default function Changelog() {
                       {TYPE_CONFIG[change.type]?.label || change.type}
                     </Badge>
                   </div>
-                  <p className="text-sm leading-relaxed text-foreground/80">
-                    {change.text}
-                  </p>
+                  <p className="text-sm leading-relaxed text-foreground/80">{change.text}</p>
                 </div>
               ))}
             </div>

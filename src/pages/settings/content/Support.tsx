@@ -15,21 +15,21 @@ const HELP_TOPICS = [
     description: 'Sistemi ilk kez kullanıyorsanız, kurulum ve temel işlemler için rehberimize göz atın.',
     icon: <BookOpen className="w-6 h-6 text-blue-500" />,
     action: 'Rehberi Aç',
-    link: '#'
+    link: '#',
   },
   {
     title: 'Sıkça Sorulan Sorular',
     description: 'Ödeme yöntemleri, stok takibi ve yedekleme ile ilgili en çok sorulan sorular ve cevapları.',
     icon: <MessageSquare className="w-6 h-6 text-green-500" />,
     action: 'SSS Görüntüle',
-    link: '#'
+    link: '#',
   },
   {
     title: 'Hata Bildirimi',
     description: 'Sistemde bir hata mı fark ettiniz? Geliştirici ekibimize anında bildirin, hemen çözelim.',
     icon: <LifeBuoy className="w-6 h-6 text-red-500" />,
     action: 'Hata Bildir',
-    link: '#'
+    link: '#',
   },
 ];
 
@@ -42,8 +42,8 @@ export default function Support() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Destek Merkezi</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Size yardımcı olmak için buradayız. Karşılaştığınız sorunları bildirebilir veya
-          uygulamayı daha verimli kullanmak için rehberlerimize göz atabilirsiniz.
+          Size yardımcı olmak için buradayız. Karşılaştığınız sorunları bildirebilir veya uygulamayı daha verimli
+          kullanmak için rehberlerimize göz atabilirsiniz.
         </p>
       </div>
 
@@ -51,17 +51,18 @@ export default function Support() {
         {HELP_TOPICS.map((topic, index) => (
           <Card key={index} className="flex flex-col h-full hover:shadow-md transition-all duration-300">
             <CardHeader>
-              <div className="mb-4 p-2 w-fit rounded-lg bg-muted">
-                {topic.icon}
-              </div>
+              <div className="mb-4 p-2 w-fit rounded-lg bg-muted">{topic.icon}</div>
               <CardTitle className="text-lg">{topic.title}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col justify-between space-y-6">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {topic.description}
-              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{topic.description}</p>
               <Button variant="outline" className="w-full" asChild>
-                <a href={topic.link} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2">
+                <a
+                  href={topic.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2"
+                >
                   {topic.action} <ExternalLink className="w-3 h-3" />
                 </a>
               </Button>

@@ -11,27 +11,25 @@ interface FaturaTableProps {
   onUpdateStatus: (id: string, status: Invoice['status']) => void;
 }
 
-export function FaturaTable({
-  invoices,
-  onEdit,
-  onPreview,
-  onDelete,
-  onUpdateStatus,
-}: FaturaTableProps) {
+export function FaturaTable({ invoices, onEdit, onPreview, onDelete, onUpdateStatus }: FaturaTableProps) {
   return (
     <div className={`responsive-table-wrap ${styles.tableContainer}`}>
       <table className={styles.table}>
         <thead>
           <tr className={styles.headerRow}>
             {['Fatura No', 'Tür', 'Müşteri/Tedarikçi', 'Tarih', 'Tutar', 'Durum', 'Ödeme', ''].map((h) => (
-              <th key={h} className={styles.headerCell}>{h}</th>
+              <th key={h} className={styles.headerCell}>
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {invoices.length === 0 ? (
             <tr>
-              <td colSpan={8} className={styles.emptyCell}>Henüz fatura yok</td>
+              <td colSpan={8} className={styles.emptyCell}>
+                Henüz fatura yok
+              </td>
             </tr>
           ) : (
             invoices.map((inv) => (
@@ -46,9 +44,7 @@ export function FaturaTable({
                 <td data-label="Fatura No" className={styles.cell}>
                   <div className={styles.invoiceNoWrap}>
                     <span className={styles.invoiceNo}>{inv.invoiceNo}</span>
-                    {inv.saleId && (
-                      <span className={styles.saleBadge}>🔗 Satış</span>
-                    )}
+                    {inv.saleId && <span className={styles.saleBadge}>🔗 Satış</span>}
                   </div>
                 </td>
                 <td data-label="Tür" className={styles.cell}>
@@ -65,9 +61,15 @@ export function FaturaTable({
                     {inv.type === 'satis' ? '📤 Satış' : '📥 Alış'}
                   </span>
                 </td>
-                <td data-label="Müşteri" className={styles.customerCell}>{inv.cariName}</td>
-                <td data-label="Tarih" className={styles.dateCell}>{formatDate(inv.createdAt)}</td>
-                <td data-label="Tutar" className={styles.amountCell}>{formatMoney(inv.total)}</td>
+                <td data-label="Müşteri" className={styles.customerCell}>
+                  {inv.cariName}
+                </td>
+                <td data-label="Tarih" className={styles.dateCell}>
+                  {formatDate(inv.createdAt)}
+                </td>
+                <td data-label="Tutar" className={styles.amountCell}>
+                  {formatMoney(inv.total)}
+                </td>
                 <td data-label="Durum" className={styles.cell}>
                   <span
                     style={{
@@ -82,7 +84,9 @@ export function FaturaTable({
                     {statusLabels[inv.status]}
                   </span>
                 </td>
-                <td data-label="Ödeme" className={styles.paymentCell}>{paymentLabels[inv.payment]}</td>
+                <td data-label="Ödeme" className={styles.paymentCell}>
+                  {paymentLabels[inv.payment]}
+                </td>
                 <td className={styles.actionCell}>
                   <div className={styles.actionWrap}>
                     <button onClick={() => onPreview(inv.id)} title="Önizle" style={miniBtn}>
@@ -109,11 +113,7 @@ export function FaturaTable({
                         💰
                       </button>
                     )}
-                    <button
-                      onClick={() => onDelete(inv.id)}
-                      title="Sil"
-                      style={{ ...miniBtn, color: '#ef4444' }}
-                    >
+                    <button onClick={() => onDelete(inv.id)} title="Sil" style={{ ...miniBtn, color: '#ef4444' }}>
                       🗑️
                     </button>
                   </div>

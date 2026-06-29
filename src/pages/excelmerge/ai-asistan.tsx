@@ -1,11 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Network } from "@capacitor/network";
-import { Send, Wifi, WifiOff, Brain, Sparkles, RefreshCw, ChevronRight, AlertTriangle, CheckCircle, TrendingUp, Lightbulb } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ExcelFile } from "@/lib/excel-merge";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Network } from '@capacitor/network';
+import {
+  Send,
+  Wifi,
+  WifiOff,
+  Brain,
+  Sparkles,
+  RefreshCw,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle,
+  TrendingUp,
+  Lightbulb,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { type ExcelFile } from '@/lib/excel-merge';
 import {
   analyzeOffline,
   buildFileContext,
@@ -13,12 +25,11 @@ import {
   suggestKeyColumns,
   type OfflineAnalysis,
   type LearnedPattern,
-} from "@/lib/offline-ai";
-import { logger } from "@/lib/logger";
-
+} from '@/lib/offline-ai';
+import { logger } from '@/lib/logger';
 
 interface Message {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -33,11 +44,11 @@ async function streamAIResponse(
   body: object,
   onChunk: (text: string) => void,
   onDone: () => void,
-  onError: (msg: string) => void
+  onError: (msg: string) => void,
 ) {
-  const resp = await fetch(`${BASE_URL.replace(/\/$/, "")}/api${url}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  const resp = await fetch(`${BASE_URL.replace(/\/$/, '')}/api${url}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 
@@ -48,16 +59,16 @@ async function streamAIResponse(
 
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = "";
+  let buffer = '';
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
     for (const line of lines) {
-      if (line.startsWith("data: ")) {
+      if (line.startsWith('data: ')) {
         try {
           const data = JSON.parse(line.slice(6));
           if (data.content) onChunk(data.content);
@@ -75,7 +86,7 @@ async function streamAIResponse(
 
 export default function AiAsistanPage({ files }: AiAsistanPageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [offlineAnalysis, setOfflineAnalysis] = useState<OfflineAnalysis | null>(null);
@@ -84,7 +95,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
     Array<{ column: string; confidence: number; reason: string }>
   >([]);
   const [analyzing, setAnalyzing] = useState(false);
-  const [tab, setTab] = useState<"chat" | "analiz" | "ogrenilen">("chat");
+  const [tab, setTab] = useState<'chat' | 'analiz' | 'ogrenilen'>('chat');
   const bottomRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<boolean>(false);
 
@@ -94,7 +105,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
       setIsOnline(status.connected);
     });
 
-    const listenerPromise = Network.addListener("networkStatusChange", (status) => {
+    const listenerPromise = Network.addListener('networkStatusChange', (status) => {
       setIsOnline(status.connected);
     });
 
@@ -104,7 +115,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   useEffect(() => {
@@ -139,9 +150,9 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
     if (!isOnline) {
       const offResult = analyzeOffline(files);
       setOfflineAnalysis(offResult);
-      const msg = `**Cevrimdisi Analiz Tamamlandi** (AI internet gerektiriyor)\n\n**Veri Kalite Skoru:** ${offResult.overallScore}/100\n\n**Oneriler:**\n${offResult.recommendations.map((r) => `- ${r}`).join("\n")}`;
-      setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
-      setTab("analiz");
+      const msg = `**Cevrimdisi Analiz Tamamlandi** (AI internet gerektiriyor)\n\n**Veri Kalite Skoru:** ${offResult.overallScore}/100\n\n**Oneriler:**\n${offResult.recommendations.map((r) => `- ${r}`).join('\n')}`;
+      setMessages((prev) => [...prev, { role: 'assistant', content: msg }]);
+      setTab('analiz');
       setAnalyzing(false);
       return;
     }
@@ -149,26 +160,26 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
     setMessages((prev) => [
       ...prev,
       {
-        role: "user",
-        content: "Yuklenen dosyalarimi analiz et ve ayrintili rapor ver.",
+        role: 'user',
+        content: 'Yuklenen dosyalarimi analiz et ve ayrintili rapor ver.',
       },
     ]);
 
-    let aiText = "";
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    let aiText = '';
+    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
     setStreaming(true);
     abortRef.current = false;
 
     try {
       await streamAIResponse(
-        "/ai/analyze",
+        '/ai/analyze',
         { fileContext },
         (chunk) => {
           if (abortRef.current) return;
           aiText += chunk;
           setMessages((prev) => {
             const next = [...prev];
-            next[next.length - 1] = { role: "assistant", content: aiText };
+            next[next.length - 1] = { role: 'assistant', content: aiText };
             return next;
           });
         },
@@ -182,14 +193,14 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
           setMessages((prev) => {
             const next = [...prev];
             next[next.length - 1] = {
-              role: "assistant",
-              content: `**Cevrimdisi analiz:** ${err}\n\nVeri Kalite Skoru: ${offResult.overallScore}/100\n\n${offResult.recommendations.map((r) => `- ${r}`).join("\n")}`,
+              role: 'assistant',
+              content: `**Cevrimdisi analiz:** ${err}\n\nVeri Kalite Skoru: ${offResult.overallScore}/100\n\n${offResult.recommendations.map((r) => `- ${r}`).join('\n')}`,
             };
             return next;
           });
           setStreaming(false);
           setAnalyzing(false);
-        }
+        },
       );
     } catch {
       logger.warn('excel-ai', 'API çağrısı başarısız, çevrimdışı analiz kullanılıyor');
@@ -198,8 +209,8 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
       setMessages((prev) => {
         const next = [...prev];
         next[next.length - 1] = {
-          role: "assistant",
-          content: `**Cevrimdisi analiz sonucu:**\n\nVeri Kalite Skoru: ${offResult.overallScore}/100\n\n${offResult.recommendations.map((r) => `- ${r}`).join("\n")}`,
+          role: 'assistant',
+          content: `**Cevrimdisi analiz sonucu:**\n\nVeri Kalite Skoru: ${offResult.overallScore}/100\n\n${offResult.recommendations.map((r) => `- ${r}`).join('\n')}`,
         };
         return next;
       });
@@ -211,28 +222,28 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
   const sendMessage = async () => {
     if (!input.trim() || streaming) return;
     const userMsg = input.trim();
-    setInput("");
+    setInput('');
 
-    const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
+    const newMessages: Message[] = [...messages, { role: 'user', content: userMsg }];
     setMessages(newMessages);
 
     if (!isOnline) {
       const offResult = analyzeOffline(files);
       const offline = `**Cevrimdisi moddasınız.** Internet baglantisi olmadan tam AI yaniti verilemiyor.\n\nBenim yapabileceklerim:\n- Dosya karsilastir (Karsilastir sekmesi)\n- Veri birlestir (Birlestir sekmesi)\n- Veri ara (Arama sekmesi)\n\nVeri Kalite Skoru: ${offResult.overallScore}/100`;
-      setMessages([...newMessages, { role: "assistant", content: offline }]);
+      setMessages([...newMessages, { role: 'assistant', content: offline }]);
       return;
     }
 
-    setMessages([...newMessages, { role: "assistant", content: "" }]);
+    setMessages([...newMessages, { role: 'assistant', content: '' }]);
     setStreaming(true);
     abortRef.current = false;
 
     const fileContext = files.length > 0 ? buildFileContext(files) : undefined;
-    let aiText = "";
+    let aiText = '';
 
     try {
       await streamAIResponse(
-        "/ai/chat",
+        '/ai/chat',
         {
           messages: newMessages,
           fileContext,
@@ -242,7 +253,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
           aiText += chunk;
           setMessages((prev) => {
             const next = [...prev];
-            next[next.length - 1] = { role: "assistant", content: aiText };
+            next[next.length - 1] = { role: 'assistant', content: aiText };
             return next;
           });
         },
@@ -250,17 +261,17 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
         (err) => {
           setMessages((prev) => {
             const next = [...prev];
-            next[next.length - 1] = { role: "assistant", content: `Hata: ${err}` };
+            next[next.length - 1] = { role: 'assistant', content: `Hata: ${err}` };
             return next;
           });
           setStreaming(false);
-        }
+        },
       );
     } catch {
       logger.warn('excel-ai', 'Sohbet mesajı gönderilemedi');
       setMessages((prev) => {
         const next = [...prev];
-        next[next.length - 1] = { role: "assistant", content: "Baglantiyi kontrol edin veya tekrar deneyin." };
+        next[next.length - 1] = { role: 'assistant', content: 'Baglantiyi kontrol edin veya tekrar deneyin.' };
         return next;
       });
       setStreaming(false);
@@ -268,11 +279,11 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
   };
 
   const suggestedQuestions = [
-    "Bu dosyalarda hangi sutunu anahtar olarak kullanmaliyim?",
-    "Veri kalitesi nasil? Sorunlu satirlar var mi?",
-    "Kurtarma dosyasi ile orijinal dosya arasindaki farki nasil bulabilirim?",
-    "Bu verileri en iyi nasil birlestirebilirim?",
-    "Olagandisi veya hatalı gorunen veri var mi?",
+    'Bu dosyalarda hangi sutunu anahtar olarak kullanmaliyim?',
+    'Veri kalitesi nasil? Sorunlu satirlar var mi?',
+    'Kurtarma dosyasi ile orijinal dosya arasindaki farki nasil bulabilirim?',
+    'Bu verileri en iyi nasil birlestirebilirim?',
+    'Olagandisi veya hatalı gorunen veri var mi?',
   ];
 
   /** React-based line renderer — **bold** support */
@@ -312,32 +323,42 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
           <div>
             <h1 className="text-lg font-bold text-foreground leading-none">AI Asistan</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {isOnline ? "Cevrimici — GPT ile guclu analiz" : "Cevrimdisi — yerel analiz modu"}
+              {isOnline ? 'Cevrimici — GPT ile guclu analiz' : 'Cevrimdisi — yerel analiz modu'}
             </p>
           </div>
           <Badge
             variant="outline"
-            className={`ml-2 ${isOnline ? "text-green-600 border-green-400" : "text-yellow-600 border-yellow-400"}`}
+            className={`ml-2 ${isOnline ? 'text-green-600 border-green-400' : 'text-yellow-600 border-yellow-400'}`}
           >
-            {isOnline ? <><Wifi className="w-3 h-3 mr-1" />Cevrimici</> : <><WifiOff className="w-3 h-3 mr-1" />Cevrimdisi</>}
+            {isOnline ? (
+              <>
+                <Wifi className="w-3 h-3 mr-1" />
+                Cevrimici
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-3 h-3 mr-1" />
+                Cevrimdisi
+              </>
+            )}
           </Badge>
         </div>
 
         <div className="flex items-center gap-2">
-          {(["chat", "analiz", "ogrenilen"] as const).map((t) => (
+          {(['chat', 'analiz', 'ogrenilen'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${tab === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}
               data-testid={`tab-${t}`}
             >
-              {t === "chat" ? "Sohbet" : t === "analiz" ? "Analiz" : "Ogrenilen"}
+              {t === 'chat' ? 'Sohbet' : t === 'analiz' ? 'Analiz' : 'Ogrenilen'}
             </button>
           ))}
         </div>
       </div>
 
-      {tab === "chat" && (
+      {tab === 'chat' && (
         <div className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
@@ -350,12 +371,17 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                   <p className="text-muted-foreground text-sm mt-1">
                     {files.length > 0
                       ? `${files.length} dosya yuklendi. Analiz veya soru sorun.`
-                      : "Once Dosya Yukle sekmesinden Excel dosyasi yukleyin."}
+                      : 'Once Dosya Yukle sekmesinden Excel dosyasi yukleyin.'}
                   </p>
                 </div>
 
                 {files.length > 0 && (
-                  <Button onClick={runAIAnalysis} disabled={analyzing} className="w-full" data-testid="button-ai-analyze">
+                  <Button
+                    onClick={runAIAnalysis}
+                    disabled={analyzing}
+                    className="w-full"
+                    data-testid="button-ai-analyze"
+                  >
                     {analyzing ? (
                       <>
                         <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -372,9 +398,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
 
                 {files.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Hizli Sorular
-                    </p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Hizli Sorular</p>
                     {suggestedQuestions.map((q, i) => (
                       <button
                         key={i}
@@ -392,18 +416,18 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
             )}
 
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card border border-card-border text-foreground"
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card border border-card-border text-foreground'
                   }`}
                   data-testid={`message-${i}`}
                 >
-                  {msg.role === "assistant" ? (
+                  {msg.role === 'assistant' ? (
                     <>
-                      {msg.content === "" && streaming ? (
+                      {msg.content === '' && streaming ? (
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <div className="flex gap-1">
                             <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce bounce-delay-0" />
@@ -417,9 +441,14 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                           {msg.content.split('\n').map((line, li) => (
                             <span key={li}>
                               {li > 0 && <br />}
-                              {line.startsWith('- ')
-                                ? <><span className="mr-1">•</span>{renderBoldLines(line.slice(2), li)}</>
-                                : renderBoldLines(line, li)}
+                              {line.startsWith('- ') ? (
+                                <>
+                                  <span className="mr-1">•</span>
+                                  {renderBoldLines(line.slice(2), li)}
+                                </>
+                              ) : (
+                                renderBoldLines(line, li)
+                              )}
                             </span>
                           ))}
                         </div>
@@ -440,15 +469,13 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
                   }
                 }}
                 placeholder={
-                  files.length === 0
-                    ? "Once dosya yukleyin..."
-                    : "Bir soru sorun veya analiz isteyin... (Enter gonder)"
+                  files.length === 0 ? 'Once dosya yukleyin...' : 'Bir soru sorun veya analiz isteyin... (Enter gonder)'
                 }
                 disabled={files.length === 0 || streaming}
                 className="min-h-[60px] max-h-32 resize-none"
@@ -468,13 +495,13 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
             <p className="text-xs text-muted-foreground text-center mt-2">
               {isOnline
                 ? "Dosyalariniz AI'ya gonderilmez — sadece sutun adlari ve ornek degerler kullanilir"
-                : "Cevrimdisi: Yerel analiz aktif, sohbet AI internet gerektirir"}
+                : 'Cevrimdisi: Yerel analiz aktif, sohbet AI internet gerektirir'}
             </p>
           </div>
         </div>
       )}
 
-      {tab === "analiz" && (
+      {tab === 'analiz' && (
         <div className="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl mx-auto w-full">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Yerel AI Analizi</h2>
@@ -491,21 +518,36 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
             </div>
           ) : offlineAnalysis ? (
             <>
-              <div className={`p-5 rounded-xl border text-center ${
-                offlineAnalysis.overallScore >= 80 ? "bg-green-50 dark:bg-green-900/20 border-green-200" :
-                offlineAnalysis.overallScore >= 60 ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200" :
-                "bg-red-50 dark:bg-red-900/20 border-red-200"
-              }`}>
-                <div className={`text-4xl font-bold ${
-                  offlineAnalysis.overallScore >= 80 ? "text-green-600" :
-                  offlineAnalysis.overallScore >= 60 ? "text-yellow-600" : "text-red-600"
-                }`}>
+              <div
+                className={`p-5 rounded-xl border text-center ${
+                  offlineAnalysis.overallScore >= 80
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200'
+                    : offlineAnalysis.overallScore >= 60
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200'
+                      : 'bg-red-50 dark:bg-red-900/20 border-red-200'
+                }`}
+              >
+                <div
+                  className={`text-4xl font-bold ${
+                    offlineAnalysis.overallScore >= 80
+                      ? 'text-green-600'
+                      : offlineAnalysis.overallScore >= 60
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                  }`}
+                >
                   {offlineAnalysis.overallScore}/100
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">Genel Veri Kalite Skoru</p>
                 <div className="flex justify-center gap-4 mt-3 text-sm">
-                  <span className="text-red-600"><AlertTriangle className="w-3.5 h-3.5 inline mr-1" />{offlineAnalysis.emptyCount} bos hucre</span>
-                  <span className="text-yellow-600"><TrendingUp className="w-3.5 h-3.5 inline mr-1" />{offlineAnalysis.duplicateCount} tekrar</span>
+                  <span className="text-red-600">
+                    <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
+                    {offlineAnalysis.emptyCount} bos hucre
+                  </span>
+                  <span className="text-yellow-600">
+                    <TrendingUp className="w-3.5 h-3.5 inline mr-1" />
+                    {offlineAnalysis.duplicateCount} tekrar
+                  </span>
                   <span className="text-orange-600">{offlineAnalysis.anomalies.length} anomali</span>
                 </div>
               </div>
@@ -542,7 +584,9 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                           <p className="text-xs text-muted-foreground">{s.reason}</p>
                         </div>
                         <div className="text-right">
-                          <div className={`text-sm font-bold ${s.confidence >= 70 ? "text-green-600" : s.confidence >= 40 ? "text-yellow-600" : "text-muted-foreground"}`}>
+                          <div
+                            className={`text-sm font-bold ${s.confidence >= 70 ? 'text-green-600' : s.confidence >= 40 ? 'text-yellow-600' : 'text-muted-foreground'}`}
+                          >
                             %{s.confidence}
                           </div>
                           <div className="text-xs text-muted-foreground">guven</div>
@@ -560,18 +604,28 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {offlineAnalysis.anomalies.map((anomaly, i) => (
-                      <div key={i} className={`p-3 rounded-lg border text-sm ${
-                        anomaly.severity === "high" ? "bg-red-50 dark:bg-red-900/20 border-red-200" :
-                        anomaly.severity === "medium" ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200" :
-                        "bg-blue-50 dark:bg-blue-900/20 border-blue-200"
-                      }`}>
+                      <div
+                        key={i}
+                        className={`p-3 rounded-lg border text-sm ${
+                          anomaly.severity === 'high'
+                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200'
+                            : anomaly.severity === 'medium'
+                              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200'
+                              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'
+                        }`}
+                      >
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className={`text-xs ${
-                            anomaly.severity === "high" ? "text-red-600 border-red-400" :
-                            anomaly.severity === "medium" ? "text-yellow-600 border-yellow-400" :
-                            "text-blue-600 border-blue-400"
-                          }`}>
-                            {anomaly.severity === "high" ? "Yuksek" : anomaly.severity === "medium" ? "Orta" : "Dusuk"}
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              anomaly.severity === 'high'
+                                ? 'text-red-600 border-red-400'
+                                : anomaly.severity === 'medium'
+                                  ? 'text-yellow-600 border-yellow-400'
+                                  : 'text-blue-600 border-blue-400'
+                            }`}
+                          >
+                            {anomaly.severity === 'high' ? 'Yuksek' : anomaly.severity === 'medium' ? 'Orta' : 'Dusuk'}
                           </Badge>
                           <span className="font-medium text-foreground">{anomaly.column}</span>
                         </div>
@@ -590,15 +644,15 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
         </div>
       )}
 
-      {tab === "ogrenilen" && (
+      {tab === 'ogrenilen' && (
         <div className="flex-1 overflow-y-auto p-4 space-y-4 max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">Ogrenilen Kaliplar</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Sistem, sizin tercihlerinizden ogrenerek zamanla daha iyi oneriler sunmaktadir.
-            Veriler cihazinizda saklanir, hicbir yere gonderilmez.
+            Sistem, sizin tercihlerinizden ogrenerek zamanla daha iyi oneriler sunmaktadir. Veriler cihazinizda
+            saklanir, hicbir yere gonderilmez.
           </p>
 
           {learnedPatterns ? (
@@ -615,9 +669,7 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                   <div className="text-xs text-muted-foreground mt-1">Ogrenilen Sutun</div>
                 </div>
                 <div className="p-4 rounded-xl bg-card border border-card-border text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {learnedPatterns.analysisHistory.length}
-                  </div>
+                  <div className="text-2xl font-bold text-primary">{learnedPatterns.analysisHistory.length}</div>
                   <div className="text-xs text-muted-foreground mt-1">Gecmis Kayit</div>
                 </div>
               </div>
@@ -661,13 +713,16 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
                       .slice(-8)
                       .reverse()
                       .map((entry, i) => (
-                        <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-border last:border-0">
+                        <div
+                          key={i}
+                          className="flex items-center justify-between text-sm py-1 border-b border-border last:border-0"
+                        >
                           <div>
-                            <span className="text-foreground font-medium">{entry.keyColumnChosen || "—"}</span>
+                            <span className="text-foreground font-medium">{entry.keyColumnChosen || '—'}</span>
                             <span className="text-muted-foreground ml-2">({entry.strategy})</span>
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(entry.timestamp).toLocaleDateString("tr-TR")}
+                            {new Date(entry.timestamp).toLocaleDateString('tr-TR')}
                           </span>
                         </div>
                       ))}
@@ -693,4 +748,3 @@ export default function AiAsistanPage({ files }: AiAsistanPageProps) {
     </div>
   );
 }
-

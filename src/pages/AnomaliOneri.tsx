@@ -96,15 +96,9 @@ function AnomalyCard({
         <div className="flex-1 min-w-0">
           <div className="font-bold text-slate-100 text-sm mb-0.5">
             {anomaly.title}
-            {isResolved && (
-              <span className="ml-2 text-[0.72rem] text-emerald-500">
-                ✓ Çözüldü
-              </span>
-            )}
+            {isResolved && <span className="ml-2 text-[0.72rem] text-emerald-500">✓ Çözüldü</span>}
           </div>
-          <div className="text-slate-400 text-xs overflow-hidden text-ellipsis whitespace-nowrap">
-            {anomaly.detail}
-          </div>
+          <div className="text-slate-400 text-xs overflow-hidden text-ellipsis whitespace-nowrap">{anomaly.detail}</div>
         </div>
         <div className="flex gap-1.5 shrink-0 items-center">
           <span className={`text-[0.7rem] ${s.badge} ${s.text} px-2 py-0.5 rounded-md font-bold`}>
@@ -208,7 +202,9 @@ export default function AnomaliOneri({ db, save }: Props) {
         }
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [db, refreshKey]);
 
   const filtered = useMemo(() => {
@@ -289,15 +285,17 @@ export default function AnomaliOneri({ db, save }: Props) {
             🔍
           </div>
           <div className="flex-1">
-            <h2 className="font-black text-slate-100 text-lg m-0">
-              Anomali & Öneri
-            </h2>
+            <h2 className="font-black text-slate-100 text-lg m-0">Anomali & Öneri</h2>
             <p className="text-slate-600 text-xs m-0 mt-0.5">
               {loading ? (
                 <>
                   <span className="inline-block animate-spin mr-1">⟳</span>
                   Anomali taraması yapılıyor
-                  {progress && <span className="text-indigo-400 ml-1">({progress.current}/{progress.total} — {progress.label})</span>}
+                  {progress && (
+                    <span className="text-indigo-400 ml-1">
+                      ({progress.current}/{progress.total} — {progress.label})
+                    </span>
+                  )}
                 </>
               ) : (
                 <>
@@ -384,10 +382,7 @@ export default function AnomaliOneri({ db, save }: Props) {
             { label: 'Bilgi', value: report.summary.info, color: 'text-blue-500' },
             { label: 'Toplam', value: report.summary.total, color: 'text-slate-400' },
           ].map((s, i) => (
-            <div
-              key={i}
-              className="bg-black/25 rounded-xl p-2.5 text-center"
-            >
+            <div key={i} className="bg-black/25 rounded-xl p-2.5 text-center">
               <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
               <div className="text-[0.65rem] text-slate-600 mt-0.5">{s.label}</div>
             </div>
@@ -397,9 +392,7 @@ export default function AnomaliOneri({ db, save }: Props) {
         {/* Trend Grafiği */}
         {trendData.length > 1 && (
           <div className="mt-3">
-            <div className="text-slate-600 text-[0.6rem] mb-1 uppercase tracking-wider">
-              Anomali Trendi (30 gün)
-            </div>
+            <div className="text-slate-600 text-[0.6rem] mb-1 uppercase tracking-wider">Anomali Trendi (30 gün)</div>
             <ResponsiveContainer width="100%" height={64}>
               <AreaChart data={trendData} margin={{ top: 2, right: 4, bottom: 2, left: -20 }}>
                 <defs>
@@ -439,12 +432,8 @@ export default function AnomaliOneri({ db, save }: Props) {
         <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-[18px] py-[14px] flex gap-3 items-start">
           <span className="text-xl shrink-0">🤖</span>
           <div className="flex-1">
-            <div className="text-indigo-400 font-bold text-xs mb-1.5">
-              AI Asistan'a Gönderilecek Mesaj
-            </div>
-            <pre className="text-slate-400 text-xs whitespace-pre-wrap m-0 font-inherit">
-              {aiMessage}
-            </pre>
+            <div className="text-indigo-400 font-bold text-xs mb-1.5">AI Asistan'a Gönderilecek Mesaj</div>
+            <pre className="text-slate-400 text-xs whitespace-pre-wrap m-0 font-inherit">{aiMessage}</pre>
             <div className="flex gap-2 mt-2.5">
               <button
                 onClick={() => {
@@ -479,8 +468,8 @@ export default function AnomaliOneri({ db, save }: Props) {
             key={sev}
             onClick={() => setFilterSev(sev)}
             className={`px-3.5 py-2 rounded-lg border-none font-semibold cursor-pointer text-xs transition-all ${
-              filterSev === sev 
-                ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' 
+              filterSev === sev
+                ? 'bg-indigo-500/20 text-indigo-400 shadow-sm'
                 : 'bg-white/[0.04] text-slate-500 hover:bg-white/10'
             }`}
           >
@@ -504,9 +493,7 @@ export default function AnomaliOneri({ db, save }: Props) {
       {/* Anomali listesi */}
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-slate-800">
-          <div className="text-5xl mb-3 opacity-30">
-            {report.anomalies.length === 0 ? '✅' : '🔍'}
-          </div>
+          <div className="text-5xl mb-3 opacity-30">{report.anomalies.length === 0 ? '✅' : '🔍'}</div>
           <p className="font-semibold text-base m-0">
             {report.anomalies.length === 0
               ? 'Anomali tespit edilmedi — veriler temiz görünüyor!'
@@ -531,17 +518,15 @@ export default function AnomaliOneri({ db, save }: Props) {
       {/* Kategori özeti */}
       {report.summary.total > 0 && (
         <div className="bg-black/20 border border-white/5 rounded-xl p-3.5">
-          <div className="font-bold text-slate-400 text-xs mb-2 uppercase tracking-wider">
-            Kategori Dağılımı
-          </div>
+          <div className="font-bold text-slate-400 text-xs mb-2 uppercase tracking-wider">Kategori Dağılımı</div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(report.summary.byCategory).map(([cat, count]) => (
               <button
                 key={cat}
                 onClick={() => setFilterCat(cat as AnomalyCategory)}
                 className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                  filterCat === cat 
-                    ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400' 
+                  filterCat === cat
+                    ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400'
                     : 'bg-white/[0.04] border-white/[0.07] text-slate-500 hover:bg-white/10'
                 }`}
               >

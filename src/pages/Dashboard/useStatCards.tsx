@@ -1,5 +1,14 @@
 import { useMemo } from 'react';
-import { DollarSign, TrendingUp, Calendar, Package, Wallet, Landmark, ClipboardList, AlertTriangle } from 'lucide-react';
+import {
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  Package,
+  Wallet,
+  Landmark,
+  ClipboardList,
+  AlertTriangle,
+} from 'lucide-react';
 import { formatMoney } from '@/lib/utils-tr';
 import type { StatCardData } from './types';
 

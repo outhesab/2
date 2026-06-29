@@ -1,18 +1,7 @@
-import React from "react";
-import {
-  Card as ShadcnCard,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React from 'react';
+import { Card as ShadcnCard, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export function Card({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+export function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <ShadcnCard className="w-full">
       <CardHeader>

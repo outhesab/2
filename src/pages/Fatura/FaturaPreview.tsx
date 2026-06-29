@@ -115,7 +115,9 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
           <thead>
             <tr className={styles.itemsTheadRow}>
               {['Açıklama', 'Adet', 'Birim', 'KDV', 'Toplam'].map((h) => (
-                <th key={h} className={styles.itemsTh}>{h}</th>
+                <th key={h} className={styles.itemsTh}>
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -154,10 +156,7 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
             <div className={styles.installmentHeader}>
               <span className={styles.installmentTitle}>📅 Taksit Planı</span>
               {installments.length === 0 && (
-                <button
-                  onClick={() => setShowInstForm((v) => !v)}
-                  className={styles.createPlanBtn}
-                >
+                <button onClick={() => setShowInstForm((v) => !v)} className={styles.createPlanBtn}>
                   📅 Taksit Planı Oluştur
                 </button>
               )}
@@ -204,10 +203,7 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                   >
                     ✅ Oluştur
                   </button>
-                  <button
-                    onClick={() => setShowInstForm(false)}
-                    className={styles.instCancelBtn}
-                  >
+                  <button onClick={() => setShowInstForm(false)} className={styles.instCancelBtn}>
                     İptal
                   </button>
                 </div>
@@ -219,7 +215,9 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                 <thead>
                   <tr className={styles.instThead}>
                     {['#', 'Vade', 'Tutar', 'Durum', ''].map((h) => (
-                      <th key={h} className={styles.instTh}>{h}</th>
+                      <th key={h} className={styles.instTh}>
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -256,11 +254,15 @@ export default function FaturaPreview({ db, previewInv, onClose, save, showToast
                         <td className={styles.instTdPrimary}>{formatDate(inst.dueDate)}</td>
                         <td className={styles.instTdGreen}>{formatMoney(inst.amount)}</td>
                         <td className={styles.instTd}>
-                          <span style={{ color: statusColor, fontSize: '0.78rem', fontWeight: 700 }}>{statusLabel}</span>
+                          <span style={{ color: statusColor, fontSize: '0.78rem', fontWeight: 700 }}>
+                            {statusLabel}
+                          </span>
                         </td>
                         <td className={styles.instTd}>
                           {!inst.paid && (
-                            <button onClick={() => payInstallment(inst.id)} className={styles.payBtn}>✅ Ödendi</button>
+                            <button onClick={() => payInstallment(inst.id)} className={styles.payBtn}>
+                              ✅ Ödendi
+                            </button>
                           )}
                         </td>
                       </tr>

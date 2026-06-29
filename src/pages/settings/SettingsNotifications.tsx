@@ -17,12 +17,26 @@ function load(): BildirimAyarlari {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch { /* */ }
-  return { bildirimSesi: true, masaustuBildirim: true, satisBildirim: true, stokUyari: true, alacakUyari: true, gunlukOzet: false, sesliUyari: false };
+  } catch {
+    /* */
+  }
+  return {
+    bildirimSesi: true,
+    masaustuBildirim: true,
+    satisBildirim: true,
+    stokUyari: true,
+    alacakUyari: true,
+    gunlukOzet: false,
+    sesliUyari: false,
+  };
 }
 
 function save(v: BildirimAyarlari) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch { /* */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(v));
+  } catch {
+    /* */
+  }
 }
 
 export function SettingsNotifications({ showToast }: { showToast: (m: string, t?: string) => void }) {
@@ -51,14 +65,21 @@ export function SettingsNotifications({ showToast }: { showToast: (m: string, t?
     <Card title="🔔 Bildirim Ayarları">
       <div className="space-y-1">
         {items.map(({ key, label, desc }) => (
-          <div key={key} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
+          <div
+            key={key}
+            className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors"
+          >
             <div>
               <div className="text-sm font-medium text-foreground">{label}</div>
               <div className="text-xs text-muted-foreground">{desc}</div>
             </div>
-            <button onClick={() => toggle(key)}
-              className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${cfg[key] ? 'bg-indigo-600' : 'bg-gray-600'}`}>
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg[key] ? 'left-6' : 'left-0.5'}`} />
+            <button
+              onClick={() => toggle(key)}
+              className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${cfg[key] ? 'bg-indigo-600' : 'bg-gray-600'}`}
+            >
+              <span
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${cfg[key] ? 'left-6' : 'left-0.5'}`}
+              />
             </button>
           </div>
         ))}

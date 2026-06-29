@@ -118,7 +118,11 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
       <div className={rStyles.twoColGrid}>
         <SectionBox
           title="📅 Aylık Ciro & Kâr"
-          action={<button onClick={handleExport} className={sStyles.btnExport}>📥 Excel</button>}
+          action={
+            <button onClick={handleExport} className={sStyles.btnExport}>
+              📥 Excel
+            </button>
+          }
         >
           {monthlyData.length === 0 ? (
             <EmptyChart />
@@ -176,11 +180,7 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
               <thead>
                 <tr className={styles.trBold}>
                   {['Kategori', 'Ciro', 'Kâr', 'Marj %', 'Adet'].map((h) => (
-                    <th
-                      key={h}
-                      className={sStyles.catTh}
-                      style={{ textAlign: h === 'Kategori' ? 'left' : 'right' }}
-                    >
+                    <th key={h} className={sStyles.catTh} style={{ textAlign: h === 'Kategori' ? 'left' : 'right' }}>
                       {h}
                     </th>
                   ))}
@@ -190,10 +190,7 @@ export function ReportsSatis({ db, start, end }: ReportProps) {
                 {categoryData.map((c, i) => (
                   <tr key={i}>
                     <td className={sStyles.catTdName}>
-                      <span
-                        className={sStyles.catDot}
-                        style={{ background: COLORS[i % COLORS.length] }}
-                      />
+                      <span className={sStyles.catDot} style={{ background: COLORS[i % COLORS.length] }} />
                       {c.name}
                     </td>
                     <td className={sStyles.catTdCiro}>{formatMoney(c.ciro)}</td>

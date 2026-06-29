@@ -21,16 +21,10 @@ export function FaturaToolbar({
 }: FaturaToolbarProps) {
   return (
     <div className={styles.toolbar}>
-      <button
-        onClick={() => onOpenNew('satis')}
-        className={styles.satisBtn}
-      >
+      <button onClick={() => onOpenNew('satis')} className={styles.satisBtn}>
         + SatıÅŸ Faturası
       </button>
-      <button
-        onClick={() => onOpenNew('alis')}
-        className={styles.alisBtn}
-      >
+      <button onClick={() => onOpenNew('alis')} className={styles.alisBtn}>
         + AlıÅŸ Faturası
       </button>
       <div className={styles.rightSection}>
@@ -49,11 +43,7 @@ export function FaturaToolbar({
           <option value="satis">SatıÅŸ</option>
           <option value="alis">AlıÅŸ</option>
         </select>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={styles.filterSelect}>
           <option value="all">Tüm Durumlar</option>
           <option value="taslak">Taslak</option>
           <option value="onaylandi">Onaylandı</option>

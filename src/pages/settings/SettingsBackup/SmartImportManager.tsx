@@ -35,8 +35,16 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
     const autoMapped: Record<string, string> = {};
     const knownAll = new Set([
       ...Object.keys(KNOWN_ARRAYS),
-      '_version', 'company', 'settings', 'pelletSettings', 'kasalar',
-      'matchRules', 'monitorRules', 'monitorLog', '_activityLog', 'soundSettings',
+      '_version',
+      'company',
+      'settings',
+      'pelletSettings',
+      'kasalar',
+      'matchRules',
+      'monitorRules',
+      'monitorLog',
+      '_activityLog',
+      'soundSettings',
     ]);
     Object.keys(data).forEach((key) => {
       if (!knownAll.has(key)) {
@@ -50,42 +58,48 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
     return { unknown, autoMapped };
   }, []);
 
-  const applyMappings = useCallback((data: Record<string, unknown>, mappings: Record<string, string>): Record<string, unknown> => {
-    const result: Record<string, unknown> = { ...data };
-    Object.entries(mappings).forEach(([src, dst]) => {
-      if (dst && dst !== '' && result[src] !== undefined) {
-        if (!result[dst] || !Array.isArray(result[dst])) {
-          result[dst] = result[src];
-        } else if (Array.isArray(result[dst]) && Array.isArray(result[src])) {
-          result[dst] = [...(result[dst] as unknown[]), ...(result[src] as unknown[])];
+  const applyMappings = useCallback(
+    (data: Record<string, unknown>, mappings: Record<string, string>): Record<string, unknown> => {
+      const result: Record<string, unknown> = { ...data };
+      Object.entries(mappings).forEach(([src, dst]) => {
+        if (dst && dst !== '' && result[src] !== undefined) {
+          if (!result[dst] || !Array.isArray(result[dst])) {
+            result[dst] = result[src];
+          } else if (Array.isArray(result[dst]) && Array.isArray(result[src])) {
+            result[dst] = [...(result[dst] as unknown[]), ...(result[src] as unknown[])];
+          }
+          delete result[src];
         }
-        delete result[src];
-      }
-    });
-    return result;
-  }, []);
+      });
+      return result;
+    },
+    [],
+  );
 
-  const detectConflicts = useCallback((data: Record<string, unknown>): ConflictInfo[] => {
-    const checks = [
-      { entity: 'products', label: 'Ürün', dbItems: db.products, importKey: 'products' },
-      { entity: 'sales', label: 'Satış', dbItems: db.sales, importKey: 'sales' },
-      { entity: 'cari', label: 'Cari Müşteri', dbItems: db.cari, importKey: 'cari' },
-      { entity: 'suppliers', label: 'Tedarikçi', dbItems: db.suppliers || [], importKey: 'suppliers' },
-    ];
-    return checks
-      .map(({ entity, label, dbItems, importKey }) => {
-        const incoming = (data[importKey] as { id?: string; name?: string; code?: string }[]) || [];
-        const items = dbItems as { id?: string; name?: string }[];
-        const existingIds = new Set(items.map((d) => d.id).filter(Boolean));
-        const existingNames = new Set(items.map((d) => (d.name || '').toLowerCase().trim()).filter(Boolean));
-        const byId = incoming.filter((item) => item.id && existingIds.has(item.id)).length;
-        const byName = incoming.filter(
-          (item) => !item.id && item.name && existingNames.has(item.name.toLowerCase().trim()),
-        ).length;
-        return { entity, label, byId, byName, total: byId + byName };
-      })
-      .filter((c) => c.total > 0);
-  }, [db]);
+  const detectConflicts = useCallback(
+    (data: Record<string, unknown>): ConflictInfo[] => {
+      const checks = [
+        { entity: 'products', label: 'Ürün', dbItems: db.products, importKey: 'products' },
+        { entity: 'sales', label: 'Satış', dbItems: db.sales, importKey: 'sales' },
+        { entity: 'cari', label: 'Cari Müşteri', dbItems: db.cari, importKey: 'cari' },
+        { entity: 'suppliers', label: 'Tedarikçi', dbItems: db.suppliers || [], importKey: 'suppliers' },
+      ];
+      return checks
+        .map(({ entity, label, dbItems, importKey }) => {
+          const incoming = (data[importKey] as { id?: string; name?: string; code?: string }[]) || [];
+          const items = dbItems as { id?: string; name?: string }[];
+          const existingIds = new Set(items.map((d) => d.id).filter(Boolean));
+          const existingNames = new Set(items.map((d) => (d.name || '').toLowerCase().trim()).filter(Boolean));
+          const byId = incoming.filter((item) => item.id && existingIds.has(item.id)).length;
+          const byName = incoming.filter(
+            (item) => !item.id && item.name && existingNames.has(item.name.toLowerCase().trim()),
+          ).length;
+          return { entity, label, byId, byName, total: byId + byName };
+        })
+        .filter((c) => c.total > 0);
+    },
+    [db],
+  );
 
   const analyzeData = useCallback((data: Record<string, unknown>) => {
     const errs: string[] = [];
@@ -111,80 +125,86 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
     return { errs, warns, st };
   }, []);
 
-  const proceedToPreview = useCallback((data: Record<string, unknown>, userMappings: Record<string, string>) => {
-    const allMappings = { ...legacyMapped, ...userMappings };
-    const resolved = applyMappings(data, allMappings);
-    const { errs, warns, st } = analyzeData(resolved);
-    const detectedConflicts = detectConflicts(resolved);
-    const initRes: Record<string, string> = {};
-    detectedConflicts.forEach((c) => {
-      initRes[c.entity] = 'overwrite';
-    });
-    setMapped(resolved);
-    setErrors(errs);
-    setWarnings(warns);
-    setStats(st);
-    setConflicts(detectedConflicts);
-    setResolutions(initRes as Record<string, ConflictResolution>);
-    setStage('preview');
-  }, [legacyMapped, applyMappings, analyzeData, detectConflicts]);
+  const proceedToPreview = useCallback(
+    (data: Record<string, unknown>, userMappings: Record<string, string>) => {
+      const allMappings = { ...legacyMapped, ...userMappings };
+      const resolved = applyMappings(data, allMappings);
+      const { errs, warns, st } = analyzeData(resolved);
+      const detectedConflicts = detectConflicts(resolved);
+      const initRes: Record<string, string> = {};
+      detectedConflicts.forEach((c) => {
+        initRes[c.entity] = 'overwrite';
+      });
+      setMapped(resolved);
+      setErrors(errs);
+      setWarnings(warns);
+      setStats(st);
+      setConflicts(detectedConflicts);
+      setResolutions(initRes as Record<string, ConflictResolution>);
+      setStage('preview');
+    },
+    [legacyMapped, applyMappings, analyzeData, detectConflicts],
+  );
 
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
-        const rows = parseCSV(text);
-        if (rows.length === 0) {
-          setErrors(['CSV dosyası boş veya geçersiz format']);
-          setStage('preview');
+  const handleFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string;
+        if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
+          const rows = parseCSV(text);
+          if (rows.length === 0) {
+            setErrors(['CSV dosyası boş veya geçersiz format']);
+            setStage('preview');
+            return;
+          }
+          setCsvRows(rows);
+          const headers = Object.keys(rows[0]);
+          const mappings = detectCsvColumns(headers);
+          setCsvMappings(mappings);
+          const hasCariCols = mappings.some((m) => m.targetEntity === 'cari');
+          const hasProductCols = mappings.some((m) => m.targetEntity === 'products');
+          setCsvTarget(hasCariCols ? 'cari' : hasProductCols ? 'products' : 'cari');
+          setStage('csvMapping');
           return;
         }
-        setCsvRows(rows);
-        const headers = Object.keys(rows[0]);
-        const mappings = detectCsvColumns(headers);
-        setCsvMappings(mappings);
-        const hasCariCols = mappings.some((m) => m.targetEntity === 'cari');
-        const hasProductCols = mappings.some((m) => m.targetEntity === 'products');
-        setCsvTarget(hasCariCols ? 'cari' : hasProductCols ? 'products' : 'cari');
-        setStage('csvMapping');
-        return;
-      }
-      try {
-        const data = JSON.parse(text);
-        if (typeof data !== 'object' || Array.isArray(data)) {
-          setErrors(['Geçersiz JSON formatı — nesne bekleniyor']);
+        try {
+          const data = JSON.parse(text);
+          if (typeof data !== 'object' || Array.isArray(data)) {
+            setErrors(['Geçersiz JSON formatı — nesne bekleniyor']);
+            setStage('preview');
+            setRawData(null);
+            return;
+          }
+          setRawData(data);
+          const { unknown, autoMapped } = detectFieldMappings(data);
+          setLegacyMapped(autoMapped);
+          setUnknownFields(unknown);
+          const initMappings: Record<string, string> = {};
+          unknown.forEach((f) => {
+            initMappings[f] = '';
+          });
+          setFieldMappings(initMappings);
+          if (unknown.length > 0 || Object.keys(autoMapped).length > 0) {
+            setStage('mapping');
+          } else {
+            proceedToPreview(data, {});
+          }
+        } catch {
+          logger.warn('settings', 'Dosya ayrıştırılamadı — JSON veya CSV formatı hatalı');
+          setErrors(['Dosya ayrıştırılamadı — JSON veya CSV formatını kontrol edin']);
           setStage('preview');
           setRawData(null);
-          return;
         }
-        setRawData(data);
-        const { unknown, autoMapped } = detectFieldMappings(data);
-        setLegacyMapped(autoMapped);
-        setUnknownFields(unknown);
-        const initMappings: Record<string, string> = {};
-        unknown.forEach((f) => {
-          initMappings[f] = '';
-        });
-        setFieldMappings(initMappings);
-        if (unknown.length > 0 || Object.keys(autoMapped).length > 0) {
-          setStage('mapping');
-        } else {
-          proceedToPreview(data, {});
-        }
-      } catch {
-        logger.warn('settings', 'Dosya ayrıştırılamadı — JSON veya CSV formatı hatalı');
-        setErrors(['Dosya ayrıştırılamadı — JSON veya CSV formatını kontrol edin']);
-        setStage('preview');
-        setRawData(null);
-      }
-    };
-    reader.readAsText(file);
-    if (fileRef.current) fileRef.current.value = '';
-  }, [proceedToPreview, detectFieldMappings]);
+      };
+      reader.readAsText(file);
+      if (fileRef.current) fileRef.current.value = '';
+    },
+    [proceedToPreview, detectFieldMappings],
+  );
 
   const applyCsvImport = () => {
     if (csvRows.length === 0) return;
@@ -202,7 +222,11 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
         if (numFields.includes(m.targetField)) {
           item[m.targetField] = parseFloat(val.replace(/[^\d.,-]/g, '').replace(',', '.')) || 0;
         } else if (m.targetField === 'createdAt') {
-          try { item.createdAt = new Date(val).toISOString(); } catch { /* keep default */ }
+          try {
+            item.createdAt = new Date(val).toISOString();
+          } catch {
+            /* keep default */
+          }
         } else {
           item[m.targetField] = val;
         }
@@ -242,13 +266,39 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
       () => {
         try {
           const def: Record<string, unknown> = {
-            _version: 1, products: [], sales: [], suppliers: [], orders: [], cari: [], kasa: [],
-            kasalar: [{ id: 'nakit', name: 'Nakit', icon: '💵' }, { id: 'banka', name: 'Banka', icon: '🏦' }],
-            bankTransactions: [], matchRules: [], monitorRules: [], monitorLog: [], stockMovements: [],
-            peletSuppliers: [], peletOrders: [], boruSuppliers: [], boruOrders: [], invoices: [],
-            budgets: [], returns: [], _activityLog: [], _auditLog: [], company: db.company || {},
-            settings: db.settings || {}, pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
-            ortakEmanetler: [], installments: [], partners: [], productCategories: [], notes: [],
+            _version: 1,
+            products: [],
+            sales: [],
+            suppliers: [],
+            orders: [],
+            cari: [],
+            kasa: [],
+            kasalar: [
+              { id: 'nakit', name: 'Nakit', icon: '💵' },
+              { id: 'banka', name: 'Banka', icon: '🏦' },
+            ],
+            bankTransactions: [],
+            matchRules: [],
+            monitorRules: [],
+            monitorLog: [],
+            stockMovements: [],
+            peletSuppliers: [],
+            peletOrders: [],
+            boruSuppliers: [],
+            boruOrders: [],
+            invoices: [],
+            budgets: [],
+            returns: [],
+            _activityLog: [],
+            _auditLog: [],
+            company: db.company || {},
+            settings: db.settings || {},
+            pelletSettings: { gramaj: 14, kgFiyat: 6.5, cuvalKg: 15, critDays: 3 },
+            ortakEmanetler: [],
+            installments: [],
+            partners: [],
+            productCategories: [],
+            notes: [],
           };
           const finalData: Record<string, unknown> = { ...def, ...mapped };
           const conflictEntities = ['products', 'cari', 'suppliers', 'sales'] as const;
@@ -406,10 +456,16 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
               </select>
             </div>
           ))}
-          <Button onClick={applyCsvImport} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">
+          <Button
+            onClick={applyCsvImport}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+          >
             Devam → Önizleme & Çakışma Çözümü
           </Button>
-          <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
+          <Button
+            onClick={reset}
+            className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
+          >
             Sıfırla
           </Button>
         </div>
@@ -422,9 +478,13 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
               <div className="text-green-400 font-bold">✅ Otomatik Algılanan Eski Alanlar</div>
               {Object.entries(legacyMapped).map(([src, dst]) => (
                 <div key={src} className="flex items-center gap-2">
-                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-warning)]">{src}</span>
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-warning)]">
+                    {src}
+                  </span>
                   <span className="text-[var(--text-dim)] text-sm">→</span>
-                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-success)]">{dst}</span>
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2 py-0.5 rounded text-[var(--color-success)]">
+                    {dst}
+                  </span>
                 </div>
               ))}
             </div>
@@ -434,7 +494,9 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
               <div className="text-amber-400 font-bold text-sm">⚠️ Tanınmayan Alanlar — Eşleme Seçin</div>
               {unknownFields.map((field) => (
                 <div key={field} className="flex items-center gap-2.5">
-                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2.5 py-1 rounded text-[var(--color-warning)] text-center min-w-[120px]">{field}</span>
+                  <span className="font-mono text-xs bg-[rgba(0,0,0,0.3)] px-2.5 py-1 rounded text-[var(--color-warning)] text-center min-w-[120px]">
+                    {field}
+                  </span>
                   <span className="text-[var(--text-dim)] text-sm">→</span>
                   <select
                     value={fieldMappings[field] || ''}
@@ -443,17 +505,25 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
                   >
                     <option value="">— Yoksay —</option>
                     {Object.entries(KNOWN_ARRAYS).map(([k, label]) => (
-                      <option key={k} value={k}>{label} ({k})</option>
+                      <option key={k} value={k}>
+                        {label} ({k})
+                      </option>
                     ))}
                   </select>
                 </div>
               ))}
             </div>
           )}
-          <Button onClick={() => proceedToPreview(rawData, fieldMappings)} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">
+          <Button
+            onClick={() => proceedToPreview(rawData, fieldMappings)}
+            className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+          >
             Devam → Önizleme & Çakışma Çözümü
           </Button>
-          <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
+          <Button
+            onClick={reset}
+            className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
+          >
             Sıfırla
           </Button>
         </div>
@@ -464,13 +534,21 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
           {errors.length > 0 && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-[10px] p-3">
               <div className="text-red-400 font-bold text-sm">❌ Hatalar</div>
-              {errors.map((e, i) => (<div key={i} className="text-red-400 text-xs">• {e}</div>))}
+              {errors.map((e, i) => (
+                <div key={i} className="text-red-400 text-xs">
+                  • {e}
+                </div>
+              ))}
             </div>
           )}
           {warnings.length > 0 && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-[10px] p-3">
               <div className="text-amber-400 font-bold text-sm">⚠️ Uyarılar</div>
-              {warnings.map((w, i) => (<div key={i} className="text-amber-400 text-xs">• {w}</div>))}
+              {warnings.map((w, i) => (
+                <div key={i} className="text-amber-400 text-xs">
+                  • {w}
+                </div>
+              ))}
             </div>
           )}
           {Object.keys(stats).length > 0 && (
@@ -497,20 +575,41 @@ export function SmartImportManager({ db, save, showToast, showConfirm }: SmartIm
                     {c.byName > 0 && `${c.byName} aynı isim`} çakışması
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'overwrite' }))} style={btnStyle(resolutions[c.entity] === 'overwrite', '#ef4444')}>🔁 Üzerine Yaz</button>
-                    <button onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'skip' }))} style={btnStyle(resolutions[c.entity] === 'skip', '#f59e0b')}>⏭️ Çakışanları Atla</button>
-                    <button onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'merge' }))} style={btnStyle(resolutions[c.entity] === 'merge', '#10b981')}>🔀 Birleştir</button>
+                    <button
+                      onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'overwrite' }))}
+                      style={btnStyle(resolutions[c.entity] === 'overwrite', '#ef4444')}
+                    >
+                      🔁 Üzerine Yaz
+                    </button>
+                    <button
+                      onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'skip' }))}
+                      style={btnStyle(resolutions[c.entity] === 'skip', '#f59e0b')}
+                    >
+                      ⏭️ Çakışanları Atla
+                    </button>
+                    <button
+                      onClick={() => setResolutions((r) => ({ ...r, [c.entity]: 'merge' }))}
+                      style={btnStyle(resolutions[c.entity] === 'merge', '#10b981')}
+                    >
+                      🔀 Birleştir
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
           {mapped && errors.length === 0 && (
-            <Button onClick={doImport} className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30">
+            <Button
+              onClick={doImport}
+              className="px-3 py-2.5 rounded-xl font-bold text-sm bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+            >
               ✅ Aktarımı Onayla & Başlat
             </Button>
           )}
-          <Button onClick={reset} className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30">
+          <Button
+            onClick={reset}
+            className="px-3 py-2 rounded-lg font-medium text-sm bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
+          >
             Sıfırla
           </Button>
         </div>

@@ -37,11 +37,7 @@ export default function SupplierForm({
   onClose,
 }: Props) {
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={editId ? '✏ Tedarikçi Düzenle' : '➕ Yeni Tedarikçi'}
-    >
+    <Modal open={open} onClose={onClose} title={editId ? '✏ Tedarikçi Düzenle' : '➕ Yeni Tedarikçi'}>
       <div className="grid grid-cols-2 gap-3.5">
         <div className="col-span-full">
           <label className={labelClass}>Ad *</label>
@@ -54,28 +50,16 @@ export default function SupplierForm({
           {dupWarning.length > 0 && (
             <div
               className={`mt-2 rounded-lg px-3 py-2.5 border ${
-                forceSave
-                  ? 'bg-amber-500/10 border-amber-500/40'
-                  : 'bg-red-500/10 border-red-500/40'
+                forceSave ? 'bg-amber-500/10 border-amber-500/40' : 'bg-red-500/10 border-red-500/40'
               }`}
             >
-              <p
-                className={`text-xs font-bold mb-1 ${
-                  forceSave ? 'text-amber-500' : 'text-red-500'
-                }`}
-              >
-                {forceSave
-                  ? '⚠ Yine de kaydetmek için tekrar "Kaydet" e tıklayın'
-                  : '🔴 Benzer tedarikçiler bulundu:'}
+              <p className={`text-xs font-bold mb-1 ${forceSave ? 'text-amber-500' : 'text-red-500'}`}>
+                {forceSave ? '⚠ Yine de kaydetmek için tekrar "Kaydet" e tıklayın' : '🔴 Benzer tedarikçiler bulundu:'}
               </p>
               {dupWarning.map((d, i) => (
                 <p key={i} className="text-[var(--text-dim)] text-xs my-0.5">
                   • {d.name}{' '}
-                  <span
-                    className={`font-bold ${
-                      d.score >= 90 ? 'text-red-500' : 'text-amber-500'
-                    }`}
-                  >
+                  <span className={`font-bold ${d.score >= 90 ? 'text-red-500' : 'text-amber-500'}`}>
                     (%{d.score} benzerlik)
                   </span>
                 </p>

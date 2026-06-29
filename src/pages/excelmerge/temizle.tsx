@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
-import { Sparkles, Download, FileSpreadsheet, CheckCircle, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { type ExcelFile, type CleanOptions, cleanSheetData, exportToExcel } from "@/lib/excel-merge";
+import { useState, useMemo } from 'react';
+import { Sparkles, Download, FileSpreadsheet, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { type ExcelFile, type CleanOptions, cleanSheetData, exportToExcel } from '@/lib/excel-merge';
 
 interface TemizlePageProps {
   files: ExcelFile[];
@@ -15,13 +15,13 @@ const defaultCleanOptions: CleanOptions = {
   trimWhitespace: true,
   deduplicateRows: false,
   fillNullsWithEmpty: false,
-  standardizeCase: "none",
+  standardizeCase: 'none',
   standardizeDates: false,
 };
 
 export default function TemlizlePage({ files }: TemizlePageProps) {
-  const [selectedFileId, setSelectedFileId] = useState<string>("");
-  const [selectedSheet, setSelectedSheet] = useState<string>("");
+  const [selectedFileId, setSelectedFileId] = useState<string>('');
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
   const [opts, setOpts] = useState<CleanOptions>(defaultCleanOptions);
   const [result, setResult] = useState<ReturnType<typeof cleanSheetData> | null>(null);
   const [preview, setPreview] = useState(false);
@@ -47,8 +47,8 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
 
   const handleExport = () => {
     if (!result) return;
-    const name = selectedFile ? `temizlenmis_${selectedFile.name.replace(/\.[^.]+$/, "")}.xlsx` : "temizlenmis.xlsx";
-    exportToExcel(result.headers, result.rows, name, currentSheet?.name ?? "Temizlenmis");
+    const name = selectedFile ? `temizlenmis_${selectedFile.name.replace(/\.[^.]+$/, '')}.xlsx` : 'temizlenmis.xlsx';
+    exportToExcel(result.headers, result.rows, name, currentSheet?.name ?? 'Temizlenmis');
   };
 
   if (files.length === 0) {
@@ -82,7 +82,11 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
               <label className="text-sm font-medium text-foreground">Dosya</label>
               <Select
                 value={selectedFileId}
-                onValueChange={(v) => { setSelectedFileId(v); setSelectedSheet(""); setResult(null); }}
+                onValueChange={(v) => {
+                  setSelectedFileId(v);
+                  setSelectedSheet('');
+                  setResult(null);
+                }}
                 data-testid="select-file"
               >
                 <SelectTrigger>
@@ -94,7 +98,11 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
                       <div className="flex items-center gap-2">
                         <FileSpreadsheet className="w-4 h-4" />
                         {f.name}
-                        {f.isRecovery && <Badge variant="outline" className="text-yellow-600 border-yellow-400 text-xs py-0">⚠</Badge>}
+                        {f.isRecovery && (
+                          <Badge variant="outline" className="text-yellow-600 border-yellow-400 text-xs py-0">
+                            ⚠
+                          </Badge>
+                        )}
                       </div>
                     </SelectItem>
                   ))}
@@ -107,7 +115,10 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
                 <label className="text-sm font-medium text-foreground">Sayfa</label>
                 <Select
                   value={selectedSheet || sheets[0]?.name}
-                  onValueChange={(v) => { setSelectedSheet(v); setResult(null); }}
+                  onValueChange={(v) => {
+                    setSelectedSheet(v);
+                    setResult(null);
+                  }}
                   data-testid="select-sheet"
                 >
                   <SelectTrigger>
@@ -129,9 +140,8 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 text-sm text-muted-foreground">
               <FileSpreadsheet className="w-4 h-4 shrink-0" />
               <span>
-                <strong className="text-foreground">{currentSheet.name}</strong> ·{" "}
-                {currentSheet.rows.length.toLocaleString("tr-TR")} satir ·{" "}
-                {currentSheet.headers.length} sutun
+                <strong className="text-foreground">{currentSheet.name}</strong> ·{' '}
+                {currentSheet.rows.length.toLocaleString('tr-TR')} satir · {currentSheet.headers.length} sutun
               </span>
             </div>
           )}
@@ -146,18 +156,18 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
           <CardContent className="space-y-4">
             {[
               {
-                key: "trimWhitespace" as const,
-                label: "Bas/Son Boslukları Temizle",
-                desc: "Hucre degerlerinin basindaki ve sonundaki boslukları kaldirir",
+                key: 'trimWhitespace' as const,
+                label: 'Bas/Son Boslukları Temizle',
+                desc: 'Hucre degerlerinin basindaki ve sonundaki boslukları kaldirir',
               },
               {
-                key: "deduplicateRows" as const,
-                label: "Tekrar Eden Satirlari Kaldir (Deduplication)",
-                desc: "Tum sutunlarda tamamen ayni olan satir ciftlerinden birini siler",
+                key: 'deduplicateRows' as const,
+                label: 'Tekrar Eden Satirlari Kaldir (Deduplication)',
+                desc: 'Tum sutunlarda tamamen ayni olan satir ciftlerinden birini siler',
               },
               {
-                key: "fillNullsWithEmpty" as const,
-                label: "Bos Hucreleri (null) Bos String ile Doldur",
+                key: 'fillNullsWithEmpty' as const,
+                label: 'Bos Hucreleri (null) Bos String ile Doldur',
                 desc: "null/undefined degerleri bos metin '' ile degistirir",
               },
             ].map(({ key, label, desc }) => (
@@ -179,7 +189,7 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
               <p className="text-xs text-muted-foreground">Metin hucre degerlerinin harf biçimini standartlastir</p>
               <Select
                 value={opts.standardizeCase}
-                onValueChange={(v) => setOpt("standardizeCase", v as CleanOptions["standardizeCase"])}
+                onValueChange={(v) => setOpt('standardizeCase', v as CleanOptions['standardizeCase'])}
                 data-testid="select-case"
               >
                 <SelectTrigger className="w-64">
@@ -206,19 +216,21 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="p-4 rounded-xl bg-card border border-card-border text-center">
-              <div className="text-2xl font-bold text-foreground">{result.originalCount.toLocaleString("tr-TR")}</div>
+              <div className="text-2xl font-bold text-foreground">{result.originalCount.toLocaleString('tr-TR')}</div>
               <div className="text-xs text-muted-foreground mt-1">Orijinal Satir</div>
             </div>
             <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 text-center">
-              <div className="text-2xl font-bold text-green-600">{result.cleanedCount.toLocaleString("tr-TR")}</div>
+              <div className="text-2xl font-bold text-green-600">{result.cleanedCount.toLocaleString('tr-TR')}</div>
               <div className="text-xs text-muted-foreground mt-1">Temizlenmis Satir</div>
             </div>
             <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 text-center">
-              <div className="text-2xl font-bold text-orange-600">{result.duplicatesRemoved.toLocaleString("tr-TR")}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {result.duplicatesRemoved.toLocaleString('tr-TR')}
+              </div>
               <div className="text-xs text-muted-foreground mt-1">Tekrar Kaldirildi</div>
             </div>
             <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 text-center">
-              <div className="text-2xl font-bold text-blue-600">{result.nullsFilled.toLocaleString("tr-TR")}</div>
+              <div className="text-2xl font-bold text-blue-600">{result.nullsFilled.toLocaleString('tr-TR')}</div>
               <div className="text-xs text-muted-foreground mt-1">Bos Hucre Doldu</div>
             </div>
           </div>
@@ -230,12 +242,15 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
             </div>
           )}
 
-          {result.originalCount === result.cleanedCount && result.duplicatesRemoved === 0 && result.nullsFilled === 0 && result.trimmedCells === 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-sm">
-              <AlertTriangle className="w-4 h-4 text-yellow-500" />
-              <span className="text-muted-foreground">Secilen seceneklere gore temizlenecek veri bulunamadi.</span>
-            </div>
-          )}
+          {result.originalCount === result.cleanedCount &&
+            result.duplicatesRemoved === 0 &&
+            result.nullsFilled === 0 &&
+            result.trimmedCells === 0 && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted text-sm">
+                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                <span className="text-muted-foreground">Secilen seceneklere gore temizlenecek veri bulunamadi.</span>
+              </div>
+            )}
 
           <Card className="border border-card-border">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -252,7 +267,9 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
                     <tr className="bg-muted/50 border-b border-border">
                       <th className="text-left px-3 py-2 font-medium text-muted-foreground w-10">#</th>
                       {result.headers.map((h) => (
-                        <th key={h} className="text-left px-3 py-2 font-medium text-muted-foreground max-w-36 truncate">{h}</th>
+                        <th key={h} className="text-left px-3 py-2 font-medium text-muted-foreground max-w-36 truncate">
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -265,7 +282,7 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
                             key={h}
                             className="px-3 py-2 max-w-36 overflow-hidden text-ellipsis whitespace-nowrap text-foreground"
                           >
-                            {String(row[h] ?? "")}
+                            {String(row[h] ?? '')}
                           </td>
                         ))}
                       </tr>
@@ -275,7 +292,8 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
               </div>
               {result.rows.length > 50 && (
                 <p className="text-xs text-muted-foreground text-center py-3 border-t border-border">
-                  ... ve {(result.rows.length - 50).toLocaleString("tr-TR")} satir daha. Tamami icin Excel Indir'e basin.
+                  ... ve {(result.rows.length - 50).toLocaleString('tr-TR')} satir daha. Tamami icin Excel Indir'e
+                  basin.
                 </p>
               )}
             </CardContent>
@@ -285,4 +303,3 @@ export default function TemlizlePage({ files }: TemizlePageProps) {
     </div>
   );
 }
-

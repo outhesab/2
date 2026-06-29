@@ -17,7 +17,7 @@
 }
 
 .addItemBtn {
-  background: rgba(59,130,246,0.12);
+  background: rgba(59, 130, 246, 0.12);
   border: none;
   border-radius: 6px;
   color: #60a5fa;
@@ -28,7 +28,7 @@
 }
 
 .itemsTableWrap {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -39,7 +39,7 @@
 }
 
 .itemsTableHead {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .itemsTh {
@@ -51,7 +51,7 @@
 }
 
 .itemsRow {
-  border-top: 1px solid rgba(255,255,255,0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .itemsTd {
@@ -102,7 +102,7 @@
 }
 
 .totalsPanel {
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   padding: 14px 16px;
 }
@@ -115,7 +115,7 @@
 }
 
 .discountDivider {
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 10px;
   margin-top: 4px;
 }

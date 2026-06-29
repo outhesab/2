@@ -95,9 +95,7 @@ export function SectionBox({
   return (
     <div className={ecss.sectionBox}>
       <div className={ecss.sectionHeader}>
-        <h3 className={ecss.sectionTitle}>
-          {title}
-        </h3>
+        <h3 className={ecss.sectionTitle}>{title}</h3>
         {action}
       </div>
       {children}

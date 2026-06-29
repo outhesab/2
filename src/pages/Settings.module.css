@@ -1,8 +1,52 @@
 /* Settings-specific — redesigned for post-split structure */
-.container { max-width: 900px; margin: 0 auto; padding: 20px; }
-.tabBar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
-.tabBtn { padding: 8px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #64748b; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-.tabBtnActive { padding: 8px 14px; background: rgba(255,87,34,0.15); border: 1px solid rgba(255,87,34,0.3); border-radius: 8px; color: #ff7043; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-.sectionCard { background: #111e33; border-radius: 14px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 16px; }
-.sectionTitle { font-weight: 700; color: #f1f5f9; font-size: 0.95rem; margin: 0 0 14px; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.tabBar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 12px;
+}
+.tabBtn {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.tabBtnActive {
+  padding: 8px 14px;
+  background: rgba(255, 87, 34, 0.15);
+  border: 1px solid rgba(255, 87, 34, 0.3);
+  border-radius: 8px;
+  color: #ff7043;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.sectionCard {
+  background: #111e33;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
+}
+.sectionTitle {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  margin: 0 0 14px;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}

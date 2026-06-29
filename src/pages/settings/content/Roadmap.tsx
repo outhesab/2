@@ -34,7 +34,8 @@ const ROADMAP_DATA: RoadmapItem[] = [
   },
   {
     title: 'Sayfa Modernizasyonu ve Modülerizasyon',
-    description: 'Tüm ana sayfaların (Suppliers, Cari, Monitor vb.) monolit yapıdan kurtarılıp modüler hale getirilmesi.',
+    description:
+      'Tüm ana sayfaların (Suppliers, Cari, Monitor vb.) monolit yapıdan kurtarılıp modüler hale getirilmesi.',
     status: 'completed',
     category: 'ux',
     date: 'v3.32.0',
@@ -71,9 +72,12 @@ const ROADMAP_DATA: RoadmapItem[] = [
 
 const StatusIcon = ({ status }: { status: RoadmapItem['status'] }) => {
   switch (status) {
-    case 'completed': return <CheckCircle2 className="w-5 h-5 text-green-500" />;
-    case 'in-progress': return <CircleDot className="w-5 h-5 text-blue-500 animate-pulse" />;
-    case 'planned': return <Clock className="w-5 h-5 text-slate-400" />;
+    case 'completed':
+      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+    case 'in-progress':
+      return <CircleDot className="w-5 h-5 text-blue-500 animate-pulse" />;
+    case 'planned':
+      return <Clock className="w-5 h-5 text-slate-400" />;
   }
 };
 
@@ -85,7 +89,11 @@ const CategoryBadge = ({ category }: { category: RoadmapItem['category'] }) => {
     'yapay-zeka': { label: 'AI/ML', color: 'bg-amber-100 text-amber-700 border-amber-200' },
   };
   const { label, color } = config[category];
-  return <Badge variant="outline" className={`${color} font-medium`}>{label}</Badge>;
+  return (
+    <Badge variant="outline" className={`${color} font-medium`}>
+      {label}
+    </Badge>
+  );
 };
 
 export default function Roadmap() {
@@ -97,8 +105,8 @@ export default function Roadmap() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Yol Haritası</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          PARSPEL'in gelişim yolculuğu. Mevcut yeteneklerimizi geliştirirken,
-          geleceğin akıllı işletme yönetim sistemini inşa ediyoruz.
+          PARSPEL'in gelişim yolculuğu. Mevcut yeteneklerimizi geliştirirken, geleceğin akıllı işletme yönetim sistemini
+          inşa ediyoruz.
         </p>
       </div>
 
@@ -115,14 +123,10 @@ export default function Roadmap() {
                   <CardTitle className="text-lg font-semibold">{item.title}</CardTitle>
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={item.category} />
-                    {item.date && (
-                      <span className="text-xs text-muted-foreground font-mono">{item.date}</span>
-                    )}
+                    {item.date && <span className="text-xs text-muted-foreground font-mono">{item.date}</span>}
                   </div>
                 </div>
-                <CardDescription className="text-sm leading-relaxed">
-                  {item.description}
-                </CardDescription>
+                <CardDescription className="text-sm leading-relaxed">{item.description}</CardDescription>
               </CardHeader>
             </Card>
           </div>

@@ -76,42 +76,72 @@ interface SettingsCategory {
 }
 
 const CATEGORIES: SettingsCategory[] = [
-  { id: 'genel', label: 'Genel', icon: '🏠', tabs: [
-    { id: 'arayuz', label: 'Arayüz', icon: '🎨' },
-    { id: 'baglantilar', label: 'Bağlantılar', icon: '🔌' },
-    { id: 'company', label: 'Şirket', icon: '🏢' },
-    { id: 'vergi', label: 'Vergi', icon: '💰' },
-  ]},
-  { id: 'veri', label: 'Veri & İçe Aktarma', icon: '📂', tabs: [
-    { id: 'categories', label: 'Kategoriler', icon: '🏷️' },
-    { id: 'excel', label: 'İçe Aktar', icon: '📥' },
-    { id: 'excel_export', label: 'Excel Dışa Aktar', icon: '📊' },
-    { id: 'data', label: 'Veri Yönetimi', icon: '📂' },
-  ]},
-  { id: 'yedek', label: 'Yedek & Onarım', icon: '💾', tabs: [
-    { id: 'backup', label: 'Yedek Al', icon: '💾' },
-    { id: 'repair', label: 'Onarım', icon: '🔧' },
-  ]},
-  { id: 'ai', label: 'AI & Otomasyon', icon: '🤖', tabs: [
-    { id: 'agent', label: 'Agentlar', icon: '🤖' },
-    { id: 'pellet', label: 'Pelet', icon: '🪵' },
-    { id: 'sound', label: 'Ses', icon: '🔊' },
-    { id: 'bildirim', label: 'Bildirimler', icon: '🔔' },
-  ]},
-  { id: 'guvenlik', label: 'Güvenlik & Kısayollar', icon: '🔒', tabs: [
-    { id: 'security', label: 'Güvenlik', icon: '🔒' },
-    { id: 'shortcuts', label: 'Kısayollar', icon: '⌨' },
-    { id: 'activity', label: 'Aktivite', icon: '📋' },
-  ]},
-  { id: 'hakkinda', label: 'Sistem & Bilgi', icon: 'ℹ️', tabs: [
-    { id: 'fatura', label: 'Fatura', icon: '🧾' },
-    { id: 'bakim', label: 'Bakım', icon: '⚡' },
-    { id: 'sysmap', label: 'Harita', icon: '🗺️' },
-    { id: 'about', label: 'Hakkında', icon: 'ℹ️' },
-    { id: 'roadmap', label: 'Yol Haritası', icon: '🚀' },
-    { id: 'changelog', label: 'Güncellemeler', icon: '📜' },
-    { id: 'support', label: 'Destek', icon: '🆘' },
-  ]},
+  {
+    id: 'genel',
+    label: 'Genel',
+    icon: '🏠',
+    tabs: [
+      { id: 'arayuz', label: 'Arayüz', icon: '🎨' },
+      { id: 'baglantilar', label: 'Bağlantılar', icon: '🔌' },
+      { id: 'company', label: 'Şirket', icon: '🏢' },
+      { id: 'vergi', label: 'Vergi', icon: '💰' },
+    ],
+  },
+  {
+    id: 'veri',
+    label: 'Veri & İçe Aktarma',
+    icon: '📂',
+    tabs: [
+      { id: 'categories', label: 'Kategoriler', icon: '🏷️' },
+      { id: 'excel', label: 'İçe Aktar', icon: '📥' },
+      { id: 'excel_export', label: 'Excel Dışa Aktar', icon: '📊' },
+      { id: 'data', label: 'Veri Yönetimi', icon: '📂' },
+    ],
+  },
+  {
+    id: 'yedek',
+    label: 'Yedek & Onarım',
+    icon: '💾',
+    tabs: [
+      { id: 'backup', label: 'Yedek Al', icon: '💾' },
+      { id: 'repair', label: 'Onarım', icon: '🔧' },
+    ],
+  },
+  {
+    id: 'ai',
+    label: 'AI & Otomasyon',
+    icon: '🤖',
+    tabs: [
+      { id: 'agent', label: 'Agentlar', icon: '🤖' },
+      { id: 'pellet', label: 'Pelet', icon: '🪵' },
+      { id: 'sound', label: 'Ses', icon: '🔊' },
+      { id: 'bildirim', label: 'Bildirimler', icon: '🔔' },
+    ],
+  },
+  {
+    id: 'guvenlik',
+    label: 'Güvenlik & Kısayollar',
+    icon: '🔒',
+    tabs: [
+      { id: 'security', label: 'Güvenlik', icon: '🔒' },
+      { id: 'shortcuts', label: 'Kısayollar', icon: '⌨' },
+      { id: 'activity', label: 'Aktivite', icon: '📋' },
+    ],
+  },
+  {
+    id: 'hakkinda',
+    label: 'Sistem & Bilgi',
+    icon: 'ℹ️',
+    tabs: [
+      { id: 'fatura', label: 'Fatura', icon: '🧾' },
+      { id: 'bakim', label: 'Bakım', icon: '⚡' },
+      { id: 'sysmap', label: 'Harita', icon: '🗺️' },
+      { id: 'about', label: 'Hakkında', icon: 'ℹ️' },
+      { id: 'roadmap', label: 'Yol Haritası', icon: '🚀' },
+      { id: 'changelog', label: 'Güncellemeler', icon: '📜' },
+      { id: 'support', label: 'Destek', icon: '🆘' },
+    ],
+  },
 ];
 
 export default function Settings({ db, save, exportJSON, importJSON: _importJSON }: Props) {
@@ -170,7 +200,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
 
   const totalRecords = dataStats.reduce((s, d) => s + d.count, 0);
 
-  const activeCategory = CATEGORIES.find(cat => cat.tabs.some(t => t.id === tab))?.id || 'genel';
+  const activeCategory = CATEGORIES.find((cat) => cat.tabs.some((t) => t.id === tab))?.id || 'genel';
 
   const renderContent = () => {
     switch (tab) {
@@ -222,7 +252,8 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           <div className="grid gap-4">
             <Card title="📤 Yedek Al">
               <p className="text-muted-foreground text-sm">
-                Tüm verilerinizi <strong className="text-orange-400 font-semibold">JSON formatında</strong> dışa aktarın.
+                Tüm verilerinizi <strong className="text-orange-400 font-semibold">JSON formatında</strong> dışa
+                aktarın.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {dataStats.slice(0, 4).map((d) => (
@@ -236,7 +267,10 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
               <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 text-sm text-muted-foreground mt-3">
                 Toplam {totalRecords} kayıt yedeklenecek
               </div>
-              <Button onClick={exportJSON} className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm mt-3">
+              <Button
+                onClick={exportJSON}
+                className="btn-primary btn-green w-full py-3 rounded-xl font-bold text-sm mt-3"
+              >
                 Yedeği İndir (.json)
               </Button>
             </Card>
@@ -300,7 +334,12 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
       case 'fatura':
         return <SettingsFatura showToast={showToast} />;
       case 'bakim':
-        return <SettingsBakim showToast={showToast} showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void} />;
+        return (
+          <SettingsBakim
+            showToast={showToast}
+            showConfirm={showConfirm as (t: string, m: string, ok: () => void, d?: boolean) => void}
+          />
+        );
       case 'sysmap':
         return (
           <div className="grid gap-4">
@@ -341,7 +380,9 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
           <div className="space-y-2">
             {CATEGORIES.map((cat) => (
               <div key={cat.id} className="rounded-xl border border-white/5 overflow-hidden bg-card">
-                <div className={`px-3 py-2.5 text-sm font-semibold text-foreground flex items-center gap-2 ${activeCategory === cat.id ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : ''}`}>
+                <div
+                  className={`px-3 py-2.5 text-sm font-semibold text-foreground flex items-center gap-2 ${activeCategory === cat.id ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : ''}`}
+                >
                   <span>{cat.icon}</span>
                   <span>{cat.label}</span>
                 </div>
@@ -367,9 +408,7 @@ export default function Settings({ db, save, exportJSON, importJSON: _importJSON
         </div>
 
         {/* Sağ İçerik */}
-        <div className="flex-1 min-w-0">
-          {renderContent()}
-        </div>
+        <div className="flex-1 min-w-0">{renderContent()}</div>
       </div>
     </div>
   );

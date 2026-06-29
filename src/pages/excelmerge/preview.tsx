@@ -1,24 +1,18 @@
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { type ExcelFile } from "@/lib/excel-merge";
-import { Eye, FileSpreadsheet } from "lucide-react";
-import { useState } from "react";
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type ExcelFile } from '@/lib/excel-merge';
+import { Eye, FileSpreadsheet } from 'lucide-react';
+import { useState } from 'react';
 
 interface PreviewPageProps {
   files: ExcelFile[];
 }
 
 export default function PreviewPage({ files }: PreviewPageProps) {
-  const [selectedFileId, setSelectedFileId] = useState<string>("");
-  const [selectedSheet, setSelectedSheet] = useState<string>("");
-  const [filterText, setFilterText] = useState("");
+  const [selectedFileId, setSelectedFileId] = useState<string>('');
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
+  const [filterText, setFilterText] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 100;
 
@@ -29,7 +23,7 @@ export default function PreviewPage({ files }: PreviewPageProps) {
     sheet?.rows.filter((row) => {
       if (!filterText.trim()) return true;
       return Object.values(row).some((v) =>
-        String(v ?? "")
+        String(v ?? '')
           .toLowerCase()
           .includes(filterText.toLowerCase()),
       );
@@ -43,12 +37,8 @@ export default function PreviewPage({ files }: PreviewPageProps) {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="text-center py-16">
           <Eye className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Onizleme icin dosya gerekli
-          </h2>
-          <p className="text-muted-foreground">
-            Lutfen once Dosya Yukle sayfasindan Excel dosyalari yukleyin.
-          </p>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Onizleme icin dosya gerekli</h2>
+          <p className="text-muted-foreground">Lutfen once Dosya Yukle sayfasindan Excel dosyalari yukleyin.</p>
         </div>
       </div>
     );
@@ -58,9 +48,7 @@ export default function PreviewPage({ files }: PreviewPageProps) {
     <div className="p-6 max-w-full mx-auto space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dosya Onizleme</h1>
-        <p className="text-muted-foreground mt-1">
-          Yuklenen dosyalarin icinde hizlica gezinin ve filtreleyin.
-        </p>
+        <p className="text-muted-foreground mt-1">Yuklenen dosyalarin icinde hizlica gezinin ve filtreleyin.</p>
       </div>
 
       <div className="flex flex-wrap gap-3 items-end">
@@ -70,9 +58,9 @@ export default function PreviewPage({ files }: PreviewPageProps) {
             value={selectedFileId}
             onValueChange={(v) => {
               setSelectedFileId(v);
-              setSelectedSheet("");
+              setSelectedSheet('');
               setPage(1);
-              setFilterText("");
+              setFilterText('');
             }}
             data-testid="select-preview-file"
           >
@@ -85,7 +73,7 @@ export default function PreviewPage({ files }: PreviewPageProps) {
                   <span className="flex items-center gap-2">
                     <FileSpreadsheet className="w-3.5 h-3.5" />
                     {f.name}
-                    {f.isRecovery && " ⚠"}
+                    {f.isRecovery && ' ⚠'}
                   </span>
                 </SelectItem>
               ))}
@@ -101,7 +89,7 @@ export default function PreviewPage({ files }: PreviewPageProps) {
               onValueChange={(v) => {
                 setSelectedSheet(v);
                 setPage(1);
-                setFilterText("");
+                setFilterText('');
               }}
               data-testid="select-preview-sheet"
             >
@@ -121,9 +109,7 @@ export default function PreviewPage({ files }: PreviewPageProps) {
 
         {sheet && (
           <div className="space-y-1 flex-1 min-w-48">
-            <label className="text-sm font-medium text-foreground">
-              Filtrele
-            </label>
+            <label className="text-sm font-medium text-foreground">Filtrele</label>
             <Input
               placeholder="Herhangi bir sutunda ara..."
               value={filterText}
@@ -143,8 +129,8 @@ export default function PreviewPage({ files }: PreviewPageProps) {
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 {filterText
-                  ? `${filteredRows.length.toLocaleString("tr-TR")} / ${sheet.rows.length.toLocaleString("tr-TR")} satir`
-                  : `${sheet.rows.length.toLocaleString("tr-TR")} satir, ${sheet.headers.length} sutun`}
+                  ? `${filteredRows.length.toLocaleString('tr-TR')} / ${sheet.rows.length.toLocaleString('tr-TR')} satir`
+                  : `${sheet.rows.length.toLocaleString('tr-TR')} satir, ${sheet.headers.length} sutun`}
               </span>
               {filterText && (
                 <Badge variant="secondary" className="text-xs">
@@ -197,13 +183,8 @@ export default function PreviewPage({ files }: PreviewPageProps) {
               <tbody>
                 {pagedRows.length === 0 && (
                   <tr>
-                    <td
-                      colSpan={sheet.headers.length + 1}
-                      className="text-center py-12 text-muted-foreground"
-                    >
-                      {filterText
-                        ? "Bu filtreyle satir bulunamadi"
-                        : "Bu sayfa bos"}
+                    <td colSpan={sheet.headers.length + 1} className="text-center py-12 text-muted-foreground">
+                      {filterText ? 'Bu filtreyle satir bulunamadi' : 'Bu sayfa bos'}
                     </td>
                   </tr>
                 )}
@@ -220,9 +201,9 @@ export default function PreviewPage({ files }: PreviewPageProps) {
                       <td
                         key={h}
                         className="px-3 py-1.5 border-r border-border last:border-r-0 max-w-48 truncate text-foreground"
-                        title={String(row[h] ?? "")}
+                        title={String(row[h] ?? '')}
                       >
-                        {String(row[h] ?? "")}
+                        {String(row[h] ?? '')}
                       </td>
                     ))}
                   </tr>

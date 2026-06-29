@@ -128,13 +128,18 @@ export default function Sales({ db, save: _save }: Props) {
         saleDate,
       };
 
-      const sonuc = await getAgent('satis').islemYap({ action: 'yeniSatis', payload: params as unknown as Record<string, unknown> });
+      const sonuc = await getAgent('satis').islemYap({
+        action: 'yeniSatis',
+        payload: params as unknown as Record<string, unknown>,
+      });
       if (!sonuc.ok) {
         showToast(sonuc.error || 'Satış kaydedilemedi', 'error');
         return;
       }
 
-      const resultData = sonuc.data as { intentResult: { data: { dbUpdates: { sale: { id: string; total: number } } } } };
+      const resultData = sonuc.data as {
+        intentResult: { data: { dbUpdates: { sale: { id: string; total: number } } } };
+      };
       const saleData = resultData.intentResult.data.dbUpdates.sale;
       playSound('sale');
       toast.success(`Satış kaydedildi! ${formatMoney(saleData.total)}`);
@@ -221,8 +226,8 @@ export default function Sales({ db, save: _save }: Props) {
       </div>
 
       <div className="flex gap-3 mb-4 items-center flex-wrap">
-        <Button 
-          onClick={() => setModalOpen(true)} 
+        <Button
+          onClick={() => setModalOpen(true)}
           className="bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl px-5 gap-2 transition-all active:scale-95"
         >
           <Plus size={16} /> Yeni Satış
@@ -244,10 +249,10 @@ export default function Sales({ db, save: _save }: Props) {
         </Button>
         <div className="relative flex-1 min-w-[200px]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-          <Input 
-            value={search} 
-            onChange={(e) => setSearch(e.target.value)} 
-            placeholder="Ürün ara..." 
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Ürün ara..."
             className="pl-9 rounded-xl"
           />
         </div>
@@ -257,11 +262,11 @@ export default function Sales({ db, save: _save }: Props) {
           onChange={(e) => setDateFrom(e.target.value)}
           className="rounded-xl w-[160px]"
         />
-        <Input 
-          type="date" 
-          value={dateTo} 
-          onChange={(e) => setDateTo(e.target.value)} 
-          className="rounded-xl w-[160px]" 
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          className="rounded-xl w-[160px]"
         />
         <div className="flex gap-2">
           {(['all', 'tamamlandi', 'iade', 'iptal'] as const).map((f) => (
@@ -277,17 +282,12 @@ export default function Sales({ db, save: _save }: Props) {
         </div>
       </div>
 
-      <div
-        className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto"
-      >
+      <div className="responsive-table-wrap bg-card rounded-xl border border-border overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-slate-900/60">
               {['Tarih', 'Ürün', 'Müşteri', 'Miktar', 'Tutar', 'Kâr', 'Ödeme', 'Durum', ''].map((h) => (
-                <th
-                  key={h}
-                  className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase"
-                >
+                <th key={h} className="p-3 text-left text-muted-foreground text-[0.78rem] font-semibold uppercase">
                   {h}
                 </th>
               ))}
@@ -314,31 +314,19 @@ export default function Sales({ db, save: _save }: Props) {
             ) : (
               sorted.map((s) => (
                 <tr key={s.id} className="border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
-                  <td
-                    data-label="Tarih"
-                    className="p-3 text-muted-foreground text-xs"
-                  >
+                  <td data-label="Tarih" className="p-3 text-muted-foreground text-xs">
                     {formatDate(s.createdAt)}
                   </td>
-                  <td
-                    data-label="Ürün"
-                    className="p-3 text-foreground font-semibold"
-                  >
+                  <td data-label="Ürün" className="p-3 text-foreground font-semibold">
                     {s.productName}
                   </td>
-                  <td
-                    data-label="Müşteri"
-                    className="p-3 text-slate-400 text-sm"
-                  >
+                  <td data-label="Müşteri" className="p-3 text-slate-400 text-sm">
                     {db.cari.find((c) => c.id === s.cariId)?.name || '-'}
                   </td>
                   <td data-label="Miktar" className="p-3 text-slate-400">
                     {s.quantity}
                   </td>
-                  <td
-                    data-label="Tutar"
-                    className="p-3 text-emerald-500 font-bold"
-                  >
+                  <td data-label="Tutar" className="p-3 text-emerald-500 font-bold">
                     {formatMoney(s.total)}
                   </td>
                   <td
@@ -361,7 +349,9 @@ export default function Sales({ db, save: _save }: Props) {
                     <Badge
                       variant="outline"
                       className={`font-semibold text-xs ${
-                        s.status === 'tamamlandi' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                        s.status === 'tamamlandi'
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          : 'bg-red-500/10 text-red-500 border-red-500/20'
                       }`}
                     >
                       {s.status === 'tamamlandi' ? '✓ Tamamlandı' : s.status === 'iade' ? '↩ İade' : '✕ İptal'}

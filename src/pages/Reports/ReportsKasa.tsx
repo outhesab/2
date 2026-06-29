@@ -14,12 +14,13 @@ export function ReportsKasa({ db, start, end }: ReportProps) {
     () => db.kasa.filter((e) => !e.deleted && new Date(e.createdAt) >= start && new Date(e.createdAt) <= end),
     [db.kasa, start, end],
   );
-  
+
   const kasalar = useMemo(
-    () => db.kasalar || [
-      { id: 'nakit', name: 'Nakit', icon: '💵' },
-      { id: 'banka', name: 'Banka', icon: '🏦' },
-    ],
+    () =>
+      db.kasalar || [
+        { id: 'nakit', name: 'Nakit', icon: '💵' },
+        { id: 'banka', name: 'Banka', icon: '🏦' },
+      ],
     [db.kasalar],
   );
 
@@ -99,7 +100,11 @@ export function ReportsKasa({ db, start, end }: ReportProps) {
       <div className={rStyles.twoColGrid}>
         <SectionBox
           title="📅 Aylık Nakit Akışı"
-          action={<button onClick={handleExport} className={kStyles.btnExport}>📥 Excel</button>}
+          action={
+            <button onClick={handleExport} className={kStyles.btnExport}>
+              📥 Excel
+            </button>
+          }
         >
           {monthlyKasa.length === 0 ? (
             <EmptyChart />

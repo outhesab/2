@@ -87,14 +87,18 @@ export default function FaturaForm({
         <div>
           <div className={styles.itemsHeader}>
             <label style={{ ...lbl, marginBottom: 0 }}>Fatura Kalemleri</label>
-            <button onClick={addItem} className={styles.addItemBtn}>+ Kalem</button>
+            <button onClick={addItem} className={styles.addItemBtn}>
+              + Kalem
+            </button>
           </div>
           <div className={styles.itemsTableWrap}>
             <table className={styles.itemsTable}>
               <thead>
                 <tr className={styles.itemsTableHead}>
                   {['Açıklama', 'Adet', 'Birim ₺', 'KDV %', 'Toplam', ''].map((h) => (
-                    <th key={h} className={styles.itemsTh}>{h}</th>
+                    <th key={h} className={styles.itemsTh}>
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -165,7 +169,9 @@ export default function FaturaForm({
                     </td>
                     <td className={styles.itemsTd}>
                       {form.items.length > 1 && (
-                        <button onClick={() => removeItem(idx)} className={styles.removeBtn}>×</button>
+                        <button onClick={() => removeItem(idx)} className={styles.removeBtn}>
+                          ×
+                        </button>
                       )}
                     </td>
                   </tr>

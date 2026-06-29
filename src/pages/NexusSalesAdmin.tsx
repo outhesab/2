@@ -31,42 +31,70 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
   const [tab, setTab] = useState<PanelTab>('dashboard');
   const [sessions, setSessions] = useState<NexusSession[]>([]);
   const [nexusEnabled, setNexusEnabled] = useState(() => {
-    try { return localStorage.getItem('nexus_enabled') !== 'false'; } catch { return true; }
+    try {
+      return localStorage.getItem('nexus_enabled') !== 'false';
+    } catch {
+      return true;
+    }
   });
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
-    try { return localStorage.getItem('nexus_voice_enabled') !== 'false'; } catch { return true; }
+    try {
+      return localStorage.getItem('nexus_voice_enabled') !== 'false';
+    } catch {
+      return true;
+    }
   });
   const [autoConfirm, setAutoConfirm] = useState(() => {
-    try { return localStorage.getItem('nexus_auto_confirm') === 'true'; } catch { return false; }
+    try {
+      return localStorage.getItem('nexus_auto_confirm') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [composerActive, setComposerActive] = useState(nexusExecutive.isComposerActive());
 
   // Satış istatistikleri
   const stats = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
-    const todaySales = db.sales.filter(s => !s.deleted && s.status === 'tamamlandi' && s.createdAt.slice(0, 10) === today);
+    const todaySales = db.sales.filter(
+      (s) => !s.deleted && s.status === 'tamamlandi' && s.createdAt.slice(0, 10) === today,
+    );
     const todayRevenue = todaySales.reduce((sum, s) => sum + s.total, 0);
     const todayProfit = todaySales.reduce((sum, s) => sum + s.profit, 0);
-    const totalSales = db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').length;
-    const totalRevenue = db.sales.filter(s => !s.deleted && s.status === 'tamamlandi').reduce((sum, s) => sum + s.total, 0);
+    const totalSales = db.sales.filter((s) => !s.deleted && s.status === 'tamamlandi').length;
+    const totalRevenue = db.sales
+      .filter((s) => !s.deleted && s.status === 'tamamlandi')
+      .reduce((sum, s) => sum + s.total, 0);
     return { todaySales: todaySales.length, todayRevenue, todayProfit, totalSales, totalRevenue };
   }, [db.sales]);
 
   const toggleNexus = (enabled: boolean) => {
     setNexusEnabled(enabled);
-    try { localStorage.setItem('nexus_enabled', String(enabled)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('nexus_enabled', String(enabled));
+    } catch {
+      /* ignore */
+    }
     showToast(enabled ? 'Nexus AI aktif' : 'Nexus AI devre dışı', enabled ? 'success' : 'info');
   };
 
   const toggleVoice = (enabled: boolean) => {
     setVoiceEnabled(enabled);
-    try { localStorage.setItem('nexus_voice_enabled', String(enabled)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('nexus_voice_enabled', String(enabled));
+    } catch {
+      /* ignore */
+    }
     showToast(enabled ? 'Sesli komut aktif' : 'Sesli komut devre dışı', enabled ? 'success' : 'info');
   };
 
   const toggleAutoConfirm = (enabled: boolean) => {
     setAutoConfirm(enabled);
-    try { localStorage.setItem('nexus_auto_confirm', String(enabled)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem('nexus_auto_confirm', String(enabled));
+    } catch {
+      /* ignore */
+    }
     showToast(enabled ? 'Otomatik onay aktif (dikkatli olun)' : 'Onay gerekiyor', enabled ? 'warning' : 'info');
   };
 
@@ -110,7 +138,9 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${nexusEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${nexusEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+          >
             {nexusEnabled ? '● Aktif' : '○ Devre Dışı'}
           </span>
         </div>
@@ -118,7 +148,7 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-card rounded-xl p-1">
-        {tabs.map(t => (
+        {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -136,7 +166,13 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
       <AnimatePresence mode="wait">
         {/* DASHBOARD TAB */}
         {tab === 'dashboard' && (
-          <motion.div key="dashboard" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+          <motion.div
+            key="dashboard"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="bg-card rounded-xl p-4 border border-white/5">
                 <div className="text-xs text-muted-foreground mb-1">Bugün Satış</div>
@@ -217,7 +253,9 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Satış Modu</span>
-                  <span className={`text-sm font-medium ${composerActive ? 'text-green-400' : 'text-muted-foreground'}`}>
+                  <span
+                    className={`text-sm font-medium ${composerActive ? 'text-green-400' : 'text-muted-foreground'}`}
+                  >
                     {composerActive ? 'Aktif' : 'Beklemede'}
                   </span>
                 </div>
@@ -234,10 +272,19 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
 
         {/* SESSIONS TAB */}
         {tab === 'sessions' && (
-          <motion.div key="sessions" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+          <motion.div
+            key="sessions"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
+          >
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">Nexus Oturumları</h3>
-              <button onClick={clearSessions} className="px-3 py-1 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20">
+              <button
+                onClick={clearSessions}
+                className="px-3 py-1 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
+              >
                 🗑️ Temizle
               </button>
             </div>
@@ -249,15 +296,19 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
               </div>
             ) : (
               <div className="space-y-2">
-                {sessions.map(s => (
+                {sessions.map((s) => (
                   <div key={s.id} className="bg-card rounded-xl p-4 border border-white/5">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-foreground">Oturum #{s.id.slice(0, 8)}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        s.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                        s.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          s.status === 'active'
+                            ? 'bg-green-500/20 text-green-400'
+                            : s.status === 'completed'
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                        }`}
+                      >
                         {s.status === 'active' ? 'Aktif' : s.status === 'completed' ? 'Tamamlandı' : 'Beklemede'}
                       </span>
                     </div>
@@ -278,13 +329,20 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
 
         {/* COMPOSER TAB */}
         {tab === 'composer' && (
-          <motion.div key="composer" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+          <motion.div
+            key="composer"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
+          >
             <div className="bg-card rounded-xl p-4 border border-white/5">
               <h3 className="text-sm font-semibold text-foreground mb-3">🛒 Sesli Satış Modu</h3>
               <p className="text-xs text-muted-foreground mb-4">
-                Nexus AI ile sesli komutlarla satış yapabilirsiniz. "Yeni satış" deyin, ürün ekleyin, müşteri seçin ve "sat" deyin.
+                Nexus AI ile sesli komutlarla satış yapabilirsiniz. "Yeni satış" deyin, ürün ekleyin, müşteri seçin ve
+                "sat" deyin.
               </p>
-              
+
               {composerActive ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
@@ -313,27 +371,39 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"Yeni satış"</strong> — Satış modunu başlatır</span>
+                  <span>
+                    <strong className="text-foreground">"Yeni satış"</strong> — Satış modunu başlatır
+                  </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"X tane Y ekle"</strong> — Sepete ürün ekler</span>
+                  <span>
+                    <strong className="text-foreground">"X tane Y ekle"</strong> — Sepete ürün ekler
+                  </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"Müşteri: Z"</strong> — Müşteri seçer</span>
+                  <span>
+                    <strong className="text-foreground">"Müşteri: Z"</strong> — Müşteri seçer
+                  </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"İndirim X"</strong> — İndirim uygular</span>
+                  <span>
+                    <strong className="text-foreground">"İndirim X"</strong> — İndirim uygular
+                  </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"Sat"</strong> — Satışı tamamlar (onay ister)</span>
+                  <span>
+                    <strong className="text-foreground">"Sat"</strong> — Satışı tamamlar (onay ister)
+                  </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-indigo-400 font-mono">→</span>
-                  <span><strong className="text-foreground">"İptal"</strong> — Satışı iptal eder</span>
+                  <span>
+                    <strong className="text-foreground">"İptal"</strong> — Satışı iptal eder
+                  </span>
                 </div>
               </div>
             </div>
@@ -342,22 +412,32 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
 
         {/* SETTINGS TAB */}
         {tab === 'settings' && (
-          <motion.div key="settings" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+          <motion.div
+            key="settings"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
+          >
             <div className="bg-card rounded-xl p-4 border border-white/5">
               <h3 className="text-sm font-semibold text-foreground mb-4">⚙️ Nexus AI Ayarları</h3>
-              
+
               <div className="space-y-4">
                 {/* Nexus Anahtar */}
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-medium text-foreground">Nexus AI Motor</div>
-                    <div className="text-xs text-muted-foreground">Nexus AI'ı etkinleştirin veya devre dışı bırakın</div>
+                    <div className="text-xs text-muted-foreground">
+                      Nexus AI'ı etkinleştirin veya devre dışı bırakın
+                    </div>
                   </div>
                   <button
                     onClick={() => toggleNexus(!nexusEnabled)}
                     className={`relative w-12 h-6 rounded-full transition-colors ${nexusEnabled ? 'bg-indigo-600' : 'bg-gray-600'}`}
                   >
-                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${nexusEnabled ? 'left-6' : 'left-0.5'}`} />
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${nexusEnabled ? 'left-6' : 'left-0.5'}`}
+                    />
                   </button>
                 </div>
 
@@ -371,7 +451,9 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
                     onClick={() => toggleVoice(!voiceEnabled)}
                     className={`relative w-12 h-6 rounded-full transition-colors ${voiceEnabled ? 'bg-indigo-600' : 'bg-gray-600'}`}
                   >
-                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${voiceEnabled ? 'left-6' : 'left-0.5'}`} />
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${voiceEnabled ? 'left-6' : 'left-0.5'}`}
+                    />
                   </button>
                 </div>
 
@@ -379,13 +461,17 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm font-medium text-foreground">Otomatik Onay</div>
-                    <div className="text-xs text-muted-foreground">Satış işlemleri için onay sorma (dikkatli kullanın)</div>
+                    <div className="text-xs text-muted-foreground">
+                      Satış işlemleri için onay sorma (dikkatli kullanın)
+                    </div>
                   </div>
                   <button
                     onClick={() => toggleAutoConfirm(!autoConfirm)}
                     className={`relative w-12 h-6 rounded-full transition-colors ${autoConfirm ? 'bg-yellow-600' : 'bg-gray-600'}`}
                   >
-                    <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${autoConfirm ? 'left-6' : 'left-0.5'}`} />
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${autoConfirm ? 'left-6' : 'left-0.5'}`}
+                    />
                   </button>
                 </div>
               </div>
@@ -395,7 +481,7 @@ export default function NexusSalesAdmin({ db, save: _save }: Props) {
             <div className="bg-card rounded-xl p-4 border border-white/5">
               <h3 className="text-sm font-semibold text-foreground mb-3">🤖 Agent Durumu</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {['satis', 'stok', 'kasa', 'cari', 'fatura', 'rapor', 'deep_seek'].map(agentId => {
+                {['satis', 'stok', 'kasa', 'cari', 'fatura', 'rapor', 'deep_seek'].map((agentId) => {
                   try {
                     getAgent(agentId as 'satis' | 'stok' | 'kasa' | 'cari' | 'fatura' | 'rapor' | 'deep_seek');
                     return (

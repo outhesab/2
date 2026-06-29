@@ -57,9 +57,7 @@ export default function Suppliers({ db, save }: Props) {
         const ex = prev.find((i) => i.productId === productId);
         if (ex)
           return prev.map((i) =>
-            i.productId === productId
-              ? { ...i, qty: i.qty + 1, lineTotal: (i.qty + 1) * i.unitCost }
-              : i,
+            i.productId === productId ? { ...i, qty: i.qty + 1, lineTotal: (i.qty + 1) * i.unitCost } : i,
           );
         return [
           ...prev,
@@ -151,10 +149,7 @@ export default function Suppliers({ db, save }: Props) {
   const saveOrder = useCallback(() => {
     if (!orderSupplierId) {
       if (db.suppliers.length === 0) {
-        showToast(
-          'Önce tedarikçi ekleyin! Tedarikçiler sekmesine yönlendiriliyorsunuz...',
-          'error',
-        );
+        showToast('Önce tedarikçi ekleyin! Tedarikçiler sekmesine yönlendiriliyorsunuz...', 'error');
         setTimeout(() => {
           setOrderModal(false);
           setTab('suppliers');
@@ -209,23 +204,15 @@ export default function Suppliers({ db, save }: Props) {
 
   const deleteSupplier = useCallback(
     (id: string) => {
-      showConfirm(
-        'Tedarikçi Sil',
-        'Tedarikçi ve ilişkili cari kaydı gizlenecek. Devam etmek istiyor musunuz?',
-        () => {
-          const nowIso = new Date().toISOString();
-          save((prev) => ({
-            ...prev,
-            suppliers: prev.suppliers.map((s) =>
-              s.id === id ? { ...s, deleted: true, updatedAt: nowIso } : s,
-            ),
-            cari: prev.cari.map((c) =>
-              c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c,
-            ),
-          }));
-          showToast('Silindi!');
-        },
-      );
+      showConfirm('Tedarikçi Sil', 'Tedarikçi ve ilişkili cari kaydı gizlenecek. Devam etmek istiyor musunuz?', () => {
+        const nowIso = new Date().toISOString();
+        save((prev) => ({
+          ...prev,
+          suppliers: prev.suppliers.map((s) => (s.id === id ? { ...s, deleted: true, updatedAt: nowIso } : s)),
+          cari: prev.cari.map((c) => (c.id === id ? { ...c, deleted: true, updatedAt: nowIso } : c)),
+        }));
+        showToast('Silindi!');
+      });
     },
     [save, showConfirm, showToast],
   );
@@ -253,17 +240,12 @@ export default function Suppliers({ db, save }: Props) {
           const products = prev.products.map((p) => {
             const item = order.items.find((i) => i.productId === p.id);
             if (!item) return p;
-            const nakliyePay =
-              nakliyeToplam > 0
-                ? ((item.lineTotal / totalOrderAmount) * nakliyeToplam) / item.qty
-                : 0;
+            const nakliyePay = nakliyeToplam > 0 ? ((item.lineTotal / totalOrderAmount) * nakliyeToplam) / item.qty : 0;
             const yeniMaliyet = item.unitCost + nakliyePay;
             const mevcutStok = p.stock || 0;
             const toplamStok = mevcutStok + item.qty;
             const ortMaliyet =
-              toplamStok > 0
-                ? (p.cost * mevcutStok + yeniMaliyet * item.qty) / toplamStok
-                : yeniMaliyet;
+              toplamStok > 0 ? (p.cost * mevcutStok + yeniMaliyet * item.qty) / toplamStok : yeniMaliyet;
             return {
               ...p,
               stock: toplamStok,
@@ -271,8 +253,7 @@ export default function Suppliers({ db, save }: Props) {
             };
           });
           order.items.forEach((i) => {
-            if (!prev.products.find((p) => p.id === i.productId))
-              missingProducts.push(i.productName);
+            if (!prev.products.find((p) => p.id === i.productId)) missingProducts.push(i.productName);
           });
           const stockMovements = [
             ...prev.stockMovements,
@@ -285,8 +266,7 @@ export default function Suppliers({ db, save }: Props) {
                 type: 'giris' as const,
                 amount: i.qty,
                 before: prev.products.find((p) => p.id === i.productId)?.stock || 0,
-                after:
-                  (prev.products.find((p) => p.id === i.productId)?.stock || 0) + i.qty,
+                after: (prev.products.find((p) => p.id === i.productId)?.stock || 0) + i.qty,
                 note: `Sipariş #${id.slice(0, 8)}${supplier ? ' — ' + supplier.name : ''}`,
                 date: new Date().toISOString(),
               })),
@@ -303,9 +283,7 @@ export default function Suppliers({ db, save }: Props) {
             return c;
           });
           if (missingProducts.length > 0) {
-            showToast(
-              `Sipariş tamamlandı! ⚠ Bulunamayan ürünler atlandı: ${missingProducts.join(', ')}`,
-            );
+            showToast(`Sipariş tamamlandı! ⚠ Bulunamayan ürünler atlandı: ${missingProducts.join(', ')}`);
           } else {
             showToast('Sipariş tamamlandı! Stok ve cari güncellendi.');
           }
@@ -314,9 +292,7 @@ export default function Suppliers({ db, save }: Props) {
             products,
             stockMovements,
             cari,
-            orders: newState.orders.map((o) =>
-              o.id === id ? { ...o, stockCompleted: true } : o,
-            ),
+            orders: newState.orders.map((o) => (o.id === id ? { ...o, stockCompleted: true } : o)),
           };
         }
         return newState;
@@ -349,10 +325,7 @@ export default function Suppliers({ db, save }: Props) {
                 type: 'cikis' as const,
                 amount: i.qty,
                 before: prev.products.find((p) => p.id === i.productId)?.stock || 0,
-                after: Math.max(
-                  0,
-                  (prev.products.find((p) => p.id === i.productId)?.stock || 0) - i.qty,
-                ),
+                after: Math.max(0, (prev.products.find((p) => p.id === i.productId)?.stock || 0) - i.qty),
                 note: 'Sipariş geri alındı',
                 date: nowIso,
               })),
@@ -397,21 +370,18 @@ export default function Suppliers({ db, save }: Props) {
     setForm((f) => ({ ...f, [field]: val }));
   }, []);
 
-  const openSupplierForm = useCallback(
-    (supplier?: (typeof filteredSuppliers)[number]) => {
-      if (supplier) {
-        setForm({ ...supplier });
-        setEditId(supplier.id);
-      } else {
-        setForm(emptySupplier);
-        setEditId(null);
-      }
-      setDupWarning([]);
-      setForceSave(false);
-      setSupModal(true);
-    },
-    [],
-  );
+  const openSupplierForm = useCallback((supplier?: (typeof filteredSuppliers)[number]) => {
+    if (supplier) {
+      setForm({ ...supplier });
+      setEditId(supplier.id);
+    } else {
+      setForm(emptySupplier);
+      setEditId(null);
+    }
+    setDupWarning([]);
+    setForceSave(false);
+    setSupModal(true);
+  }, []);
 
   return (
     <div>
@@ -421,9 +391,7 @@ export default function Suppliers({ db, save }: Props) {
             key={t}
             onClick={() => setTab(t)}
             className={`px-5 py-2.5 rounded-xl border-none font-bold cursor-pointer transition-colors ${
-              tab === t
-                ? 'bg-[#ff5722] text-white'
-                : 'bg-slate-700 text-slate-400 hover:text-slate-200'
+              tab === t ? 'bg-[#ff5722] text-white' : 'bg-slate-700 text-slate-400 hover:text-slate-200'
             }`}
           >
             {t === 'suppliers' ? '🏭 Tedarikçiler' : '📦 Siparişler'}

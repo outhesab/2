@@ -18,7 +18,10 @@ export function getDashboardPrefsUrl(): string | null {
   return `https://firestore.googleapis.com/v1/projects/${cfg.firebase.projectId}/databases/(default)/documents/config/dashboardPrefs?key=${cfg.firebase.apiKey}`;
 }
 
-export async function loadDashboardPrefsFromFirebase(): Promise<{ leftWidgets: WidgetId[]; brightness: number } | null> {
+export async function loadDashboardPrefsFromFirebase(): Promise<{
+  leftWidgets: WidgetId[];
+  brightness: number;
+} | null> {
   try {
     const url = getDashboardPrefsUrl();
     if (!url) return null;

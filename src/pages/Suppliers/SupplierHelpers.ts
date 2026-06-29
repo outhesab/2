@@ -9,9 +9,7 @@ import type { CatFilter, SupplierWithCat } from './types';
 
 export function getAllSuppliers(db: DB): SupplierWithCat[] {
   return [
-    ...db.suppliers
-      .filter((s) => !s.deleted)
-      .map((s) => ({ ...s, _kat: 'genel' as const })),
+    ...db.suppliers.filter((s) => !s.deleted).map((s) => ({ ...s, _kat: 'genel' as const })),
     ...(db.peletSuppliers || []).map((s) => ({
       id: s.id,
       name: s.name,
@@ -41,41 +39,27 @@ export function getAllSuppliers(db: DB): SupplierWithCat[] {
   ];
 }
 
-export function filterSuppliers(
-  suppliers: SupplierWithCat[],
-  catFilter: CatFilter,
-  search: string,
-): SupplierWithCat[] {
+export function filterSuppliers(suppliers: SupplierWithCat[], catFilter: CatFilter, search: string): SupplierWithCat[] {
   let result = suppliers;
   if (catFilter !== 'hepsi') {
     result = result.filter((s) => s._kat === catFilter);
   }
   if (search.trim()) {
     const term = search.toLowerCase();
-    result = result.filter(
-      (s) =>
-        s.name.toLowerCase().includes(term) || (s.phone || '').includes(search),
-    );
+    result = result.filter((s) => s.name.toLowerCase().includes(term) || (s.phone || '').includes(search));
   }
   return result;
 }
 
 export function calcScore(supplier: SupplierWithCat, orders: Order[]): number {
-  const supplierOrders = orders.filter(
-    (o) => o.supplierId === supplier.id && o.status !== 'iptal',
-  );
+  const supplierOrders = orders.filter((o) => o.supplierId === supplier.id && o.status !== 'iptal');
   const completedOnTime = supplierOrders.filter((o) => {
     if (o.status !== 'tamamlandi') return false;
     if (!o.deliveryDate || !o.createdAt) return true;
-    const diff =
-      (new Date(o.deliveryDate).getTime() - new Date(o.createdAt).getTime()) /
-      86400000;
+    const diff = (new Date(o.deliveryDate).getTime() - new Date(o.createdAt).getTime()) / 86400000;
     return diff <= 7;
   });
-  const onTimeRate =
-    supplierOrders.length > 0
-      ? (completedOnTime.length / supplierOrders.length) * 100
-      : 0;
+  const onTimeRate = supplierOrders.length > 0 ? (completedOnTime.length / supplierOrders.length) * 100 : 0;
   const orderScore = Math.min(30, (supplier.totalOrders || 0) * 3);
   const amountScore = Math.min(30, ((supplier.totalAmount || 0) / 10000) * 10);
   const deliveryScore = onTimeRate * 0.4;

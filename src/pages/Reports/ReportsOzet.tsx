@@ -2,10 +2,7 @@ import { useMemo } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { formatMoney } from '@/lib/utils-tr';
-import {
-  getLowStockProducts,
-  getOutOfStockProducts
-} from '@/lib/dbUtils';
+import { getLowStockProducts, getOutOfStockProducts } from '@/lib/dbUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { SectionBox, EmptyChart } from './ReportsCommon';
 import { ReportProps } from './types';
@@ -23,20 +20,14 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
       ),
     [db.sales, start, end],
   );
-  
-  const prevSales = useMemo(
-    () => {
-      const prevStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
-      return db.sales.filter(
-        (s) =>
-          s.status === 'tamamlandi' &&
-          !s.deleted &&
-          new Date(s.createdAt) >= prevStart &&
-          new Date(s.createdAt) < start,
-      );
-    },
-    [db.sales, start, end],
-  );
+
+  const prevSales = useMemo(() => {
+    const prevStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
+    return db.sales.filter(
+      (s) =>
+        s.status === 'tamamlandi' && !s.deleted && new Date(s.createdAt) >= prevStart && new Date(s.createdAt) < start,
+    );
+  }, [db.sales, start, end]);
 
   const kar = sales.reduce((s, x) => s + x.profit, 0);
   const prevCiro = prevSales.reduce((s, x) => s + x.total, 0);
@@ -143,8 +134,7 @@ export function ReportsOzet({ db, start, end }: ReportProps) {
           {(() => {
             const out = getOutOfStockProducts(db);
             const low = getLowStockProducts(db);
-            if (!out.length && !low.length)
-              return <div className={oStyles.allGood}>✅ Tüm stoklar yeterli</div>;
+            if (!out.length && !low.length) return <div className={oStyles.allGood}>✅ Tüm stoklar yeterli</div>;
             return (
               <div className={oStyles.stockList}>
                 {out.map((p) => (

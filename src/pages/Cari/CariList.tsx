@@ -62,9 +62,27 @@ export default function CariList({
   const [, setLocation] = useLocation();
 
   const agingBuckets = [
-    { label: '0–7 gun', items: aging['0-7'], color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
-    { label: '8–30 gun', items: aging['8-30'], color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
-    { label: '31–60 gun', items: aging['31-60'], color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30' },
+    {
+      label: '0–7 gun',
+      items: aging['0-7'],
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/30',
+    },
+    {
+      label: '8–30 gun',
+      items: aging['8-30'],
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/30',
+    },
+    {
+      label: '31–60 gun',
+      items: aging['31-60'],
+      color: 'text-red-500',
+      bg: 'bg-red-500/10',
+      border: 'border-red-500/30',
+    },
     { label: '60+ gun', items: aging['60+'], color: 'text-red-600', bg: 'bg-red-600/10', border: 'border-red-600/30' },
   ];
 
@@ -173,7 +191,11 @@ export default function CariList({
           placeholder="🔍 Ara..."
           className="flex-1 min-w-[200px] rounded-xl"
         />
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'musteri' | 'tedarikci')} className="rounded-xl">
+        <Tabs
+          value={filter}
+          onValueChange={(v) => setFilter(v as 'all' | 'musteri' | 'tedarikci')}
+          className="rounded-xl"
+        >
           <TabsList className="bg-slate-800/50 border border-white/10">
             <TabsTrigger value="all">Tumu</TabsTrigger>
             <TabsTrigger value="musteri">Musteri</TabsTrigger>
@@ -290,19 +312,11 @@ export default function CariList({
                       }`}
                     >
                       {formatMoney(Math.abs(c.balance))}
-                      {c.balance > 0
-                        ? c.type === 'musteri'
-                          ? ' ↑ alacak'
-                          : ' ↑ borc'
-                        : c.balance < 0
-                          ? ' ↓'
-                          : ''}
+                      {c.balance > 0 ? (c.type === 'musteri' ? ' ↑ alacak' : ' ↑ borc') : c.balance < 0 ? ' ↓' : ''}
                     </td>
                     <td data-label="Borc Suresi" className="p-3">
                       {c.balance > 0 && c.debtDays !== null ? (
-                        <Badge className={`font-bold text-[0.78rem] px-2 py-0 ${dc.bg} ${dc.color}`}>
-                          {dc.label}
-                        </Badge>
+                        <Badge className={`font-bold text-[0.78rem] px-2 py-0 ${dc.bg} ${dc.color}`}>{dc.label}</Badge>
                       ) : (
                         <span className="text-slate-600 text-[0.78rem]">—</span>
                       )}
@@ -326,11 +340,7 @@ export default function CariList({
                             {c.type === 'musteri' ? '💰 Tahsilat' : '💸 Ode'}
                           </Button>
                         )}
-                        <ActionButtons
-                          onEdit={() => onOpenEdit(c)}
-                          onDelete={() => onDelete(c.id)}
-                          size="small"
-                        />
+                        <ActionButtons onEdit={() => onOpenEdit(c)} onDelete={() => onDelete(c.id)} size="small" />
                       </div>
                     </td>
                   </tr>

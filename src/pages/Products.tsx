@@ -2,6 +2,7 @@ import EmptyState from '@/components/EmptyState';
 import { SkeletonStatRow, SkeletonTable } from '@/components/SkeletonLoaders';
 import { PackageSearch } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useDebounce } from '@/pages/useDebounce';
 import { Modal } from '@/components/Modal';
 import { useToast } from '@/components/Toast';
 import { useConfirm } from '@/components/ConfirmDialog';
@@ -18,15 +19,6 @@ import { useLocation } from 'wouter';
 interface Props {
   db: DB;
   save: (fn: (prev: DB) => DB) => void;
-}
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
 }
 
 const empty: Omit<Product, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -244,21 +236,41 @@ export default function Products({ db, save }: Props) {
           onClick={() => setFilter('zero')}
           className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === 'zero' ? 'bg-red-600' : ''}`}
         >
-          🔴 Biten {outOfStock > 0 && <Badge variant="destructive" className="ml-1 px-1 h-4">{outOfStock}</Badge>}
+          🔴 Biten{' '}
+          {outOfStock > 0 && (
+            <Badge variant="destructive" className="ml-1 px-1 h-4">
+              {outOfStock}
+            </Badge>
+          )}
         </Button>
         <Button
           variant={filter === 'low' ? 'outline' : 'outline'}
           onClick={() => setFilter('low')}
           className={`rounded-xl px-3 h-8 text-xs font-semibold ${filter === 'low' ? 'border-amber-500 text-amber-500 bg-amber-500/10' : ''}`}
         >
-          ⚠️ Az {lowStock > 0 && <Badge variant="outline" className="ml-1 px-1 h-4 border-amber-500 text-amber-500 bg-amber-500/10">{lowStock}</Badge>}
+          ⚠️ Az{' '}
+          {lowStock > 0 && (
+            <Badge variant="outline" className="ml-1 px-1 h-4 border-amber-500 text-amber-500 bg-amber-500/10">
+              {lowStock}
+            </Badge>
+          )}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
-          { label: 'Toplam Ürün', value: String(db.products.length), color: 'text-blue-500', border: 'border-blue-500/20' },
-          { label: 'Stok Değeri', value: formatMoney(totalValue), color: 'text-emerald-500', border: 'border-emerald-500/20' },
+          {
+            label: 'Toplam Ürün',
+            value: String(db.products.length),
+            color: 'text-blue-500',
+            border: 'border-blue-500/20',
+          },
+          {
+            label: 'Stok Değeri',
+            value: formatMoney(totalValue),
+            color: 'text-emerald-500',
+            border: 'border-emerald-500/20',
+          },
           { label: 'Biten Stok', value: String(outOfStock), color: 'text-red-500', border: 'border-red-500/20' },
           { label: 'Az Stok', value: String(lowStock), color: 'text-amber-500', border: 'border-amber-500/20' },
         ].map((s) => (
@@ -266,12 +278,8 @@ export default function Products({ db, save }: Props) {
             key={s.label}
             className={`bg-card rounded-xl p-3 border transition-all hover:border-white/20 ${s.border}`}
           >
-            <div className={`text-lg font-black ${s.color}`}>
-              {s.value}
-            </div>
-            <div className="text-muted-foreground text-[0.78rem] mt-1">
-              {s.label}
-            </div>
+            <div className={`text-lg font-black ${s.color}`}>{s.value}</div>
+            <div className="text-muted-foreground text-[0.78rem] mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -301,23 +309,19 @@ export default function Products({ db, save }: Props) {
                   ? { color: '#f59e0b', label: `⚠️ Az: ${p.stock}` }
                   : { color: '#10b981', label: `✓ ${p.stock} adet` };
             return (
-              <Card 
-                key={p.id} 
+              <Card
+                key={p.id}
                 className={`group transition-all hover:-translate-y-1 ${p.stock === 0 ? 'border-red-500/30' : p.stock <= p.minStock ? 'border-amber-500/30' : 'border-slate-500/30'}`}
               >
                 <CardContent className="p-4">
                   <div className="text-4xl mb-3 text-center">{getCategoryIcon(p.category)}</div>
-                  <h4 className="font-bold mb-1 text-foreground text-sm line-clamp-1">
-                    {p.name}
-                  </h4>
+                  <h4 className="font-bold mb-1 text-foreground text-sm line-clamp-1">{p.name}</h4>
                   <p className="text-muted-foreground text-xs mb-3">
                     {p.brand ? `${p.brand} · ` : ''}
                     {getCategoryName(p.category)}
                   </p>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold text-foreground text-base">
-                      {formatMoney(p.price)}
-                    </span>
+                    <span className="font-bold text-foreground text-base">{formatMoney(p.price)}</span>
                     <span style={{ color: marginColor }} className="text-xs font-bold">
                       %{margin} markup
                     </span>
@@ -330,9 +334,7 @@ export default function Products({ db, save }: Props) {
                   <div style={{ color: stockStatus.color }} className="text-sm font-semibold mb-3">
                     {stockStatus.label}
                   </div>
-                  {p.barcode && (
-                    <div className="text-slate-500 text-[0.72rem] mb-3">🔖 {p.barcode}</div>
-                  )}
+                  {p.barcode && <div className="text-slate-500 text-[0.72rem] mb-3">🔖 {p.barcode}</div>}
                   <div className="flex gap-2">
                     <Button
                       variant="ghost"
@@ -370,11 +372,7 @@ export default function Products({ db, save }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <Label>Ürün Adı *</Label>
-            <Input
-              value={form.name || ''}
-              onChange={(e) => f('name', e.target.value)}
-              placeholder="Ürün adı"
-            />
+            <Input value={form.name || ''} onChange={(e) => f('name', e.target.value)} placeholder="Ürün adı" />
           </div>
           <div>
             <Label>Kategori</Label>
@@ -392,7 +390,11 @@ export default function Products({ db, save }: Props) {
           </div>
           <div>
             <Label>Tedarikçi (opsiyonel)</Label>
-            <select value={form.supplierId || ''} onChange={(e) => f('supplierId', e.target.value)} className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none">
+            <select
+              value={form.supplierId || ''}
+              onChange={(e) => f('supplierId', e.target.value)}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
+            >
               <option value="">— Seçilmedi —</option>
               {db.suppliers
                 .filter((s) => !s.deleted)
@@ -405,11 +407,7 @@ export default function Products({ db, save }: Props) {
           </div>
           <div>
             <Label>Marka</Label>
-            <Input
-              value={form.brand || ''}
-              onChange={(e) => f('brand', e.target.value)}
-              placeholder="Marka"
-            />
+            <Input value={form.brand || ''} onChange={(e) => f('brand', e.target.value)} placeholder="Marka" />
           </div>
           <div>
             <Label>Alış Fiyatı</Label>
@@ -467,11 +465,7 @@ export default function Products({ db, save }: Props) {
           </div>
           <div>
             <Label>Barkod</Label>
-            <Input
-              value={form.barcode || ''}
-              onChange={(e) => f('barcode', e.target.value)}
-              placeholder="Barkod"
-            />
+            <Input value={form.barcode || ''} onChange={(e) => f('barcode', e.target.value)} placeholder="Barkod" />
           </div>
           <div className="col-span-2">
             <Label>Açıklama</Label>
@@ -499,7 +493,10 @@ export default function Products({ db, save }: Props) {
           ) : null}
         </div>
         <div className="flex gap-2.5 mt-5">
-          <Button onClick={handleSave} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl">
+          <Button
+            onClick={handleSave}
+            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl"
+          >
             💾 Kaydet
           </Button>
           <Button variant="outline" onClick={() => setModalOpen(false)} className="rounded-xl">
@@ -512,7 +509,11 @@ export default function Products({ db, save }: Props) {
         <div className="grid gap-3.5">
           <div>
             <Label>Kategori</Label>
-            <select value={bulkCat} onChange={(e) => setBulkCat(e.target.value)} className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none">
+            <select
+              value={bulkCat}
+              onChange={(e) => setBulkCat(e.target.value)}
+              className="w-full p-2.5 bg-slate-800 border border-white/10 rounded-xl text-foreground text-sm outline-none"
+            >
               <option value="all">Tüm Kategoriler</option>
               {productCats.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -582,7 +583,8 @@ export default function Products({ db, save }: Props) {
           })()}
         </div>
         <div className="flex gap-2.5 mt-5">
-          <Button onClick={() => {
+          <Button
+            onClick={() => {
               const pct = parseFloat(bulkPct);
               if (!pct || pct <= 0) {
                 showToast('Geçerli yüzde girin!', 'error');
@@ -607,7 +609,9 @@ export default function Products({ db, save }: Props) {
               );
               setBulkModal(false);
               setBulkPct('');
-            }} className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl">
+            }}
+            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl"
+          >
             🔄 Uygula
           </Button>
           <Button variant="outline" onClick={() => setBulkModal(false)} className="rounded-xl">
@@ -619,5 +623,3 @@ export default function Products({ db, save }: Props) {
     </div>
   );
 }
-
-

@@ -238,7 +238,13 @@ export default function Cari({ db, save }: Props) {
         showToast={showToast}
       />
 
-      <CariForm open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSave} initial={form} editId={editId} />
+      <CariForm
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        initial={form}
+        editId={editId}
+      />
 
       <CariIslemModal
         open={!!islemModal}
