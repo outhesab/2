@@ -104,7 +104,7 @@ export async function requestAllPermissions(): Promise<void> {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     stream.getTracks().forEach((t) => t.stop()); // hemen kapat, sadece izin al
-    console.info('[permissions] Mikrofon izni verildi');
+    logger.info('permissions', 'Mikrofon izni verildi');
   } catch {
     logger.warn('permissions', 'Mikrofon izni reddedildi');
   }
@@ -113,7 +113,7 @@ export async function requestAllPermissions(): Promise<void> {
   try {
     const { Filesystem } = await import('@capacitor/filesystem');
     await Filesystem.requestPermissions();
-    console.info('[permissions] Depolama izni verildi');
+    logger.info('permissions', 'Depolama izni verildi');
   } catch {
     logger.warn('permissions', 'Depolama izni reddedildi');
   }

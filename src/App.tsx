@@ -186,7 +186,7 @@ function AppContent({
             minute: '2-digit',
           }),
         );
-      if (status === 'error' && detail) console.warn('[sync]', detail);
+      if (status === 'error' && detail) logger.warn('sync', 'sync hatası', { detail });
     });
     return unsub;
   }, []);
