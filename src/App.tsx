@@ -150,10 +150,6 @@ function AppContent({
     return cleanup;
   }, [isDBReady, save, showToast]);
 
-  if (!isDBReady) {
-    return <PageFallback />;
-  }
-
   // Tarayıcı sekmesinin yanlışlıkla kapatılmasını önle (Veri kaybını ve takibi korumak için)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -309,6 +305,7 @@ function AppContent({
         .reduce((s, k) => s + (k.type === 'gelir' ? k.amount : -k.amount), 0),
     [db.kasa],
   );
+
   const activeGroup = TABS.find((t) => t.id === activeTab)?.group || 'Sistem';
   const activeGroupClass =
     activeGroup === 'Ana'
@@ -341,6 +338,11 @@ function AppContent({
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [navigate]);
+
+  if (!isDBReady) {
+    return <PageFallback />;
+  }
+
 
   return (
     <div className="app-shell">

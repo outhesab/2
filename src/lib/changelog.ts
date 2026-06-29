@@ -67,6 +67,7 @@ export const CHANGELOG: VersionEntry[] = [
         text: 'userManager.ts: 5 sessiz hata fix — kullanıcı cache okuma/yazma, Firebase yükleme hataları artık logger.error',
       },
       { type: 'iyilestirme', text: 'permissions.ts: saveFileToDevice export hatası artık logger.error' },
+      { type: 'duzeltme', text: 'App.tsx: React Rules of Hooks ihlali düzeltildi — isDBReady erken return kontrolü tüm useEffect çağrılarından sonraya taşındı (production StrictMode console.error + state tutarsızlığı riski giderildi)' },
     ],
   },
   {
