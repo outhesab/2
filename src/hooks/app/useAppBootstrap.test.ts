@@ -14,11 +14,8 @@ import { renderHook, act } from '@testing-library/react';
 import { useAppBootstrap, type AppBootstrapParams } from '@/hooks/app/useAppBootstrap';
 import { getAllAgents } from '@/agents';
 import { setupDomainListeners } from '@/domain';
-import { getAppVersion, getVersionTitle } from '@/lib/version';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { useToast } from '@/components/Toast';
 import type { DB } from '@/types';
-import type { TabGroup } from '@/config/tabs';
 
 // Mocks
 vi.mock('@/agents', () => ({
@@ -49,7 +46,6 @@ const mockSetIsMobile = vi.fn();
 const mockSetExpandedGroups = vi.fn();
 const mockExportJSON = vi.fn();
 const mockClearError = vi.fn();
-const mockLog = { warn: vi.fn(), error: vi.fn(), info: vi.fn() };
 
 const baseParams: AppBootstrapParams = {
   db: mockDB,

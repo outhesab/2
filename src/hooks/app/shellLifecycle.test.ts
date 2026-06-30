@@ -102,13 +102,14 @@ describe('useStorageSync', () => {
 
 describe('useSyncStatusListener', () => {
   let mockUnsubscribe: ReturnType<typeof vi.fn>;
+  // SyncStatus type'ı useDB'den geliyor; test'te string kullanıyoruz
   let mockCallback: ((status: string, detail?: string) => void) | undefined;
 
   beforeEach(() => {
     mockUnsubscribe = vi.fn();
     mockCallback = undefined;
-    vi.mocked(onSyncStatus).mockImplementation((cb) => {
-      mockCallback = cb;
+    vi.mocked(onSyncStatus).mockImplementation((cb: Parameters<typeof onSyncStatus>[0]) => {
+      mockCallback = cb as never;
       return mockUnsubscribe;
     });
   });

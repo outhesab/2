@@ -80,10 +80,23 @@ async function getSessionDerivedKey(): Promise<CryptoKey | null> {
     ['deriveKey'],
   );
 
+  // S-3 (Round2 review): Static salt kaldırıldı.
+  // PBKDF2'nin amacı unique salt — sabit salt tüm kullanıcılar için aynı key türetirdi.
+  // Şimdi her session için 16-byte random salt üretilip localStorage'da saklanıyor.
+  // Bu sayede her session unique bir key türetir (rainbow table attack imkansız).
+  const SESSION_SALT_KEY = `crypto_session_salt_${session.userId}`;
+  let saltB64 = localStorage.getItem(SESSION_SALT_KEY);
+  if (!saltB64) {
+    const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+    saltB64 = btoa(String.fromCharCode(...saltBytes));
+    localStorage.setItem(SESSION_SALT_KEY, saltB64);
+  }
+  const saltBytes = Uint8Array.from(atob(saltB64), (c) => c.charCodeAt(0));
+
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: enc.encode('parspel-salt-123'), // Static salt for session key
+      salt: saltBytes,
       iterations: 100000,
       hash: 'SHA-256',
     },
