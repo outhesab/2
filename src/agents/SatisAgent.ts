@@ -1,6 +1,8 @@
 import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
+import { processIntent } from '@/domain/intentEngine';
+import { domainEventBus } from '@/domain/eventBus';
 import { SaleIntentSchema, SaleIptalSchema, SaleIadeSchema, SaleFiyatDuzeltSchema } from '@/lib/schemas';
 import type { SaleIptalParams, SaleIadeParams, SaleFiyatDuzeltParams } from '@/agents/actionMap';
 import type { YeniSatisParams } from '@/agents/types';
@@ -27,12 +29,12 @@ export class SatisAgent extends DomainAgent {
   readonly yetkiler = ['satis.read', 'satis.write', 'kasa.read', 'stok.read', 'cari.read', 'rapor.read'] as const;
 
   /**
-   * PR-D2: Typed action handler'lar — her action için payload tipi
-   * AgentActionMap'ten geliyor, cast ihtiyacı sıfır.
+   * A-2: Typed handler'lar — validation + processIntent + intentResult döndürür.
+   * DomainAgent.islemYap handler varsa delegasyon yapar, intentResult'u save'e uygular.
    */
   protected actionHandlers: ActionHandlerMap = {
-    yeniSatis: (payload: YeniSatisParams) => this.handleYeniSatis(payload),
-    satis: (payload: YeniSatisParams) => this.handleYeniSatis(payload),
+    yeniSatis: (payload: YeniSatisParams, request: AgentRequest<unknown>) => this.handleYeniSatis(payload, request),
+    satis: (payload: YeniSatisParams, request: AgentRequest<unknown>) => this.handleYeniSatis(payload, request),
     sale_iptal: (payload: SaleIptalParams) => this.handleSaleIptal(payload),
     iptalEt: (payload: SaleIptalParams) => this.handleSaleIptal(payload),
     sale_iade: (payload: SaleIadeParams) => this.handleSaleIade(payload),
@@ -41,131 +43,139 @@ export class SatisAgent extends DomainAgent {
     fiyatDuzelt: (payload: SaleFiyatDuzeltParams) => this.handleSaleFiyatDuzelt(payload),
   };
 
-  /**
-   * Typed handler — payload zaten SaleIptalParams, cast yok.
-   */
+  private requireWritePermission(): AgentResponse<unknown> | null {
+    if (!this.yetkiKontrolu('satis.write')) {
+      return { ok: false, error: `${this.id} agent'ının bu işlem için yetkisi yok` };
+    }
+    return null;
+  }
+
   private handleSaleIptal(payload: SaleIptalParams): AgentResponse<unknown> {
+    const perm = this.requireWritePermission();
+    if (perm) return perm;
+
     if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
-    return { ok: true, data: { saleId: payload.saleId } };
+
+    const v = SaleIptalSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `İptal hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
+    }
+
+    const intent: Intent = { type: 'sale_iptal', payload: { saleId: v.data.saleId } };
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'İptal başarısız', 'INTENT_FAILED', { agent: this.id, action: 'sale_iptal' });
+      return { ok: false, error: result.error };
+    }
+
+    return { ok: true, data: { intentResult: result } };
   }
 
   private handleSaleIade(payload: SaleIadeParams): AgentResponse<unknown> {
+    const perm = this.requireWritePermission();
+    if (perm) return perm;
+
     if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
-    return { ok: true, data: { saleId: payload.saleId, qty: asNumberOrRecord(payload.quantity) } };
+
+    const v = SaleIadeSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `İade hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
+    }
+
+    const qty = asNumberOrRecord(v.data.quantity);
+    const intent: Intent = { type: 'sale_iade', payload: { saleId: v.data.saleId, qty } };
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'İade başarısız', 'INTENT_FAILED', { agent: this.id, action: 'sale_iade' });
+      return { ok: false, error: result.error };
+    }
+
+    return { ok: true, data: { intentResult: result } };
   }
 
   private handleSaleFiyatDuzelt(payload: SaleFiyatDuzeltParams): AgentResponse<unknown> {
+    const perm = this.requireWritePermission();
+    if (perm) return perm;
+
     if (!payload.saleId) return { ok: false, error: 'saleId gerekli' };
-    const yeniFiyat = asNumberOrRecord(payload.yeniFiyat) ?? asNumberOrRecord(payload.unitPrice) ?? 0;
-    return { ok: true, data: { saleId: payload.saleId, yeniFiyat } };
+
+    const v = SaleFiyatDuzeltSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `Fiyat düzeltme hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
+    }
+
+    const yeniFiyat = asNumberOrRecord(v.data.yeniFiyat) ?? asNumberOrRecord(v.data.unitPrice) ?? 0;
+    const intent: Intent = { type: 'sale_fiyat_duzelt', payload: { saleId: v.data.saleId, yeniFiyat } };
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'Fiyat düzeltme başarısız', 'INTENT_FAILED', { agent: this.id, action: 'sale_fiyat_duzelt' });
+      return { ok: false, error: result.error };
+    }
+
+    return { ok: true, data: { intentResult: result } };
   }
 
   /**
-   * Typed handler — yeniSatis payload validation.
-   * Not: Persistence legacy islemYap → mapRequestToIntent → processIntent üzerinden yürür.
-   * Bu handler yalnızca validation ve shape consistency sağlar (R3-6 TD-3).
+   * A-2: handleYeniSatis — validation + processIntent + silinmiş kayıt kontrolü.
+   * Eski islemYap override + mapRequestToIntent kaldırıldı, hepsi bu handler'da.
    */
-  private handleYeniSatis(payload: YeniSatisParams): AgentResponse<unknown> {
-    if (!payload.items || payload.items.length === 0) {
-      return { ok: false, error: 'En az bir ürün gerekli' };
-    }
-    // Shape'i legacy path ile uyumlu hale getir (TD-3 fix)
-    return {
-      ok: true,
-      data: {
-        action: 'yeniSatis',
-        status: 'completed',
-        intentResult: {
-          ok: true,
-          data: {
-            dbUpdates: { sale: payload },
-          },
-        },
-      },
-    };
-  }
+  private handleYeniSatis(payload: YeniSatisParams, _request: AgentRequest<unknown>): AgentResponse<unknown> {
+    const perm = this.requireWritePermission();
+    if (perm) return perm;
 
-  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
-    if (!this.ctx) {
-      return { ok: false, error: `${this.id} agent bağlanmadı - önce bagla() çağrın` } as AgentResponse<R>;
-    }
-    if (!this.yetkiKontrolu('satis.write')) {
-      return { ok: false, error: `${this.id} agent'ının bu işlem için yetkisi yok` } as AgentResponse<R>;
+    // Zod validation
+    const validation = SaleIntentSchema.safeParse(payload);
+    if (!validation.success) {
+      return {
+        ok: false,
+        error: `GEÇERSİZ SATIŞ VERİSİ: ${validation.error.issues.map((e) => e.message).join(', ')}`,
+      };
     }
 
-    // Zod Validation for sale actions
-    if (talep.action === 'yeniSatis' || talep.action === 'satis') {
-      const validation = SaleIntentSchema.safeParse(talep.payload);
-      if (!validation.success) {
-        return {
-          ok: false,
-          error: `GEÇERSİZ SATIŞ VERİSİ: ${validation.error.issues.map((e) => e.message).join(', ')}`,
-        } as AgentResponse<R>;
-      }
-    }
-
-    // Silinmiş kayıt kontrolü (Sertleştirme)
-    if (talep.payload && Array.isArray((talep.payload as Record<string, unknown>).items)) {
-      for (const item of (talep.payload as Record<string, unknown>).items as Array<{
-        productId: string;
-        productName?: string;
-      }>) {
+    // Silinmiş kayıt kontrolü
+    if (payload.items && payload.items.length > 0) {
+      for (const item of payload.items) {
         const p = this.db.products.find((x) => x.id === item.productId);
         if (!p || p.deleted) {
           return {
             ok: false,
             error: `SATIŞ HATASI: ${item.productName || item.productId} ürünü sistemde bulunamadı veya silinmiş.`,
-          } as AgentResponse<R>;
+          };
         }
       }
     }
 
-    return super.islemYap(talep);
-  }
+    // Intent oluştur + processIntent
+    const v = validation.data;
+    const intent: Intent = {
+      type: 'sale',
+      payload: {
+        items: v.items,
+        payment: v.payment,
+        cariId: v.cariId,
+        cariName: v.cariName,
+        customerName: v.customerName,
+        discount: v.discount,
+        discountAmount: v.discountAmount,
+        tahsilat: v.tahsilat,
+        saleDate: v.saleDate,
+        dueDays: v.dueDays,
+      },
+    };
 
-  protected mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null {
-    const p = talep.payload || {};
-    switch (talep.action) {
-      case 'yeniSatis':
-      case 'satis': {
-        const validation = SaleIntentSchema.parse(p);
-        return {
-          type: 'sale',
-          payload: {
-            items: validation.items,
-            payment: validation.payment,
-            cariId: validation.cariId,
-            cariName: validation.cariName,
-            customerName: validation.customerName,
-            discount: validation.discount,
-            discountAmount: validation.discountAmount,
-            tahsilat: validation.tahsilat,
-            saleDate: validation.saleDate,
-            dueDays: validation.dueDays,
-          },
-        };
-      }
-      case 'iptalEt':
-      case 'sale_iptal': {
-        const v = SaleIptalSchema.safeParse(p);
-        if (!v.success) return null;
-        return { type: 'sale_iptal', payload: { saleId: v.data.saleId } };
-      }
-      case 'iadeYap':
-      case 'sale_iade': {
-        const v = SaleIadeSchema.safeParse(p);
-        if (!v.success) return null;
-        return { type: 'sale_iade', payload: { saleId: v.data.saleId, qty: asNumberOrRecord(v.data.quantity) } };
-      }
-      case 'fiyatDuzelt':
-      case 'sale_fiyat_duzelt': {
-        const v = SaleFiyatDuzeltSchema.safeParse(p);
-        if (!v.success) return null;
-        const yeniFiyat = asNumberOrRecord(v.data.yeniFiyat) ?? asNumberOrRecord(v.data.unitPrice) ?? 0;
-        return { type: 'sale_fiyat_duzelt', payload: { saleId: v.data.saleId, yeniFiyat } };
-      }
-      default:
-        return null;
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'Satış başarısız', 'INTENT_FAILED', { agent: this.id, action: 'yeniSatis' });
+      return { ok: false, error: result.error };
     }
+
+    return {
+      ok: true,
+      data: {
+        action: 'yeniSatis',
+        status: 'completed',
+        intentResult: result,
+      },
+    };
   }
 }

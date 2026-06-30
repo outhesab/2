@@ -65,6 +65,12 @@ Pre-commit hook sadece registry drift kontrolü yapıyor.
 - Aynı anda 5+ dosyaya dokunma (bölmediysen sor)
 - `git push --force`, `--no-verify`
 
+### /ONAY Modu
+`/ONAY` komutu verildiğinde o session boyunca ARAF onay beklemeden çalışır:
+- Rutin işlemler (commit, push, dosya sil/düzenle) sormadan yapılır
+- Bir sonraki adım biliniyorsa devam edilir
+- Sadece güvenlik riski, kırıcı değişiklik veya net olmayan yön varsa durulur
+
 ---
 
 ## Komutlar

@@ -1,64 +1,73 @@
 import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
-import type { AgentRequest, AgentResponse } from '@/agents/types';
+import type { AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
+import { processIntent } from '@/domain/intentEngine';
+import { domainEventBus } from '@/domain/eventBus';
 import { StokGuncelleSchema, ProductSchema } from '@/lib/schemas';
+import type { StokGuncelleParams, UrunEkleParams } from '@/agents/actionMap';
 
 export class StokAgent extends DomainAgent {
   readonly id = 'stok' as const;
   readonly yetkiler = ['stok.read', 'stok.write', 'rapor.read'] as const;
-  // PR-D2: Typed action handlers (D2b follow-up'ta eklenecek)
-  protected actionHandlers: ActionHandlerMap = {};
 
-  async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
-    const p = talep.payload ?? {};
+  /**
+   * A-2: Typed handler'lar — validation + processIntent.
+   * Eski islemYap override + mapRequestToIntent kaldırıldı.
+   */
+  protected actionHandlers: ActionHandlerMap = {
+    stok_guncelle: (payload: StokGuncelleParams) => this.handleStokGuncelle(payload),
+    urun_ekle: (payload: UrunEkleParams) => this.handleUrunEkle(payload),
+  };
 
-    // Zod Validation
-    if (talep.action === 'stok_guncelle') {
-      const v = StokGuncelleSchema.safeParse(p);
-      if (!v.success)
-        return {
-          ok: false,
-          error: `Stok Güncelleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
-        } as AgentResponse<R>;
-    }
-    if (talep.action === 'urun_ekle') {
-      const v = ProductSchema.safeParse(p);
-      if (!v.success)
-        return {
-          ok: false,
-          error: `Ürün Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}`,
-        } as AgentResponse<R>;
+  private handleStokGuncelle(payload: StokGuncelleParams): AgentResponse<unknown> {
+    // Zod validation
+    const v = StokGuncelleSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `Stok Güncelleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
     }
 
-    return super.islemYap(talep);
+    const intent: Intent = {
+      type: 'stok_guncelle',
+      payload: {
+        productId: v.data.productId,
+        amount: v.data.quantity,
+        type: v.data.type,
+        description: v.data.label,
+      },
+    };
+
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'Stok güncelleme başarısız', 'INTENT_FAILED', { agent: this.id, action: 'stok_guncelle' });
+      return { ok: false, error: result.error };
+    }
+
+    return { ok: true, data: { intentResult: result } };
   }
 
-  protected mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null {
-    const p = talep.payload || {};
-    if (talep.action === 'stok_guncelle') {
-      const validation = StokGuncelleSchema.parse(p);
-      return {
-        type: 'stok_guncelle',
-        payload: {
-          productId: validation.productId,
-          amount: validation.quantity,
-          type: validation.type,
-          description: validation.label,
-        },
-      };
+  private handleUrunEkle(payload: UrunEkleParams): AgentResponse<unknown> {
+    // Zod validation
+    const v = ProductSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `Ürün Ekleme Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
     }
-    if (talep.action === 'urun_ekle') {
-      const validation = ProductSchema.parse(p);
-      return {
-        type: 'urun_ekle',
-        payload: {
-          productName: validation.name,
-          category: validation.category,
-          initialStock: validation.stock,
-          unitPrice: validation.price,
-        },
-      };
+
+    const intent: Intent = {
+      type: 'urun_ekle',
+      payload: {
+        productName: v.data.name,
+        category: v.data.category,
+        initialStock: v.data.stock,
+        unitPrice: v.data.price,
+      },
+    };
+
+    const result = processIntent(intent, this.db);
+    if (!result.ok) {
+      domainEventBus.emitError(result.error || 'Ürün ekleme başarısız', 'INTENT_FAILED', { agent: this.id, action: 'urun_ekle' });
+      return { ok: false, error: result.error };
     }
-    return null;
+
+    return { ok: true, data: { intentResult: result } };
   }
 }
