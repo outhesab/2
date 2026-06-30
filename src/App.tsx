@@ -134,9 +134,6 @@ function AppContent({
     [setLocation],
   );
 
-  // PR-D1b: Keyboard shortcuts
-  useKeyboardShortcuts(navigate);
-
   const toggleGroup = useCallback((group: TabGroup) => {
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
   }, []);
