@@ -59,6 +59,10 @@ export abstract class BaseAgent {
   /**
    * Typed dispatch — actionHandlers map'i üzerinden type-safe handler çağırır.
    * PR-D2 tamamlama: Ajanlar bu method'u kullanarak cast'ten kurtulur.
+   * R3-6 A-2 notu: İki parallal dispatch sistemi (handle + islemYap) hâlâ
+   * birleştirilmemiştir. Typed handler'lar şu an validation-only'dir;
+   * persistence işlemi legacy islemYap → mapRequestToIntent → processIntent
+   * üzerinden yürür. A-2 tam çözümü her iki yolu birleştirmeyi gerektirir.
    *
    * @example
    *   return this.handle('sale_iptal', { saleId: 'abc123' });
@@ -83,8 +87,8 @@ export abstract class BaseAgent {
   }
 
   /**
-   * Generic islemYap — geriye dönük uyumluluk için korunuyor.
-   * Yeni kodlar \`handle(action, payload)\` typed API'sini kullanmalı.
+   * Generic islemYap — ana dispatch yöntemi.
+   * Alt sınıflar (DomainAgent) bu method'u implemente eder.
    */
   abstract islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>>;
 }

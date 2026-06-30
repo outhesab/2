@@ -31,17 +31,17 @@ export const errorRules: SpecRule[] = [
     severity: 'error',
     check: (): SpecCheckResult => {
       try {
-        const app = readFileSync(join(ROOT, 'src/App.tsx'), 'utf-8');
-        const routes = (app.match(/<Route\s+path=/g) || []).length;
-        const suspense = (app.match(/<Suspense/g) || []).length;
+        const routesFile = readFileSync(join(ROOT, 'src/components/AppRoutes.tsx'), 'utf-8');
+        const routes = (routesFile.match(/<Route\s+path=/g) || []).length;
+        const suspense = (routesFile.match(/<Suspense/g) || []).length;
         const passed = routes > 0 && suspense > 0;
         return {
           passed,
-          violations: passed ? [] : [{ file: 'src/App.tsx', message: `${routes} route var ama Suspense bulunamadı` }],
+          violations: passed ? [] : [{ file: 'src/components/AppRoutes.tsx', message: `${routes} route var ama Suspense bulunamadı` }],
         };
       } catch {
-        logger.warn('error', 'App.tsx Suspense kontrolü sırasında hata oluştu');
-        return { passed: false, violations: [{ file: 'src/App.tsx', message: 'Okunamadı' }] };
+        logger.warn('error', 'AppRoutes.tsx Suspense kontrolü sırasında hata oluştu');
+        return { passed: false, violations: [{ file: 'src/components/AppRoutes.tsx', message: 'Okunamadı' }] };
       }
     },
   },

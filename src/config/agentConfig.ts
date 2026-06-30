@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger';
+import type { AgentId } from '@/agents/types';
 
-export type AgentId = 'satis' | 'stok' | 'cari' | 'kasa' | 'fatura' | 'rapor';
+export type { AgentId };
 
 export type AgentSettings = Record<AgentId, boolean>;
 
@@ -13,6 +14,7 @@ const defaultAgentSettings: AgentSettings = {
   kasa: true,
   fatura: true,
   rapor: true,
+  deep_seek: false,
 };
 
 type StoredShape = {

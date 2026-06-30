@@ -1,13 +1,11 @@
 /**
  * Action-Payload type map.
- * PR-D2: AgentRequest generic'i dekoratif kalmaktan kurtarılıyor.
- * Her aksiyon adı için beklenen payload tipi burada tanımlanır.
- * Cast (\`as any\`, \`as Record<string, unknown>\`) ihtiyacı azalır.
+ * PR-D2 + R3-4: AgentActionMap tüm action'lar ve payload tipleri için
+ * merkezi tür haritası. BaseAgent.handle<K>() buradan tiplenir.
  *
- * Kullanım:
- *   import { actionPayload } from '@/agents/types';
- *   const p = actionPayload<'sale_iptal'>(request);
- *   // p artık SaleIptalParams | undefined
+ * Not: Bazı action'ların hem Türkçe hem İngilizce alias'ı vardır
+ * (ör. iptalEt/sale_iptal). Kanonik isim Türkçe'dir; her iki form da
+ * kod tabanında kullanıldığı için interface'te tutulur.
  */
 
 import type { YeniSatisParams } from './types';
@@ -113,31 +111,3 @@ export interface AgentActionMap {
 }
 
 export type AgentAction = keyof AgentActionMap;
-
-// ── Type-safe payload extractor ─────────────────────────────────────────────
-/**
- * Bir AgentRequest'ten action adına göre tip-güvenli payload çıkarır.
- * Action uyuşmazsa undefined döner (cast hatası yerine kontrol).
- *
- * @example
- *   const p = actionPayload(request, 'sale_iptal');
- *   if (p) { // p: SaleIptalParams
- *     console.log(p.saleId);
- *   }
- */
-export function actionPayload<K extends AgentAction>(
-  request: { action: string; payload?: unknown },
-  expectedAction: K,
-): AgentActionMap[K] | undefined {
-  if (request.action !== expectedAction) return undefined;
-  return request.payload as AgentActionMap[K];
-}
-
-// ── Helper: any-compatible wrapper for legacy callers ───────────────────────
-/**
- * Legacy API uyumluluğu — payload'ı typed olarak çıkartırken
- * agent'lar tarafında kalan \`as any\` kullanımını azaltmak için.
- */
-export function payloadOf<K extends AgentAction>(request: { action: string; payload?: unknown }, action: K): AgentActionMap[K] | undefined {
-  return actionPayload(request, action);
-}

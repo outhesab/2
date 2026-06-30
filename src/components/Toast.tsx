@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useSoundFeedback } from '@/hooks/useSoundFeedback';
 import type { SoundType } from '@/hooks/useSoundFeedback';
@@ -31,7 +32,7 @@ function cleanForSpeech(msg: string): string {
 export function useToast() {
   const { playSound, speakMessage } = useSoundFeedback();
 
-  const showToast = (
+  const showToast = useCallback((
     message: string,
     type: 'success' | 'error' | 'warning' | 'info' = 'success',
     options?: {
@@ -65,7 +66,7 @@ export function useToast() {
     else if (type === 'error') toast.error(prefixedMessage);
     else if (type === 'warning') toast.warning(prefixedMessage);
     else toast.info(prefixedMessage);
-  };
+  }, [playSound, speakMessage]);
 
   return { showToast };
 }

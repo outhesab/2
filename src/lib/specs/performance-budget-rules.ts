@@ -28,17 +28,17 @@ export const performanceBudgetRules: SpecRule[] = [
     severity: 'error',
     check: (): SpecCheckResult => {
       try {
-        const app = readFileSync(join(ROOT, 'src/App.tsx'), 'utf-8');
+        const app = readFileSync(join(ROOT, 'src/components/AppRoutes.tsx'), 'utf-8');
         const lazyCount = (app.match(/lazy\(/g) || []).length;
         const passed = lazyCount >= 10;
         return {
           passed,
           violations: passed
             ? []
-            : [{ file: 'src/App.tsx', message: `Sadece ${lazyCount} lazy() kullanımı — en az 10 olmalı` }],
+            : [{ file: 'src/components/AppRoutes.tsx', message: `Sadece ${lazyCount} lazy() kullanımı — en az 10 olmalı` }],
         };
       } catch {
-        return { passed: false, violations: [{ file: 'src/App.tsx', message: 'Okunamadı' }] };
+        return { passed: false, violations: [{ file: 'src/components/AppRoutes.tsx', message: 'Okunamadı' }] };
       }
     },
   },

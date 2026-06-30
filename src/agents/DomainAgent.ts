@@ -9,6 +9,11 @@ import { domainEventBus } from '@/domain/eventBus';
 export abstract class DomainAgent extends BaseAgent {
   protected abstract mapRequestToIntent(talep: AgentRequest<unknown>): Intent | null;
 
+  /**
+   * Ana dispatch yöntemi — mapRequestToIntent → processIntent → save
+   * R3-6 notu: Typed handle() ve legacy islemYap arasındaki birleştirme
+   * (A-2) henüz yapılmamıştır; typed handler'lar validation-only'dir.
+   */
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     if (!this.ctx) return { ok: false, error: `${this.id} bağlanmadı` } as AgentResponse<R>;
 

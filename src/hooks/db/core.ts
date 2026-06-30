@@ -5,17 +5,14 @@
  * tarafından "korunan dosya" olarak listelenen `src/hooks/db/core.ts`
  * referansını gerçek kodla eşlemek için oluşturuldu.
  *
- * Sorumluluk: DB save/update API'sinin tek giriş noktası. Şu anda
- * `useDBActions` hook'u içindeki `processSave` mantığını sarmalıyor;
- * ileride static save() eklenirse buraya yönlendirilecek.
+ * Sorumluluk: DB save/update API'sinin tek giriş noktası.
+ * - `useDBActions` → hook tabanlı save/undo
+ * - `checkDBStructure` → save sonrası yapısal bütünlük kontrolü
  *
- * NOT: Bu facade **implementasyon taşımaz**, yalnızca yeniden export
- * eder. Hook yapısı (useDB → useDBActions) korunur.
+ * Yeni bir save API'si eklenecekse burada toplanmalıdır.
  */
 
 export { useDB } from './index';
 export { useDBActions } from './useDBActions';
-// saveSchema re-export: Gün 1 stash'inde (moratorium-day1-hour5-7-final-saveSchema).
-// Moratorium sonunda birleştirildiğinde bu satır açılacak:
-// export { checkDBStructure, DBStructureSchema } from './saveSchema';
-// export type { StructureCheck } from './saveSchema';
+export { checkDBStructure } from './saveSchema';
+export type { StructureCheck } from './saveSchema';

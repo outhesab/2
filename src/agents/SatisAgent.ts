@@ -60,11 +60,29 @@ export class SatisAgent extends DomainAgent {
     return { ok: true, data: { saleId: payload.saleId, yeniFiyat } };
   }
 
+  /**
+   * Typed handler — yeniSatis payload validation.
+   * Not: Persistence legacy islemYap → mapRequestToIntent → processIntent üzerinden yürür.
+   * Bu handler yalnızca validation ve shape consistency sağlar (R3-6 TD-3).
+   */
   private handleYeniSatis(payload: YeniSatisParams): AgentResponse<unknown> {
     if (!payload.items || payload.items.length === 0) {
       return { ok: false, error: 'En az bir ürün gerekli' };
     }
-    return { ok: true, data: payload };
+    // Shape'i legacy path ile uyumlu hale getir (TD-3 fix)
+    return {
+      ok: true,
+      data: {
+        action: 'yeniSatis',
+        status: 'completed',
+        intentResult: {
+          ok: true,
+          data: {
+            dbUpdates: { sale: payload },
+          },
+        },
+      },
+    };
   }
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {

@@ -53,7 +53,6 @@ const baseParams: AppBootstrapParams = {
   isDBReady: true,
   dbError: null,
   clearError: mockClearError,
-  isMobile: false,
   setIsMobile: mockSetIsMobile,
   exportJSON: mockExportJSON,
   activeTab: 'dashboard',

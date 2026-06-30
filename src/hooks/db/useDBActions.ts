@@ -10,6 +10,7 @@ import { saveToFirebase } from './sync';
 import { getFirebasePromise } from './dbHelpers';
 import { TransactionManager } from './TransactionManager';
 import { domainEventBus } from '@/domain/eventBus';
+import { checkDBStructure } from './saveSchema';
 
 export function useDBActions(
   db: DB,
@@ -112,6 +113,16 @@ export function useDBActions(
       if (opts.action !== 'auto_backup') {
         const snap = safeClone(txResult.db);
         void saveToIndexedSnapshot(snap);
+      }
+
+      // Structural integrity check (Zod schema) — PR-R3-5
+      const structureCheck = checkDBStructure(txResult.db);
+      if (!structureCheck.ok) {
+        domainEventBus.emitWarning(
+          `Structural check failed: ${structureCheck.issues.join(', ')}`,
+          'STRUCTURAL_CHECK',
+          { cat: 'db' },
+        );
       }
 
       return saveAppliedState(txResult.db, entry, saveToStorage, saveToIndexedSnapshot, syncTimer, () => {}, {

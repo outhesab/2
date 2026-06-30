@@ -17,41 +17,41 @@ export const navigationRules: SpecRule[] = [
     severity: 'error',
     check: (): SpecCheckResult => {
       try {
-        const app = readFileSync(join(ROOT, 'src/App.tsx'), 'utf-8');
+        const app = readFileSync(join(ROOT, 'src/components/AppRoutes.tsx'), 'utf-8');
         const lines = app.split('\n');
         const violations: SpecCheckResult['violations'] = [];
         for (let i = 0; i < lines.length; i++) {
           const m = lines[i].match(/import\s+\{?\s*(\w+)\s*\}?\s+from\s+['"]@\/pages\/(\w+)/);
           if (m && !app.includes(`const ${m[1]} = lazy`)) {
-            violations.push({ file: 'src/App.tsx', line: i + 1, message: `"${m[1]}" lazy() ile sarılmamış` });
+            violations.push({ file: 'src/components/AppRoutes.tsx', line: i + 1, message: `"${m[1]}" lazy() ile sarılmamış` });
           }
         }
         return { passed: violations.length === 0, violations };
       } catch {
-        logger.warn('navigation', 'App.tsx okunurken hata oluştu');
-        return { passed: false, violations: [{ file: 'src/App.tsx', message: 'Okunamadı' }] };
+        logger.warn('navigation', 'AppRoutes.tsx okunurken hata oluştu');
+        return { passed: false, violations: [{ file: 'src/components/AppRoutes.tsx', message: 'Okunamadı' }] };
       }
     },
   },
   {
     id: 'TAB_ROUTE_MATCH',
     spec: 'NAVIGASYON',
-    title: "Her tab için App.tsx'de eşleşen Route path'i olmalı",
+    title: "Her tab için AppRoutes.tsx'de eşleşen Route path'i olmalı",
     severity: 'error',
     check: (): SpecCheckResult => {
       try {
         const tabs = readFileSync(join(ROOT, 'src/config/tabs.ts'), 'utf-8');
-        const app = readFileSync(join(ROOT, 'src/App.tsx'), 'utf-8');
+        const routesFile = readFileSync(join(ROOT, 'src/components/AppRoutes.tsx'), 'utf-8');
         const tabIds: string[] = [];
         const tabMatches = tabs.matchAll(/id:\s*["'](\w+-?\w+)["']/g);
         for (const m of tabMatches) tabIds.push(m[1]);
 
         const routePaths = new Set<string>();
-        const routeMatches = app.matchAll(/Route\s+path=["']\/([\w-]+)["']/g);
+        const routeMatches = routesFile.matchAll(/Route\s+path=["']\/([\w-]+)["']/g);
         for (const m of routeMatches) routePaths.add(m[1]);
 
         const lazyImports = new Set<string>();
-        const importMatches = app.matchAll(/import\(['"]@\/pages\/(\w+)['"]\)/g);
+        const importMatches = routesFile.matchAll(/import\(['"]@\/pages\/(\w+)['"]\)/g);
         for (const m of importMatches) lazyImports.add(m[1].toLowerCase());
 
         const violations: SpecCheckResult['violations'] = [];
@@ -64,13 +64,13 @@ export const navigationRules: SpecRule[] = [
             !routePaths.has(id.replace(/-/g, '')) &&
             !lazyImports.has(idLower)
           ) {
-            violations.push({ file: 'src/App.tsx', message: `"${id}" tab'i için eşleşen Route path'i bulunamadı` });
+            violations.push({ file: 'src/components/AppRoutes.tsx', message: `"${id}" tab'i için eşleşen Route path'i bulunamadı` });
           }
         }
         return { passed: violations.length === 0, violations };
       } catch {
-        logger.warn('navigation', 'tabs.ts veya App.tsx okunurken hata oluştu');
-        return { passed: false, violations: [{ file: 'src/App.tsx', message: 'Okunamadı' }] };
+        logger.warn('navigation', 'tabs.ts veya AppRoutes.tsx okunurken hata oluştu');
+        return { passed: false, violations: [{ file: 'src/components/AppRoutes.tsx', message: 'Okunamadı' }] };
       }
     },
   },

@@ -58,6 +58,16 @@ globs: ["**/*.{ts,tsx,js,jsx,json,md}"]
 > ⚠️ **3 dosya kuralı:** `changelog.ts` + `package.json` + `appConfig.ts` versiyonları senkron olmalı. CI `version-consistency.test.ts` ile kontrol eder.
 > 📖 Detay: `docs/agents/degisiklik-protokolu.md`
 
+### PR Description Checklist (Zorunlu)
+
+Her PR description'ı aşağıdaki maddeleri içermelidir:
+
+- [ ] Satır sayıları (`wc -l` çıktısı veya eşdeğeri)
+- [ ] Yeni dosyaların listesi + satır sayıları
+- [ ] Değişen ve değişmeyen dosyalar ayrı ayrı listelenmiş
+- [ ] Yeni claim'lerin kanıtı (test sonucu, çalıştırma çıktısı vb.)
+- [ ] "Yapıldı" denilen her şey için PR içinde referans (commit SHA, dosya:satır)
+
 ---
 
 ## §2. KOMUTLAR (Hızlı)
