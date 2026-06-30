@@ -34,8 +34,6 @@
     "cap:apk:fast": "vite build --mode development --emptyOutDir && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --build-cache --parallel --offline",
     "build:apk": "pnpm install --frozen-lockfile && pnpm run build && pnpm exec cap sync android && cd android && ./gradlew assembleDebug --no-daemon --stacktrace",
     "build:check": "pnpm install --no-frozen-lockfile && pnpm run lint && pnpm run typecheck && pnpm run test:run && pnpm run build",
-    "sync:agents": "node scripts/sync-agent-files.mjs",
-    "check:agents": "node scripts/sync-agent-files.mjs --check",
     "registry": "node scripts/generate-registry.mjs",
     "prepare": "simple-git-hooks",
     "preinstall": "npx only-allow pnpm",
@@ -95,7 +93,7 @@
     }
   },
   "simple-git-hooks": {
-    "pre-commit": "node scripts/check-agents-drift.mjs"
+    "pre-commit": "node scripts/check-registry-drift.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",

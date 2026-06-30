@@ -9,4 +9,4 @@ if [ -f "$SIMPLE_GIT_HOOKS_RC" ]; then
     . "$SIMPLE_GIT_HOOKS_RC"
 fi
 
-node scripts/check-agents-drift.mjs
+node scripts/check-registry-drift.mjs
