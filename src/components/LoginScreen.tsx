@@ -152,21 +152,6 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
     setLoading(true);
     setError('');
 
-    if (u.trim() === 'demo29605' && p.trim() === 'demo1234') {
-      const demoUser: AppUser = {
-        id: 'demo_id',
-        username: 'Demo Kullanıcı',
-        passwordHash: 'demo1234',
-        role: 'admin',
-        active: true,
-        createdAt: new Date().toISOString(),
-      };
-      setSuccess(true);
-      setTimeout(() => onLogin(demoUser, remember), 900);
-      setLoading(false);
-      return;
-    }
-
     const users = await loadUsers();
     if (users.length === 0) {
       setError('Henüz kayıtlı kullanıcı yok. Lütfen kayıt olun.');
@@ -369,10 +354,15 @@ export default function LoginScreen({ onLogin }: { onLogin: (user: AppUser, reme
                 type="button"
                 variant="outline"
                 className="w-full h-11 gap-2 text-sm font-semibold"
-                onClick={() => handleLogin('demo29605', 'demo1234')}
+                onClick={() => {
+                  // Round2 review C-3: Demo backdoor kaldırıldı.
+                  // Demo için: import.meta.env.DEV koşuluyla ayrı bir development seed eklenebilir.
+                  setRegisterMode(true);
+                  setError('');
+                }}
                 disabled={loading}
               >
-                <Sparkles className="size-4" /> Demo Hesap ile Hızlı Giriş
+                <Sparkles className="size-4" /> Yeni Hesap Oluştur
               </Button>
             )}
 
