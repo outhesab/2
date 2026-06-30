@@ -57,6 +57,32 @@ export abstract class BaseAgent {
   }
 
   /**
+   * Typed dispatch — actionHandlers map'i üzerinden type-safe handler çağırır.
+   * PR-D2 tamamlama: Ajanlar bu method'u kullanarak cast'ten kurtulur.
+   *
+   * @example
+   *   return this.handle('sale_iptal', { saleId: 'abc123' });
+   *   // payload tipi otomatik SaleIptalParams
+   */
+  protected handle<K extends AgentAction>(
+    action: K,
+    payload: AgentActionMap[K],
+  ): Promise<AgentResponse<unknown>> | AgentResponse<unknown> {
+    const handler = this.actionHandlers[action] as ActionHandler<K> | undefined;
+    if (!handler) {
+      return {
+        ok: false,
+        error: `${this.id} ajanı '${action}' aksiyonunu desteklemiyor`,
+      };
+    }
+    return handler(payload, {
+      action,
+      payload,
+      meta: undefined,
+    });
+  }
+
+  /**
    * Generic islemYap — geriye dönük uyumluluk için korunuyor.
    * Yeni kodlar \`handle(action, payload)\` typed API'sini kullanmalı.
    */

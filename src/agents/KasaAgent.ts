@@ -2,12 +2,30 @@ import { DomainAgent, type ActionHandlerMap } from '@/agents/DomainAgent';
 import type { AgentRequest, AgentResponse } from '@/agents/types';
 import type { Intent } from '@/domain/types';
 import { KasaIslemSchema } from '@/lib/schemas';
+import type { KasaIslemParams } from '@/agents/actionMap';
 
 export class KasaAgent extends DomainAgent {
   readonly id = 'kasa' as const;
   readonly yetkiler = ['kasa.read', 'kasa.write', 'rapor.read'] as const;
-  // PR-D2: Typed action handlers (D2b follow-up'ta eklenecek)
-  protected actionHandlers: ActionHandlerMap = {};
+
+  /**
+   * PR-D2 tamamlama: Typed action handlers.
+   * actionHandlers[action] payload type'ı otomatik KasaIslemParams olarak gelir.
+   */
+  protected actionHandlers: ActionHandlerMap = {
+    kasa_gelir: (payload: KasaIslemParams) => this.handleKasaIslem(payload),
+    kasa_gider: (payload: KasaIslemParams) => this.handleKasaIslem(payload),
+  };
+
+  private handleKasaIslem(payload: KasaIslemParams): AgentResponse<unknown> {
+    // Validation (typed payload üzerinden)
+    const v = KasaIslemSchema.safeParse(payload);
+    if (!v.success) {
+      return { ok: false, error: `Kasa İşlemi Hatası: ${v.error.issues.map((e) => e.message).join(', ')}` };
+    }
+    // Cast yok — payload zaten typed
+    return { ok: true, data: v.data };
+  }
 
   async islemYap<P = unknown, R = unknown>(talep: AgentRequest<P>): Promise<AgentResponse<R>> {
     const p = talep.payload ?? {};
