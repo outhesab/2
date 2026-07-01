@@ -32,10 +32,9 @@ React + TypeScript + Vite ERP uygulaması (Türkçe). Offline-first: localStorag
 
 ## Mimari Kararlar (ADR)
 
-### [ADR-001] A-2 (DomainAgent dispatch) — Ertelendi
-Tüm agent handler'larını DomainAgent.handle çatısı altında birleştirme fikri 1.5-2.5 günlük refactor.
-Typed handler'lar validation-only, persistence legacy path'te kaldı.
-**Karar:** Belgelenip ertelendi, çalışıyor, bloker değil. Gerektiğinde ele alınır.
+### [ADR-001] A-2 (DomainAgent dispatch) — Tamamlandı
+Tüm agent handler'larını `DomainAgent` üzerinden birleştirme refactor'ü tamamlandı. Legacy `mapRequestToIntent` kaldırıldı.
+**Karar:** Uygulandı ve doğrulanmıştır.
 
 ### [ADR-002] Round2 kapsam daraltması
 F-3 (.env API key'leri) acil değil → "projede kalabilir" dendi.
@@ -102,7 +101,7 @@ Pre-commit hook sadece registry drift kontrolü yapıyor.
 
 | Tarih | Oturum | Önemli Kararlar |
 |---|---|---|
-| 30 Haz 2026 | Round2 tamamlama | Tüm 21 sorun çözüldü, R3-8 (AppRoutes extraction) push. IDE dosyaları temizlendi, AGENTS.md → BELLEK.md dönüşümü. |
+| 30 Haz 2026 | A-2 ve Round2 | A-2 (DomainAgent dispatch birleştirme) tamamlandı, legacy `mapRequestToIntent` kaldırıldı. Tüm 21 sorun çözüldü, R3-8 tamamlandı. |
 
 ---
 
@@ -126,4 +125,4 @@ Tek branch: **`dev`** — her push = otomatik Vercel deploy.
 
 ---
 
-*Son güncelleme: 30 Haziran 2026*
+*Son güncelleme: 30 Haziran 2026, 20:30*
