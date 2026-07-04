@@ -13,78 +13,6 @@
       "options": {
         "apiKey": "${OPENROUTER_API_KEY}"
       }
-    },
-    "lmstudio": {
-      "options": {
-        "baseURL": "http://127.0.0.1:1234/v1",
-        "apiKey": "lm-studio"
-      },
-      "models": {
-        "qwen/qwen3-4b-thinking-2507": {
-          "name": "Qwen3 4B Thinking",
-          "family": "qwen",
-          "tool_call": true,
-          "reasoning": true,
-          "temperature": true,
-          "vision": false,
-          "limit": {
-            "context": 2048,
-            "output": 1024
-          },
-          "cost": {
-            "input": 0,
-            "output": 0
-          }
-        },
-        "qwen/qwen3-vl-4b": {
-          "name": "Qwen3 VL 4B (Vision)",
-          "family": "qwen",
-          "tool_call": true,
-          "reasoning": false,
-          "temperature": true,
-          "vision": true,
-          "limit": {
-            "context": 2048,
-            "output": 1024
-          },
-          "cost": {
-            "input": 0,
-            "output": 0
-          }
-        },
-        "phi-3.5-mini-instruct": {
-          "name": "Phi 3.5 Mini Instruct",
-          "family": "phi",
-          "tool_call": true,
-          "reasoning": false,
-          "temperature": true,
-          "vision": false,
-          "limit": {
-            "context": 2048,
-            "output": 1024
-          },
-          "cost": {
-            "input": 0,
-            "output": 0
-          }
-        },
-        "liquid/lfm2-1.2b": {
-          "name": "LFM2 1.2B",
-          "family": "lfm",
-          "tool_call": true,
-          "reasoning": false,
-          "temperature": true,
-          "vision": false,
-          "limit": {
-            "context": 2048,
-            "output": 1024
-          },
-          "cost": {
-            "input": 0,
-            "output": 0
-          }
-        }
-      }
     }
   },
   "disabled_providers": [
@@ -96,6 +24,7 @@
     "lmstudio"
   ],
   "instructions": [
+    ".opencode/ARAF_LITE.md",
     "PAKET YÃ–NETÄ°CÄ°SÄ°: Sadece pnpm kullan. npm veya yarn kullanma.",
     "CHANGELOG ZORUNLULUÄžU: Her kaynak kod deÄŸiÅŸikliÄŸinden sonra src/lib/changelog.ts dosyasÄ±na mutlaka yeni bir sÃ¼rÃ¼m giriÅŸi ekle.",
     "OFFLINE-FIRST: localStorage birincil depolama, Firebase Firestore opsiyonel sync.",
@@ -229,6 +158,25 @@
     "storybook": {
       "type": "local",
       "command": ["node", "scripts/storybook-mcp.mjs"],
+      "enabled": true
+    },
+    "araf": {
+      "type": "local",
+      "command": [
+        "C:\\Users\\PARS PELET\\.bun\\bin\\bun.exe",
+        "C:\\Users\\PARS PELET\\Desktop\\gerçek\\ARAF\\server\\src\\mcp.ts"
+      ],
+      "environment": {
+        "ARAF_API_KEY": "araf-gizli-anahtar-2026",
+        "OPENAI_API_KEY": "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",
+        "GEMINI_API_KEY": "AIzaSyAB6ukOXGlGC2jSixHO5OU7f09lWG6Fn6A",
+        "OPENROUTER_API_KEY": "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",
+        "GROQ_API_KEY": "gsk_ZCBXnKYM5Dbar9lGVIBIWGdyb3FYDfCUY86uZKAUvi3hvgFtofO",
+        "ARAF_MODEL": "meta-llama/llama-3.3-70b-instruct:free",
+        "ARAF_CORE_PATH": "C:\\Users\\PARS PELET\\Desktop\\gerçek\\ARAF\\ARAF_CORE.md",
+        "ARAF_DB_PATH": "C:\\Users\\PARS PELET\\Desktop\\gerçek\\ARAF\\server\\data\\araf.db",
+        "ARAF_LOG_LEVEL": "warn"
+      },
       "enabled": true
     }
   },
