@@ -22,6 +22,7 @@ export type LogCategory =
   | 'crash'
   | 'ai'
   | 'aiApi'
+  | 'arafClient'
   | 'anomali'
   | 'app'
   | 'appConfig'
